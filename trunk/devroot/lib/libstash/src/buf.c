@@ -764,6 +764,9 @@ buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
 			    & (a_buf->array_size - 1));
       a_buf->array_num_valid++;
 
+#ifdef _LIBSTASH_DBG
+      a_buf->bufel_array[a_buf->array_start].magic = _CW_BUFEL_MAGIC;
+#endif
       a_buf->bufel_array[a_buf->array_start].beg_offset = a_beg_offset;
       a_buf->bufel_array[a_buf->array_start].end_offset = a_end_offset;
       a_buf->bufel_array[a_buf->array_start].bufc = a_bufc;
@@ -846,7 +849,7 @@ buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   
       /* Now append the bufel. */
 #ifdef _LIBSTASH_DBG
-      a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFC_MAGIC;
+      a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFEL_MAGIC;
 #endif
       a_buf->bufel_array[a_buf->array_end].beg_offset = a_beg_offset;
       a_buf->bufel_array[a_buf->array_end].end_offset = a_end_offset;
@@ -2498,6 +2501,7 @@ bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
 		void * a_dealloc_arg)
 {
   _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
   _cw_check_ptr(a_buffer);
   _cw_assert(a_size > 0);
   
@@ -2520,6 +2524,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   cw_uint32_t i;
   
   _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
   _cw_check_ptr(a_prefix);
 
 #ifdef _CW_REENTRANT
