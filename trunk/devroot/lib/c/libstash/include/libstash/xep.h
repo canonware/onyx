@@ -53,6 +53,9 @@ struct cw_xep_s {
 			break;						\
 		case (a_value):
 
+#define xep_mcatch(a_value)						\
+		case (a_value):
+
 #define xep_finally xep_catch(_CW_XEPV_FINALLY)
 
 #define	xep_end()							\

@@ -30,6 +30,10 @@ xep - Exception handling.
 .RI ( "cw_xepv_t a_xepv" )
 .I "..."
 
+.B xep_mcatch
+.RI ( "cw_xepv_t a_xepv" )
+.I "..."
+
 .B xep_finally
 .I "..."
 
@@ -101,7 +105,8 @@ xep_handled();
 .RE
 }
 .br
-xep_catch(_CW_XEPV_ANOTHER_EXCEPTION) {
+xep_catch(_CW_XEPV_ANOTHER_EXCEPTION)
+xep_mcatch(_CW_XEPV_YET_ANOTHER) {
 .RS
 /* React to exception, but propagate... */
 .RE
@@ -221,6 +226,35 @@ None.
 Description:
 .RS
 Begin a block of code that catches an exception.
+The exception is not considered handled unless \fBxep_handled\fR() is called.
+.RE
+.RE
+
+.B xep_mcatch
+.RI ( "cw_xepv_t a_xepv" )
+.I "..."
+.RS
+Input(s):
+.RS
+.IR a_xepv :
+.RS
+Exception number.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Exception(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Begin a block of code that catches an exception.
+Must immediately follow a \fBxep_catch\fR() call.
+This interface is used for the case where more than one exception type is to be
+handled by the same code block.
 The exception is not considered handled unless \fBxep_handled\fR() is called.
 .RE
 .RE
