@@ -160,7 +160,7 @@ void
 buf_dump(cw_buf_t * a_buf, const char * a_prefix);
 
 /* XXX */
-cw_uint32_t
+cw_sint32_t
 buf_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg);
 
 /* XXX */

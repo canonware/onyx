@@ -1,3 +1,7 @@
+1999-07-16  J. Owen Evans  <jasone@canonware.com>
+
+	* : Add the out (extendible printf-alike) class.
+
 1999-07-12  Jason Evans  <jasone@canonware.com>
 
 	* src/oh.c (oh_item_delete, oh_item_search, oh_item_get_iterate,

@@ -109,6 +109,12 @@ main()
 
   out_put(cw_g_out, "0x:[p]:\n", 0x12345678);
   out_put(cw_g_out, "0x:[p|w:12|p:_|j:c]:\n", 0x12345678);
+
+  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+	    "Extended\n");
+  
+/*    out_put_fle(cw_g_out, 2, __FILE__, __LINE__, __FUNCTION__, */
+/*  	      "Yo, timestamped\n"); */
   
   log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
