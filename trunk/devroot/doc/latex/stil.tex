@@ -358,10 +358,9 @@ occurs, the following operations are performed:
 \item{Unless the error is an interrupt or a timeout, push the object whose
 execution caused the error onto the operand stack.}
 \item{Execute the error handler.}
+\item{Unless the error is an interrupt or a timeout, execute errordict's stop
+operator.}
 \end{enumerate}
-
-All the standard error handlers except those for interrupt and timeout execute
-errordict's stop operator as the last step of handling the error.
 
 \section{Threads}
 \subsection{Implicit synchronization}
@@ -661,9 +660,9 @@ a stack. \\
 \hline \hline
 \multicolumn{4}{|l|}{Polymorphic operators} \\
 \hline \hline
-[a] [b] & {\bf \htmlref{catenate}{systemdict:token}} & [a b] & \\
-(a) (b) & {\bf \htmlref{catenate}{systemdict:token}} & (a b) & \\
-`a' `b' & {\bf \htmlref{catenate}{systemdict:token}} & `ab' & \\
+[a] [b] & {\bf \htmlref{catenate}{systemdict:catenate}} & [a b] & \\
+(a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & \\
+`a' `b' & {\bf \htmlref{catenate}{systemdict:catenate}} & `ab' & \\
 \hline
 & {\bf \htmlref{token}{systemdict:token}} & & \\
 \hline
@@ -795,7 +794,9 @@ a stack. \\
 \hline
 & {\bf \htmlref{flushfile}{systemdict:flushfile}} & & \\
 \hline
--- & {\bf \htmlref{pwd}{systemdict:dirforeach}} & path & \\
+path & {\bf \htmlref{cd}{systemdict:cd}} & -- & \\
+\hline
+-- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & \\
 \hline
 & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & & \\
 \hline
@@ -1026,6 +1027,35 @@ s:1> 1 sprint
 s:0> `a' `b' catenate
 s:1> 1 sprint
 `ab'
+s:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:cd}
+\index{\stilop{}{cd}{}}
+\item[{\stilop{path}{cd}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that represents a filesystem path.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Change the present working directory to \oparg{path}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> pwd 1 sprint
+`/usr/local'
+s:0> `bin' cd
+s:0> pwd 1 sprint
+`/usr/local/bin'
 s:0>
 		\end{verbatim}
 	\end{description}

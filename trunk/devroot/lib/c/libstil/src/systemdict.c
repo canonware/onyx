@@ -708,7 +708,52 @@ systemdict_catenate(cw_stilo_t *a_thread)
 void
 systemdict_cd(cw_stilo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_stilo_t	*ostack, *tstack, *path, *tpath;
+	int		error;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
+	STILO_STACK_GET(path, ostack, a_thread);
+	if (stilo_type_get(path) != STILOT_STRING) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/*
+	 * Create a copy of the path with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	tpath = stilo_stack_push(tstack);
+	stilo_string_new(tpath, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), stilo_string_len_get(path) +
+	    1);
+	stilo_string_lock(path);
+	stilo_string_lock(tpath);
+	stilo_string_set(tpath, 0, stilo_string_get(path),
+	    stilo_string_len_get(path));
+	stilo_string_el_set(tpath, '\0', stilo_string_len_get(tpath) - 1);
+	stilo_string_unlock(path);
+
+	error = chdir(stilo_string_get(tpath));
+	if (error == -1) {
+		stilo_string_unlock(tpath);
+		switch (errno) {
+		case EIO:
+			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
+			break;
+		default:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_INVALIDACCESS);
+		}
+		goto ERROR;
+	}
+
+	stilo_string_unlock(tpath);
+
+	stilo_stack_pop(ostack);
+
+	ERROR:
+	stilo_stack_pop(tstack);
 }
 
 void
