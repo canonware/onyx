@@ -84,11 +84,12 @@
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
-typedef enum {
-	NXAM_NONE,
-	NXAM_RECONFIGURE,
-	NXAM_SHUTDOWN
-} cw_nxam_t;
+/*
+ * The following values must not be confusable with valid pointers (including
+ * NULL).
+ */
+#define	NXAM_RECONFIGURE	((void *)1)
+#define	NXAM_SHUTDOWN		((void *)3)
 
 static void *nxa_p_gc_entry(void *a_arg);
 
@@ -121,7 +122,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 
 		ql_new(&a_nxa->seq_set);
 		a_nxa->white = FALSE;
-		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
+		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxoe_t *));
 		try_stage = 5;
 
 #ifdef _CW_DBG
@@ -549,15 +550,50 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
  * Clean up unreferenced objects.
  */
 _CW_INLINE void
-nxa_p_sweep(cw_nxoe_t *a_garbage, cw_nx_t *a_nx)
+nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
-	cw_nxoe_t	*nxoe;
+	struct timeval	t_tv;
+	cw_nxoi_t	start_us, sweep_us;
 
-	do {
-		nxoe = qr_next(a_garbage, link);
-		qr_remove(nxoe, link);
-		nxoe_l_delete(nxoe, a_nx);
-	} while (nxoe != a_garbage);
+	/* Record the start time. */
+	gettimeofday(&t_tv, NULL);
+	start_us = t_tv.tv_sec;
+	start_us *= 1000000;
+	start_us += t_tv.tv_usec;
+
+	/* If there is garbage, discard it. */
+	if (a_garbage != NULL) {
+		cw_nxoe_t	*nxoe;
+
+		do {
+			nxoe = qr_next(a_garbage, link);
+			qr_remove(nxoe, link);
+			nxoe_l_delete(nxoe, a_nxa->nx);
+		} while (nxoe != a_garbage);
+	}
+
+	/* Drain the pools. */
+	pool_drain(&a_nxa->chi_pool);
+	pool_drain(&a_nxa->dicto_pool);
+	pool_drain(&a_nxa->stacko_pool);
+
+	/* Record the sweep finish time and calculate sweep_us. */
+	gettimeofday(&t_tv, NULL);
+	sweep_us = t_tv.tv_sec;
+	sweep_us *= 1000000;
+	sweep_us += t_tv.tv_usec;
+	sweep_us -= start_us;
+
+	/* Protect statistics updates. */
+	mtx_lock(&a_nxa->lock);
+
+	/* Update sweep timing statistics. */
+	a_nxa->gcdict_current[1] = sweep_us;
+	if (sweep_us > a_nxa->gcdict_maximum[1])
+		a_nxa->gcdict_maximum[1] = sweep_us;
+	a_nxa->gcdict_sum[1] += sweep_us;
+
+	mtx_unlock(&a_nxa->lock);
 }
 
 /*
@@ -569,7 +605,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	cw_uint32_t	nroot, nreachable;
 	cw_nxoe_t	*garbage;
 	struct timeval	t_tv;
-	cw_nxoi_t	start_us, mark_us, sweep_us;
+	cw_nxoi_t	start_us, mark_us;
 
 	/* Record the start time. */
 	gettimeofday(&t_tv, NULL);
@@ -610,26 +646,10 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	/* Update statistics counters. */
 	a_nxa->gcdict_new = 0;
 
-	mtx_unlock(&a_nxa->lock);
-
-	/* If there is garbage, discard it. */
-	if (garbage != NULL)
-		nxa_p_sweep(garbage, a_nxa->nx);
-
-	/* Drain the pools. */
-	pool_drain(&a_nxa->chi_pool);
-	pool_drain(&a_nxa->dicto_pool);
-
-	/* Record the sweep finish time and calculate sweep_us. */
-	gettimeofday(&t_tv, NULL);
-	sweep_us = t_tv.tv_sec;
-	sweep_us *= 1000000;
-	sweep_us += t_tv.tv_usec;
-	sweep_us -= start_us;
-	sweep_us -= mark_us;
-
-	/* Protect statistics updates. */
-	mtx_lock(&a_nxa->lock);
+	/*
+	 * Send a message to the GC thread to sweep.
+	 */
+	mq_put(&a_nxa->gc_mq, garbage);
 
 	/* Update timing statistics. */
 	/* mark. */
@@ -638,11 +658,11 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 		a_nxa->gcdict_maximum[0] = mark_us;
 	a_nxa->gcdict_sum[0] += mark_us;
 
-	/* sweep. */
-	a_nxa->gcdict_current[1] = sweep_us;
-	if (sweep_us > a_nxa->gcdict_maximum[1])
-		a_nxa->gcdict_maximum[1] = sweep_us;
-	a_nxa->gcdict_sum[1] += sweep_us;
+	/*
+	 * sweep.  Clear current sweep time so that it's zero until after the
+	 * sweep is done.
+	 */
+	a_nxa->gcdict_current[1] = 0;
 
 	/* Increment the collections counter. */
 	a_nxa->gcdict_collections++;
@@ -655,7 +675,7 @@ nxa_p_gc_entry(void *a_arg)
 {
 	cw_nxa_t	*nxa = (cw_nxa_t *)a_arg;
 	struct timespec	period;
-	cw_nxam_t	message;
+	cw_nxoe_t	*message;
 	cw_bool_t	shutdown;
 
 	/*
@@ -673,46 +693,53 @@ nxa_p_gc_entry(void *a_arg)
 		mtx_unlock(&nxa->lock);
 
 		if (period.tv_sec > 0) {
-			if (mq_timedget(&nxa->gc_mq, &period, &message))
-				message = NXAM_NONE;
-		} else
-			mq_get(&nxa->gc_mq, &period, &message);
+			if (mq_timedget(&nxa->gc_mq, &period, &message)) {
+				mtx_lock(&nxa->lock);
+				if (nxa->gcdict_active && nxa->gcdict_new > 0) {
+					/*
+					 * No messages.  Check to see if there
+					 * have been any allocations since the
+					 * last timeout.
+					 */
+					if (nxa->prev_new == nxa->gcdict_new) {
+						mtx_lock(&nxa->interlock);
+						nxa->prev_new = 0;
+						mtx_unlock(&nxa->lock);
+						nxa_p_collect(nxa);
+						mtx_unlock(&nxa->interlock);
+					} else {
+						nxa->prev_new = nxa->gcdict_new;
+						mtx_unlock(&nxa->lock);
+					}
+				} else
+					mtx_unlock(&nxa->lock);
 
-		switch (message) {
-		case NXAM_NONE:
-			mtx_lock(&nxa->lock);
-			if (nxa->gcdict_active && nxa->gcdict_new > 0) {
-				/*
-				 * No messages.  Check to see if there have been
-				 * any additions to the sequence set since the
-				 * last timeout.
-				 */
-				if (nxa->prev_new == nxa->gcdict_new) {
-					mtx_lock(&nxa->interlock);
-					nxa->prev_new = 0;
-					mtx_unlock(&nxa->lock);
-					nxa_p_collect(nxa);
-					mtx_unlock(&nxa->interlock);
-				} else {
-					nxa->prev_new = nxa->gcdict_new;
-					mtx_unlock(&nxa->lock);
-				}
-			} else
-				mtx_unlock(&nxa->lock);
-			break;
-		case NXAM_RECONFIGURE:
+				continue;
+			}
+		} else
+			mq_get(&nxa->gc_mq, &message);
+
+		if (message == NXAM_RECONFIGURE) {
 			/* Don't do anything here. */
-			break;
-		case NXAM_SHUTDOWN:
+			continue;
+		}
+
+		if (message == NXAM_SHUTDOWN) {
 			mtx_lock(&nxa->interlock);
 			nxa_p_collect(nxa);
 			mtx_unlock(&nxa->interlock);
 
+			/*
+			 * nxa_p_collect() sends a message to sweep, which we
+			 * can unconditionally get here.
+			 */
+			mq_get(&nxa->gc_mq, &message);
+
 			shutdown = TRUE;
-			break;
-		default:
-			_cw_not_reached();
 		}
+
+		/* Sweep. */
+		nxa_p_sweep(nxa, message);
 	}
 
 	return NULL;
