@@ -605,10 +605,12 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 				 *
 				 * 2) Operator.
 				 *
-				 * 3) Array.  (Set attribute to evaluatable.)
+				 * 3) Hook.
+				 *
+				 * 4) Array.  (Set attribute to evaluatable.)
 				 */
 				if (nxo_attr_get(val) == NXOA_LITERAL || type ==
-				    NXOT_OPERATOR)
+				    NXOT_OPERATOR || type == NXOT_HOOK)
 					nxo_array_el_set(a_proc, val, i);
 				else if (type == NXOT_ARRAY) {
 					nxo_attr_set(val, NXOA_EVALUATABLE);
