@@ -36,7 +36,7 @@
                nxo_real.h
 #endif
 #if @enable_regex@
-               nxo_regex.h nxo_regub.h
+               nxo_regex.h nxo_regsub.h
 #endif
                ;
   incs = [addprefix @srcroot@/lib/libonyx/include/libonyx/ [incs]];
