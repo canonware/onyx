@@ -16,14 +16,37 @@
  *
  ****************************************************************************/
 
+#ifdef _STASH_DBG
+#define _CW_BUF_MAGIC 0xb00f0001
+#define _CW_BUFEL_MAGIC 0xb00f0002
+#define _CW_BUFC_MAGIC 0xb00f0003
+#define _CW_BUFPOOL_MAGIC 0xb00f0004
+#endif
+
+typedef struct cw_bufpool_s cw_bufpool_t;
 typedef struct cw_buf_s cw_buf_t;
 typedef struct cw_bufel_s cw_bufel_t;
 
+struct cw_bufpool_s
+{
+#ifdef _STASH_DBG
+  cw_uint32_t magic;
+#endif
+  cw_uint32_t buffer_size;
+  cw_uint32_t max_spare_buffers;
+  cw_list_t spare_buffers;
+};
+
 typedef struct
 {
+#ifdef _STASH_DBG
+  cw_uint32_t magic;
+#endif
 #ifdef _CW_REENTRANT
   cw_mtx_t lock;
 #endif
+  void (*free_func)(void *, void *);
+  void * free_arg;
   cw_uint32_t ref_count;
   cw_uint32_t buf_size;
   char * buf;
@@ -31,6 +54,9 @@ typedef struct
 
 struct cw_bufel_s
 {
+#ifdef _STASH_DBG
+  cw_uint32_t magic;
+#endif
   cw_bool_t is_malloced;
   cw_uint32_t beg_offset;
   cw_uint32_t end_offset;
@@ -45,6 +71,9 @@ typedef struct
 
 struct cw_buf_s
 {
+#ifdef _STASH_DBG
+  cw_uint32_t magic;
+#endif
   cw_bool_t is_malloced;
 #ifdef _CW_REENTRANT
   cw_bool_t is_threadsafe;
@@ -59,6 +88,38 @@ struct cw_buf_s
   cw_bool_t is_cumulative_valid;
   cw_bufel_array_el_t * array;
 };
+
+#define bufpool_new _CW_NS_STASH(bufpool_new)
+cw_bufpool_t *
+bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
+	    cw_uint32_t a_max_spare_buffers);
+
+#define bufpool_delete _CW_NS_STASH(bufpool_delete)
+void
+bufpool_delete(cw_bufpool_t * a_bufpool);
+
+#define bufpool_get_buffer_size _CW_NS_STASH(bufpool_get_buffer_size)
+cw_uint32_t
+bufpool_get_buffer_size(cw_bufpool_t * a_bufpool);
+
+#define bufpool_get_max_spare_buffers \
+        _CW_NS_STASH(bufpool_get_max_spare_buffers)
+cw_uint32_t
+bufpool_get_max_spare_buffers(cw_bufpool_t * a_bufpool);
+
+#define bufpool_set_max_spare_buffers \
+        _CW_NS_STASH(bufpool_set_max_spare_buffers)
+void
+bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
+			      cw_uint32_t a_max_spare_buffers);
+
+#define bufpool_get_buffer _CW_NS_STASH(bufpool_get_buffer)
+void *
+bufpool_get_buffer(cw_bufpool_t * a_bufpool);
+
+#define bufpool_put_buffer _CW_NS_STASH(bufpool_put_buffer)
+void
+bufpool_put_buffer(cw_bufpool_t * a_bufpool, void * a_buffer);
 
 /****************************************************************************
  *
@@ -103,12 +164,9 @@ buf_get_size(cw_buf_t * a_buf);
  * a_preserve : If TRUE, preserve a_b (don't modify it).  If FALSE, release the
  *              data in a_b after catenating a_b to a_a.
  *
- * a_try_bufel_merge : If TRUE, try to copy data from a_b into a_a, if there is
- *                     enough space in the last bufel in a_a.  This keeps the
- *                     reference count for at least some of the data in a_b from
- *                     being incremented, so that it may be possible to free up
- *                     memory when a_b is deleted.  In short, specifying TRUE
- *                     can save memory at the cost of memcpy()'s.
+ * a_try_bufel_merge : If TRUE, try to merge a_a's last bufel and a_b's first
+ *                     bufel, if the two bufel's reference the same internal
+ *                     buffer and are consectutive and contiguous.
  *
  * <<< Output(s) >>>
  *
@@ -121,8 +179,31 @@ buf_get_size(cw_buf_t * a_buf);
  ****************************************************************************/
 #define buf_append_buf _CW_NS_STASH(buf_append_buf)
 void
-buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
-		 cw_bool_t a_preserve, cw_bool_t a_try_bufel_merge);
+buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_a : Pointer to a buf.
+ *
+ * a_b : Pointer to a buf.
+ *
+ * a_offset : Offset at which to split a_b.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Split a_b at offset a_offset.  Append the data before a_offset to a_a, and
+ * leave the remainder in a_b.
+ *
+ ****************************************************************************/
+#define buf_split _CW_NS_STASH(buf_split)
+void
+buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
 
 /****************************************************************************
  *
@@ -403,29 +484,6 @@ bufel_get_size(cw_bufel_t * a_bufel);
  *
  * a_bufel : Pointer to a bufel.
  *
- * a_size : Size in bytes to set a_bufel's buffer to.
- *
- * <<< Output(s) >>>
- *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Shrinking the bufel would chop off valid data as indicated by
- *                 end_offset.
- *
- * <<< Description >>>
- *
- * Either malloc() or realloc() the internal buffer to be of size a_size.
- *
- ****************************************************************************/
-#define bufel_set_size _CW_NS_STASH(bufel_set_size)
-cw_bool_t
-bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufel : Pointer to a bufel.
- *
  * <<< Output(s) >>>
  *
  * retval : Offset from the beginning of the internal buffer to the begin
@@ -544,7 +602,7 @@ bufel_get_valid_data_size(cw_bufel_t * a_bufel);
  *
  ****************************************************************************/
 #define bufel_get_data_ptr _CW_NS_STASH(bufel_get_data_ptr)
-void *
+const void *
 bufel_get_data_ptr(cw_bufel_t * a_bufel);
 
 /****************************************************************************
@@ -556,6 +614,10 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  * a_buf : Pointer to a memory buffer.
  *
  * a_size : Size in bytes of a_buf.
+ *
+ * a_free_func :
+ *
+ * a_free_arg :
  *
  * <<< Output(s) >>>
  *
@@ -571,25 +633,6 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  ****************************************************************************/
 #define bufel_set_data_ptr _CW_NS_STASH(bufel_set_data_ptr)
 void
-bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_a : Pointer to a bufel.
- *
- * a_b : Pointer to a bufel.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Catenate a_b to a_a, and realloc if necessary.  a_b is not modified.
- *
- ****************************************************************************/
-#define bufel_catenate_bufel _CW_NS_STASH(bufel_catenate_bufel)
-void
-bufel_catenate_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);
+bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size,
+		   void (*a_free_func)(void * free_arg, void * buffer_p),
+		   void * a_free_arg);

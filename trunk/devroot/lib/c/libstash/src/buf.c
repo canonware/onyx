@@ -22,6 +22,47 @@
 #include <netinet/in.h>
 #include <sys/param.h>
 
+cw_bufpool_t *
+bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
+	    cw_uint32_t a_max_spare_buffers)
+{
+  return NULL; /* XXX */
+}
+
+void
+bufpool_delete(cw_bufpool_t * a_bufpool)
+{
+}
+
+cw_uint32_t
+bufpool_get_buffer_size(cw_bufpool_t * a_bufpool)
+{
+  return 0; /* XXX */
+}
+
+cw_uint32_t
+bufpool_get_max_spare_buffers(cw_bufpool_t * a_bufpool)
+{
+  return 0; /* XXX */
+}
+
+void
+bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
+			      cw_uint32_t a_max_spare_buffers)
+{
+}
+
+void *
+bufpool_get_buffer(cw_bufpool_t * a_bufpool)
+{
+  return NULL; /* XXX */
+}
+
+void
+bufpool_put_buffer(cw_bufpool_t * a_bufpool, void * a_buffer)
+{
+}
+
 cw_buf_t *
 #ifdef _CW_REENTRANT
 buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
@@ -41,6 +82,10 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
     retval = a_buf;
     retval->is_malloced = FALSE;
   }
+
+#ifdef _STASH_DBG
+  retval->magic = _CW_BUF_MAGIC;
+#endif
 
 #ifdef _CW_REENTRANT
   retval->is_threadsafe = a_is_threadsafe;
@@ -83,6 +128,15 @@ buf_delete(cw_buf_t * a_buf)
     bufel_delete(&a_buf->array[(i + a_buf->array_start)
 			      % a_buf->array_size].bufel);
   }
+
+#ifdef _STASH_DBG
+  a_buf->magic = 0;
+#endif
+
+  if (a_buf->is_malloced)
+  {
+    _cw_free(a_buf);
+  }
 }
 
 cw_uint32_t
@@ -91,6 +145,7 @@ buf_get_size(cw_buf_t * a_buf)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -110,14 +165,16 @@ buf_get_size(cw_buf_t * a_buf)
 }
 
 void
-buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
-		 cw_bool_t a_preserve, cw_bool_t a_try_bufel_merge)
+buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
 {
   cw_uint32_t i, j, k;
   cw_bool_t did_bufel_merge = FALSE;
+  cw_uint32_t last_element_index;
   
   _cw_check_ptr(a_a);
+  _cw_assert(a_a->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_b);
+  _cw_assert(a_b->magic == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_a->is_threadsafe == TRUE)
   {
@@ -131,29 +188,34 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
 
   buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid);
     
-  if (TRUE == a_try_bufel_merge)
+  /* This looks ugly because we have to be careful to not decrement past the
+   * beginning of the array. */
+  last_element_index = (((a_a->array_end + a_a->array_size) - 1)
+			% a_a->array_size);
+  if ((bufel_get_data_ptr(&a_a->array[last_element_index].bufel)
+       == bufel_get_data_ptr(&a_b->array[a_b->array_start].bufel))
+      && (bufel_get_end_offset(&a_a->array[last_element_index].bufel)
+	  == bufel_get_beg_offset(&a_b->array[a_b->array_start].bufel)))
   {
-    /* This looks ugly because we have to be careful to not decrement past the
-     * beginning of the array. */
-    cw_uint32_t last_element_index = (((a_a->array_end + a_a->array_size) - 1)
-				      % a_a->array_size);
+    /* These two bufel's reference the same bufc, and the buffer regions they
+     * refer to are consecutive and adjacent.  Merge the two bufel's
+     * together. */
+    did_bufel_merge = TRUE;
 
-    if ((bufel_get_size(&a_a->array[last_element_index].bufel)
-	 -
-	 bufel_get_end_offset(&a_a->array[last_element_index].bufel))
-	>= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel))
+    bufel_set_end_offset(&a_a->array[last_element_index].bufel,
+			 (bufel_get_end_offset(
+			   &a_a->array[last_element_index].bufel)
+			  + bufel_get_valid_data_size(
+			    &a_b->array[a_b->array_start].bufel)));
+      
+    a_a->size
+      += bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel);
+      
+    a_a->array[last_element_index].cumulative_size = a_a->size;
+      
+    if (FALSE == a_preserve)
     {
-      /* There's enough space to merge a_b's first bufel into a_a's last
-       * bufel. */
-      did_bufel_merge = TRUE;
-      
-      bufel_catenate_bufel(&a_a->array[last_element_index].bufel,
-			   &a_b->array[a_b->array_start].bufel);
-      
-      a_a->size
-	+= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel);
-
-      a_a->array[last_element_index].cumulative_size = a_a->size;
+      bufel_delete(&a_b->array[a_b->array_start].bufel);
     }
   }
   
@@ -166,7 +228,6 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
        i++,
 	 j = (j + 1) % a_a->array_size,
 	 k = (k + 1) % a_b->array_size)
-					 
   {
     memcpy(&a_a->array[i].bufel,
 	   &a_b->array[j].bufel,
@@ -179,19 +240,102 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b,
 
     a_a->array_num_valid++;
 
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_a->array[i].bufel.bufc->lock);
-#endif
-
-    a_a->array[i].bufel.bufc->ref_count++;
-    
-#ifdef _CW_REENTRANT
-    mtx_unlock(&a_a->array[i].bufel.bufc->lock);
-#endif
+    if (TRUE == a_preserve)
+    {
+      bufc_ref_increment(a_a->array[i].bufel.bufc);
+    }
   }
 
   /* Finish making a_a's state consistent. */
   a_a->array_end = i;
+
+  /* Make a_b's state consistent if not preserving its state. */
+  if (FALSE == a_preserve)
+  {
+    a_b->size = 0;
+    a_b->array_num_valid = 0;
+    a_b->array_start = 0;
+    a_b->array_end = 0;
+    a_b->is_cumulative_valid = FALSE;
+  }
+  
+#ifdef _CW_REENTRANT
+  if (a_b->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_b->lock);
+  }
+  if (a_a->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_a->lock);
+  }
+#endif
+}
+
+void
+buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
+{
+  cw_uint32_t array_element, bufel_offset, num_bufels_to_move;
+  cw_uint32_t i, a_a_index, a_b_index;
+
+  _cw_check_ptr(a_a);
+  _cw_assert(a_a->magic == _CW_BUF_MAGIC);
+  _cw_check_ptr(a_b);
+  _cw_assert(a_b->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_offset < buf_get_size(a_b));
+
+#ifdef _CW_REENTRANT
+  if (a_a->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_a->lock);
+  }
+  if (a_b->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_b->lock);
+  }
+#endif
+
+  buf_p_get_data_position(a_b, a_offset, &array_element, &bufel_offset);
+
+  num_bufels_to_move = (((array_element >= a_b->array_start)
+			? array_element - a_b->array_start
+			: array_element + a_b->array_size - a_b->array_start));
+
+  /* Make sure that a_a's array is big enough. */
+  buf_p_fit_array(a_a, a_a->array_num_valid + num_bufels_to_move);
+
+  /* Iterate through the bufel's in a_b and move them to a_a, up to and
+   * including the bufel where the split occurs. */
+  for (i = 0,
+	 a_a_index = a_a->array_end,
+	 a_b_index = a_b->array_start;
+       i < num_bufels_to_move;
+       i++,
+	 a_a_index = (a_a_index + 1) % a_a->array_size,
+	 a_b_index = (a_b_index + 1) % a_b->array_size)
+  {
+    memcpy(&a_a->array[a_a_index].bufel,
+	   &a_b->array[a_b_index].bufel,
+	   sizeof(cw_bufel_t));
+  }
+
+  /* Deal with the bufel that the split is in. */
+  if (array_element == 0)
+  {
+    /* The split is actually between bufel's.  We're done. */
+  }
+  else
+  {
+    /* Increment the reference count for the buffer, and set the offsets
+     * appropriately for both bufel's. */
+
+    /* XXX */
+  }
+
+  /* Make a_a's and a_b's states consistent. */
+  /* XXX */
+  a_a->is_cumulative_valid = FALSE;
+  a_b->is_cumulative_valid = FALSE;
+  
   
 #ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
@@ -209,7 +353,9 @@ void
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -217,6 +363,8 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   }
 #endif
 
+  /* XXX Try to merge a_bufel into the first bufel in a_buf. */
+  
   buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
   
   /* Now prepend the bufel. */
@@ -230,15 +378,7 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
   a_buf->size += bufel_get_valid_data_size(a_bufel);
   a_buf->is_cumulative_valid = FALSE;
 
-#ifdef _CW_REENTRANT
-  mtx_lock(&a_bufel->bufc->lock);
-#endif
-
-  a_bufel->bufc->ref_count++;
-    
-#ifdef _CW_REENTRANT
-  mtx_unlock(&a_bufel->bufc->lock);
-#endif
+  bufc_ref_increment(a_bufel->bufc);
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -252,13 +392,17 @@ void
 buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
     mtx_lock(&a_buf->lock);
   }
 #endif
+
+  /* XXX Try to merge a_bufel into the last bufel in a_buf. */
   
   buf_p_fit_array(a_buf, a_buf->array_num_valid + 1);
   
@@ -272,11 +416,7 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel)
 	      
   a_buf->array_end = ((a_buf->array_end + 1) % a_buf->array_size);
 
-#ifdef _CW_REENTRANT
-  mtx_lock(&a_bufel->bufc->lock);
-#endif
-
-  a_bufel->bufc->ref_count++;
+  bufc_ref_increment(a_bufel->bufc);
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
@@ -293,6 +433,7 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   cw_uint32_t array_index, bufel_valid_data, i;
   
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
@@ -336,6 +477,12 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     /* Adjust the array variables. */
     a_buf->array_start = (a_buf->array_start + i) % a_buf->array_size;
     a_buf->array_num_valid -= i;
+    if (a_buf->array_num_valid == 0)
+    {
+      /* Shrink the array back down. */
+      a_buf->array = _cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_buf->array_size = 2;
+    }
 
     a_buf->is_cumulative_valid = FALSE;
 
@@ -358,6 +505,7 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   cw_uint32_t array_index, bufel_valid_data, i;
   
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
@@ -403,6 +551,12 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
     a_buf->array_end = ((a_buf->array_end + a_buf->array_size - i)
 			% a_buf->array_size);
     a_buf->array_num_valid -= i;
+    if (a_buf->array_num_valid == 0)
+    {
+      /* Shrink the array back down. */
+      a_buf->array = _cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_buf->array_size = 2;
+    }
 
     retval = FALSE;
   }
@@ -424,6 +578,7 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_assert(a_offset < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -435,7 +590,8 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset)
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
-  retval = a_buf->array[array_element].bufel.bufc->buf[bufel_offset];
+  retval = *(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+	     + bufel_offset);
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
@@ -452,6 +608,7 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_assert(a_offset < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -463,7 +620,8 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
 
   buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
 
-  a_buf->array[array_element].bufel.bufc->buf[bufel_offset] = a_val;
+  *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
+    = a_val;
   
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
@@ -479,6 +637,7 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   cw_uint32_t retval, array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 3) < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -500,16 +659,19 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
 
     /* XXX Assumes 32 bit addresses. */
     a = *(char *) ((cw_uint32_t)
-		   (a_buf->array[array_element].bufel.bufc->buf + bufel_offset)
+		   (bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		    + bufel_offset)
 		   & ((cw_uint32_t) 0xfffffffc));
     b = *(char *)
       ((cw_uint32_t)
-       (a_buf->array[array_element].bufel.bufc->buf + bufel_offset + 4)
+       (bufc_get_p(a_buf->array[array_element].bufel.bufc)
+	+ bufel_offset + 4)
        & (0xfffffffc));
     
     bit_alignment
       = ((cw_uint32_t)
-	 (a_buf->array[array_element].bufel.bufc->buf[bufel_offset])
+	 (bufc_get_p(a_buf->array[array_element].bufel.bufc)
+	  + bufel_offset)
 	 & (0x3)) * 8;
 
     retval = (a << (32 - bit_alignment));
@@ -519,19 +681,23 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   {
     /* The data is spread across two to four buffers. */
 
-    retval = (a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    retval = (*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+	      + bufel_offset)
 	      << 24);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    retval |= ((a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    retval |= ((*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 16) & 0x00ff0000);
     
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
-    retval |= ((a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    retval |= ((*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 8) & 0x0000ff00);
     
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
-    retval |= (a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    retval |= (*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		+ bufel_offset)
 	       & 0x000000ff);
   }
 
@@ -551,6 +717,7 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 3) < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -568,35 +735,35 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
   {
     /* Yay, all of the data is in one bufel. */
 
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = a_val >> 24;
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 1]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 1)
       = (a_val >> 16) & 0x000000ff;
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 2]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 2)
       = (a_val >> 8) & 0x000000ff;
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 3]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 3)
       = a_val & 0x000000ff;
   }
   else
   {
     /* The data is spread across two to four buffers. */
 
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = a_val >> 24;
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = (a_val >> 16) & 0x000000ff;
     
     buf_p_get_data_position(a_buf, a_offset + 2, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = (a_val >> 8) & 0x000000ff;
     
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = a_val & 0x000000ff;
   }
 
@@ -615,6 +782,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 7) < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -638,17 +806,17 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     /* XXX Assumes 32 bit addresses. */
     a = *(char *)
       ((cw_uint32_t)
-       (&a_buf->array[array_element].bufel.bufc->buf[bufel_offset])
+       (bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
        & (cw_uint32_t) 0xfffffff8);
     b = *(char *)
-      ((cw_uint32_t) (&a_buf->array[array_element].bufel.bufc->buf +
-		      bufel_offset + 8)
+      ((cw_uint32_t) (bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		      + bufel_offset + 8)
        & (cw_uint32_t) 0xfffffff8);
     
     bit_alignment =
-      ((cw_uint32_t)
-       (&a_buf->array[array_element].bufel.bufc->buf + bufel_offset)
-	 & (0x7)) * 8;
+      (((cw_uint32_t)
+       (bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset))
+	 & 0x7) * 8;
 
     retval = (a << (64 - bit_alignment));
     retval |= (b >> bit_alignment);
@@ -657,42 +825,50 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   {
     /* The data is spread across two to eight buffers. */
     retval = ((cw_uint64_t)
-	      a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
-	      << 56);
+	      *(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+	       + bufel_offset))
+	      << 56;
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
-		a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 48) & ((cw_uint64_t) 0x00ff0000 << 32) & 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
-		a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 40) & ((cw_uint64_t) 0x0000ff00 << 32) & 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
-		a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 32) & ((cw_uint64_t) 0x000000ff << 32) & 0x00000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
-		a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 24) & ((cw_uint64_t) 0x00000000 << 32) & 0xff000000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
-		a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 16) & ((cw_uint64_t) 0x00000000 << 32) & 0x00ff0000);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= (((cw_uint64_t)
-		a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 		<< 8) & ((cw_uint64_t) 0x00000000 << 32) & 0x0000ff00);
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
     retval |= ((cw_uint64_t)
-	       a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+		*(bufc_get_p(a_buf->array[array_element].bufel.bufc)
+		 + bufel_offset)
 	       & ((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
   }
 
@@ -711,6 +887,7 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
+  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 7) < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -727,62 +904,62 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
       a_buf->array[array_element].bufel.end_offset)
   {
     /* All of the data is in one bufel. */
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = a_val >> 56;
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 1]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 1)
       = (a_val >> 48) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 2]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 2)
       = (a_val >> 40) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 3]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 3)
       = (a_val >> 32) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 4]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 4)
       = (a_val >> 24) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 5]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 5)
       = (a_val >> 16) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 6]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 6)
       = (a_val >> 8) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 7]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 7)
       = a_val & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
   }
   else
   {
     /* The data is spread across two to eight buffers. */
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset)
       = a_val >> 56;
 
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 1]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 1)
       = (a_val >> 48) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 2]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 2)
       = (a_val >> 40) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 3]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 3)
       = (a_val >> 32) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 4]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 4)
       = (a_val >> 24) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 5]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 5)
       = (a_val >> 16) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
     buf_p_get_data_position(a_buf, a_offset + 1, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 6]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 6)
       = (a_val >> 8) & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
     
     buf_p_get_data_position(a_buf, a_offset + 3, &array_element, &bufel_offset);
-    a_buf->array[array_element].bufel.bufc->buf[bufel_offset + 7]
+    *(bufc_get_p(a_buf->array[array_element].bufel.bufc) + bufel_offset + 7)
       = a_val & (((cw_uint64_t) 0x00000000 << 32) & 0x000000ff);
   }
 
@@ -910,6 +1087,10 @@ bufel_new(cw_bufel_t * a_bufel)
     bzero(retval, sizeof(cw_bufel_t));
     retval->is_malloced = FALSE;
   }
+
+#ifdef _STASH_DBG
+  retval->magic = _CW_BUFEL_MAGIC;
+#endif
   
   return retval;
 }
@@ -921,38 +1102,13 @@ bufel_delete(cw_bufel_t * a_bufel)
 
   if (a_bufel->bufc != NULL)
   {
-#ifdef _CW_REENTRANT
-    cw_bool_t should_delete_bufc;
-    
-    mtx_lock(&a_bufel->bufc->lock);
-    
-    a_bufel->bufc->ref_count--;
-    if (0 == a_bufel->bufc->ref_count)
-    {
-      /* Make a note that we should delete the bufc once we've released the
-       * mutex. */
-      should_delete_bufc = TRUE;
-    }
-    else
-    {
-      should_delete_bufc = FALSE;
-    }
-
-    mtx_unlock(&a_bufel->bufc->lock);
-
-    if (TRUE == should_delete_bufc)
-    {
-      mtx_delete(&a_bufel->bufc->lock);
-      _cw_free(a_bufel->bufc);
-    }
-#else
-    a_bufel->bufc->ref_count--;
-    if (0 == a_bufel->bufc->ref_count)
-    {
-      _cw_free(a_bufel->bufc);
-    }
-#endif
+    bufc_ref_decrement(a_bufel->bufc);
   }
+
+#ifdef _STASH_DBG
+  a_bufel->magic = 0;
+#endif
+
   if (a_bufel->is_malloced == TRUE)
   {
     _cw_free(a_bufel);
@@ -965,6 +1121,7 @@ bufel_get_size(cw_bufel_t * a_bufel)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
 
   if (NULL == a_bufel->bufc)
   {
@@ -972,123 +1129,7 @@ bufel_get_size(cw_bufel_t * a_bufel)
   }
   else
   {
-    retval = a_bufel->bufc->buf_size;
-  }
-  
-  return retval;
-}
-
-cw_bool_t
-bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
-{
-  cw_bool_t retval = FALSE;
-
-  _cw_check_ptr(a_bufel);
-
-  if ((a_size < a_bufel->end_offset)
-      && (a_bufel->beg_offset != a_bufel->end_offset))
-  {
-    /* We would chop off valid data if we did this. */
-    retval = TRUE;
-  }
-  else if (a_size == 0)
-  {
-    if (a_bufel->bufc != NULL)
-    {
-      /* Decrement the reference count for the bufc and free it if necessary. */
-#ifdef _CW_REENTRANT
-      cw_bool_t should_delete_bufc;
-      mtx_lock(&a_bufel->bufc->lock);
-    
-      a_bufel->bufc->ref_count--;
-      if (0 == a_bufel->bufc->ref_count)
-      {
-	/* Make a note that we should delete the bufc once we've released the
-	 * mutex. */
-	should_delete_bufc = TRUE;
-      }
-      else
-      {
-	should_delete_bufc = FALSE;
-      }
-
-      mtx_unlock(&a_bufel->bufc->lock);
-
-      if (TRUE == should_delete_bufc)
-      {
-	mtx_delete(&a_bufel->bufc->lock);
-	_cw_free(a_bufel->bufc->buf);
-	_cw_free(a_bufel->bufc);
-      }
-#else
-      a_bufel->bufc->ref_count--;
-      if (0 == a_bufel->bufc->ref_count)
-      {
-	_cw_free(a_bufel->bufc->buf);
-	_cw_free(a_bufel->bufc);
-      }
-#endif
-      a_bufel->bufc = NULL;
-    }
-    
-    a_bufel->beg_offset = 0;
-    a_bufel->end_offset = 0;
-  }
-  else if (a_bufel->bufc != NULL)
-  {
-    if (a_bufel->bufc->buf_size != a_size)
-    {
-#ifdef _CW_REENTRANT
-      mtx_lock(&a_bufel->bufc->lock);
-#endif
-      if (a_bufel->bufc->ref_count > 1)
-      {
-	cw_bufc_t * t_bufc;
-	
-	/* Someone else has a reference, so we need to make our own copy. */
-
-	t_bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-#ifdef _CW_REENTRANT
-	mtx_new(&t_bufc->lock);
-#endif
-	t_bufc->buf = (char *) _cw_malloc(a_size);
-	t_bufc->buf_size = a_size;
-	t_bufc->ref_count = 1;
-
-	memcpy(t_bufc->buf + a_bufel->beg_offset,
-	       a_bufel->bufc->buf + a_bufel->beg_offset,
-	       a_bufel->end_offset - a_bufel->beg_offset);
-
-	a_bufel->bufc->ref_count--;
-      }
-      else
-      {
-	/* No one else has a reference, so muck around freely with the current
-	 * bufc. */
-	a_bufel->bufc->buf = (char *) _cw_realloc(a_bufel->bufc->buf,
-						  a_size);
-	a_bufel->bufc->buf_size = a_size;
-	if (a_bufel->beg_offset > a_bufel->bufc->buf_size)
-	{
-	  a_bufel->beg_offset = a_bufel->bufc->buf_size;
-	  a_bufel->end_offset = a_bufel->bufc->buf_size;
-	}
-      }
-#ifdef _CW_REENTRANT
-	  mtx_unlock(&a_bufel->bufc->lock);
-#endif
-    }
-  }
-  else
-  {
-    /* Allocate for the first time. */
-    a_bufel->bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-    a_bufel->bufc->buf = (char *) _cw_malloc(a_size);
-#ifdef _CW_REENTRANT
-    mtx_new(&a_bufel->bufc->lock);
-#endif
-    a_bufel->bufc->buf_size = a_size;
-    a_bufel->bufc->ref_count = 1;
+    retval = bufc_get_size(a_bufel->bufc);
   }
   
   return retval;
@@ -1098,6 +1139,7 @@ cw_uint32_t
 bufel_get_beg_offset(cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
   return a_bufel->beg_offset;
 }
 
@@ -1107,6 +1149,7 @@ bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
   cw_bool_t retval;
   
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
 
   if (a_offset > a_bufel->end_offset)
   {
@@ -1125,6 +1168,7 @@ cw_uint32_t
 bufel_get_end_offset(cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
   return a_bufel->end_offset;
 }
 
@@ -1134,12 +1178,13 @@ bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset)
   cw_bool_t retval;
   
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
 
   if (a_offset < a_bufel->beg_offset)
   {
     retval = TRUE;
   }
-  else if (a_offset > a_bufel->bufc->buf_size)
+  else if (a_offset > bufc_get_size(a_bufel->bufc))
   {
     retval = TRUE;
   }
@@ -1156,19 +1201,22 @@ cw_uint32_t
 bufel_get_valid_data_size(cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
   _cw_assert(a_bufel->end_offset >= a_bufel->beg_offset);
 
   return a_bufel->end_offset - a_bufel->beg_offset;
 }
 
-void *
+const void *
 bufel_get_data_ptr(cw_bufel_t * a_bufel)
 {
   void * retval;
   
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
   /* Shouldn't have a bufc with a NULL buf. */
-  _cw_assert(0 == ((a_bufel->bufc != NULL) && (a_bufel->bufc->buf == NULL)));
+  _cw_assert(0 == ((a_bufel->bufc != NULL)
+		   && (bufc_get_p(a_bufel->bufc) == NULL)));
   
   /* Since the user can potentially write to the buffer at any time after this,
    * we need to be sure that there's only one reference to the bufc, in order to
@@ -1179,197 +1227,159 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel)
   }
   else
   {
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_bufel->bufc->lock);
-#endif
-    if (a_bufel->bufc->ref_count > 1)
-    {
-      cw_bufc_t * t_bufc;
-      
-      /* Need to make our own copy. */
-      t_bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-#ifdef _CW_REENTRANT
-      mtx_new(&t_bufc->lock);
-#endif
-      t_bufc->buf = (char *) _cw_malloc(a_bufel->bufc->buf_size);
-      t_bufc->buf_size = a_bufel->bufc->buf_size;
-      t_bufc->ref_count = 1;
-
-      memcpy(t_bufc->buf + a_bufel->beg_offset,
-	     a_bufel->bufc->buf + a_bufel->beg_offset,
-	     a_bufel->end_offset - a_bufel->beg_offset);
-
-      /* Disengage ourselves from the old bufc. */
-      a_bufel->bufc->ref_count--;
-#ifdef _CW_REENTRANT
-      mtx_unlock(&a_bufel->bufc->lock);
-#endif
-      a_bufel->bufc = t_bufc;
-    }
-#ifdef _CW_REENTRANT
-    else
-    {
-      mtx_unlock(&a_bufel->bufc->lock);
-    }
-#endif
-    
-    retval = a_bufel->bufc->buf;
+    retval = (void *) (bufc_get_p(a_bufel->bufc)
+		       + a_bufel->beg_offset);
   }
 
   return retval;
 }
 
 void
-bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size)
+bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size,
+		   void (*a_free_func)(void * free_arg, void * buffer_p),
+		   void * a_free_arg)
 {
   _cw_check_ptr(a_bufel);
+  _cw_assert(a_bufel->magic == _CW_BUFEL_MAGIC);
   _cw_check_ptr(a_buf);
   _cw_assert(a_size > 0);
+  _cw_check_ptr(a_free_func);
 
-  if (a_bufel->bufc == NULL)
+  if (a_bufel->bufc != NULL)
   {
-    /* Do first time allocation. */
-    a_bufel->bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-    a_bufel->bufc->buf = a_buf;
-    a_bufel->bufc->buf_size = a_size;
-    a_bufel->bufc->ref_count = 1;
+    bufc_ref_decrement(a_bufel->bufc);
   }
-  else
-  {
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_bufel->bufc->lock);
-#endif
-    if (a_bufel->bufc->ref_count > 1)
-    {
-      cw_bufc_t * t_bufc;
-      
-      /* Need to make our own bufc. */
-      t_bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-#ifdef _CW_REENTRANT
-      mtx_new(&t_bufc->lock);
-#endif
-      t_bufc->buf = (char *) a_buf;
-      t_bufc->buf_size = a_size;
-      t_bufc->ref_count = 1;
-
-      /* Disengage ourselves from the old bufc. */
-      a_bufel->bufc->ref_count--;
-#ifdef _CW_REENTRANT
-      mtx_unlock(&a_bufel->bufc->lock);
-#endif
-      a_bufel->bufc = t_bufc;
-    }
-#ifdef _CW_REENTRANT
-    else
-    {
-      /* We're the only one with a reference, so muck with the existing bufc. */
-      _cw_free(a_bufel->bufc->buf);
-      a_bufel->bufc->buf = (char *) a_buf;
-      a_bufel->bufc->buf_size = a_size;
-      
-      mtx_unlock(&a_bufel->bufc->lock);
-    }
-#endif
-  }
+  
+  a_bufel->bufc = bufc_new(a_buf, a_size, a_free_func, a_free_arg);
 
   a_bufel->beg_offset = 0;
   a_bufel->end_offset = a_size;
 }
 
-void
-bufel_catenate_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b)
+static cw_bufc_t *
+bufc_new(void * a_buffer, cw_uint32_t a_size,
+	 void (*a_free_func)(void * free_arg, void * buffer_p),
+	 void * a_free_arg)
 {
-  _cw_check_ptr(a_a);
-  _cw_check_ptr(a_b);
+  cw_bufc_t * retval;
 
-  if (a_b->bufc == NULL)
+  _cw_check_ptr(a_buffer);
+  _cw_assert(a_size > 0);
+  _cw_check_ptr(a_free_func);
+
+  retval = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
+
+#ifdef _STASH_DBG
+  retval->magic = _CW_BUFC_MAGIC;
+#endif
+
+#ifdef _CW_REENTRANT
+  mtx_new(&retval->lock);
+#endif
+
+  if (NULL != a_buffer)
   {
-    /* Nothing to catenate. */
-    goto RETURN;
+    _cw_assert(a_size > 0);
+
+    retval->buf = (char *) a_buffer;
+    retval->buf_size = a_size;
   }
-  else if (a_a->bufc == NULL)
-  {
-    /* Need a new bufc. */
-    a_a->bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-    a_a->bufc->buf = (char *) _cw_malloc(a_b->end_offset - a_b->beg_offset);
-    a_a->bufc->buf_size = a_b->end_offset - a_b->beg_offset;
-#ifdef _CW_REENTRANT
-    mtx_new(&a_a->bufc->lock);
-#endif
-    a_a->bufc->ref_count = 1;
 
-    a_a->end_offset = a_a->bufc->buf_size;
-    
-    memcpy(a_a->bufc->buf,
-	   a_b->bufc->buf + a_b->beg_offset,
-	   a_a->bufc->buf_size);
-  }
-  else
-  {
-    cw_uint32_t new_size;
-
-    if (a_a->end_offset + bufel_get_valid_data_size(a_b) > a_a->bufc->buf_size)
-    {
-      /* Need more space. */
-      new_size = (a_a->bufc->buf_size + bufel_get_valid_data_size(a_b));
-    }
-    else
-    {
-      /* Current size is adequate. */
-      new_size = a_a->bufc->buf_size;
-    }
-    
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_a->bufc->lock);
-#endif
-
-    if (a_a->bufc->ref_count > 1)
-    {
-      cw_bufc_t * t_bufc;
-      
-      /* We need our own bufc. */
-      t_bufc = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
-      t_bufc->buf = (char *) _cw_malloc(new_size);
-#ifdef _CW_REENTRANT
-      mtx_new(&t_bufc->lock);
-#endif
-      t_bufc->buf_size = new_size;
-      t_bufc->ref_count = 1;
-
-      memcpy(t_bufc->buf + a_a->beg_offset,
-	     a_a->bufc->buf + a_a->beg_offset,
-	     a_a->end_offset - a_a->beg_offset);
-
-      /* Extricate ourselves from the old bufc. */
-      a_a->bufc->ref_count--;
-#ifdef _CW_REENTRANT
-      mtx_unlock(&a_a->bufc->lock);
-#endif
-      a_a->bufc = t_bufc;
-    }
-    else if (new_size != a_a->bufc->buf_size)
-    {
-      /* Need more space. */
-      a_a->bufc->buf = (char *) _cw_realloc(a_a->bufc->buf, new_size);
-      a_a->bufc->buf_size = new_size;
-
-#ifdef _CW_REENTRANT
-      mtx_unlock(&a_a->bufc->lock);
-#endif
-    }
-#ifdef _CW_REENTRANT
-    else
-    {
-      /* We have our own buffer, and it's already big enough. */
-      mtx_unlock(&a_a->bufc->lock);
-    }
-#endif
-
-    memcpy(a_a->bufc->buf + a_a->end_offset,
-	   a_b->bufc->buf + a_b->beg_offset,
-	   a_b->end_offset - a_b->beg_offset);
-    a_a->end_offset += bufel_get_valid_data_size(a_b);
-  }
+  retval->free_func = a_free_func;
+  retval->free_arg = a_free_arg;
   
-  RETURN:
+  return retval;
+}
+
+static void
+bufc_delete(cw_bufc_t * a_bufc)
+{
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  
+#ifdef _STASH_DBG
+  a_bufc->magic = 0;
+#endif
+
+#ifdef _CW_REENTRANT
+  mtx_delete(&a_bufc->lock);
+#endif
+
+  a_bufc->free_func(a_bufc->free_arg, (void *) a_bufc->buf);
+  _cw_free(a_bufc);
+}
+
+static cw_uint32_t
+bufc_get_size(cw_bufc_t * a_bufc)
+{
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+
+  return a_bufc->buf_size;
+}
+
+static char *
+bufc_get_p(cw_bufc_t * a_bufc)
+{
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+
+  return a_bufc->buf;
+}
+
+static void
+bufc_ref_increment(cw_bufc_t * a_bufc)
+{
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+      
+#ifdef _CW_REENTRANT
+      mtx_lock(&a_bufc->lock);
+#endif
+
+      a_bufc->ref_count++;
+    
+#ifdef _CW_REENTRANT
+      mtx_unlock(&a_bufc->lock);
+#endif
+}
+
+static void
+bufc_ref_decrement(cw_bufc_t * a_bufc)
+{
+#ifdef _CW_REENTRANT
+      cw_bool_t should_delete;
+#endif
+      
+  _cw_check_ptr(a_bufc);
+  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+      
+#ifdef _CW_REENTRANT
+      mtx_lock(&a_bufc->lock);
+    
+      a_bufc->ref_count--;
+      if (0 == a_bufc->ref_count)
+      {
+	/* Make a note that we should delete the bufc once we've released the
+	 * mutex. */
+	should_delete = TRUE;
+      }
+      else
+      {
+	should_delete = FALSE;
+      }
+
+      mtx_unlock(&a_bufc->lock);
+
+      if (TRUE == should_delete)
+      {
+	bufc_delete(a_bufc);
+      }
+#else
+      a_bufc->ref_count--;
+      if (0 == a_bufc->ref_count)
+      {
+	bufc_delete(a_bufc);
+      }
+#endif
 }

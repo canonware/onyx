@@ -127,18 +127,12 @@ main()
     _cw_assert(50 == bufel_get_end_offset(bufel_p));
     _cw_assert(50 == bufel_get_valid_data_size(bufel_p));
     
-    bufel_set_data_ptr(bufel_p, NULL, 0);
-    _cw_assert(NULL == bufel_get_data_ptr(bufel_p));
-    _cw_assert(0 == bufel_get_beg_offset(bufel_p));
-    _cw_assert(0 == bufel_get_end_offset(bufel_p));
-    _cw_assert(0 == bufel_get_valid_data_size(bufel_p));
-
     /* Don't free string, since bufel_p will do it. */
     
     bufel_delete(bufel_p);
   }
 
-  /* bufel_append_bufel(). */
+  /* bufel_catenate_bufel(). */
   {
     cw_bufel_t * bufel_a, * bufel_b;
     char * str_a;
@@ -171,7 +165,7 @@ main()
     bufel_b_size = bufel_get_size(bufel_b);
     bufel_b_valid_size = bufel_get_valid_data_size(bufel_b);
 
-    bufel_append_bufel(bufel_a, bufel_b);
+    bufel_catenate_bufel(bufel_a, bufel_b);
 
     _cw_assert(0 == strcmp(str_cat, bufel_get_data_ptr(bufel_a)));
 
@@ -194,57 +188,61 @@ main()
     bufel_delete(bufel_b);
   }
   
-  /* bufel_get_uint8(), bufel_set_uint8(),
-   * bufel_get_uint32(), bufel_set_uint32(). */
+  /* buf_get_uint8(), buf_set_uint8(),
+   * buf_get_uint32(), buf_set_uint32(). */
   {
     cw_bufel_t * bufel_p;
+    cw_buf_t * buf_p;
     cw_uint32_t i;
 
     bufel_p = bufel_new(NULL);
+    buf_p = buf_new(NULL, TRUE);
 
     _cw_assert(FALSE == bufel_set_size(bufel_p, 512));
     _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 512));
+    buf_append_bufel(buf_p, bufel_p);
     
     for (i = 0; i < 256; i++)
     {
-      bufel_set_uint8(bufel_p, i, i);
+      buf_set_uint8(buf_p, i, i);
     }
 
     log_printf(g_log, "lower char dump:\n");
     for (i = 0; i < 256; i += 8)
     {
       log_printf(g_log,
-		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x\n",
-		 i, bufel_get_uint8(bufel_p, i),
-		 i + 1, bufel_get_uint8(bufel_p, i + 1),
-		 i + 2, bufel_get_uint8(bufel_p, i + 2),
-		 i + 3, bufel_get_uint8(bufel_p, i + 3),
-		 i + 4, bufel_get_uint8(bufel_p, i + 4),
-		 i + 5, bufel_get_uint8(bufel_p, i + 5),
-		 i + 6, bufel_get_uint8(bufel_p, i + 6),
-		 i + 7, bufel_get_uint8(bufel_p, i + 7));
+		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:"
+		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x\n",
+		 i, buf_get_uint8(buf_p, i),
+		 i + 1, buf_get_uint8(buf_p, i + 1),
+		 i + 2, buf_get_uint8(buf_p, i + 2),
+		 i + 3, buf_get_uint8(buf_p, i + 3),
+		 i + 4, buf_get_uint8(buf_p, i + 4),
+		 i + 5, buf_get_uint8(buf_p, i + 5),
+		 i + 6, buf_get_uint8(buf_p, i + 6),
+		 i + 7, buf_get_uint8(buf_p, i + 7));
     }
 
     /* Copy the bytes from the lower 256 bytes into the upper 256 bytes,
      * but reverse them. */
     for (i = 0; i < 256; i += 4)
     {
-      bufel_set_uint32(bufel_p, (512 - 4) - i,
-		       (((cw_uint32_t) (bufel_get_uint8(bufel_p, i)) << 24)
-			| (((cw_uint32_t)
-			    bufel_get_uint8(bufel_p, i + 1)) << 16)
-			| (((cw_uint32_t) bufel_get_uint8(bufel_p, i + 2)) << 8)
-			| ((cw_uint32_t) bufel_get_uint8(bufel_p, i + 3))));
+      buf_set_uint32(buf_p, (512 - 4) - i,
+		     (((cw_uint32_t) (buf_get_uint8(buf_p, i)) << 24)
+		      | (((cw_uint32_t) buf_get_uint8(buf_p, i + 1)) << 16)
+		      | (((cw_uint32_t) buf_get_uint8(buf_p, i + 2)) << 8)
+		      | ((cw_uint32_t) buf_get_uint8(buf_p, i + 3))));
     }
 
     log_printf(g_log, "upper long dump:\n");
     for (i = 256; i < 512; i += 8)
     {
       log_printf(g_log, "%03u->0x%08x:%03u->0x%08x\n",
-		 i, bufel_get_uint32(bufel_p, i),
-		 i + 4, bufel_get_uint32(bufel_p, i + 4));
+		 i, buf_get_uint32(buf_p, i),
+		 i + 4, buf_get_uint32(buf_p, i + 4));
     }
-    
+
+    buf_delete(buf_p);
     bufel_delete(bufel_p);
   }
   
@@ -268,30 +266,33 @@ main()
   }
 
   
-  /* buf_rm_head_bufel(), buf_rm_tail_bufel(),
-     buf_prepend_bufel(), buf_append_bufel(),
+  /* buf_prepend_bufel(), buf_append_bufel(),
      buf_get_size(). */
   {
     cw_buf_t * buf_p;
     cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c;
+    char * str_a, * str_b, * str_c;
+
+    str_a = (char *) _cw_malloc(1);
+    str_a[0] = 'A';
+    
+    str_b = (char *) _cw_malloc(1);
+    str_b[0] = 'B';
+    
+    str_c = (char *) _cw_malloc(1);
+    str_c[0] = 'C';
 
     buf_p = buf_new(NULL, TRUE);
     _cw_assert(0 == buf_get_size(buf_p));
 
     bufel_p_a = bufel_new(NULL);
-    _cw_assert(FALSE == bufel_set_size(bufel_p_a, 1));
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p_a, 1));
-    bufel_set_uint8(bufel_p_a, 0, 'A');
+    bufel_set_data_ptr(bufel_p_a, str_a, 1);
     
     bufel_p_b = bufel_new(NULL);
-    _cw_assert(FALSE == bufel_set_size(bufel_p_b, 1));
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p_b, 1));
-    bufel_set_uint8(bufel_p_b, 0, 'B');
+    bufel_set_data_ptr(bufel_p_b, str_b, 1);
     
     bufel_p_c = bufel_new(NULL);
-    _cw_assert(FALSE == bufel_set_size(bufel_p_c, 1));
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p_c, 1));
-    bufel_set_uint8(bufel_p_c, 0, 'C');
+    bufel_set_data_ptr(bufel_p_c, str_c, 1);
 
     buf_append_bufel(buf_p, bufel_p_a);
     _cw_assert(1 == buf_get_size(buf_p));
@@ -299,27 +300,20 @@ main()
     _cw_assert(2 == buf_get_size(buf_p));
     buf_append_bufel(buf_p, bufel_p_c);
     _cw_assert(3 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_a == buf_rm_head_bufel(buf_p));
-    _cw_assert(2 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_b == buf_rm_head_bufel(buf_p));
-    _cw_assert(1 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_c == buf_rm_head_bufel(buf_p));
-    _cw_assert(0 == buf_get_size(buf_p));
-    _cw_assert(NULL == buf_rm_head_bufel(buf_p));
     
     buf_prepend_bufel(buf_p, bufel_p_a);
-    _cw_assert(1 == buf_get_size(buf_p));
+    _cw_assert(4 == buf_get_size(buf_p));
     buf_prepend_bufel(buf_p, bufel_p_b);
-    _cw_assert(2 == buf_get_size(buf_p));
+    _cw_assert(5 == buf_get_size(buf_p));
     buf_prepend_bufel(buf_p, bufel_p_c);
-    _cw_assert(3 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_a == buf_rm_tail_bufel(buf_p));
-    _cw_assert(2 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_b == buf_rm_tail_bufel(buf_p));
-    _cw_assert(1 == buf_get_size(buf_p));
-    _cw_assert(bufel_p_c == buf_rm_tail_bufel(buf_p));
-    _cw_assert(0 == buf_get_size(buf_p));
-    _cw_assert(NULL == buf_rm_tail_bufel(buf_p));
+    _cw_assert(6 == buf_get_size(buf_p));
+
+    _cw_assert('C' == buf_get_uint8(buf_p, 0));
+    _cw_assert('B' == buf_get_uint8(buf_p, 1));
+    _cw_assert('A' == buf_get_uint8(buf_p, 2));
+    _cw_assert('A' == buf_get_uint8(buf_p, 3));
+    _cw_assert('B' == buf_get_uint8(buf_p, 4));
+    _cw_assert('C' == buf_get_uint8(buf_p, 5));
 
     bufel_delete(bufel_p_a);
     bufel_delete(bufel_p_b);
@@ -327,59 +321,44 @@ main()
     buf_delete(buf_p);
   }
   
-  /* buf_prepend_buf(), buf_append_buf(),
+  /* buf_catenate_buf(),
      buf_get_size(). */
   {
     cw_buf_t * buf_p_a, * buf_p_b;
     cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c;
+    char * str_a, * str_b, * str_c;
+
+    str_a = (char *) _cw_malloc(1);
+    str_a[0] = 'A';
+    
+    str_b = (char *) _cw_malloc(1);
+    str_b[0] = 'B';
+    
+    str_c = (char *) _cw_malloc(1);
+    str_c[0] = 'C';
 
     buf_p_a = buf_new(NULL, TRUE);
     buf_p_b = buf_new(NULL, FALSE); /* XXX */
+    _cw_assert(0 == buf_get_size(buf_p_a));
+    _cw_assert(0 == buf_get_size(buf_p_b));
 
     bufel_p_a = bufel_new(NULL);
-    _cw_assert(FALSE == bufel_set_size(bufel_p_a, 1));
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p_a, 1));
-    bufel_set_uint8(bufel_p_a, 0, 'A');
+    bufel_set_data_ptr(bufel_p_a, str_a, 1);
     
     bufel_p_b = bufel_new(NULL);
-    _cw_assert(FALSE == bufel_set_size(bufel_p_b, 1));
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p_b, 1));
-    bufel_set_uint8(bufel_p_b, 0, 'B');
+    bufel_set_data_ptr(bufel_p_b, str_b, 1);
     
     bufel_p_c = bufel_new(NULL);
-    _cw_assert(FALSE == bufel_set_size(bufel_p_c, 1));
-    _cw_assert(FALSE == bufel_set_end_offset(bufel_p_c, 1));
-    bufel_set_uint8(bufel_p_c, 0, 'C');
+    bufel_set_data_ptr(bufel_p_c, str_c, 1);
 
     buf_append_bufel(buf_p_a, bufel_p_a);
     buf_append_bufel(buf_p_a, bufel_p_b);
     buf_append_bufel(buf_p_b, bufel_p_c);
     _cw_assert(2 == buf_get_size(buf_p_a));
     _cw_assert(1 == buf_get_size(buf_p_b));
-    buf_append_buf(buf_p_a, buf_p_b);
+    buf_catenate_buf(buf_p_a, buf_p_b, TRUE, FALSE);
     _cw_assert(3 == buf_get_size(buf_p_a));
-    _cw_assert(0 == buf_get_size(buf_p_b));
-    _cw_assert(bufel_p_a == buf_rm_head_bufel(buf_p_a));
-    _cw_assert(2 == buf_get_size(buf_p_a));
-    _cw_assert(bufel_p_b == buf_rm_head_bufel(buf_p_a));
-    _cw_assert(1 == buf_get_size(buf_p_a));
-    _cw_assert(bufel_p_c == buf_rm_head_bufel(buf_p_a));
-    _cw_assert(0 == buf_get_size(buf_p_a));
-
-    buf_append_bufel(buf_p_a, bufel_p_a);
-    buf_append_bufel(buf_p_a, bufel_p_b);
-    buf_append_bufel(buf_p_b, bufel_p_c);
-    _cw_assert(2 == buf_get_size(buf_p_a));
     _cw_assert(1 == buf_get_size(buf_p_b));
-    buf_prepend_buf(buf_p_a, buf_p_b);
-    _cw_assert(3 == buf_get_size(buf_p_a));
-    _cw_assert(0 == buf_get_size(buf_p_b));
-    _cw_assert(bufel_p_b == buf_rm_tail_bufel(buf_p_a));
-    _cw_assert(2 == buf_get_size(buf_p_a));
-    _cw_assert(bufel_p_a == buf_rm_tail_bufel(buf_p_a));
-    _cw_assert(1 == buf_get_size(buf_p_a));
-    _cw_assert(bufel_p_c == buf_rm_tail_bufel(buf_p_a));
-    _cw_assert(0 == buf_get_size(buf_p_a));
 
     bufel_delete(bufel_p_a);
     bufel_delete(bufel_p_b);

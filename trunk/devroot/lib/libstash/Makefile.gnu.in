@@ -259,7 +259,9 @@ configure : configure.in
 config.status : configure
 	./config.status --recheck
 
-Makefile : Makefile.in config.status
+Makefile : Makefile.gnu
+
+Makefile.gnu : Makefile.gnu.in config.status
 	./config.status
 
 stamp.in : configure.in
