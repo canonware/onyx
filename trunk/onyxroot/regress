@@ -1,6 +1,6 @@
 #!/usr/bin/env oonyx
 #
-# regress [<srcdir>] [<par>]
+# regress [<srcdir> [<par>]]
 
 argv length 2 ge {
     $SRCDIR argv 1 get def
