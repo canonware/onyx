@@ -277,6 +277,8 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
        -compatibility_version [LIBONYX_REV]
        -current_version [LIBONYX_REV]
        -install_name @abs_objroot@/[LIBONYX_S]
+#else /* if [matches aout @abi@] */
+       -shared
 #endif
        -o [target] [need];
 
