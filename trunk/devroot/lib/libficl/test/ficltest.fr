@@ -1,0 +1,29 @@
+\ test file for ficl
+\ test ANSI CORE stuff first...
+-1 set-order
+load tester.fr
+load core.fr
+
+\ Now test ficl extras and optional word-sets
+testing :noname
+{ -> }
+{ :noname 1 ; execute -> 1 }
+{ 1 2 3 -rot -> 3 1 2 }
+
+testing default search order
+{ get-order -> forth-wordlist 1 }
+{ only definitions get-order -> forth-wordlist 1 }
+
+testing forget
+here constant fence
+{ fence forget fence -> here }
+
+testing within
+{ -1 1 0    within -> true }
+{  0 1s 2   within -> true }
+{ -100 0 -1 within -> true }
+{ -1 1 2    within -> false }
+{ -1 1 -2   within -> false }
+{ 1 -5 5    within -> true }
+{ 33000 32000 34000 within -> true }
+{ 0x80000000 0x7f000000 0x81000000 within -> true }
