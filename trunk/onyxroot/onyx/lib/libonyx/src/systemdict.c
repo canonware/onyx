@@ -11927,7 +11927,7 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
     {
 	int sockfds[2];
 
-	if (socketpair(family, type, protocol, sockfds))
+	if (socketpair(family, type, protocol, sockfds) == -1)
 	{
 	    goto ERROR;
 	}
