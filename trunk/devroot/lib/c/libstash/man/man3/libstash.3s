@@ -537,7 +537,6 @@ _
 lb | lb | lb.
  Name@Man page@Description
 _
-.TH
 .T&
 l | l | l.
  bhp@libstash_bhp(3s)@Binomial heap.
@@ -569,4 +568,3 @@ l | l | l.
 \"  .SH BUGS
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
-
