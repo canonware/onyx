@@ -38,7 +38,7 @@ condition to occur.
 	\end{capilist}
 \label{cnd_delete}
 \index{cnd_delete@\cfunc{cnd\_delete}{}}
-\citem{\cfunc[void]{cnd\_}{cw\_cnd\_t *a\_cnd}}
+\citem{\cfunc[void]{cnd\_delete}{cw\_cnd\_t *a\_cnd}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -81,8 +81,8 @@ condition to occur.
 	\end{capilist}
 \label{cnd_timedwait}
 \index{cnd_timedwait@\cfunc{cnd\_timedwait}{}}
-\citem{\cfunc[cw\_bool\_t]{cnd\_}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t *a\_mtx, const
-struct timespec *a\_timeout}}
+\citem{\cfunc[cw\_bool\_t]{cnd\_timedwait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t
+*a\_mtx, const struct timespec *a\_timeout}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
