@@ -294,6 +294,11 @@ EXTRA_CFLAGS="?"
 	as -Werror, while allowing the configure script to determine what other
 	flags are appropriate for the specified configuration.
 
+	The configure script specifically checks whether an optimization (-O*)
+	flag is specified in EXTRA_CFLAGS, and refrains from specifying an
+	optimization level if it finds that one has already been specified in
+	EXTRA_CFLAGS.
+
 CPPFLAGS="?"
 	Pass these flags to the C preprocessor.  Note that CFLAGS is not passed
 	to 'cpp' when 'configure' is looking for include files, so you must use
