@@ -22,6 +22,23 @@
 #define _CW_THD_MAGIC 0x5638638e
 #endif
 
+struct cw_thd_s {
+#ifdef _LIBSTASH_DBG
+	cw_uint32_t	magic;
+#endif
+	pthread_t	thread;
+	void		*(*start_func)(void *);
+	void		*start_arg;
+#ifdef _CW_THD_GENERIC_SR
+	sem_t		sem;	/* For suspend/resume. */
+#endif
+	cw_bool_t	suspended:1;
+	cw_mtx_t	crit_lock;
+	cw_bool_t	singled:1;	/* Suspended by thd_single_enter()? */
+	qr(cw_thd_t)	link;
+	cw_bool_t	delete:1;
+};
+
 #ifdef _LIBSTASH_DBG
 static cw_bool_t cw_g_thd_initialized = FALSE;
 #endif
