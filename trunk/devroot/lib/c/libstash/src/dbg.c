@@ -53,9 +53,6 @@ dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
 {
   if (NULL != a_dbg)
   {
-    /* Ignore the return value, since we don't care if the flag is already
-     * registered.  Pass a NULL data pointer since we don't need any additional
-     * info stored with the flag. */
     oh_item_insert(&a_dbg->flag_hash, (void *) a_flag, NULL);
   }
 }
@@ -63,17 +60,9 @@ dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
 void
 dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag)
 {
-  char * junk1, * junk2;
-
   if (NULL != a_dbg)
   {
-    /* Ignore the return value, since we don't care if the flag isn't
-     * registered.  Also, pass dummy variables junk1 and junk2, since we don't
-     * care about their contents. */
-    oh_item_delete(&a_dbg->flag_hash,
-		   a_flag,
-		   (void **) &junk1,
-		   (void **) &junk2);
+    oh_item_delete(&a_dbg->flag_hash, a_flag, NULL, NULL);
   }
 }
 
@@ -81,14 +70,12 @@ cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag)
 {
   cw_bool_t retval;
-  char * junk = NULL;
 
   _cw_check_ptr(a_flag);
 
   if (NULL != a_dbg)
   {
-    /* Pass dummy variable junk, since we don't care about the data pointer. */
-    retval = ! oh_item_search(&a_dbg->flag_hash, a_flag, (void **) &junk);
+    retval = ! oh_item_search(&a_dbg->flag_hash, a_flag, NULL);
   }
   else
   {

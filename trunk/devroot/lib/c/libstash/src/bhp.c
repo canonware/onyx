@@ -352,9 +352,21 @@ bhp_get_size(cw_bhp_t * a_bhp)
   cw_uint64_t retval;
 
   _cw_check_ptr(a_bhp);
-  /* Don't need to lock. */
+#ifdef _CW_REENTRANT
+  if (a_bhp->is_thread_safe == TRUE)
+  {
+    rwl_rlock(&a_bhp->rw_lock);
+  }
+#endif
 
   retval = a_bhp->num_nodes;
+  
+#ifdef _CW_REENTRANT
+  if (a_bhp->is_thread_safe == TRUE)
+  {
+    rwl_runlock(&a_bhp->rw_lock);
+  }
+#endif
   return retval;
 }
 

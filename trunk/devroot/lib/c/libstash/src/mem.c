@@ -164,7 +164,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   }
 
 #ifdef _LIBSTASH_DBG
-  bzero(retval, a_size);
+  memset(retval, 0xa5, a_size);
 #endif
   
   return retval;
@@ -249,7 +249,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   }
 
 #ifdef _LIBSTASH_DBG
-  bzero(retval, a_number * a_size);
+  memset(retval, 0xa5, a_number * a_size);
 #endif
   
   return retval;
@@ -309,6 +309,11 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	}
       }
 
+      if (old_size < a_size)
+      {
+	memset(retval + old_size, 0xa5, a_size - old_size);
+      }
+      
       if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
       {
 	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
@@ -385,6 +390,7 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 		     ? "<?>" : allocation->filename),
 		    allocation->line_num);
       }
+      memset(a_ptr, 0x5a, allocation->size);
       _cw_free(allocation);
     }
   }

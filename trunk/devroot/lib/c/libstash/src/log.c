@@ -504,7 +504,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
   else
   {
     /* Unsupported base. */
-    _cw_error("Unsupported base in log_print_uint64()");
+    _cw_error("Unsupported base");
     retval = NULL;
   }
   

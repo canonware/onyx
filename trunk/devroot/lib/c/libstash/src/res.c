@@ -22,8 +22,7 @@
 
 #include "libstash/res_p.h"
 
-/* Size of buffer to use for name/value parsing.  In practice, this is
- * probably plenty, but in theory, any arbitrary limitation is bad. */
+/* Initcial size of buffer to use for name/value parsing. */
 #define _LIBSTASH_RES_BUFFSIZE 8192
 
 /* Character types for state machine. */
@@ -387,16 +386,31 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
   cw_bool_t retval = FALSE;
   size_t i, name_pos = 0, val_pos = 0;
   cw_uint32_t state = _LIBSTASH_RES_STATE_START, col_num, line_num = 1;
-  char c, name[_LIBSTASH_RES_BUFFSIZE], val[_LIBSTASH_RES_BUFFSIZE];
+  char c, * name, * val;
+  cw_uint32_t name_bufsize, val_bufsize;
+
+  name_bufsize = _LIBSTASH_RES_BUFFSIZE;
+  val_bufsize = _LIBSTASH_RES_BUFFSIZE;
+
+  name = (char *) _cw_malloc(name_bufsize);
+  val = (char *) _cw_malloc(val_bufsize);
 
   for (i = 0, col_num = 1;
        ((state != _LIBSTASH_RES_STATE_FINISH) && (retval != TRUE));
        i++, col_num++)
   {
-    /* XXX Check whether we overflowed the buffers.  Perhaps we should move
-     * to extensible buffers, once they're written for the socket code. */
-    _cw_assert(name_pos < _LIBSTASH_RES_BUFFSIZE);
-    _cw_assert(val_pos < _LIBSTASH_RES_BUFFSIZE);
+    /* Check whether we overflowed the buffers, and expand them, if
+     * necessary. */
+    if (name_pos >= name_bufsize)
+    {
+      name_bufsize <<= 1;
+      name = (char *) _cw_realloc(name, name_bufsize);
+    }
+    if (val_pos >= val_bufsize)
+    {
+      val_bufsize <<= 1;
+      val = (char *) _cw_realloc(val, val_bufsize);
+    }
     
     /* Read the next character in. */
     if (a_is_file)
@@ -1023,6 +1037,8 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
     }
   }
 
+  _cw_free(name);
+  _cw_free(val);
   return retval;
 }
 

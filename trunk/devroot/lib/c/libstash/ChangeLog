@@ -1,5 +1,10 @@
 1999-04-28  J. Owen Evans  <jasone@canonware.com>
 
+	* src/res.c: Remove static buffers.
+
+	* src/mem.c: For the debug libraries, memset() newly allocated space
+	to 0xa5, and newly freed memory to 0x5a.
+
 	* src/buf.c (buf_p_get_data_position): Simplify (and improve
 	performance of) the binary search code.
 
