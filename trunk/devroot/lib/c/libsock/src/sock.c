@@ -302,6 +302,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
 		    "Error in connect(): %s\n", strerror(errno));
       }
+      /* XXX close(a_sock->sockfd); ? */
       a_sock->sockfd = -1;
       retval = TRUE;
       goto RETURN;

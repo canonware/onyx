@@ -181,7 +181,7 @@ main(int argc, char ** argv)
 	  sock_delete(sock_vec[sockfd]);
 	  sock_vec[sockfd] = NULL;
 
-	  log_printf(cw_g_log, "Connection closed\n");
+	  log_lprintf(cw_g_log, "Connection closed\n");
 	}
       }
     }
@@ -211,7 +211,7 @@ accept_entry_func(void * a_arg)
   {
     if (sock == socks_accept(socks, NULL, sock))
     {
-      log_printf(cw_g_log, "New connection\n");
+      log_lprintf(cw_g_log, "New connection\n");
       
       sock_vec[sock_get_fd(sock)] = sock;
 

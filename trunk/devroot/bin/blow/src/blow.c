@@ -190,6 +190,10 @@ main(int argc, char ** argv)
       }
       goto RETURN;
     }
+    else
+    {
+      log_lprintf(cw_g_log, "New connection (%lu)\n", i);
+    }
   }
 
   buf_new(&buf, FALSE);
@@ -259,6 +263,7 @@ main(int argc, char ** argv)
   {
     sock_flush_out(&sock_array[i]);
     sock_delete(&sock_array[i]);
+    log_lprintf(cw_g_log, "Connection closed (%lu)\n", i);
   }
   
   RETURN:
