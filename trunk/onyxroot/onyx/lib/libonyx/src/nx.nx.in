@@ -998,9 +998,9 @@ dup <
 	:rnew
 	#instance
 
-	dup data <
+	<
 	    $modules dict
-	> exch copy pop
+	> over data copy pop
     }
 
     #class :singleton #instance
@@ -1066,7 +1066,7 @@ dup <
 	#modname #mclass_singleton #instance
 
 	# Define instance data.
-	dup data <
+	<
 	    #modname #mclass_singleton #instance #data #<
 	    $name 5 idup
 	    $mclass_singleton 6 idup
@@ -1075,7 +1075,7 @@ dup <
 	    $pre_unload_hook null cvx
 	    $post_unload_hook null cvx
 	    $version 0
-	> exch copy pop
+	> over data copy pop
 
 	# Define $mclass_singleton as instance data before loading the module,
 	# so that it is available to the module initialization code.
@@ -1125,7 +1125,7 @@ dup <
     $def {
 	# Record the existence of the definition in $defs.
 	data $defs get
-	#defname #defval #defdict #data
+	#defname #defval #defdict #defs
 	[
 	    4 idup
 	    4 idup
@@ -1136,7 +1136,7 @@ dup <
 	#defname #defval #defdict
 
 	# Define.
-	3 ndup up put
+	up put
     }
 
     # Load a module that this one depends on, and record the dependency.
