@@ -26,7 +26,6 @@ clopt <
 	<
 	    $error false
 	    $argv null
-	    $packing true
 	    # Dictionary of the format:
 	    #
 	    #   `--flag' --> [arg? handler]
@@ -34,22 +33,6 @@ clopt <
 	    $index 0
 	    $arg null
 	> over data copy pop
-    } bind
-
-    # Get the packing mode for single character options.
-    #
-    #instance#
-    #- packing_get #packing?
-    $packing_get {
-	,packing
-    } bind
-
-    # Set the packing mode for single character options.
-    #
-    #instance#
-    #packing? packing_set -
-    $packing_set {
-	$packing exch ;def
     } bind
 
     # Print an error.
@@ -121,12 +104,19 @@ clopt <
 	    2 ndup get
 	    #argv #i #elm
 
-	    dup `^(--[^=]+)=?(.+)?' match {
+	    dup `^(--[^=]+)(=?)(.*)?' match {
 		# Long format option.
 		pop
 		#argv #i
 		1 submatch
-		2 submatch
+		# Use the `=' opt/arg separator to determine whether an argument
+		# was passed, so that an empty (`') argument can be handled
+		# correctly.
+		2 submatch `=' ne {
+		    null
+		}{
+		    3 submatch
+		} ifelse
 		#argv #i #opt #arg
 		;p_longopt_dispatch
 		#argv #i
@@ -232,28 +222,6 @@ clopt <
     #instance#
     #argv #i #elm p_shortopt_dispatch #i
     $p_shortopt_dispatch {
-	,packing {
-	    ;p_packed_shortopt_dispatch
-	}{
-	    ;p_unpacked_shortopt_dispatch
-	} ifelse
-    } bind
-
-    # Dispatch a short format option in packed mode.
-    #
-    #instance#
-    #argv #i #elm :p_packed_shortopt_dispatch #i
-    $p_packed_shortopt_dispatch {
-	`XXX Not implemented' 1 sprint
-	1 die
-	# XXX
-    } bind
-
-    # Dispatch a short format option in unpacked mode.
-    #
-    #instance#
-    #argv #i #elm p_unpacked_shortopt_dispatch #i
-    $p_unpacked_shortopt_dispatch {
 	this isa
 	#argv #i #elm #class
 
