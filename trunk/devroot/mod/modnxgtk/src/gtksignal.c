@@ -111,7 +111,5 @@ nx_gtk_signal_connect (cw_nxo_t *a_thread)
   g_free (s);
   g_free (c);
 
-  NXO_STACK_POP (ostack, a_thread);
-  NXO_STACK_POP (ostack, a_thread);
-  NXO_STACK_POP (ostack, a_thread);
+  nxo_stack_npop (ostack, 3);
 }

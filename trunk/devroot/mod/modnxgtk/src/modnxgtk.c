@@ -1,6 +1,7 @@
 
 #include "libonyx/libonyx.h"
 #include "gtk/gtk.h"
+#include "gtkdict.h"
 
 static const cw_uint8_t dict_name[] = "gtkdict";
 
@@ -18,6 +19,9 @@ _cw_modnxgtk_init (void *a_arg, cw_nxo_t *a_thread)
 	fake_argv[1] = NULL;
 
 	gtk_init (&fake_argc, &fake_argv);
+
+	gtk_signal_set_funcs (nx_gtk_signal_marshal,
+			      nx_gtk_signal_destroy);
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
