@@ -213,7 +213,7 @@ read_getcmd(el, cmdnum, ch)
 	cmd = el->el_map.current[(unsigned char) *ch];
 	if (cmd == ED_SEQUENCE_LEAD_IN) {
 	    key_value_t val;
-	    switch (key_get(el, ch, &val)) {
+	    switch (libedit_key_get(el, ch, &val)) {
 	    case XK_CMD:
 		cmd = val.cmd;
 		break;

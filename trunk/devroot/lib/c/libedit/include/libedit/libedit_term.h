@@ -58,7 +58,6 @@ typedef struct {
     int	    t_loc;			/* location used	*/
     char  **t_str;			/* termcap strings	*/
     int	   *t_val;			/* termcap values	*/
-    char   *t_cap;			/* Termcap buffer	*/
     fkey_t *t_fkey;			/* Array of keys	*/
 } el_term_t;
 

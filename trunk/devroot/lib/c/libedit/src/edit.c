@@ -86,7 +86,7 @@ el_init(prog, fin, fout)
      */
     (void) term_init(el);
     (void) tty_init(el);
-    (void) key_init(el);
+    (void) libedit_key_init(el);
     (void) map_init(el);
     (void) ch_init(el);
     (void) search_init(el);
@@ -113,7 +113,7 @@ el_end(el)
 
     term_end(el);
     tty_end(el);
-    key_end(el);
+    libedit_key_end(el);
     map_end(el);
     ch_end(el);
     search_end(el);

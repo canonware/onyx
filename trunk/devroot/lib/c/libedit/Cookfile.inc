@@ -23,9 +23,9 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = tty.h vi.h term.h parse.h key.h chared.h hist.h histedit.h
-               refresh.h search.h map.h libedit.h prompt.h libedit_incs.h
-               emacs.h common.h fcns.h help.h tokenizer.h;
+  local incs = tty.h vi.h libedit_term.h parse.h libedit_key.h chared.h hist.h
+               histedit.h refresh.h search.h map.h libedit.h prompt.h
+               libedit_incs.h emacs.h common.h fcns.h help.h tokenizer.h;
   incs = [fromto % [srcdir]/lib/c/libedit/include/libedit/% [incs]];
   incs = [incs] [objdir]/lib/c/libedit/include/libedit/libedit_defs.h;
 

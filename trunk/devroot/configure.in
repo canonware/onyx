@@ -109,8 +109,8 @@ AC_SUBST(VERIFY)
 dnl Find libraries.
 
 if test "x$build_libedit" = "xyes" ; then
-  AC_CHECK_LIB(termcap, tgetent, LIBS="$LIBS", \
-    AC_MSG_ERROR(Cannot find the termcap library))
+  AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
+    AC_MSG_ERROR(Cannot find the curses library))
 fi
 
 CW_USE_PTHREADS()

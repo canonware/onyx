@@ -41,11 +41,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <termcap.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
 #include "../include/libedit/libedit.h"
+
+#include <curses.h>
+#include <term.h>
 
 /*
  * IMPORTANT NOTE: these routines are allowed to look at the current screen
@@ -67,81 +69,81 @@ private struct termcapstr {
 } tstr[] = {
 
 #define T_al	0
-    {	"al",	"add new blank line"		},
+    {	"il1",	"add new blank line"		},
 #define T_bl	1
-    {	"bl",	"audible bell"			},
+    {	"bel",	"audible bell"			},
 #define T_cd	2
-    {	"cd",	"clear to bottom"		},
+    {	"ed",	"clear to bottom"		},
 #define T_ce	3
-    {	"ce",	"clear to end of line"		},
+    {	"el",	"clear to end of line"		},
 #define T_ch	4
-    {	"ch",	"cursor to horiz pos"		},
+    {	"hpa",	"cursor to horiz pos"		},
 #define T_cl	5
-    {	"cl",	"clear screen"			},
+    {	"clear","clear screen"			},
 #define	T_dc	6
-    {	"dc",	"delete a character"		},
+    {	"dch1",	"delete a character"		},
 #define	T_dl	7
-    {	"dl",	"delete a line"		 	},
+    {	"dl1",	"delete a line"		 	},
 #define	T_dm	8
-    {	"dm",	"start delete mode"		},
+    {	"smdc",	"start delete mode"		},
 #define	T_ed	9
-    {	"ed",	"end delete mode"		},
+    {	"rmdc",	"end delete mode"		},
 #define	T_ei	10
-    {	"ei",	"end insert mode"		},
+    {	"rmir",	"end insert mode"		},
 #define	T_fs	11
-    {	"fs",	"cursor from status line"	},
+    {	"fsl",	"cursor from status line"	},
 #define	T_ho	12
-    {	"ho",	"home cursor"			},
+    {	"home",	"home cursor"			},
 #define	T_ic	13
-    {	"ic",	"insert character"		},
+    {	"ich1",	"insert character"		},
 #define	T_im	14
-    {	"im",	"start insert mode"		},
+    {	"smir",	"start insert mode"		},
 #define	T_ip	15
     {	"ip",	"insert padding"		},
 #define	T_kd	16
-    {	"kd",	"sends cursor down"		},
+    {	"kcud1","sends cursor down"		},
 #define	T_kl	17
-    {	"kl",	"sends cursor left"		},
+    {	"kcub1","sends cursor left"		},
 #define T_kr	18
-    {	"kr",	"sends cursor right"		},
+    {	"kcuf1","sends cursor right"		},
 #define T_ku	19
-    {	"ku",	"sends cursor up"		},
+    {	"kcuu1","sends cursor up"		},
 #define T_md	20
-    {	"md",	"begin bold"			},
+    {	"bold",	"begin bold"			},
 #define T_me	21
-    {	"me",	"end attributes"		},
+    {	"sgr0",	"end attributes"		},
 #define T_nd	22
-    {	"nd",	"non destructive space"	 	},
+    {	"cuf1",	"non destructive space"	 	},
 #define T_se	23
-    {	"se",	"end standout"			},
+    {	"rmso",	"end standout"			},
 #define T_so	24
-    {	"so",	"begin standout"		},
+    {	"smso",	"begin standout"		},
 #define T_ts	25
-    {	"ts",	"cursor to status line"	 	},
+    {	"tsl",	"cursor to status line"	 	},
 #define T_up	26
-    {	"up",	"cursor up one"		 	},
+    {	"cuu1",	"cursor up one"		 	},
 #define T_us	27
-    {	"us",	"begin underline"		},
+    {	"smul",	"begin underline"		},
 #define T_ue	28
-    {	"ue",	"end underline"		 	},
+    {	"rmul",	"end underline"		 	},
 #define T_vb	29
-    {	"vb",	"visible bell"			},
+    {	"flash","visible bell"			},
 #define T_DC	30
-    {	"DC",	"delete multiple chars"	 	},
+    {	"dch",	"delete multiple chars"	 	},
 #define T_DO	31
-    {	"DO",	"cursor down multiple"		},
+    {	"cud",	"cursor down multiple"		},
 #define T_IC	32
-    {	"IC",	"insert multiple chars"	 	},
+    {	"ich",	"insert multiple chars"	 	},
 #define T_LE	33
-    {	"LE",	"cursor left multiple"		},
+    {	"cub",	"cursor left multiple"		},
 #define T_RI	34
-    {	"RI",	"cursor right multiple"	 	},
+    {	"cuf",	"cursor right multiple"	 	},
 #define T_UP	35
-    {	"UP",	"cursor up multiple"		},
+    {	"cuu",	"cursor up multiple"		},
 #define T_kh	36
-    {	"kh",	"sends cursor home"		},
+    {	"khome","sends cursor home"		},
 #define T_at7	37
-    {	"@7",	"sends cursor end"		},
+    {	"kend",	"sends cursor end"		},
 #define T_str	38
     {	NULL,   NULL			 	}
 };
@@ -151,11 +153,11 @@ private struct termcapval {
     char   *long_name;
 } tval[] = {
 #define T_pt	0
-    {	"pt",	"has physical tabs"	},
+{	"pt",	"has physical tabs"	},	/* XXX */
 #define T_li	1
-    {	"li",	"Number of lines"	},
+    {	"lines","Number of lines"	},
 #define T_co	2
-    {	"co",	"Number of columns"	},
+    {	"cols",	"Number of columns"	},
 #define T_km	3
     {	"km",	"Has meta key"		},
 #define T_xt	4
@@ -229,7 +231,6 @@ term_init(el)
     EditLine *el;
 {
     el->el_term.t_buf = (char *)  el_malloc(TC_BUFSIZE);
-    el->el_term.t_cap = (char *)  el_malloc(TC_BUFSIZE);
     el->el_term.t_fkey = (fkey_t *) el_malloc(A_K_NKEYS * sizeof(fkey_t));
     (void) memset(el->el_term.t_fkey, 0, A_K_NKEYS * sizeof(fkey_t));
     el->el_term.t_loc = 0;
@@ -252,8 +253,6 @@ term_end(el)
 {
     el_free((ptr_t) el->el_term.t_buf);
     el->el_term.t_buf = NULL;
-    el_free((ptr_t) el->el_term.t_cap);
-    el->el_term.t_cap = NULL;
     el_free((ptr_t) el->el_term.t_fkey);
     el->el_term.t_fkey = NULL;
     el->el_term.t_loc = 0;
@@ -428,7 +427,7 @@ term_move_to_line(el, where)
 
     if ((del = where - el->el_cursor.v) > 0) {
 	if ((del > 1) && GoodStr(T_DO))
-	    (void) tputs(tgoto(Str(T_DO), del, del), del, term__putc);
+	    (void) tputs(tparm(Str(T_DO), del, del), del, term__putc);
 	else {
 	    for (i = 0; i < del; i++)
 		term__putc('\n');
@@ -437,7 +436,7 @@ term_move_to_line(el, where)
     }
     else {			/* del < 0 */
 	if (GoodStr(T_UP) && (-del > 1 || !GoodStr(T_up)))
-	    (void) tputs(tgoto(Str(T_UP), -del, -del), -del, term__putc);
+	    (void) tputs(tparm(Str(T_UP), -del, -del), -del, term__putc);
 	else {
 	    if (GoodStr(T_up))
 		for (i = 0; i < -del; i++)
@@ -480,11 +479,11 @@ mc_again:
 
     if ((del < -4 || del > 4) && GoodStr(T_ch))
 	/* go there directly */
-	(void) tputs(tgoto(Str(T_ch), where, where), where, term__putc);
+	(void) tputs(tparm(Str(T_ch), where, where), where, term__putc);
     else {
 	if (del > 0) {		/* moving forward */
 	    if ((del > 4) && GoodStr(T_RI))
-		(void) tputs(tgoto(Str(T_RI), del, del), del, term__putc);
+		(void) tputs(tparm(Str(T_RI), del, del), del, term__putc);
 	    else {
 		if (EL_CAN_TAB) {	/* if I can do tabs, use them */
 		    if ((el->el_cursor.h & 0370) != (where & 0370)) {
@@ -506,7 +505,7 @@ mc_again:
 	}
 	else {			/* del < 0 := moving backward */
 	    if ((-del > 4) && GoodStr(T_LE))
-		(void) tputs(tgoto(Str(T_LE), -del, -del), -del, term__putc);
+		(void) tputs(tparm(Str(T_LE), -del, -del), -del, term__putc);
 	    else {		/* can't go directly there */
 		/* if the "cost" is greater than the "cost" from col 0 */
 		if (EL_CAN_TAB ? (-del > ((where >> 3) + (where & 07)))
@@ -578,7 +577,7 @@ term_deletechars(el, num)
 
     if (GoodStr(T_DC))		/* if I have multiple delete */
 	if ((num > 1) || !GoodStr(T_dc)) {	/* if dc would be more expen. */
-	    (void) tputs(tgoto(Str(T_DC), num, num), num, term__putc);
+	    (void) tputs(tparm(Str(T_DC), num, num), num, term__putc);
 	    return;
 	}
 
@@ -622,7 +621,7 @@ term_insertwrite(el, cp, num)
 
     if (GoodStr(T_IC))		/* if I have multiple insert */
 	if ((num > 1) || !GoodStr(T_ic)) {	/* if ic would be more expen. */
-	    (void) tputs(tgoto(Str(T_IC), num, num), num, term__putc);
+	    (void) tputs(tparm(Str(T_IC), num, num), num, term__putc);
 	    term_overwrite(el, cp, num);	/* this updates el_cursor.h */
 	    return;
 	}
@@ -755,13 +754,11 @@ term_set(el, term)
     if (!term || !term[0])
 	term = "dumb";
 
-    memset(el->el_term.t_cap, 0, TC_BUFSIZE);
-
-    i = tgetent(el->el_term.t_cap, term);
+    i = setupterm(term, 1, NULL);
 
     if (i <= 0) {
 	if (i == -1)
-	    (void) fprintf(el->el_errfile, "Cannot read termcap database;\n");
+	    (void) fprintf(el->el_errfile, "Cannot read terminfo database;\n");
 	else if (i == 0)
 	    (void) fprintf(el->el_errfile,
 			   "No entry for terminal type \"%s\";\n", term);
@@ -774,16 +771,16 @@ term_set(el, term)
     }
     else {
 	/* Can we tab */
-	Val(T_pt) = tgetflag("pt");
-	Val(T_xt) = tgetflag("xt");
+	Val(T_pt) = 0; /* Was tgetflag("pt"), but "pt" doesn't exist. */
+	Val(T_xt) = tigetflag("xt");
 	/* do we have a meta? */
-	Val(T_km) = tgetflag("km");
-	Val(T_MT) = tgetflag("MT");
+	Val(T_km) = tigetflag("km");
+	Val(T_MT) = 0; /* Was tgetflag("MT"), but "MT" doesn't exist. */
 	/* Get the size */
-	Val(T_co) = tgetnum("co");
-	Val(T_li) = tgetnum("li");
+	Val(T_co) = tigetnum("cols");
+	Val(T_li) = tigetnum("lines");
 	for (t = tstr; t->name != NULL; t++)
-	    term_alloc(el, t, tgetstr(t->name, &area));
+	    term_alloc(el, t, tigetstr(t->name));
     }
 
     if (Val(T_co) < 2)
@@ -921,28 +918,28 @@ term_reset_arrow(el)
     static char stOC[] = {033, 'O', 'C', '\0'};
     static char stOD[] = {033, 'O', 'D', '\0'};
 
-    key_add(el, strA, &arrow[A_K_UP].fun, arrow[A_K_UP].type);
-    key_add(el, strB, &arrow[A_K_DN].fun, arrow[A_K_DN].type);
-    key_add(el, strC, &arrow[A_K_RT].fun, arrow[A_K_RT].type);
-    key_add(el, strD, &arrow[A_K_LT].fun, arrow[A_K_LT].type);
-    key_add(el, str1, &arrow[A_K_HO].fun, arrow[A_K_HO].type);
-    key_add(el, str4, &arrow[A_K_EN].fun, arrow[A_K_EN].type);
-    key_add(el, stOA, &arrow[A_K_UP].fun, arrow[A_K_UP].type);
-    key_add(el, stOB, &arrow[A_K_DN].fun, arrow[A_K_DN].type);
-    key_add(el, stOC, &arrow[A_K_RT].fun, arrow[A_K_RT].type);
-    key_add(el, stOD, &arrow[A_K_LT].fun, arrow[A_K_LT].type);
+    libedit_key_add(el, strA, &arrow[A_K_UP].fun, arrow[A_K_UP].type);
+    libedit_key_add(el, strB, &arrow[A_K_DN].fun, arrow[A_K_DN].type);
+    libedit_key_add(el, strC, &arrow[A_K_RT].fun, arrow[A_K_RT].type);
+    libedit_key_add(el, strD, &arrow[A_K_LT].fun, arrow[A_K_LT].type);
+    libedit_key_add(el, str1, &arrow[A_K_HO].fun, arrow[A_K_HO].type);
+    libedit_key_add(el, str4, &arrow[A_K_EN].fun, arrow[A_K_EN].type);
+    libedit_key_add(el, stOA, &arrow[A_K_UP].fun, arrow[A_K_UP].type);
+    libedit_key_add(el, stOB, &arrow[A_K_DN].fun, arrow[A_K_DN].type);
+    libedit_key_add(el, stOC, &arrow[A_K_RT].fun, arrow[A_K_RT].type);
+    libedit_key_add(el, stOD, &arrow[A_K_LT].fun, arrow[A_K_LT].type);
 
     if (el->el_map.type == MAP_VI) {
-	key_add(el, &strA[1], &arrow[A_K_UP].fun, arrow[A_K_UP].type);
-	key_add(el, &strB[1], &arrow[A_K_DN].fun, arrow[A_K_DN].type);
-	key_add(el, &strC[1], &arrow[A_K_RT].fun, arrow[A_K_RT].type);
-	key_add(el, &strD[1], &arrow[A_K_LT].fun, arrow[A_K_LT].type);
-	key_add(el, &str1[1], &arrow[A_K_HO].fun, arrow[A_K_HO].type);
-	key_add(el, &str4[1], &arrow[A_K_EN].fun, arrow[A_K_EN].type);
-	key_add(el, &stOA[1], &arrow[A_K_UP].fun, arrow[A_K_UP].type);
-	key_add(el, &stOB[1], &arrow[A_K_DN].fun, arrow[A_K_DN].type);
-	key_add(el, &stOC[1], &arrow[A_K_RT].fun, arrow[A_K_RT].type);
-	key_add(el, &stOD[1], &arrow[A_K_LT].fun, arrow[A_K_LT].type);
+	libedit_key_add(el, &strA[1], &arrow[A_K_UP].fun, arrow[A_K_UP].type);
+	libedit_key_add(el, &strB[1], &arrow[A_K_DN].fun, arrow[A_K_DN].type);
+	libedit_key_add(el, &strC[1], &arrow[A_K_RT].fun, arrow[A_K_RT].type);
+	libedit_key_add(el, &strD[1], &arrow[A_K_LT].fun, arrow[A_K_LT].type);
+	libedit_key_add(el, &str1[1], &arrow[A_K_HO].fun, arrow[A_K_HO].type);
+	libedit_key_add(el, &str4[1], &arrow[A_K_EN].fun, arrow[A_K_EN].type);
+	libedit_key_add(el, &stOA[1], &arrow[A_K_UP].fun, arrow[A_K_UP].type);
+	libedit_key_add(el, &stOB[1], &arrow[A_K_DN].fun, arrow[A_K_DN].type);
+	libedit_key_add(el, &stOC[1], &arrow[A_K_RT].fun, arrow[A_K_RT].type);
+	libedit_key_add(el, &stOD[1], &arrow[A_K_LT].fun, arrow[A_K_LT].type);
     }
 }
 
@@ -1004,7 +1001,8 @@ term_print_arrow(el, name)
     for (i = 0; i < A_K_NKEYS; i++)
 	if (*name == '\0' || strcmp(name, arrow[i].name) == 0)
 	    if (arrow[i].type != XK_NOD)
-		key_kprint(el, arrow[i].name, &arrow[i].fun, arrow[i].type);
+		libedit_key_kprint(el, arrow[i].name, &arrow[i].fun,
+		    arrow[i].type);
 }
 
 
@@ -1043,19 +1041,19 @@ term_bind_arrow(el)
 	     * 2. They are single arrow keys pointing to an unassigned key.
 	     */
 	    if (arrow[i].type == XK_NOD)
-		key_clear(el, map, p);
+		libedit_key_clear(el, map, p);
 	    else {
 		if (p[1] && (dmap[j] == map[j] ||
 			     map[j] == ED_SEQUENCE_LEAD_IN)) {
-		    key_add(el, p, &arrow[i].fun, arrow[i].type);
+		    libedit_key_add(el, p, &arrow[i].fun, arrow[i].type);
 		    map[j] = ED_SEQUENCE_LEAD_IN;
 		}
 		else if (map[j] == ED_UNASSIGNED) {
-		    key_clear(el, map, p);
+		    libedit_key_clear(el, map, p);
 		    if (arrow[i].type == XK_CMD)
 			map[j] = arrow[i].fun.cmd;
 		    else
-			key_add(el, p, &arrow[i].fun, arrow[i].type);
+			libedit_key_add(el, p, &arrow[i].fun, arrow[i].type);
 		}
 	    }
 	}
@@ -1277,7 +1275,7 @@ term_echotc(el, argc, argv)
 	    break;
 	}
     if (t->name == NULL)
-	scap = tgetstr(*argv, &area);
+	scap = tigetstr(*argv);
     if (!scap || scap[0] == '\0') {
 	if (!silent)
 	    (void) fprintf(el->el_errfile,
@@ -1345,7 +1343,7 @@ term_echotc(el, argc, argv)
 		    "echotc: Warning: Extra argument `%s'.\n", *argv);
 	    return -1;
 	}
-	(void) tputs(tgoto(scap, arg_cols, arg_rows), 1, term__putc);
+	(void) tputs(tparm(scap, arg_cols, arg_rows), 1, term__putc);
 	break;
     default:
 	/* This is wrong, but I will ignore it... */
@@ -1378,7 +1376,7 @@ term_echotc(el, argc, argv)
 		    "echotc: Warning: Extra argument `%s'.\n", *argv);
 	    return -1;
 	}
-	(void) tputs(tgoto(scap, arg_cols, arg_rows), arg_rows, term__putc);
+	(void) tputs(tparm(scap, arg_cols, arg_rows), arg_rows, term__putc);
 	break;
     }
     return 0;

@@ -981,7 +981,8 @@ map_init_meta(el)
 	    break;
 	default:
 	    buf[1] = i & 0177;
-	    key_add(el, buf, key_map_cmd(el, (int) map[i]), XK_CMD);
+	    libedit_key_add(el, buf, libedit_key_map_cmd(el, (int) map[i]),
+	        XK_CMD);
 	    break;
 	}
     map[(int)buf[0]] = ED_SEQUENCE_LEAD_IN;
@@ -1004,7 +1005,7 @@ map_init_vi(el)
     el->el_map.type = MAP_VI;
     el->el_map.current = el->el_map.key;
 
-    key_reset(el);
+    libedit_key_reset(el);
 
     for (i = 0; i < N_KEYS; i++) {
 	key[i] = vii[i];
@@ -1037,7 +1038,7 @@ map_init_emacs(el)
 
     el->el_map.type = MAP_EMACS;
     el->el_map.current = el->el_map.key;
-    key_reset(el);
+    libedit_key_reset(el);
 
     for (i = 0; i < N_KEYS; i++) {
 	key[i] = emacs[i];
@@ -1054,7 +1055,7 @@ map_init_emacs(el)
     buf[0] = CONTROL('X');
     buf[1] = CONTROL('X');
     buf[2] = 0;
-    key_add(el, buf, key_map_cmd(el, EM_EXCHANGE_MARK), XK_CMD);
+    libedit_key_add(el, buf, libedit_key_map_cmd(el, EM_EXCHANGE_MARK), XK_CMD);
 
     tty_bind_char(el, 1);
     term_bind_arrow(el);
@@ -1103,7 +1104,7 @@ map_print_key(el, map, in)
 	    }
     }
     else
-	key_print(el, in);
+	libedit_key_print(el, in);
 }
 
 
@@ -1195,7 +1196,7 @@ map_print_all_keys(el)
     map_print_some_keys(el, el->el_map.alt, prev, i - 1);
 
     (void) fprintf(el->el_outfile, "Multi-character bindings\n");
-    key_print(el, "");
+    libedit_key_print(el, "");
     (void) fprintf(el->el_outfile, "Arrow key bindings\n");
     term_print_arrow(el, "");
 }
@@ -1290,9 +1291,9 @@ map_bind(el, argc, argv)
 	    return -1;
 	}
 	if (in[1])
-	    (void) key_delete(el, in);
+	    (void) libedit_key_delete(el, in);
 	else if (map[(unsigned char) *in] == ED_SEQUENCE_LEAD_IN)
-	    (void) key_delete(el, in);
+	    (void) libedit_key_delete(el, in);
 	else
 	    map[(unsigned char) *in] = ED_UNASSIGNED;
 	return 0;
@@ -1322,9 +1323,9 @@ map_bind(el, argc, argv)
 	    return -1;
 	}
 	if (key)
-	    term_set_arrow(el, in, key_map_str(el, out), ntype);
+	    term_set_arrow(el, in, libedit_key_map_str(el, out), ntype);
 	else
-	    key_add(el, in, key_map_str(el, out), ntype);
+	    libedit_key_add(el, in, libedit_key_map_str(el, out), ntype);
 	map[(unsigned char) *in] = ED_SEQUENCE_LEAD_IN;
 	break;
 
@@ -1335,14 +1336,14 @@ map_bind(el, argc, argv)
 	    return -1;
 	}
 	if (key)
-	    term_set_arrow(el, in, key_map_str(el, out), ntype);
+	    term_set_arrow(el, in, libedit_key_map_str(el, out), ntype);
 	else {
 	    if (in[1]) {
-		key_add(el, in, key_map_cmd(el, cmd), ntype);
+		libedit_key_add(el, in, libedit_key_map_cmd(el, cmd), ntype);
 		map[(unsigned char) *in] = ED_SEQUENCE_LEAD_IN;
 	    }
 	    else  {
-		key_clear(el, map, in);
+		libedit_key_clear(el, map, in);
 		map[(unsigned char) *in] = cmd;
 	    }
 	}

@@ -88,12 +88,12 @@ private	int	       key__decode_char	__P((char *, int, int));
  *	Initialize the key maps
  */
 protected int
-key_init(el)
+libedit_key_init(el)
     EditLine *el;
 {
     el->el_key.buf = (char *) el_malloc(KEY_BUFSIZ);
     el->el_key.map = NULL;
-    key_reset(el);
+    libedit_key_reset(el);
     return 0;
 }
 
@@ -102,12 +102,12 @@ key_init(el)
  *	Free the key maps
  */
 protected void
-key_end(el)
+libedit_key_end(el)
     EditLine *el;
 {
     el_free((ptr_t) el->el_key.buf);
     el->el_key.buf = NULL;
-    key_reset(el);
+    libedit_key_reset(el);
     el->el_key.map = NULL;
 }
 
@@ -116,7 +116,7 @@ key_end(el)
  *	Associate cmd with a key value
  */
 protected key_value_t *
-key_map_cmd(el, cmd)
+libedit_key_map_cmd(el, cmd)
     EditLine *el;
     int cmd;
 {
@@ -129,7 +129,7 @@ key_map_cmd(el, cmd)
  *	Associate str with a key value
  */
 protected key_value_t *
-key_map_str(el, str)
+libedit_key_map_str(el, str)
     EditLine *el;
     char  *str;
 {
@@ -144,7 +144,7 @@ key_map_str(el, str)
  *	[Always bind the ansi arrow keys?]
  */
 protected void
-key_reset(el)
+libedit_key_reset(el)
     EditLine *el;
 {
     node__put(el->el_key.map);
@@ -162,7 +162,7 @@ key_reset(el)
  *      The last character read is returned in *ch.
  */
 protected int
-key_get(el, ch, val)
+libedit_key_get(el, ch, val)
     EditLine    *el;
     char        *ch;
     key_value_t *val;
@@ -179,7 +179,7 @@ key_get(el, ch, val)
  *      out str or a unix command.
  */
 protected void
-key_add(el, key, val, ntype)
+libedit_key_add(el, key, val, ntype)
     EditLine    *el;
     char        *key;
     key_value_t *val;
@@ -211,7 +211,7 @@ key_add(el, key, val, ntype)
  *
  */
 protected void
-key_clear(el, map, in)
+libedit_key_clear(el, map, in)
     EditLine *el;
     el_action_t *map;
     char   *in;
@@ -221,7 +221,7 @@ key_clear(el, map, in)
 	  el->el_map.alt[(unsigned char) *in] != ED_SEQUENCE_LEAD_IN) ||
 	 (map == el->el_map.alt &&
 	  el->el_map.key[(unsigned char) *in] != ED_SEQUENCE_LEAD_IN)))
-	(void) key_delete(el, in);
+	(void) libedit_key_delete(el, in);
 }
 
 
@@ -230,7 +230,7 @@ key_clear(el, map, in)
  *      they exists.
  */
 protected int
-key_delete(el, key)
+libedit_key_delete(el, key)
     EditLine *el;
     char   *key;
 {
@@ -253,7 +253,7 @@ key_delete(el, key)
  *	Print entire el->el_key.map if null
  */
 protected void
-key_print(el, key)
+libedit_key_print(el, key)
     EditLine *el;
     char   *key;
 {
@@ -516,7 +516,8 @@ node_lookup(el, str, ptr, cnt)
 		if (str[1] == 0) {
 		    el->el_key.buf[ncnt + 1] = '"';
 		    el->el_key.buf[ncnt + 2] = '\0';
-		    key_kprint(el, el->el_key.buf, &ptr->val, ptr->type);
+		    libedit_key_kprint(el, el->el_key.buf, &ptr->val,
+		        ptr->type);
 		    return 0;
 		}
 		else
@@ -567,7 +568,7 @@ node_enum(el, ptr, cnt)
 	/* print this key and function */
 	el->el_key.buf[ncnt + 1] = '"';
 	el->el_key.buf[ncnt + 2] = '\0';
-	key_kprint(el, el->el_key.buf, &ptr->val, ptr->type);
+	libedit_key_kprint(el, el->el_key.buf, &ptr->val, ptr->type);
     }
     else
 	(void) node_enum(el, ptr->next, ncnt + 1);
@@ -583,8 +584,8 @@ node_enum(el, ptr, cnt)
  *	Print the specified key and its associated
  *	function specified by val
  */
-protected void
-key_kprint(el, key, val, ntype)
+/*  protected  */void
+libedit_key_kprint(el, key, val, ntype)
     EditLine      *el;
     char          *key;
     key_value_t   *val;
