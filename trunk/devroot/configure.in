@@ -640,7 +640,7 @@ dnl Check for header files.
 if test "x$enable_posix_file" = "x1" ; then
   dnl Make sure that poll() and/or select() is available.
   can_poll="0"
-  AC_CHECK_FUNCS(poll select, can_poll=1)
+  AC_CHECK_FUNCS(poll select, can_poll="1")
   if test "x$can_poll" = "x0" ; then
     AC_MSG_ERROR(Cannot build without poll() or select())
   fi
