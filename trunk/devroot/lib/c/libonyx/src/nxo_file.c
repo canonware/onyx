@@ -975,7 +975,7 @@ nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...)
 			} else {
 				/*
 				 * Try to render to the buffer again.  If it
-				 * nxl doesn't fit, use out_put_sva to
+				 * still doesn't fit, use out_put_sva to
 				 * allocate a string, write the string, then
 				 * deallocate it.
 				 */

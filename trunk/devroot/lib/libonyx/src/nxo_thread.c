@@ -1402,22 +1402,11 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					    '\0';
 					errno = 0;
 
-#if (_CW_NXOI_SIZEOF == 8)
 					val = strtoll(a_thread->tok_str, NULL,
 					    10);
-#else
-					val = strtol(a_thread->tok_str, NULL,
-					    10);
-#endif
 					if ((errno == ERANGE) &&
-#if (_CW_NXOI_SIZEOF == 8)
 					    ((val == LLONG_MIN) || (val ==
-					    LLONG_MAX))
-#else
-					    ((val == LONG_MIN) || (val ==
-					    LONG_MAX))
-#endif
-					    ) {
+					    LLONG_MAX))) {
 						nxoe_p_thread_reset(a_thread);
 						nxo_thread_error(
 						    &a_thread->self,
@@ -1504,24 +1493,12 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					    '\0';
 					errno = 0;
 
-#if (_CW_NXOI_SIZEOF == 8)
 					val = strtoll(&a_thread->tok_str[
 					    a_thread->m.n.b_off], NULL,
 					    a_thread->m.n.base);
-#else
-					val = strtol(&a_thread->tok_str[
-					    a_thread->m.n.b_off], NULL,
-					    a_thread->m.n.base);
-#endif
 					if ((errno == ERANGE) &&
-#if (_CW_NXOI_SIZEOF == 8)
 					    ((val == LLONG_MIN) || (val ==
-					    LLONG_MAX))
-#else
-					    ((val == LONG_MIN) || (val ==
-					    LONG_MAX))
-#endif
-					    ) {
+					    LLONG_MAX))) {
 						nxoe_p_thread_reset(a_thread);
 						nxo_thread_error(
 						    &a_thread->self,

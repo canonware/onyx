@@ -217,7 +217,6 @@ nxa_dump(cw_nxa_t *a_nxa, cw_nxo_t *a_thread)
 	mtx_lock(&a_nxa->lock);
 	nxo_file_output(file, "active: [s|w:10]\n", a_nxa->gcdict_active ?
 	    "true" : "false");
-#if (_CW_NXOI_SIZEOF == 8)
 	nxo_file_output(file, "period: [q|w:10]\n", a_nxa->gcdict_period);
 	nxo_file_output(file, "threshold: [q|w:7]\n",
 	    a_nxa->gcdict_threshold);
@@ -246,36 +245,6 @@ nxa_dump(cw_nxa_t *a_nxa, cw_nxo_t *a_thread)
 	    a_nxa->gcdict_sum[2] / 1000000,
 	    a_nxa->gcdict_sum[2] % 1000000);
 	nxo_file_buffer_flush(file);
-#else
-	nxo_file_output(file, "period: [i|w:10]\n", a_nxa->gcdict_period);
-	nxo_file_output(file, "threshold: [i|w:7]\n",
-	    a_nxa->gcdict_threshold);
-	nxo_file_output(file, "collections: [i|w:5]\n",
-	    a_nxa->gcdict_collections);
-	nxo_file_output(file, "new:     [i|w:9]\n", a_nxa->gcdict_new);
-	nxo_file_output(file,
-	    "current: [i|w:9] [i|w:5].[i|w:6|p:0] [i|w:5].[i|w:6|p:0]\n",
-	    a_nxa->gcdict_current[0],
-	    a_nxa->gcdict_current[1] / 1000000,
-	    a_nxa->gcdict_current[1] % 1000000,
-	    a_nxa->gcdict_current[2] / 1000000,
-	    a_nxa->gcdict_current[2] % 1000000);
-	nxo_file_output(file,
-	    "maximum: [i|w:9] [i|w:5].[i|w:6|p:0] [i|w:5].[i|w:6|p:0]\n",
-	    a_nxa->gcdict_maximum[0],
-	    a_nxa->gcdict_maximum[1] / 1000000,
-	    a_nxa->gcdict_maximum[1] % 1000000,
-	    a_nxa->gcdict_maximum[2] / 1000000,
-	    a_nxa->gcdict_maximum[2] % 1000000);
-	nxo_file_output(file,
-	    "sum:     [i|w:9] [i|w:5].[i|w:6|p:0] [i|w:5].[i|w:6|p:0]\n",
-	    a_nxa->gcdict_sum[0],
-	    a_nxa->gcdict_sum[1] / 1000000,
-	    a_nxa->gcdict_sum[1] % 1000000,
-	    a_nxa->gcdict_sum[2] / 1000000,
-	    a_nxa->gcdict_sum[2] % 1000000);
-	nxo_file_buffer_flush(file);
-#endif
 	mtx_unlock(&a_nxa->lock);
 }
 

@@ -75,22 +75,7 @@ typedef enum {
 	NXOA_EXECUTABLE
 }	cw_nxoa_t;
 
-/*
- * The nx language was designed to use 64 bit signed integers.  However, 64
- * bit processors nxl aren't the defacto standard, and nx performance can
- * suffer considerably due to the compiler emulating 64 bit integers.  It is
- * possible to use nx with signed 32 bit integers, but this introduces a
- * number of unpleasant limitations.  For example, files are limited to 2 GB in
- * size.
- */
-#define	_CW_NXOI_SIZEOF	8
-#if (_CW_NXOI_SIZEOF == 8)
 typedef cw_sint64_t cw_nxoi_t;
-#elif (_CW_NXOI_SIZEOF == 4)
-typedef cw_sint32_t cw_nxoi_t;
-#else
-#error "Unsupported nxoi size"
-#endif
 
 /*
  * Main object structure.

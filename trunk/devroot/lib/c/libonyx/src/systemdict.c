@@ -541,7 +541,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 						}
 					}
 					/*
-					 * If val isn't a fastop, nxl convert
+					 * If val isn't a fastop, still convert
 					 * the name to an operator.
 					 */
 					if (j == NFASTOPS) {
@@ -1349,13 +1349,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		cw_uint8_t	result[21];
 		cw_sint32_t	len;
 
-#if (_CW_NXOI_SIZEOF == 8)
 		len = _cw_out_put_s(result, "[q|s:s]", nxo_integer_get(nxo));
-#elif (_CW_NXOI_SIZEOF == 4)
-		len = _cw_out_put_s(result, "[i|s:s]", nxo_integer_get(nxo));
-#else
-#error "Unsupported integer size"
-#endif
 		nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 		    nxo_thread_currentlocking(a_thread), len);
 		nxo_string_lock(nxo);

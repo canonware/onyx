@@ -28,12 +28,7 @@ nxo_l_integer_print(cw_nxo_t *a_thread)
 	}
 	stdout_nxo = nx_stdout_get(nxo_thread_nx_get(a_thread));
 
-#if (_CW_NXOI_SIZEOF == 8)
 	error = nxo_file_output(stdout_nxo, "[q|s:s]", integer->o.integer.i);
-#else
-	error = nxo_file_output(stdout_nxo, "[i|s:s]", integer->o.integer.i);
-#endif
-
 	if (error) {
 		nxo_thread_error(a_thread, error);
 		return;
