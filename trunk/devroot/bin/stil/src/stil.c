@@ -68,9 +68,9 @@ main(int argc, char **argv)
 		    " print flush\n";
 		EditLine	*el;
 		History		*hist;
-		const HistEvent	*hevent;
 		const char	*str;
 		int		count;
+		cw_bool_t	continuation = FALSE;
 
 		/* Print product and version info. */
 		stilt_interp_str(&stilt, &estilts, code, sizeof(code) - 1);
@@ -91,13 +91,32 @@ main(int argc, char **argv)
 		for (;;) {
 			if ((str = el_gets(el, &count)) == NULL)
 				break;
-			/*
-			 * If not a duplicate, store the command to the
-			 * history.
-			 */
-			hevent = history(hist, H_FIRST);
-			if (hevent == NULL || strcmp(str, hevent->str))
-				history(hist, H_ENTER, str);
+			if ((stilt_deferred(&stilt) == FALSE) &&
+			    (stilt_state(&stilt) == STATE_START)) {
+				const HistEvent	*hevent;
+
+				/*
+				 * Completion of a history element.  Insert it,
+				 * taking care to avoid simple (non-continued)
+				 * duplicates.
+				 */
+				if (continuation) {
+					history(hist, H_ENTER, str);
+					continuation = FALSE;
+				} else {
+					hevent = history(hist, H_FIRST);
+					if (hevent == NULL || strcmp(str,
+					    hevent->str))
+					history(hist, H_ENTER, str);
+				}
+			} else {
+				/*
+				 * Continuation.  Append it to the current
+				 * history element.
+				 */
+				history(hist, H_ADD, str);
+				continuation = TRUE;
+			}
 
 			stilt_interp_str(&stilt, &stilts, str,
 			    (cw_uint32_t)count);
@@ -131,60 +150,43 @@ main(int argc, char **argv)
 char *
 prompt(EditLine *a_el)
 {
-	char	*retval;
+	if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
+	    STATE_START)) {
+		cw_uint8_t	code[] = "prompt\n";
+		cw_uint8_t	*pstr;
+		cw_uint32_t	plen, maxlen;
+		cw_stilo_t	*stilo;
+		cw_stils_t	*stack = stilt_data_stack_get(&stilt);
 
-	if (stilt_deferred(&stilt) == FALSE) {
-		if (stilt_state(&stilt) == STATE_START) {
-			cw_uint8_t	code[] = "prompt\n";
-			cw_uint8_t	*pstr;
-			cw_uint32_t	plen, maxlen;
-			cw_stilo_t	*stilo;
-			cw_stils_t	*stack = stilt_data_stack_get(&stilt);
+		/* Push the prompt onto the data stack. */
+		stilt_interp_str(&stilt, &estilts, code, sizeof(code) - 1);
 
-			/* Push the prompt onto the data stack. */
-			stilt_interp_str(&stilt, &estilts, code, sizeof(code) -
-			    1);
+		/* Get the actual prompt string. */
+		stilo = stils_get(stack, 0);
+		pstr = stilo_string_get(stilo);
+		plen = stilo_string_len_get(stilo);
 
-			/* Get the actual prompt string. */
-			stilo = stils_get(stack, 0);
-			pstr = stilo_string_get(stilo);
-			plen = stilo_string_len_get(stilo);
+		/* Copy the prompt string to a global buffer. */
+		maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN - 1 :
+		    plen;
+		strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
+		prompt_str[maxlen] = '\0';
 
-			/* Copy the prompt string to a global buffer. */
-			maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN -
-			    1 : plen;
-			strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
-			prompt_str[maxlen] = '\0';
-
-			/* Pop the prompt string off the data stack. */
-			stils_pop(stack, &stilt, 1);
-
-			retval = prompt_str;
-		} else {
-			/*
-			 * Continuation of a string or similarly parsed token.
-			 */
-			retval = "";
-		}
+		/* Pop the prompt string off the data stack. */
+		stils_pop(stack, &stilt, 1);
 	} else {
 		/*
-		 * The scanner is in a deferred state right now which means that
-		 * we cannot call the interpreter to get the prompt string.  Use
-		 * the previous value this time around.  This will only result
-		 * in an incorrect prompt if the user types something like:
+		 * One or both of:
 		 *
-		 * s> /prompt {"prompt> "} def /foo {
-		 * s> "bar"
-		 * s> } def
-		 * prompt>
+		 * - Continuation of a string or similarly parsed token.
+		 * - Execution is deferred due to unmatched {}'s.
 		 *
-		 * Oh well.  Due to the dynamic nature of the prompt, there is
-		 * no reasonable way to make this edge case work correctly.
+		 * Don't print a prompt.
 		 */
-		retval = prompt_str;
+		prompt_str[0] = '\0';
 	}
 
-	return retval;
+	return prompt_str;
 }
 
 /* Doesn't strip trailing '/' characters. */
