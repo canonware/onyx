@@ -42,7 +42,7 @@ handle_client(void * a_arg)
     message = buf_get_uint32(&buf, 0);
     out_put(cw_g_out, "Connection [i], message [i]\n", i, message);
 
-    sock_disconnect(&sock);
+    _cw_assert(FALSE == sock_disconnect(&sock));
   }
 
   sock_delete(&sock);
