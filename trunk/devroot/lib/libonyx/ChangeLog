@@ -1,3 +1,12 @@
+2002-01-13  Jason Evans  <jasone@canonware.com>
+
+	* : Add support for reals, which are double precision floating
+	point numbers.  This includes modifications to the scanner, the
+	addition of the nxo_real class, and several new operators: cvds,
+	cves, ceiling, floor, round, trunc, sqrt, ln, log, idiv, sin, cos,
+	and atan.  Also, many operators and other portions of code were
+	modified to handle the mixture of reals and integers.
+
 2001-12-23  Jason Evans  <jasone@canonware.com>
 
 	* include/libonyx/nx_l.h (nx_l_ref_iter): Don't skip over gcdict
