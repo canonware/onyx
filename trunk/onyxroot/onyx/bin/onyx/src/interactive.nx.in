@@ -38,7 +38,7 @@
 systemdict begin
 # - promptstring #string
 $promptstring {
-    count cvs `onyx:' exch cat `> ' cat
+    count cvs `onyx:' exch `> ' 3 ncat
 } bind def
 end
 
