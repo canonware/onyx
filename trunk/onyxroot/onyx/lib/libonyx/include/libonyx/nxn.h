@@ -578,6 +578,10 @@ typedef enum
 #endif
     NXN_ENTRY(SIGXCPU),
     NXN_ENTRY(SIGXFSZ),
+    NXN_ENTRY(SIG_BLOCK),
+    NXN_ENTRY(SIG_GETMASK),
+    NXN_ENTRY(SIG_SETMASK),
+    NXN_ENTRY(SIG_UNBLOCK),
 #endif
 #ifdef CW_SOCKET
     NXN_ENTRY(SO_BROADCAST),
@@ -682,15 +686,14 @@ typedef enum
     NXN_ENTRY(sibdup),
     NXN_ENTRY(sibpop),
     NXN_ENTRY(sidup),
+#ifdef CW_POSIX
+    NXN_ENTRY(sigmask),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(signal),
 #endif
-#if (defined(CW_POSIX) && defined(CW_THREADS))
-    NXN_ENTRY(signalthread),
-#endif
 #ifdef CW_POSIX
     NXN_ENTRY(sigpending),
-    NXN_ENTRY(sigprocmask),
     NXN_ENTRY(sigsuspend),
     NXN_ENTRY(sigwait),
 #endif

@@ -512,15 +512,14 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sibdup),
     ENTRY(sibpop),
     ENTRY(sidup),
+#ifdef CW_POSIX
+    ENTRY(sigmask),
+#endif
 #ifdef CW_THREADS
     ENTRY(signal),
 #endif
-#if (defined(CW_POSIX) && defined(CW_THREADS))
-    ENTRY(signalthread),
-#endif
 #ifdef CW_POSIX
     ENTRY(sigpending),
-    ENTRY(sigprocmask),
     ENTRY(sigsuspend),
     ENTRY(sigwait),
 #endif
@@ -11519,6 +11518,280 @@ systemdict_sidup(cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
+#ifdef CW_POSIX
+void
+systemdict_sigmask(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo_how, *nxo_set, *nxo_oset;
+    cw_nxo_t *tstack, *tnxo, *tkey, *tval;
+    int how, sig;
+    uint32_t nkeep, npop, i, nkeys;
+    sigset_t set, oset;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Get arguments. */
+    NXO_STACK_GET(nxo_oset, ostack, a_thread);
+    if (nxo_type_get(nxo_oset) != NXOT_DICT)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    NXO_STACK_NGET(nxo_set, ostack, a_thread, 1);
+    switch(nxo_type_get(nxo_set))
+    {
+	case NXOT_NAME:
+	{
+	    /* oset wasn't actually specified. */
+	    nkeep = 0;
+	    npop = 2;
+	    nxo_how = nxo_set;
+	    nxo_set = nxo_oset;
+	    nxo_oset = NULL;
+	    break;
+	}
+	case NXOT_DICT:
+	{
+	    nkeep = 1;
+	    npop = 2;
+	    NXO_STACK_NGET(nxo_how, ostack, a_thread, 2);
+	    if (nxo_type_get(nxo_how) != NXOT_NAME)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    /* Translate arguments. */
+    tstack = nxo_thread_tstack_get(a_thread);
+    tnxo = nxo_stack_push(tstack);
+    tkey = nxo_stack_push(tstack);
+    tval = nxo_stack_push(tstack);
+
+    /* how. */
+#define HOWFLAGCOMP(a_nxn, a_how)					\
+    nxo_name_new(tnxo, nxn_str(a_nxn), nxn_len(a_nxn), true);		\
+    if (nxo_compare(tnxo, nxo_how) == 0)				\
+    {									\
+	how = (a_how);							\
+	break;								\
+    }
+
+    how = -1;
+    do
+    {
+	HOWFLAGCOMP(NXN_SIG_BLOCK, SIG_BLOCK);
+	HOWFLAGCOMP(NXN_SIG_UNBLOCK, SIG_UNBLOCK);
+	HOWFLAGCOMP(NXN_SIG_GETMASK, -2);
+	HOWFLAGCOMP(NXN_SIG_SETMASK, SIG_SETMASK);
+#undef HOWFLAGCOMP
+    } while (0);
+
+    if (how == -1)
+    {
+	/* Unrecognized command. */
+	nxo_stack_npop(tstack, 3);
+	nxo_thread_nerror(a_thread, NXN_argcheck);
+	return;
+    }
+
+    switch (how)
+    {
+	case -2:
+	{
+	    /* set wasn't actually specified (but oset was). */
+	    if (nkeep != 0)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+	    nkeep = 1;
+	    npop = 1;
+	    nxo_oset = nxo_set;
+	    nxo_set = NULL;
+	    break;
+	}
+	case SIG_BLOCK:
+	case SIG_UNBLOCK:
+	case SIG_SETMASK:
+	{
+	    break;
+	}
+	case -1:
+	{
+	    nxo_stack_npop(tstack, 3);
+	    nxo_thread_nerror(a_thread, NXN_argcheck);
+	    return;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* set. */
+    if (nxo_set != NULL)
+    {
+	sigemptyset(&set);
+
+#define SIGNALNAMECOMP(a_nxn, a_signal)					\
+	nxo_name_new(tnxo, nxn_str(a_nxn), nxn_len(a_nxn), true);	\
+	if (nxo_compare(tnxo, tkey) == 0)				\
+	{								\
+	    sig = (a_signal);						\
+	    break;							\
+	}
+
+	for (i = 0, nkeys = nxo_dict_count(nxo_set); i < nkeys; i++)
+	{
+	    nxo_dict_iterate(nxo_set, tkey);
+
+	    sig = -1;
+	    do
+	    {
+		SIGNALNAMECOMP(NXN_SIGABRT, SIGABRT);
+		SIGNALNAMECOMP(NXN_SIGALRM, SIGALRM);
+		SIGNALNAMECOMP(NXN_SIGBUS, SIGBUS);
+		SIGNALNAMECOMP(NXN_SIGCHLD, SIGCHLD);
+		SIGNALNAMECOMP(NXN_SIGCONT, SIGCONT);
+		SIGNALNAMECOMP(NXN_SIGFPE, SIGFPE);
+		SIGNALNAMECOMP(NXN_SIGHUP, SIGHUP);
+		SIGNALNAMECOMP(NXN_SIGILL, SIGILL);
+		SIGNALNAMECOMP(NXN_SIGINT, SIGINT);
+		SIGNALNAMECOMP(NXN_SIGKILL, SIGKILL);
+		SIGNALNAMECOMP(NXN_SIGPIPE, SIGPIPE);
+		SIGNALNAMECOMP(NXN_SIGQUIT, SIGQUIT);
+		SIGNALNAMECOMP(NXN_SIGSEGV, SIGSEGV);
+		SIGNALNAMECOMP(NXN_SIGSTOP, SIGSTOP);
+		SIGNALNAMECOMP(NXN_SIGTERM, SIGTERM);
+		SIGNALNAMECOMP(NXN_SIGTSTP, SIGTSTP);
+		SIGNALNAMECOMP(NXN_SIGTTIN, SIGTTIN);
+		SIGNALNAMECOMP(NXN_SIGTTOU, SIGTTOU);
+		SIGNALNAMECOMP(NXN_SIGUSR1, SIGUSR1);
+		SIGNALNAMECOMP(NXN_SIGUSR2, SIGUSR2);
+#ifdef SIGPOLL
+		SIGNALNAMECOMP(NXN_SIGPOLL, SIGPOLL);
+#endif
+		SIGNALNAMECOMP(NXN_SIGPROF, SIGPROF);
+		SIGNALNAMECOMP(NXN_SIGSYS, SIGSYS);
+		SIGNALNAMECOMP(NXN_SIGTRAP, SIGTRAP);
+		SIGNALNAMECOMP(NXN_SIGURG, SIGURG);
+#ifdef SIGVTALRM
+		SIGNALNAMECOMP(NXN_SIGVTALRM, SIGVTALRM);
+#endif
+		SIGNALNAMECOMP(NXN_SIGXCPU, SIGXCPU);
+		SIGNALNAMECOMP(NXN_SIGXFSZ, SIGXFSZ);
+#undef SIGNALNAMECOMP
+	    } while (0);
+
+	    if (sig == -1)
+	    {
+		/* Unrecognized signal name. */
+		nxo_stack_npop(tstack, 3);
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+
+	    nxo_dict_lookup(nxo_set, tkey, tval);
+	    if (nxo_type_get(tval) != NXOT_BOOLEAN)
+	    {
+		nxo_stack_npop(tstack, 3);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    if (nxo_boolean_get(tval))
+	    {
+		sigaddset(&set, sig);
+	    }
+	}
+
+	/* Take action. */
+#ifdef CW_THREADS
+	thd_sigmask(how, &set, &oset);
+#else
+	sigprocmask(how, &set, &oset);
+#endif
+    }
+    else
+    {
+	/* Take action. */
+#ifdef CW_THREADS
+	thd_sigmask(SIG_SETMASK, NULL, &oset);
+#else
+	sigprocmask(SIG_SETMASK, NULL, &oset);
+#endif
+    }
+
+    /* Update nxo_oset. */
+    if (nxo_oset != NULL)
+    {
+#define SIGNALNAMESET(a_nxn, a_signal)					\
+	nxo_name_new(tkey, nxn_str(a_nxn), nxn_len(a_nxn), true);	\
+	if (sigismember(&oset, a_signal))				\
+	{								\
+	    nxo_dict_def(nxo_oset, tkey, tval);				\
+	}								\
+	else								\
+	{								\
+	    if (nxo_dict_lookup(nxo_oset, tkey, NULL) == false)		\
+	    {								\
+		nxo_dict_undef(nxo_oset, tkey);				\
+	    }								\
+	}
+
+	/* tval is used in the above macro. */
+	nxo_boolean_new(tval, true);
+
+	SIGNALNAMESET(NXN_SIGABRT, SIGABRT);
+	SIGNALNAMESET(NXN_SIGALRM, SIGALRM);
+	SIGNALNAMESET(NXN_SIGBUS, SIGBUS);
+	SIGNALNAMESET(NXN_SIGCHLD, SIGCHLD);
+	SIGNALNAMESET(NXN_SIGCONT, SIGCONT);
+	SIGNALNAMESET(NXN_SIGFPE, SIGFPE);
+	SIGNALNAMESET(NXN_SIGHUP, SIGHUP);
+	SIGNALNAMESET(NXN_SIGILL, SIGILL);
+	SIGNALNAMESET(NXN_SIGINT, SIGINT);
+	SIGNALNAMESET(NXN_SIGKILL, SIGKILL);
+	SIGNALNAMESET(NXN_SIGPIPE, SIGPIPE);
+	SIGNALNAMESET(NXN_SIGQUIT, SIGQUIT);
+	SIGNALNAMESET(NXN_SIGSEGV, SIGSEGV);
+	SIGNALNAMESET(NXN_SIGSTOP, SIGSTOP);
+	SIGNALNAMESET(NXN_SIGTERM, SIGTERM);
+	SIGNALNAMESET(NXN_SIGTSTP, SIGTSTP);
+	SIGNALNAMESET(NXN_SIGTTIN, SIGTTIN);
+	SIGNALNAMESET(NXN_SIGTTOU, SIGTTOU);
+	SIGNALNAMESET(NXN_SIGUSR1, SIGUSR1);
+	SIGNALNAMESET(NXN_SIGUSR2, SIGUSR2);
+#ifdef SIGPOLL
+	SIGNALNAMESET(NXN_SIGPOLL, SIGPOLL);
+#endif
+	SIGNALNAMESET(NXN_SIGPROF, SIGPROF);
+	SIGNALNAMESET(NXN_SIGSYS, SIGSYS);
+	SIGNALNAMESET(NXN_SIGTRAP, SIGTRAP);
+	SIGNALNAMESET(NXN_SIGURG, SIGURG);
+#ifdef SIGVTALRM
+	SIGNALNAMESET(NXN_SIGVTALRM, SIGVTALRM);
+#endif
+	SIGNALNAMESET(NXN_SIGXCPU, SIGXCPU);
+	SIGNALNAMESET(NXN_SIGXFSZ, SIGXFSZ);
+#undef SIGNALNAMESET
+    }
+
+    /* Clean up. */
+    nxo_stack_npop(tstack, 3);
+    nxo_stack_roll(ostack, npop + nkeep, nkeep);
+    nxo_stack_npop(ostack, npop);
+}
+#endif
+
 #ifdef CW_THREADS
 void
 systemdict_signal(cw_nxo_t *a_thread)
@@ -11540,25 +11813,9 @@ systemdict_signal(cw_nxo_t *a_thread)
 }
 #endif
 
-#if (defined(CW_POSIX) && defined(CW_THREADS))
-void
-systemdict_signalthread(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-#endif
-
 #ifdef CW_POSIX
 void
 systemdict_sigpending(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-#endif
-
-#ifdef CW_POSIX
-void
-systemdict_sigprocmask(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }

@@ -560,6 +560,22 @@ execution stack operators} \\
 	{Send a signal to a process.}
 \hline
 \optableent
+	{\$SIG\_GETMASK oset}
+	{{\bf \htmlref{sigmask}{systemdict:sigmask}}}
+	{oset}
+	{Get signal mask.}
+\optableent
+	{how set}
+	{{\bf \htmlref{sigmask}{systemdict:sigmask}}}
+	{--}
+	{Modify signal mask.}
+\optableent
+	{how set oset}
+	{{\bf \htmlref{sigmask}{systemdict:sigmask}}}
+	{oset}
+	{Modify signal mask.}
+\hline
+\optableent
 	{--}
 	{{\bf \htmlref{pid}{systemdict:pid}}}
 	{pid}
@@ -10799,89 +10815,14 @@ onyx:1> 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:signal}
-\index{signal@\onyxop{}{signal}{}}
-\item[{\onyxop{condition}{signal}{--}}: ]
+\label{systemdict:sigmask}
+\index{sigmask@\onyxop{}{sigmask}{}}
+\item[{\onyxop{\$SIG\_GETMASK oset}{sigmask}{oset}}: ]
+\item[{\onyxop{how set}{sigmask}{--}}: ]
+\item[{\onyxop{how set oset}{sigmask}{oset}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[condition: ]
-			A condition object.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-		Signal a thread that is waiting on \oparg{condition}.  If there
-		are no waiters, this operator has no effect.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> condition mutex dup lock ostack
-onyx:3> {dup lock exch signal unlock}
-onyx:4> thread 3 1 roll
-onyx:3> dup 3 1 roll
-onyx:4> wait unlock join
-onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:signalthread}
-\index{signalthread@\onyxop{}{signalthread}{}}
-\item[{\onyxop{OPARGS}{signalthread}{OPOUTS}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{systemdict:sigpending}
-\index{sigpending@\onyxop{}{sigpending}{}}
-\item[{\onyxop{OPARGS}{sigpending}{OPOUTS}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{systemdict:sigprocmask}
-\index{sigprocmask@\onyxop{}{sigprocmask}{}}
-\item[{\onyxop{\$SIG\_GETMASK oset}{sigprocmask}{oset}}: ]
-\item[{\onyxop{how set}{sigprocmask}{--}}: ]
-\item[{\onyxop{how set oset}{sigprocmask}{oset}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[\$SIG\_GETMASK: ]
-			A name object that tells the operator to take no action,
-			except to return the signal mask.
 		\item[how: ] A name object:
 			\begin{description}\item[]
 			\item[\$SIG\_BLOCK: ]
@@ -10891,6 +10832,8 @@ onyx:0>
 			\item[\$SIG\_UNBLOCK: ]
 				Unmask the signals in \oparg{set} whose values
 				are set to true.
+			\item[\$SIG\_GETMASK: ]
+				Get the current signal mask.
 			\item[\$SIG\_SETMASK: ]
 				Set the signal mask to the signals in
 				\oparg{set} whose values are set to true.
@@ -10941,12 +10884,73 @@ onyx:0>
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
-                XXX
 		\end{description}
 	\item[Description: ]
-		Get or set the current signal mask.
+		Get or set the calling thread's current signal mask.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> $SIG_GETMASK <> sigmask 1 sprint
+<$SIGHUP true $SIGINT true $SIGQUIT true $SIGTERM true>
+onyx:0> $SIG_BLOCK <$SIGPIPE true> <> sigmask 1 sprint
+<$SIGHUP true $SIGINT true $SIGQUIT true $SIGTERM true>
+onyx:0> $SIG_GETMASK <> sigmask 1 sprint
+<$SIGHUP true $SIGINT true $SIGPIPE true $SIGQUIT true $SIGTERM true>
+onyx:0> $SIG_UNBLOCK <$SIGPIPE true> <> sigmask 1 sprint
+<$SIGHUP true $SIGINT true $SIGPIPE true $SIGQUIT true $SIGTERM true>
+onyx:0> $SIG_GETMASK <> sigmask 1 sprint
+<$SIGHUP true $SIGINT true $SIGQUIT true $SIGTERM true>
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:signal}
+\index{signal@\onyxop{}{signal}{}}
+\item[{\onyxop{condition}{signal}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[condition: ]
+			A condition object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Signal a thread that is waiting on \oparg{condition}.  If there
+		are no waiters, this operator has no effect.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> condition mutex dup lock ostack
+onyx:3> {dup lock exch signal unlock}
+onyx:4> thread 3 1 roll
+onyx:3> dup 3 1 roll
+onyx:4> wait unlock join
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sigpending}
+\index{sigpending@\onyxop{}{sigpending}{}}
+\item[{\onyxop{OPARGS}{sigpending}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}

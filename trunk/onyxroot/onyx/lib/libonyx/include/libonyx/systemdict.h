@@ -957,24 +957,19 @@ systemdict_sibpop(cw_nxo_t *a_thread);
 void
 systemdict_sidup(cw_nxo_t *a_thread);
 
+#ifdef CW_POSIX
+void
+systemdict_sigmask(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_THREADS
 void
 systemdict_signal(cw_nxo_t *a_thread);
 #endif
 
-#if (defined(CW_POSIX) && defined(CW_THREADS))
-void
-systemdict_signalthread(cw_nxo_t *a_thread);
-#endif
-
 #ifdef CW_POSIX
 void
 systemdict_sigpending(cw_nxo_t *a_thread);
-#endif
-
-#ifdef CW_POSIX
-void
-systemdict_sigprocmask(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_POSIX

@@ -145,13 +145,16 @@ ONYX_OTESTS =
               setenv_c.nx.in seteuid_a.nx.in seteuid_b.nx.in seteuid_c.nx.in
               seteuid_d.nx.in setgid_a.nx.in setgid_b.nx.in setgid_c.nx.in
               setgid_d.nx.in setuid_a.nx.in setuid_b.nx.in setuid_c.nx.in
-              setuid_d.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
-              srand_d.nx.in system_a.nx.in system_b.nx.in system_c.nx.in
-              system_d.nx.in system_e.nx.in system_f.nx.in system_g.nx.in
-              truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
-              truncate_d.nx.in truncate_e.nx.in uid_a.nx.in umask_a.nx.in
-              umask_b.nx.in umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
-              waitpid_a.nx.in waitpid_b.nx.in waitpid_c.nx.in
+              setuid_d.nx.in sigmask_a.nx.in sigmask_b.nx.in sigmask_c.nx.in
+              sigmask_d.nx.in sigmask_e.nx.in sigmask_f.nx.in sigmask_g.nx.in
+              sigmask_h.nx.in sigmask_i.nx.in sigmask_j.nx.in sigmask_k.nx.in
+              srand_a.nx.in srand_b.nx.in srand_c.nx.in srand_d.nx.in
+              system_a.nx.in system_b.nx.in system_c.nx.in system_d.nx.in
+              system_e.nx.in system_f.nx.in system_g.nx.in truncate_a.nx.in
+              truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
+              truncate_e.nx.in uid_a.nx.in umask_a.nx.in umask_b.nx.in
+              umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in waitpid_a.nx.in
+              waitpid_b.nx.in waitpid_c.nx.in
 
 #endif
 #if @enable_socket@
