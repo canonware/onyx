@@ -1,5 +1,30 @@
 2001-07-13  Chris Toshok  <toshok@ximian.com>
 
+	* include/gtkdict.h: remove prototypes for the (now static) hook
+	functions, and add one for nx_gtk_object_attach_hook.
+
+	* src/gtkwindow.c (nx_gtk_window_new): use
+	nx_gtk_object_attach_hook.
+
+	* src/gtklabel.c (nx_gtk_label_new): use
+	nx_gtk_object_attach_hook.
+
+	* src/gtkbutton.c (nx_gtk_button_new): use
+	nx_gtk_object_attach_hook.
+	(nx_gtk_button_new_with_label): same.
+
+	* src/gtkobject.c (nx_gtk_object_destroyed): make static, call
+	nxo_hook_data_set so we don't try and gtk_object_destroy it in
+	nx_gtk_object_delete.
+	(nx_gtk_object_delete): remove the destroy handler before
+	destroying the object.
+	(nx_gtk_object_ref_iter): new function, ref the parent of the
+	widget.
+	(nx_gtk_object_attach_hook): new function, connect all the hook
+	stuff and gtk destruction signals/functions.
+
+2001-07-13  Chris Toshok  <toshok@ximian.com>
+
 	* Cookfile.inc (MODGTK_MSRCS): add gtkobject.c
 
 2001-07-13  Chris Toshok  <toshok@toshok.org>

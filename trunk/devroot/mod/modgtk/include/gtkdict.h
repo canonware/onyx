@@ -32,8 +32,8 @@ void nx_gtk_window_new(cw_nxo_t *a_thread);
 void nx_gtk_main(cw_nxo_t *a_thread);
 void nx_gtk_main_quit(cw_nxo_t *a_thread);
 
-/* special hook handling function */
-void nx_gtk_object_delete (void *a_data, cw_nx_t *a_nx);
+/* special hook handling functions */
+cw_nxo_t *nx_gtk_object_attach_hook (cw_nx_t *nx, cw_nxo_t *stack, GtkObject *o);
 
 /* special signal handling functions */
 void nx_gtk_signal_marshal (GtkObject *object,
