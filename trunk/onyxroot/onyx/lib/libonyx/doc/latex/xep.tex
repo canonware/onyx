@@ -163,6 +163,38 @@ corrupt the exception handler chain.
 	\item[Description: ]
 		Return the value of the current exception being handled.
 	\end{capilist}
+\label{xep_filename}
+\index{xep_filename@\cfunc{xep\_filename}{}}
+\citem{\cfunc[const char *]{xep\_filename}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Filename where the current exception being handled was
+			thrown.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the filename where the current exception being handled
+		was thrown.
+	\end{capilist}
+\label{xep_line_num}
+\index{xep_line_num@\cfunc{xep\_line\_num}{}}
+\citem{\cfunc[cw\_uint32\_t]{xep\_line\_num}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Line number where the current exception being handled
+			was thrown.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the line number where the current exception being handled
+		was thrown.
+	\end{capilist}
 \label{xep_throw_e}
 \label{xep_throw}
 \index{xep_throw_e@\cfunc{xep\_throw\_e}{}}

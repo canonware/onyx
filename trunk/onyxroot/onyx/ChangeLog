@@ -1,5 +1,10 @@
 2003-03-20 : Jason Evans <jasone@canonware.com>
 
+	* bin/onyx/src/onyx.c:main() : Add a top level exception handler.
+
+	* lib/libonyx/include/libonyx/xep.h : Add xep_filename() and
+	  xep_line_num() to facilitate diagnostic output.
+
 	* lib/libonyx/src/nx.nx.in:[m]require : Re-order code so that loaded
 	  modules can safely leave objects on ostack.
 
