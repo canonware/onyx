@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 68 $
- * $Date: 1998-05-02 02:08:23 -0700 (Sat, 02 May 1998) $
+ * $Revision: 74 $
+ * $Date: 1998-05-02 19:59:51 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -41,5 +41,17 @@
 #ifndef _LIST_PRIV_H_
 #define _LIST_PRIV_H_
 
+struct cw_list_item_s
+{
+  struct cw_list_item_s * next;
+  struct cw_list_item_s * prev;
+  void * item;
+};
+
+#define list_hpop_priv _CW_NS_CMN(list_hpop_priv)
+#define list_tpop_priv _CW_NS_CMN(list_tpop_priv)
+
+void * list_hpop_priv(cw_list_t * a_list_o);
+void * list_tpop_priv(cw_list_t * a_list_o);
 
 #endif /* _LIST_PRIV_H_ */

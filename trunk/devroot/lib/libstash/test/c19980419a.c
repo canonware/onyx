@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 66 $
- * $Date: 1998-05-02 02:06:52 -0700 (Sat, 02 May 1998) $
+ * $Revision: 74 $
+ * $Date: 1998-05-02 19:59:51 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -47,9 +47,8 @@
 int
 main()
 {
-  char * strings[NUM_ITEMS];
+  char * strings[NUM_ITEMS], * str_ptr;
   cw_list_t * list1, list2;
-  cw_list_item_t * item;
   int i;
   
   glob_new();
@@ -69,9 +68,7 @@ main()
   {
     _cw_assert(list_count(list1) == i);
 
-    item = list_item_new();
-    list_item_set(item, (void *) strings[i]);
-    list_tpush(list1, item);
+    list_tpush(list1, (void *) strings[i]);
   }
   _cw_assert(list_count(list1) == NUM_ITEMS);
   
@@ -79,10 +76,13 @@ main()
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
-    item = list_hpop(list1);
-    _cw_check_ptr(item);
-    log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
-    list_hpush(&list2, item);
+/*     log_printf(g_log_o, "i == %d\n", i); */
+/*     list_dump(list1); */
+/*     list_dump(&list2); */
+    str_ptr = (char *) list_hpop(list1);
+    _cw_check_ptr(str_ptr);
+    log_printf(g_log_o, "%s\n", str_ptr);
+    list_hpush(&list2, (void *) str_ptr);
   }
 
   _cw_assert(list_count(list1) == 0);
@@ -92,10 +92,10 @@ main()
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
-    item = list_tpop(&list2);
-    _cw_check_ptr(item);
-    log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
-    list_hpush(&list2, item);
+    str_ptr = (char *) list_tpop(&list2);
+    _cw_check_ptr(str_ptr);
+    log_printf(g_log_o, "%s\n", str_ptr);
+    list_hpush(&list2, (void *) str_ptr);
   }
 
   _cw_assert(list_count(list1) == 0);
@@ -106,10 +106,13 @@ main()
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
-    item = list_tpop(&list2);
-    _cw_check_ptr(item);
-    log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
-    list_tpush(list1, item);
+/*     log_printf(g_log_o, "i == %d\n", i); */
+/*     list_dump(list1); */
+/*     list_dump(&list2); */
+    str_ptr = (char *) list_tpop(&list2);
+    _cw_check_ptr(str_ptr);
+    log_printf(g_log_o, "%s\n", str_ptr);
+    list_tpush(list1, (void *) str_ptr);
   }
 
   _cw_assert(list_count(list1) == NUM_ITEMS);

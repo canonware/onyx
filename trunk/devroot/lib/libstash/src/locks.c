@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 69 $
- * $Date: 1998-05-02 02:08:51 -0700 (Sat, 02 May 1998) $
+ * $Revision: 74 $
+ * $Date: 1998-05-02 19:59:51 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -84,7 +84,6 @@ lwq_new(cw_lwq_t * a_lwq_o)
 
   mtx_new(&retval->lock);
   list_new(&retval->list, FALSE);
-  list_new(&retval->spares_list, FALSE);
 
   return retval;
 }
@@ -100,9 +99,6 @@ lwq_delete(cw_lwq_t * a_lwq_o)
   _cw_assert(list_count(&a_lwq_o->list) == 0);
   list_delete(&a_lwq_o->list);
 
-  /* Clean up spares list. */
-  list_delete(&a_lwq_o->spares_list);
-
   if (a_lwq_o->is_malloced == TRUE)
   {
     _cw_free(a_lwq_o);
@@ -112,7 +108,6 @@ lwq_delete(cw_lwq_t * a_lwq_o)
 void
 lwq_lock(cw_lwq_t * a_lwq_o)
 {
-  cw_list_item_t * item;
   cw_cnd_t condition;
   
   _cw_check_ptr(a_lwq_o);
@@ -124,19 +119,7 @@ lwq_lock(cw_lwq_t * a_lwq_o)
     /* Create a condition variable. */
     cnd_new(&condition);
 
-    /* Create a list_item and append it to the list.  Use an item from the
-     * spares list if one exists. */
-    if (list_count(&a_lwq_o->spares_list) > 0)
-    {
-      item = list_hpop(&a_lwq_o->spares_list);
-    }
-    else
-    {
-      item = list_item_new();
-    }
-    
-    list_item_set(item, (void *) &condition);
-    list_tpush(&a_lwq_o->list, item);
+    list_tpush(&a_lwq_o->list, (void *) &condition);
 
     /* Wait on the condition variable. */
     a_lwq_o->num_lock_waiters++;
@@ -157,7 +140,6 @@ lwq_lock(cw_lwq_t * a_lwq_o)
 void
 lwq_unlock(cw_lwq_t * a_lwq_o)
 {
-  cw_list_item_t * item;
   cw_cnd_t * condition;
 
   _cw_check_ptr(a_lwq_o);
@@ -168,11 +150,7 @@ lwq_unlock(cw_lwq_t * a_lwq_o)
 
   if (list_count(&a_lwq_o->list) > 0)
   {
-    item = list_hpop(&a_lwq_o->list);
-
-    condition = (cw_cnd_t *) list_item_get(item);
-    /* Save the item for repeat use. */
-    list_hpush(&a_lwq_o->spares_list, item);
+    condition = (cw_cnd_t *) list_hpop(&a_lwq_o->list);
     
     cnd_signal(condition);
 
@@ -202,28 +180,20 @@ lwq_num_waiters(cw_lwq_t * a_lwq_o)
 /****************************************************************************
  * <<< Description >>>
  *
- * Frees the list items pointed to by a_lwq_o->spares_list, if any.
- * Normally we shouldn't care about this too much, but in the case of
- * B-trees, there may be long queues for the root node, then the root node
- * may become a node with much less contention.  In such a case, it's nice
- * to be able to reclaim space that will likely never be needed again.
+ * Frees the list items in the list spares list, if any.  Normally we
+ * shouldn't care about this too much, but in the case of B-trees, there
+ * may be long queues for the root node, then the root node may become a
+ * node with much less contention.  In such a case, it's nice to be able to
+ * reclaim space that will likely never be needed again.
  *
  ****************************************************************************/
 void lwq_purge_spares(cw_lwq_t * a_lwq_o)
 {
-  cw_sint32_t count, i;
-  cw_list_item_t * item;
-
   _cw_check_ptr(a_lwq_o);
-
   mtx_lock(&a_lwq_o->lock);
+
+  list_purge_spares(&a_lwq_o->list);
   
-  count = list_count(&a_lwq_o->spares_list);
-  for (i = 0; i < count; i++)
-  {
-    item = list_hpop(&a_lwq_o->spares_list);
-    list_item_delete(item);
-  }
   mtx_unlock(&a_lwq_o->lock);
 }
 

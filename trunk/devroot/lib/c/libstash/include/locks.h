@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 69 $
- * $Date: 1998-05-02 02:08:51 -0700 (Sat, 02 May 1998) $
+ * $Revision: 74 $
+ * $Date: 1998-05-02 19:59:51 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -55,7 +55,6 @@ struct cw_lwq_s
   cw_uint32_t num_lockers;
   cw_uint32_t num_lock_waiters;
   cw_list_t list;
-  cw_list_t spares_list;
 };
 
 struct cw_rwl_s

@@ -29,22 +29,12 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 68 $
- * $Date: 1998-05-02 02:08:23 -0700 (Sat, 02 May 1998) $
+ * $Revision: 74 $
+ * $Date: 1998-05-02 19:59:51 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
  * Doubly linked list implementation.
- *
- * XXX This implementation is slow due to excessive malloc()s and free()s.
- * At some point, this implementation needs changed, either so that it
- * keeps around a pool of spare item structures instead of free()ing them,
- * or chains large structures that contain arrays of items.  Either will
- * reduce the malloc() calls.  The latter has the potential advantage of
- * dynamically contracting its storage requirements autonomously, but the
- * implementation is more complex and requires lots of memory->memory
- * copies.  Probably the best way to go is to keep a pool of free items
- * around, and provide a public method to empty the free pool.
  *
  ****************************************************************************/
 
@@ -52,6 +42,12 @@
 #include <config.h>
 #include <list_priv.h>
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * list_item constructor.
+ *
+ ****************************************************************************/
 cw_list_item_t *
 list_item_new()
 {
@@ -71,6 +67,12 @@ list_item_new()
   return retval;
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * list_item_destructor.
+ *
+ ****************************************************************************/
 void
 list_item_delete(cw_list_item_t * a_list_item_o)
 {
@@ -87,6 +89,12 @@ list_item_delete(cw_list_item_t * a_list_item_o)
   }
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Get the value of the data pointer.
+ *
+ ****************************************************************************/
 void *
 list_item_get(cw_list_item_t * a_list_item_o)
 {
@@ -103,23 +111,35 @@ list_item_get(cw_list_item_t * a_list_item_o)
   return a_list_item_o->item;
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Set the value of the data pointer.
+ *
+ ****************************************************************************/
 void
-list_item_set(cw_list_item_t * a_list_item_o, void * a_item)
+list_item_set(cw_list_item_t * a_list_item_o, void * a_data)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Enter list_item_set()");
   }
   _cw_check_ptr(a_list_item_o);
-  _cw_check_ptr(a_item);
+  _cw_check_ptr(a_data);
 
-  a_list_item_o->item = a_item;
+  a_list_item_o->item = a_data;
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_item_set()");
   }
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * list constructor.
+ *
+ ****************************************************************************/
 cw_list_t *
 list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
 {
@@ -153,6 +173,8 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
   retval->head = NULL;
   retval->tail = NULL;
   retval->count = 0;
+  retval->spares_head = NULL;
+  retval->spares_count = 0;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
@@ -161,20 +183,38 @@ list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe)
   return retval;
 }
      
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * list destructor.
+ *
+ ****************************************************************************/
 void
 list_delete(cw_list_t * a_list_o)
 {
-  cw_sint64_t i;
-
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Enter list_delete()");
   }
   _cw_check_ptr(a_list_o);
 
-  for (i = list_count(a_list_o); i > 0; i--)
+  /* Delete whatever items are still in the list.  This does *not* free
+   * memory pointed to by the item pointers. */
+  for (; a_list_o->count > 0; a_list_o->count--)
   {
-    _cw_free(list_hpop(a_list_o));
+    _cw_free(list_hpop_priv(a_list_o));
+  }
+  
+  /* Delete the spares list. */
+  {
+    cw_list_item_t * item;
+    
+    for (; a_list_o->spares_count > 0; a_list_o->spares_count--)
+    {
+      item = a_list_o->spares_head;
+      a_list_o->spares_head = a_list_o->spares_head->next;
+      _cw_free(item);
+    }
   }
 
   if (a_list_o->is_thread_safe)
@@ -191,6 +231,12 @@ list_delete(cw_list_t * a_list_o)
   }
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Returns the number of items in the list.
+ *
+ ****************************************************************************/
 cw_sint64_t
 list_count(cw_list_t * a_list_o)
 {
@@ -211,33 +257,58 @@ list_count(cw_list_t * a_list_o)
   return retval;
 }
 
-void
-list_hpush(cw_list_t * a_list_o, cw_list_item_t * a_item)
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Pushes an item onto the head of the list.
+ *
+ ****************************************************************************/
+cw_list_item_t *
+list_hpush(cw_list_t * a_list_o, void * a_data)
 {
+  cw_list_item_t * retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Enter list_hpush()");
   }
   _cw_check_ptr(a_list_o);
-  _cw_check_ptr(a_item);
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
-  
-  if (a_list_o->head != NULL)
+
+  /* Find a list item somewhere. */
+  if (a_list_o->spares_count > 0)
   {
-    a_item->prev = NULL;
-    a_item->next = a_list_o->head;
-    a_list_o->head->prev = a_item;
-    a_list_o->head = a_item;
+    /* A spare item is available, so use it. */
+    retval = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->spares_head->next;
+    a_list_o->spares_count--;
   }
   else
   {
-    a_item->prev = NULL;
-    a_item->next = NULL;
-    a_list_o->head = a_item;
-    a_list_o->tail = a_item;
+    /* No spares available.  Create a new item. */
+    retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
+  }
+  retval->item = a_data;
+
+  /* Link things together. */
+  if (a_list_o->head != NULL)
+  {
+    /* The list isn't empty. */
+    retval->prev = NULL;
+    retval->next = a_list_o->head;
+    a_list_o->head->prev = retval;
+    a_list_o->head = retval;
+  }
+  else
+  {
+    /* The list is empty. */
+    retval->prev = NULL;
+    retval->next = NULL;
+    a_list_o->head = retval;
+    a_list_o->tail = retval;
   }
   a_list_o->count++;
 
@@ -249,12 +320,19 @@ list_hpush(cw_list_t * a_list_o, cw_list_item_t * a_item)
   {
     _cw_marker("Exit list_hpush()");
   }
+  return retval;
 }
 
-cw_list_item_t *
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Pops an item off the head of the list.
+ *
+ ****************************************************************************/
+void *
 list_hpop(cw_list_t * a_list_o)
 {
-  cw_list_item_t * retval;
+  void * retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
@@ -266,29 +344,8 @@ list_hpop(cw_list_t * a_list_o)
     mtx_lock(&a_list_o->lock);
   }
 
-  if (a_list_o->head == NULL)
-  {
-    retval = NULL;
-    goto RETURN;
-  }
-  else if (a_list_o->head == a_list_o->tail)
-  {
-    retval = a_list_o->head;
-    a_list_o->head = NULL;
-    a_list_o->tail = NULL;
-  }
-  else
-  {
-    retval = a_list_o->head;
-    a_list_o->head = a_list_o->head->next;
-    _cw_assert(a_list_o->head != NULL);
-    _cw_assert(a_list_o->head->prev != NULL);
-    a_list_o->head->prev = NULL;
-    retval->next = NULL;
-  }
-  a_list_o->count--;
+  retval = list_hpop_priv(a_list_o);
 
- RETURN:
   if (a_list_o->is_thread_safe)
   {
     mtx_unlock(&a_list_o->lock);
@@ -300,33 +357,58 @@ list_hpop(cw_list_t * a_list_o)
   return retval;
 }
 
-void
-list_tpush(cw_list_t * a_list_o, cw_list_item_t * a_item)
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Pushes an item onto the tail of the list.
+ *
+ ****************************************************************************/
+cw_list_item_t *
+list_tpush(cw_list_t * a_list_o, void * a_data)
 {
+  cw_list_item_t * retval;
+
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Enter list_tpush()");
   }
   _cw_check_ptr(a_list_o);
-  _cw_check_ptr(a_item);
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
 
-  if (a_list_o->tail != NULL)
+  /* Find a list item somewhere. */
+  if (a_list_o->spares_count > 0)
   {
-    a_item->next = NULL;
-    a_item->prev = a_list_o->tail;
-    a_list_o->tail->next = a_item;
-    a_list_o->tail = a_item;
+    /* A spare item is available, so use it. */
+    retval = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->spares_head->next;
+    a_list_o->spares_count--;
   }
   else
   {
-    a_item->prev = NULL;
-    a_item->next = NULL;
-    a_list_o->head = a_item;
-    a_list_o->tail = a_item;
+    /* No spares available.  Create a new item. */
+    retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
+  }
+  retval->item = a_data;
+  
+  /* Link things together. */
+  if (a_list_o->tail != NULL)
+  {
+    /* The list isn't empty. */
+    retval->next = NULL;
+    retval->prev = a_list_o->tail;
+    a_list_o->tail->next = retval;
+    a_list_o->tail = retval;
+  }
+  else
+  {
+    /* The list is empty. */
+    retval->prev = NULL;
+    retval->next = NULL;
+    a_list_o->head = retval;
+    a_list_o->tail = retval;
   }
   a_list_o->count++;
 
@@ -338,12 +420,19 @@ list_tpush(cw_list_t * a_list_o, cw_list_item_t * a_item)
   {
     _cw_marker("Exit list_tpush()");
   }
+  return retval;
 }
 
-cw_list_item_t *
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Pops an item off the tail of the list.
+ *
+ ****************************************************************************/
+void *
 list_tpop(cw_list_t * a_list_o)
 {
-  cw_list_item_t * retval;
+  void * retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
@@ -355,24 +444,7 @@ list_tpop(cw_list_t * a_list_o)
     mtx_lock(&a_list_o->lock);
   }
 
-  if (a_list_o->tail == NULL)
-  {
-    retval = NULL;
-  }
-  else if (a_list_o->tail == a_list_o->head)
-  {
-    retval = a_list_o->tail;
-    a_list_o->head = NULL;
-    a_list_o->tail = NULL;
-  }
-  else
-  {
-    retval = a_list_o->tail;
-    a_list_o->tail = a_list_o->tail->prev;
-    a_list_o->tail->next = NULL;
-    retval->prev = NULL;
-  }
-  a_list_o->count--;
+  retval = list_tpop_priv(a_list_o);
 
   if (a_list_o->is_thread_safe)
   {
@@ -385,35 +457,59 @@ list_tpop(cw_list_t * a_list_o)
   return retval;
 }
 
-void
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Inserts an item after the list node pointed to by a_in_list.
+ *
+ ****************************************************************************/
+cw_list_item_t *
 list_insert_after(cw_list_t * a_list_o,
 		  cw_list_item_t * a_in_list,
-		  cw_list_item_t * a_to_insert)
+		  void * a_data)
 {
+  cw_list_item_t * retval;
+  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Enter list_insert_after()");
   }
   _cw_check_ptr(a_list_o);
   _cw_check_ptr(a_in_list);
-  _cw_check_ptr(a_to_insert);
   if (a_list_o->is_thread_safe)
   {
     mtx_lock(&a_list_o->lock);
   }
 
-  if (a_in_list->next == NULL)
+  /* Find a list item somewhere. */
+  if (a_list_o->spares_count > 0)
   {
-    a_in_list->next = a_to_insert;
-    a_to_insert->prev = a_in_list;
-    a_to_insert->next = NULL;
+    /* A spare item is available, so use it. */
+    retval = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->spares_head->next;
+    a_list_o->spares_count--;
   }
   else
   {
-    a_to_insert->prev = a_in_list;
-    a_to_insert->next = a_in_list->next;
-    a_in_list->next = a_to_insert;
-    a_to_insert->next->prev = a_to_insert;
+    /* No spares available.  Create a new item. */
+    retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
+  }
+  retval->item = a_data;
+  
+  if (a_in_list->next == NULL)
+  {
+    /* Inserting at the end of the list. */
+    a_in_list->next = retval;
+    retval->prev = a_in_list;
+    retval->next = NULL;
+  }
+  else
+  {
+    /* Not at the end of the list. */
+    retval->prev = a_in_list;
+    retval->next = a_in_list->next;
+    a_in_list->next = retval;
+    retval->next->prev = retval;
   }
   a_list_o->count++;
 
@@ -425,12 +521,20 @@ list_insert_after(cw_list_t * a_list_o,
   {
     _cw_marker("Exit list_insert_after()");
   }
+  return retval;
 }
 
-cw_list_item_t *
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Given a pointer to an item, removes the item from the list and returns
+ * the data pointer.
+ *
+ ****************************************************************************/
+void *
 list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
 {
-  cw_list_item_t * retval;
+  void * retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
@@ -445,19 +549,27 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
 
   if (a_to_remove->prev == NULL)
   {
-    retval = list_hpop(a_list_o);
+    /* Removing from the beginning of the list. */
+    retval = list_hpop_priv(a_list_o);
   }
   else if (a_to_remove->next == NULL)
   {
-    retval = list_tpop(a_list_o);
+    /* Removing from the end of the list. */
+    retval = list_tpop_priv(a_list_o);
   }
   else
   {
+    /* Removing from the middle of the list. */
+    retval = a_to_remove->item;
+    
     a_to_remove->prev->next = a_to_remove->next;
     a_to_remove->next->prev = a_to_remove->prev;
-    a_to_remove->prev = NULL;
-    a_to_remove->next = NULL;
-    retval = a_to_remove;
+
+    /* Put item on the spares list. */
+    a_to_remove->next = a_list_o->spares_head;
+    a_list_o->spares_head = a_to_remove;
+    a_list_o->spares_count++;
+    
     a_list_o->count--;
   }
 
@@ -468,6 +580,222 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_remove()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Free the space used by the free item list.
+ *
+ ****************************************************************************/
+void
+list_purge_spares(cw_list_t * a_list_o)
+{
+  cw_list_item_t * item;
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_purge_spares()");
+  }
+  _cw_check_ptr(a_list_o);
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_lock(&a_list_o->lock);
+  }
+    
+  for (; a_list_o->spares_count > 0; a_list_o->spares_count--)
+  {
+    item = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->spares_head->next;
+    _cw_free(item);
+  }
+
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_unlock(&a_list_o->lock);
+  }
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_purge_spares()");
+  }
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Print debugging spew.  Note that the 64 bit values don't print correctly 
+ * when using long long for 64 bit variables.
+ *
+ ****************************************************************************/
+void
+list_dump(cw_list_t * a_list_o)
+{
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_dump()");
+  }
+  _cw_check_ptr(a_list_o);
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_lock(&a_list_o->lock);
+  }
+
+  log_printf(g_log_o,
+	     "=== cw_list_t ==============================================\n");
+  log_printf(g_log_o, "is_malloced: [%d], is_thread_safe: [%d]\n",
+	     a_list_o->is_malloced, a_list_o->is_thread_safe);
+  log_printf(g_log_o, "count: [%d]  spares: [%d]\n",
+	     a_list_o->count, a_list_o->spares_count);
+  log_printf(g_log_o, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
+	     a_list_o->head, a_list_o->tail, a_list_o->spares_head);
+  if (a_list_o->count > 0)
+  {
+    log_printf(g_log_o, "head->item: [%010p]  tail->item: [%010p]\n",
+	       a_list_o->head->item, a_list_o->tail->item);
+  }
+  else
+  {
+    log_printf(g_log_o, "head->item: [N/A]  tail->item: [N/A]\n");
+  }
+  log_printf(g_log_o,
+	     "============================================================\n");
+  
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_unlock(&a_list_o->lock);
+  }
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_dump()");
+  }
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Pop an item of the head of the list, without locking.
+ *
+ ****************************************************************************/
+void *
+list_hpop_priv(cw_list_t * a_list_o)
+{
+  void * retval;
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_hpop_priv()");
+  }
+
+  if (a_list_o->head == NULL)
+  {
+    /* List is empty. */
+    retval = NULL;
+  }
+  else if (a_list_o->head == a_list_o->tail)
+  {
+    /* Only one item in the list. */
+    retval = a_list_o->head->item;
+
+    /* Put the item on the spares list. */
+    a_list_o->head->next = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->head;
+    a_list_o->spares_count++;
+
+    a_list_o->head = NULL;
+    a_list_o->tail = NULL;
+
+    a_list_o->count--;
+  }
+  else
+  {
+    cw_list_item_t * temp_ptr;
+    
+    /* More than one item in the list. */
+    retval = a_list_o->head->item;
+
+    temp_ptr = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->head;
+
+    a_list_o->head = a_list_o->head->next;
+    a_list_o->head->prev = NULL;
+    /* Done with main list. */
+    
+    a_list_o->spares_head->next = temp_ptr;
+    a_list_o->spares_count++;
+    /* Done with spares list. */
+
+    a_list_o->count--;
+  }
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_hpop_priv()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Pop an item off the tail of the list, without locking.
+ *
+ ****************************************************************************/
+void *
+list_tpop_priv(cw_list_t * a_list_o)
+{
+  void * retval;
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_tpop_priv()");
+  }
+
+  if (a_list_o->tail == NULL)
+  {
+    /* List is empty. */
+    retval = NULL;
+  }
+  else if (a_list_o->tail == a_list_o->head)
+  {
+    /* Only one item in the list. */
+    retval = a_list_o->tail->item;
+
+    /* Put the item on the spares list. */
+    a_list_o->head->next = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->tail;
+    a_list_o->spares_count++;
+    
+    a_list_o->head = NULL;
+    a_list_o->tail = NULL;
+
+    a_list_o->count--;
+  }
+  else
+  {
+    cw_list_item_t * temp_ptr;
+
+    /* More than one item in the list. */
+    retval = a_list_o->tail->item;
+
+    temp_ptr = a_list_o->spares_head;
+    a_list_o->spares_head = a_list_o->tail;
+
+    a_list_o->tail = a_list_o->tail->prev;
+    a_list_o->tail->next = NULL;
+    /* Done with main list. */
+
+    a_list_o->spares_head->next = temp_ptr;
+    a_list_o->spares_count++;
+    /* Done with spares list. */
+      
+    a_list_o->count--;
+  }
+
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_tpop_priv()");
   }
   return retval;
 }
