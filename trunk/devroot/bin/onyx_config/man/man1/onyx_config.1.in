@@ -13,6 +13,11 @@ onyx_config - configuration helper for building with libonyx
 .B onyx_config
 .BR [ \-\-help ]
 .BR [ \-\-prefix ]
+.BR [ \-\-bindir ]
+.BR [ \-\-datadir ]
+.BR [ \-\-libdir ]
+.BR [ \-\-includedir ]
+.BR [ \-\-mandir ]
 .BR [ \-\-onyx\-path ]
 .BR [ \-\-version ]
 .BR [ \-\-features ]
@@ -29,6 +34,17 @@ program is a script that aids in building programs with libonyx.
 Display usage information and exit.
 .IP \-\-prefix
 Display the installation prefix.
+.IP \-\-bindir
+Display the the directory path where binaries are installed.
+.IP \-\-datadir
+Display the the directory path where documentation, modules, and other program
+files are installed.
+.IP \-\-libdir
+Display the the directory path where libraries are installed.
+.IP \-\-includedir
+Display the the directory path where header files are installed.
+.IP \-\-mandir
+Display the the directory path where manual pages are installed.
 .IP \-\-onyx\-path
 Display the absolute path to the onyx binary.
 .IP \-\-version

@@ -30,10 +30,27 @@
 #
 # - usage_string #string
 $usage_string
+'
+opt_dstdir {
+    `\
 `\
-Usage: onyx_config [--help] [--version] [--features]\n\
-                   [--prefix] [--onyx-path]\n\
-                   [--cppflags] [--cflags] [--ldflags] [--libs]\n'
+Usage: onyx_config [--help] [--version] [--features]
+                   [--prefix] [--bindir] [--datadir] [--libdir]
+                   [--includedir] [--mandir] [--onyx-path]
+                   [--cppflags] [--cflags] [--ldflags] [--libs]
+'
+' cat
+}{
+    `\
+`\
+Usage: oonyx_config [--help] [--version] [--features]
+                    [--prefix] [--bindir] [--datadir] [--libdir]
+                    [--includedir] [--mandir] [--onyx-path]
+                    [--cppflags] [--cflags] [--ldflags] [--libs]
+'
+' cat
+} ifelse
+`\
 def
 
 # Print usage to stderr.
@@ -49,7 +66,7 @@ $usage {
 # whitespace.
 #
 #string strip_print -
-'
+' cat
 @enable_regex@ 1 eq {
     `\
     $strip_print {
@@ -73,6 +90,21 @@ $flags <
     }
     `--prefix' {
 	`@prefix@' strip_print
+    }
+    `--bindir' {
+	`@BINDIR@' strip_print
+    }
+    `--datadir' {
+	`@DATADIR@' strip_print
+    }
+    `--libdir' {
+	`@LIBDIR@' strip_print
+    }
+    `--includedir' {
+	`@INCLUDEDIR@' strip_print
+    }
+    `--mandir' {
+	`@MANDIR@' strip_print
     }
 ' cat
 opt_dstdir {

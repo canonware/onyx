@@ -1,3 +1,8 @@
+2003-10-20 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config/src/onyx_config.nx.in : Add --bindir, --datadir,
+	  --libdir, --includedir, and --mandir.
+
 2003-10-13 : Jason Evans <jasone@canonware.com>
 
 	* bin/onyx_config/src/onyx_config.nx.in : Add --onyx-path.
