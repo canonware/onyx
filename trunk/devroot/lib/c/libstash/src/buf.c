@@ -2151,7 +2151,7 @@ bufc_delete(cw_bufc_t * a_bufc)
 }
 
 void
-bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
+bufc_set_buffer(cw_bufc_t * a_bufc, const void * a_buffer, cw_uint32_t a_size,
 		void (*a_dealloc_func)(void * dealloc_arg, void * buffer),
 		void * a_dealloc_arg)
 {
@@ -2162,7 +2162,7 @@ bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
 #ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
 #endif
-  a_bufc->buf = (char *) a_buffer;
+  a_bufc->buf = (const cw_uint8_t *) a_buffer;
   a_bufc->buf_size = a_size;
   a_bufc->buffer_dealloc_func = a_dealloc_func;
   a_bufc->buffer_dealloc_arg = a_dealloc_arg;
@@ -2213,7 +2213,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
     {
       log_printf(cw_g_log, "\n%s         [%4x] ", a_prefix, i);
     }
-    log_printf(cw_g_log, "%02x ", (cw_uint8_t) a_bufc->buf[i]);
+    log_printf(cw_g_log, "%02x ", a_bufc->buf[i]);
   }
   log_printf(cw_g_log, "\n");
   
@@ -2231,7 +2231,7 @@ bufc_p_get_size(cw_bufc_t * a_bufc)
   return a_bufc->buf_size;
 }
 
-static char *
+static const cw_uint8_t *
 bufc_p_get_p(cw_bufc_t * a_bufc)
 {
   _cw_check_ptr(a_bufc);

@@ -1,3 +1,8 @@
+1999-03-25  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/buf.h (bufc_set_buffer): Add const qualifier to
+	a_buffer argument.
+
 1999-03-24  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (buf_prepend_bufel): Don't try to append a bufel that

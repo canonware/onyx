@@ -71,7 +71,8 @@ typedef struct
   void * buffer_dealloc_arg;
   cw_uint32_t ref_count;
   cw_uint32_t buf_size;
-  char * buf;
+/*    char * buf; */
+  const cw_uint8_t * buf;
 } cw_bufc_t;
 
 struct cw_bufel_s
@@ -843,6 +844,6 @@ bufc_delete(cw_bufc_t * a_bufc);
  *
  ****************************************************************************/
 void
-bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
+bufc_set_buffer(cw_bufc_t * a_bufc, const void * a_buffer, cw_uint32_t a_size,
 		void (*a_dealloc_func)(void * dealloc_arg, void * buffer),
 		void * a_dealloc_arg);

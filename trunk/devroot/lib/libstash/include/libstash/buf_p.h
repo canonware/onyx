@@ -54,7 +54,7 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix);
 static cw_uint32_t
 bufc_p_get_size(cw_bufc_t * a_bufc);
 
-static char *
+static const cw_uint8_t *
 bufc_p_get_p(cw_bufc_t * a_bufc);
 
 static cw_uint32_t
