@@ -769,7 +769,7 @@ $system {
 # 1) Absolute path: `'.
 # 2) Relative path: `.'.
 # 3) $ONYX_[MR]PATH: Colon-separated string in envdict.
-# 4) `@prefix@/share/onyx-@onyx_version@/nx[m]': Standard installation location.
+# 4) onyxdict [rm]path_post: Standard location(s).
 onyxdict begin
 $rpath_pre [`' `.'] def
 $mpath_pre [`' `.'] def

@@ -75,10 +75,10 @@ as the argument, rather than stdin.
 .IP \-V
 Display the version number and exit.
 .SH FILES
-@prefix@/share/onyx/doc/html/onyx.html
+@DATADIR@/onyx/doc/html/onyx.html
 .br
-@prefix@/share/onyx/doc/ps/onyx.ps
+@DATADIR@/onyx/doc/ps/onyx.ps
 .br
-@prefix@/share/onyx/doc/pdf/onyx.pdf
+@DATADIR@/onyx/doc/pdf/onyx.pdf
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -44,11 +44,11 @@ Display the library linker flags.
 .IP \-\-libs
 Display the libaries to link against.
 .SH FILES
-@prefix@/share/onyx/doc/html/onyx.html
+@DATADIR@/onyx/doc/html/onyx.html
 .br
-@prefix@/share/onyx/doc/ps/onyx.ps
+@DATADIR@/onyx/doc/ps/onyx.ps
 .br
-@prefix@/share/onyx/doc/pdf/onyx.pdf
+@DATADIR@/onyx/doc/pdf/onyx.pdf
 .SH SEE ALSO
 onyx(1)
 .SH HISTORY

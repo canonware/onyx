@@ -163,14 +163,14 @@ opt_dstdir {
 	`@CPPFLAGS@'
 ' cat
 @enable_regex@ 1 eq {
-    `@CPPFLAGS' `-I@prefix@/include\\b' match not {
+    `@CPPFLAGS' `-I@INCLUDEDIR@\\b' match not {
 	`\
-	`-I@prefix@/include ' exch cat
+	`-I@INCLUDEDIR@ ' exch cat
 ' cat
     } if
 }{
     `\
-	`-I@prefix@/include ' exch cat
+	`-I@INCLUDEDIR@ ' exch cat
 ' cat
 } ifelse
 `\
@@ -222,14 +222,14 @@ opt_dstdir {
 	`@LDFLAGS@'
 ' cat
 @enable_regex@ 1 eq {
-    `@LDFLAGS@' `-L@prefix@/lib\\b' match not {
+    `@LDFLAGS@' `-L@LIBDIR@\\b' match not {
 	`\
-	`-L@prefix@/lib ' exch cat
+	`-L@LIBDIR@ ' exch cat
 ' cat
     } if
 }{
     `\
-	`-L@prefix@/lib ' exch cat
+	`-L@LIBDIR@ ' exch cat
 ' cat
 } ifelse
 `@RPATH@' length 0 gt {
