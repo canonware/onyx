@@ -19,15 +19,11 @@
  *
  * Internal buffer representation:
  *
- * buf's and everything associated with them are implicitly synchronized.
- *
- * Buffer/character position numbering starts at 1.
+ * Buffer position numbering starts at 1.
  *
  * Absolute position:  0   1   2   3   4   5   6   7   8
- *                                                     |
- * Character position: 1   2   3               4   5   |
- *                     |   |   |               |   |   |
- *                     v   v   v               v   v   v
+ *                     |   |   |   |   |   |   |   |   |
+ *                     v   v   v   v   v   v   v   v   v
  *                   /---+---+---+---+---+---+---+---\
  *                   | A | B | C |:::|:::|:::| D | E |
  *                   \---+---+---+---+---+---+---+---/
@@ -35,15 +31,13 @@
  *                   |   |   |               |   |   |
  * Buffer position:  1   2   3               4   5   6
  *
- * Position 0 is invalid, and there is one more buffer position than there are
- * character positions.  Externally, character positions are never mentioned.
+ * Buffer position 0 is invalid.
  *
  * Position rules:
  *
- * *) bpos refers to buffer position.
- * *) cpos refers to character position.
  * *) apos refers to absolute position.
- * *) If a position isn't specified as bpos, cpos, or apos, then it is bpos.
+ * *) bpos refers to buffer position.
+ * *) If a position isn't specified as apos or bpos, then it is bpos.
  *
  ******************************************************************************
  *
