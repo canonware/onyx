@@ -10,7 +10,7 @@
 #
 ################################################################################
 
-# Called as: ppid_a.nx <srcdir> <objdir>
+# Called as: exec_g.nx <srcdir> <objdir>
 
 `Test begin\n' print flush
 

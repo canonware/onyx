@@ -10,9 +10,7 @@
 #
 ################################################################################
 
-# Called as: ppid_a.nx <srcdir> <objdir>
-#
-# The child actually does the ppid testing.
+# Called as: exec_a.nx <srcdir> <objdir>
 
 `Test begin\n' print flush
 
