@@ -306,26 +306,26 @@ main()
     }
     _cw_assert(list_count(list1) == NUM_ITEMS);
   
-    log_printf(g_log, "hpop()ping from list1 and hpush()ing to list2\n");
+    log_printf(cw_g_log, "hpop()ping from list1 and hpush()ing to list2\n");
   
     for (i = 0; i < NUM_ITEMS; i++)
     {
       str_ptr = (char *) list_hpop(list1);
       _cw_check_ptr(str_ptr);
-      log_printf(g_log, "%s\n", str_ptr);
+      log_printf(cw_g_log, "%s\n", str_ptr);
       list_hpush(&list2, (void *) str_ptr);
     }
 
     _cw_assert(list_count(list1) == 0);
     _cw_assert(list_count(&list2) == NUM_ITEMS);
 
-    log_printf(g_log, "tpop()ping from list2 and hpush()ing to list2\n");
+    log_printf(cw_g_log, "tpop()ping from list2 and hpush()ing to list2\n");
   
     for (i = 0; i < NUM_ITEMS; i++)
     {
       str_ptr = (char *) list_tpop(&list2);
       _cw_check_ptr(str_ptr);
-      log_printf(g_log, "%s\n", str_ptr);
+      log_printf(cw_g_log, "%s\n", str_ptr);
       list_hpush(&list2, (void *) str_ptr);
     }
 
@@ -333,19 +333,19 @@ main()
     {
       char t_buf[21];
       
-      log_printf(g_log, "list2->count == %s\n",
+      log_printf(cw_g_log, "list2->count == %s\n",
 		 log_print_uint64(list_count(&list2), 10, t_buf));
     }
     
     _cw_assert(list_count(&list2) == NUM_ITEMS);
 
-    log_printf(g_log, "tpop()ping from list2 and tpush()ing to list1\n");
+    log_printf(cw_g_log, "tpop()ping from list2 and tpush()ing to list1\n");
   
     for (i = 0; i < NUM_ITEMS; i++)
     {
       str_ptr = (char *) list_tpop(&list2);
       _cw_check_ptr(str_ptr);
-      log_printf(g_log, "%s\n", str_ptr);
+      log_printf(cw_g_log, "%s\n", str_ptr);
       list_tpush(list1, (void *) str_ptr);
     }
 

@@ -572,34 +572,34 @@ list_dump(cw_list_t * a_list)
   }
 #endif
 
-  log_printf(g_log,
+  log_printf(cw_g_log,
 	     "=== cw_list_t ==============================================\n");
 #ifdef _CW_REENTRANT
-  log_printf(g_log, "is_malloced: [%d], is_thread_safe: [%d]\n",
+  log_printf(cw_g_log, "is_malloced: [%d], is_thread_safe: [%d]\n",
 	     a_list->is_malloced, a_list->is_thread_safe);
 #else
-  log_printf(g_log, "is_malloced: [%d]\n", a_list->is_malloced);
+  log_printf(cw_g_log, "is_malloced: [%d]\n", a_list->is_malloced);
 #endif
   {
     char buf_a[21], buf_b[21];
     
-    log_printf(g_log, "count: [%s]  spares: [%s]\n",
+    log_printf(cw_g_log, "count: [%s]  spares: [%s]\n",
 	       log_print_uint64(a_list->count, 10, buf_a),
 	       log_print_uint64(a_list->spares_count, 10, buf_b));
   }
   
-  log_printf(g_log, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
+  log_printf(cw_g_log, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
 	     a_list->head, a_list->tail, a_list->spares_head);
   if (a_list->count > 0)
   {
-    log_printf(g_log, "head->item: [%010p]  tail->item: [%010p]\n",
+    log_printf(cw_g_log, "head->item: [%010p]  tail->item: [%010p]\n",
 	       list_item_get(a_list->head), list_item_get(a_list->tail));
   }
   else
   {
-    log_printf(g_log, "head->item: [N/A]  tail->item: [N/A]\n");
+    log_printf(cw_g_log, "head->item: [N/A]  tail->item: [N/A]\n");
   }
-  log_printf(g_log,
+  log_printf(cw_g_log,
 	     "============================================================\n");
   
 #ifdef _CW_REENTRANT

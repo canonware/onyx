@@ -43,7 +43,7 @@ insert_items(void * a_arg)
 	    foo_var->thread_num, i);
     _cw_assert(FALSE == oh_item_insert(foo_var->hash,
 				       (void *) string, (void *) string));
-/*     log_eprintf(g_log, NULL, 0, "insert_items", */
+/*     log_eprintf(cw_g_log, NULL, 0, "insert_items", */
 /* 		"thread %u, end iteration %u\n", foo_var->thread_num, i); */
   }
   
@@ -70,7 +70,7 @@ main()
     foo_var->thread_num = i;
     
     thd_new(&threads[i], insert_items, (void *) foo_var);
-/*     log_printf(g_log, "Got to end of for loop, i == %u\n", i); */
+/*     log_printf(cw_g_log, "Got to end of for loop, i == %u\n", i); */
   }
 
   /* Join on threads. */
@@ -82,7 +82,7 @@ main()
   {
     char buf[21];
     
-    log_printf(g_log, "Number of items in hash table: %s\n",
+    log_printf(cw_g_log, "Number of items in hash table: %s\n",
 	       log_print_uint64(oh_get_num_items(hash), 10, buf));
   }
 

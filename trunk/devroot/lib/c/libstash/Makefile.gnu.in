@@ -18,8 +18,8 @@
 #
 
 # Include files that _are_ installed.
-INCS := libstash.h libstash_incs.h bhp.h buf.h dbg.h lex.h list.h log.h \
-	matrix.h mem.h oh.h res.h treen.h
+INCS := libstash.h libstash_defs.h libstash_incs.h bhp.h buf.h dbg.h lex.h \
+	list.h log.h matrix.h mem.h oh.h res.h treen.h
 
 INCS_R := libstash_r.h locks.h thread.h
 
@@ -35,9 +35,12 @@ SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c oh.c \
 SRCS_R := locks.c thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS := c_buf_a.c c_cnd_a.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
+CTESTS := c_buf_a.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
 	c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c c_res_a.c c_rwl_a.c c_sem_a.c \
 	c_thd_a.c c_treen_a.c
+
+# Deadlocks on FreeBSD due to a libc_r bug in pthread_cond_timed_wait().
+# c_cnd_a.c 
 
 # Hopelessly broken.
 # c_bhp_a.c 
@@ -267,10 +270,10 @@ Makefile.gnu : Makefile.gnu.in config.status
 stamp.in : configure.in
 	echo timestamp > stamp.in
 
-stamp : include/libstash/libstash.h.in config.status
+stamp : include/libstash/libstash_defs.h.in config.status
 	./config.status
 
-include/libstash/libstash.h : stamp
+include/libstash/libstash_defs.h : stamp
 
 
 FORCE :
@@ -381,7 +384,8 @@ clean : FORCE
 distclean : clean
 	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
 	rm -f Makefile Makefile.gnu Makefile.bsd stamp
-	rm -f config.cache config.log config.status include/libstash/libstash.h
+	rm -f config.cache config.log config.status 
+	rm -f include/libstash/libstash_defs.h
 	rm -f TAGS
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)

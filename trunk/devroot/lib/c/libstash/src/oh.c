@@ -719,55 +719,55 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   }
 #endif
 
-  log_printf(g_log,
+  log_printf(cw_g_log,
 	     "============================================================\n");
-  log_printf(g_log,
+  log_printf(cw_g_log,
 	     "Size: [%s]  Slots filled: [%d]\n\n",
 	     log_print_uint64(a_oh->size, 10, buf_a),
 	     list_count(&a_oh->items_list));
-  log_printf(g_log, "      pow h1         h2    shrink grow \n");
-  log_printf(g_log, "      --- ---------- ----- ------ -----\n");
-  log_printf(g_log, "Base: %2d             %5d %5d  %5d\n",
+  log_printf(cw_g_log, "      pow h1         h2    shrink grow \n");
+  log_printf(cw_g_log, "      --- ---------- ----- ------ -----\n");
+  log_printf(cw_g_log, "Base: %2d             %5d %5d  %5d\n",
 	     a_oh->base_power,
 	     a_oh->base_h2,
 	     a_oh->base_shrink_point,
 	     a_oh->base_grow_point);
-  log_printf(g_log, "Curr: %2d  %10p %5s %5s  %5s\n\n",
+  log_printf(cw_g_log, "Curr: %2d  %10p %5s %5s  %5s\n\n",
 	     a_oh->curr_power,
 	     a_oh->curr_h1,
 	     log_print_uint64(a_oh->curr_h2, 10, buf_a),
 	     log_print_uint64(a_oh->curr_shrink_point, 10, buf_b),
 	     log_print_uint64(a_oh->curr_grow_point, 10, buf_c));
 
-  log_printf(g_log, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
+  log_printf(cw_g_log, "Counters: collisions[%s] inserts[%s] deletes[%s]\n",
 	     log_print_uint64(a_oh->num_collisions, 10, buf_a),
 	     log_print_uint64(a_oh->num_inserts, 10, buf_b),
 	     log_print_uint64(a_oh->num_deletes, 10, buf_c));
-  log_printf(g_log, "          grows[%s] shrinks[%s]\n\n",
+  log_printf(cw_g_log, "          grows[%s] shrinks[%s]\n\n",
 	     log_print_uint64(a_oh->num_grows, 10, buf_a),
 	     log_print_uint64(a_oh->num_shrinks, 10, buf_b));
 
   if (a_all)
   {
-    log_printf(g_log, "slot key        value\n");
-    log_printf(g_log, "---- ---------- ----------\n");
+    log_printf(cw_g_log, "slot key        value\n");
+    log_printf(cw_g_log, "---- ---------- ----------\n");
   
     for (i = 0; i < a_oh->size; i++)
     {
-      log_printf(g_log, "%4d ", i);
+      log_printf(cw_g_log, "%4d ", i);
       if (a_oh->items[i] != NULL)
       {
-	log_printf(g_log, "0x%08x %10p\n",
+	log_printf(cw_g_log, "0x%08x %10p\n",
 		   a_oh->items[i]->key,
 		   a_oh->items[i]->data);
       }
       else
       {
-	log_printf(g_log, "\n");
+	log_printf(cw_g_log, "\n");
       }
     }
   }
-  log_printf(g_log,
+  log_printf(cw_g_log,
 	     "============================================================\n");
 
 #ifdef _CW_REENTRANT

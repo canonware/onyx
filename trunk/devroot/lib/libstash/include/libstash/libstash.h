@@ -19,31 +19,9 @@ extern "C" {
 #ifndef _LIBSTASH_H_A_
 #  define _LIBSTASH_H_A_
 
-#define _LIBSTASH_VERSION_ <Version>
+#  define _LIBSTASH_VERSION_ <Version>
 
-/*
- * Various macros possibly defined by configure.
- */
-#  undef _CW_OS_FREEBSD
-#  undef _CW_OS_LINUX
-#  undef _CW_OS_SOLARIS
-
-#  undef WORDS_BIGENDIAN
-
-#  undef SIZEOF_SIGNED_CHAR
-#  undef SIZEOF_UNSIGNED_CHAR
-#  undef SIZEOF_SIGNED_SHORT
-#  undef SIZEOF_UNSIGNED_SHORT
-#  undef SIZEOF_INT
-#  undef SIZEOF_UNSIGNED
-#  undef SIZEOF_LONG
-#  undef SIZEOF_UNSIGNED_LONG
-#  undef SIZEOF_LONG_LONG
-#  undef SIZEOF_UNSIGNED_LONG_LONG
-#  undef SIZEOF_FLOAT
-#  undef SIZEOF_DOUBLE
-#  undef SIZEOF_LONG_DOUBLE
-#  undef SIZEOF_INT_P
+#  include "libstash_defs.h"
 
 /*
  * Global typedefs.
@@ -125,12 +103,34 @@ typedef long double cw_float16_t;
 #    error "Lacking mandatory typedefs"
 #  endif
 
+/* Grossness to make sure things still work, even if TRUE and/or FALSE are/is
+ * defined. */
+#  ifdef TRUE
+#    define _CW_TRUE_DEFINED TRUE
+#    undef TRUE
+#  endif
+#  ifdef FALSE
+#    define _CW_FALSE_DEFINED FALSE
+#    undef FALSE
+#  endif
+  
 typedef enum
 {
   FALSE,
   TRUE
 } cw_bool_t;
 
+/* More grossness to make sure things still work, even if TRUE and/or FALSE
+ * are/is defined. */
+#  ifdef _CW_TRUE_DEFINED
+#    define TRUE _CW_TRUE_DEFINED
+#    undef _CW_TRUE_DEFINED
+#  endif
+#  ifdef _CW_FALSE_DEFINED
+#    define FALSE _CW_FALSE_DEFINED
+#    undef _CW_FALSE_DEFINED
+#  endif
+  
 /*
  * Namespace setup.
  */
@@ -172,22 +172,22 @@ libstash_shutdown(void);
 /*
  * Global variables.
  */
-#define g_mem _CW_NS_LIBSTASH(g_mem)
-extern cw_mem_t * g_mem;
+#define cw_g_mem _CW_NS_LIBSTASH(cw_g_mem)
+extern cw_mem_t * cw_g_mem;
 
-#define g_dbg _CW_NS_LIBSTASH(g_dbg)
-extern cw_dbg_t * g_dbg;
+#define cw_g_dbg _CW_NS_LIBSTASH(cw_g_dbg)
+extern cw_dbg_t * cw_g_dbg;
 
-#define g_log _CW_NS_LIBSTASH(g_log)
-extern cw_log_t * g_log;
+#define cw_g_log _CW_NS_LIBSTASH(cw_g_log)
+extern cw_log_t * cw_g_log;
 
 /*
  * Global macros we use everywhere.
  */
-#  define _cw_malloc(a) mem_malloc(g_mem, a)
-#  define _cw_calloc(a, b) mem_calloc(g_mem, a, b)
-#  define _cw_realloc(a, b) mem_realloc(g_mem, a, b)
-#  define _cw_free(a) mem_free(g_mem, a)
+#  define _cw_malloc(a) mem_malloc(cw_g_mem, a)
+#  define _cw_calloc(a, b) mem_calloc(cw_g_mem, a, b)
+#  define _cw_realloc(a, b) mem_realloc(cw_g_mem, a, b)
+#  define _cw_free(a) mem_free(cw_g_mem, a)
 
 #  define _cw_ntohq(a) (cw_uint64_t) \
                        ((((cw_uint64_t) \

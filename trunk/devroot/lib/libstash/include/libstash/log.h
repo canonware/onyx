@@ -147,7 +147,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
 
 #define _cw_error(a) \
   { \
-    log_eprintf(g_log, __FILE__, __LINE__, __FUNCTION__, "Error: %s\n", a); \
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, "Error: %s\n", a); \
     abort(); \
   }
 
@@ -156,7 +156,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
   { \
     if (!(a)) \
       { \
-        log_eprintf(g_log, __FILE__, __LINE__, __FUNCTION__, \
+        log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, \
 		    "Failed assertion: \"%s\"\n", #a); \
         abort(); \
       } \
@@ -164,7 +164,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
 
 #define _cw_marker(a) \
   { \
-    log_eprintf(g_log, __FILE__, __LINE__, __FUNCTION__, "%s\n", a); \
+    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, "%s\n", a); \
   }
 
 /* Macro to do the drudgery of checking whether a pointer is null. */
@@ -172,7 +172,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
   { \
     if ((x) == NULL) \
       { \
-	log_eprintf(g_log, __FILE__, __LINE__, __FUNCTION__, \
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, \
 		    "%s is a NULL pointer\n", #x); \
         abort(); \
       } \

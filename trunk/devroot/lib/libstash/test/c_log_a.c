@@ -36,13 +36,13 @@ main()
   k = ((cw_uint64_t) 12345678 * 10000000) + 9012345;
   l = 42;
   
-  log_printf(g_log, "0xffff0000ffffabcd --> 0x%s (16), %s (2)\n",
+  log_printf(cw_g_log, "0xffff0000ffffabcd --> 0x%s (16), %s (2)\n",
 	     log_print_uint64(i, 16, a), log_print_uint64(i, 2, b));
-  log_printf(g_log, "0x0123456789abcdef --> 0x%s (16), %s (2)\n",
+  log_printf(cw_g_log, "0x0123456789abcdef --> 0x%s (16), %s (2)\n",
 	     log_print_uint64(j, 16, a), log_print_uint64(j, 2, b));
-  log_printf(g_log, "123456789012345 --> %s (10)\n",
+  log_printf(cw_g_log, "123456789012345 --> %s (10)\n",
 	     log_print_uint64(k, 10, a));
-  log_printf(g_log, "42 --> %s (10)\n",
+  log_printf(cw_g_log, "42 --> %s (10)\n",
 	     log_print_uint64(l, 10, a));
 
   libstash_shutdown();

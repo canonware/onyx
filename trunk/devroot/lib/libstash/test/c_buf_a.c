@@ -164,31 +164,50 @@ main()
   {
     cw_bufel_t * bufel_p;
     cw_buf_t * buf_p;
-    cw_uint32_t i;
+    cw_uint32_t i, j/*  , glom */;
     cw_bufpool_t bufpool;
+    char * buffer;
+    cw_uint32_t * buffer_cast;
 
     bufpool_new(&bufpool, 512, 10);
 
     bufel_p = bufel_new(NULL);
     buf_p = buf_new(NULL, TRUE);
 
+    buffer = (char *) bufpool_get_buffer(&bufpool);
+    buffer_cast = (cw_uint32_t *) buffer;
     bufel_set_data_ptr(bufel_p,
-		       bufpool_get_buffer(&bufpool),
+		       buffer,
 		       bufpool_get_buffer_size(&bufpool),
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
     _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 512));
-    buf_append_bufel(buf_p, bufel_p);
-    
+
     for (i = 0; i < 256; i++)
     {
-      buf_set_uint8(buf_p, i, i);
+      buffer[i] = i;
     }
 
-    log_printf(g_log, "lower char dump:\n");
+    /* Copy the bytes from the lower 256 bytes into the upper 256 bytes,
+     * but reverse them, and make them host byte order on long boundaries. */
+    for (i = j = 0; i < 256; i += 4, j++)
+    {
+      buffer_cast[128 - 1 - j] = ntohl(buffer_cast[j]);
+      
+/*        glom = ((((cw_uint32_t) buffer[i]) << 24) */
+/*  	      | (((cw_uint32_t) buffer[i + 1]) << 16) */
+/*  	      | (((cw_uint32_t) buffer[i + 2]) << 8) */
+/*  	      | (((cw_uint32_t) buffer[i + 3]))); */
+
+/*        buffer_cast[128 - 1 - j] = glom; */
+    }
+
+    buf_append_bufel(buf_p, bufel_p);
+    
+    log_printf(cw_g_log, "lower char dump:\n");
     for (i = 0; i < 256; i += 8)
     {
-      log_printf(g_log,
+      log_printf(cw_g_log,
 		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:"
 		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x\n",
 		 i, buf_get_uint8(buf_p, i),
@@ -201,21 +220,27 @@ main()
 		 i + 7, buf_get_uint8(buf_p, i + 7));
     }
 
-    /* Copy the bytes from the lower 256 bytes into the upper 256 bytes,
-     * but reverse them. */
-    for (i = 0; i < 256; i += 4)
-    {
-      buf_set_uint32(buf_p, (512 - 4) - i,
-		     (((cw_uint32_t) (buf_get_uint8(buf_p, i)) << 24)
-		      | (((cw_uint32_t) buf_get_uint8(buf_p, i + 1)) << 16)
-		      | (((cw_uint32_t) buf_get_uint8(buf_p, i + 2)) << 8)
-		      | ((cw_uint32_t) buf_get_uint8(buf_p, i + 3))));
-    }
 
-    log_printf(g_log, "upper long dump:\n");
+/*      log_printf(cw_g_log, "upper char dump:\n"); */
+/*      for (i = 256; i < 512; i += 8) */
+/*      { */
+/*        log_printf(cw_g_log, */
+/*  		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:" */
+/*  		 "%03u->0x%02x:%03u->0x%02x:%03u->0x%02x:%03u->0x%02x\n", */
+/*  		 i, buf_get_uint8(buf_p, i), */
+/*  		 i + 1, buf_get_uint8(buf_p, i + 1), */
+/*  		 i + 2, buf_get_uint8(buf_p, i + 2), */
+/*  		 i + 3, buf_get_uint8(buf_p, i + 3), */
+/*  		 i + 4, buf_get_uint8(buf_p, i + 4), */
+/*  		 i + 5, buf_get_uint8(buf_p, i + 5), */
+/*  		 i + 6, buf_get_uint8(buf_p, i + 6), */
+/*  		 i + 7, buf_get_uint8(buf_p, i + 7)); */
+/*      } */
+    
+    log_printf(cw_g_log, "upper long dump:\n");
     for (i = 256; i < 512; i += 8)
     {
-      log_printf(g_log, "%03u->0x%08x:%03u->0x%08x\n",
+      log_printf(cw_g_log, "%03u->0x%08x:%03u->0x%08x\n",
 		 i, buf_get_uint32(buf_p, i),
 		 i + 4, buf_get_uint32(buf_p, i + 4));
     }
@@ -288,47 +313,27 @@ main()
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
 
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     buf_append_bufel(buf_p, bufel_p_a);
     _cw_assert(1 == buf_get_size(buf_p));
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     buf_append_bufel(buf_p, bufel_p_b);
     _cw_assert(2 == buf_get_size(buf_p));
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     buf_append_bufel(buf_p, bufel_p_c);
     _cw_assert(3 == buf_get_size(buf_p));
 
-/*      _cw_error("Enough"); */
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     buf_prepend_bufel(buf_p, bufel_p_a);
     _cw_assert(4 == buf_get_size(buf_p));
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     buf_prepend_bufel(buf_p, bufel_p_b);
     _cw_assert(5 == buf_get_size(buf_p));
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     buf_prepend_bufel(buf_p, bufel_p_c);
     _cw_assert(6 == buf_get_size(buf_p));
 
-    _cw_marker("Got here");
-    buf_dump(buf_p);
     _cw_assert('C' == buf_get_uint8(buf_p, 0));
-    _cw_marker("Got here");
+/*      buf_dump(buf_p, "H "); */
     _cw_assert('B' == buf_get_uint8(buf_p, 1));
-    _cw_marker("Got here");
     _cw_assert('A' == buf_get_uint8(buf_p, 2));
-    _cw_marker("Got here");
     _cw_assert('A' == buf_get_uint8(buf_p, 3));
-    _cw_marker("Got here");
     _cw_assert('B' == buf_get_uint8(buf_p, 4));
-    _cw_marker("Got here");
     _cw_assert('C' == buf_get_uint8(buf_p, 5));
-    _cw_marker("Got here");
 
     bufel_delete(bufel_p_a);
     bufel_delete(bufel_p_b);

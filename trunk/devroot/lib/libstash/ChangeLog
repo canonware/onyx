@@ -1,3 +1,12 @@
+1999-02-22  Jason Evans  <jasone@canonware.com>
+
+	* : Structural changes to make libstash more friendly with other
+	libraries, such as glib.  Change g_* to cw_g_* to avoid namespace
+	collisions with glib.  Break libstash.h.in into libstash.h and
+	libstash_defs.h.in to allow using #undef in libstash.h.  Make
+	cw_bool_t work, even in the presence of cpp definitions of TRUE
+	and/or FALSE.
+
 1999-02-18  Jason Evans  <jasone@canonware.com>
 
 	* Makefile: Change _STASH_* to _LIBSTASH_*.

@@ -81,7 +81,7 @@ main()
   thd_join(&thread_b);
   mtx_delete(&mutex_a);
 
-  log_printf(g_log, "g_count: %u\n", g_count);
+  log_printf(cw_g_log, "g_count: %u\n", g_count);
   
   libstash_shutdown();
   return 0;

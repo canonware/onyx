@@ -50,22 +50,22 @@ main()
 
   libstash_init();
 
-/*   dbg_register(g_dbg, "res_state"); */
+/*   dbg_register(cw_g_dbg, "res_state"); */
   
   res_new(&res);
 
-  log_printf(g_log, "Merging in a list...\n");
+  log_printf(cw_g_log, "Merging in a list...\n");
   _cw_assert(FALSE == res_merge_list(&res, s1, s2, s3, s4, s5, s6, s7,
 				     s8, NULL));
 
-  log_printf(g_log, "Searching for a resource...\n");
+  log_printf(cw_g_log, "Searching for a resource...\n");
   str = res_get_res_val(&res, "simple");
 
   _cw_check_ptr(str);
-  log_printf(g_log, "simple:%s\n", str);
+  log_printf(cw_g_log, "simple:%s\n", str);
   _cw_assert(!strcmp(str, "value"));
 
-  log_printf(g_log, "Testing invalid resources handling...\n");
+  log_printf(cw_g_log, "Testing invalid resources handling...\n");
 
   _cw_assert(TRUE == res_merge_list(&res, es1, NULL));
   _cw_assert(TRUE == res_merge_list(&res, es2, NULL));

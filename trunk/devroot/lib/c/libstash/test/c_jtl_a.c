@@ -36,7 +36,7 @@ thread_entry_func(void * a_arg)
     /* Grab tlock. */
     jtl_tlock(foo_var->lock, foo_var->tq_el);
     usleep(1);
-    log_eprintf(g_log, NULL, 0, "thread_entry_func",
+    log_eprintf(cw_g_log, NULL, 0, "thread_entry_func",
 		"Thread %u has tlock\n", foo_var->thd_num);
     jtl_tunlock(foo_var->lock);
   }
@@ -44,30 +44,30 @@ thread_entry_func(void * a_arg)
   {
     /* Grab slock. */
     jtl_slock(foo_var->lock);
-/*     log_eprintf(g_log, NULL, 0, "thread_entry_func", */
+/*     log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
 /* 		"Thread %u has slock\n", foo_var->thd_num); */
 
     jtl_2qlock(foo_var->lock);
-/*     log_eprintf(g_log, NULL, 0, "thread_entry_func", */
+/*     log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
 /* 		"Thread %u has qlock\n", foo_var->thd_num); */
     jtl_qunlock(foo_var->lock);
 
     jtl_2rlock(foo_var->lock);
-/*     log_eprintf(g_log, NULL, 0, "thread_entry_func", */
+/*     log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
 /* 		"Thread %u has rlock\n", foo_var->thd_num); */
     jtl_runlock(foo_var->lock);
 
     jtl_2wlock(foo_var->lock);
-/*     log_eprintf(g_log, NULL, 0, "thread_entry_func", */
+/*     log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
 /* 		"Thread %u has wlock\n", foo_var->thd_num); */
     jtl_wunlock(foo_var->lock);
 
     jtl_2xlock(foo_var->lock);
-/*     log_eprintf(g_log, NULL, 0, "thread_entry_func", */
+/*     log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
 /* 		"Thread %u has xlock\n", foo_var->thd_num); */
     jtl_xunlock(foo_var->lock);
   } 
-/*   log_eprintf(g_log, NULL, 0, "thread_entry_func", */
+/*   log_eprintf(cw_g_log, NULL, 0, "thread_entry_func", */
 /* 	      "Thread %u is done\n", foo_var->thd_num); */
   _cw_free(foo_var);
     

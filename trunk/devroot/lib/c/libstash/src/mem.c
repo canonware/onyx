@@ -49,7 +49,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   retval = malloc(a_size);
   if (retval == NULL)
   {
-    log_eprintf(g_log, __FILE__, __LINE__, "mem_malloc",
+    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_malloc",
 		"malloc(%d) returned NULL\n", a_size);
     abort();
   }
@@ -68,7 +68,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number,
   retval = calloc(a_number, a_size);
   if (retval == NULL)
   {
-    log_eprintf(g_log, __FILE__, __LINE__, "mem_calloc",
+    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_calloc",
 		"calloc(%d, %d) returned NULL\n", a_number, a_size);
     abort();
   }
@@ -87,7 +87,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   retval = realloc(a_ptr, a_size);
   if (retval == NULL)
   {
-    log_eprintf(g_log, __FILE__, __LINE__, "mem_realloc",
+    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_realloc",
 		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
     abort();
   }

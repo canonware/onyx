@@ -36,7 +36,7 @@ thd_new(cw_thd_t * a_thd,
   error = pthread_create(&retval->thread, NULL, a_start_func, a_arg);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "thd_new",
+    log_eprintf(cw_g_log, NULL, 0, "thd_new",
 		"Error in pthread_create(): %s\n", strerror(error));
     abort();
   }
@@ -54,7 +54,7 @@ thd_delete(cw_thd_t * a_thd)
   error = pthread_detach(a_thd->thread);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "thd_delete",
+    log_eprintf(cw_g_log, NULL, 0, "thd_delete",
 		"Error in pthread_detach(): %s\n", strerror(error));
     abort();
   }
@@ -76,7 +76,7 @@ thd_join(cw_thd_t * a_thd)
   error = pthread_join(a_thd->thread, &retval);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "thd_join",
+    log_eprintf(cw_g_log, NULL, 0, "thd_join",
 		"Error in pthread_join(): %s\n", strerror(error));
     abort();
   }
@@ -216,7 +216,7 @@ cnd_new(cw_cnd_t * a_cnd)
   error = pthread_cond_init(&retval->condition, NULL);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "cnd_new",
+    log_eprintf(cw_g_log, NULL, 0, "cnd_new",
 		"Error in pthread_cond_init(): %s\n", strerror(error));
     abort();
   }
@@ -234,7 +234,7 @@ cnd_delete(cw_cnd_t * a_cnd)
   error = pthread_cond_destroy(&a_cnd->condition);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "cnd_delete",
+    log_eprintf(cw_g_log, NULL, 0, "cnd_delete",
 		"Error in pthread_cond_destroy(): %s\n", strerror(error));
     abort();
   }
@@ -255,7 +255,7 @@ cnd_signal(cw_cnd_t * a_cnd)
   error = pthread_cond_signal(&a_cnd->condition);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "cnd_signal",
+    log_eprintf(cw_g_log, NULL, 0, "cnd_signal",
 		"Error in pthread_cond_signal(): %s\n", strerror(error));
     abort();
   }
@@ -271,7 +271,7 @@ cnd_broadcast(cw_cnd_t * a_cnd)
   error = pthread_cond_broadcast(&a_cnd->condition);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "cnd_broadcast",
+    log_eprintf(cw_g_log, NULL, 0, "cnd_broadcast",
 		"Error in pthread_cond_broadcast(): %s\n", strerror(error));
     abort();
   }
@@ -298,7 +298,7 @@ cnd_timedwait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx,
   }
   else
   {
-    log_eprintf(g_log, NULL, 0, "cnd_timedwait",
+    log_eprintf(cw_g_log, NULL, 0, "cnd_timedwait",
 		"Error in pthread_cond_timedwait(): %s\n", strerror(error));
     abort();
   }
@@ -317,7 +317,7 @@ cnd_wait(cw_cnd_t * a_cnd, cw_mtx_t * a_mtx)
   error = pthread_cond_wait(&a_cnd->condition, &a_mtx->mutex);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "cnd_wait",
+    log_eprintf(cw_g_log, NULL, 0, "cnd_wait",
 		"Error in pthread_cond_wait: %s\n", strerror(error));
     abort();
   }
@@ -477,7 +477,7 @@ tsd_new(cw_tsd_t * a_tsd, void (*a_func)(void *))
   error = pthread_key_create(&retval->key, a_func);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "tsd_new",
+    log_eprintf(cw_g_log, NULL, 0, "tsd_new",
 		"Error in pthread_key_create(): %s\n", strerror(error));
     abort();
   }
@@ -495,7 +495,7 @@ tsd_delete(cw_tsd_t * a_tsd)
   error = pthread_key_delete(a_tsd->key);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "tsd_delete",
+    log_eprintf(cw_g_log, NULL, 0, "tsd_delete",
 		"Error in pthread_key_delete(): %s\n", strerror(error));
     abort();
   }
@@ -528,7 +528,7 @@ tsd_set(cw_tsd_t * a_tsd, void * a_val)
   error = pthread_setspecific(a_tsd->key, a_val);
   if (error)
   {
-    log_eprintf(g_log, NULL, 0, "tsd_set",
+    log_eprintf(cw_g_log, NULL, 0, "tsd_set",
 		"Error in pthread_setspecific(): %s\n", strerror(error));
     abort();
   }

@@ -1,0 +1,36 @@
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ****************************************************************************
+ *
+ * <Copyright = "jasone">
+ * <License>
+ *
+ ****************************************************************************
+ *
+ * Version: <Version>
+ *
+ * <<< Description >>>
+ *
+ * Header file processed by configure.
+ *
+ ****************************************************************************/
+
+#undef _CW_OS_FREEBSD
+#undef _CW_OS_LINUX
+#undef _CW_OS_SOLARIS
+ 
+#undef WORDS_BIGENDIAN
+ 
+#undef SIZEOF_SIGNED_CHAR
+#undef SIZEOF_UNSIGNED_CHAR
+#undef SIZEOF_SIGNED_SHORT
+#undef SIZEOF_UNSIGNED_SHORT
+#undef SIZEOF_INT
+#undef SIZEOF_UNSIGNED
+#undef SIZEOF_LONG
+#undef SIZEOF_UNSIGNED_LONG
+#undef SIZEOF_LONG_LONG
+#undef SIZEOF_UNSIGNED_LONG_LONG
+#undef SIZEOF_FLOAT
+#undef SIZEOF_DOUBLE
+#undef SIZEOF_LONG_DOUBLE
+#undef SIZEOF_INT_P

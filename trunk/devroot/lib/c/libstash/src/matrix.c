@@ -264,10 +264,10 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       {
 	for (i = 0; i < a_matrix->x_size; i++)
 	{
-	  log_printf(g_log, "%s",
+	  log_printf(cw_g_log, "%s",
 		     matrix_get_element(a_matrix, i, j) ? "X" : ".");
 	}
-	log_printf(g_log, "\n");
+	log_printf(cw_g_log, "\n");
       }
     }
     else
@@ -301,32 +301,32 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
       /* Top labels. */
       for (k = 0; k < y_digits; k++)
       {
-	log_printf(g_log, " ");
+	log_printf(cw_g_log, " ");
       }
-      log_printf(g_log, "|");
+      log_printf(cw_g_log, "|");
       for (i = 0; i < a_matrix->x_size; i++)
       {
 	sprintf(t_str, "%u", i);
 	t_len = strlen(t_str);
 	for (k = 0; k < ((x_digits + 1) - t_len); k++)
 	{
-	  log_printf(g_log, " ");
+	  log_printf(cw_g_log, " ");
 	}
-	log_printf(g_log, "%u", i);
+	log_printf(cw_g_log, "%u", i);
       }
-      log_printf(g_log, "\n");
+      log_printf(cw_g_log, "\n");
 
       /* Top horizontal line. */
       for (k = 0; k < y_digits; k++)
       {
-	log_printf(g_log, "-");
+	log_printf(cw_g_log, "-");
       }
-      log_printf(g_log, "+");
+      log_printf(cw_g_log, "+");
       for (i = 0; i < (a_matrix->x_size * (x_digits + 1)); i++)
       {
-	log_printf(g_log, "-");
+	log_printf(cw_g_log, "-");
       }
-      log_printf(g_log, "\n");
+      log_printf(cw_g_log, "\n");
 
       for (j = 0; j < a_matrix->y_size; j++)
       {
@@ -335,9 +335,9 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
 	t_len = strlen(t_str);
 	for (k = 0; k < ((y_digits) - t_len); k++)
 	{
-	  log_printf(g_log, " ");
+	  log_printf(cw_g_log, " ");
 	}
-	log_printf(g_log, "%u|", j);
+	log_printf(cw_g_log, "%u|", j);
 
 	/* Matrix elements. */
 	for (i = 0; i < a_matrix->x_size; i++)
@@ -348,19 +348,19 @@ matrix_dump(cw_matrix_t * a_matrix, cw_bool_t a_compact)
 							      i, j)));
 	       k++)
 	  {
-	    log_printf(g_log, " ");
+	    log_printf(cw_g_log, " ");
 	  }
-	  log_printf(g_log, "%d",
+	  log_printf(cw_g_log, "%d",
 		     matrix_get_element(a_matrix, i, j));
 	}
 	
-	log_printf(g_log, "\n");
+	log_printf(cw_g_log, "\n");
       }
     }
   }
   else
   {
-    log_printf(g_log, "Invalid matrix\n");
+    log_printf(cw_g_log, "Invalid matrix\n");
   }
 }
 

@@ -21,7 +21,7 @@ thread_entry_func(void * a_arg)
 {
   char * arg_str = (char *) a_arg;
 
-  log_eprintf(g_log, NULL, 0, "thread_entry_func",
+  log_eprintf(cw_g_log, NULL, 0, "thread_entry_func",
 	      "Argument string: \"%s\"\n", arg_str);
 
   return NULL;

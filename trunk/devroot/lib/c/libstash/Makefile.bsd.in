@@ -18,8 +18,8 @@
 #
 
 # Include files that _are_ installed.
-INCS := libstash.h libstash_incs.h bhp.h buf.h dbg.h lex.h list.h log.h \
-	matrix.h mem.h oh.h res.h treen.h
+INCS := libstash.h libstash_defs.h libstash_incs.h bhp.h buf.h dbg.h lex.h \
+	list.h log.h matrix.h mem.h oh.h res.h treen.h
 
 INCS_R := libstash_r.h locks.h thread.h
 
@@ -290,11 +290,11 @@ $(.CURDIR)/Makefile.bsd : $(.CURDIR)/Makefile.bsd.in $(.CURDIR)/config.status
 $(.CURDIR)/stamp.in : $(.CURDIR)/configure.in
 	$(SHELL) -c 'cd $(.CURDIR); echo timestamp > stamp.in; cd -'
 
-$(.CURDIR)/stamp : $(.CURDIR)/include/libstash/libstash.h.in \
+$(.CURDIR)/stamp : $(.CURDIR)/include/libstash/libstash_defs.h.in \
 	$(.CURDIR)/config.status
 	$(SHELL) -c 'cd $(.CURDIR); ./config.status; cd -'
 
-$(.CURDIR)/include/libstash/libstash.h : $(.CURDIR)/stamp
+$(.CURDIR)/include/libstash/libstash_defs.h : $(.CURDIR)/stamp
 
 FORCE :
 
@@ -413,7 +413,8 @@ distclean : clean
 	rm -f $(.CURDIR)/Makefile $(.CURDIR)/Makefile.bsd 
 	rm -f $(.CURDIR)/Makefile.gnu $(.CURDIR)/stamp
 	rm -f $(.CURDIR)/config.cache $(.CURDIR)/config.log 
-	rm -f $(.CURDIR)/config.status $(.CURDIR)/include/libstash/libstash.h
+	rm -f $(.CURDIR)/config.status
+	rm -f $(.CURDIR)/include/libstash/libstash_defs.h
 	rm -f $(.CURDIR)/TAGS
 	rm -f $(.CURDIR)/$(PMERGE)
 	rm -f $(.CURDIR)/$(PSTUB)

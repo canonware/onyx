@@ -474,22 +474,22 @@ bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
     /* Indent. */
     for (i = 0; i < (a_depth * 50); i++)
     {
-      log_printf(g_log, " ");
+      log_printf(cw_g_log, " ");
     }
   }
-  log_printf(g_log, "[depth: %d, degree: %d, priority: %d, data: %d]",
+  log_printf(cw_g_log, "[depth: %d, degree: %d, priority: %d, data: %d]",
 	     a_depth, a_bhpi->degree, *(cw_sint32_t *) a_bhpi->priority,
 	     *(cw_sint32_t *) a_bhpi->data);
   
   /* Child. */
   if (NULL != a_bhpi->child)
   {
-    log_printf(g_log, " ---> ");
+    log_printf(cw_g_log, " ---> ");
     a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
   }
   else
   {
-    log_printf(g_log, "\n");
+    log_printf(cw_g_log, "\n");
   }
 
   return a_last_printed;

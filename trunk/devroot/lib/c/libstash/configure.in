@@ -5,10 +5,10 @@ dnl
 dnl Version: <Version>
 dnl
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(include/libstash/libstash.h.in)
-AC_CONFIG_HEADER(include/libstash/libstash.h)
+AC_INIT(include/libstash/libstash.h)
+AC_CONFIG_HEADER(include/libstash/libstash_defs.h)
 
-dnl Comment out threaded dependency includes in Makefile.in if 
+dnl Comment out threaded dependency includes in Makefile.in if
 dnl --without-pthreads is defined.
 AC_ARG_WITH(pthreads, [  --with-pthreads         Build threaded libstash libraries
   --without-pthreads      Do not build threaded libstash libraries],

@@ -303,7 +303,7 @@ buf_delete(cw_buf_t * a_buf);
  ****************************************************************************/
 #define buf_dump _CW_NS_LIBSTASH(buf_dump)
 void
-buf_dump(cw_buf_t * a_buf);
+buf_dump(cw_buf_t * a_buf, const char * a_prefix);
 
 /****************************************************************************
  *
@@ -508,29 +508,6 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset);
  *
  * a_buf : Pointer to a buf.
  *
- * a_offset : Offset in bytes of uint8 to set.
- *
- * a_val : Value to set the uint8 at offset a_offset in a_buf.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Set the uint8 at offset a_offset to a_val.
- *
- ****************************************************************************/
-#define buf_set_uint8 _CW_NS_LIBSTASH(buf_set_uint8)
-void
-buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_buf : Pointer to a buf.
- *
  * a_offset : Offset in bytes of uint32 to return.
  *
  * <<< Output(s) >>>
@@ -552,29 +529,6 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset);
  *
  * a_buf : Pointer to a buf.
  *
- * a_offset : Offset in bytes of uint32 to set.
- *
- * a_val : Value to set the uint32 at offset a_offset in a_buf.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Set the uint32 at offset a_offset to a_val.
- *
- ****************************************************************************/
-#define buf_set_uint32 _CW_NS_LIBSTASH(buf_set_uint32)
-void
-buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_buf : Pointer to a buf.
- *
  * a_offset : Offset in bytes of uint64 to return.
  *
  * <<< Output(s) >>>
@@ -589,29 +543,6 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
 #define buf_get_uint64 _CW_NS_LIBSTASH(buf_get_uint64)
 cw_uint64_t
 buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_buf : Pointer to a buf.
- *
- * a_offset : Offset in bytes of uint64 to set.
- *
- * a_val : Value to set the uint64 at offset a_offset in a_buf.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Set the uint64 at offset a_offset to a_val.
- *
- ****************************************************************************/
-#define buf_set_uint64 _CW_NS_LIBSTASH(buf_set_uint64)
-void
-buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
 
 /****************************************************************************
  *
@@ -668,7 +599,7 @@ bufel_delete(cw_bufel_t * a_bufel);
  ****************************************************************************/
 #define bufel_dump _CW_NS_LIBSTASH(bufel_dump)
 void
-bufel_dump(cw_bufel_t * a_bufel);
+bufel_dump(cw_bufel_t * a_bufel, const char * a_prefix);
 
 /****************************************************************************
  *
