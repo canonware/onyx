@@ -18,7 +18,6 @@ typedef struct cw_booleantype_s cw_booleantype_t;
 typedef struct cw_conditiontype_s cw_conditiontype_t;
 typedef struct cw_dicttype_s cw_dicttype_t;
 typedef struct cw_filetype_s cw_filetype_t;
-typedef struct cw_hiddentype_s cw_hiddentype_t; /* Internal library use only. */
 typedef struct cw_locktype_s cw_locktype_t;
 typedef struct cw_marktype_s cw_marktype_t;
 typedef struct cw_mstatetype_s cw_mstatetype_t;
@@ -35,6 +34,7 @@ typedef struct cw_stringtype_s cw_stringtype_t;
 typedef struct cw_kasio_ext_s cw_kasio_ext_t;
 typedef struct cw_arrayext_s cw_arrayext_t;
 typedef struct cw_conditionext_s cw_conditionext_t;
+typedef struct cw_dictext_s cw_dictext_t;
 typedef struct cw_lockext_s cw_lockext_t;
 typedef struct cw_nameext_s cw_nameext_t;
 typedef struct cw_numberext_s cw_numberext_t;
@@ -53,7 +53,6 @@ enum cw_kasio_type_s
   _CW_KASIO_CONDITIONTYPE,
   _CW_KASIO_DICTTYPE,
   _CW_KASIO_FILETYPE,
-  _CW_KASIO_HIDDENTYPE, /* Internal library use only. */
   _CW_KASIO_LOCKTYPE,
   _CW_KASIO_MARKTYPE,
   _CW_KASIO_MSTATETYPE,
@@ -82,22 +81,14 @@ struct cw_conditiontype_s
   cw_conditionext_t * ext;
 };
 
-/* Forward reference. */
-typedef struct cw_kasid_s cw_kasid_t;
-
 struct cw_dicttype_s
 {
-  cw_kasid_t * dict;
+  cw_dictext_t * ext;
 };
 
 struct cw_filetype_s
 {
   cw_sint32_t fd;
-};
-
-struct cw_hiddentype_s
-{
-  int garbage;
 };
 
 struct cw_locktype_s
@@ -193,6 +184,18 @@ struct cw_conditionext_s
   cw_cnd_t condition;
 };
 
+/* Defined in kasid.h, in order to resolve a circular dependency. */
+#if (0)
+struct cw_dictext_s
+{
+  cw_kasio_ext_t ext;
+  cw_kasid_t dict;
+};
+#endif
+
+/* Forward reference. */
+/*  typedef struct cw_kasid_s cw_kasid_t; */
+
 struct cw_lockext_s
 {
   cw_kasio_ext_t ext;
@@ -256,7 +259,6 @@ struct cw_kasio_s
     cw_conditiontype_t condition;
     cw_dicttype_t dict;
     cw_filetype_t file;
-    cw_hiddentype_t hidden;
     cw_locktype_t lock;
     cw_marktype_t mark;
     cw_mstatetype_t mstate;
@@ -268,7 +270,7 @@ struct cw_kasio_s
     cw_packedarraytype_t packedarray;
     cw_savetype_t save;
     cw_stringtype_t string;
-  } op;
+  } object;
 
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
   cw_uint32_t magic_b;

@@ -39,12 +39,21 @@ main(int argc, char ** argv)
   kasit_new(&kasit, NULL, NULL, &kasi);
 
   out_put(cw_g_out, "sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
+  out_put(cw_g_out, "\n");
+
   out_put(cw_g_out, "sizeof(cw_kasis_t): [i]\n", sizeof(cw_kasis_t));
-  out_put(cw_g_out, "sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
-  out_put(cw_g_out, "sizeof(cw_kasis_op_t): [i]\n", sizeof(cw_kasis_op_t));
-  out_put(cw_g_out, "sizeof(cw_kasis_chunk_t): [i]\n",
-	  sizeof(cw_kasis_chunk_t));
+  out_put(cw_g_out, "sizeof(cw_kasiso_t): [i]\n", sizeof(cw_kasiso_t));
+  out_put(cw_g_out, "sizeof(cw_kasisc_t): [i]\n",
+	  sizeof(cw_kasisc_t));
+  out_put(cw_g_out, "\n");
   
+  out_put(cw_g_out, "sizeof(cw_kasid_t): [i]\n", sizeof(cw_kasid_t));
+  out_put(cw_g_out, "sizeof(cw_kasido_t): [i]\n", sizeof(cw_kasido_t));
+  out_put(cw_g_out, "\n");
+  
+  out_put(cw_g_out, "sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
+  out_put(cw_g_out, "sizeof(cw_oh_t): [i]\n", sizeof(cw_oh_t));
+  out_put(cw_g_out, "\n");
 
   while (1)
   {
