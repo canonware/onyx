@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 45 $
+ * $Date: 1998-04-26 22:53:33 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -43,7 +43,51 @@
 
 #define _OH_PERF_
 
+/* Pseudo-opaque type. */
 typedef struct cw_oh_s cw_oh_t;
+
+typedef struct
+{
+  cw_bool_t is_valid;
+  void * key;
+  void * data;
+} cw_oh_item_t;
+
+struct cw_oh_s
+{
+  cw_bool_t is_malloced;
+  cw_rwl_t rw_lock;
+  cw_oh_item_t ** items;
+
+  cw_uint32_t (*base_h1)(cw_oh_t *, void *);
+  cw_uint32_t (*curr_h1)(cw_oh_t *, void *);
+
+  cw_uint32_t size;
+  cw_uint32_t num_items;
+  cw_uint32_t num_invalid;
+
+  cw_uint32_t base_power;
+  cw_uint32_t base_h2;
+  cw_uint32_t base_shrink_point;
+  cw_uint32_t base_grow_point;
+  cw_uint32_t base_rehash_point;
+
+  cw_uint32_t curr_power;
+  cw_uint32_t curr_h2;
+  cw_uint32_t curr_shrink_point;
+  cw_uint32_t curr_grow_point;
+  cw_uint32_t curr_rehash_point;
+
+#ifdef _OH_PERF_  
+  /* Counters used to get an idea of performance. */
+  cw_uint32_t num_collisions;
+  cw_uint32_t num_inserts;
+  cw_uint32_t num_deletes;
+  cw_uint32_t num_grows;
+  cw_uint32_t num_shrinks;
+  cw_uint32_t num_rehashes;
+#endif
+};
 
 #define oh_new _CW_NS_CMN(oh_new)
 #define oh_delete _CW_NS_CMN(oh_delete)
@@ -82,7 +126,7 @@ typedef struct cw_oh_s cw_oh_t;
 
 typedef cw_uint32_t oh_h1_t(cw_oh_t *, void *);
 
-cw_oh_t * oh_new();
+cw_oh_t * oh_new(cw_oh_t * a_oh_o);
 void oh_delete(cw_oh_t * a_oh_o);
 cw_bool_t oh_rehash(cw_oh_t * a_oh_o);
 cw_uint32_t oh_get_size(cw_oh_t * a_oh_o);

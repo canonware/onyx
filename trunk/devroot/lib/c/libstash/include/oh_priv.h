@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 45 $
+ * $Date: 1998-04-26 22:53:33 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -41,20 +41,13 @@
 #ifndef _OH_PRIV_H_
 #define _OH_PRIV_H_
 
-#include <oh.h>
-
-#ifdef _SHADE_
-#include <namespace.h>
-
-#define oh_coalesce_priv EXTOS(oh_coalesce_priv)
-#define oh_grow_priv EXTOS(oh_grow_priv)
-#define oh_shrink_priv EXTOS(oh_shrink_priv)
-#define oh_h1_priv EXTOS(oh_h1_priv)
-#define oh_insert_priv EXTOS(oh_insert_priv)
-#define oh_search_priv EXTOS(oh_search_priv)
-#define oh_rehash_priv EXTOS(oh_rehash_priv)
-
-#endif
+#define oh_coalesce_priv _CW_NS_CMN(oh_coalesce_priv)
+#define oh_grow_priv _CW_NS_CMN(oh_grow_priv)
+#define oh_shrink_priv _CW_NS_CMN(oh_shrink_priv)
+#define oh_h1_priv _CW_NS_CMN(oh_h1_priv)
+#define oh_insert_priv _CW_NS_CMN(oh_insert_priv)
+#define oh_search_priv _CW_NS_CMN(oh_search_priv)
+#define oh_rehash_priv _CW_NS_CMN(oh_rehash_priv)
 
 /* 2^(_OH_BASE_POWER) is the base table size used for calculations. */
 #define _OH_BASE_POWER 8;
@@ -68,48 +61,6 @@
 
 /* Maximum number of items allowable before we consider rehashing. */
 #define _OH_BASE_REHASH_POINT 192;
-
-typedef struct
-{
-  cw_bool_t is_valid;
-  void * key;
-  void * data;
-} cw_oh_item_t;
-
-struct cw_oh_s
-{
-  cw_rwl_t rw_lock;
-  cw_oh_item_t ** items;
-
-  cw_uint32_t (*base_h1)(cw_oh_t *, void *);
-  cw_uint32_t (*curr_h1)(cw_oh_t *, void *);
-
-  cw_uint32_t size;
-  cw_uint32_t num_items;
-  cw_uint32_t num_invalid;
-
-  cw_uint32_t base_power;
-  cw_uint32_t base_h2;
-  cw_uint32_t base_shrink_point;
-  cw_uint32_t base_grow_point;
-  cw_uint32_t base_rehash_point;
-
-  cw_uint32_t curr_power;
-  cw_uint32_t curr_h2;
-  cw_uint32_t curr_shrink_point;
-  cw_uint32_t curr_grow_point;
-  cw_uint32_t curr_rehash_point;
-
-#ifdef _OH_PERF_  
-  /* Counters used to get an idea of performance. */
-  cw_uint32_t num_collisions;
-  cw_uint32_t num_inserts;
-  cw_uint32_t num_deletes;
-  cw_uint32_t num_grows;
-  cw_uint32_t num_shrinks;
-  cw_uint32_t num_rehashes;
-#endif
-};
 
 cw_bool_t oh_coalesce_priv(cw_oh_t * a_oh_o);
 cw_bool_t oh_grow_priv(cw_oh_t * a_oh_o,

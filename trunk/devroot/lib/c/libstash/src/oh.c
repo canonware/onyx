@@ -29,12 +29,25 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 45 $
+ * $Date: 1998-04-26 22:53:33 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
+ * Dynamic open hashing class.  This is a somewhat sophisticated
+ * implementation of hashing.  All internal consistency, growth, shrinkage,
+ * etc. issues are taken care of internally.  The hash functions to use, as
+ * well as just about any other useful parameter, can be modified on the
+ * fly with no worries of inconsistency.  This class is thread safe, thanks
+ * to read/write locks.  That is, multiple readers can be in the code
+ * simultaneously, but only one locker (with no readers) can be in the code
+ * at any given time.
  *
+ * XXX Perhaps we should convert items to be within the items array, rather
+ * than storing pointers to them.  With the current implementation, this
+ * would introduce a copying overhead, but since this will eventually be
+ * converted to shuffle slots to alleviate invalid slots, the copying
+ * overhead will go away.
  *
  ****************************************************************************/
 
@@ -48,12 +61,21 @@
 #include <config.h>
 
 cw_oh_t *
-oh_new()
+oh_new(cw_oh_t * a_oh_o)
 {
   cw_oh_t * retval;
 
-  retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
-  _cw_check_ptr(retval);
+  
+  if (a_oh_o == NULL)
+  {
+    retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_oh_o;
+    retval->is_malloced = FALSE;
+  }
 
   rwl_new(&retval->rw_lock);
 
@@ -61,7 +83,6 @@ oh_new()
   
   retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
 					       * sizeof(cw_oh_item_t *));
-  _cw_check_ptr(retval->items);
   bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
 
   retval->base_h1 = oh_h1_priv;
@@ -118,7 +139,10 @@ oh_delete(cw_oh_t * a_oh_o)
   }
   
   _cw_free(a_oh_o->items);
-  _cw_free(a_oh_o);
+  if (a_oh_o->is_malloced == TRUE)
+  {
+    _cw_free(a_oh_o);
+  }
 }
 
 cw_bool_t
