@@ -83,16 +83,26 @@ bins="onyx"
 #
 # Test everything with every allowable combination of configure options.
 #
+for c in 0 1 ; do
+    # --disable-threads
+    case $c in
+    0)
+        conf_c=""
+        ;;
+    1)
+        conf_c="--disable-threads"
+        ;;
+    esac
 for d in 0 1 ; do
+    # --disable-real
     case $d in
     0)
         conf_d=""
         ;;
     1)
-        conf_d="--disable-threads"
+        conf_d="--disable-real"
         ;;
     esac
-
 for e in 0 1 2 ; do
     # --enable-debug, --enable-profile
     case $e in
@@ -140,7 +150,7 @@ for h in 0 1 ; do
         ;;
     esac
 
-    conf="$conf_d $conf_e $conf_f $conf_g $conf_h"
+    conf="$conf_c $conf_d $conf_e $conf_f $conf_g $conf_h"
 
     echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
     ../$SRCDIR/configure $conf --prefix=$PREFIX
@@ -261,6 +271,7 @@ for h in 0 1 ; do
         echo "configure options: $conf"
         exit 2
     fi
+done
 done
 done
 done
