@@ -92,11 +92,9 @@
  *
  ******************************************************************************/
 
-#ifdef CW_USE_INLINES
-CW_INLINE void
-#else
-static void
-#endif
+#include "../include/libonyx/libonyx.h"
+
+void
 nx_p_nxcode(cw_nx_t *a_nx)
 {
     cw_nxo_t thread;

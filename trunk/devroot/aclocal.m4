@@ -222,6 +222,7 @@ fi
 
 AC_SUBST(enable_libonyx)
 if test "x$enable_libonyx" = "x1" ; then
+  cfgoutputs="$cfgoutputs lib/libonyx/src/nx.nx lib/libonyx/src/nxo_thread.nx"
   AC_DEFINE(CW_USE_LIBONYX)
 fi
 ])

@@ -28,11 +28,9 @@
  *
  ******************************************************************************/
 
-#ifdef CW_USE_INLINES
-CW_INLINE void
-#else
-static void
-#endif
+#include "../include/libonyx/libonyx.h"
+
+void
 nxo_p_thread_nxcode(cw_nxo_t *a_thread)
 {
     cw_onyx_code(a_thread, "' print

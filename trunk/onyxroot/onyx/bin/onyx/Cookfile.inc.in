@@ -153,6 +153,7 @@ ONYX_TEX_SRCS = [ONYX_TEX_SRCS] @objroot@/bin/onyx/doc/latex/manual.tex;
 
 /* Binaries. */
 ONYX = @objroot@/bin/onyx/bin/onyx;
+BONYX = @objroot@/bin/onyx/bin/bonyx;
 TONYX = @objroot@/bin/onyx/bin/tonyx;
 
 [TONYX] : [ONYX];
@@ -162,6 +163,8 @@ TONYX = @objroot@/bin/onyx/bin/tonyx;
  */
 
 onyx : [ONYX] [TONYX];
+
+bonyx : [BONYX];
 
 onyx_bins_bootstrap : [ONYX]
 {
@@ -242,7 +245,7 @@ onyx_bins_clean :
   rm -f [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_OTESTS]];
 #endif
 
-  rm -f [ONYX] [TONYX];
+  rm -f [ONYX] [BONYX] [TONYX];
 }
 
 onyx_bins_distclean :
@@ -259,6 +262,26 @@ onyx_bins_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TONYX_SRCS]];
+}
+
+[BONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
+          [LIBBONYX_A]
+#if @enable_libedit@
+          [LIBEDIT_A]
+#endif
+  set mkdir
+{
+  [CC] [A_CFLAGS] -o [target]
+       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]
+#if @enable_libedit@
+       [LIBEDIT_A]
+#endif
+#if @enable_libonyx@
+#if [count @RPATH@]
+       @RPATH@@abs_objroot@/lib/libonyx/lib
+#endif
+#endif
+       [LDFLAGS] -lbonyx @LIBS@;
 }
 
 [ONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_SRCS]]

@@ -23,8 +23,9 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_name_l.h"
 
-/* Include generated code. */
-#include "nx_nxcode.c"
+/* Prototype for automatically generated function. */
+void
+nx_p_nxcode(cw_nx_t *a_nx);
 
 cw_nx_t *
 nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,

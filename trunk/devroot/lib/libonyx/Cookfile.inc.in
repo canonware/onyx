@@ -9,6 +9,9 @@
  *
  * Cookfile for libonyx.
  *
+ * libbonyx is a bootstrap library that is created for bonyx, which is used to
+ * generate the native startup code embedded in libonyx.
+ *
  ******************************************************************************/
 
 /* Include generated dependency files. */
@@ -19,7 +22,7 @@
  * File lists.
  */
 
-/* Include files that _are_ installed. */
+/* Include files that are installed. */
 {
   local incs = libonyx.h ch.h dch.h gcdict.h mem.h nx.h nxa.h nxn.h nxo.h
                nxo_array.h nxo_boolean.h nxo_dict.h nxo_file.h nxo_fino.h
@@ -39,24 +42,34 @@
   LIBONYX_INCS = [incs];
 }
 
-/* Source files. */
-LIBONYX_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
-               nxo_array.c nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
-               nxo_hook.c nxo_integer.c nxo_mark.c nxo_name.c nxo_null.c
-               nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c nxo_thread.c
-               systemdict.c xep.c
+/* Source files common to libonyx and libbonyx. */
+LIBONYX_COMMON_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
+                      nxo_array.c nxo_boolean.c nxo_dict.c nxo_file.c nxo_fino.c
+                      nxo_hook.c nxo_integer.c nxo_mark.c nxo_name.c nxo_null.c
+                      nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c
+                      nxo_thread.c systemdict.c xep.c
 #if @enable_threads@
-               cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c thd.c tsd.c
+                      cnd.c mq.c mtx.c nxo_condition.c nxo_mutex.c thd.c tsd.c
 #endif
 #if @enable_real@
-               nxo_real.c
+                      nxo_real.c
 #endif
 #if @enable_posix@
-               envdict.c
+                      envdict.c
 #endif
-               ;
+                      ;
 
-LIBONYX_SRCS = [fromto % @srcroot@/lib/libonyx/src/% [LIBONYX_SRCS]];
+/* libonyx source files. */
+LIBONYX_SRCS = [fromto % @srcroot@/lib/libonyx/src/% [LIBONYX_COMMON_SRCS]]
+               [fromto % @objroot@/lib/libonyx/src/%
+                         nx_nxcode.c nxo_thread_nxcode.c
+               ];
+
+/* libbonyx source files. */
+LIBBONYX_SRCS = [fromto % @srcroot@/lib/libonyx/src/%
+                        [LIBONYX_COMMON_SRCS]
+                        nx_bootstrap.c nxo_thread_bootstrap.c
+                ];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 LIBONYX_CTESTS = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
@@ -87,6 +100,7 @@ LIBONYX_CTESTS = [fromto % @srcroot@/lib/libonyx/test/% [LIBONYX_CTESTS]];
 /* Libraries. */
 LIBONYX_REV = 6;
 
+LIBBONYX_A = @objroot@/lib/libonyx/lib/libbonyx.a;
 LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
 #if [matches elf @abi@]
 LIBONYX_SNAME = libonyx.so.[LIBONYX_REV];
@@ -113,14 +127,14 @@ libonyx_libs_a : [LIBONYX_A];
 libonyx_libs_s : [LIBONYX_S];
 libonyx : libonyx_libs_a libonyx_libs_s;
 
-libonyx_libs_bootstrap : onyx
+libonyx_libs_bootstrap : [BONYX]
 {
-  cat @srcroot@/lib/libonyx/src/nx_nxcode.nx
-    | [ONYX] @srcroot@/lib/libonyx/src/nx_nxcode_gen.nx
-    > @srcroot@/lib/libonyx/src/nx_nxcode.c;
-  cat @srcroot@/lib/libonyx/src/nxo_thread_nxcode.nx
-    | [ONYX] @srcroot@/lib/libonyx/src/nxo_thread_nxcode_gen.nx
-    > @srcroot@/lib/libonyx/src/nxo_thread_nxcode.c;
+  cat @objroot@/lib/libonyx/src/nx.nx
+    | [BONYX] @srcroot@/lib/libonyx/src/nx_gen.nx
+    > @srcroot@/lib/libonyx/src/nx_bootstrap.c;
+  cat @objroot@/lib/libonyx/src/nxo_thread.nx
+    | [BONYX] @srcroot@/lib/libonyx/src/nxo_thread_gen.nx
+    > @srcroot@/lib/libonyx/src/nxo_thread_bootstrap.c;
 }
 
 libonyx_libs_tests : [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
@@ -167,7 +181,10 @@ libonyx_libs_clean :
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.diff [LIBONYX_CTESTS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 
-  rm -f [LIBONYX_A] [LIBONYX_S] [LIBONYX_L];
+  rm -f [addprefix @objroot@/lib/libonyx/src/
+                   nx_nxcode.c nxo_thread_nxcode.c];
+
+  rm -f [LIBBONYX_A] [LIBONYX_A] [LIBONYX_S] [LIBONYX_L];
 }
 
 libonyx_libs_distclean :
@@ -235,6 +252,13 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
  * Dependencies.
  */
 
+[LIBBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBBONYX_SRCS]]
+  set mkdir
+{
+  @AR@ cru [target] [younger];
+  @RANLIB@ [target];
+}
+
 [LIBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_SRCS]]
   set mkdir
 {
@@ -260,4 +284,18 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
   rm -f @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
   ln -s [LIBONYX_SNAME] @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
 #endif
+}
+
+@objroot@/lib/libonyx/src/nx_nxcode.c : [BONYX]
+{
+  cat @objroot@/lib/libonyx/src/nx.nx
+    | [BONYX] @srcroot@/lib/libonyx/src/nx_gen.nx
+    > @objroot@/lib/libonyx/src/nx_nxcode.c;
+}
+
+@objroot@/lib/libonyx/src/nxo_thread_nxcode.c : [BONYX]
+{
+  cat @objroot@/lib/libonyx/src/nxo_thread.nx
+    | [BONYX] @srcroot@/lib/libonyx/src/nxo_thread_gen.nx
+    > @objroot@/lib/libonyx/src/nxo_thread_nxcode.c;
 }

@@ -28,9 +28,6 @@
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
-/* Include generated code. */
-#include "nxo_thread_nxcode.c"
-
 #define CW_NXO_THREAD_GETC(a_i) a_thread->tok_str[(a_i)]
 
 #define CW_NXO_THREAD_PUTC(a_c)						\
@@ -47,6 +44,10 @@
 /* Make a note that a '\n' was just seen.  The line and column counters will be
  * updated before the next character is seen. */
 #define CW_NXO_THREAD_NEWLINE() newline = 1
+
+/* Prototype for automatically generated function. */
+void
+nxo_p_thread_nxcode(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
 static void *
