@@ -1,4 +1,4 @@
-#!/usr/bin/onyx
+#!/usr/bin/env oonyx
 #
 # regress_docs <prefix> <srcdir> <clean> [<conf>...]
 
@@ -28,7 +28,7 @@ $conf [
     `-q'
 ] def
 
-$COOK `/usr/bin/cook' def
+$COOK `cook' path def
 $COOKOPT [`-nte'] def
 #$COOKPAR [`-par' `8'] def
 $COOKPAR [] def
