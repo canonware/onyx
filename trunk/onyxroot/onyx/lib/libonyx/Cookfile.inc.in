@@ -85,7 +85,7 @@ LIBONYX_CTESTS = [fromto % @srcroot@/lib/libonyx/test/% [LIBONYX_CTESTS]];
 }
 
 /* Libraries. */
-LIBONYX_REV = 5;
+LIBONYX_REV = 6;
 
 LIBONYX_A = @objroot@/lib/libonyx/lib/libonyx.a;
 #if [matches elf @abi@]
