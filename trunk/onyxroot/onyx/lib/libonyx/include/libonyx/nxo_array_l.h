@@ -53,7 +53,7 @@ struct cw_nxoe_array_s {
 } while (0)
 #endif
 
-void	nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
+void	nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
 cw_nxoe_t *nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #ifndef _CW_USE_INLINES

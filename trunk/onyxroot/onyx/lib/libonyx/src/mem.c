@@ -323,8 +323,8 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 }
 
 void
-mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
-    a_line_num)
+mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num)
 {
 #ifdef _CW_MEM_ERROR
 	if (a_mem != NULL) {
@@ -343,6 +343,13 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 			    "to free at %s:%u\n", __FUNCTION__, a_mem, a_ptr,
 			    a_filename, a_line_num);
 		} else {
+			if (a_size != 0 && a_size != allocation->size) {
+				fprintf(stderr, "%s(%p): Wrong size %u for %p "
+				    "at %s:%u (size %u, allocated at %s:%u)\n",
+				    __FUNCTION__, a_mem, a_size, a_ptr,
+				    a_filename, a_line_num, allocation->size,
+				    allocation->filename, allocation->line_num);
+			}
 #ifdef _CW_MEM_VERBOSE
 			fprintf(stderr, "%s(%p): free(%p) at %s:%u "
 			    "(size %u, allocated at %s:%u)\n", __FUNCTION__,

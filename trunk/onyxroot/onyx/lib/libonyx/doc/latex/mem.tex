@@ -190,11 +190,12 @@ a\_size}}
 	\end{capilist}
 \label{mem_free_e}
 \index{mem_free_e@\cfunc{mem\_free\_e}{}}
-\citem{\cfunc[void]{mem\_free\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, const char
-*a\_filename, cw\_uint32\_t a\_line\_num}}
+\citem{\cfunc[void]{mem\_free\_e}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
+a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{mem_free}
 \index{mem_free@\cfunc{mem\_free}{}}
-\citem{\cfunc[void]{mem\_free}{cw\_mem\_t *a\_mem, void *a\_ptr}}
+\citem{\cfunc[void]{mem\_free}{cw\_mem\_t *a\_mem, void *a\_ptr, size\_t
+a\_size}}
 \label{_cw_free}
 \index{_cw_free@\cppmacro{\_cw\_free}{}}
 \citem{\cppmacro[void]{\_cw\_free}{void *a\_ptr}}
@@ -205,6 +206,8 @@ a\_size}}
 			Pointer to a \classname{mem}.
 		\item[a\_ptr: ]
 			Pointer to to memory range to be freed.
+		\item[a\_size: ]
+			Sizef of memory range pointed to by \cvar{a\_ptr}.
 		\item[a\_filename: ]
 			Should be \_\_FILE\_\_.
 		\item[a\_line\_num: ]

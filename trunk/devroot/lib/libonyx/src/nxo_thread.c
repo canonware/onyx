@@ -287,7 +287,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 }
 
 void
-nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_thread_t	*thread;
 
@@ -303,10 +303,10 @@ nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		 * unaccepted token.  However, it's really the caller's fault,
 		 * so just clean up.
 		 */
-		_cw_free(thread->tok_str);
+		nxa_free(a_nxa, thread->tok_str, thread->buffer_len);
 	}
 
-	_CW_NXOE_FREE(thread);
+	nxa_free(a_nxa, thread, sizeof(cw_nxoe_thread_t));
 }
 
 cw_nxoe_t *
@@ -1653,12 +1653,16 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 static void
 nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 {
+	cw_nxa_t	*nxa;
+
+	nxa = nx_nxa_get(a_thread->nx);
+
 	if (a_thread->index == _CW_NXO_THREAD_BUFFER_SIZE) {
 		/*
 		 * First overflow, initial expansion needed.
 		 */
-		a_thread->tok_str = (cw_uint8_t
-		    *)nxa_malloc(nx_nxa_get(a_thread->nx), a_thread->index * 2);
+		a_thread->tok_str = (cw_uint8_t *)nxa_malloc(nxa,
+		    a_thread->index * 2);
 		a_thread->buffer_len = a_thread->index * 2;
 		memcpy(a_thread->tok_str, a_thread->buffer, a_thread->index);
 	} else if (a_thread->index == a_thread->buffer_len) {
@@ -1667,11 +1671,10 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 		/*
 		 * Overflowed, and additional expansion needed.
 		 */
-		t_str = (cw_uint8_t *)nxa_malloc(nx_nxa_get(a_thread->nx),
-		    a_thread->index * 2);
+		t_str = (cw_uint8_t *)nxa_malloc(nxa, a_thread->index * 2);
 		a_thread->buffer_len = a_thread->index * 2;
 		memcpy(t_str, a_thread->tok_str, a_thread->index);
-		_cw_free(a_thread->tok_str);
+		nxa_free(nxa, a_thread->tok_str, a_thread->index);
 		a_thread->tok_str = t_str;
 	}
 }
@@ -1770,7 +1773,8 @@ nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread)
 {
 	a_thread->state = THREADTS_START;
 	if (a_thread->index > _CW_NXO_THREAD_BUFFER_SIZE) {
-		_cw_free(a_thread->tok_str);
+		nxa_free(nx_nxa_get(a_thread->nx), a_thread->tok_str,
+		    a_thread->buffer_len);
 		a_thread->tok_str = a_thread->buffer;
 	}
 	a_thread->index = 0;

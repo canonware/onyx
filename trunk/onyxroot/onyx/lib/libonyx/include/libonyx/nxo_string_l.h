@@ -37,5 +37,5 @@ struct cw_nxoe_string_s {
 	}	e;
 };
 
-void	nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
+void	nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
 cw_nxoe_t *nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);

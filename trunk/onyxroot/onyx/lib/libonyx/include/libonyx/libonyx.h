@@ -240,8 +240,8 @@ typedef void *cw_opaque_realloc_t (const void *, void *, size_t, const char *,
  * compatible with functions such as mem_free_e(), pezz_put_e() and
  * pool_put_e().
  */
-typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
-    cw_uint32_t);
+typedef void cw_opaque_dealloc_t (const void *, const void *, size_t, const char
+    *, cw_uint32_t);
 
 #include "qs.h"
 #include "qr.h"
@@ -281,16 +281,18 @@ extern cw_mem_t	*cw_g_mem;
 #define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size)		\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
 	    __FILE__, __LINE__)
-#define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
-	(a_func)((void *)(a_arg), (void *)(a_ptr), __FILE__, __LINE__)
+#define _cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)		\
+	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
+	    __FILE__, __LINE__)
 #else
 #define	_cw_opaque_alloc(a_func, a_arg, a_size)				\
 	(a_func)((void *)(a_arg), (size_t)(a_size), NULL, 0)
 #define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size)		\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
 	    NULL, 0)
-#define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
-	(a_func)((void *)(a_arg), (void *)(a_ptr), NULL, 0)
+#define _cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)		\
+	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
+	    NULL, 0)
 #endif
 
 #ifdef WORDS_BIGENDIAN

@@ -42,8 +42,8 @@ void	*mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const
     char *a_filename, cw_uint32_t a_line_num);
 void	*mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num);
-void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
-    cw_uint32_t a_line_num);
+void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
+    *a_filename, cw_uint32_t a_line_num);
 
 /*
  * These macros are declared differently, depending on whether this is a debug
@@ -59,7 +59,7 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
 #define mem_realloc(a_mem, a_ptr, a_size)				\
 	mem_realloc_e((a_mem), (a_ptr), (a_size), __FILE__, __LINE__)
 #define	mem_free(a_mem, a_ptr)						\
-	mem_free_e((a_mem), (a_ptr), __FILE__, __LINE__)
+	mem_free_e((a_mem), (a_ptr), 0, __FILE__, __LINE__)
 
 #define _cw_malloc(a_size)						\
 	mem_malloc_e(cw_g_mem, (a_size), __FILE__, __LINE__)
@@ -68,7 +68,7 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
 #define _cw_realloc(a_ptr, a_size)					\
 	mem_realloc_e(cw_g_mem, (a_ptr), (a_size), __FILE__, __LINE__)
 #define	_cw_free(a_ptr)							\
-	mem_free_e(cw_g_mem, (a_ptr), __FILE__, __LINE__)
+	mem_free_e(cw_g_mem, (a_ptr), 0, __FILE__, __LINE__)
 
 #else
 #define mem_malloc(a_mem, a_size)					\
@@ -78,7 +78,7 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
 #define mem_realloc(a_mem, a_ptr, a_size)				\
 	mem_realloc_e((a_mem), (a_ptr), (a_size), NULL, 0)
 #define	mem_free(a_mem, a_ptr)						\
-	mem_free_e((a_mem), (a_ptr), NULL, 0)
+	mem_free_e((a_mem), (a_ptr), 0, NULL, 0)
 
 #define _cw_malloc(a_size)						\
 	mem_malloc_e(cw_g_mem, (a_size), NULL, 0)
@@ -87,6 +87,6 @@ void	mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename,
 #define _cw_realloc(a_ptr, a_size)					\
 	mem_realloc_e(cw_g_mem, (a_ptr), (a_size), NULL, 0)
 #define	_cw_free(a_ptr)							\
-	mem_free_e(cw_g_mem, (a_ptr), NULL, 0)
+	mem_free_e(cw_g_mem, (a_ptr), 0, NULL, 0)
 
 #endif

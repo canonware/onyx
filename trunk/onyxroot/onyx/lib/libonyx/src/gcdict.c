@@ -52,7 +52,7 @@ gcdict_l_populate(cw_nxo_t *a_dict, cw_nxa_t *a_nxa)
 #define NENTRIES							\
 	(sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-	nx = nxa_l_nx_get(a_nxa);
+	nx = nxa_nx_get(a_nxa);
 	nxo_dict_new(a_dict, nx, FALSE, NENTRIES + NEXTRA);
 
 	for (i = 0; i < NENTRIES; i++) {
@@ -175,10 +175,10 @@ gcdict_setthreshold(cw_nxo_t *a_thread)
  *
  * stats -->   [
  *               collections
- *               new
- * current -->   [ mark sweep ]
- * maximum -->   [ mark sweep ]
- *     sum -->   [ mark sweep ]
+ *               count
+ * current -->   [ count mark sweep ]
+ * maximum -->   [ count mark sweep ]
+ *     sum -->   [ count mark sweep ]
  *             ]
  */
 void
@@ -189,10 +189,10 @@ gcdict_stats(cw_nxo_t *a_thread)
 	cw_bool_t	currentlocking;
 	cw_nxo_t	*ostack, *tstack;
 	cw_nxo_t	*stats, *nxo, *tnxo;
-	cw_nxoi_t	collections, new;
-	cw_nxoi_t	cmark, csweep;
-	cw_nxoi_t	mmark, msweep;
-	cw_nxoi_t	smark, ssweep;
+	cw_nxoi_t	collections, count;
+	cw_nxoi_t	ccount, cmark, csweep;
+	cw_nxoi_t	mcount, mmark, msweep;
+	cw_nxoi_t	scount, smark, ssweep;
 
 	nx = nxo_thread_nx_get(a_thread);
 	nxa = nx_nxa_get(nx);
@@ -204,10 +204,10 @@ gcdict_stats(cw_nxo_t *a_thread)
 	tnxo = nxo_stack_push(tstack);
 
 	/* Get stats. */
-	nxa_stats_get(nxa, &collections, &new,
-	    &cmark, &csweep,
-	    &mmark, &msweep,
-	    &smark, &ssweep);
+	nxa_stats_get(nxa, &collections, &count,
+	    &ccount, &cmark, &csweep,
+	    &mcount, &mmark, &msweep,
+	    &scount, &smark, &ssweep);
 
 	/* Create the main array. */
 	stats = nxo_stack_push(ostack);
@@ -217,32 +217,38 @@ gcdict_stats(cw_nxo_t *a_thread)
 	nxo_integer_new(nxo, collections);
 	nxo_array_el_set(stats, nxo, 0);
 
-	/* new. */
-	nxo_integer_new(nxo, new);
+	/* count. */
+	nxo_integer_new(nxo, count);
 	nxo_array_el_set(stats, nxo, 1);
 
 	/* current. */
-	nxo_array_new(nxo, nx, currentlocking, 2);
-	nxo_integer_new(tnxo, cmark);
+	nxo_array_new(nxo, nx, currentlocking, 3);
+	nxo_integer_new(tnxo, ccount);
 	nxo_array_el_set(nxo, tnxo, 0);
-	nxo_integer_new(tnxo, csweep);
+	nxo_integer_new(tnxo, cmark);
 	nxo_array_el_set(nxo, tnxo, 1);
+	nxo_integer_new(tnxo, csweep);
+	nxo_array_el_set(nxo, tnxo, 2);
 	nxo_array_el_set(stats, nxo, 2);
 
 	/* maximum. */
-	nxo_array_new(nxo, nx, currentlocking, 2);
-	nxo_integer_new(tnxo, mmark);
+	nxo_array_new(nxo, nx, currentlocking, 3);
+	nxo_integer_new(tnxo, mcount);
 	nxo_array_el_set(nxo, tnxo, 0);
-	nxo_integer_new(tnxo, msweep);
+	nxo_integer_new(tnxo, mmark);
 	nxo_array_el_set(nxo, tnxo, 1);
+	nxo_integer_new(tnxo, msweep);
+	nxo_array_el_set(nxo, tnxo, 2);
 	nxo_array_el_set(stats, nxo, 3);
 
 	/* current. */
-	nxo_array_new(nxo, nx, currentlocking, 2);
-	nxo_integer_new(tnxo, smark);
+	nxo_array_new(nxo, nx, currentlocking, 3);
+	nxo_integer_new(tnxo, scount);
 	nxo_array_el_set(nxo, tnxo, 0);
-	nxo_integer_new(tnxo, ssweep);
+	nxo_integer_new(tnxo, smark);
 	nxo_array_el_set(nxo, tnxo, 1);
+	nxo_integer_new(tnxo, ssweep);
+	nxo_array_el_set(nxo, tnxo, 2);
 	nxo_array_el_set(stats, nxo, 4);
 
 	nxo_stack_npop(tstack, 2);

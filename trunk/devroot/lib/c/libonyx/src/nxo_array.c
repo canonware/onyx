@@ -85,7 +85,7 @@ nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_nx_t *a_nx,
 }
 
 void
-nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_array_t	*array;
 
@@ -95,15 +95,17 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-	if (array->nxoe.indirect == FALSE && array->e.a.len > 0)
-		_CW_FREE(array->e.a.arr);
+	if (array->nxoe.indirect == FALSE && array->e.a.len > 0) {
+		nxa_free(a_nxa, array->e.a.arr, array->e.a.len *
+		    sizeof(cw_nxo_t));
+	}
 
 #ifdef _CW_THREADS
 	if (array->nxoe.locking && array->nxoe.indirect == FALSE)
 		mtx_delete(&array->lock);
 #endif
 
-	_CW_NXOE_FREE(array);
+	nxa_free(a_nxa, array, sizeof(cw_nxoe_array_t));
 }
 
 cw_nxoe_t *

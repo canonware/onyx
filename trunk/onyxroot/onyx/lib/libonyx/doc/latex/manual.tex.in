@@ -291,8 +291,8 @@ size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\end{capilist}
 \label{cw_opaque_dealloc_t}
 \index{cw_opaque_dealloc_t@\cfunc{cw\_opaque\_dealloc\_t}{}}
-\citem{\cfunc[void]{cw\_opaque\_dealloc\_t}{void *a\_mem, void *a\_ptr, const
-char *a\_filename, cw\_uint32\_t a\_line\_num}}
+\citem{\cfunc[void]{cw\_opaque\_dealloc\_t}{void *a\_mem, void *a\_ptr, size\_t
+a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -300,6 +300,8 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 			Opaque pointer.
 		\item[a\_ptr: ]
 			Pointer to to memory range to be freed.
+		\item[a\_size: ]
+			Sizef of memory range pointed to by \cvar{a\_ptr}.
 		\item[a\_filename: ]
 			Should be \_\_FILE\_\_.
 		\item[a\_line\_num: ]

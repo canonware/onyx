@@ -65,7 +65,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 }
 
 void
-nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_stack_t		*stack;
 	cw_nxoe_stacko_t	*stacko, *tstacko;
@@ -85,7 +85,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	for (i = 0; i < stack->count + stack->nspare; i++) {
 		tstacko = qr_next(stacko, link);
 		qr_remove(tstacko, link);
-		nxa_free(stack->nxa, tstacko);
+		nxa_free(stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
 	}
 
 #ifdef _CW_THREADS
@@ -93,7 +93,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		mtx_delete(&stack->lock);
 #endif
 
-	_CW_NXOE_FREE(stack);
+	nxa_free(a_nxa, stack, sizeof(cw_nxoe_stack_t));
 }
 
 cw_nxoe_t *
@@ -224,7 +224,7 @@ nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
 	stacko = ql_first(&a_stack->stack);
 	ql_first(&a_stack->stack) = qr_next(ql_first(&a_stack->stack), link);
 	qr_remove(stacko, link);
-	nxa_free(a_stack->nxa, stacko);
+	nxa_free(a_stack->nxa, stacko, sizeof(cw_nxoe_stacko_t));
 }
 
 /*
@@ -282,7 +282,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 		 _CW_LIBONYX_STACK_CACHE; i++) {
 		tstacko = qr_next(stacko, link);
 		qr_remove(tstacko, link);
-		nxa_free(a_stack->nxa, tstacko);
+		nxa_free(a_stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
 	}
 
 	a_stack->nspare = _CW_LIBONYX_STACK_CACHE;

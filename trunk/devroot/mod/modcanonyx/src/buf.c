@@ -36,6 +36,7 @@ bufb_p_cache_set(cw_bufb_t *a_bufb, cw_uint64_t a_offset, cw_uint64_t a_line)
 	a_bufb->line = a_line;
 }
 
+#if (0) /* Not used yet. */
 static cw_uint64_t
 bufb_p_len_get(cw_bufb_t *a_bufb)
 {
@@ -66,6 +67,7 @@ bufb_p_newlines_count(cw_bufb_t *a_bufb)
 
 	return (cw_uint64_t)retval;
 }
+#endif
 
 /* bufh. */
 static void
@@ -74,11 +76,13 @@ bufh_p_new(cw_bufh_t *a_bufh)
 	/* XXX */
 }
 
+#if (0) /* Not used yet. */
 static void
 bufh_p_delete(cw_bufh_t *a_bufh)
 {
 	/* XXX */
 }
+#endif
 
 /* buf. */
 cw_buf_t *
@@ -170,14 +174,16 @@ buf_delete(cw_buf_t *a_buf)
 
 	/* Destroy the bufb vector. */
 	for (i = 0; i < a_buf->bufb_count; i++) {
-		a_buf->dealloc(a_buf->arg, a_buf->bufb_vec[i],
-		    __FILE__, __LINE__);
+		_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg,
+		    a_buf->bufb_vec[i], sizeof(cw_bufb_t));
 	}
-	a_buf->dealloc(a_buf->arg, a_buf->bufb_vec, __FILE__,
-	    __LINE__);
+	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufb_vec,
+	    sizeof(cw_bufb_t *) * a_buf->bufb_veclen);
 
-	if (a_buf->alloced)
-		a_buf->dealloc(a_buf->arg, a_buf, __FILE__, __LINE__);
+	if (a_buf->alloced) {
+		_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf,
+		    sizeof(cw_buf_t));
+	}
 #ifdef _CW_DBG
 	else
 		memset(a_buf, 0x5a, sizeof(cw_buf_t));

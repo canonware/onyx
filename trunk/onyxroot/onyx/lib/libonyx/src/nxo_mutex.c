@@ -34,7 +34,7 @@ nxo_mutex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 }
 
 void
-nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_mutex_t	*mutex;
 
@@ -46,7 +46,7 @@ nxoe_l_mutex_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 
 	mtx_delete(&mutex->lock);
 
-	_CW_NXOE_FREE(mutex);
+	nxa_free(a_nxa, mutex, sizeof(cw_nxoe_mutex_t));
 }
 
 cw_nxoe_t *

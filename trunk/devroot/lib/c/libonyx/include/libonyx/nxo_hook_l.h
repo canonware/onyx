@@ -24,5 +24,5 @@ struct cw_nxoe_hook_s {
 	cw_nxo_hook_delete_t	*delete_f;
 };
 
-void	nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
+void	nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
 cw_nxoe_t *nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);

@@ -68,5 +68,5 @@ struct cw_nxoe_file_s {
 	cw_uint32_t	buffer_offset;
 };
 
-void	nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
+void	nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa);
 cw_nxoe_t *nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);

@@ -70,12 +70,11 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 }
 
 void
-nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_dict_t	*dict;
 	cw_nxoe_dicto_t	*dicto;
 	cw_chi_t	*chi;
-	cw_nxa_t	*nxa;
 
 	dict = (cw_nxoe_dict_t *)a_nxoe;
 
@@ -83,19 +82,18 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
-	nxa = nx_nxa_get(a_nx);
 #ifdef _CW_THREADS
 	if (dict->nxoe.locking)
 		mtx_delete(&dict->lock);
 #endif
 	while (dch_remove_iterate(&dict->hash, NULL, (void **)&dicto, &chi) ==
 	    FALSE) {
-		nxa_free(nxa, dicto);
-		nxa_free(nxa, chi);
+		nxa_free(a_nxa, dicto, sizeof(cw_nxoe_dicto_t));
+		nxa_free(a_nxa, chi, sizeof(cw_chi_t));
 	}
 	dch_delete(&dict->hash);
 
-	_CW_NXOE_FREE(dict);
+	nxa_free(a_nxa, dict, sizeof(cw_nxoe_dict_t));
 }
 
 cw_nxoe_t *
@@ -187,8 +185,8 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 #endif
 
 		if (removed == FALSE) {
-			nxa_free(nxa, dicto_rm);
-			nxa_free(nxa, chi_rm);
+			nxa_free(nxa, dicto_rm, sizeof(cw_nxoe_dicto_t));
+			nxa_free(nxa, chi_rm, sizeof(cw_chi_t));
 		}
 	}
 #ifdef _CW_THREADS
@@ -290,8 +288,8 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 
 		nxa = nx_nxa_get(a_nx);
 
-		nxa_free(nxa, dicto);
-		nxa_free(nxa, chi);
+		nxa_free(nxa, dicto, sizeof(cw_nxoe_dicto_t));
+		nxa_free(nxa, chi, sizeof(cw_chi_t));
 	}
 }
 

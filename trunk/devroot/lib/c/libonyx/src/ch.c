@@ -72,7 +72,8 @@ ch_delete(cw_ch_t *a_ch)
 		_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 		if (chi->is_malloced)
-			_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi);
+			_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi,
+			    sizeof(cw_chi_t));
 #ifdef _CW_DBG
 		else
 			memset(chi, 0x5a, sizeof(cw_chi_t));
@@ -80,7 +81,8 @@ ch_delete(cw_ch_t *a_ch)
 	}
 
 	if (a_ch->is_malloced)
-		_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, a_ch);
+		_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, a_ch,
+		    _CW_CH_TABLE2SIZEOF(a_ch->table_size));
 #ifdef _CW_DBG
 	else
 		memset(a_ch, 0x5a, _CW_CH_TABLE2SIZEOF(a_ch->table_size));
@@ -173,7 +175,7 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 				*r_data = (void *)chi->data;
 			if (chi->is_malloced) {
 				_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg,
-				    chi);
+				    chi, sizeof(cw_chi_t));
 			}
 			else if (r_chi != NULL) {
 #ifdef _CW_DBG
@@ -284,7 +286,8 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	if (r_data != NULL)
 		*r_data = (void *)chi->data;
 	if (chi->is_malloced)
-		_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi);
+		_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi,
+		    sizeof(cw_chi_t));
 	else if (r_chi != NULL) {
 #ifdef _CW_DBG
 		chi->magic = 0;

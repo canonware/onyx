@@ -84,6 +84,7 @@
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
+static void nxa_p_collect(cw_nxa_t *a_nxa);
 #ifdef _CW_THREADS
 static void *nxa_p_gc_entry(void *a_arg);
 #endif
@@ -116,6 +117,7 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
 #endif
 		a_nxa->gc_pending = FALSE;
+		a_nxa->gc_allocated = FALSE;
 		try_stage = 3;
 
 #ifdef _CW_DBG
@@ -130,10 +132,10 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		a_nxa->gcdict_period = _CW_LIBONYX_GCDICT_PERIOD;
 #endif
 		a_nxa->gcdict_threshold = _CW_LIBONYX_GCDICT_THRESHOLD;
-		a_nxa->gcdict_new = 0;
-		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 2);
-		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 2);
-		memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 2);
+		a_nxa->gcdict_count = 0;
+		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 3);
+		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 3);
+		memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 3);
 
 #ifdef _CW_THREADS
 		/*
@@ -203,12 +205,19 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 	mtx_lock(&a_nxa->lock);
 #endif
 
-	/* Update new. */
-	a_nxa->gcdict_new += (cw_nxoi_t)a_size;
+	/* Note that allocation has been done. */
+	a_nxa->gc_allocated = TRUE;
+
+	/* Update count. */
+	a_nxa->gcdict_count += (cw_nxoi_t)a_size;
+	if (a_nxa->gcdict_count > a_nxa->gcdict_maximum[0])
+		a_nxa->gcdict_maximum[0] = a_nxa->gcdict_count;
+	a_nxa->gcdict_sum[0] += (cw_nxoi_t)a_size;
 
 	/* Trigger a collection if the threshold was reached. */
-	if (a_nxa->gcdict_new >= a_nxa->gcdict_threshold &&
-	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
+	if (a_nxa->gcdict_count - a_nxa->gcdict_current[0] >=
+	    a_nxa->gcdict_threshold && a_nxa->gcdict_active &&
+	    a_nxa->gcdict_threshold != 0) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
 #ifdef _CW_THREADS
@@ -227,13 +236,21 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 }
 
 void
-nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, const char *a_filename, cw_uint32_t
-    a_line_num)
+nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num)
 {
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
-	mem_free_e(cw_g_mem, a_ptr, a_filename, a_line_num);
+#ifdef _CW_THREADS
+	mtx_lock(&a_nxa->lock);
+#endif
+	a_nxa->gcdict_count -= (cw_nxoi_t)a_size;
+#ifdef _CW_THREADS
+	mtx_unlock(&a_nxa->lock);
+#endif
+
+	mem_free_e(cw_g_mem, a_ptr, a_size, a_filename, a_line_num);
 }
 
 void
@@ -289,7 +306,7 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 #endif
 	a_nxa->gcdict_active = a_active;
 	if (a_active && a_nxa->gcdict_threshold > 0 && a_nxa->gcdict_threshold
-	    <= a_nxa->gcdict_new) {
+	    <= a_nxa->gcdict_count - a_nxa->gcdict_current[0]) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
 #ifdef _CW_THREADS
@@ -369,8 +386,8 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 	mtx_lock(&a_nxa->lock);
 #endif
 	a_nxa->gcdict_threshold = a_threshold;
-	if (a_threshold > 0 && a_threshold <= a_nxa->gcdict_new &&
-	    a_nxa->gcdict_active) {
+	if (a_threshold > 0 && a_threshold <= a_nxa->gcdict_count -
+	    a_nxa->gcdict_current[0] && a_nxa->gcdict_active) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
 #ifdef _CW_THREADS
@@ -387,9 +404,10 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 }
 
 void
-nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
-    cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep, cw_nxoi_t *r_mmark, cw_nxoi_t
-    *r_msweep, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
+nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
+    cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep, cw_nxoi_t
+    *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep, cw_nxoi_t *r_scount,
+    cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
 {
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
@@ -402,27 +420,33 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
 	if (r_collections != NULL)
 		*r_collections = a_nxa->gcdict_collections;
 
-	/* new. */
-	if (r_new != NULL)
-		*r_new = a_nxa->gcdict_new;
+	/* count. */
+	if (r_count != NULL)
+		*r_count = a_nxa->gcdict_count;
 
 	/* current. */
+	if (r_ccount != NULL)
+		*r_ccount = a_nxa->gcdict_current[0];
 	if (r_cmark != NULL)
-		*r_cmark = a_nxa->gcdict_current[0];
+		*r_cmark = a_nxa->gcdict_current[1];
 	if (r_csweep != NULL)
-		*r_csweep = a_nxa->gcdict_current[1];
+		*r_csweep = a_nxa->gcdict_current[2];
 
 	/* maximum. */
+	if (r_mcount != NULL)
+		*r_mcount = a_nxa->gcdict_maximum[0];
 	if (r_mmark != NULL)
-		*r_mmark = a_nxa->gcdict_maximum[0];
+		*r_mmark = a_nxa->gcdict_maximum[1];
 	if (r_msweep != NULL)
-		*r_msweep = a_nxa->gcdict_maximum[1];
+		*r_msweep = a_nxa->gcdict_maximum[2];
 
 	/* sum. */
+	if (r_scount != NULL)
+		*r_scount = a_nxa->gcdict_sum[0];
 	if (r_smark != NULL)
-		*r_smark = a_nxa->gcdict_sum[0];
+		*r_smark = a_nxa->gcdict_sum[1];
 	if (r_ssweep != NULL)
-		*r_ssweep = a_nxa->gcdict_sum[1];
+		*r_ssweep = a_nxa->gcdict_sum[2];
 
 #ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
@@ -575,14 +599,14 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
  * Clean up unreferenced objects.
  */
 _CW_INLINE void
-nxa_p_sweep(cw_nxoe_t *a_garbage, cw_nx_t *a_nx)
+nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
 	cw_nxoe_t	*nxoe;
 
 	do {
 		nxoe = qr_next(a_garbage, link);
 		qr_remove(nxoe, link);
-		nxoe_l_delete(nxoe, a_nx);
+		nxoe_l_delete(nxoe, a_nxa);
 	} while (nxoe != a_garbage);
 }
 
@@ -590,10 +614,7 @@ nxa_p_sweep(cw_nxoe_t *a_garbage, cw_nx_t *a_nx)
  * Collect garbage using a Baker's Treadmill.  a_nxa->lock is held upon entry
  * into this function.
  */
-#ifdef _CW_THREADS
-static
-#endif
-void
+static void
 nxa_p_collect(cw_nxa_t *a_nxa)
 {
 	cw_uint32_t	nroot, nreachable;
@@ -604,8 +625,8 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	/* Reset the pending flag. */
 	a_nxa->gc_pending = FALSE;
 
-	/* Update statistics counters. */
-	a_nxa->gcdict_new = 0;
+	/* Reset the allocated flag. */
+	a_nxa->gc_allocated = FALSE;
 
 	/*
 	 * Release the lock before entering the single section to avoid lock
@@ -667,7 +688,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 
 	/* If there is garbage, discard it. */
 	if (garbage != NULL)
-		nxa_p_sweep(garbage, a_nxa->nx);
+		nxa_p_sweep(a_nxa, garbage);
 
 	/* Record the sweep finish time and calculate sweep_us. */
 	gettimeofday(&t_tv, NULL);
@@ -682,18 +703,27 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	mtx_lock(&a_nxa->lock);
 #endif
 
-	/* Update timing statistics. */
+	/* Update statistics. */
+	/*
+	 * count.  Since sweeping occurs asynchronously, it is possible that the
+	 * current count is not an accurate reflection of what the lowest memory
+	 * usage since the mark phase completed.  We don't need to worry about
+	 * this too much, since, the race only exists for threaded versions of
+	 * onyx, and periodic collection will happen.
+	 */
+	a_nxa->gcdict_current[0] = a_nxa->gcdict_count;
+
 	/* mark. */
-	a_nxa->gcdict_current[0] = mark_us;
-	if (mark_us > a_nxa->gcdict_maximum[0])
-		a_nxa->gcdict_maximum[0] = mark_us;
-	a_nxa->gcdict_sum[0] += mark_us;
+	a_nxa->gcdict_current[1] = mark_us;
+	if (mark_us > a_nxa->gcdict_maximum[1])
+		a_nxa->gcdict_maximum[1] = mark_us;
+	a_nxa->gcdict_sum[1] += mark_us;
 
 	/* sweep. */
-	a_nxa->gcdict_current[1] = sweep_us;
-	if (sweep_us > a_nxa->gcdict_maximum[1])
-		a_nxa->gcdict_maximum[1] = sweep_us;
-	a_nxa->gcdict_sum[1] += sweep_us;
+	a_nxa->gcdict_current[2] = sweep_us;
+	if (sweep_us > a_nxa->gcdict_maximum[2])
+		a_nxa->gcdict_maximum[2] = sweep_us;
+	a_nxa->gcdict_sum[2] += sweep_us;
 
 	/* Increment the collections counter. */
 	a_nxa->gcdict_collections++;
@@ -706,7 +736,6 @@ nxa_p_gc_entry(void *a_arg)
 	cw_nxa_t	*nxa = (cw_nxa_t *)a_arg;
 	struct timespec	period;
 	cw_nxam_t	message;
-	cw_nxoi_t	prev_new;	/* Previous allocation since last GC. */
 	cw_bool_t	shutdown;
 
         /*
@@ -720,7 +749,6 @@ nxa_p_gc_entry(void *a_arg)
 	 * 3) Collection was explicitly requested.
 	 */
 	period.tv_nsec = 0;
-	prev_new = 0;
 	for (shutdown = FALSE; shutdown == FALSE;) {
 		mtx_lock(&nxa->lock);
 		period.tv_sec = nxa->gcdict_period;
@@ -735,17 +763,23 @@ nxa_p_gc_entry(void *a_arg)
 		switch (message) {
 		case NXAM_NONE:
 			mtx_lock(&nxa->lock);
-			if (nxa->gcdict_active && nxa->gcdict_new > 0) {
-				/*
-				 * If no additional registrations have
-				 * happened since the last mq_timedget()
-				 * timeout, collect.
-				 */
-				if (prev_new == nxa->gcdict_new) {
+			if (nxa->gcdict_active) {
+				if (nxa->gc_allocated == FALSE) {
+					/*
+					 * No additional registrations have
+					 * happened since the last mq_timedget()
+					 * timeout; collect.
+					 */
 					nxa_p_collect(nxa);
-					prev_new = 0;
-				} else
-					prev_new = nxa->gcdict_new;
+				} else {
+					/*
+					 * Reset the allocated flag so that at
+					 * the next timeout, we can tell if
+					 * there has been any allocation
+					 * activity.
+					 */
+					nxa->gc_allocated = FALSE;
+				}
 			}
 			mtx_unlock(&nxa->lock);
 
@@ -753,7 +787,6 @@ nxa_p_gc_entry(void *a_arg)
 		case NXAM_COLLECT:
 			mtx_lock(&nxa->lock);
 			nxa_p_collect(nxa);
-			prev_new = 0;
 			mtx_unlock(&nxa->lock);
 			break;
 		case NXAM_RECONFIGURE:

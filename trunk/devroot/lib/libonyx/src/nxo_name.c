@@ -100,7 +100,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 }
 
 void
-nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_name_t	*name;
 #ifdef _CW_THREADS
@@ -108,13 +108,16 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 #endif
 	cw_dch_t	*name_hash;
 	cw_chi_t	*chi;
+	cw_nx_t		*nx;
 
 	name = (cw_nxoe_name_t *)a_nxoe;
 
+	nx = nxa_nx_get(a_nxa);
+
 #ifdef _CW_THREADS
-	name_lock = nx_l_name_lock_get(a_nx);
+	name_lock = nx_l_name_lock_get(nx);
 #endif
-	name_hash = nx_l_name_hash_get(a_nx);
+	name_hash = nx_l_name_hash_get(nx);
 
 #ifdef _CW_THREADS
 	mtx_lock(name_lock);
@@ -123,12 +126,12 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	 * Only delete the hash entry if this object hasn't been put back into
 	 * use.
 	 */
-	if (name->nxoe.color != nxa_l_white_get(nx_nxa_get(a_nx))) {
+	if (name->nxoe.color != nxa_l_white_get(a_nxa)) {
 		/*
 		 * Remove from hash table.
 		 */
 		dch_remove(name_hash, (void *)name, NULL, NULL, &chi);
-		nxa_free(nx_nxa_get(a_nx), chi);
+		nxa_free(a_nxa, chi, sizeof(cw_chi_t));
 
 		if (name->nxoe.name_static == FALSE) {
 			/*
@@ -136,14 +139,14 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 			 * the string is allowed to be modified, and this cast
 			 * is better than dropping the const altogether.
 			 */
-			_CW_FREE((cw_uint8_t *)name->str);
+			nxa_free(a_nxa, (cw_uint8_t *)name->str, name->len);
 		}
 
-		_CW_NXOE_FREE(name);
+		nxa_free(a_nxa, name, sizeof(cw_nxoe_name_t));
 	} else {
 		/* Re-register. */
 		a_nxoe->registered = FALSE;
-		nxa_l_gc_register(nx_nxa_get(a_nx), a_nxoe);
+		nxa_l_gc_register(a_nxa, a_nxoe);
 	}
 #ifdef _CW_THREADS
 	mtx_unlock(name_lock);

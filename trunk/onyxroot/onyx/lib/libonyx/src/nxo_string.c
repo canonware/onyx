@@ -95,7 +95,7 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
 }
 
 void
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 {
 	cw_nxoe_string_t	*string;
 
@@ -106,14 +106,14 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_assert(string->nxoe.type == NXOT_STRING);
 
 	if (string->nxoe.indirect == FALSE && string->e.s.len > 0)
-		_CW_FREE(string->e.s.str);
+		nxa_free(a_nxa, string->e.s.str, string->e.s.len);
 
 #ifdef _CW_THREADS
 	if (string->nxoe.locking && string->nxoe.indirect == FALSE)
 		mtx_delete(&string->lock);
 #endif
 
-	_CW_NXOE_FREE(string);
+	nxa_free(a_nxa, string, sizeof(cw_nxoe_string_t));
 }
 
 cw_nxoe_t *

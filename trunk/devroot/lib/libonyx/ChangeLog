@@ -1,3 +1,14 @@
+2001-08-21  Jason Evans  <jasone@canonware.com>
+
+	* : Maintain the current number of bytes allocated by the
+	interpreter and use this count for threshold-based collection.
+
+	API additions: nxa_nx_get().
+
+	API modifications: cw_opaque_dealloc_t, _cw_opaque_dealloc(),
+	mem_free_e(), nxa_free(), nxa_free_e(), nxa_stats_get(), and
+	gcdict's stats operator.
+
 2001-08-20  Jason Evans  <jasone@canonware.com>
 
 	* src/nxo_file.c: Clean up the internals of onyx file objects and

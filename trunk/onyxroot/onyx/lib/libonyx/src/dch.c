@@ -66,7 +66,8 @@ dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc, cw_opaque_dealloc_t
 	xep_catch(_CW_ONYXX_OOM) {
 		retval = (cw_dch_t *)v_retval;
 		if (a_dch->is_malloced)
-			_cw_opaque_dealloc(a_dealloc, a_arg, retval);
+			_cw_opaque_dealloc(a_dealloc, a_arg, retval,
+			    sizeof(cw_dch_t));
 	}
 	xep_end();
 
@@ -85,8 +86,10 @@ dch_delete(cw_dch_t *a_dch)
 
 	ch_delete(a_dch->ch);
 
-	if (a_dch->is_malloced)
-		_cw_opaque_dealloc(a_dch->dealloc, a_dch->arg, a_dch);
+	if (a_dch->is_malloced) {
+		_cw_opaque_dealloc(a_dch->dealloc, a_dch->arg, a_dch,
+		    sizeof(cw_dch_t));
+	}
 #ifdef _CW_DBG
 	else
 		memset(a_dch, 0x5a, sizeof(cw_dch_t));
