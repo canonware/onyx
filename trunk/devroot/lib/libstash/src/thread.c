@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 155 $
- * $Date: 1998-07-29 16:58:01 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 209 $
+ * $Date: 1998-09-07 23:57:53 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  * 
@@ -30,6 +30,8 @@
  ****************************************************************************/
 
 #include <libstash.h>
+
+#include <string.h>
 
 cw_thd_t *
 thd_new(cw_thd_t * a_thd_o,
@@ -54,19 +56,19 @@ thd_new(cw_thd_t * a_thd_o,
 
   if (error)
   {
-    log_eprintf(g_log_o, __FILE__, __LINE__, "thd_new",
-		"Cannot create thread, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "thd_new",
+		"Cannot create thread: %s\n", strerror(error));
     abort();
   }
 
-/*   error = pthread_detach(retval->thread); */
+  /*   error = pthread_detach(retval->thread); */
 
-/*   if (error) */
-/*   { */
-/*     log_eprintf(g_log_o, __FILE__, __LINE__, "thd_new", */
-/* 		"Cannot detach thread, error %d\n", error); */
-/*     abort(); */
-/*   } */
+  /*   if (error) */
+  /*   { */
+  /*     log_eprintf(g_log_o, NULL, 0, "thd_new", */
+  /* 		"Cannot detach thread: %s\n", strerror(error)); */
+  /*     abort(); */
+  /*   } */
   
   return retval;
 }
@@ -117,8 +119,8 @@ mtx_new(cw_mtx_t * a_mtx_o)
 
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "mtx_new",
-	       "Unable to create mutex, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "mtx_new",
+		"Unable to create mutex: %s\n", strerror(error));
     abort();
   }
 
@@ -136,8 +138,8 @@ mtx_delete(cw_mtx_t * a_mtx_o)
 
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "mtx_delete",
-	       "Unable to destroy mutex, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "mtx_delete",
+		"Unable to destroy mutex: %s\n", strerror(error));
     abort();
   }
 
@@ -158,8 +160,8 @@ mtx_lock(cw_mtx_t * a_mtx_o)
 
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "mtx_lock",
-	       "Error locking mutex, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "mtx_lock",
+		"Error locking mutex: %s\n", strerror(error));
     abort();
   }
 }
@@ -171,7 +173,14 @@ mtx_trylock(cw_mtx_t * a_mtx_o)
   
   _cw_check_ptr(a_mtx_o);
 
-  retval = pthread_mutex_trylock(&a_mtx_o->mutex);
+  if (EBUSY == pthread_mutex_trylock(&a_mtx_o->mutex))
+  {
+    retval = TRUE;
+  }
+  else 
+  {
+    retval = FALSE;
+  }
 
   return retval;
 }
@@ -187,8 +196,8 @@ mtx_unlock(cw_mtx_t * a_mtx_o)
   
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "mtx_unlock",
-	       "Error unlocking mutex, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "mtx_unlock",
+		"Error unlocking mutex: %s\n", strerror(error));
     abort();
   }
 }
@@ -214,8 +223,8 @@ cnd_new(cw_cnd_t * a_cnd_o)
 
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "cnd_new",
-	       "Error creating condition variable, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "cnd_new",
+		"Error creating condition variable: %s\n", strerror(error));
     abort();
   }
 
@@ -232,8 +241,8 @@ cnd_delete(cw_cnd_t * a_cnd_o)
   error = pthread_cond_destroy(&a_cnd_o->condition);
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "cnd_delete",
-	       "Error destroying condition variable, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "cnd_delete",
+		"Error destroying condition variable %s\n", strerror(error));
     abort();
   }
 
@@ -253,8 +262,8 @@ cnd_signal(cw_cnd_t * a_cnd_o)
   error = pthread_cond_signal(&a_cnd_o->condition);
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "cnd_signal",
-	       "Error signalling condition variable, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "cnd_signal",
+		"Error signalling condition variable: %s\n", strerror(error));
     abort();
   }
 }
@@ -269,8 +278,8 @@ cnd_broadcast(cw_cnd_t * a_cnd_o)
   error = pthread_cond_broadcast(&a_cnd_o->condition);
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "cnd_broadcast",
-	       "Error broadcasting condition variable, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "cnd_broadcast",
+		"Error broadcasting condition variable: %s\n", strerror(error));
     abort();
   }
 }
@@ -280,21 +289,29 @@ cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
 	      struct timespec * a_time)
 {
   int error;
+  cw_bool_t retval;
 
   _cw_check_ptr(a_cnd_o);
   _cw_check_ptr(a_mtx_o);
 
-  error = pthread_cond_timedwait(&a_cnd_o->condition, &a_mtx_o->mutex,
-				 a_time);
-  if (error)
+  error = pthread_cond_timedwait(&a_cnd_o->condition, &a_mtx_o->mutex, a_time);
+
+  if (error == 0)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "cnd_timedwait",
-	       "Error timed waiting on condition variable, error %d\n", error);
+    retval = FALSE;
+  }
+  else if (error == ETIMEDOUT)
+  {
+    retval = TRUE;
+  }
+  else /* if (error == EINTR) */
+  {
+    log_eprintf(g_log_o, NULL, 0, "cnd_timedwait",
+		"Error waiting on condition variable: %s\n", strerror(error));
     abort();
   }
-
-  /* XXX Should we indicate whether a timeout occurred? */
-  return FALSE;
+  
+  return retval;
 }
 
 void
@@ -308,8 +325,8 @@ cnd_wait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o)
   error = pthread_cond_wait(&a_cnd_o->condition, &a_mtx_o->mutex);
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "cnd_wait",
-	       "Error waiting on condition variable, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "cnd_wait",
+		"Error waiting on condition variable: %s\n", strerror(error));
     abort();
   }
 }
@@ -421,11 +438,11 @@ sem_getvalue(cw_sem_t * a_sem_o)
   _cw_check_ptr(a_sem_o);
 
   /* I don't think we need to lock, since we're just reading. */
-/*   mtx_lock(&a_sem_o->lock); */
+  /*   mtx_lock(&a_sem_o->lock); */
 
   retval = a_sem_o->count;
 
-/*   mtx_unlock(&a_sem_o->lock); */
+  /*   mtx_unlock(&a_sem_o->lock); */
   return retval;
 }
 
@@ -497,8 +514,8 @@ tsd_set(cw_tsd_t * a_tsd_o, void * a_val)
   error = pthread_setspecific(a_tsd_o->key, a_val);
   if (error)
   {
-    log_printf(g_log_o, __FILE__, __LINE__, "tsd_set",
-	       "Error setting thread-specific data, error %d\n", error);
+    log_eprintf(g_log_o, NULL, 0, "tsd_set",
+		"Error setting thread-specific data: %s\n", strerror(error));
     abort();
   }
 }
