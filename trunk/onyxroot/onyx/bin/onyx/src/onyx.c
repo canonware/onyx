@@ -131,7 +131,7 @@ main(int argc, char **argv, char **envp)
 #ifdef HAVE_DECL_OPTRESET
     optreset = 1;
 #endif
-    optind = 0;
+    optind = 1;
 
     xep_begin();
     xep_try
