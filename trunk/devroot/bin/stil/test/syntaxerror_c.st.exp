@@ -1,0 +1,4 @@
+At line 3, column 1: Error /syntaxerror in -file-
+ostack: (`/\n' -file-)
+estack: (-file-)
+dstack: (-dict- -dict- -dict- -dict-)

@@ -66,10 +66,9 @@ SRCS = [SRCS] [STIL_SRCS];
                  spush_c.st.in spush_d.st.in sroll_a.st.in sroll_b.st.in
                  sroll_c.st.in sroll_d.st.in sroll_e.st.in sroll_f.st.in
                  sroll_g.st.in sroll_h.st.in sroll_i.st.in syntaxerror_a.st.in
-                 syntaxerror_b.st.in 
+                 syntaxerror_b.st.in syntaxerror_c.st.in syntaxerror_d.st.in
                  syntaxerror_e.st.in syntaxerror_f.st.in syntaxerror_g.st.in
-                 syntaxerror_h.st.in syntaxerror_s.st.in
-                 syntaxerror_t.st.in;
+                 syntaxerror_h.st.in;
   stests = [fromto % [srcdir]/bin/stil/test/% [stests]];
 
   STESTS = [STESTS] [stests];
