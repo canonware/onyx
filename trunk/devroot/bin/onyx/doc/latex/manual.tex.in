@@ -61,6 +61,6 @@ and returns a string.  The return string is used as the interactive prompt.}
 
 If \binname{onyx} is being run non-interactively:
 \begin{itemize}
-\item{The name ``stop'' in currenterror is redefined to call the die operator
+\item{The name ``stop'' in errordict is redefined to call the die operator
 with an argument of 1.}
 \end{itemize}
