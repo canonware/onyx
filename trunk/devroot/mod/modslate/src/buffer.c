@@ -906,7 +906,7 @@ marker_p_whence(cw_nxo_t *a_whence)
      * /SEEK_EOB. */
     len = nxo_name_len_get(a_whence);
     /* All the valid names are the same length, so a single length works. */
-    if (len != strlen("SEEK_BOB"))
+    if (len != sizeof("SEEK_BOB") - 1)
     {
 	retval = BUFW_NONE;
 	goto RETURN;

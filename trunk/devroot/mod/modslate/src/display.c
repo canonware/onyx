@@ -200,7 +200,8 @@ display_type(cw_nxo_t *a_nxo)
 
     name_len = nxo_name_len_get(tag);
     name = nxo_name_str_get(tag);
-    if ((name_len != strlen("display")) || strncmp("display", name, name_len))
+    if ((name_len != sizeof("display") - 1)
+	|| strncmp("display", name, name_len))
     {
 	retval = NXN_typecheck;
 	goto RETURN;
