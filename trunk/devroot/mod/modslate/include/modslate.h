@@ -14,6 +14,8 @@
 #include <libonyx/libonyx.h>
 
 #include <sys/param.h>
+#include <curses.h>
+#include <panel.h>
 
 #include "buf.h"
 #include "hist.h"

@@ -11,6 +11,8 @@
 
 /* slate initialization. */
 void	slate_buffer_init(cw_nxo_t *a_thread);
+cw_nxn_t buffer_type(cw_nxo_t *a_nxo);
+cw_nxn_t marker_type(cw_nxo_t *a_nxo);
 
 /* Operators. */
 void	slate_buffer(void *a_data, cw_nxo_t *a_thread);

@@ -65,7 +65,6 @@ void
 slate_init (void *a_arg, cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*estack;
-	struct termios	t;	/* XXX */
 
 	/*
 	 * The interpreter is currently executing a hook that holds a reference
