@@ -12,7 +12,7 @@
 
 # Called as: sockname_e.nx <srcdir> <objdir>
 
-argv 2 get `/sockname_e.nx.in' cat `r' open
+argv 1 get `/sockname_e.nx.in' cat `r' open
 
 dup close
 
