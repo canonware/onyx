@@ -19,4 +19,3 @@ gtk_main
 
 %%% ... and when the button is pressed, exit
 `exiting\n' print flush
-quit
