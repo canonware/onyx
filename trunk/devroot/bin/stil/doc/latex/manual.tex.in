@@ -45,8 +45,6 @@ bindings.  Use this variable to explicitly set the key bindings to either
 \section{Language differences}
 If \binname{stil} is being run interactively:
 \begin{itemize}
-\item{The promptstring operator is defined in the initial thread's userdict to
-print the number of objects on the operand stack.}
 \item{The stop operator in currenterror is redefined to recursively execute the
 stdin file in a stopped context in order to keep the interpreter from exiting on
 error.  It is possible (though generally unlikely) for buffering of stdin to
