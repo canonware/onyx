@@ -136,7 +136,7 @@ case "${host}" in
 	RPATH="-Wl,-rpath,"
 	;;
   *-*-netbsd*)
-	AC_MSG_CHECKING(ABI)
+	AC_MSG_CHECKING([ABI])
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 [[#ifdef __ELF__
 /* ELF */
