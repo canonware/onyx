@@ -55,7 +55,7 @@ main(int argc, char **argv)
 	cw_sock_t	*sock = NULL;
 	cw_sock_t	*sock_stdin = NULL;
 	cw_sock_t	*sock_stdout = NULL;
-	cw_mq_t		*mq = NULL;
+	cw_mq_t		mq;
 	struct timespec	*tout = NULL;
 
 	int		c;
@@ -269,27 +269,27 @@ main(int argc, char **argv)
 		goto RETURN;
 	}
 
-	mq = mq_new(NULL, cw_g_mem, sizeof(cw_sock_t *));
+	mq_new(&mq, cw_g_mem, sizeof(cw_sock_t *));
 	buf = buf_new(NULL, cw_g_mem);
 
 	sock_stdin = sock_new(NULL, 16384);
 	sock_wrap(sock_stdin, 0, FALSE);
-	libsock_in_notify(mq, sock_stdin, sock_stdin);
+	libsock_in_notify(&mq, sock_stdin, sock_stdin);
 
 	sock_stdout = sock_new(NULL, 0);
 	sock_wrap(sock_stdout, 1, FALSE);
 
-	libsock_in_notify(mq, sock, sock);
+	libsock_in_notify(&mq, sock, sock);
 
 	zero.tv_sec = 0;
 	zero.tv_nsec = 0;
 
 	for (;;) {
 		if ((tout != NULL) && (done_reading)) {
-			if (mq_timedget(mq, tout, &notify_sock))
+			if (mq_timedget(&mq, tout, &notify_sock))
 				break;
 		} else
-			mq_get(mq, &notify_sock);
+			mq_get(&mq, &notify_sock);
 
 		if (notify_sock == sock_stdin) {
 			do {
@@ -392,8 +392,6 @@ main(int argc, char **argv)
 		sock_delete(sock_stdin);
 	if (sock_stdout != NULL)
 		sock_delete(sock_stdout);
-	if (mq != NULL)
-		mq_delete(mq);
 	if (tout != NULL)
 		_cw_free(tout);
 	if (log_out != NULL) {

@@ -28,7 +28,7 @@ const char * basename(const char *a_str);
 
 /* Global. */
 cw_sock_t	*sock_vec[_LIBSOCK_SUCK_MAX_CONNS];
-cw_mq_t		*mq;
+cw_mq_t		mq;
 cw_socks_t	*socks;
 cw_uint32_t	opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
 
@@ -109,16 +109,14 @@ main(int argc, char **argv)
 	 */
 	buf_new(&buf, cw_g_mem);
 
-	mq = mq_new(NULL, cw_g_mem, sizeof(int));
-	if (mq == NULL)
-		_cw_error("Memory allocation error");
+	mq_new(&mq, cw_g_mem, sizeof(int));
 	/* Start thread to accept connections. */
 	accept_thd = thd_new(accept_entry_func, NULL, TRUE);
 
 	for (;;) {
 		did_work = FALSE;
 
-		while (mq_get(mq, &sockfd) == FALSE) {
+		while (mq_get(&mq, &sockfd) == FALSE) {
 			did_work = TRUE;
 
 			if (sock_vec[sockfd] != NULL) {
@@ -139,7 +137,7 @@ main(int argc, char **argv)
 			}
 		}
 	}
-	mq_delete(mq);
+	mq_delete(&mq);
 	buf_delete(&buf);
 
 	libsock_shutdown();
@@ -162,7 +160,7 @@ accept_entry_func(void *a_arg)
 
 			sock_vec[sock_fd_get(sock)] = sock;
 
-			libsock_in_notify(mq, sock, sock);
+			libsock_in_notify(&mq, sock, sock);
 
 			/*
 			 * Create another sock object for the next time we call

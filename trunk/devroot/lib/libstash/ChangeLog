@@ -1,3 +1,7 @@
+2001-04-19  Jason Evans  <jasone@canonware.com>
+
+	* src/mq.c (mq_new): Do not internally allocate the mq structure.
+
 2001-04-03  Jason Evans  <jasone@canonware.com>
 
 	* : Remove the res class.  It is not used anywhere, and its API

@@ -14,7 +14,6 @@ typedef struct cw_mq_s cw_mq_t;
 
 struct cw_mq_s {
 	cw_mem_t	*mem;
-	cw_bool_t	is_malloced;
 #ifdef _LIBSTASH_DBG
 	cw_uint32_t	magic;
 #endif
@@ -38,7 +37,7 @@ struct cw_mq_s {
 	cw_bool_t	put_stop;
 };
 
-cw_mq_t		*mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size);
+void		mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size);
 void		mq_delete(cw_mq_t *a_mq);
 cw_bool_t	mq_tryget(cw_mq_t *a_mq, ...);
 cw_bool_t	mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout,

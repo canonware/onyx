@@ -29,79 +29,47 @@
 #define _LIBSTASH_MQ_ARRAY_MIN_SIZE 8
 #endif
 
-cw_mq_t *
+void
 mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 {
-	cw_mq_t			*retval;
-	volatile cw_uint32_t	try_stage = 0;
+	_cw_check_ptr(a_mq);
 
-	xep_begin();
-	volatile cw_mq_t	*v_retval;
-	xep_try {
-		if (a_mq != NULL) {
-			v_retval = retval = a_mq;
-			a_mq->is_malloced = FALSE;
-		} else {
-			v_retval = retval = (cw_mq_t *)mem_malloc(a_mem,
-			    sizeof(cw_mq_t));
-			retval->is_malloced = TRUE;
-		}
-		try_stage = 1;
-	
-		retval->mem = a_mem;
-		retval->msg_count = 0;
+	a_mq->mem = a_mem;
+	a_mq->msg_count = 0;
 
-		switch (a_msg_size) {
-		case 1:
-			retval->msg_size = 1;
-			break;
-		case 2:
-			retval->msg_size = 2;
-			break;
-		case 4:
-			retval->msg_size = 4;
-			break;
-		case 8:
-			retval->msg_size = 8;
-			break;
-		default:
-			_cw_not_reached();
-		}
+	switch (a_msg_size) {
+	case 1:
+		a_mq->msg_size = 1;
+		break;
+	case 2:
+		a_mq->msg_size = 2;
+		break;
+	case 4:
+		a_mq->msg_size = 4;
+		break;
+	case 8:
+		a_mq->msg_size = 8;
+		break;
+	default:
+		_cw_not_reached();
+	}
 
-		retval->msgs_vec_count = _LIBSTASH_MQ_ARRAY_MIN_SIZE;
-		retval->msgs_beg = 0;
-		retval->msgs_end = 0;
+	a_mq->msgs_vec_count = _LIBSTASH_MQ_ARRAY_MIN_SIZE;
+	a_mq->msgs_beg = 0;
+	a_mq->msgs_end = 0;
 
-		retval->msgs.x = (cw_uint32_t *)mem_malloc(a_mem,
-		    retval->msgs_vec_count * retval->msg_size);
-		try_stage = 2;
+	a_mq->msgs.x = (cw_uint32_t *)mem_malloc(a_mem,
+	    a_mq->msgs_vec_count * a_mq->msg_size);
 
-		mtx_new(&retval->lock);
-		cnd_new(&retval->cond);
+	mtx_new(&a_mq->lock);
+	cnd_new(&a_mq->cond);
 
-		retval->get_stop = FALSE;
-		retval->put_stop = FALSE;
+	a_mq->get_stop = FALSE;
+	a_mq->put_stop = FALSE;
 
 #ifdef _LIBSTASH_DBG
-		retval->magic = _LIBSTASH_MQ_MAGIC;
+	a_mq->magic = _LIBSTASH_MQ_MAGIC;
 #endif
-	}
-	xep_catch(_CW_STASHX_OOM) {
-		retval = (cw_mq_t *)v_retval;
-		switch (try_stage) {
-		case 1:
-			if (a_mq->is_malloced)
-				mem_free(a_mem, retval);
-		case 0:
-			break;
-		default:
-			_cw_not_reached();
-		}
-		break;
-	}
-	xep_end();
-
-	return retval;
 }
 
 void
@@ -115,11 +83,8 @@ mq_delete(cw_mq_t *a_mq)
 
 	mem_free(a_mq->mem, a_mq->msgs.x);
 
-	if (a_mq->is_malloced)
-		mem_free(a_mq->mem, a_mq);
 #ifdef _LIBSTASH_DBG
-	else
-		memset(a_mq, 0x5a, sizeof(cw_mq_t));
+	memset(a_mq, 0x5a, sizeof(cw_mq_t));
 #endif
 }
 
@@ -509,8 +474,6 @@ mq_dump(cw_mq_t *a_mq, const char *a_prefix)
 	_cw_check_ptr(a_mq);
 	_cw_assert(a_mq->magic == _LIBSTASH_MQ_MAGIC);
 
-	out_put(out_err, "[s]is_malloced : [s]\n", a_prefix, a_mq->is_malloced ?
-	    "TRUE" : "FALSE");
 	out_put(out_err, "[s]msg_count : [i]\n", a_prefix, a_mq->msg_count);
 	out_put(out_err, "[s]msg_size : [i]\n", a_prefix, a_mq->msg_size);
 	out_put(out_err, "[s]msg_msgs_vec_count : [i]\n", a_prefix,
