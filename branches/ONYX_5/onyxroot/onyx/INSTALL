@@ -75,7 +75,7 @@ Additional install targets of finer granularity include:
 	<libname>_libs_install
 	<libname>_libs_install_[ias]
 	<modname>_mods_install
-	docs_install_{ps,pdf,html}
+	docs_install_{pdf,html}
 
 Uninstall targets include:
 
@@ -94,7 +94,7 @@ Cleanup targets include:
 Targets that depend on optional supporting software include:
 
 	docs
-	docs_{ps,pdf,html}
+	docs_{pdf,html}
 	release
 	check
 	check_update
