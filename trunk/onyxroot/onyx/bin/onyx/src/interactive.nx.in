@@ -38,7 +38,7 @@
 systemdict begin
 % - promptstring <string>
 /promptstring {
-	count cvs `onyx:' exch catenate `> ' catenate
+    count cvs `onyx:' exch catenate `> ' catenate
 } bind def
 end
 
@@ -50,9 +50,9 @@ end
 % Do not stop on error.  Instead, recursively evaluate stdin.  File bufferring
 % can cause strange behavior, but at least the error will get handled first.
 errordict begin
-	/stop {
-		stdin cvx stopped pop
-	} bind def
+    /stop {
+	stdin cvx stopped pop
+    } bind def
 end
 
 % Print the product and version info.

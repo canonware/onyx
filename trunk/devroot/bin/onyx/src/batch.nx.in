@@ -35,9 +35,9 @@
 `
 % Die with an exit code of 1 on error.
 currenterror begin
-	/stop {
-		1 die
-	} def
+    /stop {
+	1 die
+    } def
 end
 ' catenate
 
