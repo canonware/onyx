@@ -18,7 +18,7 @@ modslate_buffer_init(cw_nxo_t *a_thread);
 
 /* buffer. */
 void
-modslate_buffer(void *a_data, cw_nxo_t *a_thread);
+modslate_buffer_buffer(void *a_data, cw_nxo_t *a_thread);
 
 //void
 //modslate_buffer_p(void *a_data, cw_nxo_t *a_thread);
@@ -80,7 +80,7 @@ modslate_buffer_validate(void *a_data, cw_nxo_t *a_thread);
 
 /* marker. */
 void
-modslate_marker(void *a_data, cw_nxo_t *a_thread);
+modslate_marker_marker(void *a_data, cw_nxo_t *a_thread);
 
 //void
 //modslate_marker_p(void *a_data, cw_nxo_t *a_thread);
@@ -142,7 +142,7 @@ modslate_marker_validate(void *a_data, cw_nxo_t *a_thread);
 
 /* extent. */
 void
-modslate_extent(void *a_data, cw_nxo_t *a_thread);
+modslate_extent_extent(void *a_data, cw_nxo_t *a_thread);
 
 //void
 //modslate_extent_p(void *a_data, cw_nxo_t *a_thread);

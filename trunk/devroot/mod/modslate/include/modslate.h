@@ -29,7 +29,7 @@
 #define MODSLATE_GC_ITER_BUFFER	1
 #define MODSLATE_GC_ITER_MODULE	2
 
-#define MODSLATE_METHOD(name) {#name, modslate_##name}
+#define MODSLATE_METHOD(clas, name) {#name, modslate_##clas##_##name}
 
 // XXX
 #define MODSLATE_ENTRY(name) {#name, modslate_##name}

@@ -9,29 +9,18 @@
 #
 ################################################################################
 
-# Finish initializing the buffer class.
+# Finish initializing the marker class.
 
-buffer vclass setsuper
-buffer data <
-    $name null
+marker vclass setsuper
+marker data <
 > copy pop
-buffer methods <
-    #bsize #class :new #instance
+marker methods <
+    #buffer #class :new #instance
     $new {
 	:rnew
+	#buffer #instance
+
+	:marker
 	#instance
-
-	:buffer
-	#instance
-    }
-
-    #instance :name #name
-    $name {
-	data $name get
-    }
-
-    #name #instance :setname -
-    $setname {
-	data $name dn put
     }
 > exch copy pop

@@ -21,6 +21,8 @@ globaldict $slatedict dict dup begin put
 
 `modslate/modslate_defs.nx' require
 `modslate/buffer.nx' require
+`modslate/marker.nx' require
+`modslate/extent.nx' require
 
 # Pop slatedict off dstack and restore currentlocking.
 setlocking

@@ -101,7 +101,7 @@ $status_line {
     `\e[m' print
 } def
 
-#=buffer= b2s #string
+#buffer b2s #string
 $b2s {
     pop
     0 $SEEK_BOB tmark:seek pop
@@ -130,7 +130,8 @@ $redisplay {
     hs
     `\r\n' print
 
-    0 $SEEK_BOB tpoint:seek pop bpoint:range_get
+    0 $SEEK_BOB tpoint:seek pop
+    tpoint bpoint:range_get
     srender flush
 } def
 
@@ -168,9 +169,11 @@ $keytable <
     `\r' {
 	`\n' insert_string
     }
-    `\cg' {
+    `\cn' {
+	bpoint scratch:history_startgroup
 	gcdict $stats get eval 2 sprints
 	insert_string
+	scratch:history_endgroup
     }
     `\cq' {
 	`\r\nslate GC stats: '
@@ -181,12 +184,10 @@ $keytable <
 	exit
     }
     `\cu' {
-	# XXX Change syntax to: bpoint scratch:undo
-	bpoint:undo
+	1 bpoint scratch:undo
     }
     `\cr' {
-	# XXX Change syntax to: bpoint scratch:redo
-	bpoint:redo
+	1 bpoint scratch:redo
     }
     `\cb' {
 	-1 bpoint:seek pop
@@ -218,7 +219,7 @@ $keytable <
     `\cw' {
 	bpoint scratch:history_startgroup
 	bmark bpoint:range_cut pop
-	scratch_history_endgroup
+	scratch:history_endgroup
     }
     `\ca' {
 	-1 bpoint:seekline
@@ -246,7 +247,6 @@ $keytable <
     `\cv' {
 	`<12345678901234567890123456789012345678901234567890123456789012>'
 	insert_string
-#	`ABCDEFGH' insert_string
     }
     `\cx' {
 	`dump ' scratch:dump
@@ -277,24 +277,15 @@ $tmark scratch marker:new def
 
 `*scratch*' scratch:setname
 
-# XXX
-#2 gcdict $setperiod get eval
-# false gcdict $setactive get eval
-
 true scratch:history_setactive
 
-$disp envdict $TERM get stdin stdout display
-ostack {
-    2 sprint
-} foreach
-def
+$disp envdict $TERM get stdin stdout display def
 disp display_start
 
 stdin 0 setiobuf {
     redisplay
     getc
     interpc
-#    `' scratch:dump
     scratch:validate
 } loop
 

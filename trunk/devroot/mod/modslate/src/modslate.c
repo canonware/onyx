@@ -18,7 +18,7 @@ static cw_nxo_t modslate_module_handle;
 
 /* Reference iterator function used for modslate classes/handles created via
  * modslate_class_init().  This function makes sure that modslate_module_handle
- * is not deleted until there are no more handles. */
+ * is not deleted until there are no more classes/handles. */
 static cw_nxoe_t *
 modslate_p_ref_iter(void *a_data, cw_bool_t a_reset)
 {
@@ -103,7 +103,7 @@ modslate_class_init(cw_nxo_t *a_thread, const cw_uint8_t *a_name,
     nxo_dict_def(nxo_stack_get(nxo_thread_dstack_get(a_thread)),
 		 classname, class_);
 
-    nxo_dup(class_, r_class);
+    nxo_dup(r_class, class_);
 
     /* Clean up. */
     nxo_stack_npop(tstack, 4);
@@ -147,11 +147,7 @@ modslate_instance_kind(cw_nxo_t *a_instance, cw_nxo_t *a_class)
     cw_nxn_t retval;
     cw_nxo_t *tclass;
 
-    if (nxo_type_get(a_instance) != NXOT_INSTANCE)
-    {
-	retval = NXN_typecheck;
-	goto RETURN;
-    }
+    cw_assert(nxo_type_get(a_instance) == NXOT_INSTANCE);
 
     /* Iterate up the inheritance chain until class_ is found, or the baseclass
      * is reached. */

@@ -9,29 +9,18 @@
 #
 ################################################################################
 
-# Finish initializing the buffer class.
+# Finish initializing the extent class.
 
-buffer vclass setsuper
-buffer data <
-    $name null
+extent vclass setsuper
+extent data <
 > copy pop
-buffer methods <
-    #bsize #class :new #instance
+extent methods <
+    #buffer #beg #end #class :new #instance
     $new {
 	:rnew
+	#buffer #beg #end #instance
+
+	:extent
 	#instance
-
-	:buffer
-	#instance
-    }
-
-    #instance :name #name
-    $name {
-	data $name get
-    }
-
-    #name #instance :setname -
-    $setname {
-	data $name dn put
     }
 > exch copy pop
