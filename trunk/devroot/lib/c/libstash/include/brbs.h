@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -39,21 +39,21 @@ struct cw_brbs_s
 };
 
 /* Namespace definitions for brbs. */
-#define brbs_new _CW_NS_CMN(brbs_new)
-#define brbs_delete _CW_NS_CMN(brbs_delete)
-#define brbs_is_open _CW_NS_CMN(brbs_is_open)
-#define brbs_open _CW_NS_CMN(brbs_open)
-#define brbs_close _CW_NS_CMN(brbs_close)
-#define brbs_create _CW_NS_CMN(brbs_create)
-#define brbs_destroy _CW_NS_CMN(brbs_destroy)
-#define brbs_get_filename _CW_NS_CMN(brbs_get_filename)
-#define brbs_set_filename _CW_NS_CMN(brbs_set_filename)
-#define brbs_get_size _CW_NS_CMN(brbs_get_size)
-#define brbs_get_is_raw _CW_NS_CMN(brbs_get_is_raw)
-#define brbs_get_sect_size _CW_NS_CMN(brbs_get_sect_size)
-#define brbs_block_read _CW_NS_CMN(brbs_block_read)
-#define brbs_block_write _CW_NS_CMN(brbs_block_write)
-/* #define brbs_ _CW_NS_CMN(brbs_) */
+#define brbs_new _CW_NS_ANY(brbs_new)
+#define brbs_delete _CW_NS_ANY(brbs_delete)
+#define brbs_is_open _CW_NS_ANY(brbs_is_open)
+#define brbs_open _CW_NS_ANY(brbs_open)
+#define brbs_close _CW_NS_ANY(brbs_close)
+#define brbs_create _CW_NS_ANY(brbs_create)
+#define brbs_destroy _CW_NS_ANY(brbs_destroy)
+#define brbs_get_filename _CW_NS_ANY(brbs_get_filename)
+#define brbs_set_filename _CW_NS_ANY(brbs_set_filename)
+#define brbs_get_size _CW_NS_ANY(brbs_get_size)
+#define brbs_get_is_raw _CW_NS_ANY(brbs_get_is_raw)
+#define brbs_get_sect_size _CW_NS_ANY(brbs_get_sect_size)
+#define brbs_block_read _CW_NS_ANY(brbs_block_read)
+#define brbs_block_write _CW_NS_ANY(brbs_block_write)
+/* #define brbs_ _CW_NS_ANY(brbs_) */
 
 cw_brbs_t * brbs_new(cw_brbs_t * a_brbs_o);
 void brbs_delete(cw_brbs_t * a_brbs_o);

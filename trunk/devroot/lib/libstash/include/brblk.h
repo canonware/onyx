@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -34,29 +34,29 @@ struct cw_brblk_s
 };
 
 /* Namespace definition. */
-#define brblk_new _CW_NS_CMN(brblk_new)
-#define brblk_delete _CW_NS_CMN(brblk_delete)
+#define brblk_new _CW_NS_ANY(brblk_new)
+#define brblk_delete _CW_NS_ANY(brblk_delete)
 #ifdef _CW_DEBUG
-#  define brblk_slock _CW_NS_CMN(brblk_slock)
-#  define brblk_tlock _CW_NS_CMN(brblk_tlock)
-#  define brblk_sunlock _CW_NS_CMN(brblk_sunlock)
-#  define brblk_tunlock _CW_NS_CMN(brblk_tunlock)
-#  define brblk_get_is_dirty _CW_NS_CMN(brblk_get_is_dirty)
-#  define brblk_set_is_dirty _CW_NS_CMN(brblk_set_is_dirty)
-#  define brblk_s2dlock _CW_NS_CMN(brblk_s2dlock)
-#  define brblk_2rlock _CW_NS_CMN(brblk_2rlock)
-#  define brblk_2wlock _CW_NS_CMN(brblk_2wlock)
-#  define brblk_2xlock _CW_NS_CMN(brblk_2xlock)
-#  define brblk_dunlock _CW_NS_CMN(brblk_dunlock)
-#  define brblk_runlock _CW_NS_CMN(brblk_runlock)
-#  define brblk_wunlock _CW_NS_CMN(brblk_wunlock)
-#  define brblk_xunlock _CW_NS_CMN(brblk_xunlock)
-#  define brblk_get_byte _CW_NS_CMN(brblk_get_byte)
-#  define brblk_set_byte _CW_NS_CMN(brblk_set_byte)
-#  define brblk_get_buf_p _CW_NS_CMN(brblk_get_buf_p)
-#  define brblk_get_buf_size _CW_NS_CMN(brblk_get_buf_size)
+#  define brblk_slock _CW_NS_ANY(brblk_slock)
+#  define brblk_tlock _CW_NS_ANY(brblk_tlock)
+#  define brblk_sunlock _CW_NS_ANY(brblk_sunlock)
+#  define brblk_tunlock _CW_NS_ANY(brblk_tunlock)
+#  define brblk_get_is_dirty _CW_NS_ANY(brblk_get_is_dirty)
+#  define brblk_set_is_dirty _CW_NS_ANY(brblk_set_is_dirty)
+#  define brblk_s2dlock _CW_NS_ANY(brblk_s2dlock)
+#  define brblk_2rlock _CW_NS_ANY(brblk_2rlock)
+#  define brblk_2wlock _CW_NS_ANY(brblk_2wlock)
+#  define brblk_2xlock _CW_NS_ANY(brblk_2xlock)
+#  define brblk_dunlock _CW_NS_ANY(brblk_dunlock)
+#  define brblk_runlock _CW_NS_ANY(brblk_runlock)
+#  define brblk_wunlock _CW_NS_ANY(brblk_wunlock)
+#  define brblk_xunlock _CW_NS_ANY(brblk_xunlock)
+#  define brblk_get_byte _CW_NS_ANY(brblk_get_byte)
+#  define brblk_set_byte _CW_NS_ANY(brblk_set_byte)
+#  define brblk_get_buf_p _CW_NS_ANY(brblk_get_buf_p)
+#  define brblk_get_buf_size _CW_NS_ANY(brblk_get_buf_size)
 #endif
-/* #define brblk_ _CW_NS_CMN(brblk_) */
+/* #define brblk_ _CW_NS_ANY(brblk_) */
 
 /* The following several functions should only be used by the br code. */
 cw_brblk_t * brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size);

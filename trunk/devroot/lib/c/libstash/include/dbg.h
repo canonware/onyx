@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -64,11 +64,11 @@ struct cw_dbg_s
   cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_R_MAX + 1];
 };
 
-#define dbg_new _CW_NS_CMN(dbg_new)
-#define dbg_delete _CW_NS_CMN(dbg_delete)
-#define dbg_turn_on _CW_NS_CMN(dbg_turn_on)
-#define dbg_turn_off _CW_NS_CMN(dbg_turn_off)
-#define dbg_clear _CW_NS_CMN(dbg_clear)
+#define dbg_new _CW_NS_ANY(dbg_new)
+#define dbg_delete _CW_NS_ANY(dbg_delete)
+#define dbg_turn_on _CW_NS_ANY(dbg_turn_on)
+#define dbg_turn_off _CW_NS_ANY(dbg_turn_off)
+#define dbg_clear _CW_NS_ANY(dbg_clear)
 
 cw_dbg_t * dbg_new();
 void dbg_delete(cw_dbg_t * a_dbg_o);

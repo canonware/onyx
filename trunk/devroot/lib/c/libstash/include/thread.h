@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -68,35 +68,35 @@ struct cw_tsd_s
 
 
 /* Namespace definitions. */
-#define thd_new _CW_NS_CMN(thd_new)
-#define thd_delete _CW_NS_CMN(thd_delete)
-#define thd_join _CW_NS_CMN(thd_join)
+#define thd_new _CW_NS_ANY(thd_new)
+#define thd_delete _CW_NS_ANY(thd_delete)
+#define thd_join _CW_NS_ANY(thd_join)
 
-#define mtx_new _CW_NS_CMN(mtx_new)
-#define mtx_delete _CW_NS_CMN(mtx_delete)
-#define mtx_lock _CW_NS_CMN(mtx_lock)
-#define mtx_trylock _CW_NS_CMN(mtx_trylock)
-#define mtx_unlock _CW_NS_CMN(mtx_unlock)
+#define mtx_new _CW_NS_ANY(mtx_new)
+#define mtx_delete _CW_NS_ANY(mtx_delete)
+#define mtx_lock _CW_NS_ANY(mtx_lock)
+#define mtx_trylock _CW_NS_ANY(mtx_trylock)
+#define mtx_unlock _CW_NS_ANY(mtx_unlock)
 
-#define cnd_new _CW_NS_CMN(cnd_new)
-#define cnd_delete _CW_NS_CMN(cnd_delete)
-#define cnd_signal _CW_NS_CMN(cnd_signal)
-#define cnd_broadcast _CW_NS_CMN(cnd_broadcast)
-#define cnd_timedwait _CW_NS_CMN(cnd_timedwait)
-#define cnd_wait _CW_NS_CMN(cnd_wait)
+#define cnd_new _CW_NS_ANY(cnd_new)
+#define cnd_delete _CW_NS_ANY(cnd_delete)
+#define cnd_signal _CW_NS_ANY(cnd_signal)
+#define cnd_broadcast _CW_NS_ANY(cnd_broadcast)
+#define cnd_timedwait _CW_NS_ANY(cnd_timedwait)
+#define cnd_wait _CW_NS_ANY(cnd_wait)
 
-#define sem_new _CW_NS_CMN(sem_new)
-#define sem_delete _CW_NS_CMN(sem_delete)
-#define sem_post _CW_NS_CMN(sem_post)
-#define sem_wait _CW_NS_CMN(sem_wait)
-#define sem_trywait _CW_NS_CMN(sem_trywait)
-#define sem_getvalue _CW_NS_CMN(sem_getvalue)
-#define sem_adjust _CW_NS_CMN(sem_adjust)
+#define sem_new _CW_NS_ANY(sem_new)
+#define sem_delete _CW_NS_ANY(sem_delete)
+#define sem_post _CW_NS_ANY(sem_post)
+#define sem_wait _CW_NS_ANY(sem_wait)
+#define sem_trywait _CW_NS_ANY(sem_trywait)
+#define sem_getvalue _CW_NS_ANY(sem_getvalue)
+#define sem_adjust _CW_NS_ANY(sem_adjust)
 
-#define tsd_new _CW_NS_CMN(tsd_new)
-#define tsd_delete _CW_NS_CMN(tsd_delete)
-#define tsd_get _CW_NS_CMN(tsd_get)
-#define tsd_set _CW_NS_CMN(tsd_set)
+#define tsd_new _CW_NS_ANY(tsd_new)
+#define tsd_delete _CW_NS_ANY(tsd_delete)
+#define tsd_get _CW_NS_ANY(tsd_get)
+#define tsd_set _CW_NS_ANY(tsd_set)
 
 /* Function prototypes. */
 cw_thd_t * thd_new(cw_thd_t * a_thd_o, void * (*a_start_func)(void *),

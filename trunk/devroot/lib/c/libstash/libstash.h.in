@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 144 $
- * Last modified: $Date: 1998-07-15 17:25:18 -0700 (Wed, 15 Jul 1998) $
+ * Current revision: $Revision: 156 $
+ * Last modified: $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * Description: Master header file for libstash.
  *
@@ -35,7 +35,6 @@
  * Various macros possibly defined by configure.
  */
 #undef _CW_PEDANTIC
-#undef _CW_DEBUG
  
 #undef SIZEOF_SIGNED_CHAR
 #undef SIZEOF_UNSIGNED_CHAR
@@ -148,7 +147,7 @@ typedef enum
 #  define _cw_ns_xglue(x,y,z) _cw_ns_glue(x,y,z)
 
 /* Create one of these for each namespace. */
-#  define _CW_NS_CMN(x) _cw_ns_xglue(_CW_PREF,common_,x)
+#  define _CW_NS_ANY(x) _cw_ns_xglue(_CW_PREF,,x)
 
 /*
  * Project headers to always be included.

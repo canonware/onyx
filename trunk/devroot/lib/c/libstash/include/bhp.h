@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -43,15 +43,15 @@ struct cw_bhp_s
   cw_sint32_t (*priority_compare)(cw_bhpi_t *, cw_bhpi_t *);
 };
 
-#define bhp_new _CW_NS_CMN(bhp_new)
-#define bhp_delete _CW_NS_CMN(bhp_delete)
-#define bhp_dump _CW_NS_CMN(bhp_dump)
-#define bhp_insert _CW_NS_CMN(bhp_insert)
-#define bhp_find_min _CW_NS_CMN(bhp_find_min)
-#define bhp_del_min _CW_NS_CMN(bhp_del_min)
-#define bhp_get_size _CW_NS_CMN(bhp_get_size)
-#define bhp_union _CW_NS_CMN(bhp_union)
-#define bhp_set_priority_compare _CW_NS_CMN(bhp_set_priority_compare)
+#define bhp_new _CW_NS_ANY(bhp_new)
+#define bhp_delete _CW_NS_ANY(bhp_delete)
+#define bhp_dump _CW_NS_ANY(bhp_dump)
+#define bhp_insert _CW_NS_ANY(bhp_insert)
+#define bhp_find_min _CW_NS_ANY(bhp_find_min)
+#define bhp_del_min _CW_NS_ANY(bhp_del_min)
+#define bhp_get_size _CW_NS_ANY(bhp_get_size)
+#define bhp_union _CW_NS_ANY(bhp_union)
+#define bhp_set_priority_compare _CW_NS_ANY(bhp_set_priority_compare)
 
 /* Typedefs to allow easy function pointer passing. */
 typedef cw_sint32_t bhp_prio_comp_t(cw_bhpi_t *, cw_bhpi_t *);

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -68,35 +68,35 @@ struct cw_oh_s
 #endif
 };
 
-#define oh_new _CW_NS_CMN(oh_new)
-#define oh_delete _CW_NS_CMN(oh_delete)
-#define oh_get_size _CW_NS_CMN(oh_get_size)
-#define oh_get_num_items _CW_NS_CMN(oh_get_num_items)
+#define oh_new _CW_NS_ANY(oh_new)
+#define oh_delete _CW_NS_ANY(oh_delete)
+#define oh_get_size _CW_NS_ANY(oh_get_size)
+#define oh_get_num_items _CW_NS_ANY(oh_get_num_items)
 
-#define oh_get_base_size _CW_NS_CMN(oh_get_base_size)
-#define oh_get_base_h2 _CW_NS_CMN(oh_get_base_h2)
-#define oh_get_base_shrink_point _CW_NS_CMN(oh_get_base_shrink_point)
-#define oh_get_base_grow_point _CW_NS_CMN(oh_get_base_grow_point)
+#define oh_get_base_size _CW_NS_ANY(oh_get_base_size)
+#define oh_get_base_h2 _CW_NS_ANY(oh_get_base_h2)
+#define oh_get_base_shrink_point _CW_NS_ANY(oh_get_base_shrink_point)
+#define oh_get_base_grow_point _CW_NS_ANY(oh_get_base_grow_point)
 
-#define oh_set_h1 _CW_NS_CMN(oh_set_h1)
-#define oh_set_key_compare _CW_NS_CMN(oh_set_key_compare)
-#define oh_set_base_h2 _CW_NS_CMN(oh_set_base_h2)
-#define oh_set_base_shrink_point _CW_NS_CMN(oh_set_base_shrink_point)
-#define oh_set_base_grow_point _CW_NS_CMN(oh_set_base_grow_point)
+#define oh_set_h1 _CW_NS_ANY(oh_set_h1)
+#define oh_set_key_compare _CW_NS_ANY(oh_set_key_compare)
+#define oh_set_base_h2 _CW_NS_ANY(oh_set_base_h2)
+#define oh_set_base_shrink_point _CW_NS_ANY(oh_set_base_shrink_point)
+#define oh_set_base_grow_point _CW_NS_ANY(oh_set_base_grow_point)
 
-#define oh_item_insert _CW_NS_CMN(oh_item_insert)
-#define oh_item_delete _CW_NS_CMN(oh_item_delete)
-#define oh_item_search _CW_NS_CMN(oh_item_search)
+#define oh_item_insert _CW_NS_ANY(oh_item_insert)
+#define oh_item_delete _CW_NS_ANY(oh_item_delete)
+#define oh_item_search _CW_NS_ANY(oh_item_search)
 
-#define oh_item_delete_iterate _CW_NS_CMN(oh_item_delete_iterate)
-#define oh_dump _CW_NS_CMN(oh_dump)
+#define oh_item_delete_iterate _CW_NS_ANY(oh_item_delete_iterate)
+#define oh_dump _CW_NS_ANY(oh_dump)
 
 #ifdef _OH_PERF_
-#  define oh_get_num_collisions _CW_NS_CMN(oh_get_num_collisions)
-#  define oh_get_num_inserts _CW_NS_CMN(oh_get_num_inserts)
-#  define oh_get_num_deletes _CW_NS_CMN(oh_get_num_deletes)
-#  define oh_get_num_grows _CW_NS_CMN(oh_get_num_grows)
-#  define oh_get_num_shrinks _CW_NS_CMN(oh_get_num_shrinks)
+#  define oh_get_num_collisions _CW_NS_ANY(oh_get_num_collisions)
+#  define oh_get_num_inserts _CW_NS_ANY(oh_get_num_inserts)
+#  define oh_get_num_deletes _CW_NS_ANY(oh_get_num_deletes)
+#  define oh_get_num_grows _CW_NS_ANY(oh_get_num_grows)
+#  define oh_get_num_shrinks _CW_NS_ANY(oh_get_num_shrinks)
 #endif
 
 /* Typedefs to allow easy function pointer passing. */

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -76,44 +76,44 @@ struct cw_jtl_s
 };
 
 /* Namespace definitions. */
-#define lwq_new _CW_NS_CMN(lwq_new)
-#define lwq_delete _CW_NS_CMN(lwq_delete)
-#define lwq_lock _CW_NS_CMN(lwq_lock)
-#define lwq_unlock _CW_NS_CMN(lwq_unlock)
-#define lwq_num_waiters _CW_NS_CMN(lwq_num_waiters)
-#define lwq_purge_spares _CW_NS_CMN(lwq_purge_spares)
+#define lwq_new _CW_NS_ANY(lwq_new)
+#define lwq_delete _CW_NS_ANY(lwq_delete)
+#define lwq_lock _CW_NS_ANY(lwq_lock)
+#define lwq_unlock _CW_NS_ANY(lwq_unlock)
+#define lwq_num_waiters _CW_NS_ANY(lwq_num_waiters)
+#define lwq_purge_spares _CW_NS_ANY(lwq_purge_spares)
 
-#define rwl_new _CW_NS_CMN(rwl_new)
-#define rwl_delete _CW_NS_CMN(rwl_delete)
-#define rwl_rlock _CW_NS_CMN(rwl_rlock)
-#define rwl_runlock _CW_NS_CMN(rwl_runlock)
-#define rwl_wlock _CW_NS_CMN(rwl_wlock)
-#define rwl_wunlock _CW_NS_CMN(rwl_wunlock)
+#define rwl_new _CW_NS_ANY(rwl_new)
+#define rwl_delete _CW_NS_ANY(rwl_delete)
+#define rwl_rlock _CW_NS_ANY(rwl_rlock)
+#define rwl_runlock _CW_NS_ANY(rwl_runlock)
+#define rwl_wlock _CW_NS_ANY(rwl_wlock)
+#define rwl_wunlock _CW_NS_ANY(rwl_wunlock)
 
-#define rwq_new _CW_NS_CMN(rwq_new)
-#define rwq_delete _CW_NS_CMN(rwq_delete)
-#define rwq_rlock _CW_NS_CMN(rwq_rlock)
-#define rwq_runlock _CW_NS_CMN(rwq_runlock)
-#define rwq_wlock _CW_NS_CMN(rwq_wlock)
-#define rwq_wunlock _CW_NS_CMN(rwq_wunlock)
+#define rwq_new _CW_NS_ANY(rwq_new)
+#define rwq_delete _CW_NS_ANY(rwq_delete)
+#define rwq_rlock _CW_NS_ANY(rwq_rlock)
+#define rwq_runlock _CW_NS_ANY(rwq_runlock)
+#define rwq_wlock _CW_NS_ANY(rwq_wlock)
+#define rwq_wunlock _CW_NS_ANY(rwq_wunlock)
 
-#define jtl_new _CW_NS_CMN(jtl_new)
-#define jtl_delete _CW_NS_CMN(jtl_delete)
-#define jtl_slock _CW_NS_CMN(jtl_slock)
-#define jtl_tlock _CW_NS_CMN(jtl_tlock)
-#define jtl_s2dlock _CW_NS_CMN(jtl_s2dlock)
-#define jtl_2rlock _CW_NS_CMN(jtl_2rlock)
-#define jtl_2wlock _CW_NS_CMN(jtl_2wlock)
-#define jtl_2xlock _CW_NS_CMN(jtl_2xlock)
-#define jtl_sunlock _CW_NS_CMN(jtl_sunlock)
-#define jtl_tunlock _CW_NS_CMN(jtl_tunlock)
-#define jtl_dunlock _CW_NS_CMN(jtl_dunlock)
-#define jtl_runlock _CW_NS_CMN(jtl_runlock)
-#define jtl_wunlock _CW_NS_CMN(jtl_wunlock)
-#define jtl_xunlock _CW_NS_CMN(jtl_xunlock)
-#define jtl_get_max_dlocks _CW_NS_CMN(jtl_get_max_dlocks)
-#define jtl_set_max_dlocks _CW_NS_CMN(jtl_set_max_dlocks)
-#define jtl_get_num_stlocks _CW_NS_CMN(jtl_get_num_stlocks)
+#define jtl_new _CW_NS_ANY(jtl_new)
+#define jtl_delete _CW_NS_ANY(jtl_delete)
+#define jtl_slock _CW_NS_ANY(jtl_slock)
+#define jtl_tlock _CW_NS_ANY(jtl_tlock)
+#define jtl_s2dlock _CW_NS_ANY(jtl_s2dlock)
+#define jtl_2rlock _CW_NS_ANY(jtl_2rlock)
+#define jtl_2wlock _CW_NS_ANY(jtl_2wlock)
+#define jtl_2xlock _CW_NS_ANY(jtl_2xlock)
+#define jtl_sunlock _CW_NS_ANY(jtl_sunlock)
+#define jtl_tunlock _CW_NS_ANY(jtl_tunlock)
+#define jtl_dunlock _CW_NS_ANY(jtl_dunlock)
+#define jtl_runlock _CW_NS_ANY(jtl_runlock)
+#define jtl_wunlock _CW_NS_ANY(jtl_wunlock)
+#define jtl_xunlock _CW_NS_ANY(jtl_xunlock)
+#define jtl_get_max_dlocks _CW_NS_ANY(jtl_get_max_dlocks)
+#define jtl_set_max_dlocks _CW_NS_ANY(jtl_set_max_dlocks)
+#define jtl_get_num_stlocks _CW_NS_ANY(jtl_get_num_stlocks)
 
 /* Function prototypes. */
 cw_lwq_t * lwq_new(cw_lwq_t * a_lwq_o);

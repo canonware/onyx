@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -40,22 +40,22 @@ struct cw_list_s
  * Namespace definitions.
  */
 
-#define list_item_new _CW_NS_CMN(list_item_new)
-#define list_item_delete _CW_NS_CMN(list_item_delete)
-#define list_item_get _CW_NS_CMN(list_item_get)
-#define list_item_set _CW_NS_CMN(list_item_set)
+#define list_item_new _CW_NS_ANY(list_item_new)
+#define list_item_delete _CW_NS_ANY(list_item_delete)
+#define list_item_get _CW_NS_ANY(list_item_get)
+#define list_item_set _CW_NS_ANY(list_item_set)
 
-#define list_new _CW_NS_CMN(list_new)
-#define list_delete _CW_NS_CMN(list_delete)
-#define list_count _CW_NS_CMN(list_count)
-#define list_hpush _CW_NS_CMN(list_hpush)
-#define list_hpop _CW_NS_CMN(list_hpop)
-#define list_tpush _CW_NS_CMN(list_tpush)
-#define list_tpop _CW_NS_CMN(list_tpop)
-#define list_insert_after _CW_NS_CMN(list_insert_after)
-#define list_remove _CW_NS_CMN(list_remove)
-#define list_purge_spares _CW_NS_CMN(list_purge_spares)
-#define list_dump _CW_NS_CMN(list_dump)
+#define list_new _CW_NS_ANY(list_new)
+#define list_delete _CW_NS_ANY(list_delete)
+#define list_count _CW_NS_ANY(list_count)
+#define list_hpush _CW_NS_ANY(list_hpush)
+#define list_hpop _CW_NS_ANY(list_hpop)
+#define list_tpush _CW_NS_ANY(list_tpush)
+#define list_tpop _CW_NS_ANY(list_tpop)
+#define list_insert_after _CW_NS_ANY(list_insert_after)
+#define list_remove _CW_NS_ANY(list_remove)
+#define list_purge_spares _CW_NS_ANY(list_purge_spares)
+#define list_dump _CW_NS_ANY(list_dump)
 
 cw_list_item_t * list_item_new();
 void list_item_delete(cw_list_item_t * a_cont);

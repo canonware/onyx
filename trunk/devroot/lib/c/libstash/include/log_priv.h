@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -28,7 +28,7 @@ struct cw_log_s
   FILE * log_fp;
 };
 
-#define log_p_uint64_base10_add _CW_NS_CMN(log_p_uint64_base10_add)
+#define log_p_uint64_base10_add _CW_NS_ANY(log_p_uint64_base10_add)
 
 void log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b);
 

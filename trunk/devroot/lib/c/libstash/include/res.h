@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 125 $
- * Last modified: $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * Current revision: $Revision: 156 $
+ * Last modified: $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * Description: 
  *              
@@ -37,12 +37,12 @@ struct cw_res_s
 /*
  * Namespace definitions.
  */
-#define res_new _CW_NS_CMN(res_new)
-#define res_delete _CW_NS_CMN(res_delete)
-#define res_merge_file _CW_NS_CMN(res_merge_file)
-#define res_merge_list _CW_NS_CMN(res_merge_list)
-#define res_get_res_val _CW_NS_CMN(res_get_res_val)
-#define res_dump _CW_NS_CMN(res_dump)
+#define res_new _CW_NS_ANY(res_new)
+#define res_delete _CW_NS_ANY(res_delete)
+#define res_merge_file _CW_NS_ANY(res_merge_file)
+#define res_merge_list _CW_NS_ANY(res_merge_list)
+#define res_get_res_val _CW_NS_ANY(res_get_res_val)
+#define res_dump _CW_NS_ANY(res_dump)
 
 cw_res_t * res_new(cw_res_t * a_res_o);
 void res_delete(cw_res_t * a_res_o);

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 148 $
- * $Date: 1998-07-19 21:13:23 -0700 (Sun, 19 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -33,18 +33,18 @@ struct cw_br_s
 };
 
 /* Namespace definitions for br. */
-#define br_new _CW_NS_CMN(br_new)
-#define br_delete _CW_NS_CMN(br_delete)
-#define br_is_open _CW_NS_CMN(br_is_open)
-#define br_open _CW_NS_CMN(br_open)
-#define br_close _CW_NS_CMN(br_close)
-#define br_get_block_size _CW_NS_CMN(br_get_block_size)
-#define br_add_file _CW_NS_CMN(br_add_file)
-#define br_rm_file _CW_NS_CMN(br_rm_file)
-#define br_block_create _CW_NS_CMN(br_block_create)
-#define br_block_destroy _CW_NS_CMN(br_block_destroy)
-#define br_block_slock _CW_NS_CMN(br_block_slock)
-#define br_block_tlock _CW_NS_CMN(br_block_tlock)
+#define br_new _CW_NS_ANY(br_new)
+#define br_delete _CW_NS_ANY(br_delete)
+#define br_is_open _CW_NS_ANY(br_is_open)
+#define br_open _CW_NS_ANY(br_open)
+#define br_close _CW_NS_ANY(br_close)
+#define br_get_block_size _CW_NS_ANY(br_get_block_size)
+#define br_add_file _CW_NS_ANY(br_add_file)
+#define br_rm_file _CW_NS_ANY(br_rm_file)
+#define br_block_create _CW_NS_ANY(br_block_create)
+#define br_block_destroy _CW_NS_ANY(br_block_destroy)
+#define br_block_slock _CW_NS_ANY(br_block_slock)
+#define br_block_tlock _CW_NS_ANY(br_block_tlock)
 
 /* Function prototypes. */
 cw_br_t * br_new(cw_br_t * a_br_o);

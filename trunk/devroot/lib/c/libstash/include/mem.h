@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -22,12 +22,12 @@
 
 typedef struct cw_mem_s cw_mem_t;
 
-#define mem_new _CW_NS_CMN(mem_new)
-#define mem_delete _CW_NS_CMN(mem_delete)
-#define mem_malloc _CW_NS_CMN(mem_malloc)
-#define mem_calloc _CW_NS_CMN(mem_calloc)
-#define mem_realloc _CW_NS_CMN(mem_realloc)
-#define mem_free _CW_NS_CMN(mem_free)
+#define mem_new _CW_NS_ANY(mem_new)
+#define mem_delete _CW_NS_ANY(mem_delete)
+#define mem_malloc _CW_NS_ANY(mem_malloc)
+#define mem_calloc _CW_NS_ANY(mem_calloc)
+#define mem_realloc _CW_NS_ANY(mem_realloc)
+#define mem_free _CW_NS_ANY(mem_free)
 
 cw_mem_t * mem_new();
 void mem_delete(cw_mem_t * a_mem_o);

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 127 $
- * $Date: 1998-07-02 18:31:00 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -20,13 +20,13 @@
 #ifndef _OH_PRIV_H_
 #define _OH_PRIV_H_
 
-#define oh_p_grow _CW_NS_CMN(oh_p_grow)
-#define oh_p_shrink _CW_NS_CMN(oh_p_shrink)
-#define oh_p_h1 _CW_NS_CMN(oh_p_h1)
-#define oh_p_insert _CW_NS_CMN(oh_p_insert)
-#define oh_p_search _CW_NS_CMN(oh_p_search)
-#define oh_p_rehash _CW_NS_CMN(oh_p_rehash)
-#define oh_p_slot_shuffle _CW_NS_CMN(oh_p_slot_shuffle)
+#define oh_p_grow _CW_NS_ANY(oh_p_grow)
+#define oh_p_shrink _CW_NS_ANY(oh_p_shrink)
+#define oh_p_h1 _CW_NS_ANY(oh_p_h1)
+#define oh_p_insert _CW_NS_ANY(oh_p_insert)
+#define oh_p_search _CW_NS_ANY(oh_p_search)
+#define oh_p_rehash _CW_NS_ANY(oh_p_rehash)
+#define oh_p_slot_shuffle _CW_NS_ANY(oh_p_slot_shuffle)
 
 /* 2^(_OH_BASE_POWER) is the base table size used for calculations. */
 #define _OH_BASE_POWER 8;

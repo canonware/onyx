@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 156 $
+ * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -24,8 +24,8 @@
 /* These are globals so that we don't have to have multiple copies of them,
  * even if there are multiple dbg instances.  We mangle the names to keep
  * them from interfering with other code. */
-#define dbg_raw_tbl _CW_NS_CMN(dbg_raw_tbl)
-#define dbg_raw_on _CW_NS_CMN(dbg_raw_on)
+#define dbg_raw_tbl _CW_NS_ANY(dbg_raw_tbl)
+#define dbg_raw_on _CW_NS_ANY(dbg_raw_on)
 
 /* Array used to construct the debug table.  Order *IS* important.  These
  * should be in the same order as the externally visible *_R_* macros for
@@ -58,8 +58,8 @@ cw_sint32_t dbg_raw_on[] =
   -1
 };
 
-#define dbg_build_tbl _CW_NS_CMN(dbg_build_tbl)
-#define dbg_recalc_fpmatch _CW_NS_CMN(dbg_recalc_fpmatch)
+#define dbg_build_tbl _CW_NS_ANY(dbg_build_tbl)
+#define dbg_recalc_fpmatch _CW_NS_ANY(dbg_recalc_fpmatch)
 
 void dbg_build_tbl(cw_dbg_t * a_dbg_o);
 void dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o);
