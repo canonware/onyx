@@ -183,10 +183,14 @@ void		stilt_delete(cw_stilt_t *a_stilt);
 
 #define		stilt_state(a_stilt) (a_stilt)->state
 #define		stilt_deferred(a_stilt) ((a_stilt)->defer_count ? TRUE : FALSE)
+void		stilt_reset(cw_stilt_t *a_stilt);
+void		stilt_undefer(cw_stilt_t *a_stilt);
 void		stilt_loop(cw_stilt_t *a_stilt);
 void		stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 void		stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts);
+cw_uint32_t	stilt_token(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const
+    cw_uint8_t *a_str, cw_uint32_t a_len);
 void		stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 void		stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error);

@@ -15,38 +15,38 @@
 #include <errno.h>
 #include <limits.h>
 
-static cw_stiln_t cw_g_stilte_stiln[] = {
-	0,
-	STILN_dictstackoverflow,
-	STILN_dictstackunderflow,
-	STILN_execstackoverflow,
-	STILN_interrupt,
-	STILN_invalidaccess,
-	STILN_invalidcontext,
-	STILN_invalidexit,
-	STILN_invalidfileaccess,
-	STILN_ioerror,
-	STILN_limitcheck,
-	STILN_rangecheck,
-	STILN_stackoverflow,
-	STILN_stackunderflow,
-	STILN_syntaxerror,
-	STILN_timeout,
-	STILN_typecheck,
-	STILN_undefined,
-	STILN_undefinedfilename,
-	STILN_undefinedresource,
-	STILN_undefinedresult,
-	STILN_unmatchedmark,
-	STILN_unregistered,
-	STILN_vmerror
-};
-
 cw_stiln_t
 stilte_stiln(cw_stilte_t a_stilte)
 {
+	static const cw_stiln_t stilte_stiln[] = {
+		0,
+		STILN_dictstackoverflow,
+		STILN_dictstackunderflow,
+		STILN_execstackoverflow,
+		STILN_interrupt,
+		STILN_invalidaccess,
+		STILN_invalidcontext,
+		STILN_invalidexit,
+		STILN_invalidfileaccess,
+		STILN_ioerror,
+		STILN_limitcheck,
+		STILN_rangecheck,
+		STILN_stackoverflow,
+		STILN_stackunderflow,
+		STILN_syntaxerror,
+		STILN_timeout,
+		STILN_typecheck,
+		STILN_undefined,
+		STILN_undefinedfilename,
+		STILN_undefinedresource,
+		STILN_undefinedresult,
+		STILN_unmatchedmark,
+		STILN_unregistered,
+		STILN_vmerror
+	};
+
 	_cw_assert(a_stilte > 0 && a_stilte <= STILTE_LAST);
-	return cw_g_stilte_stiln[a_stilte];
+	return stilte_stiln[a_stilte];
 }
 
 /*  #define	_CW_STILT_SCANNER_DEBUG */
@@ -103,10 +103,9 @@ static cw_sint32_t cw_g_b64_codes[] = {
 };
 #define	stilt_p_b64b(a) cw_g_b64_codes[(a) - 43]
 	
-static void		stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
-    const cw_uint8_t *a_str, cw_uint32_t a_len);
+static cw_uint32_t	stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
+    cw_uint32_t a_token, const cw_uint8_t *a_str, cw_uint32_t a_len);
 static void		stilt_p_tok_str_expand(cw_stilt_t *a_stilt);
-static void		stilt_p_reset(cw_stilt_t *a_stilt);
 #ifdef _CW_STILT_SCANNER_DEBUG
 static void		stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts, cw_uint32_t a_length, const cw_uint8_t *a_note);
@@ -119,6 +118,7 @@ static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
 static void		*stilt_p_entry(void *a_arg);
 static void		stilt_p_special_accept(cw_stilt_t *a_stilt, const
     cw_uint8_t *a_token, cw_uint32_t a_len);
+static void		stilt_p_reset(cw_stilt_t *a_stilt);
 static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts);
@@ -361,6 +361,13 @@ stilt_delete(cw_stilt_t *a_stilt)
 	else
 		memset(a_stilt, 0x5a, sizeof(cw_stilt_t));
 #endif
+}
+
+void
+stilt_reset(cw_stilt_t *a_stilt)
+{
+	a_stilt->defer_count = 0;
+	stilt_p_reset(a_stilt);
 }
 
 void
@@ -720,18 +727,28 @@ stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
-	stilt_p_feed(a_stilt, a_stilts, a_str, a_len);
+	stilt_p_feed(a_stilt, a_stilts, 0, a_str, a_len);
 }
 
 void
 stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 {
-	cw_uint8_t	str[2] = "\n";
+	static const cw_uint8_t	str[] = "\n";
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
-	stilt_p_feed(a_stilt, a_stilts, str, sizeof(str) - 1);
+	stilt_p_feed(a_stilt, a_stilts, 0, str, sizeof(str) - 1);
+}
+
+cw_uint32_t
+stilt_token(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t *a_str,
+    cw_uint32_t a_len)
+{
+	_cw_check_ptr(a_stilt);
+	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	return stilt_p_feed(a_stilt, a_stilts, 1, a_str, a_len);
 }
 
 void
@@ -760,9 +777,14 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	cw_stilo_t	*stilo, *errordict, *key, *handler;
 	cw_stiln_t	stiln;
 	cw_bool_t	ostack_push = TRUE;
+	cw_uint32_t	defer_count;
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	/* Shut off deferral temporarily. */
+	defer_count = a_stilt->defer_count;
+	a_stilt->defer_count = 0;
 
 	/*
 	 * Get errordict.  We can't throw an undefined error here because it
@@ -815,6 +837,9 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 
 	/* Execute the handler. */
 	stilt_loop(a_stilt);
+
+	/* Turn deferral back on. */
+	a_stilt->defer_count = defer_count;
 }
 
 cw_bool_t
@@ -845,13 +870,19 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	return retval;
 }
 
-static void
-stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
-    *a_str, cw_uint32_t a_len)
+static cw_uint32_t
+stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
+    const cw_uint8_t *a_str, cw_uint32_t a_len)
 {
-	cw_uint32_t	i;
+	cw_uint32_t	retval, i;
 	cw_uint8_t	c;
 	cw_stilo_t	*stilo;
+	cw_bool_t	token;
+
+	if (a_token) {
+		token = FALSE;
+		a_stilt->defer_count++;
+	}
 
 	for (i = 0; i < a_len; i++, a_stilts->column++) {
 		c = a_str[i];
@@ -909,6 +940,25 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			START_CONTINUE:
 			_cw_assert(a_stilt->index == 0);
 
+			if (a_token) {
+				/*
+				 * token is TRUE if a token has been accepted.
+				 * We look for the situation where token is TRUE
+				 * and a_stilt->defer_count is only 1
+				 * (artificially raised).  If these conditions
+				 * are met, then we've managed to scan an entire
+				 * token, as defined by the token operator.
+				 */
+				if (token && a_stilt->defer_count == 1) {
+					/*
+					 * Return the offset of the next
+					 * character.
+					 */
+					retval = i;
+					goto RETURN;
+				}
+			}
+
 			/* Record where this token starts. */
 			a_stilt->tok_line = a_stilts->line;
 			a_stilt->tok_column = a_stilts->column;
@@ -922,6 +972,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 				break;
 			case '`':
 				a_stilt->state = STILTTS_LIT_STRING;
@@ -935,11 +987,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '[':
 				/* An operator, not the same as '{'. */
 				stilt_p_token_print(a_stilt, a_stilts, 0, "[");
+				token = TRUE;
 				stilt_p_special_accept(a_stilt, "[", 1);
 				break;
 			case ']':
 				/* An operator, not the same as '}'. */
 				stilt_p_token_print(a_stilt, a_stilts, 0, "]");
+				token = TRUE;
 				stilt_p_special_accept(a_stilt, "]", 1);
 				break;
 			case '{':
@@ -954,7 +1008,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			case '}':
 				stilt_p_token_print(a_stilt, a_stilts, 0, "}");
-				if (a_stilt->defer_count > 0) {
+				if (a_stilt->defer_count > a_token) {
+					token = TRUE;
 					a_stilt->defer_count--;
 					stilt_p_procedure_accept(a_stilt);
 				} else {
@@ -963,6 +1018,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					stilt_p_reset(a_stilt);
 					stilt_error(a_stilt,
 					    STILTE_SYNTAXERROR);
+					if (a_token)
+						goto RETURN;
 				}
 				break;
 			case '/':
@@ -1007,12 +1064,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '<':
 				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, "<<");
+				token = TRUE;
 				stilt_p_special_accept(a_stilt, "<<", 2);
 				break;
 			case '>':
 				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "empty hex string");
+				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
 				stilo_string_new(stilo, a_stilt, 0);
 				break;
@@ -1037,6 +1096,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_GT_CONT:
@@ -1046,12 +1107,15 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '>':
 				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, ">>");
+				token = TRUE;
 				stilt_p_special_accept(a_stilt, ">>", 2);
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_SLASH_CONT:
@@ -1068,6 +1132,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 				break;
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 			case '(': case ')': case '`': case '\'': case '<':
@@ -1076,6 +1142,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 				break;
 			default:
 				a_stilt->state = STILTTS_NAME;
@@ -1189,6 +1257,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 						stilt_error(a_stilt,
 						    STILTE_RANGECHECK);
 					} else {
+						token = TRUE;
 						stilo =
 						    stils_push(&a_stilt->ostack);
 						stilo_integer_new(stilo, val);
@@ -1198,6 +1267,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					/* No number specified, so a name. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "name 1");
+					token = TRUE;
 					a_stilt->m.m.action = ACTION_EXECUTE;
 					stilt_p_name_accept(a_stilt, a_stilts);
 				}
@@ -1280,6 +1350,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 						stilt_error(a_stilt,
 						    STILTE_RANGECHECK);
 					} else {
+						token = TRUE;
 						stilo =
 						    stils_push(&a_stilt->ostack);
 						stilo_integer_new(stilo, val);
@@ -1289,6 +1360,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					/* No number specified, so a name. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "name 2");
+					token = TRUE;
 					a_stilt->m.m.action = ACTION_EXECUTE;
 					stilt_p_name_accept(a_stilt, a_stilts);
 				}
@@ -1321,6 +1393,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				if (a_stilt->m.s.p_depth == 0) {
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "string");
+					token = TRUE;
 					stilo = stils_push(&a_stilt->ostack);
 					stilo_string_new(stilo, a_stilt,
 					    a_stilt->index);
@@ -1431,6 +1504,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_ASCII_STRING_HEX_FINISH:
@@ -1478,6 +1553,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_LIT_STRING:
@@ -1527,6 +1604,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Accept literal string. */
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "literal string");
+				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
 				stilo_string_new(stilo, a_stilt,
 				    a_stilt->index);
@@ -1550,6 +1628,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "hex string");
+				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
 				stilo_string_new(stilo, a_stilt,
 				    (a_stilt->index + 1) >> 1);
@@ -1612,6 +1691,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_BASE64_STRING:
@@ -1657,6 +1738,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					stilt_p_reset(a_stilt);
 					stilt_error(a_stilt,
 					    STILTE_SYNTAXERROR);
+					if (a_token)
+						goto RETURN;
 					break;
 				case 2:
 					a_stilt->m.b.nodd = 1;
@@ -1676,6 +1759,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_BASE64_STRING_PAD:
@@ -1694,6 +1779,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_BASE64_STRING_TILDE:
@@ -1712,6 +1799,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_BASE64_STRING_FINISH:
@@ -1723,6 +1812,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "base 64 string");
+				token = TRUE;
 
 				ngroups = a_stilt->index >> 2;
 				stilo = stils_push(&a_stilt->ostack);
@@ -1787,6 +1877,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				stilt_p_reset(a_stilt);
 				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				if (a_token)
+					goto RETURN;
 			}
 			break;
 		case STILTTS_NAME: {
@@ -1812,12 +1904,15 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				if (a_stilt->index > 0) {
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "name 5");
+					token = TRUE;
 					stilt_p_name_accept(a_stilt, a_stilts);
 				} else {
 					stilt_p_syntax_error_print(a_stilt, c);
 					stilt_p_reset(a_stilt);
 					stilt_error(a_stilt,
 					    STILTE_SYNTAXERROR);
+					if (a_token)
+						goto RETURN;
 				}
 				if (restart)
 					goto RESTART;
@@ -1830,9 +1925,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 		}
 		default:
 			_cw_not_reached();
-			break;
 		}
 	}
+
+	retval = i;
+	RETURN:
+	if (a_token)
+		a_stilt->defer_count--;
+	return retval;
 }
 
 #ifdef _CW_STILT_SCANNER_DEBUG
@@ -1888,17 +1988,6 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 	}
 }
 
-static void
-stilt_p_reset(cw_stilt_t *a_stilt)
-{
-	a_stilt->state = STILTTS_START;
-	if (a_stilt->index > _CW_STILT_BUFFER_SIZE) {
-		stilt_free(a_stilt, a_stilt->tok_str);
-		a_stilt->tok_str = a_stilt->buffer;
-	}
-	a_stilt->index = 0;
-}
-
 static void *
 stilt_p_entry(void *a_arg)
 {
@@ -1913,6 +2002,17 @@ stilt_p_entry(void *a_arg)
 	thd_delete(&arg->thd);
 	_cw_free(arg);
 	return NULL;
+}
+
+static void
+stilt_p_reset(cw_stilt_t *a_stilt)
+{
+	a_stilt->state = STILTTS_START;
+	if (a_stilt->index > _CW_STILT_BUFFER_SIZE) {
+		stilt_free(a_stilt, a_stilt->tok_str);
+		a_stilt->tok_str = a_stilt->buffer;
+	}
+	a_stilt->index = 0;
 }
 
 static void

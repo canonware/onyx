@@ -592,7 +592,6 @@ stilo_global_get(cw_stilo_t *a_stilo)
 	case STILOT_FILE:
 	case STILOT_HOOK:
 	case STILOT_LOCK:
-	case STILOT_NAME:	/* XXX Simple type.  Remove this? */
 	case STILOT_STRING:
 		retval = a_stilo->o.stiloe->global;
 		break;
