@@ -6,7 +6,10 @@
 
 	  Add the a_argc, a_argv, and a_envp arguments to libonyx_init().
 
-	* lib/libonyx/include/libonyx/nx.h : Remove nx_envdict_get().
+	* lib/libonyx/include/libonyx/nx.h : Add the a_thread_start argument to
+	  nx_new().
+
+	  Remove nx_envdict_get().
 
 	  Remove the a_argc, a_argv, and a_envp arguments from nx_new().
 

@@ -35,11 +35,15 @@ struct cw_nx_s
 
     /* Thread initialization hook. */
     cw_op_t *thread_init;
+
+    /* Thread start hook. */
+    cw_thread_start_t *thread_start;
 };
 
 /* nx. */
 cw_nx_t *
-nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init);
+nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init,
+       cw_thread_start_t *a_thread_start);
 
 void
 nx_delete(cw_nx_t *a_nx);

@@ -25,7 +25,7 @@ void
 nx_p_nxcode(cw_nx_t *a_nx);
 
 cw_nx_t *
-nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init)
+nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 {
     cw_nx_t *retval;
     volatile cw_uint32_t try_stage = 0;

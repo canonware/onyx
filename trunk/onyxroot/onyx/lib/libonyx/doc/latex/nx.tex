@@ -24,10 +24,33 @@ objects are deallocated.
 
 \subsubsection{API}
 \begin{capi}
+\label{cw_thread_start_t}
+\index{cw_thread_start_t@\cfunc{cw\_thread\_start\_t}{}}
+\citem{\cfunc[void]{cw\_thread\_start\_t}{cw\_nxo\_t *a\_thread, cw\_op\_t
+*a\_start}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_start: ]
+			Pointer to a start function.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application dependent.
+	\item[Description: ]
+		Type definition for a callback function that is called by
+		\cfunc{nxo\_thread\_start}{}.  This function must call
+		\cvar{a\_start}, which is the actual start function.
+
+		The main use for a start callback function is to create a top
+		level \classname{xep} exception handling context for each
+		thread.
+	\end{capilist}
 \label{nx_new}
 \index{nx_new@\cfunc{nx\_new}{}}
 \citem{\cfunc[cw\_nx\_t *]{nx\_new}{cw\_nx\_t *a\_nx, cw\_op\_t
-*a\_thread\_init}}
+*a\_thread\_init, cw\_thread\_start\_t *a\_thread\_start}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -36,6 +59,10 @@ objects are deallocated.
 		\item[a\_thread\_init: ]
 			Pointer to an initialization function to be called
 			during thread initialization, or NULL.
+		\item[a\_thread\_start: ]
+			Pointer to a thread start callback function to be called
+			by \cfunc{nxo\_thread\_start}{}, or NULL.  See the
+			\ctype{cw\_thread\_start\_t} documentation for details.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]

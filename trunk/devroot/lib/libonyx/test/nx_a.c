@@ -22,7 +22,7 @@ thread_entry_func(void *a_arg)
     cw_nxo_t thread;
     cw_uint32_t i;
 
-    cw_assert(nx_new(&nx, NULL) == &nx);
+    cw_assert(nx_new(&nx, NULL, NULL) == &nx);
     nxo_thread_new(&thread, &nx);
 
     for (i = 0; i < NITERATIONS; i++)

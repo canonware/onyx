@@ -30,6 +30,9 @@ nx_l_name_hash_get(cw_nx_t *a_nx);
 
 cw_op_t *
 nx_l_thread_init(cw_nx_t *a_nx);
+
+cw_thread_start_t *
+nx_l_thread_start(cw_nx_t *a_nx);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NX_C_))
@@ -135,5 +138,14 @@ nx_l_thread_init(cw_nx_t *a_nx)
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
     return a_nx->thread_init;
+}
+
+CW_INLINE cw_thread_start_t *
+nx_l_thread_start(cw_nx_t *a_nx)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    return a_nx->thread_start;
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NX_C_)) */

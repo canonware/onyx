@@ -51,6 +51,8 @@
 void
 nxo_p_thread_nxcode(cw_nxo_t *a_thread);
 
+static void
+nxo_p_thread_start(cw_nxo_t *a_nxo);
 #ifdef CW_THREADS
 static void *
 nxo_p_thread_entry(void *a_arg);
@@ -309,8 +311,9 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     }
 }
 
-void
-nxo_thread_start(cw_nxo_t *a_nxo)
+/* Called by thread start hook (if set). */
+static void
+nxo_p_thread_start(cw_nxo_t *a_nxo)
 {
     cw_nxoe_thread_t *thread;
     cw_nxo_t *start;
@@ -327,6 +330,33 @@ nxo_thread_start(cw_nxo_t *a_nxo)
     nxo_attr_set(start, NXOA_EXECUTABLE);
 
     nxo_thread_loop(a_nxo);
+}
+
+void
+nxo_thread_start(cw_nxo_t *a_nxo)
+{
+    cw_nxoe_thread_t *thread;
+    cw_nxo_t *start;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    if (nx_l_thread_start(thread->nx) != NULL)
+    {
+	nx_l_thread_start(thread->nx)(&thread->self, nxo_p_thread_start);
+    }
+    else
+    {
+	start = nxo_stack_push(&thread->estack);
+	nxo_operator_new(start, systemdict_start, NXN_start);
+	nxo_attr_set(start, NXOA_EXECUTABLE);
+
+	nxo_thread_loop(a_nxo);
+    }
 }
 
 void

@@ -74,7 +74,7 @@ main(int argc, char **argv, char **envp)
     libonyx_init(argc, argv, envp);
     fprintf(stderr, "Test begin\n");
 
-    cw_assert(nx_new(&nx, NULL) == &nx);
+    cw_assert(nx_new(&nx, NULL, NULL) == &nx);
     nxo_thread_new(&thread, &nx);
 
     /* Define anon_hook and mark_hook. */

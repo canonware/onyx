@@ -52,6 +52,9 @@ struct nx_write_arg_s
 
 /* Function prototypes. */
 void
+thread_start(cw_nxo_t *a_thread, cw_op_t *a_op);
+
+void
 usage(void);
 
 int
@@ -258,7 +261,7 @@ main(int argc, char **argv, char **envp)
 	    cw_free(opt_init);
 	}
     }
-    xep_catch (CW_ONYXX_OOM)
+    xep_catch(CW_ONYXX_OOM)
     {
 	/* Out of memory exception. */
 	fprintf(stderr,
@@ -303,6 +306,35 @@ usage(void)
 	   );
 }
 
+/* Thread start hook function. */
+void
+thread_start(cw_nxo_t *a_thread, cw_op_t *a_op)
+{
+    xep_begin();
+    xep_try
+    {
+	/* Call back. */
+	a_op(a_thread);
+    }
+    xep_catch(CW_ONYXX_OOM)
+    {
+	/* Out of memory exception. */
+	fprintf(stderr,
+		"onyx: Unhandled exception CW_ONYXX_OOM thrown at %s:%u\n",
+		xep_filename(), xep_line_num());
+	_exit(1);
+    }
+    xep_acatch
+    {
+	/* Other exception.  This indicates a bug somewhere, since exceptions
+	 * should not propagate to the top level. */
+	fprintf(stderr, "onyx: Unhandled exception %u thrown at %s:%u\n",
+		xep_value(), xep_filename(), xep_line_num());
+	_exit(1);
+    }
+    xep_end();
+}
+
 int
 interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
 		const cw_uint8_t *a_start)
@@ -315,7 +347,7 @@ interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
     char *init;
 
     /* Initialize the interpreter. */
-    nx_new(&nx, NULL);
+    nx_new(&nx, NULL, thread_start);
 
     /* Make sure that stdin is always synthetic, so that the prompt will be
      * printed. */
@@ -417,7 +449,7 @@ batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
     cw_nxo_t thread;
     cw_nxo_t *nxo;
 
-    nx_new(&nx, NULL);
+    nx_new(&nx, NULL, thread_start);
 #ifndef CW_POSIX_FILE
     stdin_init(&thread, &nx, FALSE);
     stdout_init(&nx);

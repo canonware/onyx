@@ -16,6 +16,7 @@ typedef struct cw_nxoe_s cw_nxoe_t;
 /* Declared here to avoid circular header dependencies. */
 typedef struct cw_nx_s cw_nx_t;
 typedef void cw_op_t(cw_nxo_t *);
+typedef void cw_thread_start_t(cw_nxo_t *, cw_op_t *);
 
 typedef enum
 {
