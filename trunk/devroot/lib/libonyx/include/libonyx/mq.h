@@ -15,7 +15,7 @@ typedef struct cw_mq_s cw_mq_t;
 
 struct cw_mq_s
 {
-    cw_mem_t *mem;
+    cw_mema_t *mema;
 #ifdef CW_DBG
     cw_uint32_t magic;
 #endif
@@ -41,7 +41,7 @@ struct cw_mq_s
 };
 
 void
-mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size);
+mq_new(cw_mq_t *a_mq, cw_mema_t *a_mema, cw_uint32_t a_msg_size);
 
 void
 mq_delete(cw_mq_t *a_mq);

@@ -29,11 +29,11 @@
 #endif
 
 void
-mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
+mq_new(cw_mq_t *a_mq, cw_mema_t *a_mema, cw_uint32_t a_msg_size)
 {
     cw_check_ptr(a_mq);
 
-    a_mq->mem = a_mem;
+    a_mq->mema = a_mema;
     a_mq->msg_count = 0;
 
     switch (a_msg_size) {
@@ -67,9 +67,10 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
     a_mq->msgs_beg = 0;
     a_mq->msgs_end = 0;
 
-    a_mq->msgs.x
-	= (cw_uint32_t *) mem_malloc(a_mem,
-				     a_mq->msgs_vec_count * a_mq->msg_size);
+    a_mq->msgs.x = (cw_uint32_t *) cw_opaque_alloc(mema_alloc_get(a_mema),
+						   mema_arg_get(a_mema),
+						   a_mq->msgs_vec_count
+						   * a_mq->msg_size);
 
     mtx_new(&a_mq->lock);
     cnd_new(&a_mq->cond);
@@ -91,7 +92,10 @@ mq_delete(cw_mq_t *a_mq)
     mtx_delete(&a_mq->lock);
     cnd_delete(&a_mq->cond);
 
-    mem_free(a_mq->mem, a_mq->msgs.x);
+    cw_opaque_dealloc(mema_dealloc_get(a_mq->mema),
+		      mema_arg_get(a_mq->mema),
+		      a_mq->msgs.x,
+		      a_mq->msgs_vec_count * a_mq->msg_size);
 
 #ifdef CW_DBG
     memset(a_mq, 0x5a, sizeof(cw_mq_t));
@@ -391,9 +395,10 @@ mq_put(cw_mq_t *a_mq, ...)
 	    cw_uint32_t i, offset;
 			
 	    /* Array overflow.  Double the array and copy the messages. */
-	    t_msgs.x = (void *) mem_malloc(a_mq->mem,
-					   a_mq->msgs_vec_count * 2 *
-					   a_mq->msg_size);
+	    t_msgs.x = (void *) cw_opaque_alloc(mema_alloc_get(a_mq->mema),
+						mema_arg_get(a_mq->mema),
+						a_mq->msgs_vec_count * 2
+						* a_mq->msg_size);
 
 	    switch (a_mq->msg_size)
 	    {
@@ -442,7 +447,10 @@ mq_put(cw_mq_t *a_mq, ...)
 		    cw_not_reached();
 		}
 	    }
-	    mem_free(a_mq->mem, a_mq->msgs.x);
+	    cw_opaque_dealloc(mema_dealloc_get(a_mq->mema),
+			      mema_arg_get(a_mq->mema),
+			      a_mq->msgs.x,
+			      a_mq->msgs_vec_count * a_mq->msg_size);
 	    a_mq->msgs.x = t_msgs.x;
 	    a_mq->msgs_beg = 0;
 	    a_mq->msgs_end = a_mq->msg_count;

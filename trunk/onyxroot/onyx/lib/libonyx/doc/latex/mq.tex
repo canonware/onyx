@@ -25,15 +25,15 @@ transition capability.
 \begin{capi}
 \label{mq_new}
 \index{mq_new@\cfunc{mq\_new}{}}
-\citem{\cfunc[void]{mq\_new}{cw\_mq\_t *a\_mq, cw\_mem\_t *a\_mem,
+\citem{\cfunc[void]{mq\_new}{cw\_mq\_t *a\_mq, cw\_mema\_t *a\_mema,
 cw\_uint32\_t a\_msg\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mq: ]
 			Pointer to space for a \classname{mq}.
-		\item[a\_mem: ]
-			Pointer to the allocator to use internally.
+		\item[a\_mema: ]
+			Pointer to a memory allocator to use internally.
 		\item[a\_msg\_size: ]
 			Size (in bytes) of messages used for all subsequent
 			calls to \cfunc{mq\_*get}{} and \cfunc{mq\_put}{}.
