@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 92 $
+ * $Date: 1998-06-26 01:34:11 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -26,11 +26,10 @@
 #define dbg_raw_tbl _CW_NS_CMN(dbg_raw_tbl)
 #define dbg_raw_on _CW_NS_CMN(dbg_raw_on)
 
-/* Array used to construct the debug table.  Make sure to add *_T_* here.
- * Order *IS* important.  These should be in the same order as the
- * externally visible *_R_* macros for which they are named.  Also, make
- * sure that all entries are terminated by a -1.  The extra -1 at the end
- * is also important. */
+/* Array used to construct the debug table.  Order *IS* important.  These
+ * should be in the same order as the externally visible *_R_* macros for
+ * which they are named.  Also, make sure that all entries are terminated
+ * by a -1.  The extra -1 at the end is also important. */
 cw_sint32_t dbg_raw_tbl[] =
 {
   _CW_DBG_C_DBG, -1, /* CW_DBG_R_DBG */
@@ -45,6 +44,7 @@ cw_sint32_t dbg_raw_tbl[] =
   _CW_DBG_C_LIST_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_LIST_FUNC */
   _CW_DBG_C_BR_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BR_FUNC */
   _CW_DBG_C_BRBLK_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BRBLK_FUNC */
+  _CW_DBG_C_BRBS_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BRBS_FUNC */
   /* <ADD> */
   -1
 };

@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 86 $
- * Last modified: $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * Current revision: $Revision: 92 $
+ * Last modified: $Date: 1998-06-26 01:34:11 -0700 (Fri, 26 Jun 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -74,6 +74,9 @@
 #    ifndef _BRBLK_H_
 #      include <brblk.h>
 #    endif
+#    ifndef _BRBS_H_
+#      include <brbs.h>
+#    endif
 #    include <br.h>
 #    define _BR_H_
 #  endif
@@ -83,6 +86,16 @@
 #  ifndef _BRBLK_H_
 #    include <brblk.h>
 #    define _BRBLK_H_
+#  endif
+#endif
+
+#if (defined(_INC_BRBS_H_))
+#  ifndef _BRBS_H_
+#    ifndef _BRBLK_H_
+#      include <brblk.h>
+#    endif
+#    include <brbs.h>
+#    define _BRBS_H_
 #  endif
 #endif
 

@@ -8,8 +8,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 86 $
-# Last modified: $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+# Current revision: $Revision: 92 $
+# Last modified: $Date: 1998-06-26 01:34:11 -0700 (Fri, 26 Jun 1998) $
 #
 # Description: Sample Makefile stub for a subdirectory.
 #              
@@ -19,7 +19,8 @@
 CURRDIR := lib/common/include
 
 $(CURRDIR)_INCS := common_incs.h bhp.h bhp_priv.h br.h br_priv.h \
-	brblk.h brblk_priv.h buf.h buf_priv.h dbg.h dbg_priv.h \
+	brblk.h brblk_priv.h brbs.h brbs_priv.h buf.h buf_priv.h \
+	dbg.h dbg_priv.h \
 	depg.h depg_priv.h depgn.h depgn_priv.h glob.h \
 	jt.h jt_priv.h list.h list_priv.h locks.h locks_priv.h \
 	log.h log_priv.h mem.h mem_priv.h oh.h oh_priv.h res.h res_priv.h \
