@@ -46,7 +46,7 @@
  *
  ******************************************************************************/
 
-#include "slate.h"
+#include "../include/slate.h"
 
 /* Prototypes. */
 static cw_uint64_t buf_p_pos_b2a(cw_buf_t *a_buf, cw_uint64_t a_bpos);

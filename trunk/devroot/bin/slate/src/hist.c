@@ -180,8 +180,8 @@
  *
  ******************************************************************************/
 
-#include "slate.h"
-#include "buf_l.h"
+#include "../include/slate.h"
+#include "../include/buf_l.h"
 
 /*
  * The upper 3 bits are used to denote the record type, and the lower 5 bits are

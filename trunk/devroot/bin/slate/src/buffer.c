@@ -12,7 +12,7 @@
  *
  ******************************************************************************/
 
-#include "slate.h"
+#include "../include/slate.h"
 
 struct cw_buffer {
 	cw_uint32_t	iter;	/* For GC iteration. */

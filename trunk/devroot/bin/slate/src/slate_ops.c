@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include "slate.h"
+#include "../include/slate.h"
 
 void
 slate_ops(cw_nxo_t *a_thread, const struct cw_slate_entry *a_entries,
@@ -41,10 +41,6 @@ slate_ops(cw_nxo_t *a_thread, const struct cw_slate_entry *a_entries,
 void
 slate_ops_init(cw_nxo_t *a_thread)
 {
-	slate_funnel_init(a_thread);
 	slate_buffer_init(a_thread);
-	slate_display_init(a_thread);
-	slate_frame_init(a_thread);
-	slate_window_init(a_thread);
 }
 
