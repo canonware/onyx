@@ -67,12 +67,13 @@ ONYX_OTESTS =
 #endif
 #if @enable_posix@
 
-              argv_a.nx.in argv_b.nx.in nsleep_a.nx.in nsleep_b.nx.in
-              nsleep_c.nx.in nsleep_d.nx.in rand_a.nx.in setenv_a.nx.in
-              setenv_b.nx.in setenv_c.nx.in srand_a.nx.in srand_b.nx.in
-              srand_c.nx.in srand_d.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
-              truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
-              truncate_d.nx.in truncate_e.nx.in
+              argv_a.nx.in argv_b.nx.in dirforeach_a.nx.in dirforeach_b.nx.in
+              dirforeach_c.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
+              nsleep_d.nx.in rand_a.nx.in setenv_a.nx.in setenv_b.nx.in
+              setenv_c.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
+              srand_d.nx.in unsetenv_a.nx.in unsetenv_b.nx.in truncate_a.nx.in
+              truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
+              truncate_e.nx.in
 
 #endif
 

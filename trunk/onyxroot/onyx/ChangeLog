@@ -1,5 +1,9 @@
 2002-03-30 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/systemdict.c:systemdict_dirforeach() : Use strlen()
+          rather than the reclen field of struct dirent if there is no namlen
+          field.  (Reported by John Liles.)
+
 	* bin/onyx/src/onyx.c:batch_run() : Specify '+' as the first character
           of the options string to getopt() on systems that use GNU libc, since
           they will otherwise permute the arguments and leave unknown ones at
