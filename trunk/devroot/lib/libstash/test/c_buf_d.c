@@ -43,22 +43,6 @@ main()
   quads[2] = ((cw_uint64_t) 0x31323334 << 32) + 0x35363738;
   quads[3] = ((cw_uint64_t) 0x393a3b3c << 32) + 0x3d3e3f40;
 
-  out_put(cw_g_out,
-	  "longs[[0-3]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
-	  "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n",
-	  longs[0], longs[1], longs[2], longs[3]);
-  out_put(cw_g_out,
-	  "longs[[4-7]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
-	  "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n",
-	  longs[4], longs[5], longs[6], longs[7]);
-
-  out_put(cw_g_out,
-	  "quads[[0-1]: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
-	  quads[0], quads[1]);
-  out_put(cw_g_out,
-	  "quads[[2-3]: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
-	  quads[2], quads[3]);
-
   buf = buf_new(NULL);
   _cw_check_ptr(buf);
 
@@ -75,10 +59,19 @@ main()
   bufc_delete(bufc);
   
   out_put(cw_g_out,
+	  "longs[[0-3]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
+	  "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n",
+	  longs[0], longs[1], longs[2], longs[3]);
+  out_put(cw_g_out,
 	  "buf[[0-3]32: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
 	  "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n",
 	  buf_get_uint32(buf, 0), buf_get_uint32(buf, 4),
 	  buf_get_uint32(buf, 8), buf_get_uint32(buf, 12));
+
+  out_put(cw_g_out,
+	  "longs[[4-7]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
+	  "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n",
+	  longs[4], longs[5], longs[6], longs[7]);
   out_put(cw_g_out,
 	  "buf[[4-7]32: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
 	  "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n",
@@ -86,8 +79,15 @@ main()
 	  buf_get_uint32(buf, 24), buf_get_uint32(buf, 28));
 
   out_put(cw_g_out,
+	  "quads[[0-1]: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
+	  quads[0], quads[1]);
+  out_put(cw_g_out,
 	  "buf[[0-1]64: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
 	  buf_get_uint64(buf, 32), buf_get_uint64(buf, 40));
+
+  out_put(cw_g_out,
+	  "quads[[2-3]: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
+	  quads[2], quads[3]);
   out_put(cw_g_out,
 	  "buf[[2-3]64: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
 	  buf_get_uint64(buf, 48), buf_get_uint64(buf, 56));
