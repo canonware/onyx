@@ -678,76 +678,176 @@ a\_size, const char *a\_format,...}}: ]
 	\item[Description: ]
 		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{description}
-\label{out_}
-\index{\cfunc{out\_}{}}
-\item[{\cfunc[]{out\_}{}}: ]
+\label{out_put_sv}
+\index{\cfunc{out\_put\_sv}{}}
+\item[{\cfunc[cw\_sint32\_t]{out\_put\_sv}{cw\_out\_t *a\_out, char *a\_str,
+const char *a\_format, va\_list a\_p}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_str: ]
+			Pointer to an output string.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[*a\_str: ]
+			Formatted output.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
 		\end{description}
 	\item[Description: ]
+		Print formatted output.
 	\end{description}
-\label{out_}
-\index{\cfunc{out\_}{}}
-\item[{\cfunc[]{out\_}{}}: ]
+\label{out_put_sva}
+\index{\cfunc{out\_put\_sva}{}}
+\item[{\cfunc[cw\_sint32\_t]{out\_put\_sva}{cw\_out\_t *a\_out, char **r\_str,
+const char *a\_format, va\_list a\_p}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[r\_str: ]
+			Pointer to an output string pointer.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[**r\_str: ]
+			Formatted output.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
 		\end{description}
 	\item[Description: ]
+		Allocate space, then print formatted output to it.
 	\end{description}
-\label{out_}
-\index{\cfunc{out\_}{}}
-\item[{\cfunc[]{out\_}{}}: ]
+\label{out_put_svn}
+\index{\cfunc{out\_put\_svn}{}}
+\item[{\cfunc[cw\_sint32\_t]{out\_put\_svn}{cw\_out\_t *a\_out, char *a\_str,
+cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_str: ]
+			Pointer to an output string.
+		\item[a\_size: ]
+			Maximum number of characters to output.  If
+			\cvar{a\_size} is less than or equal to the number of
+			bytes that could be output, were there no limit, then no
+			'{\bs}0' string termination byte is written.  Therefore,
+			if the caller is depending on such string termination,
+			care should be taken to specify \cvar{a\_size} as one
+			less than the total string length, and to make sure that
+			if the string is completely filled with output, that the
+			last byte is set to '{\bs}0'.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item[*a\_str: ]
+			Formatted output.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
 		\end{description}
 	\item[Description: ]
+		Print at most \cvar{a\_size} bytes of formatted output.
 	\end{description}
-\label{out_}
-\index{\cfunc{out\_}{}}
-\item[{\cfunc[]{out\_}{}}: ]
+\label{spec_type_get}
+\index{\cfunc{spec\_type\_get}{}}
+\item[{\cfunc[cw\_sint32\_t]{spec\_type\_get}{const char *a\_spec, cw\_uint32\_t
+a\_spec\_len, const char **r\_val}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_spec: ]
+			Pointer to a specifier string.
+		\item[a\_spec\_len: ]
+			Length of \cvar{a\_spec}.
+		\item[r\_val: ]
+			Pointer to a string pointer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			Length of type value string.
+		\item[*r\_val: ]
+			Pointer to type value string.
 		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
-		\end{description}
+	\item[Exception(s): ] None.
 	\item[Description: ]
+		Return the length of the type value string, and set
+		\cvar{*r\_val} to point to it.
+	\end{description}
+\label{spec_val_get}
+\index{\cfunc{spec\_val\_get}{}}
+\item[{\cfunc[cw\_sint32\_t]{spec\_val\_get}{const char *a\_spec, cw\_uint32\_t
+a\_spec\_len, const char *a\_name, cw\_uint32\_t a\_name\_len, const
+cw\_uint8\_t **r\_val}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_spec: ]
+			Pointer to a specifier string.
+		\item[a\_spec\_len: ]
+			Length of \cvar{a\_spec}.
+		\item[a\_name: ]
+			Pointer to a NULL-terminated name.
+		\item[a\_name\_len: ]
+			Length of \cvar{a\_name}.
+		\item[r\_val: ]
+			Pointer to a string pointer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Length of value string.
+			\item[-1: ]
+				No such name.
+			\end{description}
+		\item[*r\_val: ]
+			Pointer to value string.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the length of the value string that corresponds to
+		\cvar{a\_spec}, and set \cvar{*r\_val} to point to it.
 	\end{description}
 \end{description}
