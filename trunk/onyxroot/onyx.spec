@@ -1,6 +1,6 @@
 Name:		onyx
 Summary:	An embeddable stack-based threaded interpreted language.
-Version:	5.1.0
+Version:	5.1.1
 Release:	1
 License:	BSD-like
 Group:		Development/Languages
