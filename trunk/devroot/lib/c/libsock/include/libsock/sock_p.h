@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -15,7 +14,7 @@
  ****************************************************************************/
 
 #ifdef _LIBSOCK_DBG
-#  define _LIBSOCK_SOCK_MAGIC 0x12348765
+#define _LIBSOCK_SOCK_MAGIC 0x12348765
 #endif
 
 /****************************************************************************
@@ -37,8 +36,7 @@
  * Set socket options for a_sock.
  *
  ****************************************************************************/
-static cw_bool_t
-sock_p_config_socket(cw_sock_t * a_sock, cw_bool_t a_init);
+static cw_bool_t sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init);
 
 /****************************************************************************
  *
@@ -58,5 +56,4 @@ sock_p_config_socket(cw_sock_t * a_sock, cw_bool_t a_init);
  * Disconnect a_sock.
  *
  ****************************************************************************/
-static cw_bool_t
-sock_p_disconnect(cw_sock_t * a_sock);
+static cw_bool_t sock_p_disconnect(cw_sock_t *a_sock);

@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -34,8 +33,7 @@ typedef struct cw_socks_s cw_socks_t;
  * Constructor.
  *
  ****************************************************************************/
-cw_socks_t *
-socks_new(void);
+cw_socks_t * socks_new(void);
 
 /****************************************************************************
  *
@@ -52,8 +50,7 @@ socks_new(void);
  * Destructor.
  *
  ****************************************************************************/
-void
-socks_delete(cw_socks_t * a_socks);
+void socks_delete(cw_socks_t *a_socks);
 
 /****************************************************************************
  *
@@ -83,8 +80,7 @@ socks_delete(cw_socks_t * a_socks);
  * before returning.
  *
  ****************************************************************************/
-cw_bool_t
-socks_listen(cw_socks_t * a_socks, cw_uint32_t a_mask, int * r_port);
+cw_bool_t socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port);
 
 /****************************************************************************
  *
@@ -112,6 +108,5 @@ socks_listen(cw_socks_t * a_socks, cw_uint32_t a_mask, int * r_port);
  * expires.
  *
  ****************************************************************************/
-cw_sock_t *
-socks_accept(cw_socks_t * a_socks, struct timespec * a_timeout,
-	     cw_sock_t * r_sock);
+cw_sock_t * socks_accept(cw_socks_t *a_socks, struct timespec * a_timeout,
+    cw_sock_t *r_sock);

@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -16,39 +15,38 @@
 
 typedef struct cw_sock_s cw_sock_t;
 
-struct cw_sock_s
-{
+struct cw_sock_s {
 #if (defined(_LIBSOCK_DBG) || defined(_LIBSOCK_DEBUG))
-  cw_uint32_t magic;
+	cw_uint32_t magic;
 #endif
-  cw_bool_t is_malloced;
+	cw_bool_t is_malloced;
 
-  cw_uint32_t os_inbuf_size;
-  cw_uint32_t os_outbuf_size;
-  cw_uint16_t port;
+	cw_uint32_t os_inbuf_size;
+	cw_uint32_t os_outbuf_size;
+	cw_uint16_t port;
 
-  cw_mtx_t state_lock;
-  int sockfd;
-  cw_bool_t is_connected;
-  cw_bool_t in_progress;
-  cw_bool_t error;
+	cw_mtx_t state_lock;
+	int     sockfd;
+	cw_bool_t is_connected;
+	cw_bool_t in_progress;
+	cw_bool_t error;
 
-  cw_mtx_t lock;
-  cw_cnd_t callback_cnd;
-  cw_bool_t is_registered;
+	cw_mtx_t lock;
+	cw_cnd_t callback_cnd;
+	cw_bool_t is_registered;
 
-  cw_uint32_t in_max_buf_size;
-  cw_mtx_t in_lock;
-  cw_buf_t in_buf;
-  cw_uint32_t in_need_signal_count;
-  cw_cnd_t in_cnd;
+	cw_uint32_t in_max_buf_size;
+	cw_mtx_t in_lock;
+	cw_buf_t in_buf;
+	cw_uint32_t in_need_signal_count;
+	cw_cnd_t in_cnd;
 
-  cw_mtx_t out_lock;
-  cw_bool_t sockb_in_progress;
-  cw_buf_t out_buf;
-  cw_uint32_t out_need_broadcast_count;
-  cw_bool_t out_is_flushed;
-  cw_cnd_t out_cnd;
+	cw_mtx_t out_lock;
+	cw_bool_t sockb_in_progress;
+	cw_buf_t out_buf;
+	cw_uint32_t out_need_broadcast_count;
+	cw_bool_t out_is_flushed;
+	cw_cnd_t out_cnd;
 };
 
 /****************************************************************************
@@ -71,8 +69,7 @@ struct cw_sock_s
  * sock constructor.
  *
  ****************************************************************************/
-cw_sock_t *
-sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size);
+cw_sock_t * sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size);
 
 /****************************************************************************
  *
@@ -89,8 +86,7 @@ sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size);
  * sock destructor.
  *
  ****************************************************************************/
-void
-sock_delete(cw_sock_t * a_sock);
+void sock_delete(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -107,8 +103,7 @@ sock_delete(cw_sock_t * a_sock);
  * Returns TRUE if a_sock is connected.
  *
  ****************************************************************************/
-cw_bool_t
-sock_is_connected(cw_sock_t * a_sock);
+cw_bool_t sock_is_connected(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -125,8 +120,7 @@ sock_is_connected(cw_sock_t * a_sock);
  * Return the local port number for the socket.
  *
  ****************************************************************************/
-cw_uint32_t
-sock_get_port(cw_sock_t * a_sock);
+cw_uint32_t sock_get_port(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -160,9 +154,8 @@ sock_get_port(cw_sock_t * a_sock);
  * again in order to attempt completing a non-blocking connect.
  *
  ****************************************************************************/
-cw_sint32_t
-sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
-	     struct timespec * a_timeout);
+cw_sint32_t sock_connect(cw_sock_t *a_sock, const char *a_server_host, int
+    a_port, struct timespec *a_timeout);
 
 /****************************************************************************
  *
@@ -184,8 +177,7 @@ sock_connect(cw_sock_t * a_sock, const char * a_server_host, int a_port,
  * Wrap an open socket descriptor inside a sock.
  *
  ****************************************************************************/
-cw_bool_t
-sock_wrap(cw_sock_t * a_sock, int a_sockfd, cw_bool_t a_init);
+cw_bool_t sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init);
 
 /****************************************************************************
  *
@@ -205,8 +197,7 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd, cw_bool_t a_init);
  * Disconnect a_sock.
  *
  ****************************************************************************/
-cw_bool_t
-sock_disconnect(cw_sock_t * a_sock);
+cw_bool_t sock_disconnect(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -223,8 +214,7 @@ sock_disconnect(cw_sock_t * a_sock);
  * Return the number of bytes of buffered incoming data.
  *
  ****************************************************************************/
-cw_uint32_t
-sock_buffered_in(cw_sock_t * a_sock);
+cw_uint32_t sock_buffered_in(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -252,9 +242,8 @@ sock_buffered_in(cw_sock_t * a_sock);
  * necessarily a_max_read), or the timeout expires.
  *
  ****************************************************************************/
-cw_sint32_t
-sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
-	  struct timespec * a_timeout);
+cw_sint32_t sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t
+    a_max_read, struct timespec *a_timeout);
 
 /****************************************************************************
  *
@@ -274,8 +263,7 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
  * write queue, notify g_sockb.
  *
  ****************************************************************************/
-cw_bool_t
-sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
+cw_bool_t sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf);
 
 /****************************************************************************
  *
@@ -293,8 +281,7 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
  * sent), and don't return until done.
  *
  ****************************************************************************/
-cw_bool_t
-sock_flush_out(cw_sock_t * a_sock);
+cw_bool_t sock_flush_out(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -312,6 +299,4 @@ sock_flush_out(cw_sock_t * a_sock);
  * Return the number of the file descriptor for a_sock's socket.
  *
  ****************************************************************************/
-int
-sock_get_fd(cw_sock_t * a_sock);
-
+int sock_get_fd(cw_sock_t *a_sock);
