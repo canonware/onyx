@@ -35,7 +35,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
     volatile cw_uint32_t try_stage = 0;
 
     xep_begin();
-    cw_nx_t *v_retval;
+    volatile cw_nx_t *v_retval;
     xep_try
     {
 	if (a_nx != NULL)
