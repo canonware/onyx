@@ -19,9 +19,13 @@
 
 #include "libstash/buf_p.h"
 
-#include <netinet/in.h>
-#include <sys/param.h>
-#include <sys/uio.h>
+/*  #include <netinet/in.h> */
+/*  #include <sys/param.h> */
+
+#ifdef _CW_OS_FREEBSD
+#  include <sys/types.h>
+#  include <sys/uio.h>
+#endif
 
 #ifdef UIO_MAXIOV
 #  define _LIBSTASH_BUF_MAX_IOV UIO_MAXIOV

@@ -31,6 +31,11 @@
 #  define _PTHREAD_H_
 #endif
 
+#ifndef _SCHED_H_
+#  include <sched.h>
+#  define _SCHED_H_
+#endif
+
 #ifndef _SIGNAL_H_
 #  include <signal.h>
 #  define _SIGNAL_H_
@@ -148,13 +153,7 @@ thd_join(cw_thd_t * a_thd);
  * Give up the rest of this thread's time slice.
  *
  ****************************************************************************/
-#ifdef _CW_OS_SOLARIS
-#  define thd_yield() sched_yield()
-#elsif _CW_OS_LINUX
-#  define thd_yield()
-#else
-#  define thd_yield() pthread_yield()
-#endif
+#define thd_yield() sched_yield()
 
 /****************************************************************************
  *
