@@ -28,17 +28,6 @@
 #include <arpa/inet.h>
 #include <signal.h>
 
-#ifdef UIO_MAXIOV
-#  define _LIBSOCK_SOCKB_MAX_IOV UIO_MAXIOV
-#else
-#  ifdef _CW_OS_FREEBSD
-/* XXX */
-/*  #include <sys/uio.h> */
-/*  #define _LIBSOCK_SOCKB_MAX_IOV UIO_MAXIOV */
-#    define _LIBSOCK_SOCKB_MAX_IOV 1024
-#  endif
-#endif
-
 #include "libsock/sockb_p.h"
 #include "libsock/sockb_l.h"
 #include "libsock/sock_l.h"
@@ -659,14 +648,8 @@ sockb_p_entry_func(void * a_arg)
 	     * we use buf_in, we know for sure that there are no other
 	     * references to the byte ranges of the buffers we are writing
 	     * to. */
-	  iovec = buf_get_iovec(&buf_in, max_read, &iovec_count);
+	  iovec = buf_get_iovec(&buf_in, max_read, TRUE, &iovec_count);
 
-	  /* Make sure not to exceed the max iovec size. */
-	  if (iovec_count > _LIBSOCK_SOCKB_MAX_IOV)
-	  {
-	    iovec_count = _LIBSOCK_SOCKB_MAX_IOV;
-	  }
-	    
 	  bytes_read = readv(i, iovec, iovec_count);
 
 	  if (bytes_read >= 0)
@@ -706,14 +689,9 @@ sockb_p_entry_func(void * a_arg)
 	  /* Build an iovec for writing. */
 	  iovec = buf_get_iovec(&tmp_buf,
 				buf_get_size(&tmp_buf),
+				TRUE,
 				&iovec_count);
 
-	  /* Make sure not to exceed the max iovec size. */
-	  if (iovec_count > _LIBSOCK_SOCKB_MAX_IOV)
-	  {
-	    iovec_count = _LIBSOCK_SOCKB_MAX_IOV;
-	  }
-	  
 	  bytes_written = writev(i, iovec, iovec_count);
 
 	  if (bytes_written >= 0)
