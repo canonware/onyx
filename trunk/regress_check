@@ -4,6 +4,9 @@
 #
 # regress_check <prefix> <srcdir> [<conf>...]
 
+#$no_act true def
+$no_act false def
+
 argv length 3 lt {
     stderr `regress_check usage: regress_check <prefix> <srcdir> [<conf>...]\n'
     write pop
@@ -20,7 +23,7 @@ $conf [
     argv length 3 gt {
 	argv 3 argv length 3 sub getinterval {} foreach
     } if
-    `--prefix=' PREFIX cat `/dst' cat
+    `--prefix=' PREFIX `/dst' 3 ncat
 ] def
 
 $COOK `/usr/bin/cook' def
@@ -36,24 +39,28 @@ $bins [`onyx'] def
 
 # #obj log_print -
 $log_print {
-    `==[regress_check (' PREFIX cat `)]==> 'cat
-    exch 1 sprints cat `\n' cat print flush
+    `==[regress_check (' PREFIX `)]==> ' 4 ndn 1 sprints `\n' 5 ncat
+    print flush
 } def
 
 # #obj log_eprint -
 $log_eprint {
-    `==[regress_check (' PREFIX cat `)]==>> 'cat
-    exch 1 sprints cat `\n' cat print flush
+    `==[regress_check (' PREFIX `)]==>> ' 4 ndn 1 sprints `\n' 5 ncat
+    print flush
 } def
 
 # #arr call -
 $call {
     dup log_print
-    dup system 0 ne {
-	log_eprint
-	1 die
+    no_act false eq {
+	dup system 0 ne {
+	    log_eprint
+	    1 die
+	}{
+	    # Success.
+	    pop
+	} ifelse
     }{
-	# Success.
 	pop
     } ifelse
 } def
@@ -79,39 +86,45 @@ $cookpar {
 #
 # #dirname deltree -
 $deltree {
-    dup `e' test {
-	dup {
-	    1 idup `/' cat exch cat
-	    dup `f' test {
-		unlink
-	    }{ dup `L' test {
-		unlink
-	    }{ dup `d' test {
-		deltree
-	    }{
-		`Unknown file type for: ' exch cat log_eprint
-		1 die
-	    } ifelse
-	    } ifelse
-	    } ifelse
-	} dirforeach
-	rmdir
-    } if
+    no_act false eq {
+	dup `e' test {
+	    dup {
+		over `/' dn 3 ncat
+		dup `f' test {
+		    unlink
+		}{ dup `L' test {
+		    unlink
+		}{ dup `d' test {
+		    deltree
+		}{
+		    `Unknown file type for: ' exch cat log_eprint
+		    1 die
+		} ifelse
+		} ifelse
+		} ifelse
+	    } dirforeach
+	    rmdir
+	} if
+    }{
+	pop
+    } ifelse
 } def
 
 # Make sure a directory tree contains nothing but directories.
 #
 # #dir dir_empty -
 $tree_empty {
-    dup {
-	over `/' cat exch cat
-	dup `d' test {
-	    tree_empty
-	}{
-	    `Directory tree not empty' log_eprint
-	    1 die
-	} ifelse
-    } dirforeach
+    no_act false eq {
+	dup {
+	    over `/' dn 3 ncat
+	    dup `d' test {
+		tree_empty
+	    }{
+		`Directory tree not empty' log_eprint
+		1 die
+	    } ifelse
+	} dirforeach
+    } if
     pop
 } def
 
@@ -125,16 +138,22 @@ PREFIX ` deltree' cat log_print
 PREFIX deltree
 
 PREFIX ` mkdir' cat log_print
-PREFIX mkdir
+no_act false eq {
+    PREFIX mkdir
+} if
 
 OBJDIR ` mkdir' cat log_print
-OBJDIR mkdir
+no_act false eq {
+    OBJDIR mkdir
+} if
 
 OBJDIR ` cd' cat log_print
-OBJDIR cd
+no_act false eq {
+    OBJDIR cd
+} if
 
 [
-    `../../' SRCDIR cat `/configure' cat
+    `../../' SRCDIR `/configure' 3 ncat
     conf {} foreach
 ] call
 
@@ -177,7 +196,7 @@ bins {
 
     # Make sure the application runs.
     [
-	DSTDIR `/bin/' cat bdup cat
+	DSTDIR `/bin/' bdup 3 ncat
 	`-h'
     ] call
     bpop
