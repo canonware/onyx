@@ -95,11 +95,10 @@ sizes:
 \libname{libonyx} defines the following global variables, which can be used by
 the application:
 \begin{description}
-\item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
-\item[cw\_g\_mema: ] \classname{mema} instance, wraps \cvar{cw\_g\_mem}.
-\item[cw\_g\_nxa: ] \classname{nxa} instance, global allocator that is tied to
-the garbage collector.
-\item[cw\_g\_nxaa: ] \classname{mema} instance, wraps \cvar{cw\_g\_nxa}.
+\item[cw\_g\_mema: ] \classname{mema} instance, wraps the generic global
+allocator (also accessible via the \classname{mem} APIs).
+\item[cw\_g\_nxaa: ] \classname{mema} instance, wraps the global allocator that
+is tied to the garbage collector (also accessible via the \classname{nxa} APIs).
 \end{description}
 
 \section{Threads}

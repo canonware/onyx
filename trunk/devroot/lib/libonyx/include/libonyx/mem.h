@@ -31,33 +31,8 @@ struct cw_mema_s
     void *arg;
 };
 
-struct cw_mem_s
-{
-    /* Allocator for internal use.  This can be used during debugging for
-     * finding leaks in the mem code itself. */
-    cw_mem_t *mem;
-#ifdef CW_MEM_ERROR
-    cw_mema_t mema;
-#endif
-
-    cw_bool_t is_malloced;
-
-#ifdef CW_THREADS
-    cw_mtx_t lock;
-#endif
-
-#ifdef CW_MEM_ERROR
-/* Slots in base hash table. */
-#define CW_MEM_BASE_TABLE 1024
-/* Maximum fullness of base table. */
-#define CW_MEM_BASE_GROW 256
-/* Proportional minimal fullness. */
-#define CW_MEM_BASE_SHRINK 32
-    cw_dch_t *addr_hash;
-#endif
-
-    const void *handler_data;
-};
+/* Global variables. */
+extern cw_mema_t *cw_g_mema;
 
 /* mema. */
 cw_mema_t *
@@ -118,27 +93,21 @@ mema_arg_get(cw_mema_t *a_mema)
 #endif /* (defined(CW_USE_INLINES) || defined(CW_MEM_C_)) */
 
 /* mem. */
-cw_mem_t *
-mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal);
-
-void
-mem_delete(cw_mem_t *a_mem);
-
 void *
-mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
+mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 	     cw_uint32_t a_line_num);
 
 void *
-mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const
+mem_calloc_e(void *a_arg, size_t a_number, size_t a_size, const
 	     char *a_filename, cw_uint32_t a_line_num);
 
 void *
-mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
+mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size,
 	      size_t a_old_size, const char *a_filename,
 	      cw_uint32_t a_line_num);
 
 void
-mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
+mem_free_e(void *a_arg, void *a_ptr, size_t a_size,
 	   const char *a_filename, cw_uint32_t a_line_num);
 
 /* These macros are declared differently, depending on whether this is a debug
@@ -156,13 +125,13 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
     mem_free_e((a_mem), (a_ptr), 0, __FILE__, __LINE__)
 
 #define cw_malloc(a_size)						\
-    mem_malloc_e(cw_g_mem, (a_size), __FILE__, __LINE__)
+    mem_malloc_e(NULL, (a_size), __FILE__, __LINE__)
 #define cw_calloc(a_number, a_size)					\
-    mem_calloc_e(cw_g_mem, (a_number), (a_size), __FILE__, __LINE__)
+    mem_calloc_e(NULL, (a_number), (a_size), __FILE__, __LINE__)
 #define cw_realloc(a_ptr, a_size)					\
-    mem_realloc_e(cw_g_mem, (a_ptr), (a_size), 0, __FILE__, __LINE__)
+    mem_realloc_e(NULL, (a_ptr), (a_size), 0, __FILE__, __LINE__)
 #define cw_free(a_ptr)							\
-    mem_free_e(cw_g_mem, (a_ptr), 0, __FILE__, __LINE__)
+    mem_free_e(NULL, (a_ptr), 0, __FILE__, __LINE__)
 
 #else
 #define mem_malloc(a_mem, a_size)					\
@@ -175,12 +144,12 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
     mem_free_e((a_mem), (a_ptr), 0, NULL, 0)
 
 #define cw_malloc(a_size)						\
-    mem_malloc_e(cw_g_mem, (a_size), NULL, 0)
+    mem_malloc_e(NULL, (a_size), NULL, 0)
 #define cw_calloc(a_number, a_size)					\
-    mem_calloc_e(cw_g_mem, (a_number), (a_size), NULL, 0)
+    mem_calloc_e(NULL, (a_number), (a_size), NULL, 0)
 #define cw_realloc(a_ptr, a_size)					\
-    mem_realloc_e(cw_g_mem, (a_ptr), (a_size), 0, NULL, 0)
+    mem_realloc_e(NULL, (a_ptr), (a_size), 0, NULL, 0)
 #define cw_free(a_ptr)							\
-    mem_free_e(cw_g_mem, (a_ptr), 0, NULL, 0)
+    mem_free_e(NULL, (a_ptr), 0, NULL, 0)
 
 #endif

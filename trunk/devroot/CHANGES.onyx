@@ -1,3 +1,16 @@
+2003-04-19 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/mq.c:mq_new() : Use a mema object for allocation,
+	  rather than a mem object.
+
+	* lib/libonyx/include/libonyx/libonyx.h : Remove the following global
+	  variables:
+	  + cw_g_mem
+	  + cw_g_nxa
+
+	* lib/libonyx/include/libonyx/mem.h : Remove mem_{new,delete}().  Remove
+	  cw_mem_t.  Modify all mem APIs to ignore the first argument.
+
 2003-04-18 : Jason Evans <jasone@canonware.com>
 
 	* Move the garbage collector out of cw_nx_t and make it global, thus

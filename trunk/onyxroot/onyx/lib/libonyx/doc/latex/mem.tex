@@ -193,45 +193,6 @@ cw\_opaque\_realloc\_t *a\_realloc, cw\_opaque\_dealloc\_t *a\_dealloc, void
 		\cfunc{mema\_realloc\_get}{\cvar{a\_mema}}, and
 		\cfunc{mema\_dealloc\_get}{\cvar{a\_mema}}.
 	\end{capilist}
-\label{mem_new}
-\index{mem_new@\cfunc{mem\_new}{}}
-\citem{\cfunc[cw\_mem\_t *]{mem\_new}{cw\_mem\_t *a\_mem, cw\_mem\_t
-*a\_internal}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_mem: ]
-			Pointer to space for a \classname{mem}, or NULL.
-		\item[a\_internal: ]
-			Pointer to a \classname{mem} to use for internal
-			memory allocation, or NULL.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to a \classname{mem}.
-		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Constructor.
-	\end{capilist}
-\label{mem_delete}
-\index{mem_delete@\cfunc{mem\_delete}{}}
-\citem{\cfunc[void]{mem\_delete}{cw\_mem\_t *a\_mem}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_mem: ]
-			Pointer to a \classname{mem}.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Destructor.
-	\end{capilist}
 \label{mem_malloc_e}
 \index{mem_malloc_e@\cfunc{mem\_malloc\_e}{}}
 \citem{\cfunc[void *]{mem\_malloc\_e}{cw\_mem\_t *a\_mem, size\_t a\_size, const
@@ -246,7 +207,7 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
-			Pointer to a \classname{mem}.
+			Pointer to a \classname{mem}, or NULL.
 		\item[a\_size: ]
 			Size of memory range to allocate.
 		\item[a\_filename: ]
@@ -281,7 +242,7 @@ size\_t a\_size}}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
-			Pointer to a \classname{mem}.
+			Pointer to a \classname{mem}, or NULL.
 		\item[a\_number: ]
 			Number of elements to allocate.
 		\item[a\_size: ]
@@ -319,7 +280,7 @@ a\_size}}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
-			Pointer to a \classname{mem}.
+			Pointer to a \classname{mem}, or NULL.
 		\item[a\_ptr: ]
 			Pointer to memory range to be reallocated.
 		\item[a\_size: ]
@@ -359,7 +320,7 @@ a\_size}}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_mem: ]
-			Pointer to a \classname{mem}.
+			Pointer to a \classname{mem}, or NULL.
 		\item[a\_ptr: ]
 			Pointer to to memory range to be freed.
 		\item[a\_size: ]

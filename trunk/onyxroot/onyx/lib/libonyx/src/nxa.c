@@ -147,7 +147,7 @@ nxa_l_init(void)
 	ql_new(&cw_g_nxa->seq_set);
 
 #ifdef CW_PTHREADS
-	mq_new(&cw_g_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
+	mq_new(&cw_g_nxa->gc_mq, cw_g_mema, sizeof(cw_nxam_t));
 #endif
 	try_stage = 1;
 
@@ -296,7 +296,7 @@ nxa_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
 
     nxa_l_count_adjust((cw_nxoi_t) a_size);
 
-    return mem_malloc_e(cw_g_mem, a_size, a_filename, a_line_num);
+    return mem_malloc_e(NULL, a_size, a_filename, a_line_num);
 }
 
 void *
@@ -308,7 +308,7 @@ nxa_calloc_e(void *a_arg, size_t a_number, size_t a_size,
 
     nxa_l_count_adjust((cw_nxoi_t) (a_number * a_size));
 
-    return mem_calloc_e(cw_g_mem, a_number, a_size, a_filename, a_line_num);
+    return mem_calloc_e(NULL, a_number, a_size, a_filename, a_line_num);
 }
 
 void *
@@ -320,7 +320,7 @@ nxa_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
 
     nxa_l_count_adjust((cw_nxoi_t) a_size - (cw_nxoi_t) a_old_size);
 
-    return mem_realloc_e(cw_g_mem, a_ptr, a_size, a_old_size, a_filename,
+    return mem_realloc_e(NULL, a_ptr, a_size, a_old_size, a_filename,
 			 a_line_num);
 }
 
@@ -333,7 +333,7 @@ nxa_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
 
     nxa_l_count_adjust(-(cw_nxoi_t)a_size);
 
-    mem_free_e(cw_g_mem, a_ptr, a_size, a_filename, a_line_num);
+    mem_free_e(NULL, a_ptr, a_size, a_filename, a_line_num);
 }
 
 void
