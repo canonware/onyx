@@ -16,6 +16,8 @@
 #include <limits.h>
 #include <math.h>	/* For HUGE_VAL, though this is probably an OS bug. */
 
+/*  #define	_CW_STILT_SCANNER_DEBUG */
+
 #define _CW_STILT_GETC(a_i)						\
 	a_stilt->tok_str[(a_i)]
 
@@ -49,12 +51,35 @@ struct cw_stilt_entry_s {
 	cw_uint32_t	len;
 };
 
+/*
+ * Lookup table for base64 decoding.
+ */
+static cw_sint32_t cw_g_b64_codes[] = {
+		    62, -1, -1, -1, 63,
+	52, 53, 54, 55, 56, 57, 58, 59,
+	60, 61, -1, -1, -1, -1, -1, -1,
+
+	-1,  0,  1,  2,  3,  4 , 5,  6,
+	 7,  8,  9, 10, 11, 12, 13, 14,
+	15, 16, 17, 18, 19, 20, 21, 22,
+	23, 24, 25, -1, -1, -1, -1, -1,
+	-1, 26, 27, 28, 29, 30, 31, 32,
+	33, 34, 35, 36, 37, 38, 39, 40,
+	41, 42, 43, 44, 45, 46, 47, 48,
+	49, 50, 51
+};
+#define	stilt_p_b64b(a) cw_g_b64_codes[(a) - 43]
+	
 static cw_sint32_t	stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 static cw_sint32_t	stilt_p_tok_str_expand(cw_stilt_t *a_stilt);
 static void		stilt_p_reset(cw_stilt_t *a_stilt);
+#ifdef _CW_STILT_SCANNER_DEBUG
 static void		stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t
     *a_stilts, cw_uint32_t a_length, const cw_uint8_t *a_note);
+#else
+#define	stilt_p_token_print(a, b, c, d)
+#endif
 static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
     cw_uint8_t a_c);
 static cw_sint32_t	stilt_p_exec(cw_stilt_t *a_stilt);
@@ -343,7 +368,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 	for (i = 0; i < a_len; i++, a_stilts->column++) {
 		c = a_str[i];
 
-#if (0)
+#ifdef _CW_STILT_SCANNER_DEBUG
 #define _CW_STILT_PSTATE(a)						\
 	do {								\
 		if (a_stilt->state == (a))				\
@@ -371,8 +396,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 		_CW_STILT_PSTATE(STATE_LIT_STRING_NEWLINE_CONT);
 		_CW_STILT_PSTATE(STATE_LIT_STRING_PROT_CONT);
 		_CW_STILT_PSTATE(STATE_HEX_STRING);
-		_CW_STILT_PSTATE(STATE_BASE85_STRING);
-		_CW_STILT_PSTATE(STATE_BASE85_STRING_CONT);
+		_CW_STILT_PSTATE(STATE_BASE64_STRING);
+		_CW_STILT_PSTATE(STATE_BASE64_STRING_PAD);
+		_CW_STILT_PSTATE(STATE_BASE64_STRING_TILDE);
+		_CW_STILT_PSTATE(STATE_BASE64_STRING_FINISH);
 		_CW_STILT_PSTATE(STATE_NAME);
 #undef _CW_STILT_PSTATE
 #endif
@@ -505,7 +532,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilo_string_new(stilo, a_stilt, 0);
 				break;
 			case '~':
-				a_stilt->state = STATE_BASE85_STRING;
+				a_stilt->state = STATE_BASE64_STRING;
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
@@ -1251,10 +1278,73 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_BASE85_STRING:
+		case STATE_BASE64_STRING:
 			switch (c) {
 			case '~':
-				a_stilt->state = STATE_BASE85_STRING_CONT;
+				a_stilt->m.p.npad = 0;
+				a_stilt->state = STATE_BASE64_STRING_FINISH;
+				break;
+			case '\n':
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r':
+			case ' ':
+				/* Ignore. */
+				break;
+			case 'A': case 'B': case 'C': case 'D': case 'E':
+			case 'F': case 'G': case 'H': case 'I': case 'J':
+			case 'K': case 'L': case 'M': case 'N': case 'O':
+			case 'P': case 'Q': case 'R': case 'S': case 'T':
+			case 'U': case 'V': case 'W': case 'X': case 'Y':
+			case 'Z': case 'a': case 'b': case 'c': case 'd':
+			case 'e': case 'f': case 'g': case 'h': case 'i':
+			case 'j': case 'k': case 'l': case 'm': case 'n':
+			case 'o': case 'p': case 'q': case 'r': case 's':
+			case 't': case 'u': case 'v': case 'w': case 'x':
+			case 'y': case 'z': case '0': case '1': case '2':
+			case '3': case '4': case '5': case '6': case '7':
+			case '8': case '9': case '+': case '/':
+				_CW_STILT_PUTC(c);
+				break;
+			case '=':
+				/*
+				 * Calculate how many padding characters to
+				 * expect.
+				 */
+				switch (a_stilt->index % 4) {
+				case 0: case 1:
+					/*
+					 * We shouldn't have even seen this
+					 * padding character.
+					 */
+					stilt_p_syntax_error_print(a_stilt, c);
+					break;
+				case 2:
+					a_stilt->m.p.npad = 2;
+					a_stilt->state =
+					    STATE_BASE64_STRING_PAD;
+					_CW_STILT_PUTC(c);
+					break;
+				case 3:
+					a_stilt->m.p.npad = 1;
+					a_stilt->state =
+					    STATE_BASE64_STRING_TILDE;
+					_CW_STILT_PUTC(c);
+					break;
+				default:
+					_cw_not_reached();
+				}
+				break;
+			default:
+				stilt_p_syntax_error_print(a_stilt, c);
+				break;
+			}
+			break;
+		case STATE_BASE64_STRING_PAD:
+			switch (c) {
+			case '=':
+				a_stilt->state = STATE_BASE64_STRING_TILDE;
+				_CW_STILT_PUTC(c);
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1264,20 +1354,96 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Ignore. */
 				break;
 			default:
-				if (((c >= '!') && (c <= 'u')) || (c == 'z'))
-					_CW_STILT_PUTC(c);
-				else
-					stilt_p_syntax_error_print(a_stilt, c);
+				stilt_p_syntax_error_print(a_stilt, c);
 				break;
 			}
 			break;
-		case STATE_BASE85_STRING_CONT:
+		case STATE_BASE64_STRING_TILDE:
 			switch (c) {
-			case '>':
+			case '~':
+				a_stilt->state = STATE_BASE64_STRING_FINISH;
+				break;
+			case '\n':
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r':
+			case ' ':
+				/* Ignore. */
+				break;
+			default:
+				stilt_p_syntax_error_print(a_stilt, c);
+				break;
+			}
+			break;
+		case STATE_BASE64_STRING_FINISH:
+			switch (c) {
+			case '>': {
+				cw_uint8_t	*str;
+				cw_uint32_t	j, ngroups;
+				cw_uint32_t	bits;
+
 				stilt_p_token_print(a_stilt, a_stilts,
-				    a_stilt->index, "base 85 string");
+				    a_stilt->index, "base 64 string");
+
+				ngroups = (a_stilt->index - a_stilt->m.p.npad)
+				    >> 2;
+				stilo = stils_push(&a_stilt->data_stils);
+				stilo_string_new(stilo, a_stilt,
+				    (ngroups + 1) * 3 - a_stilt->m.p.npad);
+
+				str = stilo_string_get(stilo);
+				for (j = 0; j < ngroups; j++) {
+					/* Accumulate the bits. */
+					bits = stilt_p_b64b(a_stilt->tok_str[j *
+					    4]) << 18;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j
+					    * 4 + 1]) << 12;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j
+					    * 4 + 2]) << 6;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j
+					    * 4 + 3]);
+
+					/* Pull out the bytes. */
+					str[j * 3] = bits >> 16;
+					str[j * 3 + 1] = (bits >> 8) & 0xff;
+					str[j * 3 + 2] = bits & 0xff;
+				}
+
+				switch (a_stilt->m.p.npad) {
+				case 0:
+					/* abcd. Do nothing. */
+					break;
+				case 1:
+					/* abc=. */
+					/* Accumulate the bits. */
+					bits = stilt_p_b64b(a_stilt->tok_str[j *
+					    4]) << 18;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j
+					    * 4 + 1]) << 12;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j
+					    * 4 + 2]) << 6;
+
+					/* Pull out the bytes. */
+					str[j * 3] = bits >> 16;
+					str[j * 3 + 1] = (bits >> 8) & 0xff;
+					break;
+				case 2:
+					/* ab==. */
+					/* Accumulate the bits. */
+					bits = stilt_p_b64b(a_stilt->tok_str[j * 4]) << 18;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j * 4 + 1]) <<
+					    12;
+
+					/* Pull out the bytes. */
+					str[j * 3] = bits >> 16;
+					break;
+				default:
+					_cw_not_reached();
+				}
+
 				stilt_p_reset(a_stilt);
 				break;
+			}
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
 				break;
@@ -1330,12 +1496,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 	return retval;
 }
 
+#ifdef _CW_STILT_SCANNER_DEBUG
 static void
 stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
     a_length, const cw_uint8_t *a_note)
 {
-#if (0)
-#ifdef _LIBSTIL_DBG
 	cw_uint32_t	line, col;
 
 	stilts_position_get(a_stilts, &line, &col);
@@ -1344,9 +1509,8 @@ stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
 	_cw_out_put("<-- [s] ([i]:[i] [[--> [i]:[i])\n", a_note,
 	    a_stilt->tok_line, a_stilt->tok_column, a_stilts->line,
 	    (a_stilts->column != -1) ? a_stilts->column : 0);
-#endif
-#endif
 }
+#endif
 
 static void
 stilt_p_syntax_error_print(cw_stilt_t *a_stilt, cw_uint8_t a_c)

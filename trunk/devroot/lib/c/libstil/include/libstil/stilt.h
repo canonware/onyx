@@ -36,9 +36,11 @@ typedef enum {
 	STATE_LIT_STRING_NEWLINE_CONT	= 16,
 	STATE_LIT_STRING_PROT_CONT	= 17,
 	STATE_HEX_STRING		= 18,
-	STATE_BASE85_STRING		= 19,
-	STATE_BASE85_STRING_CONT	= 20,
-	STATE_NAME			= 21
+	STATE_BASE64_STRING		= 19,
+	STATE_BASE64_STRING_PAD		= 21,
+	STATE_BASE64_STRING_TILDE	= 22,
+	STATE_BASE64_STRING_FINISH	= 23,
+	STATE_NAME			= 24
 } cw_stiltts_t;
 
 struct cw_stilts_s {
@@ -157,6 +159,9 @@ struct cw_stilt_s {
 		struct {
 			cw_uint8_t	hex_val;
 		}	s;	/* string. */
+		struct {
+			cw_uint32_t	npad;
+		}	p;	/* base 64 string. */
 		struct {
 			enum {
 				ACTION_EXECUTE,
