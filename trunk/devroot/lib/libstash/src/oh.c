@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 45 $
- * $Date: 1998-04-26 22:53:33 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 52 $
+ * $Date: 1998-04-30 02:39:06 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -55,10 +55,9 @@
 
 #define _INC_THREAD_H_
 #define _INC_OH_H_
-#define _INC_OH_PRIV_H_
-
 #define _INC_STRING_H_
 #include <config.h>
+#include <oh_priv.h>
 
 cw_oh_t *
 oh_new(cw_oh_t * a_oh_o)
@@ -370,7 +369,7 @@ oh_set_base_rehash_point(cw_oh_t * a_oh_o,
 
 cw_bool_t
 oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
-	       void * a_data_addr)
+	       void * a_data)
 {
   cw_oh_item_t * item;
   cw_bool_t retval;
@@ -392,7 +391,7 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
 
   item->is_valid = TRUE;
   item->key = a_key;
-  item->data = a_data_addr;
+  item->data = a_data;
 
   retval = oh_item_insert_priv(a_oh_o, item);
   if (retval == TRUE)
@@ -407,7 +406,8 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
 
 cw_bool_t
 oh_item_delete(cw_oh_t * a_oh_o,
-	       void * a_key,
+	       void * a_search_key,
+	       void ** a_key,
 	       void ** a_data)
 {
   cw_uint32_t slot;
@@ -417,7 +417,7 @@ oh_item_delete(cw_oh_t * a_oh_o,
 
   rwl_wlock(&a_oh_o->rw_lock);
 
-  error = oh_item_search_priv(a_oh_o, a_key, &slot);
+  error = oh_item_search_priv(a_oh_o, a_search_key, &slot);
 
   if (error == FALSE)
   {
@@ -427,10 +427,12 @@ oh_item_delete(cw_oh_t * a_oh_o,
     a_oh_o->items[slot]->is_valid = FALSE;
     a_oh_o->num_invalid++;
     a_oh_o->num_items--;
+    *a_key = a_oh_o->items[slot]->key;
     *a_data = a_oh_o->items[slot]->data;
   }
   else
   {
+    *a_key = NULL;
     *a_data = NULL;
     retval = TRUE;
   }

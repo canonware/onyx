@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 52 $
+ * $Date: 1998-04-30 02:39:06 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  * 
@@ -74,10 +74,9 @@
  ****************************************************************************/
 
 #define _INC_THREAD_H_
-#define _INC_THREAD_PRIV_H_
-#define _INC_PTHREAD_H_
 #define _INC_STRING_H_
 #include <config.h>
+#include <thread_priv.h>
 
 cw_thd_t *
 thd_new(cw_thd_t * a_thd_o,

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 33 $
- * $Date: 1998-04-19 01:43:20 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 52 $
+ * $Date: 1998-04-30 02:39:06 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -39,8 +39,8 @@
  ****************************************************************************/
 
 #define _INC_LIST_H_
-#define _INC_LIST_PRIV_H_
 #include <config.h>
+#include <list_priv.h>
 
 cw_list_item_t *
 list_item_new()
