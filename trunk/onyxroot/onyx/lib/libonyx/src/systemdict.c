@@ -24,6 +24,7 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
+#include "../include/libonyx/nxo_thread_l.h"
 
 /* Initial size of dictionaries created with the dict operator. */
 #define	_CW_SYSTEMDICT_DICT_SIZE	16
@@ -3915,8 +3916,7 @@ systemdict_self(cw_nxo_t *a_thread)
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	thread = nxo_stack_push(ostack);
-
-	nxo_thread_self(a_thread, thread);
+	nxo_dup(thread, a_thread);
 }
 
 void
@@ -5141,7 +5141,7 @@ systemdict_token(cw_nxo_t *a_thread)
 		xep_begin();
 		xep_try {
 			nxo_string_lock(tnxo);
-			nscanned = nxo_thread_token(a_thread, &threadp,
+			nscanned = nxo_l_thread_token(a_thread, &threadp,
 			    nxo_string_get(tnxo), nxo_string_len_get(tnxo));
 		}
 		xep_acatch {
@@ -5209,7 +5209,7 @@ systemdict_token(cw_nxo_t *a_thread)
 		    nxo_file_read(tnxo, 1, &c)) {
 			xep_begin();
 			xep_try {
-				nxo_thread_token(a_thread, &threadp, &c, 1);
+				nxo_l_thread_token(a_thread, &threadp, &c, 1);
 			}
 			xep_acatch {
 				nxo_stack_pop(tstack);

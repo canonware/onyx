@@ -189,7 +189,6 @@ void	nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx);
 void	nxo_thread_start(cw_nxo_t *a_nxo);
 void	nxo_thread_exit(cw_nxo_t *a_nxo);
 
-void	nxo_thread_self(cw_nxo_t *a_nxo, cw_nxo_t *r_self);
 void	nxo_thread_thread(cw_nxo_t *a_nxo);
 void	nxo_thread_detach(cw_nxo_t *a_nxo);
 void	nxo_thread_join(cw_nxo_t *a_nxo);
@@ -203,19 +202,17 @@ void	nxo_thread_loop(cw_nxo_t *a_nxo);
 void	nxo_thread_interpret(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
     cw_uint8_t *a_str, cw_uint32_t a_len);
 void	nxo_thread_flush(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp);
-cw_uint32_t nxo_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
-    cw_uint8_t *a_str, cw_uint32_t a_len);
 void	nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_threade);
 
 cw_bool_t nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t
     *r_value);
 
+cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
+void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
+
 cw_nxo_t *nxo_thread_userdict_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_errordict_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_currenterror_get(cw_nxo_t *a_nxo);
-
-cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
-void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 
 #ifndef _CW_USE_INLINES
 cw_nx_t *nxo_thread_nx_get(cw_nxo_t *a_nxo);
