@@ -13,6 +13,7 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob @objroot@/mod/modslate/src/"*.d_*"]
+#include-cooked [glob @objroot@/mod/modslate/test/"*.d_*"]
 
 /*
  * File lists.
@@ -32,6 +33,10 @@ MODSLATE_NX = [addprefix @srcroot@/mod/modslate/nx/modslate/
                          modslate.nx
                          ];
 
+MODSLATE_CTESTS = [addprefix @srcroot@/mod/modslate/test/
+                             rb_a.c
+                             ];
+
 /* Modules. */
 MODSLATE = @objroot@/mod/modslate/nxm/modslate.nxm;
 
@@ -41,19 +46,18 @@ MODSLATE = @objroot@/mod/modslate/nxm/modslate.nxm;
 
 modslate : [MODSLATE];
 
-modslate_mods_tests :
-{
-
-}
+modslate_mods_tests : [fromto @srcroot@/%0%.c @objroot@/%0% [MODSLATE_CTESTS]];
 
 modslate_mods_check :
 {
-
+  @VERIFY@ -s @srcroot@ -o @objroot@
+           [fromto @srcroot@/%0%.c @objroot@/%0% [MODSLATE_CTESTS]];
 }
 
 modslate_mods_check_update :
 {
-
+  @VERIFY@ -u -s @srcroot@ -o @objroot@
+           [fromto @srcroot@/%0%.c @objroot@/%0% [MODSLATE_CTESTS]];
 }
 
 modslate_mods_install : [MODSLATE]
@@ -79,6 +83,12 @@ modslate_mods_clean :
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [MODSLATE_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [MODSLATE_SRCS]];
   rm -f [MODSLATE];
+
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [MODSLATE_CTESTS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [MODSLATE_CTESTS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.out [MODSLATE_CTESTS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.diff [MODSLATE_CTESTS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0% [MODSLATE_CTESTS]];
 }
 
 modslate_mods_distclean :
