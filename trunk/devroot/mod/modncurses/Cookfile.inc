@@ -91,6 +91,7 @@ modncurses : [MODNCURSES];
 
 modncurses_install : [MODNCURSES]
 {
+  [INSTALL] -d [PREFIX]/share/canonware/onyx/nxmod;
   [INSTALL] -m 0444 [MODNCURSES] [PREFIX]/share/canonware/onyx/nxmod;
 }
 
