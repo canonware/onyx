@@ -10,9 +10,7 @@
  *
  ******************************************************************************/
 
-/*
- * List definitions.
- */
+/* List definitions. */
 #define ql_head(a_type)							\
 struct									\
 {									\
@@ -43,8 +41,8 @@ struct									\
 					   : NULL)
 
 #define ql_prev(a_head, a_elm, a_field)					\
-	((ql_first(a_head) != (a_elm)) ? qr_prev((a_elm), a_field)	\
-				       : NULL)
+    ((ql_first(a_head) != (a_elm)) ? qr_prev((a_elm), a_field)		\
+				   : NULL)
 
 #define ql_before_insert(a_head, a_qlelm, a_elm, a_field)		\
     do									\
