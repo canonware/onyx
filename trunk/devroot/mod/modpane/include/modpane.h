@@ -14,6 +14,8 @@
 
 #include <libonyx/libonyx.h>
 
+#include <termios.h>
+
 #include "ds.h"
 #include "cl.h"
 #include "pn.h"
