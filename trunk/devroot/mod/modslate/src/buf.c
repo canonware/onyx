@@ -335,7 +335,8 @@ static cw_bufp_t *
 bufp_p_new(cw_buf_t *a_buf);
 static cw_uint32_t
 bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
-		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
+		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
+		     cw_bool_t a_reverse);
 static void
 bufp_p_delete(cw_bufp_t *a_bufp);
 static cw_uint32_t
@@ -374,6 +375,9 @@ buf_p_bufp_insert_comp(cw_bufp_t *a_a, cw_bufp_t *a_b);
 static cw_uint64_t
 buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 		  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
+static cw_uint64_t
+buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
+		   const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
 static void
 buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp);
 static void
@@ -398,18 +402,21 @@ static void
 mkr_p_remove(cw_mkr_t *a_mkr);
 static cw_uint32_t
 mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
-		    cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
+		    cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
+		    cw_bool_t a_reverse);
 static cw_uint32_t
 mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 			  cw_bufp_t *a_prevp, const cw_bufv_t *a_bufv,
-			  cw_uint32_t a_bufvcnt, cw_uint32_t a_count);
+			  cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
+			  cw_bool_t a_reverse);
 static cw_uint32_t
 mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
-			 cw_uint32_t a_count);
+			 cw_uint32_t a_count, cw_bool_t a_reverse);
 static cw_uint64_t
 mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
-		   cw_uint32_t a_bufvcnt, cw_uint64_t a_count);
+		   cw_uint32_t a_bufvcnt, cw_uint64_t a_count,
+		   cw_bool_t a_reverse);
 
 /* ext. */
 static cw_sint32_t
@@ -462,6 +469,55 @@ bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
 		    goto RETURN;
 		}
 	    }
+	}
+    }
+
+    RETURN:
+    return retval;
+}
+
+/* A simplified version of bufv_rcopy() that counts '\n' characters that are
+ * copied, and returns that rather than the number of elements copied. */
+CW_P_INLINE cw_uint32_t
+bufv_p_rcopy(cw_bufv_t *a_to, cw_uint32_t a_to_len, const cw_bufv_t *a_fr,
+	     cw_uint32_t a_fr_len)
+{
+    cw_uint32_t retval, to_el, fr_el, to_off, fr_off;
+
+    cw_check_ptr(a_to);
+    cw_check_ptr(a_fr);
+
+    retval = 0;
+    to_el = a_to_len - 1;
+    to_off = a_to[to_el].len - 1;
+    /* Iterate over bufv elements. */
+    for (fr_el = 0; fr_el < a_fr_len; fr_el++)
+    {
+	/* Iterate over bufv element contents. */
+	for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++)
+	{
+	    /* If there is no more room in the current destination bufv element,
+	     * move on to the previous one. */
+	    while (to_off == 0xffffffff)
+	    {
+		to_el--;
+		if (to_el == 0xffffffff)
+		{
+		    goto RETURN;
+		}
+		to_off = a_to[to_el].len - 1;
+	    }
+
+	    a_to[to_el].data[to_off] = a_fr[fr_el].data[fr_off];
+
+	    /* Count newlines. */
+	    if (a_to[to_el].data[to_off] == '\n')
+	    {
+		retval++;
+	    }
+
+	    /* Decrement the position to copy to. */
+	    to_off--;
 	}
     }
 
@@ -785,7 +841,8 @@ bufp_p_new(cw_buf_t *a_buf)
  * cached bpos/line are not used, nor are they updated. */
 static cw_uint32_t
 bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
-		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
+		     cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
+		     cw_bool_t a_reverse)
 {
     cw_uint32_t nlines;
     cw_bufv_t bufv;
@@ -793,7 +850,14 @@ bufp_p_simple_insert(cw_bufp_t *a_bufp, const cw_bufv_t *a_bufv,
     /* Insert. */
     bufv.data = &a_bufp->b[a_bufp->gap_off];
     bufv.len = CW_BUFP_SIZE - a_bufp->len;
-    nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
+    if (a_reverse == FALSE)
+    {
+	nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
+    }
+    else
+    {
+	nlines = bufv_p_rcopy(&bufv, 1, a_bufv, a_bufvcnt);
+    }
 
     /* Shrink the gap. */
     a_bufp->gap_off += a_count;
@@ -1411,7 +1475,7 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
  * and last bufp's must have their gaps moved to the end and begin,
  * respectively, and the intermediate bufp's must be empty.  This allows
  * bufp_p_simple_insert() to be used.  a_buf->bufp_cur must be at or after
- * a_bufp so that cached positions can be updated during insertion.*/
+ * a_bufp so that cached positions can be updated during insertion. */
 static cw_uint64_t
 buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 		  const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
@@ -1484,7 +1548,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    vremain.len -= vsplit.len;
 
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
-							 vsplit.len);
+							 vsplit.len, FALSE);
 
 	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len == 0)
 	    {
@@ -1508,7 +1572,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	if (cnt != 0)
 	{
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &a_bufv[v],
-							 i - v, cnt);
+							 i - v, cnt, FALSE);
 	    v = i;
 	}
 
@@ -1522,7 +1586,105 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    v++;
 
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
-							 vsplit.len);
+							 vsplit.len, FALSE);
+	}
+
+	CONTINUE:
+	/* Update the cached position. */
+	bufp->bob_relative = TRUE;
+	bufp->bpos = bpos;
+	bpos += (cw_uint64_t) bufp->len;
+	bufp->line = line;
+	line += (cw_uint64_t) bufp->nlines;
+	a_buf->bufp_cur = bufp;
+    }
+
+    return nlines;
+}
+
+/* This function inserts a_bufv into a series of contiguous bufp's in reverse
+ * order.  The first and last bufp's must have their gaps moved to the end and
+ * begin, respectively, and the intermediate bufp's must be empty.  This allows
+ * bufp_p_simple_insert() to be used.  a_buf->bufp_cur must be at or after
+ * a_bufp so that cached positions can be updated during insertion.
+ *
+ * This function is the same as buf_p_bufv_insert(), except that the data in
+ * a_bufv are inserted in reverse order.  See buf_p_bufv_insert() for a more
+ * detailed algorithmic explanation. */
+static cw_uint64_t
+buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
+		   const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
+{
+    cw_uint64_t nlines, bpos, line;
+    cw_uint32_t i, v, cnt;
+    cw_bufp_t *bufp;
+    cw_bufv_t vsplit, vremain;
+
+    cw_assert(a_bufp->bob_relative);
+
+    /* Iterate over bufp's being inserted into.  bufp starts out pointing to the
+     * original bufp on which insertion was attempted before the split. */
+    nlines = 0;
+    v = a_bufvcnt - 1;
+    vremain.len = 0;
+    for (bufp = a_bufp, bpos = bufp->bpos, line = bufp->line;
+	 bufp != a_pastp;
+	 bufp = ql_next(&a_buf->plist, bufp, plink))
+    {
+	/* Insert remainder, if any. */
+	if (vremain.len != 0)
+	{
+	    if (CW_BUFP_SIZE - bufp->len < vremain.len)
+	    {
+		vsplit.len = CW_BUFP_SIZE - bufp->len;
+	    }
+	    else
+	    {
+		vsplit.len = vremain.len;
+	    }
+	    vremain.len -= vsplit.len;
+	    vsplit.data = &vremain.data[vremain.len];
+
+	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
+							 vsplit.len, TRUE);
+
+	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len == 0)
+	    {
+		/* No more space in this bufp, or no more remaining data in
+		 * bufv[v]. */
+		goto CONTINUE;
+	    }
+	}
+
+	/* Iterate over a_bufv elements and insert their contents into the
+	 * current bufp. */
+	cnt = 0;
+	for (i = v; i != 0xffffffff; i--)
+	{
+	    if (cnt + a_bufv[i].len > CW_BUFP_SIZE - bufp->len)
+	    {
+		break;
+	    }
+	    cnt += a_bufv[i].len;
+	}
+	if (cnt != 0)
+	{
+	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &a_bufv[v],
+							 i - v, cnt, TRUE);
+	    v = i;
+	}
+
+	/* Split a_bufv[v] if bufp isn't full and there are more data. */
+	if (CW_BUFP_SIZE - bufp->len != 0 && v != 0xffffffff)
+	{
+	    vsplit.len = CW_BUFP_SIZE - bufp->len;
+	    vremain.len = a_bufv[v].len - vsplit.len;
+	    vremain.data = a_bufv[v].data;
+	    vsplit.data = &vremain.data[vremain.len];
+	    v--;
+
+	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
+							 vsplit.len, TRUE);
 	}
 
 	CONTINUE:
@@ -2307,7 +2469,8 @@ mkr_p_remove(cw_mkr_t *a_mkr)
  * internals are consistent, and that the data will fit. */
 static cw_uint32_t
 mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
-		    cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
+		    cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
+		    cw_bool_t a_reverse)
 {
     cw_uint32_t nlines;
     cw_buf_t *buf;
@@ -2324,7 +2487,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     bufp_p_gap_move(bufp, bufp_p_pos_p2r(bufp, a_mkr->ppos));
 
     /* Insert. */
-    nlines = bufp_p_simple_insert(bufp, a_bufv, a_bufvcnt, a_count);
+    nlines = bufp_p_simple_insert(bufp, a_bufv, a_bufvcnt, a_count, a_reverse);
 
     /* Adjust markers at the insertion point. */
     if (a_after == FALSE)
@@ -2384,7 +2547,8 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 static cw_uint32_t
 mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 			  cw_bufp_t *a_prevp, const cw_bufv_t *a_bufv,
-			  cw_uint32_t a_bufvcnt, cw_uint32_t a_count)
+			  cw_uint32_t a_bufvcnt, cw_uint32_t a_count,
+			  cw_bool_t a_reverse)
 {
     cw_uint32_t nlines;
     cw_buf_t *buf;
@@ -2421,7 +2585,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 
     bufv.data = &bufp->b[0];
     bufv.len = nmove;
-    nmovelines = bufp_p_simple_insert(a_prevp, &bufv, 1, nmove);
+    nmovelines = bufp_p_simple_insert(a_prevp, &bufv, 1, nmove, a_reverse);
 
     /* Move markers that belong with the data copied to a_prevp. */
     for (mkr = ql_first(&bufp->mlist);
@@ -2468,9 +2632,20 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     bufp_p_mkrs_pline_adjust(bufp, -nmovelines, 0);
 
     /* Insert the data. */
-    nlines = (cw_uint32_t) buf_p_bufv_insert(buf, a_prevp,
-					     ql_next(&buf->plist, bufp, plink),
-					     a_bufv, a_bufvcnt);
+    if (a_reverse == FALSE)
+    {
+	nlines = (cw_uint32_t) buf_p_bufv_insert(buf, a_prevp,
+						 ql_next(&buf->plist, bufp,
+							 plink),
+						 a_bufv, a_bufvcnt);
+    }
+    else
+    {
+	nlines = (cw_uint32_t) buf_p_bufv_rinsert(buf, a_prevp,
+						  ql_next(&buf->plist, bufp,
+							  plink),
+						  a_bufv, a_bufvcnt);
+    }
 
     return nlines;
 }
@@ -2478,7 +2653,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 static cw_uint32_t
 mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 			 const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
-			 cw_uint32_t a_count)
+			 cw_uint32_t a_count, cw_bool_t a_reverse)
 {
     cw_uint32_t nlines;
     cw_buf_t *buf;
@@ -2515,7 +2690,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 
     bufv.data = &bufp->b[CW_BUFP_SIZE - nmove];
     bufv.len = nmove;
-    nmovelines = bufp_p_simple_insert(a_nextp, &bufv, 1, nmove);
+    nmovelines = bufp_p_simple_insert(a_nextp, &bufv, 1, nmove, a_reverse);
 
     /* Move markers that belong with the data copied to a_nextp. */
     for (mkr = ql_last(&bufp->mlist, mlink);
@@ -2561,10 +2736,20 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
     }
 
     /* Insert the data. */
-    nlines = (cw_uint32_t) buf_p_bufv_insert(buf, bufp,
-					     ql_next(&buf->plist, a_nextp,
-						     plink),
-					     a_bufv, a_bufvcnt);
+    if (a_reverse == FALSE)
+    {
+	nlines = (cw_uint32_t) buf_p_bufv_insert(buf, bufp,
+						 ql_next(&buf->plist, a_nextp,
+							 plink),
+						 a_bufv, a_bufvcnt);
+    }
+    else
+    {
+	nlines = (cw_uint32_t) buf_p_bufv_rinsert(buf, bufp,
+						  ql_next(&buf->plist, a_nextp,
+							  plink),
+						  a_bufv, a_bufvcnt);
+    }
 
     return nlines;
 }
@@ -2572,7 +2757,8 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 /* a_bufv won't fit in a_mkr's bufp, so split it. */
 static cw_uint64_t
 mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
-		   cw_uint32_t a_bufvcnt, cw_uint64_t a_count)
+		   cw_uint32_t a_bufvcnt, cw_uint64_t a_count,
+		   cw_bool_t a_reverse)
 {
     cw_uint64_t nlines;
     cw_uint32_t i, nextra;
@@ -2690,14 +2876,22 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 						* sizeof(cw_bufv_t));
     buf->bufvcnt += (nextra + 1) * 2;
 
-    nlines = buf_p_bufv_insert(buf, bufp, pastp, a_bufv, a_bufvcnt);
+    if (a_reverse == FALSE)
+    {
+	nlines = buf_p_bufv_insert(buf, bufp, pastp, a_bufv, a_bufvcnt);
+    }
+    else
+    {
+	nlines = buf_p_bufv_rinsert(buf, bufp, pastp, a_bufv, a_bufvcnt);
+    }
 
     return nlines;
 }
 
 void
 mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
-	     const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
+	     const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+	     cw_bool_t a_reverse)
 {
     cw_uint64_t cnt, nlines;
     cw_uint32_t i;
@@ -2811,7 +3005,8 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     {
 	nlines = (cw_uint64_t) mkr_p_simple_insert(a_mkr, a_after, a_bufv,
 						   a_bufvcnt,
-						   (cw_uint32_t) cnt);
+						   (cw_uint32_t) cnt,
+						   a_reverse);
     }
     else
     {
@@ -2831,7 +3026,8 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	    nlines = (cw_uint64_t) mkr_p_before_slide_insert(a_mkr, a_after,
 							     prevp, a_bufv,
 							     a_bufvcnt,
-							     (cw_uint32_t) cnt);
+							     (cw_uint32_t) cnt,
+							     a_reverse);
 	}
 	else if (nextp != NULL && cnt <= (CW_BUFP_SIZE - bufp->len)
 		 + (CW_BUFP_SIZE - nextp->len))
@@ -2839,11 +3035,13 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	    nlines = (cw_uint64_t) mkr_p_after_slide_insert(a_mkr, a_after,
 							    nextp, a_bufv,
 							    a_bufvcnt,
-							    (cw_uint32_t) cnt);
+							    (cw_uint32_t) cnt,
+							    a_reverse);
 	}
 	else
 	{
-	    nlines = mkr_p_split_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
+	    nlines = mkr_p_split_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt,
+					a_reverse);
 	}
 
 	/* Adjust markers at the insertion point. */
@@ -2940,7 +3138,8 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     buf->nlines += (cw_uint64_t) nlines;
 
     /* Re-insert the extents that grew from zero length. */
-    ql_foreach(ext, &buf->elist, elink) {
+    ql_foreach(ext, &buf->elist, elink)
+    {
 	ext_p_insert(ext);
     }
 }
@@ -3993,14 +4192,14 @@ void
 mkr_before_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
 		   cw_uint32_t a_bufvcnt)
 {
-    mkr_l_insert(a_mkr, TRUE, FALSE, a_bufv, a_bufvcnt);
+    mkr_l_insert(a_mkr, TRUE, FALSE, a_bufv, a_bufvcnt, FALSE);
 }
 
 void
 mkr_after_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
 		  cw_uint32_t a_bufvcnt)
 {
-    mkr_l_insert(a_mkr, TRUE, TRUE, a_bufv, a_bufvcnt);
+    mkr_l_insert(a_mkr, TRUE, TRUE, a_bufv, a_bufvcnt, FALSE);
 }
 
 void

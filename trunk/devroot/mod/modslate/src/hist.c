@@ -454,8 +454,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 		       cw_uint8_t a_tag)
 {
     cw_uint64_t cnt;
-    cw_bufv_t *bufv;
-    cw_uint32_t i, bufvcnt;
+    cw_uint32_t i;
 
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
@@ -504,25 +503,24 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
      * a new empty record. */
     if (mkr_pos(&a_hist->hend) > 1 && histh_p_tag_get(&a_hist->hhead) == a_tag)
     {
-	/* Update the data count. */
+	/* Update the data count.  Be careful to leave hcur in the correct
+	 * location (just before the footer). */
 
 	/* Header. */
 	histh_p_aux_set(&a_hist->hhead, histh_p_aux_get(&a_hist->hhead) + cnt);
 	mkr_dup(&a_hist->htmp, &a_hist->hbeg);
 	mkr_seek(&a_hist->htmp, HISTH_LEN, BUFW_REL);
-	bufv = mkr_range_get(&a_hist->hbeg, &a_hist->htmp, &bufvcnt);
-	cw_check_ptr(bufv);
-	bufv_copy(bufv, bufvcnt, histh_p_bufv_get(&a_hist->hhead),
-		  histh_p_bufvcnt_get(&a_hist->hhead), 0);
+	mkr_remove(&a_hist->hbeg, &a_hist->htmp);
+	mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
+			 histh_p_bufvcnt_get(&a_hist->hhead));
+	mkr_seek(&a_hist->htmp, HISTH_LEN, BUFW_REL);
 
 	/* Footer. */
 	histh_p_aux_set(&a_hist->hfoot, histh_p_aux_get(&a_hist->hfoot) + cnt);
-	mkr_dup(&a_hist->htmp, &a_hist->hend);
-	mkr_seek(&a_hist->htmp, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
-	bufv = mkr_range_get(&a_hist->htmp, &a_hist->hend, &bufvcnt);
-	cw_check_ptr(bufv);
-	bufv_copy(bufv, bufvcnt, histh_p_bufv_get(&a_hist->hfoot),
-		  histh_p_bufvcnt_get(&a_hist->hfoot), 0);
+	mkr_remove(&a_hist->hcur, &a_hist->hend);
+	mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
+			  histh_p_bufvcnt_get(&a_hist->hfoot));
+	mkr_seek(&a_hist->hcur, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
     }
     else
     {
@@ -554,30 +552,22 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
     }
 
-    /* Insert the data. */
-    mkr_before_insert(&a_hist->hcur, a_bufv, a_bufvcnt);
-
-    /* Reverse the data, if the record type requires it. */
+    /* Insert the data in the appropriate order for the record type. */
     switch (a_tag)
     {
-	case HISTH_TAG_YNK:
-	case HISTH_TAG_REM:
-	{
-	    /* Now that there is space for the data, do a bufv_rcopy() to get
-	     * the data written in the proper order. */
-	    mkr_dup(&a_hist->htmp, &a_hist->hcur);
-	    mkr_seek(&a_hist->htmp, -(cw_sint64_t)cnt, BUFW_REL);
-	    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur, &bufvcnt);
-	    if (bufv != NULL)
-	    {
-		bufv_rcopy(bufv, bufvcnt, a_bufv, a_bufvcnt, 0);
-	    }
-
-	    break;
-	}
 	case HISTH_TAG_INS:
 	case HISTH_TAG_DEL:
 	{
+	    /* Insert in forward order. */
+	    mkr_before_insert(&a_hist->hcur, a_bufv, a_bufvcnt);
+	    break;
+	}
+	case HISTH_TAG_YNK:
+	case HISTH_TAG_REM:
+	{
+	    /* Insert in reverse order. */
+	    mkr_l_insert(&a_hist->hcur, TRUE, FALSE, a_bufv, a_bufvcnt, TRUE);
+
 	    break;
 	}
 	default:
@@ -744,7 +734,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			bufv.len = sizeof(*p);
 
 			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1);
+			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, FALSE);
 
 			/* Adjust bpos. */
 			a_hist->hbpos++;
@@ -760,7 +750,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			bufv.len = sizeof(*p);
 
 			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1);
+			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
 			break;
 		    }
 		    default:
@@ -903,7 +893,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			bufv.len = sizeof(*p);
 
 			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1);
+			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, FALSE);
 
 			/* Adjust bpos. */
 			a_hist->hbpos++;
@@ -919,7 +909,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			bufv.len = sizeof(*p);
 
 			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1);
+			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
 			break;
 		    }
 		    case HISTH_TAG_REM:
@@ -1521,7 +1511,7 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 		{
 		    cw_assert(histh_p_aux_get(&thead)
 			      == histh_p_aux_get(&tfoot));
-		    cw_assert(mkr_pos(&ttmp) < mkr_pos(&tcur));
+		    cw_assert(mkr_pos(&ttmp) <= mkr_pos(&tcur));
 		    break;
 		}
 		default:
