@@ -77,8 +77,8 @@ modslate_hooks_init(cw_nxo_t *a_thread,
 
     for (i = 0; i < a_nentries; i++)
     {
-	nxo_name_new(name, nx, a_entries[i].name, strlen(a_entries[i].name),
-		     FALSE);
+	nxo_name_new(name, nx, a_entries[i].name,
+		     strlen((char *) a_entries[i].name), FALSE);
 	nxo_hook_new(value, nx, NULL, a_entries[i].eval_f,
 		     modslate_p_hook_ref_iter, NULL);
 	nxo_dup(nxo_hook_tag_get(value), name);
@@ -114,7 +114,8 @@ modslate_hook_type(cw_nxo_t *a_hook, const cw_uint8_t *a_type)
 
     name_len = nxo_name_len_get(tag);
     name = nxo_name_str_get(tag);
-    if ((name_len != strlen(a_type)) || strncmp(a_type, name, name_len))
+    if ((name_len != strlen((char *) a_type))
+	|| strncmp(a_type, name, name_len))
     {
 	retval = NXN_typecheck;
 	goto RETURN;
