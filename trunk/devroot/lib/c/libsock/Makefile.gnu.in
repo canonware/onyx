@@ -279,7 +279,7 @@ doc :
 clean : FORCE
 	rm -f *~ */*~ */*/*~
 	rm -f *.bak *.BAK
-	rm -f core test/core *.core test/*.core
+	rm -f core test/core *.core test/*.core bin/core bin/*.core
 	rm -f src/*.[do]_*
 	rm -f bin/*.[do]
 	rm -f lib/lib*
