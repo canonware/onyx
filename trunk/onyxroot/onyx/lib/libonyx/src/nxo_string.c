@@ -204,14 +204,27 @@ nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
 {
     cw_uint32_t from_len;
 
+    cw_assert(nxo_type_get(a_from) == NXOT_STRING
+	      || nxo_type_get(a_from) == NXOT_NAME);
+
     /* Create a copy of a_from, but with a trailing '\0' so that it can be used
      * in calls to standard C functions. */
-    from_len = nxo_string_len_get(a_from);
-    nxo_string_new(a_to, nxo_thread_nx_get(a_thread), FALSE, from_len + 1);
-    nxo_string_lock(a_from);
-    nxo_string_set(a_to, 0, nxo_string_get(a_from), from_len);
-    nxo_string_el_set(a_to, '\0', from_len);
-    nxo_string_unlock(a_from);
+    if (nxo_type_get(a_from) == NXOT_STRING)
+    {
+	from_len = nxo_string_len_get(a_from);
+	nxo_string_new(a_to, nxo_thread_nx_get(a_thread), FALSE, from_len + 1);
+	nxo_string_lock(a_from);
+	nxo_string_set(a_to, 0, nxo_string_get(a_from), from_len);
+	nxo_string_el_set(a_to, '\0', from_len);
+	nxo_string_unlock(a_from);
+    }
+    else
+    {
+	from_len = nxo_name_len_get(a_from);
+	nxo_string_new(a_to, nxo_thread_nx_get(a_thread), FALSE, from_len + 1);
+	nxo_string_set(a_to, 0, nxo_name_str_get(a_from), from_len);
+	nxo_string_el_set(a_to, '\0', from_len);
+    }
 }
 
 cw_uint32_t
