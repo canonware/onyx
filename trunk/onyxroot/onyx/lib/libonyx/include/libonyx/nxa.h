@@ -73,6 +73,6 @@ nxa_threshold_set(cw_nxoi_t a_threshold);
 
 void
 nxa_stats_get(cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
-	      cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep,
-	      cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep,
-	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep);
+	      cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark,
+	      cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark,
+	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark);

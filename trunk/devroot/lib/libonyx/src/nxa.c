@@ -144,9 +144,9 @@ static cw_nxoi_t s_gcdict_period;
 static cw_nxoi_t s_gcdict_threshold;
 static cw_nxoi_t s_gcdict_collections;
 static cw_nxoi_t s_gcdict_count;
-static cw_nxoi_t s_gcdict_current[3];
-static cw_nxoi_t s_gcdict_maximum[3];
-static cw_nxoi_t s_gcdict_sum[3];
+static cw_nxoi_t s_gcdict_current[2];
+static cw_nxoi_t s_gcdict_maximum[2];
+static cw_nxoi_t s_gcdict_sum[2];
 
 /* Sequence set. */
 #ifdef CW_THREADS
@@ -154,6 +154,12 @@ static cw_mtx_t s_seq_mtx;
 #endif
 static ql_head(cw_nxoe_t) s_seq_set;
 static cw_bool_t s_white; /* Current value for white (alternates). */
+
+/* Garbage. */
+static cw_uint32_t s_iter;
+static cw_nxoi_t s_target_count;
+static cw_nxoe_t *s_garbage;
+static cw_nxoe_t *s_deferred_garbage;
 
 /* Message queue used to communicate with the GC thread. */
 #ifdef CW_PTHREADS
@@ -166,6 +172,176 @@ static cw_bool_t s_gc_allocated;
 #ifdef CW_PTHREADS
 static cw_thd_t *s_gc_thd;
 #endif
+
+/* Clean up enough unreferenced objects to drop below s_target_count.  This
+ * function is entered/exited with s_lock locked. */
+CW_P_INLINE void
+nxa_p_sweep(void)
+{
+    cw_nxoe_t *nxoe, *next;
+    cw_bool_t notyet;
+#define NSWEEP 8
+    cw_uint32_t i;
+
+    /* Iterate through the garbage objects and delete them.  If notyet is set to
+     * TRUE, the object deletion is deferred until a later pass.  Repeatedly
+     * iterate through undeleted objects until no objects defer deletion, or
+     * s_gcdict_count has dropped below s_target_count. */
+    while (1)
+    {
+	/* If all garbage is in s_deferred_garbage, start a new sweep iteration.
+	 * If no garbage is left, return. */
+	if (s_garbage == NULL)
+	{
+	    if (s_deferred_garbage == NULL)
+	    {
+		break;
+	    }
+	    else
+	    {
+		s_iter++;
+		s_garbage = s_deferred_garbage;
+		s_deferred_garbage = NULL;
+	    }
+	}
+
+	for (i = 1, nxoe = s_garbage, s_garbage = qr_next(nxoe, link);
+	     i < NSWEEP && s_garbage != nxoe;
+	     i++, s_garbage = qr_next(s_garbage, link))
+	{
+	    /* Do nothing. */
+	}
+
+	if (s_garbage != nxoe)
+	{
+	    qr_split(s_garbage, nxoe, cw_nxoe_t, link);
+	}
+	else
+	{
+	    s_garbage = NULL;
+	}
+
+	/* Drop s_lock here to avoid recursive acquisition during object
+	 * deletion. */
+#ifdef CW_THREADS
+	mtx_unlock(&s_lock);
+#endif
+
+	next = nxoe;
+	do
+	{
+	    nxoe = next;
+	    next = qr_next(next, link);
+	    qr_remove(nxoe, link);
+
+	    switch (nxoe_l_type_get(nxoe))
+	    {
+		case NXOT_ARRAY:
+		{
+		    notyet = nxoe_l_array_delete(nxoe, s_iter);
+		    break;
+		}
+#ifdef CW_THREADS
+		case NXOT_CONDITION:
+		{
+		    notyet = nxoe_l_condition_delete(nxoe, s_iter);
+		    break;
+		}
+#endif
+		case NXOT_DICT:
+		{
+		    notyet = nxoe_l_dict_delete(nxoe, s_iter);
+		    break;
+		}
+		case NXOT_FILE:
+		{
+		    notyet = nxoe_l_file_delete(nxoe, s_iter);
+		    break;
+		}
+#ifdef CW_HOOK
+		case NXOT_HOOK:
+		{
+		    notyet = nxoe_l_hook_delete(nxoe, s_iter);
+		    break;
+		}
+#endif
+#ifdef CW_THREADS
+		case NXOT_MUTEX:
+		{
+		    notyet = nxoe_l_mutex_delete(nxoe, s_iter);
+		    break;
+		}
+#endif
+		case NXOT_NAME:
+		{
+		    notyet = nxoe_l_name_delete(nxoe, s_iter);
+		    break;
+		}
+#ifdef CW_REGEX
+		case NXOT_REGEX:
+		{
+		    notyet = nxoe_l_regex_delete(nxoe, s_iter);
+		    break;
+		}
+		case NXOT_REGSUB:
+		{
+		    notyet = nxoe_l_regsub_delete(nxoe, s_iter);
+		    break;
+		}
+#endif
+		case NXOT_STACK:
+		{
+		    notyet = nxoe_l_stack_delete(nxoe, s_iter);
+		    break;
+		}
+		case NXOT_STRING:
+		{
+		    notyet = nxoe_l_string_delete(nxoe, s_iter);
+		    break;
+		}
+		case NXOT_THREAD:
+		{
+		    notyet = nxoe_l_thread_delete(nxoe, s_iter);
+		    break;
+		}
+		default:
+		{
+		    cw_not_reached();
+		    break;
+		}
+	    }
+
+	    if (notyet)
+	    {
+#ifdef CW_THREADS
+		mtx_lock(&s_lock);
+#endif
+		/* Defer deletion of this object. */
+		if (s_deferred_garbage != NULL)
+		{
+		    qr_before_insert(s_deferred_garbage, nxoe, link);
+		}
+		else
+		{
+		    s_deferred_garbage = nxoe;
+		}
+#ifdef CW_THREADS
+		mtx_unlock(&s_lock);
+#endif
+	    }
+	} while (next != nxoe);
+
+	/* Check if enough garbage has been swept. */
+#ifdef CW_THREADS
+	mtx_lock(&s_lock);
+#endif
+	if (s_gcdict_count <= s_target_count)
+	{
+	    /* Enough garbage swept for now. */
+	    break;
+	}
+    }
+}
 
 void
 nxa_l_init(void)
@@ -200,10 +376,16 @@ nxa_l_init(void)
 #endif
 
 	ql_new(&s_seq_set);
+	s_white = FALSE;
+
+	s_garbage = NULL;
+	s_deferred_garbage = NULL;
 
 #ifdef CW_PTHREADS
 	mq_new(&s_gc_mq, cw_g_mema, sizeof(cw_nxam_t));
 #endif
+	s_gc_pending = FALSE;
+	s_gc_allocated = FALSE;
 	try_stage = 1;
 
 	/* Initialize gcdict state. */
@@ -216,13 +398,10 @@ nxa_l_init(void)
 	s_gcdict_count = 0;
 	s_gcdict_current[0] = 0;
 	s_gcdict_current[1] = 0;
-	s_gcdict_current[2] = 0;
 	s_gcdict_maximum[0] = 0;
 	s_gcdict_maximum[1] = 0;
-	s_gcdict_maximum[2] = 0;
 	s_gcdict_sum[0] = 0;
 	s_gcdict_sum[1] = 0;
-	s_gcdict_sum[2] = 0;
 
 #ifdef CW_PTHREADS
 	/* Block all signals during thread creation, so that the GC thread does
@@ -299,11 +478,15 @@ nxa_l_shutdown(void)
 #ifdef CW_PTH
     mtx_lock(&s_lock);
     nxa_p_collect(TRUE);
+    s_target_count = 0;
+    nxa_p_sweep();
     mtx_unlock(&s_lock);
 #endif
     mtx_delete(&s_seq_mtx);
 #else
     nxa_p_collect(TRUE);
+    s_target_count = 0;
+    nxa_p_sweep();
 #endif
     dch_delete(&cw_g_nxa_name_hash);
 #ifdef CW_THREADS
@@ -553,9 +736,9 @@ nxa_threshold_set(cw_nxoi_t a_threshold)
 
 void
 nxa_stats_get(cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
-	      cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep,
-	      cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep,
-	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
+	      cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark,
+	      cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark,
+	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark)
 {
     cw_assert(cw_g_nxa_initialized);
 	
@@ -584,10 +767,6 @@ nxa_stats_get(cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
     {
 	*r_cmark = s_gcdict_current[1];
     }
-    if (r_csweep != NULL)
-    {
-	*r_csweep = s_gcdict_current[2];
-    }
 
     /* maximum. */
     if (r_mcount != NULL)
@@ -598,10 +777,6 @@ nxa_stats_get(cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
     {
 	*r_mmark = s_gcdict_maximum[1];
     }
-    if (r_msweep != NULL)
-    {
-	*r_msweep = s_gcdict_maximum[2];
-    }
 
     /* sum. */
     if (r_scount != NULL)
@@ -611,10 +786,6 @@ nxa_stats_get(cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
     if (r_smark != NULL)
     {
 	*r_smark = s_gcdict_sum[1];
-    }
-    if (r_ssweep != NULL)
-    {
-	*r_ssweep = s_gcdict_sum[2];
     }
 
 #ifdef CW_THREADS
@@ -682,6 +853,17 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 
     if (a_adjust > 0)
     {
+	if (s_garbage != NULL || s_deferred_garbage != NULL)
+	{
+	    s_target_count -= a_adjust;
+
+	    /* Sweep at least a_adjust bytes of garbage (or all garbage if there
+	     * isn't enough) before going any farther.  This assures that
+	     * garbage is swept at least as fast as it is generated, which keeps
+	     * the mutators from outrunning the garbage collector. */
+	    nxa_p_sweep();
+	}
+
 	if (s_gcdict_count > s_gcdict_maximum[0])
 	{
 	    /* Maximum amount of allocated memory seen. */
@@ -728,15 +910,12 @@ nxa_l_white_get(void)
     return s_white;
 }
 
-CW_P_INLINE cw_uint32_t
+CW_P_INLINE void
 nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
 {
-    cw_uint32_t retval;
-
     if (nxoe_l_registered_get(a_nxoe))
     {
 	/* Paint object gray. */
-	retval = 1;
 	cw_assert(nxoe_l_color_get(a_nxoe) == s_white);
 	nxoe_l_color_set(a_nxoe, !s_white);
 	if (*r_roots)
@@ -753,23 +932,16 @@ nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
 	 * list. */
 	*r_gray = a_nxoe;
     }
-    else
-    {
-	retval = 0;
-    }
-
-    return retval;
 }
 
 /* Find roots, if any.  Return TRUE if there are roots, FALSE otherwise.  Upon
  * return, s_seq_set points to the first object in the root set. */
 CW_P_INLINE cw_bool_t
-nxa_p_roots(cw_bool_t a_shutdown, cw_uint32_t *r_nroot)
+nxa_p_roots(cw_bool_t a_shutdown)
 {
     cw_bool_t retval = FALSE;
     cw_nx_t *nx;
     cw_nxoe_t *nxoe, *gray;
-    cw_uint32_t nroot = 0;
 
     /* Iterate through the root set and mark it gray.
      *
@@ -782,33 +954,29 @@ nxa_p_roots(cw_bool_t a_shutdown, cw_uint32_t *r_nroot)
 	     nxoe != NULL;
 	     nxoe = nx_l_ref_iter(nx, FALSE))
 	{
-	    nroot += nxa_p_root_add(nxoe, &gray, &retval);
+	    nxa_p_root_add(nxoe, &gray, &retval);
 	}
     }
 
     if (a_shutdown == FALSE)
     {
 	/* Add argv to the root set. */
-	nroot += nxa_p_root_add(nxo_nxoe_get(libonyx_argv_get()), &gray,
-				&retval);
+	nxa_p_root_add(nxo_nxoe_get(libonyx_argv_get()), &gray, &retval);
 
 	/* Add envdict to the root set. */
 #ifdef CW_POSIX
-	nroot += nxa_p_root_add(nxo_nxoe_get(libonyx_envdict_get()), &gray,
-				&retval);
+	nxa_p_root_add(nxo_nxoe_get(libonyx_envdict_get()), &gray, &retval);
 #endif
     }
 
-    *r_nroot = nroot;
     return retval;
 }
 
 /* Mark.  Return a pointer to a ring of garbage, if any, otherwise NULL. */
 CW_P_INLINE cw_nxoe_t *
-nxa_p_mark(cw_uint32_t *r_nreachable)
+nxa_p_mark(void)
 {
     cw_nxoe_t *retval, *gray, *nxoe;
-    cw_uint32_t nreachable = 0;
     cw_bool_t reset;
 
     /* Iterate through the gray objects and process them until only black and
@@ -908,7 +1076,6 @@ nxa_p_mark(cw_uint32_t *r_nreachable)
 		&& nxoe_l_registered_get(nxoe))
 	    {
 		nxoe_l_color_set(nxoe, !s_white);
-		nreachable++;
 		/* Move the object to the gray region, if it isn't already
 		 * adjacent to (and thereby part of) it. */
 		if (nxoe_l_color_get(qr_prev(nxoe, link)) == s_white)
@@ -935,117 +1102,7 @@ nxa_p_mark(cw_uint32_t *r_nreachable)
 	retval = NULL;
     }
 
-    *r_nreachable = nreachable;
     return retval;
-}
-
-/* Clean up unreferenced objects. */
-CW_P_INLINE void
-nxa_p_sweep(cw_nxoe_t *a_garbage)
-{
-    cw_nxoe_t *last, *defer, *nxoe;
-    cw_uint32_t i;
-    cw_bool_t again, notyet;
-
-    /* Iterate through the garbage objects and delete them.  If nxoe_l_delete()
-     * returns TRUE, the object deletion is deferred until a later pass.
-     * Repeatedly iterate through undeleted objects until no objects defer
-     * deletion. */
-    for (defer = a_garbage, nxoe = NULL, again = TRUE, i = 0;
-	 again == TRUE;
-	 i++)
-    {
-	again = FALSE;
-	last = defer;
-	do
-	{
-	    nxoe = qr_next(defer, link);
-	    qr_remove(nxoe, link);
-	    switch (nxoe_l_type_get(nxoe))
-	    {
-		case NXOT_ARRAY:
-		{
-		    notyet = nxoe_l_array_delete(nxoe, i);
-		    break;
-		}
-#ifdef CW_THREADS
-		case NXOT_CONDITION:
-		{
-		    notyet = nxoe_l_condition_delete(nxoe, i);
-		    break;
-		}
-#endif
-		case NXOT_DICT:
-		{
-		    notyet = nxoe_l_dict_delete(nxoe, i);
-		    break;
-		}
-		case NXOT_FILE:
-		{
-		    notyet = nxoe_l_file_delete(nxoe, i);
-		    break;
-		}
-#ifdef CW_HOOK
-		case NXOT_HOOK:
-		{
-		    notyet = nxoe_l_hook_delete(nxoe, i);
-		    break;
-		}
-#endif
-#ifdef CW_THREADS
-		case NXOT_MUTEX:
-		{
-		    notyet = nxoe_l_mutex_delete(nxoe, i);
-		    break;
-		}
-#endif
-		case NXOT_NAME:
-		{
-		    notyet = nxoe_l_name_delete(nxoe, i);
-		    break;
-		}
-#ifdef CW_REGEX
-		case NXOT_REGEX:
-		{
-		    notyet = nxoe_l_regex_delete(nxoe, i);
-		    break;
-		}
-		case NXOT_REGSUB:
-		{
-		    notyet = nxoe_l_regsub_delete(nxoe, i);
-		    break;
-		}
-#endif
-		case NXOT_STACK:
-		{
-		    notyet = nxoe_l_stack_delete(nxoe, i);
-		    break;
-		}
-		case NXOT_STRING:
-		{
-		    notyet = nxoe_l_string_delete(nxoe, i);
-		    break;
-		}
-		case NXOT_THREAD:
-		{
-		    notyet = nxoe_l_thread_delete(nxoe, i);
-		    break;
-		}
-		default:
-		{
-		    cw_not_reached();
-		    break;
-		}
-	    }
-
-	    if (notyet)
-	    {
-		again = TRUE;
-		qr_after_insert(defer, nxoe, link);
-		defer = nxoe;
-	    }
-	} while (nxoe != last);
-    }
 }
 
 /* Collect garbage using a Baker's Treadmill.  s_lock is held upon entry
@@ -1053,10 +1110,15 @@ nxa_p_sweep(cw_nxoe_t *a_garbage)
 static void
 nxa_p_collect(cw_bool_t a_shutdown)
 {
-    cw_uint32_t nroot, nreachable;
-    cw_nxoe_t *garbage;
     struct timeval t_tv;
-    cw_nxoi_t start_us, mark_us, sweep_us;
+    cw_nxoi_t start_us, mark_us;
+
+    /* Sweep any garbage that remains from the previous collection. */
+    if (s_garbage != NULL || s_deferred_garbage != NULL)
+    {
+	s_target_count = 0;
+	nxa_p_sweep();
+    }
 
     /* Reset the pending flag. */
     s_gc_pending = FALSE;
@@ -1067,7 +1129,7 @@ nxa_p_collect(cw_bool_t a_shutdown)
     /* Release the lock before entering the single section to avoid lock order
      * reversal due to mutators calling nxa_malloc() within critical sections.
      * We don't need the lock anyway, except to protect the GC statistics and
-     * the gc_pending flag. */
+     * the s_gc_pending flag. */
 #ifdef CW_THREADS
     mtx_unlock(&s_lock);
 #endif
@@ -1088,18 +1150,26 @@ nxa_p_collect(cw_bool_t a_shutdown)
     thd_single_enter();
 #endif
 
+    /* There shouldn't be any unswept garbage. */
+    cw_assert(s_garbage == NULL);
+    cw_assert(s_deferred_garbage == NULL);
+
     /* Mark the root set gray.  If there are any objects in the root set, mark
      * all objects reachable from the root set.  Otherwise, everything is
      * garbage. */
-    if (nxa_p_roots(a_shutdown, &nroot))
+    if (nxa_p_roots(a_shutdown))
     {
-	garbage = nxa_p_mark(&nreachable);
+	s_garbage = nxa_p_mark();
     }
     else
     {
-	garbage = ql_first(&s_seq_set);
+	s_garbage = ql_first(&s_seq_set);
 	ql_first(&s_seq_set) = NULL;
     }
+
+    /* Prepare for incremental sweeping. */
+    s_iter = 0;
+    s_target_count = s_gcdict_count;
 
 #ifdef CW_THREADS
     /* Allow mutator threads to run. */
@@ -1120,20 +1190,6 @@ nxa_p_collect(cw_bool_t a_shutdown)
     mark_us *= 1000000;
     mark_us += t_tv.tv_usec;
     mark_us -= start_us;
-
-    /* If there is garbage, discard it. */
-    if (garbage != NULL)
-    {
-	nxa_p_sweep(garbage);
-    }
-
-    /* Record the sweep finish time and calculate sweep_us. */
-    gettimeofday(&t_tv, NULL);
-    sweep_us = t_tv.tv_sec;
-    sweep_us *= 1000000;
-    sweep_us += t_tv.tv_usec;
-    sweep_us -= start_us;
-    sweep_us -= mark_us;
 
     /* Protect statistics updates. */
 #ifdef CW_THREADS
@@ -1156,14 +1212,6 @@ nxa_p_collect(cw_bool_t a_shutdown)
     }
     s_gcdict_sum[1] += mark_us;
 
-    /* sweep. */
-    s_gcdict_current[2] = sweep_us;
-    if (sweep_us > s_gcdict_maximum[2])
-    {
-	s_gcdict_maximum[2] = sweep_us;
-    }
-    s_gcdict_sum[2] += sweep_us;
-
     /* Increment the collections counter. */
     s_gcdict_collections++;
 }
@@ -1174,7 +1222,7 @@ nxa_p_gc_entry(void *a_arg)
 {
     struct timespec period;
     cw_nxam_t message;
-    cw_bool_t allocated, shutdown;
+    cw_bool_t allocated, sweep, shutdown;
 
     /* Any of the following conditions will cause a collection:
      *
@@ -1226,7 +1274,12 @@ nxa_p_gc_entry(void *a_arg)
 			     * the last mq_timedget() timeout and some
 			     * allocation has occurred; collect. */
 			    nxa_p_collect(FALSE);
+			    sweep = FALSE;
 			    allocated = FALSE;
+			}
+			else
+			{
+			    sweep = TRUE;
 			}
 		    }
 		    else
@@ -1235,6 +1288,16 @@ nxa_p_gc_entry(void *a_arg)
 			 * we can tell if there has been any allocation
 			 * activity. */
 			s_gc_allocated = FALSE;
+			sweep = FALSE;
+		    }
+
+		    /* If no collection was done, and no new data were
+		     * allocated, finish sweeping any remaining garbage. */
+		    if (sweep
+			&& (s_garbage != NULL || s_deferred_garbage != NULL))
+		    {
+			s_target_count = 0;
+			nxa_p_sweep();
 		    }
 		}
 		mtx_unlock(&s_lock);
@@ -1259,6 +1322,8 @@ nxa_p_gc_entry(void *a_arg)
 		shutdown = TRUE;
 		mtx_lock(&s_lock);
 		nxa_p_collect(TRUE);
+		s_target_count = 0;
+		nxa_p_sweep();
 		mtx_unlock(&s_lock);
 		break;
 	    }

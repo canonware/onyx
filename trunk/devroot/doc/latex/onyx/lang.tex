@@ -1646,8 +1646,8 @@ onyx:0>
 		\begin{description}\item[]
 		\item[array: ]
 			An array with the format {\lb}collections count
-			{\lb}ccount cmark csweep{\rb} {\lb}mcount mmark
-			msweep{\rb} {\lb}scount smark ssweep{\rb}{\rb}, where
+			{\lb}ccount cmark{\rb} {\lb}mcount mmark{\rb}
+			{\lb}scount smark{\rb}{\rb}, where
 			the fields have the following meanings:
 			\begin{description}%\item[]
 			\item[collections: ]
@@ -1661,26 +1661,17 @@ onyx:0>
 			\item[cmark: ]
 				Number of microseconds taken by the most recent
 				garbage collection mark phase.
-			\item[csweep: ]
-				Number of microseconds taken by the most recent
-				garbage collection sweep phase.
 			\item[mcount: ]
 				Largest number of bytes of memory ever allocated
 				at any point in time.
 			\item[mmark: ]
 				Maximum number of microseconds taken by any
 				garbage collection mark phase.
-			\item[msweep: ]
-				Number of microseconds taken by any garbage
-				collection sweep phase.
 			\item[scount: ]
 				Total number of bytes of memory ever allocated.
 			\item[smark: ]
 				Total number of microseconds taken by all
 				garbage collection mark phases.
-			\item[ssweep: ]
-				Total number of microseconds taken by all
-				garbage collection sweep phases.
 			\end{description}
 		\end{description}
 	\item[Errors(s): ] None.
@@ -1690,7 +1681,7 @@ onyx:0>
 
 onyx:0> gcdict begin
 onyx:0> stats 2 sprint
-[23 72673 [72268 754 3467] [4752223 930 36492] [51057886 17448 136807]]
+[28 280921 [118328 852] [904779 1007] [5707551 24205]]
 onyx:0>
 		\end{verbatim}
 	\end{description}
