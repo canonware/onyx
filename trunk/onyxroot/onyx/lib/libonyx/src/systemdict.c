@@ -158,7 +158,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(exit),
     ENTRY(exp),
 #ifdef CW_POSIX
-    ENTRY(fcntl),
     ENTRY(mkfifo),
 #endif
 #ifdef CW_REAL
@@ -242,6 +241,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(ne),
     ENTRY(neg),
     ENTRY(nip),
+    ENTRY(nonblocking),
     ENTRY(not),
     ENTRY(npop),
 #ifdef CW_POSIX
@@ -320,6 +320,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(setlocking),
 #endif
+    ENTRY(setnonblocking),
 #ifdef CW_POSIX
     ENTRY(setsockopt),
 #endif
@@ -3061,14 +3062,6 @@ systemdict_exp(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-#ifdef CW_POSIX
-void
-systemdict_fcntl(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-#endif
-
 #ifdef CW_REAL
 void
 systemdict_floor(cw_nxo_t *a_thread)
@@ -5144,17 +5137,6 @@ systemdict_ne(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_nip(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack;
-    cw_nxo_t *nxo;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_NGET(nxo, ostack, a_thread, 1);
-    nxo_stack_remove(ostack, nxo);
-}
-
-void
 systemdict_neg(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
@@ -5183,6 +5165,34 @@ systemdict_neg(cw_nxo_t *a_thread)
 	    return;
 	}
     }
+}
+
+void
+systemdict_nip(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_NGET(nxo, ostack, a_thread, 1);
+    nxo_stack_remove(ostack, nxo);
+}
+
+void
+systemdict_nonblocking(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_bool_t nonblocking;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_FILE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    nonblocking = nxo_file_nonblocking_get(nxo);
+    nxo_boolean_new(nxo, nonblocking);
 }
 
 void
@@ -5722,6 +5732,7 @@ systemdict_print(cw_nxo_t *a_thread)
     cw_nxo_t *ostack;
     cw_nxo_t *nxo, *stdout_nxo;
     cw_nxn_t error;
+    cw_bool_t nonblocking;
 
     ostack = nxo_thread_ostack_get(a_thread);
     stdout_nxo = nxo_thread_stdout_get(a_thread);
@@ -5733,10 +5744,21 @@ systemdict_print(cw_nxo_t *a_thread)
 	return;
     }
 
+    nonblocking = nxo_file_nonblocking_get(stdout_nxo);
+    if (nonblocking)
+    {
+	nxo_file_nonblocking_set(stdout_nxo, FALSE);
+    }
+
     nxo_string_lock(nxo);
     error = nxo_file_write(stdout_nxo, nxo_string_get(nxo),
-			   nxo_string_len_get(nxo));
+			   nxo_string_len_get(nxo), NULL);
     nxo_string_unlock(nxo);
+
+    if (nonblocking)
+    {
+	nxo_file_nonblocking_set(stdout_nxo, TRUE);
+    }
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
@@ -7043,6 +7065,29 @@ systemdict_setlocking(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 #endif
+
+void
+systemdict_setnonblocking(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *file, *nonblocking;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nonblocking, ostack, a_thread);
+    NXO_STACK_DOWN_GET(file, ostack, a_thread, nonblocking);
+    if (nxo_type_get(file) != NXOT_FILE
+	|| nxo_type_get(nonblocking) != NXOT_BOOLEAN)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    if (nxo_file_nonblocking_set(file, nxo_boolean_get(nonblocking)))
+    {
+	nxo_thread_nerror(a_thread, NXN_ioerror);
+	return;
+    }
+
+    nxo_stack_npop(ostack, 2);
+}
 
 #ifdef CW_POSIX
 void
@@ -9819,6 +9864,7 @@ systemdict_write(cw_nxo_t *a_thread)
     cw_nxo_t *ostack;
     cw_nxo_t *file, *value;
     cw_nxn_t error;
+    cw_uint32_t count;
 
     ostack = nxo_thread_ostack_get(a_thread);
 
@@ -9838,24 +9884,52 @@ systemdict_write(cw_nxo_t *a_thread)
 	    cw_uint8_t val;
 
 	    val = (cw_uint8_t) nxo_integer_get(value);
-	    error = nxo_file_write(file, &val, 1);
+	    error = nxo_file_write(file, &val, 1, &count);
 	    if (error)
 	    {
 		nxo_thread_nerror(a_thread, error);
 		return;
 	    }
+	    if (count == 1)
+	    {
+		/* Successful write. */
+		nxo_boolean_new(file, FALSE);
+		nxo_stack_pop(ostack);
+	    }
+	    else
+	    {
+		/* Short write. */
+		nxo_dup(file, value);
+		nxo_boolean_new(value, TRUE);
+	    }
 	    break;
 	}
 	case NXOT_STRING:
 	{
+	    cw_uint32_t len;
+
 	    nxo_string_lock(value);
-	    error = nxo_file_write(file, nxo_string_get(value),
-				   nxo_string_len_get(value));
+	    len = nxo_string_len_get(value);
+	    error = nxo_file_write(file, nxo_string_get(value), len, &count);
 	    nxo_string_unlock(value);
 	    if (error)
 	    {
 		nxo_thread_nerror(a_thread, error);
 		return;
+	    }
+	    if (count == len)
+	    {
+		/* Successful write. */
+		nxo_boolean_new(file, FALSE);
+		nxo_stack_pop(ostack);
+	    }
+	    else
+	    {
+		/* Short write. */
+		nxo_string_substring_new(file, value,
+					 nxo_thread_nx_get(a_thread),
+					 count, len - count);
+		nxo_boolean_new(value, TRUE);
 	    }
 	    break;
 	}
@@ -9865,8 +9939,6 @@ systemdict_write(cw_nxo_t *a_thread)
 	    return;
 	}
     }
-
-    nxo_stack_npop(ostack, 2);
 }
 
 void

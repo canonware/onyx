@@ -36,7 +36,8 @@ struct cw_nxoe_file_s
 	FILE_POSIX,
 #endif
 	FILE_SYNTHETIC
-    } mode;
+    } mode:2;
+    cw_bool_t nonblocking:1;
 
     union
     {

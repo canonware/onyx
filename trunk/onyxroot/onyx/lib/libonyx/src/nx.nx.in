@@ -890,6 +890,9 @@ $throw {
 	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
+	    # Avoid the need to check for partial writes.
+	    stderr false setnonblocking
+
 	    stderr `Onyx: Missing errordict or currenterror defs\n' write
 
 	    # Print stack dumps.

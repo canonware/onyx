@@ -13,7 +13,7 @@
 `Test begin\n' print flush
 
 gstderr 1 sprint
-gstderr `Written to gstderr\n' write
+gstderr `Written to gstderr\n' write pop
 
 `Test end\n' print
 pstack

@@ -1,3 +1,17 @@
+2002-06-02 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + nonblocking
+	  + setnonblocking
+
+	* Modify the write operator to return whether a write was partial or
+          not.  This is necessary for non-blocking files.
+
+	* lib/libonyx/src/nxo_file.c :
+	  + nxo_file_write() : Add the r_count parameter to support partial
+	    writes.
+	  + nxo_file_nonblocking_[gs]et() : Add.
+
 2002-06-01 : Jason Evans <jasone@canonware.com>
 
 	* Change language syntax.  The / special character is now $.

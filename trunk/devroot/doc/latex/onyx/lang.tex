@@ -3676,7 +3676,7 @@ file & {\bf \htmlref{close}{systemdict:close}} & -- & Close file. \\
 %begin{latexonly}
 file & {\bf \htmlref{read}{systemdict:read}} & integer boolean & Read from
 file. \\
-file string & {\bf \htmlref{read}{systemdict:read}} & string boolean & \\
+file string & {\bf \htmlref{read}{systemdict:read}} & substring boolean & \\
 \hline
 %end{latexonly}
 \begin{htmlonly}
@@ -3700,9 +3700,24 @@ buffer. \\
 file count & {\bf \htmlref{setiobuf}{systemdict:setiobuf}} & -- & Set size of
 I/O buffer. \\
 \hline
-file integer/string & {\bf \htmlref{write}{systemdict:write}} & -- & Write
-to file. \\
+file & {\bf \htmlref{nonblocking}{systemdict:nonblocking}} & boolean & Get
+non-blocking mode. \\
 \hline
+file boolean & {\bf \htmlref{setnonblocking}{systemdict:setnonblocking}} & -- &
+Set non-blocking mode. \\
+\hline
+%begin{latexonly}
+file integer/string & {\bf \htmlref{write}{systemdict:write}} & false & Write to file. \\
+file integer/string & {\bf \htmlref{write}{systemdict:write}} &
+integer/substring true & \\
+\hline
+%end{latexonly}
+\begin{htmlonly}
+file integer/string & {\bf \htmlref{write}{systemdict:write}} & false & Write to
+file. \\
+file integer/string & {\bf \htmlref{write}{systemdict:write}} &
+integer/substring true & Write to file. \\
+\end{htmlonly}
 string & {\bf \htmlref{print}{systemdict:print}} & -- & Print string to
 stdout. \\
 \hline
@@ -7973,6 +7988,38 @@ onyx:3> nip pstack
 onyx:2>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:nonblocking}
+\index{nonblocking@\onyxop{}{nonblocking}{}}
+\item[{\onyxop{file}{nonblocking}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			Nonb-blocking mode for \oparg{file}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get non-blocking mode for \oparg{file}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/tmp/foo' `w' open
+onyx:1> dup nonblocking 1 sprint
+false
+onyx:1> dup true setnonblocking
+onyx:1> dup nonblocking 1 sprint
+true
+onyx:1>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:not}
 \index{not@\onyxop{}{not}{}}
 \item[{\onyxop{a}{not}{r}}: ]
@@ -9910,6 +9957,37 @@ onyx:0> true setlocking
 onyx:0> currentlocking 1 sprint
 true
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setnonblocking}
+\index{setnonblocking@\onyxop{}{setnonblocking}{}}
+\item[{\onyxop{file boolean}{setnonblocking}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object.
+		\item[boolean: ]
+			Non-blocking mode to set \oparg{file} to.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set non-blocking mode for \oparg{file} to \oparg{boolean}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/tmp/foo' `w' open
+onyx:1> dup nonblocking 1 sprint
+false
+onyx:1> dup true setnonblocking
+onyx:1> dup nonblocking 1 sprint
+true
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setstderr}
@@ -12317,7 +12395,8 @@ onyx:0>
 	\end{description}
 \label{systemdict:write}
 \index{write@\onyxop{}{write}{}}
-\item[{\onyxop{file integer/string}{write}{--}}: ]
+\item[{\onyxop{file integer/string}{write}{false}}: ]
+\item[{\onyxop{file integer/string}{write}{integer/substring true}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -12328,7 +12407,17 @@ onyx:0>
 		\item[string: ]
 			A string object.
 		\end{description}
-	\item[Output(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[false: ]
+			Successful complete write.
+		\item[integer: ]
+			The \oparg{integer} that was passed in.
+		\item[substring: ]
+			The substring of \oparg{string} that was not written.
+		\item[true: ]
+			Successful partial write.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{ioerror}{ioerror}.]
@@ -12337,10 +12426,11 @@ onyx:0>
 		\end{description}
 	\item[Description: ]
 		Write \oparg{integer} or \oparg{string} to \oparg{file}.
+		Partial writes can only happen for non-blocking files.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/tmp/foo' `w+' open
-onyx:1> dup `Hello\n' write
+onyx:1> dup `Hello\n' write pop
 onyx:1> dup 0 seek
 onyx:1> dup readline 1 sprint 1 sprint
 false

@@ -61,45 +61,49 @@ $errordict <
     $handleerror {
 	$currenterror load begin
 
+	# Avoid the need to check for partial writes.
+	stderr nonblocking
+	stderr false setnonblocking
+
 	# If this is a syntaxerror, print the line and column numbers.
 	$errorname load $syntaxerror eq {
-	    stderr dup `At line ' write
-	    dup $line load cvs write
-	    dup `, column ' write
-	    dup $column load cvs write
-	    `: ' write
+	    stderr dup `At line ' write pop
+	    dup $line load cvs write pop
+	    dup `, column ' write pop
+	    dup $column load cvs write pop
+	    `: ' write pop
 	} if
 
 	# Print the errorname.
-	stderr dup `Error ' write
-	dup $errorname load 1 sprints write
+	stderr dup `Error ' write pop
+	dup $errorname load 1 sprints write pop
 
 	# Print ostack and dstack using sprint.
-	dup `\nostack: ' write
-	dup $ostack load 1 sprints write
-	dup `\ndstack: ' write
-	dup $dstack load 1 sprints write
-	`\n' write
+	dup `\nostack: ' write pop
+	dup $ostack load 1 sprints write pop
+	dup `\ndstack: ' write pop
+	dup $dstack load 1 sprints write pop
+	`\n' write pop
 
 	# Print a stack trace that depicts the currently executing element of
 	# arrays.
 	$estack load scount 1 sub dup 0 gt {
-	    stderr dup `estack/istack trace (0..' write
-	    1 idup cvs stderr exch write
-	    `):\n' write
+	    stderr dup `estack/istack trace (0..' write pop
+	    1 idup cvs stderr exch write pop
+	    `):\n' write pop
 	} if
 
 	# For each element in estack:
 	0 1 dn {
 	    # #edepth
 	    # If this element is an array, print it specially.
-	    dup cvs stderr exch write
+	    dup cvs stderr exch write pop
 	    dup $estack load dup dn sidup spop
 	    # #edepth #array
 
 	    dup type $arraytype eq {
 		# Array.
-		`: {\n' stderr exch write
+		`: {\n' stderr exch write pop
 		# #edepth #array
 		dup length 1 sub 0 1 dn {
 		    # #edepth #array #aindex
@@ -110,33 +114,36 @@ $errordict <
 		    # #edepth #array #aindex #iindex #aindex
 		    eq {
 			dup <$w 3> outputs
-			stderr exch write
+			stderr exch write pop
 			`:--> '
 		    }{
 			`\t'
 		    } ifelse
-		    stderr exch write
+		    stderr exch write pop
 		    # #edepth #array #aindex
 		    1 idup exch get 1 sprints
-		    stderr exch write
-		    stderr `\n' write
+		    stderr exch write pop
+		    stderr `\n' write pop
 		    # #edepth #array
 		} for
-		stderr `}\n' write
+		stderr `}\n' write pop
 		# #edepth #array
 		pop
 		# #edepth
 	    }{
 		# Non-array.
-		stderr `:\t' write
+		stderr `:\t' write pop
 		# #edepth #array
-		1 sprints stderr exch write
-		stderr `\n' write
+		1 sprints stderr exch write pop
+		stderr `\n' write pop
 		# #edepth
 	    } ifelse
 	    # #edepth
 	    pop
 	} for
+
+	# Set nonblocking mode of stderr back.
+	stderr exch setnonblocking
 
 	end # currenterror.
 

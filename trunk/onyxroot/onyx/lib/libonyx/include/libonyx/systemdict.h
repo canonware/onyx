@@ -249,11 +249,6 @@ systemdict_exit(cw_nxo_t *a_thread);
 void
 systemdict_exp(cw_nxo_t *a_thread);
 
-#ifdef CW_POSIX
-void
-systemdict_fcntl(cw_nxo_t *a_thread);
-#endif
-
 #ifdef CW_REAL
 void
 systemdict_floor(cw_nxo_t *a_thread);
@@ -447,6 +442,9 @@ systemdict_neg(cw_nxo_t *a_thread);
 
 void
 systemdict_nip(cw_nxo_t *a_thread);
+
+void
+systemdict_nonblocking(cw_nxo_t *a_thread);
 
 void
 systemdict_not(cw_nxo_t *a_thread);
@@ -657,6 +655,9 @@ systemdict_setiobuf(cw_nxo_t *a_thread);
 void
 systemdict_setlocking(cw_nxo_t *a_thread);
 #endif
+
+void
+systemdict_setnonblocking(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void

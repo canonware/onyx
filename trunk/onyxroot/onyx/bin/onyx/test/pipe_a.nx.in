@@ -15,7 +15,7 @@
 pipe
 $wfile exch def
 $rfile exch def
-wfile `foo\nbar\nbiz\n' write
+wfile `foo\nbar\nbiz\n' write pop
 wfile flushfile
 rfile readline pop 1 sprint
 rfile readline pop 1 sprint

@@ -149,9 +149,6 @@ typedef enum
     NXN_exit,
     NXN_exp,
     NXN_false,
-#ifdef CW_POSIX
-    NXN_fcntl,
-#endif
     NXN_filetype,
     NXN_finotype,
 #ifdef CW_REAL
@@ -262,6 +259,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_nlink,
 #endif
+    NXN_nonblocking,
     NXN_not,
     NXN_npop,
 #ifdef CW_POSIX
@@ -376,6 +374,9 @@ typedef enum
     NXN_setiobuf,
 #ifdef CW_THREADS
     NXN_setlocking,
+#endif
+    NXN_setnonblocking,
+#ifdef CW_THREADS
     NXN_setperiod,
 #endif
 #ifdef CW_POSIX

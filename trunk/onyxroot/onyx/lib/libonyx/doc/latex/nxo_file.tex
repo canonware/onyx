@@ -297,6 +297,56 @@ cw\_uint32\_t a\_flen}}
 	\item[Description: ]
 		Return the file descriptor associated with \cvar{a\_nxo}.
 	\end{capilist}
+\label{nxo_file_nonblocking_get}
+\index{nxo_file_nonblocking_get@\cfunc{nxo\_file\_nonblocking\_get}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_file\_nonblocking\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Blocking file.
+			\item[TRUE: ]
+				Non-blocking file.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the non-blocking mode for \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_file_nonblocking_set}
+\index{nxo_file_nonblocking_set@\cfunc{nxo\_file\_nonblocking\_set}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_file\_nonblocking\_set}{cw\_nxo\_t *a\_nxo,
+cw\_bool\_t a\_nonblocking}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a file \classname{nxo}.
+		\item[a\_nonblocking: ]
+			Non-blocking mode to set \classname{nxo} to.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				I/O error or non-POSIX file.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the non-blocking mode for \cvar{a\_nxo} to
+		\cvar{a\_nonblocking}.
+	\end{capilist}
 \label{nxo_file_read}
 \index{nxo_file_read@\cfunc{nxo\_file\_read}{}}
 \citem{\cfunc[cw\_sint32\_t]{nxo\_file\_read}{cw\_nxo\_t *a\_nxo, cw\_uint32\_t
@@ -374,7 +424,7 @@ a\_len, cw\_uint8\_t *r\_str}}
 \label{nxo_file_write}
 \index{nxo_file_write@\cfunc{nxo\_file\_write}{}}
 \citem{\cfunc[cw\_nxn\_t]{nxo\_file\_write}{cw\_nxo\_t *a\_nxo, const
-cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
+cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len, cw\_uint32\_t *r\_count}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -384,6 +434,9 @@ cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 			Pointer to data to write.
 		\item[a\_len: ]
 			Length of \cvar{a\_str}.
+		\item[r\_count: ]
+			Pointer to a location to store the number of bytes
+			written, or NULL.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -392,10 +445,15 @@ cw\_uint8\_t *a\_str, cw\_uint32\_t a\_len}}
 			\item[NXN\_ZERO.]
 			\item[NXN\_\htmlref{ioerror}{ioerror}.]
 			\end{description}
+		\item[*r\_count: ]
+			If \cvar{r\_count} is non-NULL, and retval is NXN\_ZERO,
+			number of bytes written, otherwise undefined.
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Write the \cvar{a\_len} bytes of data pointed to \cvar{a\_str}.
+		If the file is in non-blocking mode, it is possible for
+		\cvar{*r\_count} to be as small as 0 for a successful write.
 	\end{capilist}
 \label{nxo_file_truncate}
 \index{nxo_file_truncate@\cfunc{nxo\_file\_truncate}{}}

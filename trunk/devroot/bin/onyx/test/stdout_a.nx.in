@@ -13,7 +13,7 @@
 `Test begin\n' print flush
 
 stdout 1 sprint
-stdout `Written to stdout\n' write
+stdout `Written to stdout\n' write pop
 
 `Test end\n' print
 pstack

@@ -49,6 +49,12 @@ cw_sint32_t
 nxo_file_fd_get(cw_nxo_t *a_nxo);
 #endif
 
+cw_bool_t
+nxo_file_nonblocking_get(cw_nxo_t *a_nxo);
+
+cw_bool_t
+nxo_file_nonblocking_set(cw_nxo_t *a_nxo, cw_bool_t a_nonblocking);
+
 cw_sint32_t
 nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str);
 
@@ -57,7 +63,8 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		  cw_bool_t *r_eof);
 
 cw_nxn_t
-nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len);
+nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
+	       cw_uint32_t *r_count);
 
 #ifdef CW_POSIX_FILE
 cw_nxn_t

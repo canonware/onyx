@@ -113,7 +113,7 @@ $srender {
 	dup 16@a eq {
 	    `\r' print
 	} if
-	stdout exch write
+	stdout exch write pop
     } foreach
 } def
 
@@ -123,7 +123,7 @@ $redisplay {
     status_line
 
     scratch b2s
-#    stderr over 1 sprints write stderr `\n' write
+#    stderr over 1 sprints write stderr `\n' write pop
     srender
 
     hs
@@ -219,7 +219,7 @@ $keytable <
 
 # #string interpc -
 $interpc {
-#    stderr 1 idup cvs write stderr `\n' write
+#    stderr 1 idup cvs write pop stderr `\n' write pop
 #    scratch `interpc ' buffer_dump
     keytable 1 idup known {
 	keytable exch get eval

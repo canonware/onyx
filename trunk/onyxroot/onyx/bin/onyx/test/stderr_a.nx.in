@@ -13,7 +13,7 @@
 `Test begin\n' print flush
 
 stderr 1 sprint
-stderr `Written to stderr\n' write
+stderr `Written to stderr\n' write pop
 
 `Test end\n' print
 pstack

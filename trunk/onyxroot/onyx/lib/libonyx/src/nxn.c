@@ -150,9 +150,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "exit",
     "exp",
     "false",
-#ifdef CW_POSIX
-    "fcntl",
-#endif
     "filetype",
     "finotype",
 #ifdef CW_REAL
@@ -263,6 +260,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "nlink",
 #endif
+    "nonblocking",
     "not",
     "npop",
 #ifdef CW_POSIX
@@ -377,6 +375,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "setiobuf",
 #ifdef CW_THREADS
     "setlocking",
+#endif
+    "setnonblocking",
+#ifdef CW_THREADS
     "setperiod",
 #endif
 #ifdef CW_POSIX
