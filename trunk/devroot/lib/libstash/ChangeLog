@@ -1,3 +1,7 @@
+1999-06-18  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/thread.h (thd_sigmask): Add.
+
 1999-06-17  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/oh.h: Remove unnecessary first parameter to the
