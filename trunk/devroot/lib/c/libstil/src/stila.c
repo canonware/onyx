@@ -16,47 +16,24 @@
 #define _CW_STILA_SEQ_SET_BASE_GROW	24
 #define _CW_STILA_SEQ_SET_BASE_SHRINK	 8
 
-static cw_bool_t stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem);
+static void	stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem);
 static void	stila_p_delete(cw_stila_t *a_stila);
-static void stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt,
+static void	stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt,
     cw_stiloe_t *a_stiloe);
 
 /* stilag. */
-cw_bool_t
+void
 stilag_new(cw_stilag_t *a_stilag)
 {
 	mtx_new(&a_stilag->lock);
 	ql_new(&a_stilag->head);
 
-	if (mem_new(&a_stilag->mem, cw_g_mem) == NULL)
-		goto OOM_1;
-
-	if (pool_new(&a_stilag->chi_pool, &a_stilag->mem, sizeof(cw_chi_t)) ==
-	    NULL)
-		goto OOM_2;
-
-	if (pool_new(&a_stilag->stilsc_pool, &a_stilag->mem,
-	    sizeof(cw_stilsc_t)) == NULL)
-		goto OOM_3;
-
-	if (pool_new(&a_stilag->dicto_pool, &a_stilag->mem,
-	    sizeof(cw_stiloe_dicto_t)) == NULL)
-		goto OOM_4;
-
-	if (stila_p_new(&a_stilag->stila, &a_stilag->mem))
-		goto OOM_5;
-
-	return FALSE;
-	OOM_5:
-	pool_delete(&a_stilag->dicto_pool);
-	OOM_4:
-	pool_delete(&a_stilag->stilsc_pool);
-	OOM_3:
-	pool_delete(&a_stilag->chi_pool);
-	OOM_2:
-	mem_delete(&a_stilag->mem);
-	OOM_1:
-	return TRUE;
+	mem_new(&a_stilag->mem, cw_g_mem);
+	pool_new(&a_stilag->chi_pool, &a_stilag->mem, sizeof(cw_chi_t));
+	pool_new(&a_stilag->stilsc_pool, &a_stilag->mem, sizeof(cw_stilsc_t));
+	pool_new(&a_stilag->dicto_pool, &a_stilag->mem,
+	    sizeof(cw_stiloe_dicto_t));
+	stila_p_new(&a_stilag->stila, &a_stilag->mem);
 }
 
 void
@@ -70,25 +47,25 @@ stilag_delete(cw_stilag_t *a_stilag)
 }
 
 void *
-stilag_malloc(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
+stilag_malloc_e(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	return mem_malloc(&a_stilag->mem, a_size, a_filename, a_line_num);
+	return mem_malloc_e(&a_stilag->mem, a_size, a_filename, a_line_num);
 }
 
 void
-stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char *a_filename,
+stilag_free_e(cw_stilag_t *a_stilag, void *a_ptr, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	mem_free(&a_stilag->mem, a_ptr, a_filename, a_line_num);
+	mem_free_e(&a_stilag->mem, a_ptr, a_filename, a_line_num);
 }
 
 void *
-stilag_gc_malloc(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
+stilag_gc_malloc_e(cw_stilag_t *a_stilag, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
 	/* XXX Not at all right. */
-	return mem_malloc(&a_stilag->mem, a_size, a_filename, a_line_num);
+	return mem_malloc_e(&a_stilag->mem, a_size, a_filename, a_line_num);
 }
 
 void
@@ -101,7 +78,7 @@ stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt, cw_stiloe_t
 }
 
 /* stilat. */
-cw_bool_t
+void
 stilat_new(cw_stilat_t *a_stilat, cw_stilt_t *a_stilt, cw_stilag_t *a_stilag)
 {
 	ql_elm_new(a_stilat, link);
@@ -109,17 +86,12 @@ stilat_new(cw_stilat_t *a_stilat, cw_stilt_t *a_stilt, cw_stilag_t *a_stilag)
 	a_stilat->stilt = a_stilt;
 	a_stilat->stilag = a_stilag;
 
-	if (stila_p_new(&a_stilat->stila, stilag_mem_get(a_stilag)))
-		goto OOM;
+	stila_p_new(&a_stilat->stila, stilag_mem_get(a_stilag));
 
 	/* Add this stilat to the stilag's list. */
 	mtx_lock(&a_stilag->lock);
 	ql_head_insert(&a_stilag->head, a_stilat, link);
 	mtx_unlock(&a_stilag->lock);
-
-	return FALSE;
-	OOM:
-	return TRUE;
 }
 
 void
@@ -134,42 +106,20 @@ stilat_delete(cw_stilat_t *a_stilat)
 }
 
 void *
-stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
+stilat_malloc_e(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	void	*retval;
-
-	retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
+	return stilag_malloc_e(a_stilat->stilag, a_size, a_filename,
 	    a_line_num);
-
-	while (retval == NULL) {
-		/* XXX Throw memory error. */
-
-		retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
-		    a_line_num);
-	}
-
-	return retval;
 }
 
 void *
-stilat_gc_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
+stilat_gc_malloc_e(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	void	*retval;
-
 	/* XXX Not at all right. */
-	retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
+	return stilag_malloc_e(a_stilat->stilag, a_size, a_filename,
 	    a_line_num);
-
-	while (retval == NULL) {
-		/* XXX Throw memory error. */
-
-		retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
-		    a_line_num);
-	}
-
-	return retval;
 }
 
 void
@@ -185,84 +135,43 @@ stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t *a_stiloe)
 }
 
 void
-stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char *a_filename,
+stilat_free_e(cw_stilat_t *a_stilat, void *a_ptr, const char *a_filename,
     cw_uint32_t a_line_num)
 {
-	stilag_free(a_stilat->stilag, a_ptr, a_filename, a_line_num);
+	stilag_free_e(a_stilat->stilag, a_ptr, a_filename, a_line_num);
 }
 
 cw_chi_t *
-stilat_chi_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+stilat_chi_get_e(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
     a_line_num)
 {
-	cw_chi_t	*retval;
-
-	retval = (cw_chi_t *)pool_get(&a_stilat->stilag->chi_pool, a_filename,
+	return (cw_chi_t *)pool_get_e(&a_stilat->stilag->chi_pool, a_filename,
 	    a_line_num);
-
-	while (retval == NULL) {
-		/* XXX Throw memory error. */
-
-		retval = (cw_chi_t
-		    *)pool_get(&a_stilat->stilag->chi_pool, a_filename,
-		    a_line_num);
-	}
-
-	return retval;
 }
 
 cw_stilsc_t *
-stilat_stilsc_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+stilat_stilsc_get_e(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
     a_line_num)
 {
-	cw_stilsc_t	*retval;
-
-	retval = (cw_stilsc_t *)pool_get(&a_stilat->stilag->stilsc_pool,
+	return (cw_stilsc_t *)pool_get_e(&a_stilat->stilag->stilsc_pool,
 	    a_filename, a_line_num);
-
-	while (retval == NULL) {
-		/* XXX Throw memory error. */
-
-		retval = (cw_stilsc_t
-		    *)pool_get(&a_stilat->stilag->stilsc_pool, a_filename,
-		    a_line_num);
-	}
-
-	return retval;
 }
 
 cw_stiloe_dicto_t *
-stilat_dicto_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+stilat_dicto_get_e(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
     a_line_num)
 {
-	cw_stiloe_dicto_t	*retval;
-
-	retval = (cw_stiloe_dicto_t *)pool_get(&a_stilat->stilag->dicto_pool,
+	return (cw_stiloe_dicto_t *)pool_get_e(&a_stilat->stilag->dicto_pool,
 	    a_filename, a_line_num);
-
-	while (retval == NULL) {
-		/* XXX Throw memory error. */
-
-		retval = (cw_stiloe_dicto_t
-		    *)pool_get(&a_stilat->stilag->dicto_pool, a_filename,
-		    a_line_num);
-	}
-
-	return retval;
 }
 
 /* stila. */
-static cw_bool_t
+static void
 stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem)
 {
-	if (dch_new(&a_stila->seq_set, a_mem, _CW_STILA_SEQ_SET_BASE,
+	dch_new(&a_stila->seq_set, a_mem, _CW_STILA_SEQ_SET_BASE,
 	    _CW_STILA_SEQ_SET_BASE_GROW, _CW_STILA_SEQ_SET_BASE_SHRINK,
-	    ch_direct_hash, ch_direct_key_comp) == NULL)
-		goto OOM;
-
-	return FALSE;
-	OOM:
-	return TRUE;
+	    ch_direct_hash, ch_direct_key_comp);
 }
 
 static void
@@ -280,13 +189,13 @@ stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt, cw_stiloe_t
 
 	_cw_assert(dch_search(&a_stila->seq_set, (void *)a_stiloe, NULL));
 
-	chi = _cw_stilt_chi_get(a_stilt);
+	chi = stilt_chi_get(a_stilt);
 	xep_begin();
 	xep_try {
 		dch_insert(&a_stila->seq_set, (void *)a_stiloe, NULL, chi);
 	}
 	xep_catch(_CW_XEPV_OOM) {
-	    _cw_stilt_chi_put(a_stilt, chi);
+		stilt_chi_put(a_stilt, chi);
 	}
 	xep_end();
 }

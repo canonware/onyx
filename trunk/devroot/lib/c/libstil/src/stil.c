@@ -44,47 +44,71 @@
 cw_stil_t *
 stil_new(cw_stil_t *a_stil)
 {
-	cw_stil_t	*retval;
-	cw_stilt_t	stilt;
+	cw_stil_t		*retval;
+	cw_stilt_t		stilt;
+	volatile cw_uint32_t	try_stage = 0;
 
-	if (a_stil != NULL) {
-		retval = a_stil;
-		memset(retval, 0, sizeof(cw_stil_t));
-		retval->is_malloced = FALSE;
-	} else {
-		retval = (cw_stil_t *)_cw_malloc(sizeof(cw_stil_t));
-		if (retval == NULL)
-			goto OOM_1;
-		memset(retval, 0, sizeof(cw_stil_t));
-		retval->is_malloced = TRUE;
+	xep_begin();
+	cw_stil_t	*v_retval;
+	xep_try {
+		if (a_stil != NULL) {
+			retval = a_stil;
+			memset(retval, 0, sizeof(cw_stil_t));
+			retval->is_malloced = FALSE;
+		} else {
+			retval = (cw_stil_t *)_cw_malloc(sizeof(cw_stil_t));
+			memset(retval, 0, sizeof(cw_stil_t));
+			retval->is_malloced = TRUE;
+		}
+		try_stage = 1;
+
+		v_retval = retval;
+		stilag_new(&retval->stilag);
+		try_stage = 2;
+
+		mtx_new(&retval->name_lock);
+		dch_new(&retval->name_hash, stilag_mem_get(&retval->stilag),
+		    _CW_STIL_NAME_BASE_TABLE, _CW_STIL_NAME_BASE_GROW,
+		    _CW_STIL_NAME_BASE_SHRINK, stilo_name_hash,
+		    stilo_name_key_comp);
+		try_stage = 3;
+
+		/*
+		 * Create a temporary thread in order to be able to initialize
+		 * systemdict, and destroy the thread as soon as we're done.
+		 */
+
+		/* Initialize systemdict, since stilt_new() will access it. */
+		stilo_no_new(&retval->systemdict);
+		stilt_new(&stilt, retval);
+		try_stage = 4;
+
+		stilt_setglobal(&stilt, TRUE);
+
+		systemdict_populate(&retval->systemdict, &stilt);
+		stilo_dict_new(&retval->globaldict, &stilt,
+		    _CW_STIL_GLOBALDICT_SIZE);
+		stilt_delete(&stilt);
 	}
-
-	if (stilag_new(&retval->stilag))
-		goto OOM_2;
-
-	mtx_new(&retval->name_lock);
-	if (dch_new(&retval->name_hash, stilag_mem_get(&retval->stilag),
-	    _CW_STIL_NAME_BASE_TABLE, _CW_STIL_NAME_BASE_GROW,
-	    _CW_STIL_NAME_BASE_SHRINK, stilo_name_hash, stilo_name_key_comp) ==
-	    NULL)
-		goto OOM_3;
-	
-	/*
-	 * Create a temporary thread in order to be able to initialize
-	 * systemdict, and destroy the thread as soon as we're done.
-	 */
-
-	/* Initialize systemdict, since stilt_new() will access it. */
-	stilo_no_new(&retval->systemdict);
-
-	if (stilt_new(&stilt, retval) == NULL)
-		goto OOM_4;
-
-	stilt_setglobal(&stilt, TRUE);
-	/* XXX No way to catch OOM here. */
-	systemdict_populate(&retval->systemdict, &stilt);
-	stilo_dict_new(&retval->globaldict, &stilt, _CW_STIL_GLOBALDICT_SIZE);
-	stilt_delete(&stilt);
+	xep_catch (_CW_XEPV_OOM) {
+		retval = (cw_stil_t *)v_retval;
+		switch (try_stage) {
+		case 4:
+			stilt_delete(&stilt);
+		case 3:
+			dch_delete(&retval->name_hash);
+			mtx_delete(&retval->name_lock);
+		case 2:
+			stilag_delete(&retval->stilag);
+		case 1:
+			if (retval->is_malloced)
+				_cw_free(retval);
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
 
 	mtx_new(&retval->lock);
 
@@ -93,16 +117,6 @@ stil_new(cw_stil_t *a_stil)
 #endif
 
 	return retval;
-	OOM_4:
-	dch_delete(&retval->name_hash);
-	OOM_3:
-	mtx_delete(&retval->name_lock);
-	stilag_delete(&retval->stilag);
-	OOM_2:
-	if (retval->is_malloced)
-		_cw_free(retval);
-	OOM_1:
-	return NULL;
 }
 
 void

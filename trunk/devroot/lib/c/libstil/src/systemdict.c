@@ -359,6 +359,15 @@ systemdict_condition(cw_stilt_t *a_stilt)
 void
 systemdict_copy(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*orig, *copy;
+
+	stack = stilt_data_stack_get(a_stilt);
+	/* XXX Check depth of stack. */
+
+	orig = stils_get(stack, 0);
+	copy = stils_push(stack);
+	stilo_copy(copy, orig, a_stilt);
 }
 
 void

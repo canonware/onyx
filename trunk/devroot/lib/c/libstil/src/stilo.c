@@ -776,7 +776,7 @@ static void
 stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt)
 {
 	mtx_delete(&a_stiloe->lock);
-	_cw_stilt_free(a_stilt, a_stiloe);
+	stilt_free(a_stilt, a_stiloe);
 }
 #endif
 
@@ -825,13 +825,13 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 
 	stilo_p_new(a_stilo, STILOT_ARRAY);
 
-	array = (cw_stiloe_array_t *)_cw_stilt_malloc(a_stilt,
+	array = (cw_stiloe_array_t *)stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_array_t));
 
 	array->iterations = 0;
 	array->e.a.len = a_len;
 	if (array->e.a.len > 0) {
-		array->e.a.arr = (cw_stilo_t *)_cw_stilt_malloc(a_stilt,
+		array->e.a.arr = (cw_stilo_t *)stilt_malloc(a_stilt,
 		    sizeof(cw_stilo_t) * array->e.a.len);
 		for (i = 0; i < array->e.a.len; i++)
 			stilo_no_new(&array->e.a.arr[i]);
@@ -855,7 +855,7 @@ stilo_p_array_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 		for (i = 0; i < array->e.a.len; i++)
 			stilo_delete(&array->e.a.arr[i], a_stilt);
 	}
-	_cw_stilt_free(a_stilt, array->e.a.arr);
+	stilt_free(a_stilt, array->e.a.arr);
 
 /*  	stiloe_p_delete(&array->stiloe, a_stilt); */
 }
@@ -902,6 +902,41 @@ stilo_p_array_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 static void
 stilo_p_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	cw_stiloe_array_t	*array;
+	cw_stilo_t		*arr_from, *arr_to;
+	cw_uint32_t		i, len;
+
+	array = (cw_stiloe_array_t *)a_from->o.stiloe;
+
+	/*
+	 * Set arr_from and len according to whether this is an indirect
+         * object.
+	 */
+	if (array->stiloe.indirect) {
+		cw_stiloe_array_t	*array_indir;
+
+		array_indir = (cw_stiloe_array_t *)array->e.i.stilo.o.stiloe;
+
+		arr_from =
+		    &array_indir->e.a.arr[array->e.i.beg_offset];
+		len = array->e.i.len;
+		_cw_assert(len + array->e.i.beg_offset <=
+		    array_indir->e.a.len);
+	} else {
+		arr_from = array->e.a.arr;
+		len = array->e.a.len;
+	}
+
+	/* Create new array. */
+	stilo_array_new(a_to, a_stilt, len);
+	arr_to = ((cw_stiloe_array_t *)a_to->o.stiloe)->e.a.arr;
+
+	/* Iteratively copy elements. */
+	for (i = 0; i < len; i++) {
+		/* XXX copy or dup? */
+		stilo_copy(&arr_to[i], &arr_from[i], a_stilt);
+/*  		stilo_dup(&arr_to[i], &arr_from[i], a_stilt); */
+	}
 }
 
 static void
@@ -1128,7 +1163,7 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 
 	stilo_p_new(a_stilo, STILOT_DICT);
 
-	dict = (cw_stiloe_dict_t *)_cw_stilt_malloc(a_stilt,
+	dict = (cw_stiloe_dict_t *)stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_dict_t));
 
 	dict->iterations = 0;
@@ -1182,7 +1217,7 @@ stilo_p_dict_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 		    **)&dicto, &chi) == FALSE) {
 			stilo_delete(&dicto->key, a_stilt);
 			stilo_delete(&dicto->val, a_stilt);
-			_cw_stilt_chi_put(a_stilt, chi);
+			stilt_chi_put(a_stilt, chi);
 		}
 	}
 }
@@ -1262,12 +1297,12 @@ stilo_p_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 		dch_get_iterate(&from->e.d.hash, NULL, (void **)&dicto_from);
 
 		/* Allocate and copy. */
-		dicto_to = _cw_stilt_dicto_get(a_stilt);
+		dicto_to = stilt_dicto_get(a_stilt);
 		stilo_no_new(&dicto_to->key);
 		stilo_dup(&dicto_to->key, &dicto_from->key, a_stilt);
 		stilo_no_new(&dicto_to->val);
 		stilo_dup(&dicto_to->val, &dicto_from->val, a_stilt);
-		chi = _cw_stilt_chi_get(a_stilt);
+		chi = stilt_chi_get(a_stilt);
 
 		/* Insert. */
 		dch_insert(&to->e.d.hash, &dicto_to->key, dicto_to, chi);
@@ -1322,8 +1357,8 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 			cw_chi_t	*chi;
 
 			/* Allocate and initialize. */
-			dicto = _cw_stilt_dicto_get(a_stilt);
-			chi = _cw_stilt_chi_get(a_stilt);
+			dicto = stilt_dicto_get(a_stilt);
+			chi = stilt_chi_get(a_stilt);
 			stilo_no_new(&dicto->key);
 			stilo_move(&dicto->key, a_key);
 			stilo_no_new(&dicto->val);
@@ -1363,8 +1398,8 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		    **)&dicto, &chi) == FALSE) {
 			stilo_delete(&dicto->key, a_stilt);
 			stilo_delete(&dicto->val, a_stilt);
-			_cw_stilt_dicto_put(a_stilt, dicto);
-			_cw_stilt_chi_put(a_stilt, chi);
+			stilt_dicto_put(a_stilt, dicto);
+			stilt_chi_put(a_stilt, chi);
 		}
 		if (dict->stiloe.global)
 			stilo_p_name_kref_remove(a_key, a_stilt, dict);
@@ -1819,7 +1854,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 			gname = stilo_p_name_gref(a_stilt, a_name, a_len,
 			    a_is_static);
 
-			name = (cw_stiloe_name_t *)_cw_stilt_malloc(a_stilt,
+			name = (cw_stiloe_name_t *)stilt_malloc(a_stilt,
 			    sizeof(cw_stiloe_name_t));
 
 			name->val = gname;
@@ -1835,7 +1870,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 			 * Insert a cached entry for this thread.
 			 */
 			dch_insert(name_hash, (void *)gname, (void **)name,
-			    _cw_stilt_chi_get(a_stilt));
+			    stilt_chi_get(a_stilt));
 		}
 	} else
 		name = stilo_p_name_gref(a_stilt, a_name, a_len, a_is_static);
@@ -1943,7 +1978,7 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 		 * a new entry.
 		 */
 		stilag = stil_stilag_get(stilt_stil_get(a_stilt));
-		retval = (cw_stiloe_name_t *)_cw_stilag_malloc(stilag,
+		retval = (cw_stiloe_name_t *)stilag_malloc(stilag,
 		    sizeof(cw_stiloe_name_t));
 		memset(retval, 0, sizeof(cw_stiloe_name_t));
 
@@ -1955,7 +1990,7 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 		if (a_is_static == FALSE) {
 			/* This should be allocated from global space. */
 			retval->e.n.name =
-			    _cw_stilag_malloc(stil_stilag_get(stilt_stil_get(a_stilt)),
+			    stilag_malloc(stil_stilag_get(stilt_stil_get(a_stilt)),
 			    a_len);
 			/*
 			 * Cast away the const here; it's the only place that
@@ -1969,7 +2004,7 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 		stiloe_p_new(&retval->stiloe, STILOT_NAME);
 
 		dch_insert(name_hash, (void *)retval, (void
-		    **)retval, _cw_stilt_chi_get(a_stilt));
+		    **)retval, stilt_chi_get(a_stilt));
 	}
 	mtx_unlock(name_lock);
 
@@ -1999,7 +2034,7 @@ stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 	}
 
 	dch_insert(name->e.n.keyed_refs, (void *)a_dict, NULL,
-	    _cw_stilt_chi_get(a_stilt));
+	    stilt_chi_get(a_stilt));
 
 	stiloe_p_unlock(&name->stiloe);
 }
@@ -2049,7 +2084,7 @@ stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 	if ((retval = dch_remove(name->e.n.keyed_refs, (void *)a_dict, NULL,
 	    NULL, &chi)) == FALSE)
 		/* XXX Need stilag, not a_stilt. */
-		_cw_stilt_chi_put(a_stilt, chi);
+		stilt_chi_put(a_stilt, chi);
 
 	/* If there are no more keyed references, delete the hash. */
 	if (dch_count(name->e.n.keyed_refs) == 0) {
@@ -2250,7 +2285,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 
 	stilo_p_new(a_stilo, STILOT_STRING);
 
-	string = (cw_stiloe_string_t *)_cw_stilt_malloc(a_stilt,
+	string = (cw_stiloe_string_t *)stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_string_t));
 
 	string->iterations = 0;
@@ -2258,7 +2293,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 
 	if (string->e.s.len > 0) {
 		string->e.s.str = (cw_uint8_t
-		    *)_cw_stilt_malloc(a_stilt, string->e.s.len);
+		    *)stilt_malloc(a_stilt, string->e.s.len);
 	} else
 		string->e.s.str = NULL;
 
@@ -2311,6 +2346,7 @@ stilo_p_string_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 static void
 stilo_p_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
+	stilo_dup(a_to, a_from, a_stilt);
 }
 
 static void

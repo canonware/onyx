@@ -404,7 +404,7 @@ stilsc_p_new(cw_pool_t *a_stilsc_pool)
 	cw_stilsc_t	*retval;
 	cw_uint32_t	nstilso, i;
 
-	retval = (cw_stilsc_t *)_cw_pool_get(a_stilsc_pool);
+	retval = (cw_stilsc_t *)pool_get(a_stilsc_pool);
 	if (retval == NULL) {
 		/* XXX Report error. */
 	}
@@ -430,7 +430,7 @@ stilsc_p_delete(cw_stilsc_t *a_stilsc)
 	_cw_check_ptr(a_stilsc);
 	_cw_assert(a_stilsc->magic == _CW_STILSC_MAGIC);
 
-	_cw_pool_put(a_stilsc->stilsc_pool, a_stilsc);
+	pool_put(a_stilsc->stilsc_pool, a_stilsc);
 }
 
 static cw_uint32_t

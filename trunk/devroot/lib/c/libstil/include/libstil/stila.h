@@ -74,15 +74,15 @@ struct cw_stilat_s {
 };
 
 /* stilag. */
-cw_bool_t	stilag_new(cw_stilag_t *a_stilag);
+void		stilag_new(cw_stilag_t *a_stilag);
 void		stilag_delete(cw_stilag_t *a_stilag);
 
-void		*stilag_malloc(cw_stilag_t *a_stilag, size_t a_size, const char
-    *a_filename, cw_uint32_t a_line_num);
-void		stilag_free(cw_stilag_t *a_stilag, void *a_ptr, const char
+void		*stilag_malloc_e(cw_stilag_t *a_stilag, size_t a_size, const
+    char *a_filename, cw_uint32_t a_line_num);
+void		stilag_free_e(cw_stilag_t *a_stilag, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
 
-void		*stilag_gc_malloc(cw_stilag_t *a_stilag, size_t a_size, const
+void		*stilag_gc_malloc_e(cw_stilag_t *a_stilag, size_t a_size, const
     char *a_filename, cw_uint32_t a_line_num);
 void		stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
     cw_stiloe_t *a_stiloe);
@@ -97,55 +97,55 @@ void		stilag_gc_register(cw_stilag_t *a_stilag, cw_stilt_t *a_stilt,
 	&(a_stilag)->dicto_pool
 
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-#define		_cw_stilag_malloc(a_stilag, a_size)			\
-	stilag_malloc((a_stilag), (a_size), __FILE__, __LINE__)
-#define		_cw_stilag_free(a_stilag, a_ptr)			\
-	stilag_free((a_stilag), (a_ptr), __FILE__, __LINE__)
-#define		_cw_stilag_gc_malloc(a_stilag, a_size)			\
-	stilag_gc_malloc((a_stilag), (a_size), __FILE__, __LINE__)
+#define		stilag_malloc(a_stilag, a_size)				\
+	stilag_malloc_e((a_stilag), (a_size), __FILE__, __LINE__)
+#define		stilag_free(a_stilag, a_ptr)				\
+	stilag_free_e((a_stilag), (a_ptr), __FILE__, __LINE__)
+#define		stilag_gc_malloc(a_stilag, a_size)			\
+	stilag_gc_malloc_e((a_stilag), (a_size), __FILE__, __LINE__)
 #else
-#define		_cw_stilag_malloc(a_stilag, a_size)			\
-	stilag_malloc((a_stilag), (a_size), NULL, 0)
-#define		_cw_stilag_free(a_stilag, a_ptr)			\
-	stilag_free((a_stilag), (a_ptr), NULL, 0)
-#define		_cw_stilag_gc_malloc(a_stilag, a_size)			\
-	stilag_gc_malloc((a_stilag), (a_size), NULL, 0)
+#define		stilag_malloc(a_stilag, a_size)				\
+	stilag_malloc_e((a_stilag), (a_size), NULL, 0)
+#define		stilag_free(a_stilag, a_ptr)				\
+	stilag_free_e((a_stilag), (a_ptr), NULL, 0)
+#define		stilag_gc_malloc(a_stilag, a_size)			\
+	stilag_gc_malloc_e((a_stilag), (a_size), NULL, 0)
 #endif
 
-#define		_cw_stilag_chi_get(a_stilag)				\
-	(cw_chi_t *)_cw_pool_get(&(a_stilag)->chi_pool)
-#define		_cw_stilag_chi_put(a_stilag, a_chi)			\
-	_cw_pool_put(&(a_stilag)->chi_pool, (a_chi))
+#define		stilag_chi_get(a_stilag)				\
+	(cw_chi_t *)pool_get(&(a_stilag)->chi_pool)
+#define		stilag_chi_put(a_stilag, a_chi)				\
+	pool_put(&(a_stilag)->chi_pool, (a_chi))
 
-#define		_cw_stilag_stilsc_get(a_stilag)				\
-	(cw_stilsc_t *)_cw_pool_get(&(a_stilag)->stilsc_pool)
-#define		_cw_stilag_stilsc_put(a_stilag, a_stilsc)		\
-	_cw_pool_put(&(a_stilag)->stilsc_pool, (a_stilsc))
+#define		stilag_stilsc_get(a_stilag)				\
+	(cw_stilsc_t *)pool_get(&(a_stilag)->stilsc_pool)
+#define		stilag_stilsc_put(a_stilag, a_stilsc)		\
+	pool_put(&(a_stilag)->stilsc_pool, (a_stilsc))
 
-#define		_cw_stilag_dicto_get(a_stilag)				\
-	(cw_stiloe_dicto_t *)_cw_pool_get(&(a_stilag)->dicto_pool)
-#define		_cw_stilag_dicto_put(a_stilag, a_dicto)			\
-	_cw_pool_put(&(a_stilag)->dicto_pool, (a_dicto))
+#define		stilag_dicto_get(a_stilag)				\
+	(cw_stiloe_dicto_t *)pool_get(&(a_stilag)->dicto_pool)
+#define		stilag_dicto_put(a_stilag, a_dicto)			\
+	pool_put(&(a_stilag)->dicto_pool, (a_dicto))
 
 /* stilat. */
-cw_bool_t	stilat_new(cw_stilat_t *a_stilat, cw_stilt_t *a_stilt,
+void		stilat_new(cw_stilat_t *a_stilat, cw_stilt_t *a_stilt,
     cw_stilag_t *a_stilag);
 void		stilat_delete(cw_stilat_t *a_stilat);
 
-cw_chi_t	*stilat_chi_get(cw_stilat_t *a_stilat, const char
+cw_chi_t	*stilat_chi_get_e(cw_stilat_t *a_stilat, const char
     *a_filename, cw_uint32_t a_line_num);
-cw_stilsc_t	*stilat_stilsc_get(cw_stilat_t *a_stilat, const char
+cw_stilsc_t	*stilat_stilsc_get_e(cw_stilat_t *a_stilat, const char
     *a_filename, cw_uint32_t a_line_num);
-cw_stiloe_dicto_t *stilat_dicto_get(cw_stilat_t *a_stilat, const char
+cw_stiloe_dicto_t *stilat_dicto_get_e(cw_stilat_t *a_stilat, const char
     *a_filename, cw_uint32_t a_line_num);
 
-void		*stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char
-    *a_filename, cw_uint32_t a_line_num);
-void		*stilat_gc_malloc(cw_stilat_t *a_stilat, size_t a_size, const
+void		*stilat_malloc_e(cw_stilat_t *a_stilat, size_t a_size, const
+    char *a_filename, cw_uint32_t a_line_num);
+void		*stilat_gc_malloc_e(cw_stilat_t *a_stilat, size_t a_size, const
     char *a_filename, cw_uint32_t a_line_num);
 void		stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t
     *a_stiloe);
-void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
+void		stilat_free_e(cw_stilat_t *a_stilat, void *a_ptr, const char
     *a_filename, cw_uint32_t a_line_num);
 
 #define		stilat_currentglobal(a_stilat)				\
@@ -162,36 +162,36 @@ void		stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char
 	stilag_dicto_pool_get((a_stilat)->stilag)
 
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-#define		_cw_stilat_chi_get(a_stilat)				\
-	stilat_chi_get((a_stilat), __FILE__, __LINE__)
-#define		_cw_stilat_stilsc_get(a_stilat)				\
-	stilat_stilsc_get((a_stilat), __FILE__, __LINE__)
-#define		_cw_stilat_dicto_get(a_stilat)				\
-	stilat_dicto_get((a_stilat), __FILE__, __LINE__)
-#define		_cw_stilat_malloc(a_stilat, a_size)			\
-	stilat_malloc((a_stilat), (a_size), __FILE__, __LINE__)
-#define		_cw_stilat_gc_malloc(a_stilat, a_size)			\
-	stilat_gc_malloc((a_stilat), (a_size), __FILE__, __LINE__)
-#define		_cw_stilat_free(a_stilat, a_ptr)			\
-	stilat_free((a_stilat), (a_ptr), __FILE__, __LINE__)
+#define		stilat_chi_get(a_stilat)				\
+	stilat_chi_get_e((a_stilat), __FILE__, __LINE__)
+#define		stilat_stilsc_get(a_stilat)				\
+	stilat_stilsc_get_e((a_stilat), __FILE__, __LINE__)
+#define		stilat_dicto_get(a_stilat)				\
+	stilat_dicto_get_e((a_stilat), __FILE__, __LINE__)
+#define		stilat_malloc(a_stilat, a_size)				\
+	stilat_malloc_e((a_stilat), (a_size), __FILE__, __LINE__)
+#define		stilat_gc_malloc(a_stilat, a_size)			\
+	stilat_gc_malloc_e((a_stilat), (a_size), __FILE__, __LINE__)
+#define		stilat_free(a_stilat, a_ptr)				\
+	stilat_free_e((a_stilat), (a_ptr), __FILE__, __LINE__)
 #else
-#define		_cw_stilat_chi_get(a_stilat)				\
-	stilat_chi_get((a_stilat), NULL, 0)
-#define		_cw_stilat_stilsc_get(a_stilat)				\
-	stilat_stilsc_get((a_stilat), NULL, 0)
-#define		_cw_stilat_dicto_get(a_stilat)				\
-	stilat_dicto_get((a_stilat), NULL, 0)
-#define		_cw_stilat_malloc(a_stilat, a_size)			\
-	stilat_malloc((a_stilat), (a_size), NULL, 0)
-#define		_cw_stilat_gc_malloc(a_stilat, a_size)			\
-	stilat_gc_malloc((a_stilat), (a_size), NULL, 0)
-#define		_cw_stilat_free(a_stilat, a_ptr)			\
-	stilat_free((a_stilat), (a_ptr), NULL, 0)
+#define		stilat_chi_get(a_stilat)				\
+	stilat_chi_get_e((a_stilat), NULL, 0)
+#define		stilat_stilsc_get(a_stilat)				\
+	stilat_stilsc_get_e((a_stilat), NULL, 0)
+#define		stilat_dicto_get(a_stilat)				\
+	stilat_dicto_get_e((a_stilat), NULL, 0)
+#define		stilat_malloc(a_stilat, a_size)				\
+	stilat_malloc_e((a_stilat), (a_size), NULL, 0)
+#define		stilat_gc_malloc(a_stilat, a_size)			\
+	stilat_gc_malloc_e((a_stilat), (a_size), NULL, 0)
+#define		stilat_free(a_stilat, a_ptr)				\
+	stilat_free_e((a_stilat), (a_ptr), NULL, 0)
 #endif
 
-#define		_cw_stilat_chi_put(a_stilat, a_chi)			\
-	_cw_pool_put(&(a_stilat)->stilag->chi_pool, (a_chi))
-#define		_cw_stilat_stilsc_put(a_stilat, a_stilsc)		\
-	_cw_pool_put(&(a_stilat)->stilag->stilsc_pool, (a_stilsc))
-#define		_cw_stilat_dicto_put(a_stilat, a_dicto)			\
-	_cw_pool_put(&(a_stilat)->stilag->dicto_pool, (a_dicto))
+#define		stilat_chi_put(a_stilat, a_chi)				\
+	pool_put(&(a_stilat)->stilag->chi_pool, (a_chi))
+#define		stilat_stilsc_put(a_stilat, a_stilsc)			\
+	pool_put(&(a_stilat)->stilag->stilsc_pool, (a_stilsc))
+#define		stilat_dicto_put(a_stilat, a_dicto)			\
+	pool_put(&(a_stilat)->stilag->dicto_pool, (a_dicto))

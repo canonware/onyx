@@ -199,28 +199,28 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 	stilat_mem_get(&(a_stilt)->stilat)
 
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-#define		_cw_stilt_malloc(a_stilt, a_size)			\
-	stilat_malloc(&(a_stilt)->stilat, (a_size), __FILE__, __LINE__)
-#define		_cw_stilt_free(a_stilt, a_ptr)				\
-	stilat_free(&(a_stilt)->stilat, (a_ptr), __FILE__, __LINE__)
+#define		stilt_malloc(a_stilt, a_size)				\
+	stilat_malloc_e(&(a_stilt)->stilat, (a_size), __FILE__, __LINE__)
+#define		stilt_free(a_stilt, a_ptr)				\
+	stilat_free_e(&(a_stilt)->stilat, (a_ptr), __FILE__, __LINE__)
 #else
-#define		_cw_stilt_malloc(a_stilt, a_size)			\
-	stilat_malloc(&(a_stilt)->stilat, (a_size), NULL, 0)
-#define		_cw_stilt_free(a_stilt, a_ptr)				\
-	stilat_free(&(a_stilt)->stilat, (a_ptr), NULL, 0)
+#define		stilt_malloc(a_stilt, a_size)				\
+	stilat_malloc_e(&(a_stilt)->stilat, (a_size), NULL, 0)
+#define		stilt_free(a_stilt, a_ptr)				\
+	stilat_free_e(&(a_stilt)->stilat, (a_ptr), NULL, 0)
 #endif
 
-#define		_cw_stilt_chi_get(a_stilt)				\
-	_cw_stilat_chi_get(&(a_stilt)->stilat)
-#define		_cw_stilt_chi_put(a_stilt, a_chi)			\
-	_cw_stilat_chi_put(&(a_stilt)->stilat, (a_chi))
+#define		stilt_chi_get(a_stilt)					\
+	stilat_chi_get(&(a_stilt)->stilat)
+#define		stilt_chi_put(a_stilt, a_chi)				\
+	stilat_chi_put(&(a_stilt)->stilat, (a_chi))
 
-#define		_cw_stilt_stilsc_get(a_stilt)				\
-	_cw_stilat_stilsc_get(&(a_stilt)->stilat)
-#define		_cw_stilt_stilsc_put(a_stilt, a_stilsc)			\
-	_cw_stilat_stilsc_put(&(a_stilt)->stilat, (a_stilsc))
+#define		stilt_stilsc_get(a_stilt)				\
+	stilat_stilsc_get(&(a_stilt)->stilat)
+#define		stilt_stilsc_put(a_stilt, a_stilsc)			\
+	stilat_stilsc_put(&(a_stilt)->stilat, (a_stilsc))
 
-#define		_cw_stilt_dicto_get(a_stilt)				\
-	_cw_stilat_dicto_get(&(a_stilt)->stilat)
-#define		_cw_stilt_dicto_put(a_stilt, a_dicto)			\
-	_cw_stilat_dicto_put(&(a_stilt)->stilat, (a_dicto))
+#define		stilt_dicto_get(a_stilt)				\
+	stilat_dicto_get(&(a_stilt)->stilat)
+#define		stilt_dicto_put(a_stilt, a_dicto)			\
+	stilat_dicto_put(&(a_stilt)->stilat, (a_dicto))

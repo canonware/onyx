@@ -95,10 +95,8 @@ stilts_new(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
 /*  		memset(a_stilts, 0, sizeof(cw_stilts_t)); */
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_stilts_t *)_cw_stilt_malloc(a_stilt,
+		retval = (cw_stilts_t *)stilt_malloc(a_stilt,
 		    sizeof(cw_stilts_t));
-		if (retval == NULL)
-			goto OOM;
 /*  		memset(a_stilts, 0, sizeof(cw_stilts_t)); */
 		retval->is_malloced = TRUE;
 	}
@@ -109,7 +107,6 @@ stilts_new(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILTS_MAGIC;
 #endif
-	OOM:
 	return retval;
 }
 
@@ -126,7 +123,7 @@ stilts_delete(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
 	}
 
 	if (a_stilts->is_malloced)
-		_cw_stilt_free(a_stilt, a_stilts);
+		stilt_free(a_stilt, a_stilts);
 #ifdef _LIBSTIL_DBG
 	else
 		memset(a_stilts, 0x5a, sizeof(cw_stilts_t));
@@ -161,41 +158,67 @@ stilts_position_set(cw_stilts_t *a_stilts, cw_uint32_t a_line, cw_uint32_t
 cw_stilt_t *
 stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 {
-	cw_stilt_t	*retval;
-	cw_stilo_t	*stilo;
+	cw_stilt_t		*retval;
+	cw_stilo_t		*stilo;
+	volatile cw_uint32_t	try_stage = 0;
 
-	if (a_stilt != NULL) {
-		retval = a_stilt;
-		memset(a_stilt, 0, sizeof(cw_stilt_t));
-		retval->is_malloced = FALSE;
-	} else {
-		retval = (cw_stilt_t *)_cw_malloc(sizeof(cw_stilt_t));
-		if (retval == NULL)
-			goto OOM_1;
-		memset(a_stilt, 0, sizeof(cw_stilt_t));
-		retval->is_malloced = TRUE;
+	xep_begin();
+	volatile cw_stilt_t	*v_retval;
+	xep_try {
+		if (a_stilt != NULL) {
+			v_retval = retval = a_stilt;
+			memset(a_stilt, 0, sizeof(cw_stilt_t));
+			retval->is_malloced = FALSE;
+		} else {
+			v_retval = retval = (cw_stilt_t
+			    *)_cw_malloc(sizeof(cw_stilt_t));
+			memset(a_stilt, 0, sizeof(cw_stilt_t));
+			retval->is_malloced = TRUE;
+		}
+		try_stage = 1;
+
+		stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil));
+		try_stage = 2;
+		
+		dch_new(&retval->name_hash, stilat_mem_get(&retval->stilat),
+		    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
+		    _CW_STILT_NAME_BASE_SHRINK, ch_direct_hash,
+		    ch_direct_key_comp);
+		try_stage = 3;
+
+		stils_new(&retval->exec_stils,
+		    stilat_stilsc_pool_get(&a_stilt->stilat));
+		try_stage = 4;
+
+		stils_new(&retval->data_stils,
+		    stilat_stilsc_pool_get(&a_stilt->stilat));
+		try_stage = 5;
+
+		stils_new(&retval->dict_stils,
+		    stilat_stilsc_pool_get(&a_stilt->stilat));
+		try_stage = 6;
+
 	}
-
-	if (stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil)))
-		goto OOM_2;
-
-	if (dch_new(&retval->name_hash, stilat_mem_get(&retval->stilat),
-	    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
-	    _CW_STILT_NAME_BASE_SHRINK, ch_direct_hash, ch_direct_key_comp) ==
-	    NULL)
-		goto OOM_3;
-
-	if (stils_new(&retval->exec_stils,
-	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
-		goto OOM_4;
-
-	if (stils_new(&retval->data_stils,
-	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
-		goto OOM_5;
-
-	if (stils_new(&retval->dict_stils,
-	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
-		goto OOM_6;
+	xep_catch (_CW_XEPV_OOM) {
+		retval = (cw_stilt_t *)v_retval;
+		switch (try_stage) {
+		case 5:
+			stils_delete(&retval->data_stils, retval);
+		case 4:
+			stils_delete(&retval->exec_stils, retval);
+		case 3:
+			dch_delete(&retval->name_hash);
+		case 2:
+			stilat_delete(&retval->stilat);
+		case 1:
+			if (retval->is_malloced)
+				_cw_free(retval);
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
 
 	/* XXX Create and push threaddict onto the dictionary stack. */
 	/* Push systemdict onto the dictionary stack. */
@@ -208,25 +231,12 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	retval->stil = a_stil;
 
 	retval->tok_str = retval->buffer;
-	
+
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILT_MAGIC;
 #endif
 
 	return retval;
-	OOM_6:
-	stils_delete(&retval->data_stils, retval);
-	OOM_5:
-	stils_delete(&retval->exec_stils, retval);
-	OOM_4:
-	dch_delete(&retval->name_hash);
-	OOM_3:
-	stilat_delete(&retval->stilat);
-	OOM_2:
-	if (retval->is_malloced)
-		_cw_free(retval);
-	OOM_1:
-	return NULL;
 }
 
 void
@@ -241,7 +251,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 		 * unaccepted token.  However, it's really the caller's fault,
 		 * so just clean up and return an error.
 		 */
-		_cw_stilt_free(a_stilt, a_stilt->tok_str);
+		stilt_free(a_stilt, a_stilt->tok_str);
 	}
 
 	stils_delete(&a_stilt->dict_stils, a_stilt);
@@ -1140,7 +1150,7 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		/*
 		 * First overflow, initial expansion needed.
 		 */
-		a_stilt->tok_str = (cw_uint8_t *)_cw_stilt_malloc(a_stilt,
+		a_stilt->tok_str = (cw_uint8_t *)stilt_malloc(a_stilt,
 		    a_stilt->index * 2);
 		if (a_stilt->tok_str == NULL) {
 			retval = -1;
@@ -1155,7 +1165,7 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		/*
 		 * Overflowed, and additional expansion needed.
 		 */
-		t_str = (cw_uint8_t *)_cw_stilt_malloc(a_stilt,
+		t_str = (cw_uint8_t *)stilt_malloc(a_stilt,
 		    a_stilt->index * 2);
 		if (t_str == NULL) {
 			retval = -1;
@@ -1163,7 +1173,7 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		}
 		a_stilt->buffer_len = a_stilt->index * 2;
 		memcpy(t_str, a_stilt->tok_str, a_stilt->index);
-		_cw_stilt_free(a_stilt, a_stilt->tok_str);
+		stilt_free(a_stilt, a_stilt->tok_str);
 		a_stilt->tok_str = t_str;
 	}
 
@@ -1177,7 +1187,7 @@ stilt_p_reset(cw_stilt_t *a_stilt)
 {
 	a_stilt->state = STATE_START;
 	if (a_stilt->index > _CW_STILT_BUFFER_SIZE) {
-		_cw_stilt_free(a_stilt, a_stilt->tok_str);
+		stilt_free(a_stilt, a_stilt->tok_str);
 		a_stilt->tok_str = a_stilt->buffer;
 	}
 	a_stilt->index = 0;
