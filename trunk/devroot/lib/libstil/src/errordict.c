@@ -210,11 +210,6 @@ errordict_p_generic(cw_stilt_t *a_stilt, cw_stilte_t a_stilte, cw_bool_t
 	}
 	stils_npop(tstack, 3);
 
-	/*
-	 * XXX The stop operator is called in two places (here and in
-	 * handleerror).  Which is correct?  Under normal conditions, this copy
-	 * of the call never gets reached, but there is a bug here.
-	 */
 	_cw_stil_code(a_stilt, "handleerror currenterror /stop get eval");
 }
 
@@ -245,7 +240,6 @@ recordstacks {
 	dstack 1 spop
 } if
 end
-currenterror /stop get eval
 ");
 }
 
