@@ -1,0 +1,62 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print flush
+
+% Decimal notation.
+42.5 </s /+ /e false> output `\n' print
+-42.5 </s /+ /e false> output `\n' print
+42.5 </s /-> output `\n' print
+-42.5 </s /-> output `\n' print
+42.5 <> output `\n' print
+-42.5 <> output `\n' print
+
+42.5 </w 12> output `\n' print
+42.5 </w 12 /p `_'> output `\n' print
+42.5 </w 12 /p `_' /j /r> output `\n' print
+42.5 </w 12 /p `_' /j /c> output `\n' print
+42.5 </w 12 /p `_' /j /l> output `\n' print
+
+12345.6 </d 6> output `\n' print
+12345.6 </d 5> output `\n' print
+12345.6 </d 4> output `\n' print
+12345.6 </d 3> output `\n' print
+12345.6 </d 2> output `\n' print
+12345.6 </d 1> output `\n' print
+12345.6 </d 0> output `\n' print
+12345.6 </d -1> output `\n' print
+
+% Exponential notation.
+42.5 </s /+ /e true> output `\n' print
+-42.5 </s /+ /e true> output `\n' print
+42.5 </s /- /e true> output `\n' print
+-42.5 </s /- /e true> output `\n' print
+42.5 </e true> output `\n' print
+-42.5 </e true> output `\n' print
+
+42.5 </w 15 /e true> output `\n' print
+42.5 </w 15 /p `_' /e true> output `\n' print
+42.5 </w 15 /p `_' /j /r /e true> output `\n' print
+42.5 </w 15 /p `_' /j /c /e true> output `\n' print
+42.5 </w 15 /p `_' /j /l /e true> output `\n' print
+
+12345.6 </d 6 /e true> output `\n' print
+12345.6 </d 5 /e true> output `\n' print
+12345.6 </d 4 /e true> output `\n' print
+12345.6 </d 3 /e true> output `\n' print
+12345.6 </d 2 /e true> output `\n' print
+12345.6 </d 1 /e true> output `\n' print
+12345.6 </d 0 /e true> output `\n' print
+12345.6 </d -1 /e true> output `\n' print
+
+`Test end\n' print
+pstack

@@ -50,15 +50,20 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
 #endif
 #if [enable_real]
 
-                 abs_d.nx.in add_e.nx.in ceiling_a.nx.in ceiling_b.nx.in
-                 ceiling_c.nx.in cvds_a.nx.in cvds_b.nx.in cvds_c.nx.in
-                 cvds_d.nx.in cves_a.nx.in cves_b.nx.in cves_c.nx.in
-                 cves_d.nx.in cvs_c.nx.in div_a.nx.in div_b.nx.in div_c.nx.in
-                 div_d.nx.in div_e.nx.in eq_c.nx.in exp_e.nx.in floor_a.nx.in
-                 floor_b.nx.in floor_c.nx.in ge_i.nx.in gt_i.nx.in le_i.nx.in
-                 lt_i.nx.in mul_e.nx.in ne_c.nx.in neg_d.nx.in round_a.nx.in
-                 round_b.nx.in round_c.nx.in sub_e.nx.in trunc_a.nx.in
-                 trunc_b.nx.in trunc_c.nx.in
+                 abs_d.nx.in add_e.nx.in atan_a.nx.in atan_b.nx.in atan_c.nx.in
+                 atan_d.nx.in ceiling_a.nx.in ceiling_b.nx.in ceiling_c.nx.in
+                 cos_a.nx.in cos_b.nx.in cos_c.nx.in cvds_a.nx.in cvds_b.nx.in
+                 cvds_c.nx.in cvds_d.nx.in cves_a.nx.in cves_b.nx.in
+                 cves_c.nx.in cves_d.nx.in cvs_c.nx.in div_a.nx.in div_b.nx.in
+                 div_c.nx.in div_d.nx.in div_e.nx.in eq_c.nx.in exp_e.nx.in
+                 floor_a.nx.in floor_b.nx.in floor_c.nx.in ge_i.nx.in gt_i.nx.in
+                 le_i.nx.in ln_a.nx.in ln_b.nx.in ln_c.nx.in ln_d.nx.in
+                 log_a.nx.in log_b.nx.in log_c.nx.in log_d.nx.in lt_i.nx.in
+                 mul_e.nx.in ne_c.nx.in neg_d.nx.in output_b.nx.in round_a.nx.in
+                 round_b.nx.in round_c.nx.in sin_a.nx.in sin_b.nx.in sin_c.nx.in
+                 sprint_b.nx.in sqrt_a.nx.in sqrt_b.nx.in sqrt_c.nx.in
+                 sqrt_d.nx.in sub_e.nx.in trunc_a.nx.in trunc_b.nx.in
+                 trunc_c.nx.in
 
 #endif
 #if [enable_posix]
