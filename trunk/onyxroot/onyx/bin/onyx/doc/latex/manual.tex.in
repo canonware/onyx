@@ -48,22 +48,30 @@ bindings.  Use this variable to explicitly set the key bindings to either
 \label{sec:onyx_lang_diffs}
 If \binname{onyx} is being run interactively:
 \begin{itemize}
+\label{onyx_interactive:stop}
+\index{stop@\onyxop{}{stop}{}}
 \item{The name ``stop'' is redefined in the initial thread's errordict to
 recursively execute the stdin file in a stopped context in order to keep the
 interpreter from exiting on error.  It is possible (though generally unlikely,
 since the user must type a very long line of code) for buffering of stdin to
 cause strange things to occur; any additional program execution after an error
 is a result of this.}
+\label{onyx_interactive:resume}
+\index{resume@\onyxop{}{resume}{}}
 \item{The name ``resume'' is defined in the initial thread's threaddict as an
 alias to the stop operator.  Thus, when an error occurs, when the user is ready
 to continue running after addressing any issues the error caused, resume can be
 called as a more intuitive name for resuming.}
+\label{onyx_interactive:promptstring}
+\index{promptstring@\onyxop{}{promptstring}{}}
 \item{The name ``promptstring'' is defined in systemdict; it takes no arguments
 and returns a string.  The return string is used as the interactive prompt.}
 \end{itemize}
 
 If \binname{onyx} is being run non-interactively:
 \begin{itemize}
+\label{onyx_batch:stop}
+\index{stop@\onyxop{}{stop}{}}
 \item{The name ``stop'' in errordict is redefined to call the die operator
 with an argument of 1.}
 \end{itemize}
