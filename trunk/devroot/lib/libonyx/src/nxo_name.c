@@ -169,13 +169,13 @@ nxo_l_name_hash(const void *a_key)
 {
     cw_uint32_t retval, i;
     cw_nxoe_name_t *key = (cw_nxoe_name_t *) a_key;
-    const char *str;
+    const cw_uint8_t *str;
 
     cw_check_ptr(a_key);
 
-    for (i = 0, str = key->str, retval = 0; i < key->len; i++, str++)
+    for (i = 0, retval = 5381, str = key->str; i < key->len; i++, str++)
     {
-	retval = retval * 33 + *str;
+	retval = ((retval << 5) + retval) + *str;
     }
 
     return retval;

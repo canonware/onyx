@@ -1,5 +1,13 @@
 2002-07-12 : Jason Evans <jasone@canonware.com>
 
+	* Revise string and pointer hashing functions to marginally improve
+	  performance.
+
+	* lib/libonyx/include/libonyx/ch.h : Add CW_CH_COUNT and CW_CH_VERBOSE.
+
+	* lib/libonyx/include/libonyx/dch.h : Add CW_DCH_COUNT and
+	  CW_DCH_VERBOSE.
+
 	* lib/libonyx/include/libonyx/libonyx_defs.h.in : Add CW_P_INLINE and
 	  use it instead of CW_INLINE for private functions.
 
@@ -33,7 +41,7 @@
 	  + setnonblocking
 
 	* Modify the write operator to return whether a write was partial or
-          not.  This is necessary for non-blocking files.
+	  not.  This is necessary for non-blocking files.
 
 	* lib/libonyx/src/nxo_file.c :
 	  + nxo_file_write() : Add the r_count parameter to support partial
@@ -64,30 +72,30 @@
 	  + umask
 
 	* lib/libonyx/src/systemdict.c : Optimize operators to take advantage of
-          nxo_stack_remove().
+	  nxo_stack_remove().
 
 	* lib/libonyx/src/poll.c : Implement poll() emulation based on select().
-          This is necessary to make the poll operator portable to OS X.
+	  This is necessary to make the poll operator portable to OS X.
 
 2002-04-21 : Jason Evans <jasone@canonware.com>
 
 	* configure.in : Remove --enable-profile.
 
 	* lib/libonyx/include/libonyx/mb.h : Convert mb_write() to a nop, but in
-          such a way that the compiler cannot re-order instructions around
-          mb_write().  This improves interpreter performance by a factor of
-          approximately 2.5.
+	  such a way that the compiler cannot re-order instructions around
+	  mb_write().  This improves interpreter performance by a factor of
+	  approximately 2.5.
 
 	* Remove "fast" operator support, since it wasn't very fast.
-          Performance without fast operators is +-3% of what it was with fast
-          operator support, for typical programs.
+	  Performance without fast operators is +-3% of what it was with fast
+	  operator support, for typical programs.
 
 	* Remove dstackunderflow as an error.  With the addition of the
-          threaddstack operator, it is possible for a program to directly
-          manipulate dstack in ways that would thwart dstackunderflow checking,
-          and it is undesirable to prevent applications from being able to take
-          advantage of the possibilities afforded.  On the down side, this makes
-          it easier to accidentally get the interpreter into an unusable state.
+	  threaddstack operator, it is possible for a program to directly
+	  manipulate dstack in ways that would thwart dstackunderflow checking,
+	  and it is undesirable to prevent applications from being able to take
+	  advantage of the possibilities afforded.  On the down side, this makes
+	  it easier to accidentally get the interpreter into an unusable state.
 
 	* Add operators:
 	  + inc, dec
@@ -166,34 +174,34 @@
 	  + setgstdin, setgstdout, setgstderr
 
 	* lib/libonyx/src/nx.c : Add nx_stdin_set(), nx_stdout_set(), and
-          nx_stderr_set().
+	  nx_stderr_set().
 
 	* lib/libonyx/src/nxo_thread.c : Add nxo_thread_stdin_set(),
-          nxo_thread_stdout_set(), and nxo_thread_stderr_set().
+	  nxo_thread_stdout_set(), and nxo_thread_stderr_set().
 
 2002-03-31 : Jason Evans <jasone@canonware.com>
 
 	* Add optional mode argument to the open operator.
 
 	* lib/libonyx/src/nxo_file.c:nxo_file_open() : Add the a_mode argument,
-          so that file creation mode can be specified.
+	  so that file creation mode can be specified.
 
 	* lib/libonyx/src/systemdict.c:systemdict_test() : Use macros
-          (S_ISDIR(), S_ISREG(), etc.) for non-standardized portions of struct
-          stat's st_mode field.  This fixes various false positives on Linux.
+	  (S_ISDIR(), S_ISREG(), etc.) for non-standardized portions of struct
+	  stat's st_mode field.  This fixes various false positives on Linux.
 
 2002-03-30 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_dirforeach() : Use strlen()
-          rather than the reclen field of struct dirent if there is no namlen
-          field.  (Reported by John Liles.)
+	  rather than the reclen field of struct dirent if there is no namlen
+	  field.  (Reported by John Liles.)
 
 	* bin/onyx/src/onyx.c:batch_run() : Specify '+' as the first character
-          of the options string to getopt() on systems that use GNU libc, since
-          they will otherwise permute the arguments and leave unknown ones at
-          the end.  This fixes #! magic handling in the case when options are
-          passed to the script that are also used by the onyx binary (for
-          example, -e).
+	  of the options string to getopt() on systems that use GNU libc, since
+	  they will otherwise permute the arguments and leave unknown ones at
+	  the end.  This fixes #! magic handling in the case when options are
+	  passed to the script that are also used by the onyx binary (for
+	  example, -e).
 
 2002-03-27 : Jason Evans <jasone@canonware.com>
 
@@ -202,26 +210,26 @@
 2002-03-22 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_rand() : Fix the way random()
-          is used and really generate 63 bits of randomness for the rand
-          operator.
+	  is used and really generate 63 bits of randomness for the rand
+	  operator.
 
 2002-03-17 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_name.c : Re-register name objects that are already
-          registered, in order to remove a race condition.
+	  registered, in order to remove a race condition.
 
 	* lib/libonyx/include/libonyx/mb.h : Implement write memory barriers.
-          Memory barriers are critical for threaded versions of Onyx, and they
-          are used in nxo_dup(), nxo_p_new(), nxo_p_type_set(), and
-          nxo_stack_roll().
+	  Memory barriers are critical for threaded versions of Onyx, and they
+	  are used in nxo_dup(), nxo_p_new(), nxo_p_type_set(), and
+	  nxo_stack_roll().
 
 2002-03-16 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/thd.c : Significantly rework the generic
-          suspend/resume code to use two signals (SIGUSR1 and SIGUSR2) rather
-          than just one.  This allows the removal of some questionable code that
-          may not work on MP systems that use partial store ordering, and also
-          removes the need for resume interlocking.
+	  suspend/resume code to use two signals (SIGUSR1 and SIGUSR2) rather
+	  than just one.  This allows the removal of some questionable code that
+	  may not work on MP systems that use partial store ordering, and also
+	  removes the need for resume interlocking.
 
 	  Fix lock order reversal deadlock potential in thd_suspend() and
 	  thd_trysuspend().
@@ -229,9 +237,9 @@
 2002-03-09 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/thd.c:thd_p_start_func() : Set the thd->pthread field
-          before inserting the thd into the ring.  pthread_create() also sets
-          it, but if only one place sets it, then there is a race between one
-          thread setting thd->pthread and the other using it.
+	  before inserting the thd into the ring.  pthread_create() also sets
+	  it, but if only one place sets it, then there is a race between one
+	  thread setting thd->pthread and the other using it.
 
 2002-02-07 : Jason Evans <jasone@canonware.com>
 

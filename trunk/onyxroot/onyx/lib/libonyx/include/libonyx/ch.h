@@ -10,6 +10,13 @@
 *
 ******************************************************************************/
 
+/* Maintain counters used to get an idea of performance. */
+/* #define CW_CH_COUNT */
+#ifdef CW_CH_COUNT
+/* Print counter values to stderr in ch_delete(). */
+/* #define CW_CH_VERBOSE */
+#endif
+
 /* Pseudo-opaque type. */
 typedef struct cw_ch_s cw_ch_t;
 typedef struct cw_chi_s cw_chi_t;
@@ -47,11 +54,14 @@ struct cw_ch_s
 {
 #ifdef CW_DBG
     cw_uint32_t magic;
+#endif
 
+#ifdef CW_CH_COUNT
     /* Counters used to get an idea of performance. */
-    cw_uint32_t num_collisions;
-    cw_uint32_t num_inserts;
-    cw_uint32_t num_removes;
+    cw_uint64_t num_collisions;
+    cw_uint64_t num_inserts;
+    cw_uint64_t num_removes;
+    cw_uint64_t num_searches;
 #endif
 
     /* Opaque allocation/deallocation pointers. */

@@ -93,6 +93,16 @@ dch_delete(cw_dch_t *a_dch)
     cw_check_ptr(a_dch);
     cw_dassert(a_dch->magic == CW_DCH_MAGIC);
 
+#ifdef CW_DCH_VERBOSE
+    fprintf(stderr,
+	    "%s(%p): num_collisions: %llu, num_inserts: %llu,"
+	    " num_removes: %llu, num_searches: %llu, num_grows: %llu,"
+	    " num_shrinks: %llu\n",
+	    __FUNCTION__, a_dch, a_dch->ch->num_collisions,
+	    a_dch->ch->num_inserts, a_dch->ch->num_removes,
+	    a_dch->ch->num_searches, a_dch->num_grows, a_dch->num_shrinks);
+#endif
+
     ch_delete(a_dch->ch);
 
     if (a_dch->is_malloced)
@@ -117,8 +127,8 @@ dch_count(cw_dch_t *a_dch)
 }
 
 void
-dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data, cw_chi_t
-	   *a_chi)
+dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data,
+	   cw_chi_t *a_chi)
 {
     cw_check_ptr(a_dch);
     cw_dassert(a_dch->magic == CW_DCH_MAGIC);
@@ -212,11 +222,12 @@ dch_p_grow(cw_dch_t *a_dch)
 	}
 
 	a_dch->grow_factor *= 2;
-#ifdef CW_DBG
+#ifdef CW_DCH_COUNT
 	a_dch->num_grows++;
 	t_ch->num_collisions += a_dch->ch->num_collisions;
 	t_ch->num_inserts += a_dch->ch->num_inserts;
 	t_ch->num_removes += a_dch->ch->num_removes;
+	t_ch->num_searches += a_dch->ch->num_searches;
 #endif
 	/* Set to NULL to keep ch_delete() from deleting all the items. */
 	ql_first(&a_dch->ch->chi_ql) = NULL;
@@ -266,11 +277,12 @@ dch_p_shrink(cw_dch_t *a_dch)
 	}
 
 	a_dch->grow_factor = new_factor;
-#ifdef CW_DBG
+#ifdef CW_DCH_COUNT
 	a_dch->num_shrinks++;
 	t_ch->num_collisions += a_dch->ch->num_collisions;
 	t_ch->num_inserts += a_dch->ch->num_inserts;
 	t_ch->num_removes += a_dch->ch->num_removes;
+	t_ch->num_searches += a_dch->ch->num_searches;
 #endif
 	/* Set to NULL to keep ch_delete() from deleting all the items. */
 	ql_first(&a_dch->ch->chi_ql) = NULL;
@@ -283,7 +295,7 @@ dch_p_shrink(cw_dch_t *a_dch)
  * contents of one ch to another.  Therefore, this function mucks with ch
  * internals. */
 static void
-dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi)
+dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
 {
     cw_uint32_t slot;
 
@@ -295,14 +307,14 @@ dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi)
     ql_tail_insert(&a_ch->chi_ql, a_chi, ch_link);
 
     /* Hook into the slot list. */
-#ifdef CW_DBG
+#ifdef CW_DCH_COUNT
     if (ql_first(&a_ch->table[slot]) != NULL)
     a_ch->num_collisions++;
 #endif
     ql_head_insert(&a_ch->table[slot], a_chi, slot_link);
 
     a_ch->count++;
-#ifdef CW_DBG
+#ifdef CW_DCH_COUNT
     a_ch->num_inserts++;
 #endif
 }

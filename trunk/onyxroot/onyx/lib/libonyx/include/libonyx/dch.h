@@ -10,6 +10,15 @@
  *
  ******************************************************************************/
 
+#ifdef CW_CH_COUNT
+/* Maintain counters used to get an idea of performance. */
+/* #define CW_DCH_COUNT */
+#ifdef CW_DCH_COUNT
+/* Print counter values to stderr in dch_delete(). */
+/* #define CW_DCH_VERBOSE */
+#endif
+#endif
+
 /* Pseudo-opaque type. */
 typedef struct cw_dch_s cw_dch_t;
 
@@ -17,10 +26,12 @@ struct cw_dch_s
 {
 #ifdef CW_DBG
     cw_uint32_t magic;
+#endif
 
+#ifdef CW_DCH_COUNT
     /* Counters used to get an idea of performance. */
-    cw_uint32_t num_grows;
-    cw_uint32_t num_shrinks;
+    cw_uint64_t num_grows;
+    cw_uint64_t num_shrinks;
 #endif
 
     /* Opaque allocation/deallocation pointers. */

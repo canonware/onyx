@@ -71,6 +71,14 @@ ch_delete(cw_ch_t *a_ch)
     cw_check_ptr(a_ch);
     cw_dassert(a_ch->magic == CW_CH_MAGIC);
 
+#ifdef CW_CH_VERBOSE
+    fprintf(stderr,
+	    "%s(%p): num_collisions: %llu, num_inserts: %llu,"
+	    " num_removes: %llu, num_searches: %llu\n",
+	    __FUNCTION__, a_ch, a_ch->num_collisions, a_ch->num_inserts,
+	    a_ch->num_removes, a_ch->num_searches);
+#endif
+
     while (ql_first(&a_ch->chi_ql) != NULL)
     {
 	chi = ql_first(&a_ch->chi_ql);
@@ -147,7 +155,7 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     ql_tail_insert(&a_ch->chi_ql, chi, ch_link);
 
     /* Hook into the slot list. */
-#ifdef CW_DBG
+#ifdef CW_CH_COUNT
     if (ql_first(&a_ch->table[slot]) != NULL)
     {
 	a_ch->num_collisions++;
@@ -156,7 +164,7 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     ql_head_insert(&a_ch->table[slot], chi, slot_link);
 
     a_ch->count++;
-#ifdef CW_DBG
+#ifdef CW_CH_COUNT
     a_ch->num_inserts++;
 #endif
 }
@@ -211,7 +219,7 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	    }
 
 	    a_ch->count--;
-#ifdef CW_DBG
+#ifdef CW_CH_COUNT
 	    a_ch->num_removes++;
 #endif
 	    retval = FALSE;
@@ -257,6 +265,9 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 
     retval = TRUE;
     RETURN:
+#ifdef CW_CH_COUNT
+    a_ch->num_searches++;
+#endif
     return retval;
 }
 
@@ -339,7 +350,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
     }
 
     a_ch->count--;
-#ifdef CW_DBG
+#ifdef CW_CH_COUNT
     a_ch->num_removes++;
 #endif
 
@@ -351,14 +362,14 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 cw_uint32_t
 ch_string_hash(const void *a_key)
 {
-    cw_uint32_t retval;
-    char *str;
+    cw_uint32_t retval, c;
+    cw_uint8_t *str;
 
     cw_check_ptr(a_key);
 
-    for (str = (char *) a_key, retval = 0; *str != 0; str++)
+    for (str = (cw_uint8_t *) a_key, retval = 5381; (c = *str) != 0; str++)
     {
-	retval = retval * 33 + *str;
+	retval = ((retval << 5) + retval) + c;
     }
 
     return retval;
@@ -367,7 +378,6 @@ ch_string_hash(const void *a_key)
 cw_uint32_t
 ch_direct_hash(const void *a_key)
 {
-    cw_uint32_t retval, i;
 #if (SIZEOF_INT_P == 4)
     cw_uint32_t t = (cw_uint32_t) a_key;
 #elif (SIZEOF_INT_P == 8)
@@ -377,28 +387,17 @@ ch_direct_hash(const void *a_key)
 #endif
 
     /* Shift right until we've shifted one 1 bit off. */
-    for (i = 0; i < 8 * sizeof(void *); i++)
-    {
-	if ((t & 0x1) == 1)
-	{
-	    t >>= 1;
-	    break;
-	}
-	else
-	{
-	    t >>= 1;
-	}
-	
-    }
-
-#if (SIZEOF_INT_P == 4)
-    retval = t;
-#elif (SIZEOF_INT_P == 8)
-    retval = (cw_uint32_t) t;
-#else
-#error Unsupported pointer size
+#if (SIZEOF_INT_P == 8)
+    t >>= 32 * !(t & 0xffffffff);
 #endif
-    return retval;
+    t >>= 16 * !(t & 0xffff);
+    t >>= 8 * !(t & 0xff);
+    t >>= 4 * !(t & 0xf);
+    t >>= 2 * !(t & 0x3);
+    t >>= 1 * !(t & 0x1);
+    t >>= 1;
+
+    return t;
 }
 
 cw_bool_t
