@@ -586,7 +586,7 @@ out_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size,
 }
 
 cw_sint32_t
-spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const char **r_val)
+spec_type_get(const char *a_spec, cw_uint32_t a_spec_len, const char **r_val)
 {
 	cw_sint32_t	retval, i;
 
@@ -610,7 +610,7 @@ spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const char **r_val)
 }
 
 cw_sint32_t
-spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
+spec_val_get(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
     cw_uint32_t a_name_len, const cw_uint8_t **r_val)
 {
 	cw_sint32_t	retval, i, curr_name_len, val_len;
@@ -686,7 +686,6 @@ spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
 	}
 
 	retval = -1;
-
 	RETURN:
 	return retval;
 }
@@ -788,7 +787,7 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
 		else {
 			if (a_out != NULL)
 				mtx_unlock(&a_out->lock);
-			retval = -3;
+			retval = -1;
 			goto RETURN;
 		}
 	} while ((i < out_size) && (nwritten == -1) && (errno == EAGAIN));
@@ -909,15 +908,14 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 
 			/* Find the type string. */
 			type_len =
-			    spec_get_type(&a_format[key.key_els[key_offset].el_offset],
+			    spec_type_get(&a_format[key.key_els[key_offset].el_offset],
 			    key.key_els[key_offset].el_len, &type);
 			_cw_assert(type_len >= 0);
 			/* Get the handler for this specifier. */
 			ent = out_p_ent_get(a_out, type, type_len);
 			if (ent == NULL) {
 				/* No handler. */
-				retval = -2;
-				goto RETURN;
+				xep_throw(_CW_XEPV_OUT_PARSE);
 			}
 
 			switch (ent->size) {
@@ -1103,10 +1101,8 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 			_cw_not_reached();
 		}
 	}
-	if (state != NORMAL) {
-		retval = -2;
-		goto RETURN;
-	}
+	if (state != NORMAL)
+		xep_throw(_CW_XEPV_OUT_PARSE);
 	/*
 	 * Accept the last el, if there is one.
 	 */
@@ -1115,7 +1111,6 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		    el_offset);
 	}
 
-	RETURN:
 	return retval;
 }
 
@@ -1224,7 +1219,7 @@ out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
 	 * Calculate the width of what we'll print, assuming that it will fit in
 	 * r_buf.
 	 */
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+	if ((val_len = spec_val_get(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1251,7 +1246,7 @@ out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
 		 * character, then determine where to render the integer based
 		 * on justification.
 		 */
-		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
+		if ((val_len = spec_val_get(a_format, a_len, "p", 1, &val)) !=
 		    -1)
 			pad = val[0];
 		else
@@ -1259,7 +1254,7 @@ out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
 
 		memset(r_buf, pad, owidth);
 
-		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
+		if ((val_len = spec_val_get(a_format, a_len, "j", 1, &val)) !=
 		    -1)
 			justify = val[0];
 		else
@@ -1308,7 +1303,7 @@ out_p_int_render(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 	 */
 	result = &s_result[65 - a_nbits];
 
-	if ((val_len = spec_get_val(a_format, a_len, "b", 1, &val)) != -1) {
+	if ((val_len = spec_val_get(a_format, a_len, "b", 1, &val)) != -1) {
 		/* Base specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1322,7 +1317,7 @@ out_p_int_render(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 		base = a_default_base;
 
 	/* Determine sign. */
-	if (((val_len = spec_get_val(a_format, a_len, "s", 1, &val)) != -1) &&
+	if (((val_len = spec_val_get(a_format, a_len, "s", 1, &val)) != -1) &&
 	    (val[0] == 's') && ((arg & (((cw_uint64_t)1) << (a_nbits - 1))) !=
 	    0)) {
 		is_negative = TRUE;
@@ -1333,7 +1328,7 @@ out_p_int_render(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 		is_negative = FALSE;
 
 	/* Should we show the sign if the number is positive? */
-	if ((((val_len = spec_get_val(a_format, a_len, "+", 1, &val)) != -1) &&
+	if ((((val_len = spec_val_get(a_format, a_len, "+", 1, &val)) != -1) &&
 	    (val[0]) == '+') || (is_negative))
 		show_sign = TRUE;
 	else
@@ -1483,7 +1478,7 @@ out_p_string_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	rlen = strlen(str);
 
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+	if ((val_len = spec_val_get(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we
@@ -1565,7 +1560,7 @@ out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	rlen = buf_size_get(buf);
 
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+	if ((val_len = spec_val_get(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		/*
 		 * The next character after val is either `|' or `]', so we

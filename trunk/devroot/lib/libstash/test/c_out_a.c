@@ -657,13 +657,103 @@ main()
 		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
-		_cw_assert(out_put(out_p, "[") == -2);
-		_cw_assert(out_put(out_p, "[i") == -2);
-		_cw_assert(out_put(out_p, "[i|") == -2);
-		_cw_assert(out_put(out_p, "[i|]") == -2);
-		_cw_assert(out_put(out_p, "[i|x]") == -2);
-		_cw_assert(out_put(out_p, "[i|x:|]") == -2);
-		_cw_assert(out_put(out_p, "[foo]") == -2);
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
+
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[i");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
+
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[i|");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
+
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[i|]");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
+
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[i|x]");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
+
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[i|x:|]");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
+
+		xep_begin();
+		volatile cw_bool_t	caught = FALSE;
+		xep_try {
+			out_put(out_p, "[foo]");
+		}
+		xep_catch(_CW_XEPV_OUT_PARSE) {
+			xep_handled();
+			caught = TRUE;
+		}
+		xep_finally {
+			_cw_assert(caught == TRUE);
+		}
+		xep_end();
 
 		out_delete(out_p);
 	}

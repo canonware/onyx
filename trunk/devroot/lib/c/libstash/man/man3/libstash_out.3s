@@ -213,13 +213,13 @@ helpers.
 
 .I cw_sint32_t
 .br
-.B spec_get_type
+.B spec_type_get
 .RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
 .IR "const char **r_val" )
 
 .I cw_sint32_t
 .br
-.B spec_get_val
+.B spec_val_get
 .RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
 .IR "const char *a_name" ", " "cw_uint32_t a_name_len" ", "
 .IR "const cw_uint8_t **r_val" )
@@ -379,10 +379,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes of output space that the corresponding rendering function
-needs.
-.br
--2: Error.
+Number of bytes of output space that the corresponding rendering function needs.
 .RE
 .RE
 Exception(s):
@@ -617,15 +614,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -680,15 +677,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -731,15 +728,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -795,15 +792,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -849,15 +846,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_out's default file descriptor (2 if (NULL == a_out)).
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -902,15 +899,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_fd.
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -962,15 +959,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_fd.
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1013,15 +1010,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_fd.
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1074,15 +1071,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_fd.
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1132,15 +1129,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_fd.
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1179,15 +1176,15 @@ Output(s):
 .RS
 >= 0: Number of bytes output.
 .br
--2: Parse error.
-.br
--3: write() error.
+-1: write() error.
 .RE
 Output printed to a_fd.
 .RE
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1230,10 +1227,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output, not including the terminating '\\0'.
-.br
--2: Parse error.
-.RE
+Number of bytes output, not including the terminating '\\0'.
 .IR a_str :
 .RS
 Formatted output.
@@ -1242,6 +1236,8 @@ Formatted output.
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1278,9 +1274,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output, not including the terminating '\\0'.
-.br
--2: Parse error.
+Number of bytes output, not including the terminating '\\0'.
 .RE
 .IR *r_str :
 .RS
@@ -1290,6 +1284,8 @@ Formatted output, or undefined if error.
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1341,9 +1337,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output, not including the terminating '\\0'.
-.br
--2: Parse error.
+Number of bytes output, not including the terminating '\\0'.
 .RE
 .IR a_str :
 .RS
@@ -1353,6 +1347,8 @@ Formatted output.
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1390,9 +1386,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output, not including the terminating '\\0'.
-.br
--2: Parse error.
+Number of bytes output, not including the terminating '\\0'.
 .RE
 .IR a_str :
 .RS
@@ -1402,6 +1396,8 @@ Formatted output.
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1438,9 +1434,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output, not including the terminating '\\0'.
-.br
--2: Parse error.
+Number of bytes output, not including the terminating '\\0'.
 .RE
 .IR *r_str :
 .RS
@@ -1450,6 +1444,8 @@ Formatted output, or undefined if error.
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1495,9 +1491,7 @@ Output(s):
 .RS
 .IR retval :
 .RS
->= 0: Number of bytes output, not including the terminating '\\0'.
-.br
--2: Parse error.
+Number of bytes output, not including the terminating '\\0'.
 .RE
 .IR a_str :
 .RS
@@ -1507,6 +1501,8 @@ Formatted output.
 Exception(s):
 .RS
 _CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
 .RE
 Description:
 .RS
@@ -1516,7 +1512,7 @@ Print at most a_size bytes of formatted output.
 
 .I cw_sint32_t
 .br
-.B spec_get_type
+.B spec_type_get
 .RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
 .IR "const char **r_val" )
 .RS
@@ -1558,7 +1554,7 @@ Return the length of the type value string, and set *r_val to point to it.
 
 .I cw_sint32_t
 .br
-.B spec_get_val
+.B spec_val_get
 .RI ( "const char *a_spec" ", " "cw_uint32_t a_spec_len" ", "
 .IR "const char *a_name" ", " "cw_uint32_t a_name_len" ", "
 .IR "const cw_uint8_t **r_val" )

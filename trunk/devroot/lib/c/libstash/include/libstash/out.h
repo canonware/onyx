@@ -121,7 +121,7 @@ cw_sint32_t	out_put_sva(cw_out_t *a_out, char **r_str, const char *a_format,
 cw_sint32_t	out_put_svn(cw_out_t *a_out, char *a_str, cw_uint32_t a_size,
     const char *a_format, va_list a_p);
 
-cw_sint32_t	spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const
+cw_sint32_t	spec_type_get(const char *a_spec, cw_uint32_t a_spec_len, const
     char **r_val);
-cw_sint32_t	spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const
+cw_sint32_t	spec_val_get(const char *a_spec, cw_uint32_t a_spec_len, const
     char *a_name, cw_uint32_t a_name_len, const cw_uint8_t **r_val);

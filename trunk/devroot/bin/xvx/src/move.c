@@ -277,7 +277,7 @@ move_out_put(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 		width += 2;
 	}
   
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+	if ((val_len = spec_val_get(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
 		
 		/*
@@ -297,14 +297,14 @@ move_out_put(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 		 * character, then determine where to render, based on
 		 * justification.
 		 */
-		if ((val_len = spec_get_val(a_format, a_len, "p", 1,
+		if ((val_len = spec_val_get(a_format, a_len, "p", 1,
 		    &val)) != -1)
 			pad = val[0];
 		else
 			pad = ' ';
 		memset(r_buf, pad, min_width);
 
-		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val))
+		if ((val_len = spec_val_get(a_format, a_len, "j", 1, &val))
 		    != -1)
 			justify = val[0];
 		else

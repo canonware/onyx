@@ -18,6 +18,7 @@ typedef cw_sint32_t cw_xepv_t;
 #define	_CW_XEPV_CODE		 _CW_XEPV_NONE
 #define	_CW_XEPV_FINALLY	-1
 #define	_CW_XEPV_OOM		-2
+#define _CW_XEPV_OUT_PARSE	-3
 /*
  * Exceptions should be numbered negatively, and care should be taken to avoid
  * duplicates.  -1 through -127 are reserved by libstash.
