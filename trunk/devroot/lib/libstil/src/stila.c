@@ -85,17 +85,6 @@
 #define	_CW_STILA_MAGIC		0x63935743
 #endif
 
-/*
- * Doing any locking during GC is dangerous and can result in deadlock.  Even
- * using malloc() can cause a deadlock.  Therefore, the diagnostic messages are
- * dangerous in that they print, so if deadlocks occur while they're on, don't
- * be surprised.
- */
-#ifdef _LIBSTIL_CONFESS
-/* Print tree traversal information for root set acquisition if defined. */
-#define	_LIBSTIL_STILA_REF_ITER
-#endif
-
 typedef enum {
 	STILAM_NONE,
 	STILAM_COLLECT,
@@ -552,9 +541,6 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 	 * a call with (a_reset == TRUE), and repeated calls until NULL is
 	 * returned.
 	 */
-#ifdef _LIBSTIL_STILA_REF_ITER
-	out_put_e(NULL, NULL, 0, __FUNCTION__, "v");
-#endif
 
 	/*
 	 * Get a root object, so that we can create an invariant for the main
@@ -569,14 +555,8 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 		/*
 		 * Iterate through stils's.
 		 */
-#ifdef _LIBSTIL_STILA_REF_ITER
-		out_put(NULL, "t");
-#endif
 		for (stils = stilt_l_ref_iter(stilt, TRUE); stils != NULL; stils
 		    = stilt_l_ref_iter(stilt, FALSE)) {
-#ifdef _LIBSTIL_STILA_REF_ITER
-			out_put(NULL, "s");
-#endif
 			/*
 			 * Iterate through stiloe's on the stils.
 			 */
@@ -587,9 +567,6 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 					 * Paint object gray.
 					 */
 					nroot++;
-#ifdef _LIBSTIL_STILA_REF_ITER
-					out_put(NULL, "<R>");
-#endif
 					_cw_assert(stiloe_l_color_get(stiloe) ==
 					    a_stila->white);
 					stiloe_l_color_set(stiloe,
@@ -601,19 +578,10 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 			}
 		}
 	}
-#ifdef _LIBSTIL_STILA_REF_ITER
-	out_put(NULL, "\n");
-#endif
 	/*
 	 * If we completed the above loop, there are no roots, and therefore we
 	 * should not enter the main root set acquisition loop below.
 	 */
-#ifdef _LIBSTIL_CONFESS
-	if (ql_first(&a_stila->seq_set) != NULL)
-		out_put_e(NULL, NULL, 0, __FUNCTION__, "No objects\n");
-	else
-		out_put_e(NULL, NULL, 0, __FUNCTION__, "All garbage\n");
-#endif
 	retval = FALSE;
 	goto RETURN;
 
@@ -630,22 +598,13 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 		/*
 		 * Iterate through stils's.
 		 */
-#ifdef _LIBSTIL_STILA_REF_ITER
-		out_put(NULL, "t");
-#endif
 		for (stils = stilt_l_ref_iter(stilt, TRUE); stils != NULL; stils
 		    = stilt_l_ref_iter(stilt, FALSE)) {
-#ifdef _LIBSTIL_STILA_REF_ITER
-			out_put(NULL, "s");
-#endif
 			/*
 			 * Iterate through stiloe's on the stils.
 			 */
 			for (stiloe = stils_l_ref_iter(stils, TRUE); stiloe !=
 			    NULL; stiloe = stils_l_ref_iter(stils, FALSE)) {
-#ifdef _LIBSTIL_STILA_REF_ITER
-				out_put(NULL, "+");
-#endif
 				if (stiloe_l_color_get(stiloe) ==
 				    a_stila->white &&
 				    stiloe_l_registered_get(stiloe)) {
@@ -656,32 +615,18 @@ stila_p_roots(cw_stila_t *a_stila, cw_uint32_t *r_nroot)
 					stiloe_l_color_set(stiloe,
 					    !a_stila->white);
 					if (stiloe != qr_next(gray, link)) {
-#ifdef _LIBSTIL_STILA_REF_ITER
-						out_put(NULL, "<C>");
-#endif
 						qr_remove(stiloe, link);
 						qr_after_insert(gray, stiloe,
 						    link);
 					}
-#ifdef _LIBSTIL_STILA_REF_ITER
-					else
-						out_put(NULL, "<CW>");
-#endif
 					gray = qr_next(gray, link);
 				}
 			}
 		}
 	}
-#ifdef _LIBSTIL_STILA_REF_ITER
-	out_put(NULL, "\n");
-#endif
 
 	retval = TRUE;
 	RETURN:
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__, "[i] root object[s]\n", nroot,
-	    nroot == 1 ? "" : "s");
-#endif
 	*r_nroot = nroot;
 	return retval;
 }
@@ -740,11 +685,6 @@ stila_p_mark(cw_stila_t *a_stila, cw_uint32_t *r_nreachable)
 	} else
 		retval = NULL;
 
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__,
-	    "[i] non-root reachable object[s]\n", nreachable, nreachable == 1 ?
-	    "" : "s");
-#endif
 	*r_nreachable = nreachable;
 	return retval;
 }
@@ -756,30 +696,19 @@ _CW_INLINE void
 stila_p_sweep(cw_stiloe_t *a_garbage, cw_stil_t *a_stil)
 {
 	cw_stiloe_t	*stiloe;
-#ifdef _LIBSTIL_CONFESS
-	cw_uint32_t	ngarbage = 0;
-#endif
 
 	do {
-#ifdef _LIBSTIL_CONFESS
-		ngarbage++;
-#endif
 		stiloe = qr_next(a_garbage, link);
 		qr_remove(stiloe, link);
 		stiloe_l_delete(stiloe, a_stil);
 	} while (stiloe != a_garbage);
-
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__,
-	    "[i] garbage object[s]\n", ngarbage, ngarbage == 1 ? "" : "s");
-#endif
 }
 
 /*
  * Collect garbage using a Baker's Treadmill.
  */
 _CW_INLINE void
-stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
+stila_p_collect(cw_stila_t *a_stila)
 {
 	cw_uint32_t	nroot, nreachable;
 	cw_stiloe_t	*garbage;
@@ -794,31 +723,6 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 
 	mtx_lock(&a_stila->lock);
 
-#ifdef _LIBSTIL_CONFESS
-	/*
-	 * Do this before calling thd_single_enter() to avoid potential memory
-	 * allocation deadlock.
-	 */
-	{
-		cw_stiloe_t	*p;
-		cw_uint32_t	nregistered;
-
-		out_put_e(NULL, NULL, 0, __FUNCTION__, "---------> Start\n");
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "[q] registration[s] since last collection\n",
-		    a_stila->gcdict_current, a_stila->gcdict_current == 1 ? "" :
-		    "s");
-
-		nregistered = 0;
-		qr_foreach(p, ql_first(&a_stila->seq_set), link) {
-			nregistered++;
-		}
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "[i] object[s] registered\n", nregistered, nregistered == 1
-		    ? "" : "s");
-		_cw_assert(a_stila->gcdict_current <= nregistered);
-	}
-#endif
 	/* Stop the mutator threads. */
 	thd_single_enter();
 
@@ -862,14 +766,6 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 	pool_drain(&a_stila->dicto_pool);
 	pool_drain(&a_stila->stilsc_pool);
 
-	if (a_shutdown) {
-		/*
-		 * All objects were just swept away, so don't update the
-		 * statistics, since the storage is already gone for them.
-		 */
-		goto RETURN;
-	}
-
 	/* Record the sweep finish time and calculate sweep_us. */
 	gettimeofday(&t_tv, NULL);
 	sweep_us = t_tv.tv_sec;
@@ -898,15 +794,6 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 	a_stila->gcdict_collections++;
 
 	mtx_unlock(&a_stila->lock);
-
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__,
-	    "[q] us mark + [q] us sweep\n", mark_us, sweep_us);
-#endif
-	RETURN:
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__, "<--------- Finish\n");
-#endif
 }
 
 static void *
@@ -917,10 +804,6 @@ stila_p_gc_entry(void *a_arg)
 	cw_stilam_t	message;
 	cw_bool_t	shutdown, collect;
 	cw_stiloi_t	seq_new, prev_seq_new;
-
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__, "Start collector\n");
-#endif
 
 	/*
 	 * Any of the following conditions will cause a collection:
@@ -966,14 +849,14 @@ stila_p_gc_entry(void *a_arg)
 				 * timeout, collect.
 				 */
 				if (prev_seq_new == seq_new) {
-					stila_p_collect(stila, FALSE);
+					stila_p_collect(stila);
 					prev_seq_new = 0;
 				} else
 					prev_seq_new = seq_new;
 			}
 			break;
 		case STILAM_COLLECT:
-			stila_p_collect(stila, FALSE);
+			stila_p_collect(stila);
 			prev_seq_new = 0;
 			break;
 		case STILAM_RECONFIGURE:
@@ -981,15 +864,12 @@ stila_p_gc_entry(void *a_arg)
 			break;
 		case STILAM_SHUTDOWN:
 			shutdown = TRUE;
-			stila_p_collect(stila, TRUE);
+			stila_p_collect(stila);
 			break;
 		default:
 			_cw_not_reached();
 		}
 	}
 
-#ifdef _LIBSTIL_CONFESS
-	out_put_e(NULL, NULL, 0, __FUNCTION__, "Shut down collector\n");
-#endif
 	return NULL;
 }

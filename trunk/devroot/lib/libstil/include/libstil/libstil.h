@@ -20,9 +20,6 @@ extern  "C" {
 
 #define _LIBSTIL_VERSION "<Version>"
 
-/* Causes verbose GC-related output. */
-/*  #define	_LIBSTIL_CONFESS */
-
 /*
  * Minimum initial size of dictionaries.
  */
