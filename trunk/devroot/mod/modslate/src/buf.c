@@ -4388,21 +4388,97 @@ ext_stack_down_get(cw_ext_t *a_ext)
 }
 
 /* Get the beginning and ending points of the fragment that a_mkr is contained
- * by. */
+ * by.  If a_mkr falls on a fragment boundary, then it is considered to reside
+ * in a zero-length fragment. */
 void
 ext_frag_get(const cw_mkr_t *a_mkr, cw_mkr_t *r_beg, cw_mkr_t *r_end)
 {
+    cw_buf_t *buf;
+    cw_mkr_t *beg_mkr, *end_mkr;
+    cw_ext_t *ext, key;
+
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_assert(a_mkr->order == MKRO_EITHER);
     cw_check_ptr(r_beg);
     cw_dassert(r_beg->magic == CW_MKR_MAGIC);
+    cw_assert(r_beg->order == MKRO_EITHER);
     cw_check_ptr(r_end);
     cw_dassert(r_end->magic == CW_MKR_MAGIC);
+    cw_assert(r_end->order == MKRO_EITHER);
 
-    /* nsearch in f-order for one position past a_mkr, and nsearch in r-order
-     * for one position before a_mkr.  Beware of edge conditions (BOB/EOB). */
+    /* Use f-order and r-order to find the nearest extent begins/ends on either
+     * side of a_mkr.  rb_nsearch() makes it easy to find the following begin
+     * and leading end.  In the case that a_mkr is not on a fragment boundary,
+     * rb_nsearch() is guaranteed to return the first extent past a_mkr, which
+     * means that the extent immediatly preceding rb_nsearch()'s return value is
+     * the other extent of interest.  In the case where a_mkr is on a fragment
+     * boundary, there is no need to even look further, since we know this to be
+     * the case as soon as an extent's marker is found to be at a_mkr. */
 
-    cw_error("XXX Not implemented");
+    buf = a_mkr->bufp->buf;
+
+    /* Fake up a key for extent searching. */
+    memcpy(&key.beg, a_mkr, sizeof(cw_mkr_t));
+    memcpy(&key.end, a_mkr, sizeof(cw_mkr_t));
+#ifdef CW_DBG
+    key.magic = CW_EXT_MAGIC;
+#endif
+
+    /* Find the first extent in f-order that starts after a_mkr. */
+    rb_nsearch(&buf->ftree, &key, ext_p_fcomp, cw_ext_t, fnode, ext);
+    if (ext != rb_tree_nil(&buf->ftree))
+    {
+	end_mkr = &ext->beg;
+
+	if (r_end->bufp == a_mkr->bufp && r_end->ppos == a_mkr->ppos)
+	{
+	    /* Zero-length fragment. */
+	    beg_mkr = end_mkr;
+	    goto RETURN;
+	}
+
+	ext = ql_prev(&buf->flist, ext, flink);
+	if (ext != NULL)
+	{
+	    beg_mkr = &ext->beg;
+	}
+	else
+	{
+	    end_mkr = NULL;
+	}
+    }
+    else
+    {
+	end_mkr = NULL;
+    }
+
+    /* Find the first extent in r-order that ends before a_mkr. */
+    rb_nsearch(&buf->rtree, &key, ext_p_rcomp, cw_ext_t, rnode, ext);
+    if (ext != rb_tree_nil(&buf->rtree))
+    {
+	if (beg_mkr == NULL || mkr_p_bpos(&ext->end) > mkr_p_bpos(beg_mkr))
+	{
+	    beg_mkr = &ext->end;
+	}
+
+	if (beg_mkr->bufp == a_mkr->bufp && beg_mkr->ppos == a_mkr->ppos)
+	{
+	    /* Zero-length fragment. */
+	    end_mkr = beg_mkr;
+	    goto RETURN;
+	}
+
+	ext = ql_prev(&buf->rlist, ext, rlink);
+	if (ext != NULL &&mkr_p_bpos(&ext->end) < mkr_p_bpos(end_mkr))
+	{
+	    end_mkr = beg_mkr;
+	}
+    }
+
+    RETURN:
+    mkr_p_dup(r_beg, beg_mkr, MKRO_EITHER);
+    mkr_p_dup(r_end, end_mkr, MKRO_EITHER);
 }
 
 #ifdef CW_BUF_DUMP
