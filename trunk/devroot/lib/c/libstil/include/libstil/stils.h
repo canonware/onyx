@@ -48,7 +48,7 @@ struct cw_stilsc_s {
 
 	cw_pezz_t	*allocator;
 
-	qsl_entry(cw_stilsc_t) link;	/* Linkage for the list of stilsc's. */
+	qq_entry(cw_stilsc_t) link;	/* Linkage for the list of stilsc's. */
 
 	/*
 	 * Must be last field, since it is used for array indexing of
@@ -70,7 +70,7 @@ struct cw_stils_s {
 
 	cw_pezz_t	*stilsc_pezz;	/* Allocator for stilsc's. */
 
-	qsl_head(, cw_stilsc_t) chunks;	/* List of stilsc's. */
+	qq_head(cw_stilsc_t) chunks;	/* List of stilsc's. */
 };
 
 cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz);

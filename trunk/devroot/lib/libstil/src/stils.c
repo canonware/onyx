@@ -39,7 +39,7 @@ stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
 	retval->spares = NULL;
 	retval->nspares = 0;
 	retval->stilsc_pezz = a_stilsc_pezz;
-	qsl_init(&retval->chunks);
+	qq_init(&retval->chunks);
 
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILS_MAGIC;
@@ -63,9 +63,9 @@ stils_delete(cw_stils_t *a_stils)
 	if (a_stils->count > 0)
 		stils_pop(a_stils, a_stils->count);
 
-	while (!qsl_empty(&a_stils->chunks)) {
-		stilsc = qsl_first(&a_stils->chunks);
-		qsl_remove_head(&a_stils->chunks, link);
+	while (!qq_empty(&a_stils->chunks)) {
+		stilsc = qq_first(&a_stils->chunks);
+		qq_remove_head(&a_stils->chunks, link);
 		stilsc_p_delete(stilsc);
 	}
 
@@ -82,7 +82,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	cw_stilso_t	*old_stilso;
 	cw_stilo_t	*new_stilo;
 	cw_uint32_t	old_count, i;
-	qsl_head(, cw_stilsc_t) old_chunks;
+	qq_head(cw_stilsc_t) old_chunks;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
@@ -98,7 +98,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	a_stils->spares = NULL;
 	a_stils->nspares = 0;
 	memcpy(&old_chunks, &a_stils->chunks, sizeof(old_chunks));
-	qsl_init(&a_stils->chunks);
+	qq_init(&a_stils->chunks);
 
 	/*
 	 * Iterate through the entire stack, moving stilso's to the new stack.
@@ -128,9 +128,9 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 * Now delete the old stilsc's.  We've moved everything important to new
 	 * storage, so nothing more than deletion is necessary.
 	 */
-	while (!qsl_empty(&old_chunks)) {
-		stilsc = qsl_first(&old_chunks);
-		qsl_remove_head(&old_chunks, link);
+	while (!qq_empty(&old_chunks)) {
+		stilsc = qq_first(&old_chunks);
+		qq_remove_head(&old_chunks, link);
 		stilsc_p_delete(stilsc);
 	}
 }
@@ -411,7 +411,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 
 		stilsc = stilsc_p_new(a_stils->stilsc_pezz);
 
-		qsl_insert_head(&a_stils->chunks, stilsc, link);
+		qq_insert_head(&a_stils->chunks, stilsc, link);
 		a_stils->spares = stilsc_p_get_stilso(stilsc, 0);
 		a_stils->nspares = stilsc_p_get_nstilso(stilsc);
 	 }
@@ -484,5 +484,5 @@ static void
 stilso_p_new(cw_stilso_t *a_stilso)
 {
 	stilo_new(&a_stilso->stilo);
-	qr_init(a_stilso, link);
+	qr_new(a_stilso, link);
 }
