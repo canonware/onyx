@@ -179,6 +179,9 @@ typedef enum {
 #ifdef _CW_POSIX
 	NXN_mode,
 #endif
+#ifdef HAVE_DLOPEN
+	NXN_modload,
+#endif
 #ifdef _CW_THREADS
 	NXN_monitor,
 #endif

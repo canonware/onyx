@@ -20,11 +20,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = onyx.h
-#if [enable_posix]
-                    onyx_ops.h
-#endif
-                    ;
+  local priv_incs = onyx.h;
   priv_incs = [fromto % [srcdir]/bin/onyx/include/% [priv_incs]];
   priv_incs = [priv_incs] [objdir]/bin/onyx/include/onyx_defs.h;
 
@@ -35,11 +31,7 @@
 }
 
 /* Source files. */
-ONYX_SRCS = onyx.c
-#if [enable_posix]
-            onyx_ops.c
-#endif
-            ;
+ONYX_SRCS = onyx.c;
 ONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [ONYX_SRCS]];
 
 TONYX_SRCS = tonyx.c;

@@ -9,6 +9,11 @@
  *
  ******************************************************************************/
 
+typedef struct {
+	cw_uint32_t	iter;
+	void		*dlhandle;
+} cw_nxmod_t;
+
 void	systemdict_abs(cw_nxo_t *a_thread);
 void	systemdict_add(cw_nxo_t *a_thread);
 void	systemdict_and(cw_nxo_t *a_thread);
@@ -120,6 +125,9 @@ void	systemdict_lt(cw_nxo_t *a_thread);
 void	systemdict_mkdir(cw_nxo_t *a_thread);
 #endif
 void	systemdict_mod(cw_nxo_t *a_thread);
+#ifdef HAVE_DLOPEN
+void	systemdict_modload(cw_nxo_t *a_thread);
+#endif
 #ifdef _CW_THREADS
 void	systemdict_monitor(cw_nxo_t *a_thread);
 #endif

@@ -1,3 +1,7 @@
+2001-12-07  Jason Evans  <jasone@canonware.com>
+
+	* : Move the modload operator from the onyx program to libonyx.
+
 2001-11-17  Jason Evans  <jasone@canonware.com>
 
 	* configure.in: Do not specify CFLAGS unless none were passed in the

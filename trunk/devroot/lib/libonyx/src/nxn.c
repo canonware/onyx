@@ -181,6 +181,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef _CW_POSIX
 	"mode",
 #endif
+#ifdef HAVE_DLOPEN
+	"modload",
+#endif
 #ifdef _CW_THREADS
 	"monitor",
 #endif

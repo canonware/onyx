@@ -67,8 +67,7 @@ cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 /*
  * Function prototypes.
  */
-void		usage(const char *a_progname);
-const char	*basename(const char *a_str);
+void		usage(void);
 
 struct nx_read_arg_s *stdin_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, cw_bool_t
     a_interactive);
@@ -99,7 +98,7 @@ cw_bool_t	nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
 int
 main(int argc, char **argv, char **envp)
 {
-	int			retval;
+	int	retval;
 
 	libonyx_init();
 
@@ -116,50 +115,22 @@ main(int argc, char **argv, char **envp)
 }
 
 void
-usage(const char *a_progname)
+usage(void)
 {
-	printf("%s usage:\n"
-	    "    %s\n"
-	    "    %s -h\n"
-	    "    %s -V\n"
-	    "    %s -e <expr>\n"
+	printf("onyx usage:\n"
+	    "    onyx\n"
+	    "    onyx -h\n"
+	    "    onyx -V\n"
+	    "    onyx -e <expr>\n"
 #ifdef _CW_POSIX_FILE
-	    "    %s <file> [<args>]\n"
+	    "    onyx <file> [<args>]\n"
 #endif
 	    "\n"
 	    "    Option    | Description\n"
 	    "    ----------+------------------------------------\n"
 	    "    -h        | Print usage and exit.\n"
 	    "    -V        | Print version information and exit.\n"
-	    "    -e <expr> | Execute <expr> as Onyx code.\n",
-	    a_progname, a_progname, a_progname, a_progname, a_progname
-#ifdef _CW_POSIX_FILE
-	    , a_progname
-#endif
-	    );
-}
-
-/* Doesn't strip trailing '/' characters. */
-const char *
-basename(const char *a_str)
-{
-	const char	*retval = NULL;
-	cw_uint32_t	i;
-
-	_cw_check_ptr(a_str);
-
-	i = strlen(a_str);
-	if (i > 0) {
-		for (i--; i > 0; i--) {
-			if (a_str[i] == '/') {
-				retval = &a_str[i + 1];
-				break;
-			}
-		}
-	}
-	if (retval == NULL)
-		retval = a_str;
-	return retval;
+	    "    -e <expr> | Execute <expr> as Onyx code.\n");
 }
 
 #if (defined(_CW_USE_LIBEDIT) && defined(_CW_THREADS))
@@ -500,7 +471,7 @@ interactive_run(int argc, char **argv, char **envp)
 	hist = history_init();
 	history(hist, H_EVENT, 512);
 
-	el = el_init(basename(argv[0]), stdin, stdout);
+	el = el_init("onyx", stdin, stdout);
 	el_set(el, EL_HIST, history, hist);
 	el_set(el, EL_PROMPT, prompt);
 
@@ -528,11 +499,6 @@ interactive_run(int argc, char **argv, char **envp)
 	/* Now that the files have been wrapped, create the initial thread. */
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
-
-	/* Install custom operators. */
-#ifdef _CW_POSIX
-	onyx_ops_init(&thread);
-#endif
 
 	/* Run embedded initialization code. */
 #ifdef _CW_POSIX
@@ -611,7 +577,7 @@ batch_run(int argc, char **argv, char **envp)
 	c = getopt(argc, argv, "hVe:");
 	switch (c) {
 	case 'h':
-		usage(basename(argv[0]));
+		usage();
 		retval = 0;
 		goto CLERROR;
 	case 'V':
@@ -619,9 +585,9 @@ batch_run(int argc, char **argv, char **envp)
 		break;
 	case 'e': {
 		if (argc != 3) {
-			fprintf(stderr, "%s: Incorrect number of arguments\n",
-			    basename(argv[0]));
-			usage(basename(argv[0]));
+			fprintf(stderr,
+			    "onyx: Incorrect number of arguments\n");
+			usage();
 			retval = 1;
 			goto CLERROR;
 		}
@@ -632,9 +598,8 @@ batch_run(int argc, char **argv, char **envp)
 	case -1:
 		break;
 	default:
-		fprintf(stderr,  "%s: Unrecognized option\n",
-		    basename(argv[0]));
-		usage(basename(argv[0]));
+		fprintf(stderr,  "onyx: Unrecognized option\n");
+		usage();
 		retval = 1;
 		goto CLERROR;
 	}
@@ -644,9 +609,8 @@ batch_run(int argc, char **argv, char **envp)
 	 */
 	if ((optind < argc && (opt_expression != NULL || opt_version))
 	    || (opt_version && opt_expression != NULL)) {
-		fprintf(stderr, "%s: Incorrect number of arguments\n",
-		    basename(argv[0]));
-		usage(basename(argv[0]));
+		fprintf(stderr, "onyx: Incorrect number of arguments\n");
+		usage();
 		retval = 1;
 		goto CLERROR;
 	}
@@ -665,10 +629,9 @@ batch_run(int argc, char **argv, char **envp)
 	nxo_threadp_new(&threadp);
 
 	/*
-	 * Install custom operators and run embedded initialization code.
+	 * Run embedded initialization code.
 	 */
 #ifdef _CW_POSIX
-	onyx_ops_init(&thread);
 	onyx_nxcode(&thread);
 #endif
 
@@ -721,9 +684,8 @@ batch_run(int argc, char **argv, char **envp)
 		 */
 		src_fd = open(argv[optind], O_RDONLY);
 		if (src_fd == -1) {
-			fprintf(stderr, "%s: Error in open(\"%s\","
-			    " O_RDONLY): %s\n", basename(argv[0]),
-			    argv[optind], strerror(errno));
+			fprintf(stderr, "onyx: Error in open(\"%s\","
+			    " O_RDONLY): %s\n", argv[optind], strerror(errno));
 			retval = 1;
 			goto RETURN;
 		}
