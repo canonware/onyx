@@ -71,13 +71,8 @@ $run =
     . " -f acinclude.m4 -f aclocal.m4"
     . " -f config.guess -f config.sub -f configure -f configure.in"
     . " -f install-sh"
-    . " -f doc -f test"
-    . " -f examples/Cookfile.inc"
-    . " -f mod/Cookfile.inc -f mod/Cookfile"
-    . " -f mod/modgtk"
-    . " -f lib/Cookfile -f lib/Cookfile.inc"
-    . " -f lib/libedit -f lib/libonyx"
-    . " -f bin/.cvsignore -f bin/Cookfile -f bin/Cookfile.inc"
+    . " -f doc -f test -f examples -f mod -f lib"
+    . " -f bin/.cvsignore -f bin/Cookfile.inc.in -f bin/Cookfile"
     . " -f bin/onyx -f bin/slate";
 if (defined($opt_verbose))
 {
