@@ -1,24 +1,18 @@
-2002-11-28 : Jason Evans <jasone@canonware.com>
+2002-11-29 : Jason Evans <jasone@canonware.com>
 
-	* Add the matches operator.
+	* Add operators:
+	  + regex
+	  + match
+	  + submatch
+	  + offset
 
 2002-11-27 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/nxa.h : Add nxa_realloc() (bug fix).
 
-2002-11-24 : Jason Evans <jasone@canonware.com>
-
-	* Add the offsets operator.
-
-2002-11-23 : Jason Evans <jasone@canonware.com>
-
-	* Add the match operator.
-
 2002-11-15 : Jason Evans <jasone@canonware.com>
 
 	* Add the regexerror error.
-
-	* Add the regex operator.
 
 	* lib/libonyx/include/libonyx/nxa_l.h:nxa_l_count_adjust() : Add.
 
