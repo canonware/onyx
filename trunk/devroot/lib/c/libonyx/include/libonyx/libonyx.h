@@ -213,10 +213,12 @@ typedef enum {
 #include <strings.h>
 #include <sys/types.h>
 #include <sys/uio.h>
+#ifdef _CW_THREADS
 #include <pthread.h>
 #include <semaphore.h>
-#include <setjmp.h>
 #include <sched.h>
+#endif
+#include <setjmp.h>
 #include <signal.h>
 
 /*
