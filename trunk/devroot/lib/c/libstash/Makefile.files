@@ -14,19 +14,19 @@
 ##############################################################################
 
 # Include files that _are_ installed.
-INCS := libstash.h libstash_defs.h libstash_incs.h bhp.h buf.h dbg.h lex.h \
+INCS := libstash.h libstash_defs.h libstash_incs.h bhp.h buf.h dbg.h \
 	list.h log.h matrix.h mem.h mq.h oh.h out.h pezz.h res.h ring.h treen.h
 
 INCS_R := libstash_r.h locks.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := bhp_p.h buf_p.h lex_p.h list_p.h log_p.h mem_l.h mem_p.h oh_p.h \
+PRIV_INCS := bhp_p.h buf_p.h list_p.h log_p.h mem_l.h mem_p.h oh_p.h \
 	out_p.h res_p.h treen_p.h
 
 PRIV_INCS_R := locks_p.h
 
 # Source files.
-SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c mq.c \
+SRCS := libstash.c bhp.c buf.c dbg.c list.c log.c matrix.c mem.c mq.c \
 	oh.c out.c pezz.c res.c ring.c treen.c
 
 SRCS_R := locks.c thread.c

@@ -572,9 +572,6 @@ l | l | l.
  cnd@libstash_thread(3s)@Condition.
  dbg@libstash_dbg(3s)@Runtime debugging symbol lookup.
  jtl@libstash_locks(3s)@JOE-tree lock.
- lex@libstash_lex(3s)@Lexical analyzer state table.
- lexer@libstash_lex(3s)@Lexical analyser state machine.
- lexertok@libstash_lex(3s)@Lexical analyser token.
  list@libstash_list(3s)@Doubly linked list.
  log@libstash_log(3s)@Logging (printf(3) wrapper).
  matrix@libstash_matrix(3s)@Matrix.

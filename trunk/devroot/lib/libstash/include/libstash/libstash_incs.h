@@ -121,15 +121,6 @@
 #  endif
 #endif
 
-#ifdef _LIBSTASH_USE_LEX
-#  ifndef _LIBSTASH_USE_LIST
-#    define _LIBSTASH_USE_LIST
-#  endif
-#  ifndef _LIBSTASH_USE_BUF
-#    define _LIBSTASH_USE_BUF
-#  endif
-#endif
-
 #ifdef _LIBSTASH_USE_PEZZ
 #  ifndef _LIBSTASH_USE_RING
 #    define _LIBSTASH_USE_RING
@@ -223,13 +214,6 @@
 #  ifndef _PEZZ_H_
 #    include "pezz.h"
 #    define _PEZZ_H_
-#  endif
-#endif
-
-#ifdef _LIBSTASH_USE_LEX
-#  ifndef _LEX_H_
-#    include "lex.h"
-#    define _LEX_H_
 #  endif
 #endif
 
