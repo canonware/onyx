@@ -49,9 +49,9 @@ dstack saup
 
     # History.
     scratch buffer_undoable {
-	` <' print
+	` [<' print
     }{
-	` [' print
+	` [[' print
     } ifelse
     scratch buffer_history_active {
 	`+' print
@@ -59,9 +59,9 @@ dstack saup
 	`-' print
     } ifelse
     scratch buffer_redoable {
-	`>' print
+	`>]' print
     }{
-	`]' print
+	`]]' print
     } ifelse
 
     # Line.
@@ -187,7 +187,6 @@ dstack saup
     # C-space
     `\x00' {
 	bmark 0 bpoint marker_seek pop
-#	/bmark bpoint marker_copy def
     }
     `\cw' {
 	scratch bpoint buffer_history_startgroup
@@ -199,6 +198,15 @@ dstack saup
     }
     `\ce' {
 	bpoint 1 marker_seekline
+    }
+    `\ct' {
+	stdin readline pop insert_string
+    }
+    `\cv' {
+	`ABCDEFGH' insert_string
+    }
+    `\cx' {
+	scratch `dump ' buffer_dump
     }
     `\cy' {
 	scratch dup buffer_history_active
@@ -212,6 +220,7 @@ dstack saup
 # #string interpc -
 /interpc {
 #    stderr 1 idup cvs write stderr `\n' write
+#    scratch `interpc ' buffer_dump
     keytable 1 idup known {
 	keytable exch get eval
     }{
@@ -231,7 +240,7 @@ scratch <
 
 2 gcdict /setperiod get eval
 
-# scratch true buffer_history_setactive
+scratch true buffer_history_setactive
 
 stdin 0 setiobuf {
     redisplay
