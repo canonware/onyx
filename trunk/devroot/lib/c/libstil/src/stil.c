@@ -15,9 +15,6 @@
 #define _CW_STIL_MAGIC 0xae9678fd
 #endif
 
-/* Number of stack elements per memory chunk. */
-#define _CW_STIL_STILSC_COUNT		 16
-
 /*
  * Size and fullness control of initial name cache hash table.  We know for sure
  * that there will be about 175 names referenced by systemdict and threaddict to

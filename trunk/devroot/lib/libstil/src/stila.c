@@ -16,6 +16,9 @@
 #define _CW_STILA_SEQ_SET_BASE_GROW	24
 #define _CW_STILA_SEQ_SET_BASE_SHRINK	 8
 
+/* Number of stack elements per memory chunk. */
+#define _CW_STIL_STILSC_COUNT		16
+
 static void	stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem);
 static void	stila_p_delete(cw_stila_t *a_stila);
 static void	stila_p_gc_register(cw_stila_t *a_stila, cw_stilt_t *a_stilt,
@@ -30,7 +33,8 @@ stilag_new(cw_stilag_t *a_stilag)
 
 	mem_new(&a_stilag->mem, cw_g_mem);
 	pool_new(&a_stilag->chi_pool, &a_stilag->mem, sizeof(cw_chi_t));
-	pool_new(&a_stilag->stilsc_pool, &a_stilag->mem, sizeof(cw_stilsc_t));
+	pool_new(&a_stilag->stilsc_pool, &a_stilag->mem,
+	    _CW_STILSC_O2SIZEOF(_CW_STIL_STILSC_COUNT));
 	pool_new(&a_stilag->dicto_pool, &a_stilag->mem,
 	    sizeof(cw_stiloe_dicto_t));
 	stila_p_new(&a_stilag->stila, &a_stilag->mem);
