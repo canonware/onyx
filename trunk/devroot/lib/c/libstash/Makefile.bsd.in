@@ -176,21 +176,18 @@ $(srcfile:R:S/$/&.o_st_r_p/) : $(srcfile)
 .endif
 .endfor
 
-#@without_threads@WITH_THREADS=yes
-#.ifdef WITHTHREADS
 @without_threads@.for depfile in $(SRCS:R:S/$/&.d_st_r_d/) \
 @without_threads@	$(SRCS_R:R:S/$/&.d_st_r_d/) \
-@without_threads@	$(SRCS:R:S/$/&.d_st_r_o/) \
+@without_threads@	  $(SRCS:R:S/$/&.d_st_r_o/) \
 @without_threads@	$(SRCS_R:R:S/$/&.d_st_r_o/) \
-@without_threads@	$(SRCS:R:S/$/&.d_sh_r_o/) \
+@without_threads@	  $(SRCS:R:S/$/&.d_sh_r_o/) \
 @without_threads@	$(SRCS_R:R:S/$/&.d_sh_r_o/) \
-@without_threads@	$(SRCS:R:S/$/&.d_st_r_p/) \
-@without_threads@	$(SRCS_R:R:S/$/&.d_st_p_d/)
+@without_threads@	  $(SRCS:R:S/$/&.d_st_r_p/) \
+@without_threads@	$(SRCS_R:R:S/$/&.d_st_r_p/)
 @without_threads@.if exists($(depfile))
 @without_threads@.include "$(depfile)"
 @without_threads@.endif
 @without_threads@.endfor
-#.endif
 
 .for depfile in $(CTESTS:R:S/$/&.d/) $(BTESTS:R:S/$/&.d/)
 .if exists($(depfile))
@@ -224,7 +221,7 @@ $(LIB_ST_R_O) : $(SRCS:R:S/$/&.o_st_r_o/) $(SRCS_R:R:S/$/&.o_st_r_o/)
 $(LIB_SH_R_O) : $(SRCS:R:S/$/&.o_sh_r_o/) $(SRCS_R:R:S/$/&.o_sh_r_o/)
 	$(CC) -shared -o $@ $>
 
-$(LIB_ST_R_P) : $(SRCS:R:S/$/&.o_st_r_p/) $(SRCS:R:S/$/&.o_st_r_p/)
+$(LIB_ST_R_P) : $(SRCS:R:S/$/&.o_st_r_p/) $(SRCS_R:R:S/$/&.o_st_r_p/)
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
