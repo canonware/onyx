@@ -809,7 +809,7 @@ void
 op_product(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
-	cw_uint8_t	code[] = "`Canonware stil'";
+	cw_uint8_t	code[] = "`Canonware stil'\n";
 
 	stilts_new(&stilts, a_stilt);
 	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
@@ -820,7 +820,7 @@ void
 op_prompt(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
-	cw_uint8_t	code[] = "`stil> ' print flush";
+	cw_uint8_t	code[] = "`stil> ' print flush\n";
 
 	stilts_new(&stilts, a_stilt);
 	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
@@ -1173,7 +1173,7 @@ void
 op_version(cw_stilt_t *a_stilt)
 {
 	cw_stilts_t	stilts;
-	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'";
+	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'\n";
 
 	stilts_new(&stilts, a_stilt);
 	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);

@@ -10,18 +10,13 @@
  ******************************************************************************/
 
 #ifdef _LIBSTIL_DBG
-#define	_CW_STILTS_BUFFER_SIZE	  8
+#define	_CW_STILT_BUFFER_SIZE	  8
 #else
-#define	_CW_STILTS_BUFFER_SIZE	256
+#define	_CW_STILT_BUFFER_SIZE	256
 #endif
 
 typedef struct cw_stilts_s cw_stilts_t;
 
-/*
- * Tokenizer state.  If a token is broken across two or more input strings, data
- * are copied to an internal buffer, and state machine state is preserved so
- * that the buffered data need not be processed again.
- */
 struct cw_stilts_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -30,86 +25,11 @@ struct cw_stilts_s {
 	cw_bool_t	is_malloced;
 
 	/*
-	 * Every time a '{' token is encountered by the scanner, this value is
-	 * incremented, and this value is decremented every time the scanner
-	 * encounters a '}' token.  Execution of objects is deferred if this
-	 * value is non-zero.
-	 */
-	cw_uint32_t	defer_count;
-
-	/* Offset of first invalid character in tok_str. */
-	cw_uint32_t	index;
-
-	/*
-	 * Pointer to the token buffer.  As long as index is less than
-	 * _CW_STILTS_BUFFER_SIZE, tok_str actually points to buffer.
-	 * Otherwise, adequate space is allocated (using exponential doubling),
-	 * and the contents of tok_buffer are copied to the allocated buffer.
-	 *
-	 * If a temporary buffer is allocated, it is discarded as soon as the
-	 * token is handled.  That is, tok_buffer is used for every token until
-	 * (if) tok_buffer overflows.
-	 */
-	cw_uint8_t	*tok_str;
-	cw_uint32_t	buffer_len;	/* Only valid if buffer overflowed. */
-	cw_uint8_t	buffer[_CW_STILTS_BUFFER_SIZE];
-
-	enum {
-		STATE_START,
-		STATE_LT_CONT,
-		STATE_GT_CONT,
-		STATE_SLASH_CONT,
-		STATE_COMMENT,
-		STATE_NUMBER,
-		STATE_ASCII_STRING,
-		STATE_ASCII_STRING_NEWLINE_CONT,
-		STATE_ASCII_STRING_PROT_CONT,
-		STATE_ASCII_STRING_CRLF_CONT,
-		STATE_ASCII_STRING_HEX_CONT,
-		STATE_ASCII_STRING_HEX_FINISH,
-		STATE_LIT_STRING,
-		STATE_LIT_STRING_NEWLINE_CONT,
-		STATE_LIT_STRING_PROT_CONT,
-		STATE_HEX_STRING,
-		STATE_BASE85_STRING,
-		STATE_BASE85_STRING_CONT,
-		STATE_NAME
-	}	state;
-
-	/*
 	 * Current line number (counting starts at 1 by convention) and column
 	 * number (counting starts at 0).
 	 */
 	cw_uint32_t	line;
 	cw_sint32_t	column;
-	
-	/*
-	 * Position where the current token starts.
-	 */
-	cw_uint32_t	tok_line;
-	cw_uint32_t	tok_column;
-
-	union {
-		struct {
-			enum {
-				SIGN_POS,
-				SIGN_NEG
-			}		sign;
-			cw_uint32_t	base;
-			cw_sint32_t	point_offset;
-			cw_uint32_t	begin_offset;
-		}       number;
-		struct {
-			cw_uint8_t	hex_val;
-		}	string;
-		struct {
-			enum {
-				ACTION_EXECUTE,
-				ACTION_LITERAL,
-				ACTION_EVALUATE
-			}	action;
-		}	name;
-	}       meta;
 };
 
 struct cw_stilt_s {
@@ -141,16 +61,98 @@ struct cw_stilt_s {
 	 * XXX File handles should eventually be objects in threaddict.
 	 */
 	cw_sint32_t	stdout_fd;
+
+	/*
+	 * Tokenizer state.  If a token is broken across two or more input
+	 * strings, data are copied to an internal buffer, and state machine
+	 * state is preserved so that the buffered data need not be processed
+	 * again.
+	 */
+
+	enum {
+		STATE_START			=  0,
+		STATE_LT_CONT			=  1,
+		STATE_GT_CONT			=  2,
+		STATE_SLASH_CONT		=  3,
+		STATE_COMMENT			=  4,
+		STATE_NUMBER			=  5,
+		STATE_ASCII_STRING		=  6,
+		STATE_ASCII_STRING_NEWLINE_CONT	=  7,
+		STATE_ASCII_STRING_PROT_CONT	=  8,
+		STATE_ASCII_STRING_CRLF_CONT	=  9,
+		STATE_ASCII_STRING_HEX_CONT	= 10,
+		STATE_ASCII_STRING_HEX_FINISH	= 11,
+		STATE_LIT_STRING		= 12,
+		STATE_LIT_STRING_NEWLINE_CONT	= 13,
+		STATE_LIT_STRING_PROT_CONT	= 14,
+		STATE_HEX_STRING		= 15,
+		STATE_BASE85_STRING		= 16,
+		STATE_BASE85_STRING_CONT	= 17,
+		STATE_NAME			= 18
+	}	state;
+
+	/*
+	 * Every time a '{' token is encountered by the scanner, this value is
+	 * incremented, and this value is decremented every time the scanner
+	 * encounters a '}' token.  Execution of objects is deferred if this
+	 * value is non-zero.
+	 */
+	cw_uint32_t	defer_count;
+
+	/* Offset of first invalid character in tok_str. */
+	cw_uint32_t	index;
+
+	/*
+	 * Position where the current token starts.
+	 */
+	cw_uint32_t	tok_line;
+	cw_uint32_t	tok_column;
+
+	/*
+	 * Pointer to the token buffer.  As long as index is less than
+	 * _CW_STILT_BUFFER_SIZE, tok_str actually points to buffer.
+	 * Otherwise, adequate space is allocated (using exponential doubling),
+	 * and the contents of tok_buffer are copied to the allocated buffer.
+	 *
+	 * If a temporary buffer is allocated, it is discarded as soon as the
+	 * token is handled.  That is, tok_buffer is used for every token until
+	 * (if) tok_buffer overflows.
+	 */
+	cw_uint8_t	*tok_str;
+	cw_uint32_t	buffer_len;	/* Only valid if buffer overflowed. */
+	cw_uint8_t	buffer[_CW_STILT_BUFFER_SIZE];
+
+	union {
+		struct {
+			enum {
+				SIGN_POS,
+				SIGN_NEG
+			}		sign;
+			cw_uint32_t	base;
+			cw_sint32_t	point_offset;
+			cw_uint32_t	begin_offset;
+		}       number;
+		struct {
+			cw_uint8_t	hex_val;
+		}	string;
+		struct {
+			enum {
+				ACTION_EXECUTE,
+				ACTION_LITERAL,
+				ACTION_EVALUATE
+			}	action;
+		}	name;
+	}       meta;
 };
 
 /*
  * stilts.
  */
 cw_stilts_t	*stilts_new(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt);
-cw_bool_t	stilts_delete(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt);
-void		stilts_get_position(cw_stilts_t *a_stilt, cw_uint32_t *r_line,
+void		stilts_delete(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt);
+void		stilts_position_get(cw_stilts_t *a_stilt, cw_uint32_t *r_line,
     cw_uint32_t *r_column);
-void		stilts_set_position(cw_stilts_t *a_stilt, cw_uint32_t a_line,
+void		stilts_position_set(cw_stilts_t *a_stilt, cw_uint32_t a_line,
     cw_uint32_t a_column);
 
 /*

@@ -422,6 +422,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 	qr_remove(retval, link);
 	a_stils->nspares--;
 
+	stilo_no_new(&retval->stilo);
 	return retval;
 }
 
