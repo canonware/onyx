@@ -63,7 +63,7 @@ Targets that depend on optional supporting software include:
 
 	all
 	doc
-	manual_[ph]
+	manual_[pfh]
 	release
 	check
 	check_update
