@@ -7,12 +7,15 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 99 $
- * $Date: 1998-06-27 23:36:45 -0700 (Sat, 27 Jun 1998) $
+ * $Revision: 116 $
+ * $Date: 1998-06-30 17:45:16 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
- *
+ * Block repository backing store class.  This class encapsulates a file or 
+ * raw device and provides read and write functions that behave the same
+ * regardless of the underlying backing store.  In the case of a
+ * dynamically resizeable file, 
  *
  ****************************************************************************/
 
@@ -58,10 +61,9 @@ brbs_new(cw_brbs_t * a_brbs_o)
   retval->is_open = FALSE;
   retval->filename = NULL;
   retval->fd = -1;
+  retval->size = 0;
   retval->is_raw = FALSE;
-/*   retval->sect_size = 0; */
-  retval->is_dynamic = FALSE;
-  retval->max_size = 0;
+  retval->sect_size = 0;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
@@ -181,6 +183,7 @@ brbs_open(cw_brbs_t * a_brbs_o)
 	a_brbs_o->fd = open(a_brbs_o->filename, O_RDWR | O_CREAT, 0600);
 	if (a_brbs_o->fd == -1)
 	{
+	  /* Error opening file. */
 	  retval = TRUE;
 	  if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
 	  {
@@ -190,6 +193,7 @@ brbs_open(cw_brbs_t * a_brbs_o)
 	}
 	else
 	{
+	  /* Success opening file. */
 	  a_brbs_o->is_open = TRUE;
 	}
       }
@@ -202,19 +206,33 @@ brbs_open(cw_brbs_t * a_brbs_o)
     if (a_brbs_o->is_open == TRUE)
     {
       /* Figure out whether this is a normal file, or a raw device. */
-      brbs_p_get_is_raw(a_brbs_o);
-      
-      if (a_brbs_o->is_raw == TRUE)
+      if (brbs_p_get_is_raw(a_brbs_o))
       {
-	/* Raw device. */
-	a_brbs_o->is_raw = TRUE;
-	
-	brbs_p_get_sector_size(a_brbs_o);
+	retval = TRUE;
       }
       else
       {
-	/* Normal file. */
-	a_brbs_o->is_raw = FALSE;
+	if (a_brbs_o->is_raw == TRUE)
+	{
+	  /* Raw device. */
+	  a_brbs_o->is_raw = TRUE;
+	
+	  brbs_p_get_sector_size(a_brbs_o);
+	}
+	else
+	{
+	  /* Normal file. */
+	  a_brbs_o->is_raw = FALSE;
+	}
+      }
+
+      /* Figure out how big the file or device is. */
+      /* XXX This isn't working for raw devices.  Maybe we need to read the 
+       * size from the disk label. */
+      a_brbs_o->size = lseek(a_brbs_o->fd, 0, SEEK_END);
+      if (a_brbs_o->size == -1)
+      {
+	retval = TRUE;
       }
     }
   }
@@ -228,17 +246,9 @@ brbs_open(cw_brbs_t * a_brbs_o)
 }
 
 /****************************************************************************
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * If a file is open, close it.
  *
  ****************************************************************************/
 cw_bool_t 
@@ -283,17 +293,9 @@ brbs_close(cw_brbs_t * a_brbs_o)
 }
 
 /****************************************************************************
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * Get the current filename.
  *
  ****************************************************************************/
 char * 
@@ -320,17 +322,9 @@ brbs_get_filename(cw_brbs_t * a_brbs_o)
 }
 
 /****************************************************************************
- * <<< Arguments >>>
- *
- *
- *
- * <<< Return Value >>>
- *
- *
- *
  * <<< Description >>>
  *
- *
+ * If a file isn't already open, set the filename.
  *
  ****************************************************************************/
 cw_bool_t
@@ -348,6 +342,7 @@ brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename)
 
   if (a_brbs_o->is_open == TRUE)
   {
+    /* Already open; can't change the filename while open. */
     retval = TRUE;
   }
   else
@@ -377,137 +372,6 @@ brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename)
 /****************************************************************************
  * <<< Description >>>
  *
- * Returns whether the backing store is dynamically resizeable.
- *
- ****************************************************************************/
-cw_bool_t 
-brbs_get_is_dynamic(cw_brbs_t * a_brbs_o)
-{
-  cw_bool_t retval;
-  
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Enter brbs_get_is_dynamic()");
-  }
-  _cw_check_ptr(a_brbs_o);
-  rwl_rlock(&a_brbs_o->rw_lock);
-
-  retval = a_brbs_o->is_dynamic;
-
-  rwl_runlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Exit brbs_get_is_dynamic()");
-  }
-
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * As long as the backing store isn't an open raw device, set
- * a_brbs_o->is_dynamic.
- *
- ****************************************************************************/
-cw_bool_t 
-brbs_set_is_dynamic(cw_brbs_t * a_brbs_o, cw_bool_t a_is_dynamic)
-{
-  cw_bool_t retval;
-  
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Enter brbs_set_is_dynamic()");
-  }
-  _cw_check_ptr(a_brbs_o);
-  rwl_wlock(&a_brbs_o->rw_lock);
-
-  if ((a_brbs_o->is_open == TRUE) && (a_brbs_o->is_raw == TRUE))
-  {
-    retval = TRUE;
-  }
-  else
-  {
-    retval = FALSE;
-    a_brbs_o->is_dynamic = a_is_dynamic;
-  }
-
-  rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Exit brbs_set_is_dynamic()");
-  }
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * Return a_brbs_o->max_size.
- *
- ****************************************************************************/
-cw_uint64_t 
-brbs_get_max_size(cw_brbs_t * a_brbs_o)
-{
-  cw_uint64_t retval;
-  
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Enter brbs_get_max_size()");
-  }
-  _cw_check_ptr(a_brbs_o);
-  rwl_rlock(&a_brbs_o->rw_lock);
-
-  retval = a_brbs_o->max_size;
-
-  rwl_runlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Exit brbs_get_max_size()");
-  }
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * As long as the backing store isn't an open raw device, set
- * a_brbs_o->max_size.
- *
- ****************************************************************************/
-cw_bool_t 
-brbs_set_max_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_max_size)
-{
-  cw_bool_t retval;
-  
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Enter brbs_set_max_size()");
-  }
-  _cw_check_ptr(a_brbs_o);
-  rwl_wlock(&a_brbs_o->rw_lock);
-
-  if ((a_brbs_o->is_open == TRUE) && (a_brbs_o->is_raw == TRUE))
-  {
-    retval = TRUE;
-  }
-  else
-  {
-    retval = FALSE;
-    a_brbs_o->max_size = a_max_size;
-  }
-
-  rwl_wunlock(&a_brbs_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
-  {
-    _cw_marker("Exit brbs_set_max_size()");
-  }
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
  * Returns whether the file is a raw device.
  *
  ****************************************************************************/
@@ -521,11 +385,11 @@ brbs_get_is_raw(cw_brbs_t * a_brbs_o)
     _cw_marker("Enter brbs_get_()");
   }
   _cw_check_ptr(a_brbs_o);
-  rwl_rlock(&a_brbs_o->rw_lock);
+/*   rwl_rlock(&a_brbs_o->rw_lock); */
 
   retval = a_brbs_o->is_raw;
 
-  rwl_runlock(&a_brbs_o->rw_lock);
+/*   rwl_runlock(&a_brbs_o->rw_lock); */
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_()");
@@ -549,14 +413,92 @@ brbs_get_sect_size(cw_brbs_t * a_brbs_o)
     _cw_marker("Enter brbs_get_()");
   }
   _cw_check_ptr(a_brbs_o);
-  rwl_rlock(&a_brbs_o->rw_lock);
+/*   rwl_rlock(&a_brbs_o->rw_lock); */
 
   retval = a_brbs_o->sect_size;
 
-  rwl_runlock(&a_brbs_o->rw_lock);
+/*   rwl_runlock(&a_brbs_o->rw_lock); */
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
   {
     _cw_marker("Exit brbs_get_()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Return a_brbs_o->size.
+ *
+ ****************************************************************************/
+cw_uint64_t 
+brbs_get_size(cw_brbs_t * a_brbs_o)
+{
+  cw_uint64_t retval;
+  
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_get_size()");
+  }
+  _cw_check_ptr(a_brbs_o);
+/*   rwl_rlock(&a_brbs_o->rw_lock); */
+
+  retval = a_brbs_o->size;
+
+/*   rwl_runlock(&a_brbs_o->rw_lock); */
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_get_size()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * As long as the backing store isn't an open raw device, set
+ * a_brbs_o->size.
+ *
+ ****************************************************************************/
+cw_bool_t 
+brbs_set_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_size)
+{
+  cw_bool_t retval;
+  
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_set_size()");
+  }
+  _cw_check_ptr(a_brbs_o);
+  rwl_wlock(&a_brbs_o->rw_lock);
+
+  if (((a_brbs_o->is_open == TRUE) && (a_brbs_o->is_raw == TRUE))
+      || (a_brbs_o->is_open == FALSE))
+  {
+    retval = TRUE;
+  }
+  else
+  {
+    if (-1 == lseek(a_brbs_o->fd, a_size, SEEK_SET))
+    {
+      retval = TRUE;
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      {
+	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_set_size",
+		     "lseek() error: %s\n", strerror(errno));
+      }
+    }
+    else
+    {
+      retval = FALSE;
+      a_brbs_o->size = a_size;
+    }
+  }
+
+  rwl_wunlock(&a_brbs_o->rw_lock);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_set_size()");
   }
   return retval;
 }
@@ -589,6 +531,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 
   if (-1 == lseek(a_brbs_o->fd, a_offset, SEEK_SET))
   {
+    /* Error seeking. */
     retval = TRUE;
     if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
     {
@@ -603,6 +546,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 		 brblk_get_buf_size(a_brblk_o));
     if (error == -1)
     {
+      /* Error reading. */
       retval = TRUE;
       if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
       {
@@ -612,6 +556,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     }
     else if (error != brblk_get_buf_size(a_brblk_o))
     {
+      /* Partial read error. */
       retval = TRUE;
       if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
       {
@@ -621,6 +566,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     }
     else
     {
+      /* Success. */
       retval = FALSE;
     }
   }
@@ -661,6 +607,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 
   if (-1 == lseek(a_brbs_o->fd, a_offset, SEEK_SET))
   {
+    /* Error seeking. */
     retval = TRUE;
     if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
     {
@@ -675,6 +622,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 		  brblk_get_buf_size(a_brblk_o));
     if (error == -1)
     {
+      /* Error writing. */
       retval = TRUE;
       if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
       {
@@ -684,6 +632,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     }
     else if (error != brblk_get_buf_size(a_brblk_o))
     {
+      /* Partial write error. */
       retval = TRUE;
       if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
       {
@@ -693,6 +642,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
     }
     else
     {
+      /* Success. */
       retval = FALSE;
     }
   }
@@ -766,9 +716,10 @@ brbs_p_get_sector_size(cw_brbs_t * a_brbs_o)
  * a_brbs_o->is_raw accordingly.
  *
  ****************************************************************************/
-void
+cw_bool_t
 brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
 {
+  cw_bool_t retval = FALSE;
   struct stat sb;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
@@ -777,6 +728,7 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
   }
   if (-1 == fstat(a_brbs_o->fd, &sb))
   {
+    retval = TRUE;
     if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
     {
       log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_is_raw",
@@ -788,10 +740,6 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
     if (S_ISCHR(sb.st_mode))
     {
       a_brbs_o->is_raw = TRUE;
-
-      /* Figure out how big the device is. */
-      a_brbs_o->max_size = lseek(a_brbs_o->fd, 0, SEEK_END);
-      _cw_assert(a_brbs_o->max_size != -1);
     }
     else
     {
@@ -802,4 +750,5 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
   {
     _cw_marker("Exit brbs_p_get_is_raw()");
   }
+  return retval;
 }

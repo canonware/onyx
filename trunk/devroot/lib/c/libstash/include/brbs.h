@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 99 $
- * $Date: 1998-06-27 23:36:45 -0700 (Sat, 27 Jun 1998) $
+ * $Revision: 116 $
+ * $Date: 1998-06-30 17:45:16 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -31,12 +31,10 @@ struct cw_brbs_s
   char * filename;
   int fd;
 
+  cw_uint64_t size; /* Current size in bytes. */
+
   cw_bool_t is_raw; /* Is this a raw device? */
   cw_uint32_t sect_size;
-
-  cw_bool_t is_dynamic; /* Does this backing store grow and shrink? */
-  cw_uint64_t max_size; /* Maximum size in bytes to expand to if
-			 * is_dynamic. */
 };
 
 /* Namespace definitions for brbs. */
@@ -47,10 +45,8 @@ struct cw_brbs_s
 #define brbs_close _CW_NS_CMN(brbs_close)
 #define brbs_get_filename _CW_NS_CMN(brbs_get_filename)
 #define brbs_set_filename _CW_NS_CMN(brbs_set_filename)
-#define brbs_get_is_dynamic _CW_NS_CMN(brbs_get_is_dynamic)
-#define brbs_set_is_dynamic _CW_NS_CMN(brbs_set_is_dynamic)
-#define brbs_get_max_size _CW_NS_CMN(brbs_get_max_size)
-#define brbs_set_max_size _CW_NS_CMN(brbs_set_max_size)
+#define brbs_get_size _CW_NS_CMN(brbs_get_size)
+#define brbs_set_size _CW_NS_CMN(brbs_set_size)
 #define brbs_get_is_raw _CW_NS_CMN(brbs_get_is_raw)
 #define brbs_get_sect_size _CW_NS_CMN(brbs_get_sect_size)
 #define brbs_block_read _CW_NS_CMN(brbs_block_read)
@@ -67,14 +63,11 @@ cw_bool_t brbs_close(cw_brbs_t * a_brbs_o);
 char * brbs_get_filename(cw_brbs_t * a_brbs_o);
 cw_bool_t brbs_set_filename(cw_brbs_t * a_brbs_o, char * a_filename);
 
-cw_bool_t brbs_get_is_dynamic(cw_brbs_t * a_brbs_o);
-cw_bool_t brbs_set_is_dynamic(cw_brbs_t * a_brbs_o, cw_bool_t a_is_dynamic);
-
-cw_uint64_t brbs_get_max_size(cw_brbs_t * a_brbs_o);
-cw_bool_t brbs_set_max_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_max_size);
-
 cw_bool_t brbs_get_is_raw(cw_brbs_t * a_brbs_o);
 cw_uint32_t brbs_get_sect_size(cw_brbs_t * a_brbs_o);
+
+cw_uint64_t brbs_get_size(cw_brbs_t * a_brbs_o);
+cw_bool_t brbs_set_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_max_size);
 
 cw_bool_t brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 			  cw_brblk_t * a_brblk_o);
