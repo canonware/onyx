@@ -573,9 +573,22 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case 'P': case 'Q': case 'R': case 'S': case 'T':
 			case 'U': case 'V': case 'W': case 'X': case 'Y':
 			case 'Z':
-				/* To lower case. */
-				c += 32;
-				/* Fall through. */
+				/*
+				 * We can't change the case of letters, since we
+				 * may later discover that this token is
+				 * actually a name.  So, the number acceptor
+				 * needs to deal with changing the case of
+				 * letters.
+				 */
+				if (a_stilt->meta.number.base <= (10 +
+				    ((cw_uint32_t)(c - 'A')))) {
+					/* Too big for this base. */
+					a_stilt->state = _CW_STILT_STATE_NAME;
+					a_stilt->meta.name.is_literal = FALSE;
+					a_stilt->meta.name.is_immediate = FALSE;
+				}
+				_CW_STILT_PUTC(c);
+				break;
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f': case 'g': case 'h': case 'i': case 'j':
 			case 'k': case 'l': case 'm': case 'n': case 'o':
