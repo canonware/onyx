@@ -317,7 +317,6 @@ stilt_exec(cw_stilt_t *a_stilt)
 			case STILOT_DICT:
 			case STILOT_INTEGER:
 			case STILOT_MARK:
-			case STILOT_REAL:
 			case STILOT_STRING:
 				/* Push onto the dictionary stack. */
 				tstilo = stils_push(&a_stilt->data_stils);
@@ -449,8 +448,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 		_CW_STILT_PSTATE(STATE_COMMENT);
 		_CW_STILT_PSTATE(STATE_INTEGER);
 		_CW_STILT_PSTATE(STATE_INTEGER_RADIX);
-		_CW_STILT_PSTATE(STATE_REAL);
-		_CW_STILT_PSTATE(STATE_REAL_EXP);
 		_CW_STILT_PSTATE(STATE_ASCII_STRING);
 		_CW_STILT_PSTATE(STATE_ASCII_STRING_NEWLINE_CONT);
 		_CW_STILT_PSTATE(STATE_ASCII_STRING_PROT_CONT);
@@ -557,13 +554,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				a_stilt->state = STATE_INTEGER;
 				a_stilt->m.n.sign = SIGN_NEG;
 				a_stilt->m.n.b_off = 1;
-				_CW_STILT_PUTC(c);
-				break;
-			case '.':
-				a_stilt->state = STATE_REAL;
-				a_stilt->m.n.sign = SIGN_POS;
-				a_stilt->m.n.t.r.p_off = 0;
-				a_stilt->m.n.b_off = 0;
 				_CW_STILT_PUTC(c);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
@@ -725,24 +715,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				_CW_STILT_PUTC(c);
 				break;
 			}
-			case '.':
-				a_stilt->m.n.t.r.p_off = a_stilt->index;
-				a_stilt->state = STATE_REAL;
-				_CW_STILT_PUTC(c);
-				break;
-			case 'e':
-				if (a_stilt->index > a_stilt->m.n.b_off) {
-					a_stilt->m.n.t.e.esign = ESIGN_POS;
-					a_stilt->m.n.t.e.p_off = -1;
-					a_stilt->m.n.t.e.e_off = a_stilt->index;
-					a_stilt->state = STATE_REAL_EXP;
-				} else {
-					/* No number specified, so a name. */
-					a_stilt->m.m.action = ACTION_EXECUTE;
-					a_stilt->state = STATE_NAME;
-				}
-				_CW_STILT_PUTC(c);
-				break;
 			case '\n':
 				restart = TRUE; /* Inverted below. */
 				_CW_STILT_NEWLINE();
@@ -874,159 +846,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					/* No number specified, so a name. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "name 2");
-					a_stilt->m.m.action = ACTION_EXECUTE;
-					stilt_p_name_accept(a_stilt, a_stilts);
-				}
-				if (restart)
-					goto RESTART;
-				break;
-			default:
-				/* Not a number character. */
-				a_stilt->m.m.action = ACTION_EXECUTE;
-				a_stilt->state = STATE_NAME;
-				_CW_STILT_PUTC(c);
-				break;
-			}
-			break;
-		}
-		case STATE_REAL: {
-			cw_bool_t	restart = FALSE;
-
-			switch (c) {
-			case '0': case '1': case '2': case '3': case '4':
-			case '5': case '6': case '7': case '8': case '9':
-				_CW_STILT_PUTC(c);
-				break;
-			case 'e':
-				if (a_stilt->index - a_stilt->m.n.b_off > 1) {
-					a_stilt->m.n.t.e.esign = ESIGN_POS;
-					a_stilt->m.n.t.e.e_off = a_stilt->index;
-					a_stilt->state = STATE_REAL_EXP;
-				} else {
-					/* No digit specified, so a name. */
-					a_stilt->m.m.action = ACTION_EXECUTE;
-					a_stilt->state = STATE_NAME;
-				}
-				_CW_STILT_PUTC(c);
-				break;
-			case '\n':
-				restart = TRUE; /* Inverted below. */
-				_CW_STILT_NEWLINE();
-				/* Fall through. */
-			case '"': case '`': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '/': case '%':
-				/* New token. */
-				/*
-				 * Invert, in case we fell through from
-				 * above.
-				 */
-				restart = !restart;
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r': case ' ':
-				if (a_stilt->index - a_stilt->m.n.b_off > 1) {
-					cw_fp64_t	val;
-
-					/* Real. */
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "real");
-
-					/*
-					 * Convert string to real.  Do the
-					 * conversion before mucking with the
-					 * stack in case there is an exception.
-					 */
-					a_stilt->tok_str[a_stilt->index] = '\0';
-					errno = 0;
-					val = strtod(a_stilt->tok_str, NULL);
-					if ((errno == ERANGE) && ((val ==
-					    HUGE_VAL) || (val == -HUGE_VAL)))
-						xep_throw(_CW_XEPV_RANGECHECK);
-
-					stilo =
-					    stils_push(&a_stilt->data_stils);
-					stilo_real_new(stilo, a_stilt, val);
-
-					stilt_p_reset(a_stilt);
-				} else {
-					/*
-					 * No number/fraction specified, so a
-					 * name.
-					 */
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "name 3");
-					a_stilt->m.m.action = ACTION_EXECUTE;
-					stilt_p_name_accept(a_stilt, a_stilts);
-				}
-				if (restart)
-					goto RESTART;
-				break;
-			default:
-				/* Not a number character. */
-				a_stilt->m.m.action = ACTION_EXECUTE;
-				a_stilt->state = STATE_NAME;
-				_CW_STILT_PUTC(c);
-				break;
-			}
-			break;
-		}
-		case STATE_REAL_EXP: {
-			cw_bool_t	restart = FALSE;
-
-			switch (c) {
-			case '0': case '1': case '2': case '3': case '4':
-			case '5': case '6': case '7': case '8': case '9':
-				_CW_STILT_PUTC(c);
-				break;
-			case '-':
-				a_stilt->m.n.t.e.esign = ESIGN_NEG;
-				/* Fall through. */
-			case '+':
-				a_stilt->m.n.t.e.e_off = a_stilt->index;
-				_CW_STILT_PUTC(c);
-				break;
-			case '\n':
-				restart = TRUE; /* Inverted below. */
-				_CW_STILT_NEWLINE();
-				/* Fall through. */
-			case '"': case '`': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '/': case '%':
-				/* New token. */
-				/*
-				 * Invert, in case we fell through from
-				 * above.
-				 */
-				restart = !restart;
-				/* Fall through. */
-			case '\0': case '\t': case '\f': case '\r': case ' ':
-				if (a_stilt->index - a_stilt->m.n.t.e.e_off >
-				    1) {
-					cw_fp64_t	val;
-
-					/* Real. */
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "real (exp)");
-
-					/*
-					 * Convert string to real.  Do the
-					 * conversion before mucking with the
-					 * stack in case there is an exception.
-					 */
-					a_stilt->tok_str[a_stilt->index] = '\0';
-					errno = 0;
-					val = strtod(a_stilt->tok_str, NULL);
-					if ((errno == ERANGE) && ((val ==
-					    HUGE_VAL) || (val == -HUGE_VAL)))
-						xep_throw(_CW_XEPV_RANGECHECK);
-
-					stilo =
-					    stils_push(&a_stilt->data_stils);
-					stilo_real_new(stilo, a_stilt, val);
-
-					stilt_p_reset(a_stilt);
-				} else {
-					/* No exponent specified, so a name. */
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "name 4");
 					a_stilt->m.m.action = ACTION_EXECUTE;
 					stilt_p_name_accept(a_stilt, a_stilts);
 				}

@@ -232,7 +232,7 @@ systemdict_add(cw_stilt_t *a_stilt)
 		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);
-	stilo_add(&t_stilo, b, a);
+	stilo_integer_add(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
 	stilo_delete(&t_stilo, a_stilt);
 }
@@ -531,7 +531,7 @@ systemdict_div(cw_stilt_t *a_stilt)
 		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);
-	stilo_div(&t_stilo, b, a);
+	stilo_integer_div(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
 	stilo_delete(&t_stilo, a_stilt);
 }
@@ -862,7 +862,7 @@ systemdict_mul(cw_stilt_t *a_stilt)
 		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);
-	stilo_mul(&t_stilo, b, a);
+	stilo_integer_mul(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
 	stilo_delete(&t_stilo, a_stilt);
 }
@@ -1255,7 +1255,7 @@ systemdict_sub(cw_stilt_t *a_stilt)
 		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);
-	stilo_sub(&t_stilo, b, a);
+	stilo_integer_sub(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
 	stilo_delete(&t_stilo, a_stilt);
 }
