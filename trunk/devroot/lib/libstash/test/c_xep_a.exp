@@ -1,38 +1,42 @@
 Test begin
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 0
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 1
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 2
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 80: main(): _CW_XEPV_FOO
-At ./lib/c/libstash/test/c_xep_a.c, line 86: main(): _CW_XEPV_BAR
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 3
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 91: main(): _CW_XEPV_BIZ
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 4
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 5
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 30: func_b(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 34: func_b(): _CW_XEPV_BIZ
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 6
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 45: func_c(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 49: func_c(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 91: main(): _CW_XEPV_BIZ
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 7
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 96: main(): _CW_XEPV_BAZ
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
-At ./lib/c/libstash/test/c_xep_a.c, line 63: main(): i == 8
-At ./lib/c/libstash/test/c_xep_a.c, line 66: main(): _CW_XEPV_CODE
-At ./lib/c/libstash/test/c_xep_a.c, line 100: main(): _CW_XEPV_FINALLY
+main(): i == 0
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_FINALLY
+main(): i == 1
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_FINALLY
+main(): i == 2
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_FOO
+main(): _CW_XEPV_BAR
+main(): _CW_XEPV_FINALLY
+main(): i == 3
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_BIZ
+main(): _CW_XEPV_FINALLY
+main(): i == 4
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_FINALLY
+main(): i == 5
+main(): _CW_XEPV_CODE
+func_b(): _CW_XEPV_CODE
+func_b(): _CW_XEPV_BIZ
+main(): _CW_XEPV_FINALLY
+main(): i == 6
+main(): _CW_XEPV_CODE
+func_c(): _CW_XEPV_CODE
+func_c(): _CW_XEPV_FINALLY
+main(): _CW_XEPV_BIZ
+main(): _CW_XEPV_FINALLY
+main(): i == 7
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_BAZ
+main(): _CW_XEPV_FINALLY
+main(): i == 8
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_BANG
+main(): _CW_XEPV_FINALLY
+main(): i == 9
+main(): _CW_XEPV_CODE
+main(): _CW_XEPV_FINALLY
 Test end
