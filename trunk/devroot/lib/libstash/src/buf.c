@@ -217,6 +217,7 @@ buf_rm_head_bufel(cw_buf_t * a_buf)
   {
     retval = (cw_bufel_t *) list_hpop(&a_buf->bufels);
     a_buf->size -= bufel_get_valid_data_size(retval);
+    _cw_assert((cw_sint32_t) a_buf->size >= 0);
   }
   else
   {
@@ -365,7 +366,8 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
 
   _cw_check_ptr(a_bufel);
 
-  if (a_size < a_bufel->end_offset)
+  if ((a_size < a_bufel->end_offset)
+      && (a_bufel->beg_offset != a_bufel->end_offset))
   {
     /* We would chop off valid data if we did this. */
     retval = TRUE;
@@ -393,6 +395,11 @@ bufel_set_size(cw_bufel_t * a_bufel, cw_uint32_t a_size)
 
       a_bufel->buf = t_buf;
       a_bufel->buf_size = a_size;
+      if (a_bufel->beg_offset > a_bufel->buf_size)
+      {
+	a_bufel->beg_offset = a_bufel->buf_size;
+	a_bufel->end_offset = a_bufel->buf_size;
+      }
     }
     retval = FALSE;
   }
@@ -500,6 +507,7 @@ cw_uint32_t
 bufel_get_valid_data_size(cw_bufel_t * a_bufel)
 {
   _cw_check_ptr(a_bufel);
+  _cw_assert((a_bufel->end_offset - a_bufel->beg_offset) >= 0);
 
   return a_bufel->end_offset - a_bufel->beg_offset;
 }

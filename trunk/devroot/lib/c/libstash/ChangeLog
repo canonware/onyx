@@ -1,3 +1,9 @@
+1999-01-12  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c (bufel_set_size): Allow truncating a bufel with no
+	valid data, even if the begin and end offsets need to be moved
+	back.
+
 1998-12-28  Jason Evans  <jasone@canonware.com>
 
 	* : Convert "*_o" variables to "*".
@@ -8,7 +14,7 @@
 
 1998-12-04  Jason Evans  <jasone@canonware.com>
 
-	* src/list.c (list_insert_after): Set the lists tail if inserting
+	* src/list.c (list_insert_after): Set the list's tail if inserting
 	at the end of the list.
 	: Use the list_item methods inside of list instead of mucking with
 	list_item internals.
