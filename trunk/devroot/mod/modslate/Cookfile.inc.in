@@ -62,20 +62,20 @@ modslate_mods_check_update :
 
 modslate_mods_install : [MODSLATE]
 {
-  @INSTALL@ -d [PREFIX]/share/slate-@slate_version@/nxm;
-  @INSTALL@ -m 0444 [MODSLATE] [PREFIX]/share/slate-@slate_version@/nxm;
-  @INSTALL@ -d [PREFIX]/share/slate-@slate_version@/nx/modslate;
+  @INSTALL@ -d [DATADIR]/slate-@slate_version@/nxm;
+  @INSTALL@ -m 0444 [MODSLATE] [DATADIR]/slate-@slate_version@/nxm;
+  @INSTALL@ -d [DATADIR]/slate-@slate_version@/nx/modslate;
 
   loop local f = [MODSLATE_NX] [MODSLATE_NX_GEN]
   {
-    @INSTALL@ -m 0644 [f] [PREFIX]/share/slate-@slate_version@/nx/modslate/;
+    @INSTALL@ -m 0644 [f] [DATADIR]/slate-@slate_version@/nx/modslate/;
   }
 }
 
 modslate_mods_uninstall :
 {
-  rm -f [PREFIX]/share/slate-@slate_version@/nxm/modslate.nxm;
-  rm -rf [PREFIX]/share/slate-@slate_version@/nx/modslate;
+  rm -f [DATADIR]/slate-@slate_version@/nxm/modslate.nxm;
+  rm -rf [DATADIR]/slate-@slate_version@/nx/modslate;
 }
 
 modslate_mods_clean :

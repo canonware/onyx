@@ -282,35 +282,35 @@ onyx_bins_install : [ONYX] mods_install
                libonyx_libs_install_s
 #endif
 {
-  @INSTALL@ -d [PREFIX]/bin;
+  @INSTALL@ -d [BINDIR];
 
-  [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx-@onyx_version@
+  [CC] [A_CFLAGS] -o [BINDIR]/onyx-@onyx_version@
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
        [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
 #if @enable_libonyx@
 #if [count @RPATH@]
-       @RPATH@[PREFIX]/lib
+       @RPATH@[LIBDIR]
 #endif
 #endif
        [LDFLAGS] -lonyx @LIBS@;
-  chmod 0755 [PREFIX]/bin/onyx-@onyx_version@;
-  rm -f [PREFIX]/bin/onyx;
-  ln -s onyx-@onyx_version@ [PREFIX]/bin/onyx;
+  chmod 0755 [BINDIR]/onyx-@onyx_version@;
+  rm -f [BINDIR]/onyx;
+  ln -s onyx-@onyx_version@ [BINDIR]/onyx;
 
-  @INSTALL@ -d [PREFIX]/man/man1;
-  @INSTALL@ -m 0444 @objroot@/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
+  @INSTALL@ -d [MANDIR]/man1;
+  @INSTALL@ -m 0444 @objroot@/bin/onyx/man/man1/onyx.1 [MANDIR]/man1;
 
-  @INSTALL@ -d [PREFIX]/share;
-  rm -f [PREFIX]/share/onyx;
-  ln -s onyx-@onyx_version@ [PREFIX]/share/onyx;
+  @INSTALL@ -d [DATADIR];
+  rm -f [DATADIR]/onyx;
+  ln -s onyx-@onyx_version@ [DATADIR]/onyx;
 }
 
 onyx_bins_uninstall :
 {
-  rm -f [PREFIX]/bin/onyx-@onyx_version@;
-  rm -f [PREFIX]/bin/onyx;
-  rm -f [PREFIX]/man/man1/onyx.1;
-  rm -f [PREFIX]/share/onyx;
+  rm -f [BINDIR]/onyx-@onyx_version@;
+  rm -f [BINDIR]/onyx;
+  rm -f [MANDIR]/man1/onyx.1;
+  rm -f [DATADIR]/onyx;
 }
 
 onyx_bins_clean :

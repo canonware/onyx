@@ -214,7 +214,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	first in the default library search path, or if the library is not in
 	the default library search path.
 
-Optionally, define environment variables, including (not exclusively):
+Optionally, define environment variables when invoking configure, including (not
+exclusively):
 
 CFLAGS="?"
 	Pass these flags to the compiler.  You probably shouldn't define this
@@ -229,7 +230,40 @@ LD_LIBRARY_PATH="?"
 	'ld' uses this colon-separated list to find libraries.
 
 LDFLAGS="?"
-	Flags passed to 'cc', which should normally be passed on to 'ld'.
+	Pass these flags when linking.
 
 PATH="?"
 	'configure' uses this to find programs.
+
+Optionally, define cook variables when invoking cook, including (not
+exclusively):
+
+PREFIX="?"
+	Use this as the installation prefix.
+
+BINDIR="?"
+	Use this as the installation prefix for programs.
+
+DATADIR="?"
+	Use this as the installation prefix for modules and documentation.
+
+LIBDIR="?"
+	Use this as the installation prefix for libraries.
+
+INCLUDEDIR="?"
+	Use this as the installation prefix for header files.
+
+MANDIR="?"
+	Use this as the installation prefix for man pages.
+
+CC="?"
+	Use this to invoke the C compiler.
+
+CPPDEFS="?"
+	Pass these flags to the C preprocessor.
+
+CFLAGS="?"
+	Pass these flags to the compiler.
+
+LDFLAGS="?"
+	Pass these flags when linking.

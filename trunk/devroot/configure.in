@@ -22,6 +22,31 @@ AC_SUBST(objroot)
 abs_objroot=`pwd`
 AC_SUBST(abs_objroot)
 
+dnl Munge install path variables, since cook doesn't do sh variables.
+if test "x$prefix" = "xNONE" ; then
+  prefix="/usr/local"
+fi
+if test "x$exec_prefix" = "xNONE" ; then
+  exec_prefix=$prefix
+fi
+PREFIX=$prefix
+AC_SUBST(PREFIX)
+BINDIR=`eval echo $bindir`
+BINDIR=`eval echo $BINDIR`
+AC_SUBST(BINDIR)
+DATADIR=`eval echo $datadir`
+DATADIR=`eval echo $DATADIR`
+AC_SUBST(DATADIR)
+LIBDIR=`eval echo $libdir`
+LIBDIR=`eval echo $LIBDIR`
+AC_SUBST(LIBDIR)
+INCLUDEDIR=`eval echo $includedir`
+INCLUDEDIR=`eval echo $INCLUDEDIR`
+AC_SUBST(INCLUDEDIR)
+MANDIR=`eval echo $mandir`
+MANDIR=`eval echo $MANDIR`
+AC_SUBST(MANDIR)
+
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
 cfghdrs="config.stamp"
@@ -334,11 +359,7 @@ if test "x$enable_onyx" = "x0" ; then
   fi
   TONYX="$ONYX"
 else
-  if test "x$prefix" = "xNONE" ; then
-    ONYX="/usr/local/bin/onyx-$onyx_version"
-  else
-    ONYX="$prefix/bin/onyx-$onyx_version"
-  fi
+  ONYX="$BINDIR/onyx-$onyx_version"
   AC_SUBST(ONYX)
   TONYX="$abs_objroot/bin/onyx/bin/tonyx"
 fi
@@ -623,13 +644,8 @@ if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_HEADERS(sys/socket.h netinet/in.h arpa/inet.h machine/endian.h)
 
   if test "x$enable_posix" = "x1" ; then
-    if test "x$prefix" = "xNONE" ; then
-      rpath_post="\`/usr/local/share/onyx-$onyx_version/nx'"
-      mpath_post="\`/usr/local/share/onyx-$onyx_version/nxm'"
-    else
-      rpath_post="\`$prefix/share/onyx-$onyx_version/nx'"
-      mpath_post="\`$prefix/share/onyx-$onyx_version/nxm'"
-    fi
+    rpath_post="\`$DATADIR/onyx-$onyx_version/nx'"
+    mpath_post="\`$DATADIR/onyx-$onyx_version/nxm'"
     AC_SUBST(rpath_post)
     AC_SUBST(mpath_post)
 
@@ -715,13 +731,8 @@ dnl
 if test "x$bin_slate" = "x1" ; then
   AC_DEFINE_UNQUOTED(CW_TSLATE_SLATE, "$abs_objroot/bin/slate/bin/slate")
 
-  if test "x$prefix" = "xNONE" ; then
-    slate_rpath_post="\`/usr/local/share/slate-$slate_version/nx'"
-    slate_mpath_post="\`/usr/local/share/slate-$slate_version/nxm'"
-  else
-    slate_rpath_post="\`$prefix/share/slate-$slate_version/nx'"
-    slate_mpath_post="\`$prefix/share/slate-$slate_version/nxm'"
-  fi
+  slate_rpath_post="\`$DATADIR/slate-$slate_version/nx'"
+  slate_mpath_post="\`$DATADIR/slate-$slate_version/nxm'"
   AC_SUBST(slate_rpath_post)
   AC_SUBST(slate_mpath_post)
 
@@ -765,11 +776,17 @@ AC_MSG_RESULT(CPPFLAGS      : ${CPPFLAGS})
 AC_MSG_RESULT(LDFLAGS       : ${LDFLAGS})
 AC_MSG_RESULT(LIBS          : ${LIBS})
 AC_MSG_RESULT()
+AC_MSG_RESULT(PREFIX        : ${PREFIX})
+AC_MSG_RESULT(BINDIR        : ${BINDIR})
+AC_MSG_RESULT(DATADIR       : ${DATADIR})
+AC_MSG_RESULT(LIBDIR        : ${LIBDIR})
+AC_MSG_RESULT(INCLUDEDIR    : ${INCLUDEDIR})
+AC_MSG_RESULT(MANDIR        : ${MANDIR})
+AC_MSG_RESULT()
 AC_MSG_RESULT(srcroot       : ${srcroot})
 AC_MSG_RESULT(abs_srcroot   : ${abs_srcroot})
 AC_MSG_RESULT(objroot       : ${objroot})
 AC_MSG_RESULT(abs_objroot   : ${abs_objroot})
-AC_MSG_RESULT(prefix        : ${prefix})
 AC_MSG_RESULT()
 AC_MSG_RESULT(libs          :${libs})
 AC_MSG_RESULT(mods          :${mods})

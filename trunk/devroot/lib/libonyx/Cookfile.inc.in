@@ -158,8 +158,8 @@ libonyx_libs_install : libonyx_libs_install_i libonyx_libs_install_a
 
 libonyx_libs_uninstall :
 {
-  rm -f [glob [PREFIX]/lib/libonyx*];
-  rm -rf [PREFIX]/include/libonyx;
+  rm -f [glob [LIBDIR]/libonyx*];
+  rm -rf [INCLUDEDIR]/libonyx;
 }
 
 libonyx_libs_clean :
@@ -207,22 +207,22 @@ CPPFLAGS = [CPPFLAGS] -I@srcroot@/lib/libonyx/include
 
 libonyx_libs_install_i :
 {
-  @INSTALL@ -d [PREFIX]/include/libonyx;
+  @INSTALL@ -d [INCLUDEDIR]/libonyx;
 
   loop local f = [LIBONYX_INCS]
   {
-    @INSTALL@ -m 0644 [f] [PREFIX]/include/libonyx/;
+    @INSTALL@ -m 0644 [f] [INCLUDEDIR]/libonyx/;
   }
 }
 
 libonyx_libs_install_common :
 {
-  @INSTALL@ -d [PREFIX]/lib;
+  @INSTALL@ -d [LIBDIR];
 }
 
 libonyx_libs_install_a : [LIBONYX_A] libonyx_libs_install_common
 {
-  @INSTALL@ -m 0444 [LIBONYX_A] [PREFIX]/lib;
+  @INSTALL@ -m 0444 [LIBONYX_A] [LIBDIR];
 }
 
 libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
@@ -232,17 +232,17 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
   [CC] -undefined suppress -flat_namespace -dynamiclib
        -compatibility_version [LIBONYX_REV]
        -current_version [LIBONYX_REV]
-       -install_name [PREFIX]/lib/libonyx.[LIBONYX_REV].dylib
+       -install_name [LIBDIR]/libonyx.[LIBONYX_REV].dylib
        -o [LIBONYX_S]
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
        [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]];
 #endif
 
-  @INSTALL@ -m 0444 [LIBONYX_S] [PREFIX]/lib;
+  @INSTALL@ -m 0444 [LIBONYX_S] [LIBDIR];
 
 #if [count [LIBONYX_LNAME]]
-  rm -f [PREFIX]/lib/[LIBONYX_LNAME];
-  ln -s [LIBONYX_SNAME] [PREFIX]/lib/[LIBONYX_LNAME];
+  rm -f [LIBDIR]/[LIBONYX_LNAME];
+  ln -s [LIBONYX_SNAME] [LIBDIR]/[LIBONYX_LNAME];
 #endif
 }
 

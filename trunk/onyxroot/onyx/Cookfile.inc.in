@@ -15,9 +15,45 @@
  * Standard definitions.
  */
 
-/* Installation prefix. */
+/* Installation prefixes. */
 if [not [defined PREFIX]] then
-  PREFIX = [split " " [strip "@prefix@"]];
+{
+  PREFIX = [split " " [strip "@PREFIX@"]];
+
+  if [not [defined BINDIR]] then
+    BINDIR = [split " " [strip "@BINDIR@"]];
+
+  if [not [defined DATADIR]] then
+    DATADIR = [split " " [strip "@DATADIR@"]];
+
+  if [not [defined LIBDIR]] then
+    LIBDIR = [split " " [strip "@LIBDIR@"]];
+
+  if [not [defined INCLUDEDIR]] then
+    INCLUDEDIR = [split " " [strip "@INCLUDEDIR@"]];
+
+  if [not [defined MANDIR]] then
+    MANDIR = [split " " [strip "@MANDIR@"]];
+}
+else
+{
+  /* Implicitly override all installation paths using [PREFIX], but take
+   * care to still honor explicit overrides. */
+  if [not [defined BINDIR]] then
+    BINDIR = [PREFIX]/bin;
+
+  if [not [defined DATADIR]] then
+    DATADIR = [PREFIX]/share;
+
+  if [not [defined LIBDIR]] then
+    LIBDIR = [PREFIX]/lib;
+
+  if [not [defined INCLUDEDIR]] then
+    INCLUDEDIR = [PREFIX]/include;
+
+  if [not [defined MANDIR]] then
+    MANDIR = [PREFIX]/man;
+}
 
 /* Paths to programs used by the build system. */
 SHELL = /bin/sh;

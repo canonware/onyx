@@ -58,26 +58,26 @@ onyx_config_bins_install : mods_install
                      onyx_bins_install
 #endif
 {
-  @INSTALL@ -d [PREFIX]/bin;
+  @INSTALL@ -d [BINDIR];
 
-  echo \"#!@ONYX@\" > [PREFIX]/bin/onyx_config-@onyx_version@;
+  echo \"#!@ONYX@\" > [BINDIR]/onyx_config-@onyx_version@;
   cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [ONYX_CONFIG_NSRCS]]
-      >> [PREFIX]/bin/onyx_config-@onyx_version@;
-  chmod 0755 [PREFIX]/bin/onyx_config-@onyx_version@;
+      >> [BINDIR]/onyx_config-@onyx_version@;
+  chmod 0755 [BINDIR]/onyx_config-@onyx_version@;
 
-  rm -f [PREFIX]/bin/onyx_config;
-  ln -s onyx_config-@onyx_version@ [PREFIX]/bin/onyx_config;
+  rm -f [BINDIR]/onyx_config;
+  ln -s onyx_config-@onyx_version@ [BINDIR]/onyx_config;
 
-  @INSTALL@ -d [PREFIX]/man/man1;
+  @INSTALL@ -d [MANDIR]/man1;
   @INSTALL@ -m 0444 @objroot@/bin/onyx_config/man/man1/onyx_config.1
-            [PREFIX]/man/man1;
+            [MANDIR]/man1;
 }
 
 onyx_config_bins_uninstall :
 {
-  rm -f [PREFIX]/bin/onyx_config-@onyx_version@;
-  rm -f [PREFIX]/bin/onyx_config;
-  rm -f [PREFIX]/man/man1/onyx_config.1;
+  rm -f [BINDIR]/onyx_config-@onyx_version@;
+  rm -f [BINDIR]/onyx_config;
+  rm -f [MANDIR]/man1/onyx_config.1;
 }
 
 onyx_config_bins_clean :

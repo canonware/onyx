@@ -62,30 +62,30 @@ slate_bins_install : mods_install
                      onyx_bins_install
 #endif
 {
-  @INSTALL@ -d [PREFIX]/bin;
+  @INSTALL@ -d [BINDIR];
 
-  echo \"#!@ONYX@\" > [PREFIX]/bin/slate-@slate_version@;
+  echo \"#!@ONYX@\" > [BINDIR]/slate-@slate_version@;
   cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]]
-      >> [PREFIX]/bin/slate-@slate_version@;
-  chmod 0755 [PREFIX]/bin/slate-@slate_version@;
+      >> [BINDIR]/slate-@slate_version@;
+  chmod 0755 [BINDIR]/slate-@slate_version@;
 
-  rm -f [PREFIX]/bin/slate;
-  ln -s slate-@slate_version@ [PREFIX]/bin/slate;
+  rm -f [BINDIR]/slate;
+  ln -s slate-@slate_version@ [BINDIR]/slate;
 
-  @INSTALL@ -d [PREFIX]/man/man1;
-  @INSTALL@ -m 0444 @objroot@/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
+  @INSTALL@ -d [MANDIR]/man1;
+  @INSTALL@ -m 0444 @objroot@/bin/slate/man/man1/slate.1 [MANDIR]/man1;
 
-  @INSTALL@ -d [PREFIX]/share;
-  rm -f [PREFIX]/share/slate;
-  ln -s slate-@slate_version@ [PREFIX]/share/slate;
+  @INSTALL@ -d [DATADIR];
+  rm -f [DATADIR]/slate;
+  ln -s slate-@slate_version@ [DATADIR]/slate;
 }
 
 slate_bins_uninstall :
 {
-  rm -f [PREFIX]/bin/slate-@slate_version@;
-  rm -f [PREFIX]/bin/slate;
-  rm -f [PREFIX]/man/man1/slate.1;
-  rm -f [PREFIX]/share/slate;
+  rm -f [BINDIR]/slate-@slate_version@;
+  rm -f [BINDIR]/slate;
+  rm -f [MANDIR]/man1/slate.1;
+  rm -f [DATADIR]/slate;
 }
 
 slate_bins_clean :

@@ -1,3 +1,14 @@
+2002-09-05 : Jason Evans <jasone@canonware.com>
+
+	* Use the following in the build system, rather than using PREFIX
+	  directly, so that individual paths can be set during configuration
+	  and/or installation:
+	  + BINDIR
+	  + DATADIR
+	  + LIBDIR
+	  + INCLUDEDIR
+	  + MANDIR
+
 2002-09-02 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:
