@@ -131,7 +131,7 @@ extern "C" {
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdint.h> /* This shouldn't be necessary, but Darwin requires it. */
+#include <inttypes.h>
 #include <unistd.h>
 #include <limits.h>
 #include <string.h>
