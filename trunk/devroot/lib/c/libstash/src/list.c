@@ -136,7 +136,7 @@ list_delete(cw_list_t * a_list_o)
 
   /* Delete whatever items are still in the list.  This does *not* free
    * memory pointed to by the item pointers. */
-  for (; a_list_o->count > 0; a_list_o->count--)
+  while(a_list_o->count > 0)
   {
     _cw_free(list_p_hpop(a_list_o));
   }
@@ -611,8 +611,14 @@ list_dump(cw_list_t * a_list_o)
 #else
   log_printf(g_log_o, "is_malloced: [%d]\n", a_list_o->is_malloced);
 #endif
-  log_printf(g_log_o, "count: [%d]  spares: [%d]\n",
-	     a_list_o->count, a_list_o->spares_count);
+  {
+    char buf_a[21], buf_b[21];
+    
+    log_printf(g_log_o, "count: [%s]  spares: [%s]\n",
+	       log_print_uint64(a_list_o->count, 10, buf_a),
+	       log_print_uint64(a_list_o->spares_count, 10, buf_b));
+  }
+  
   log_printf(g_log_o, "head: [%010p]  tail: [%010p]  spares_head: [%010p]\n",
 	     a_list_o->head, a_list_o->tail, a_list_o->spares_head);
   if (a_list_o->count > 0)
