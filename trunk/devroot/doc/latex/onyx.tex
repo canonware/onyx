@@ -321,15 +321,21 @@ $2^{63} - 1$.  The sign is optional.  Examples include:
 +17
 \end{verbatim}
 
-\item[{\lt}radix\_integer{\gt} : ] Integer with explicit base between 2 and 36,
-inclusive, in the range $0$ to $2^{63} - 1$.  Integer digits are composed of
-decimal numbers and lower case letters.  Examples include:
+\item[{\lt}radix\_integer{\gt} : ] Signed integer with explicit base between 2
+and 36, inclusive, in the range $-2^{63}$ to $2^{63} - 1$.  Integer digits are
+composed of decimal numbers and lower or upper case letters.  The sign is
+optional.  Examples include:
 \begin{verbatim}
 2#101
 16#ff
+16#Ff
+16#FF
+-10#42
 10#42
++10#42
 9#18
 35#7r3x
+35#7R3x
 \end{verbatim}
 
 \end{description}

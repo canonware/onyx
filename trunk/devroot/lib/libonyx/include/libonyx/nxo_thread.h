@@ -138,6 +138,7 @@ struct cw_nxoe_thread_s {
 
 	union {
 		struct {
+			cw_sint32_t	sign;	/* -1, 0 (not specified), 1. */
 			cw_uint32_t	base;
 			cw_uint32_t	b_off;	/* Depends on sign, radix. */
 		}       n;	/* number. */

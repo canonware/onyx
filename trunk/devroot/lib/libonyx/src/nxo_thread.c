@@ -83,6 +83,7 @@ static void	nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     cw_nxo_threadp_t *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
     cw_uint8_t *a_suffix, cw_sint32_t a_c);
 static void	nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
+static void	nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
 
@@ -1144,17 +1145,23 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				break;
 			case '+':
 				a_thread->state = THREADTS_INTEGER;
+				a_thread->m.n.sign = 1;
+				a_thread->m.n.base = 10;
 				a_thread->m.n.b_off = 1;
 				_CW_NXO_THREAD_PUTC(c);
 				break;
 			case '-':
 				a_thread->state = THREADTS_INTEGER;
+				a_thread->m.n.sign = -1;
+				a_thread->m.n.base = 10;
 				a_thread->m.n.b_off = 1;
 				_CW_NXO_THREAD_PUTC(c);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 				a_thread->state = THREADTS_INTEGER;
+				a_thread->m.n.sign = 0;
+				a_thread->m.n.base = 10;
 				a_thread->m.n.b_off = 0;
 				_CW_NXO_THREAD_PUTC(c);
 				break;
@@ -1222,41 +1229,45 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				_CW_NXO_THREAD_PUTC(c);
 				break;
 			case '#': {
-				cw_uint32_t	i, digit;
+				cw_uint32_t	digit, ndigits;
 
 				/*
 				 * Convert the string to a base (interpreted as
 				 * base 10).
 				 */
-				a_thread->m.n.base = 0;
-
-				for (i = 0; i < a_thread->index; i++) {
+				ndigits = a_thread->index - a_thread->m.n.b_off;
+				switch (ndigits) {
+				case 2:
 					digit = _CW_NXO_THREAD_GETC(
-					    a_thread->m.n.b_off + i) - '0';
-
-					if (a_thread->index -
-					    a_thread->m.n.b_off - i == 2)
-						digit *= 10;
-					a_thread->m.n.base += digit;
-
-					if (((digit != 0) && ((a_thread->index -
-					    a_thread->m.n.b_off - i) > 2)) ||
-					    (a_thread->m.n.base > 36)) {
+					    a_thread->m.n.b_off) - '0';
+					if (digit == 0) {
 						/*
-						 * Base too large. Set base to 0
-						 * so that the check for too
-						 * small a base catches this.
+						 * Leading '0' in radix not
+						 * allowed.
 						 */
-						a_thread->m.n.base = 0;
 						break;
 					}
+					a_thread->m.n.base = digit * 10;
+
+					digit = _CW_NXO_THREAD_GETC(
+					    a_thread->m.n.b_off + 1) - '0';
+					a_thread->m.n.base += digit;
+					break;
+					/* Fall through. */
+				case 1:
+					digit = _CW_NXO_THREAD_GETC(
+					    a_thread->m.n.b_off) - '0';
+					a_thread->m.n.base = digit;
+					break;
+				default:
+					/* Too many, or not enough digits. */
+					a_thread->m.n.base = 0;
+					break;
 				}
 
-				if (a_thread->m.n.base < 2) {
-					/*
-					 * Base too small (or too large, as
-					 * detected in the for loop above).
-					 */
+				if (a_thread->m.n.base < 2 || a_thread->m.n.base
+				    > 36) {
+					/* Base too small or too large. */
 					a_thread->state = THREADTS_NAME;
 					a_thread->m.m.action = ACTION_EXECUTE;
 				} else {
@@ -1283,45 +1294,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				restart = !restart;
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
-				if (a_thread->index > a_thread->m.n.b_off) {
-					cw_nxoi_t	val;
-
-					/* Integer. */
-
-					/*
-					 * Convert string to integer.  Do the
-					 * conversion before mucking with the
-					 * stack in case the integer has to be
-					 * converted to a name.
-					 */
-					a_thread->tok_str[a_thread->index] =
-					    '\0';
-					errno = 0;
-
-					val = strtoll(a_thread->tok_str, NULL,
-					    10);
-					token = TRUE;
-					if (errno == ERANGE) {
-						/*
-						 * Number too big or too small.
-						 * Accept as a name.
-						 */
-						a_thread->m.m.action =
-						    ACTION_EXECUTE;
-						nxoe_p_thread_name_accept(
-						    a_thread);
-					} else {
-						nxo = nxo_stack_push(
-						    &a_thread->ostack);
-						nxo_integer_new(nxo, val);
-						nxoe_p_thread_reset(a_thread);
-					}
-				} else {
-					/* No number specified, so a name. */
-					token = TRUE;
-					a_thread->m.m.action = ACTION_EXECUTE;
-					nxoe_p_thread_name_accept(a_thread);
-				}
+				nxoe_p_thread_integer_accept(a_thread);
+				token = TRUE;
 				if (restart)
 					goto RESTART;
 				break;
@@ -1391,46 +1365,9 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				restart = !restart;
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
-				if (a_thread->index > a_thread->m.n.b_off) {
-					cw_nxoi_t	val;
-
-					/* Integer. */
-
-					/*
-					 * Convert string to integer.  Do the
-					 * conversion before mucking with the
-					 * stack in case the integer has to be
-					 * converted to a name.
-					 */
-					a_thread->tok_str[a_thread->index] =
-					    '\0';
-					errno = 0;
-
-					val = strtoll(&a_thread->tok_str[
-					    a_thread->m.n.b_off], NULL,
-					    a_thread->m.n.base);
-					token = TRUE;
-					if (errno == ERANGE) {
-						/*
-						 * Number too big or too small.
-						 * Accept as a name.
-						 */
-						a_thread->m.m.action =
-						    ACTION_EXECUTE;
-						nxoe_p_thread_name_accept(
-						    a_thread);
-					} else {
-						nxo = nxo_stack_push(
-						    &a_thread->ostack);
-						nxo_integer_new(nxo, val);
-						nxoe_p_thread_reset(a_thread);
-					}
-				} else {
-					/* No number specified, so a name. */
-					token = TRUE;
-					a_thread->m.m.action = ACTION_EXECUTE;
-					nxoe_p_thread_name_accept(a_thread);
-				}
+				/* Integer. */
+				nxoe_p_thread_integer_accept(a_thread);
+				token = TRUE;
 				if (restart)
 					goto RESTART;
 				break;
@@ -1812,6 +1749,47 @@ nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread)
 		a_thread->tok_str = a_thread->buffer;
 	}
 	a_thread->index = 0;
+}
+
+static void
+nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
+{
+	if (a_thread->index > a_thread->m.n.b_off) {
+		cw_nxoi_t	val;
+
+		/*
+		 * Convert string to integer.  Do the conversion before mucking
+		 * with the stack in case the integer has to be converted to a
+		 * name.
+		 */
+		a_thread->tok_str[a_thread->index] = '\0';
+		errno = 0;
+
+		if (a_thread->m.n.sign != 0) {
+			_cw_assert(a_thread->m.n.b_off > 0);
+			a_thread->tok_str[a_thread->m.n.b_off - 1] =
+			    _CW_NXO_THREAD_GETC(0);
+			a_thread->m.n.b_off--;
+		}
+
+		val = strtoll(&a_thread->tok_str[a_thread->m.n.b_off], NULL,
+		    a_thread->m.n.base);
+		if (errno == ERANGE) {
+			/* Number too big or too small.  Accept as a name. */
+			a_thread->m.m.action = ACTION_EXECUTE;
+			nxoe_p_thread_name_accept(a_thread);
+		} else {
+			cw_nxo_t	*nxo;
+
+			nxo = nxo_stack_push(&a_thread->ostack);
+			nxo_integer_new(nxo, val);
+			nxoe_p_thread_reset(a_thread);
+		}
+	} else {
+		/* No number specified, so a name. */
+		a_thread->m.m.action = ACTION_EXECUTE;
+		nxoe_p_thread_name_accept(a_thread);
+	}
 }
 
 static void
