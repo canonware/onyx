@@ -177,13 +177,14 @@ dataend
 
 libsock_install_a : [LIBSOCK_A] libsock_install_common
 {
-	[INSTALL] -m 0444 [LIBSOCK_A] [PREFIX]/lib;
+  [INSTALL] -m 0444 [LIBSOCK_A] [PREFIX]/lib;
 }
 
 libsock_install_s : [LIBSOCK_S] libsock_install_common
 {
-	[INSTALL] -m 0444 [LIBSOCK_S] [PREFIX]/lib;
-	[LN] -sf libsock.so.[LIBSOCK_REV] [PREFIX]/lib/libsock.so;
+  [INSTALL] -m 0444 [LIBSOCK_S] [PREFIX]/lib;
+  rm -f [PREFIX]/lib/libsock.so;
+  [LN] -s libsock.so.[LIBSOCK_REV] [PREFIX]/lib/libsock.so;
 }
 
 /*
@@ -201,5 +202,6 @@ libsock_install_s : [LIBSOCK_S] libsock_install_common
   set mkdir
 {
   [CC] -shared -o [target] [need];
-  [LN] -sf libsock.so.[LIBSOCK_REV] [objdir]/lib/c/libsock/lib/libsock.so;
+  rm -f [objdir]/lib/c/libsock/lib/libsock.so;
+  [LN] -s libsock.so.[LIBSOCK_REV] [objdir]/lib/c/libsock/lib/libsock.so;
 }

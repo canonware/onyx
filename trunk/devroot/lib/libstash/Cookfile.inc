@@ -197,13 +197,14 @@ dataend
 
 libstash_install_a : [LIBSTASH_A] libstash_install_common
 {
-	[INSTALL] -m 0444 [LIBSTASH_A] [PREFIX]/lib;
+  [INSTALL] -m 0444 [LIBSTASH_A] [PREFIX]/lib;
 }
 
 libstash_install_s : [LIBSTASH_S] libstash_install_common
 {
-	[INSTALL] -m 0444 [LIBSTASH_S] [PREFIX]/lib;
-	[LN] -sf libstash.so.[LIBSTASH_REV] [PREFIX]/lib/libstash.so;
+  [INSTALL] -m 0444 [LIBSTASH_S] [PREFIX]/lib;
+  rm -f [PREFIX]/lib/libstash.so;
+  [LN] -s libstash.so.[LIBSTASH_REV] [PREFIX]/lib/libstash.so;
 }
 
 /*
@@ -221,5 +222,6 @@ libstash_install_s : [LIBSTASH_S] libstash_install_common
   set mkdir
 {
   [CC] -shared -o [target] [need];
-  [LN] -sf libstash.so.[LIBSTASH_REV] [objdir]/lib/c/libstash/lib/libstash.so;
+  rm -f [objdir]/lib/c/libstash/lib/libstash.so;
+  [LN] -s libstash.so.[LIBSTASH_REV] [objdir]/lib/c/libstash/lib/libstash.so;
 }

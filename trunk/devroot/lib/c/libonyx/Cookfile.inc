@@ -210,13 +210,14 @@ dataend
 
 libonyx_install_a : [LIBONYX_A] libonyx_install_common
 {
-	[INSTALL] -m 0444 [LIBONYX_A] [PREFIX]/lib;
+  [INSTALL] -m 0444 [LIBONYX_A] [PREFIX]/lib;
 }
 
 libonyx_install_s : [LIBONYX_S] libonyx_install_common
 {
-	[INSTALL] -m 0444 [LIBONYX_S] [PREFIX]/lib;
-	[LN] -sf libonyx.so.[LIBONYX_REV] [PREFIX]/lib/libonyx.so;
+  [INSTALL] -m 0444 [LIBONYX_S] [PREFIX]/lib;
+  rm -f [PREFIX]/lib/libonyx.so;
+  [LN] -s libonyx.so.[LIBONYX_REV] [PREFIX]/lib/libonyx.so;
 }
 
 /*
@@ -234,5 +235,6 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
   set mkdir
 {
   [CC] -shared -o [target] [need];
-  [LN] -sf libonyx.so.[LIBONYX_REV] [objdir]/lib/c/libonyx/lib/libonyx.so;
+  rm -f [objdir]/lib/c/libonyx/lib/libonyx.so;
+  [LN] -s libonyx.so.[LIBONYX_REV] [objdir]/lib/c/libonyx/lib/libonyx.so;
 }

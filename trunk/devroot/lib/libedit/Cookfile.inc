@@ -187,7 +187,8 @@ libedit_install_a : [LIBEDIT_A] libedit_install_common
 libedit_install_s : [LIBEDIT_S] libedit_install_common
 {
   [INSTALL] -m 0444 [LIBEDIT_S] [PREFIX]/lib;
-  [LN] -sf libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so;
+  rm -f [PREFIX]/lib/libedit.so;
+  [LN] -s libedit.so.[LIBEDIT_REV] [PREFIX]/lib/libedit.so;
 }
 
 /*
@@ -205,5 +206,6 @@ libedit_install_s : [LIBEDIT_S] libedit_install_common
   set mkdir
 {
   [CC] -shared -o [target] [need];
-  [LN] -sf libedit.so.[LIBEDIT_REV] [objdir]/lib/c/libedit/lib/libedit.so;
+  rm -f [objdir]/lib/c/libedit/lib/libedit.so;
+  [LN] -s libedit.so.[LIBEDIT_REV] [objdir]/lib/c/libedit/lib/libedit.so;
 }
