@@ -15,6 +15,37 @@
 #define CW_HIST_DUMP
 #endif
 
+/* History record header. */
+typedef struct cw_histh_s cw_histh_t;
+struct cw_histh_s
+{
+#ifdef CW_DBG
+#define CW_HISTH_MAGIC 0x2389473d
+    cw_uint32_t magic;
+#endif
+    /* Record tag.  Not an enumerated type since it needs to be only 8 bits. */
+#define HISTH_TAG_NONE		0
+#define HISTH_TAG_GRP_BEG	1
+#define HISTH_TAG_GRP_END	2
+#define HISTH_TAG_POS		3
+#define HISTH_TAG_INS		4
+#define HISTH_TAG_YNK		5
+#define HISTH_TAG_REM		6
+#define HISTH_TAG_DEL		7
+    cw_uint8_t tag;
+
+    /* Auxiliary field (bpos or data byte count). */
+    union
+    {
+	cw_uint64_t aux; /* Always network byte order. */
+	cw_uint8_t str[8];
+    } u;
+
+    /* Vector that is set up to contain &tag and u.str. */
+#define HISTH_LEN	9
+    cw_bufv_t bufv[2];
+};
+
 struct cw_hist_s
 {
 #ifdef CW_DBG
