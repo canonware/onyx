@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 111 $
- * $Date: 1998-06-30 15:55:50 -0700 (Tue, 30 Jun 1998) $
+ * $Revision: 121 $
+ * $Date: 1998-07-01 17:22:38 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -331,7 +331,8 @@ log_leprintf(cw_log_t * a_log_o,
  *
  * a_val : Value to convert to a string.
  * a_base : Number base to convert to.
- * a_buf : A string buffer of at least 65 bytes (for base 2 conversion).
+ * a_buf : A buffer of at least 65 bytes for base 2 conversion, 21 bytes
+ *         for base 10 conversion, and 17 bytes for base 16 conversion.
  *
  * <<< Description >>>
  *
@@ -350,12 +351,11 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
   
   if (a_base == 16)
   {
-    cw_uint32_t i;
-    cw_uint32_t digit;
+    cw_uint32_t i, digit;
     
     for (i = 0; i < 16; i++)
     {
-      digit = ((a_val >> (60 - (4 * i))) & (cw_uint64_t) 0x0000000f);
+      digit = ((a_val >> (60 - (4 * i))) & 0x0000000f);
 
       if ((digit >= 0) && (digit <= 9))
       {
@@ -437,6 +437,13 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
   return retval;
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Does a base 10 addition of the strings a_a and a_b, and puts the result
+ * into string a_result.
+ *
+ ****************************************************************************/
 void
 log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b)
 {

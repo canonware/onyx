@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 108 $
- * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
+ * $Revision: 121 $
+ * $Date: 1998-07-01 17:22:38 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -36,7 +36,6 @@ cw_sint32_t dbg_raw_tbl[] =
   _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_FUNC */
   _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_ERROR */
   _CW_DBG_C_OH_SLOT, -1, /* _CW_DBG_R_OH_SLOT */
-  _CW_DBG_C_RES_ERROR, _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_RES_ERROR */
   _CW_DBG_C_RES_STATE, -1, /* _CW_DBG_R_RES_STATE */
   _CW_DBG_C_BR_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BR_FUNC */
   _CW_DBG_C_BRBLK_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BRBLK_FUNC */

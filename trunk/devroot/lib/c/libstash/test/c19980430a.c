@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 121 $
+ * $Date: 1998-07-01 17:22:38 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -58,7 +58,6 @@ main()
 /*   dbg_turn_on(g_dbg_o, _CW_DBG_C_OH_FUNC); */
 /*   dbg_turn_on(g_dbg_o, _CW_DBG_C_OH_SLOT); */
 /*   dbg_turn_on(g_dbg_o, _CW_DBG_C_RES_STATE); */
-  dbg_turn_on(g_dbg_o, _CW_DBG_C_RES_ERROR);
   
   res_new(&res_o);
 

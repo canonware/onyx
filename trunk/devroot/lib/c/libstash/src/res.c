@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 115 $
- * Last modified: $Date: 1998-06-30 17:44:05 -0700 (Tue, 30 Jun 1998) $
+ * Current revision: $Revision: 121 $
+ * Last modified: $Date: 1998-07-01 17:22:38 -0700 (Wed, 01 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -160,7 +160,7 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
   else
   {
     /* Run the state machine on the file. */
-    state_mach_error = res_parse_res(a_res_o, TRUE);
+    state_mach_error = res_p_parse_res(a_res_o, TRUE);
     if (state_mach_error == TRUE)
     {
       retval = TRUE;
@@ -207,7 +207,7 @@ res_merge_list(cw_res_t * a_res_o, ...)
        ((a_res_o->str != NULL) && (retval != TRUE));
        a_res_o->str = va_arg(ap, char *))
   {
-    state_mach_error = res_parse_res(a_res_o, FALSE);
+    state_mach_error = res_p_parse_res(a_res_o, FALSE);
     if (state_mach_error == TRUE)
     {
       retval = TRUE;
@@ -283,7 +283,7 @@ res_dump(cw_res_t * a_res_o)
  *
  ****************************************************************************/
 cw_bool_t
-res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
+res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 {
   cw_bool_t retval = FALSE;
   size_t i, name_pos = 0, val_pos = 0;
@@ -311,10 +311,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	/* Make sure it's an EOF, not an error. */
 	if (ferror(a_res_o->fd))
 	{
-	  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	  {
-	    log_printf(g_log_o, "res_parse_res(): Error reading from file\n");
-	  }
+	  log_printf(g_log_o, "res_parse_res(): Error reading from file\n");
 	  retval = TRUE;
 	  break;
 	}
@@ -349,7 +346,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	/* 	name = '\0'; */
 	/* 	val = '\0'; */
 	
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -394,12 +391,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_START, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_START, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -409,7 +403,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Whitespace that precedes the resource name. */
       case _CW_RES_STATE_BEGIN_WHITESPACE:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -455,12 +449,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  case _CW_RES_CHAR_OTHER:
 	  default:
 	  {
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_BEGIN_WHITESPACE, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_BEGIN_WHITESPACE, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -470,7 +461,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Comment that was preceded only by whitespace characters. */
       case _CW_RES_STATE_BEGIN_COMMENT:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -504,12 +495,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_BEGIN_COMMENT, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_BEGIN_COMMENT, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -519,7 +507,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Resource name state. */
       case _CW_RES_STATE_NAME:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -557,12 +545,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_NAME, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_NAME, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -572,7 +557,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Swallow whitespace following the resource name. */
       case _CW_RES_STATE_POST_NAME_WHITESPACE:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_COLON:
 	  {
@@ -600,12 +585,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_POST_NAME_WHITESPACE, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_POST_NAME_WHITESPACE, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -615,7 +597,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Swallow whitespace following the colon. */
       case _CW_RES_STATE_POST_COLON_WHITESPACE:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -641,7 +623,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    /* Empty value.  NULL-terminate the string and jump to the
 	     * trailing comment state. */
 	    val[val_pos] = '\0';
-	    res_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res_o, name, val);
 	    state = _CW_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
@@ -658,7 +640,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
-	    res_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res_o, name, val);
 	    state = _CW_RES_STATE_START;
 	    break;
 	  }
@@ -666,7 +648,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  {
 	    /* Empty value, and end of input.  Insert the resource. */
 	    val[val_pos] = '\0';
-	    res_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res_o, name, val);
 	    state = _CW_RES_STATE_FINISH;
 	    break;
 	  }
@@ -674,12 +656,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_POST_COLON_WHITESPACE, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_POST_COLON_WHITESPACE, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -689,7 +668,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Resource value. */
       case _CW_RES_STATE_VALUE:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -712,7 +691,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	     * NULL-terminate the string, insert the resource, and jump to
 	     * the trailing comment state. */
 	    val[val_pos] = '\0';
-	    res_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res_o, name, val);
 	    state = _CW_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
@@ -730,7 +709,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
-	    res_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res_o, name, val);
 	    state = _CW_RES_STATE_START;
 	    break;
 	  }
@@ -739,7 +718,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	    /* Do the same thing as for a newline, except that we want the
 	     * state machine to exit. */
 	    val[val_pos] = '\0';
-	    res_merge_res(a_res_o, name, val);
+	    res_p_merge_res(a_res_o, name, val);
 	    state = _CW_RES_STATE_FINISH;
 	    break;
 	  }
@@ -747,12 +726,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_VALUE, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_VALUE, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -762,7 +738,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Backslash within the resource value. */
       case _CW_RES_STATE_VALUE_BACKSLASH:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_BACKSLASH:
 	  {
@@ -827,12 +803,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_VALUE_BACKSLASH, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_VALUE_BACKSLASH, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -841,7 +814,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       }
       case _CW_RES_STATE_BACKSLASH_WHITESPACE:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_WHITESPACE:
 	  {
@@ -871,12 +844,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_BACKSLASH_WHITESPACE, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_BACKSLASH_WHITESPACE, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -886,7 +856,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       /* Comment at end of resource. */
       case _CW_RES_STATE_TRAILING_COMMENT:
       {
-	switch (res_char_type(c))
+	switch (res_p_char_type(c))
 	{
 	  case _CW_RES_CHAR_CAP:
 	  case _CW_RES_CHAR_LOWER:
@@ -920,12 +890,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	    {
-	      log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-			  "Illegal character while in _CW_STATE_TRAILING_COMMENT, line %d, column %d\n",
-			  line_num, col_num);
-	    }
+	    log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+			"Illegal character while in _CW_STATE_TRAILING_COMMENT, line %d, column %d\n",
+			line_num, col_num);
 	    retval = TRUE;
 	    break;
 	  }
@@ -934,12 +901,9 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
       }
       default:
       {
-	if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_ERROR))
-	{
-	  log_eprintf(g_log_o, NULL, 0, "res_parse_res",
-		      "Jumped to non-existant state, line %d, column %d\n",
-		      line_num, col_num);
-	}
+	log_eprintf(g_log_o, NULL, 0, "res_parse_res",
+		    "Jumped to non-existant state, line %d, column %d\n",
+		    line_num, col_num);
 	retval = TRUE;
 	break;
       }
@@ -956,7 +920,7 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
  *
  ****************************************************************************/
 cw_uint32_t
-res_char_type(char a_char)
+res_p_char_type(char a_char)
 {
   cw_uint32_t retval;
   
@@ -1076,7 +1040,7 @@ res_char_type(char a_char)
  *
  ****************************************************************************/
 void
-res_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
+res_p_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
 {
   char * temp_name, * temp_val;
   cw_bool_t error;
