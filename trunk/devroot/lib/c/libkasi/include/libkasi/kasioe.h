@@ -11,6 +11,7 @@
  ****************************************************************************/
 
 typedef struct cw_kasioe_s cw_kasioe_t;
+typedef struct cw_kasioer_s cw_kasioer_t;
 
 typedef enum
 {
@@ -28,37 +29,22 @@ struct cw_kasioe_s
   cw_uint32_t magic;
 #endif
   
-  struct
-  {
-    /* Not an enumerated type, since that would make it a full machine word.
-     * Instead, cw_kasiot_t is cast to a cw_uint8_t before being stored here. */
-    cw_uint8_t type;
-    /* Not an enumerated type, since that would make it a full machine word.
-     * Instead, cw_kasioea_t is cast to a cw_uint8_t before being stored
-     * here. */
-    cw_uint8_t access;
-    /* If non-zero, then this object must be locked during access. */
-    cw_uint8_t global;
-    /* If non-zero, there is a watchpoint set on this object.  In general, this
-     * field is not looked at unless the interpreter has been put into debugging
-     * mode.  Note that setting a watchpoint on an extended type causes
-     * modification via *any* reference to be watched. */
-    cw_uint8_t watchpoint;
-  } flags;
-  cw_mtx_t lock;
-
-  /* Number of references to this object. */
-  cw_uint32_t ref_count;
-
-  /* Deallocation hooks. */
-  void (*dealloc_func)(void *, void *);
-  void * dealloc_arg;
+  cw_kasiot_t type : 4;
+  cw_kasioea_t access : 2;
+  /* If TRUE, there is a watchpoint set on this object.  In general, this field
+   * is not looked at unless the interpreter has been put into debugging mode.
+   * Note that setting a watchpoint on an extended type causes modification via
+   * *any* reference to be watched. */
+  cw_bool_t watchpoint : 1;
+  /* If TRUE, this object is black (or gray).  Otherwise it is white. */
+  cw_bool_t black : 1;
+  /* If TRUE, this object cannot be modified, which means it need not be
+   * locked, even if global. */
+  cw_bool_t immutable : 1;
 };
 
 void
-kasioe_new(cw_kasioe_t * a_kasioe,
-	   void (*a_dealloc_func)(void * dealloc_arg, void * kasioe),
-	   void * a_dealloc_arg);
+kasioe_new(cw_kasioe_t * a_kasioe);
 
 void
 kasioe_delete(cw_kasioe_t * a_kasioe);

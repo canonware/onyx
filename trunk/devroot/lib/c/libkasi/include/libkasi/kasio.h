@@ -52,35 +52,41 @@ struct cw_kasio_s
   cw_uint32_t magic;
 #endif
 
-  struct
-  {
-    /* Not an enumerated type, since that would make it a full machine word.
-     * Instead, cw_kasiot_t is cast to a cw_uint8_t before being stored here. */
-    cw_uint8_t type;
-    /* If non-zero, this is an extended type.  This field is used for number and
-     * mstate objects, which can both switch between simple and extended
-     * representations.
-     *
-     * In addition, name objects use it to indicate if a name is an indirect
-     * reference.  Each kasit maintains a cache of kasin pointers, each holding
-     * a single reference to the names hash in kasi.  If this is an indirect
-     * reference (1 == flags.extended), the unreferencing operation should
-     * actually be done with the kasit's kasin cache.  Note that this is the
-     * (very) common case.  Use the kasin pointer to get the actual name "value"
-     * for the unreferencing operation.  This is safe, because this kasit is
-     * guaranteed to be holding a reference to the kasin. */
-    cw_uint8_t extended;
-    /* If non-zero, there is a breakpoint set on this object.  In general, this
-     * field is not looked at unless the interpreter has been put into debugging
-     * mode. */
-    cw_uint8_t breakpoint;
-    /* If non-zero, there is a watchpoint set on this object.  In general, this
-     * field is not looked at unless the interpreter has been put into debugging
-     * mode.  Note that setting a watchpoint on an extended type only detects
-     * changes that are made via that particular reference to the extension. */
-    cw_uint8_t watchpoint;
-  } flags;
-
+  cw_kasiot_t type : 4;
+  /* If non-zero, this is an extended number or mstate.  Both number and mstate
+   * objects can switch between simple and extended representations. */
+  cw_bool_t extended : 1;
+  /* Name objects use this bit to indicate if a name is an indirect reference.
+   * Each kasit maintains a cache of kasin pointers, each holding a single
+   * reference to the names hash in kasi.  If this is an indirect reference, the
+   * unreferencing operation should actually be done with the kasit's kasin
+   * cache.  Note that this is the (very) common case.  Use the kasin pointer to
+   * get the actual name "value" for the unreferencing operation.  This is safe,
+   * because this kasit is guaranteed to be holding a reference to the kasin. */
+  cw_bool_t indirect_name : 1;
+  /* If TRUE, there is a breakpoint set on this object.  In general, this field
+   * is not looked at unless the interpreter has been put into debugging
+   * mode. */
+  cw_bool_t breakpoint : 1;
+  /* If TRUE, there is a watchpoint set on this object.  In general, this field
+   * is not looked at unless the interpreter has been put into debugging mode.
+   * Note that setting a watchpoint on a reference to an extended type only
+   * detects changes that are made via that particular reference to the
+   * extension. */
+  cw_bool_t watchpoint : 1;
+  /* Reference count.  We use only one bit:
+   *
+   * 1 == One reference.
+   * 0 == Overflow (GC knows about the kasioe). */
+  cw_uint32_t ref_count : 1;
+  /* Reference to a local or global object? */
+  cw_bool_t global : 1;
+  /* This bit is used to protect modifications to a kasioe pointer.  Since a
+   * thread can be suspended at any time, it is critical to mark the pointer
+   * invalid while modifying it so that the collector knows not to try using a
+   * possibly corrupt pointer. */
+  cw_bool_t valid : 1;
+  
   union
   {
     struct
@@ -113,7 +119,7 @@ struct cw_kasio_s
     } mark;
     struct
     {
-      /* If not (flags.extended), the mstate is:
+      /* If not extended, the mstate is:
        *
        * accuracy : 32
        * point    : 0

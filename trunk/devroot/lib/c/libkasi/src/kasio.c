@@ -33,7 +33,7 @@ kasio_delete(cw_kasio_t * a_kasio)
   _cw_check_ptr(a_kasio);
   _cw_assert(_CW_KASIO_MAGIC == a_kasio->magic);
 
-  switch ((cw_kasiot_t) a_kasio->flags.type)
+  switch (a_kasio->type)
   {
     case _CW_KASIOT_NOTYPE:
     case _CW_KASIOT_BOOLEANTYPE:
@@ -65,7 +65,7 @@ kasio_delete(cw_kasio_t * a_kasio)
     }
     case _CW_KASIOT_MSTATETYPE:
     {
-      if (0 != a_kasio->flags.extended)
+      if (FALSE != a_kasio->extended)
       {
 	/* XXX */
       }
@@ -77,7 +77,7 @@ kasio_delete(cw_kasio_t * a_kasio)
     }
     case _CW_KASIOT_NUMBERTYPE:
     {
-      if (0 != a_kasio->flags.extended)
+      if (FALSE != a_kasio->extended)
       {
 	/* XXX */
       }
@@ -108,7 +108,7 @@ kasio_type(cw_kasio_t * a_kasio)
   _cw_check_ptr(a_kasio);
   _cw_assert(_CW_KASIO_MAGIC == a_kasio->magic);
 
-  return (cw_kasiot_t) a_kasio->flags.type;
+  return a_kasio->type;
 }
 
 void

@@ -25,7 +25,8 @@ kasis_new(cw_kasis_t * a_kasis, cw_pezz_t * a_chunk_pezz)
   _cw_check_ptr(a_chunk_pezz);
 
   
-  
+
+  return retval;
 }
 
 void
@@ -34,6 +35,13 @@ kasis_delete(cw_kasis_t * a_kasis)
   _cw_check_ptr(a_kasis);
   _cw_assert(_CW_KASIS_MAGIC == a_kasis->magic);
   
+}
+
+void
+kasis_collect(cw_kasis_t * a_kasis,
+	      void (*a_add_root_func)(void * add_root_arg, cw_kasioe_t * root),
+	      void * a_add_root_arg)
+{
 }
 
 cw_kasio_t *
