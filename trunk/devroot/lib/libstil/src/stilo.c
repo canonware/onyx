@@ -725,7 +725,7 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 		array->e.a.arr = (cw_stilo_t *)stilt_malloc(a_stilt,
 		    sizeof(cw_stilo_t) * array->e.a.len);
 		for (i = 0; i < array->e.a.len; i++)
-			stilo_no_new(&array->e.a.arr[i]);
+			stilo_null_new(&array->e.a.arr[i]);
 	}
 	a_stilo->o.stiloe = (cw_stiloe_t *)array;
 
@@ -824,10 +824,8 @@ stilo_p_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	 * Iteratively copy elements.  Only copy one level deep (not
 	 * recursively), by using dup.
 	 */
-	for (i = 0; i < len; i++) {
-		stilo_cast(&arr_to[i], STILOT_NO);
+	for (i = 0; i < len; i++)
 		stilo_dup(&arr_to[i], &arr_from[i]);
-	}
 }
 
 static void
