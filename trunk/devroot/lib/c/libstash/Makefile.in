@@ -135,7 +135,7 @@ all : default
 #
 
 # This rule is used to build the tests.
-% : %.c $(LIB_ST_D)
+% : %.c $(LIB_ST_R_D)
 	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
 	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(LIB_ST_R_D) -dynamic $(EXTRALIBS)
 
