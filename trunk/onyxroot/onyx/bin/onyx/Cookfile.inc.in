@@ -116,9 +116,12 @@ ONYX_OTESTS =
               readlink_a.nx.in readlink_b.nx.in readlink_c.nx.in
               readlink_d.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
               srand_a.nx.in srand_b.nx.in srand_c.nx.in srand_d.nx.in
-              truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
-              truncate_d.nx.in truncate_e.nx.in umask_a.nx.in umask_b.nx.in
-              umask_c.nx.in unsetenv_a.nx.in unsetenv_b.nx.in
+              system_a.nx.in system_b.nx.in system_c.nx.in system_d.nx.in
+              system_e.nx.in system_f.nx.in system_g.nx.in truncate_a.nx.in
+              truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
+              truncate_e.nx.in umask_a.nx.in umask_b.nx.in umask_c.nx.in
+              unsetenv_a.nx.in unsetenv_b.nx.in waitpid_a.nx.in waitpid_b.nx.in
+              waitpid_c.nx.in
 
 #endif
 
@@ -265,8 +268,11 @@ ONYX_OTESTS = [addprefix @srcroot@/bin/onyx/test/ [ONYX_OTESTS]];
  */
 ONYX_BTESTS = [addprefix @srcroot@/bin/onyx/test/
 #if @enable_posix@
+
                          b_argv_b.nx.in b_forkexec_a.nx.in b_exec_a.nx.in
-                         b_ppid_a.nx.in
+                         b_ppid_a.nx.in b_system_a.nx.in b_waitpid_a_a.nx.in
+                         b_waitpid_a_b.nx.in b_waitpid_a_c.nx.in
+
 #endif
                          ];
 

@@ -1,0 +1,7 @@
+Test begin
+Child A test begin
+Child A test end
+Child B test begin
+Non-zero exit status: 1
+Non-zero exit status: -9
+Test end
