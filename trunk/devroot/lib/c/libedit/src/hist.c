@@ -34,7 +34,7 @@
  * hist.c: History access functions
  */
 #include <stdlib.h>
-#include "libcl.h"
+#include "libedit.h"
 
 /* hist_init():
  *	Initialization function.

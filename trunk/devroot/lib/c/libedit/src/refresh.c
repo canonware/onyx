@@ -37,7 +37,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "libcl.h"
+#include "libedit.h"
 
 private	void	re_addc 		__P((EditLine *, int));
 private	void	re_update_line 		__P((EditLine *, char *, char *, int));

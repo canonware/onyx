@@ -43,7 +43,7 @@
 #else
 # include <varargs.h>
 #endif
-#include "libcl.h"
+#include "libedit.h"
 
 /* el_init():
  *	Initialize editline and set default parameters.

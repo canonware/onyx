@@ -1,4 +1,4 @@
-#include "libcl.h"
+#include "libedit.h"
 private struct el_bindings_t el_func_help[] = {
     { "vi-paste-next",               VI_PASTE_NEXT,                
       "Vi paste previous deletion to the right of the cursor" },

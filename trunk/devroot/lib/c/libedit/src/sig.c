@@ -37,7 +37,7 @@
  *	  our policy is to trap all signals, set a good state
  *	  and pass the ball to our caller.
  */
-#include "libcl.h"
+#include "libedit.h"
 #include <stdlib.h>
 
 private EditLine *sel = NULL;

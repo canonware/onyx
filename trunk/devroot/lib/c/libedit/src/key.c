@@ -54,7 +54,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "libcl.h"
+#include "libedit.h"
 
 /*
  * The Nodes of the el->el_key.map.  The el->el_key.map is a linked list

@@ -46,7 +46,7 @@
 #include <sys/types.h>
 #include <sys/ioctl.h>
 
-#include "libcl.h"
+#include "libedit.h"
 
 /*
  * IMPORTANT NOTE: these routines are allowed to look at the current screen

@@ -115,8 +115,8 @@ install_bins :
 #if @bin_blow@
           blow_install_a
 #endif
-#if @bin_cltest@
-          cltest_install_a
+#if @bin_edittest@
+          edittest_install_a
 #endif
 #if @bin_echos@
           echos_install_a
@@ -142,8 +142,8 @@ install_libs :
 #if @lib_stil@
           libstil_install
 #endif
-#if @lib_cl@
-          libcl_install
+#if @lib_edit@
+          libedit_install
 #endif
 #if @lib_sock@
           libsock_install
@@ -159,8 +159,8 @@ uninstall_bins :
 #if @bin_blow@
           blow_uninstall
 #endif
-#if @bin_cltest@
-          cltest_uninstall
+#if @bin_edittest@
+          edittest_uninstall
 #endif
 #if @bin_echos@
           echos_uninstall
@@ -186,8 +186,8 @@ uninstall_libs :
 #if @lib_stil@
           libstil_uninstall
 #endif
-#if @lib_cl@
-          libcl_uninstall
+#if @lib_edit@
+          libedit_uninstall
 #endif
 #if @lib_sock@
           libsock_uninstall
@@ -368,8 +368,8 @@ dataend
 #if @lib_stil@
 #  include [srcdir]/lib/c/libstil/Howto.cook.inc
 #endif
-#if @lib_cl@
-#  include [srcdir]/lib/c/libcl/Howto.cook.inc
+#if @lib_edit@
+#  include [srcdir]/lib/c/libedit/Howto.cook.inc
 #endif
 #if @lib_sock@
 #  include [srcdir]/lib/c/libsock/Howto.cook.inc
@@ -384,8 +384,8 @@ dataend
 #if @bin_blow@
 #  include [srcdir]/bin/blow/Howto.cook.inc
 #endif
-#if @bin_cltest@
-#  include [srcdir]/bin/cltest/Howto.cook.inc
+#if @bin_edittest@
+#  include [srcdir]/bin/edittest/Howto.cook.inc
 #endif
 #if @bin_echos@
 #  include [srcdir]/bin/echos/Howto.cook.inc

@@ -151,14 +151,14 @@ stil_install_d : [STIL_D] stil_install_common
 
 stil_install_a : [STIL_A] stil_install_common
 #if [ENABLE_SHARED]
-                 libstil_install_s libcl_install_s libstash_install_s
+                 libstil_install_s libedit_install_s libstash_install_s
 #endif
 {
 #if [ENABLE_SHARED]
   [CC] [D_CFLAGS] -o [PREFIX]/bin/stil
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
        -rpath [PREFIX]/lib
-       [LDFLAGS] -lstil -lcl -lstash -ltermcap [EXTRALIBS];
+       [LDFLAGS] -lstil -ledit -lstash -ltermcap [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/stil;
 #else
 	[INSTALL] -m 0755 [STIL_A] [PREFIX]/bin;
@@ -175,19 +175,19 @@ stil_install_p : [STIL_P] stil_install_common
  */
 
 [STIL_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STIL_SRCS]]
-           [LIBSTIL_D] [LIBCL_D] [LIBSTASH_D]
+           [LIBSTIL_D] [LIBEDIT_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [STIL_SRCS]]
-       [LDFLAGS] -lstil_d -lcl_d -lstash_d -ltermcap [EXTRALIBS];
+       [LDFLAGS] -lstil_d -ledit_d -lstash_d -ltermcap [EXTRALIBS];
 }
 
 [STIL_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
 #if [ENABLE_SHARED]
-           [LIBSTIL_S] [LIBCL_S] [LIBSTASH_S]
+           [LIBSTIL_S] [LIBEDIT_S] [LIBSTASH_S]
 #else
-           [LIBSTIL_A] [LIBCL_A] [LIBSTASH_A]
+           [LIBSTIL_A] [LIBEDIT_A] [LIBSTASH_A]
 #endif
   set mkdir
 {
@@ -195,17 +195,17 @@ stil_install_p : [STIL_P] stil_install_common
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
 #if [ENABLE_SHARED]
        -rpath [objdir]/lib/c/libstil/lib
-       -rpath [objdir]/lib/c/libcl/lib
+       -rpath [objdir]/lib/c/libedit/lib
        -rpath [objdir]/lib/c/libstash/lib
 #endif
-       [LDFLAGS] -lstil -lcl -lstash -ltermcap [EXTRALIBS];
+       [LDFLAGS] -lstil -ledit -lstash -ltermcap [EXTRALIBS];
 }
 
 [STIL_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STIL_SRCS]]
-           [LIBSTIL_P] [LIBCL_P] [LIBSTASH_P]
+           [LIBSTIL_P] [LIBEDIT_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [STIL_SRCS]]
-       [LDFLAGS] -lstil_p -lcl_p -lstash_p -ltermcap [EXTRALIBS];
+       [LDFLAGS] -lstil_p -ledit_p -lstash_p -ltermcap [EXTRALIBS];
 }

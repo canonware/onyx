@@ -34,7 +34,7 @@
  * chared.c: Character editor utilities
  */
 #include <stdlib.h>
-#include "libcl.h"
+#include "libedit.h"
 
 /* cv_undo():
  *	Handle state for the vi undo command

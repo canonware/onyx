@@ -85,7 +85,7 @@ typedef struct el_state_t {
 #define el_reallocf(a,b) reallocf(a, b)
 #define el_free(a)	free(a)
 
-#include "libcl_incs.h"
+#include "libedit_incs.h"
 
 struct editline {
     char	 *el_prog;	/* the program name 			*/
