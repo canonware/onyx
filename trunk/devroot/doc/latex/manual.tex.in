@@ -30,7 +30,7 @@
 \input{@abs_objdir@/lib/c/libsock/doc/latex/manual}
 \input{@abs_objdir@/lib/c/libstil/doc/latex/manual}
 
-% Languages.
+% stil Language Reference.
 \clearemptydoublepage
 \part{Languages}
 \input{@abs_objdir@/doc/latex/stil}

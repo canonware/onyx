@@ -95,4 +95,12 @@ defines the following exceptions:
 	\end{description}
 \end{description}
 
-\section{Classes}
+\section{Classes and dictionaries}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/envdict}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/gcdict}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/stil}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/stila}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/stilo}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/stils}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/stilt}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/systemdict}

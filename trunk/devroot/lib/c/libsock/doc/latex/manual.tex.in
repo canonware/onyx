@@ -14,3 +14,5 @@
 
 \clearemptydoublepage
 \chapter{libsock}
+\input{@abs_srcdir@/lib/c/libsock/doc/latex/sock}
+\input{@abs_srcdir@/lib/c/libsock/doc/latex/socks}
