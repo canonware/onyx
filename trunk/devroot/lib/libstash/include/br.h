@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 125 $
- * $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
+ * $Revision: 148 $
+ * $Date: 1998-07-19 21:13:23 -0700 (Sun, 19 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -60,16 +60,11 @@ cw_bool_t br_close(cw_br_t * a_br_o);
 cw_uint64_t br_get_block_size(cw_br_t * a_br_o);
 
 cw_bool_t br_add_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_t,
-		      cw_uint64_t a_vltc_size);
+		      cw_uint64_t a_base_addr);
 cw_bool_t br_get_brbs_p(cw_br_t * a_br_o, char * a_filename,
 			cw_brbs_t ** a_brbs_o);
 cw_bool_t br_rm_brbs(cw_br_t * a_br_o, char * a_filename);
 
-/* XXX Should br_block_create() imply some sort of lock is held?  Since the 
- * block didn't exist in a valid state until this function returned, no one 
- * else is in the block, but it is conceivable for someone else to ask (and 
- * get) a lock on the block, even though they don't have an explicit way of 
- * knowing that it exists.  Hmm... */
 cw_bool_t br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o);
 cw_bool_t br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o);
 
@@ -80,7 +75,6 @@ cw_bool_t br_block_tlock(cw_br_t * a_br_o,
 			 cw_uint64_t a_logical_addr,
 			 cw_brblk_t ** a_brblk_o);
 /* Must already hold an s or t lock before calling this. */
-cw_bool_t br_block_flush(cw_br_t * a_br_o, cw_uint64_t a_logical_addr,
-			 cw_brblk_t * a_brblk_o);
+cw_bool_t br_block_flush(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o);
 
 #endif /* _BR_H_ */

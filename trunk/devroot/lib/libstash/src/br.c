@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 145 $
- * $Date: 1998-07-15 17:26:27 -0700 (Wed, 15 Jul 1998) $
+ * $Revision: 148 $
+ * $Date: 1998-07-19 21:13:23 -0700 (Sun, 19 Jul 1998) $
  *
  * <<< Description >>>
  *
@@ -19,16 +19,16 @@
  *
  * /----------------------------------\
  * |                                  |
- * | config space (cs)                |
+ * | config space (CS)                |
  * |                                  |
  * |----------------------------------| 0x0000000000000000
  * |                                  |
- * | v_addr lookup table (vlt)        |
+ * | v_addr lookup table (VLT)        |
  * |                                  |
  * |                                  |
  * |----------------------------------| (2^64 / (8 * page_size + 1)) 
  * |                                  | div page_size
- * | data blocks (pdb)                |
+ * | data blocks (PDB)                |
  * |                                  |
  * |                                  |
  * |                                  |
@@ -38,7 +38,7 @@
  * |                                  |
  * |----------------------------------|
  * |                                  |
- * | v_addr lookup table cache (vltc) |
+ * | v_addr lookup table cache (VLTC) |
  * |                                  |
  * \----------------------------------/ 0xffffffffffffffff
  *
@@ -51,28 +51,28 @@
  *
  * In order to prevent having to shuffle sections around to allow expansion
  * and contraction, the sections are set at fixed br_addr's during creation
- * of the repository.  The vltc starts at the top of the address space
+ * of the repository.  The VLTC starts at the top of the address space
  * (0xffffffffffffffff) and grows downward.  Since we know in advance the
  * following:
  *
- *       (vlt + pdb + vltc) <= 2^64 bytes
- *                     vltc >= 0 bytes
- *              sizeof(vlt) == (sizeof(pdb) / page_size) / 8
+ *       (VLT + PDB + VLTC) <= 2^64 bytes
+ *                     VLTC >= 0 bytes
+ *              sizeof(VLT) == (sizeof(PDB) / page_size) / 8
  *
- * we can calculate the base address of pdb:
+ * we can calculate the base address of PDB:
  *
- *       base_addr(pdb) == sizeof(vlt) == ((2^64 - vltc) / (8 * page_size + 1))
+ *       base_addr(PDB) == sizeof(VLT) == ((2^64 - VLTC) / (8 * page_size + 1))
  *                                        div page_size
  *
  * and
  *
- *       sizeof(pdb) == (((2^64 - vltc) * 8 * page_size) / (8 * page_size + 1))
+ *       sizeof(PDB) == (((2^64 - VLTC) * 8 * page_size) / (8 * page_size + 1))
  *                      div page_size
  *
- * So, assuming a page size of 8kB and vltc of 0B:
+ * So, assuming a page size of 8kB and VLTC of 0B:
  *
- *   base_addr(pdb) == 281470681800704 == FFFF0000E000
- *   sizeof(pdb) == 18446462603027742720 == 0xffff0000ffff0000
+ *   base_addr(PDB) == 281470681800704 == FFFF0000E000
+ *   sizeof(PDB) == 18446462603027742720 == 0xffff0000ffff0000
  *
  ****************************************************************************
  *
@@ -85,13 +85,13 @@
  * So, that is what br does.  Each backing store is mapped to one or more
  * br_addr ranges.
  *
- * Note that once a portion of the address range dedicated to the vlt is
+ * Note that once a portion of the address range dedicated to the VLT is
  * mapped, it cannot be unmapped.  The only way to remove a backing store
  * that is partially or completely mapped to the vtl address range is to
  * first map one or more backing stores to create a redundant copy of that
- * portion of the vlt that we wish to remove a backing store mapping for.
+ * portion of the VLT that we wish to remove a backing store mapping for.
  *
- * Backing stores that have been mapped entirely within the pdb can be
+ * Backing stores that have been mapped entirely within the PDB can be
  * removed from the repository by moving all valid blocks to other backing
  * stores and changing the logical to physical address mappings accordingly.
  * 
@@ -112,7 +112,7 @@ br_new(cw_br_t * a_br_o)
 {
   cw_br_t * retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_new()");
   }
@@ -134,7 +134,7 @@ br_new(cw_br_t * a_br_o)
   retval-> is_open = FALSE;
   
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_new()");
   }
@@ -150,7 +150,7 @@ br_new(cw_br_t * a_br_o)
 void
 br_delete(cw_br_t * a_br_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_delete()");
   }
@@ -172,7 +172,7 @@ br_delete(cw_br_t * a_br_o)
     _cw_free(a_br_o);
   }
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_delete()");
   }
@@ -190,7 +190,7 @@ br_is_open(cw_br_t * a_br_o)
 {
   cw_bool_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_is_open()");
   }
@@ -200,7 +200,7 @@ br_is_open(cw_br_t * a_br_o)
   retval = a_br_o->is_open;
   
   rwl_runlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_is_open()");
   }
@@ -217,7 +217,9 @@ br_is_open(cw_br_t * a_br_o)
 cw_bool_t
 br_open(cw_br_t * a_br_o, char * a_filename)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_open()");
   }
@@ -228,14 +230,15 @@ br_open(cw_br_t * a_br_o, char * a_filename)
   /* Get size of config space. */
   /* Parse config space (res format). */
   /* Create and initialize internal data structures. */
-  
+
+  retval = TRUE; /* XXX */
   
   rwl_wunlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_open()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -248,21 +251,23 @@ br_open(cw_br_t * a_br_o, char * a_filename)
 cw_bool_t
 br_close(cw_br_t * a_br_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_close()");
   }
   _cw_check_ptr(a_br_o);
   rwl_wlock(&a_br_o->rw_lock);
   
-
+  retval = TRUE; /* XXX */
   
   rwl_wunlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_close()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -274,21 +279,23 @@ br_close(cw_br_t * a_br_o)
 cw_uint64_t
 br_get_block_size(cw_br_t * a_br_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_uint64_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_get_block_size()");
   }
   _cw_check_ptr(a_br_o);
   rwl_rlock(&a_br_o->rw_lock);
   
-
+  retval = 0; /* XXX */
   
   rwl_runlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_get_block_size()");
   }
-  return 0; /* XXX */
+  return retval;
 }
 			    
 /****************************************************************************
@@ -298,26 +305,54 @@ br_get_block_size(cw_br_t * a_br_o)
  *
  ****************************************************************************/
 cw_bool_t
-br_add_file(cw_br_t * a_br_o, char * a_filename,
-	    cw_bool_t a_is_raw, cw_bool_t a_can_overlap,
-	    cw_bool_t a_is_dynamic,
-	    cw_uint64_t a_base_addr, cw_uint64_t a_max_size)
+br_add_brbs(cw_br_t * a_br_o, cw_brbs_t * a_brbs_o, cw_uint64_t a_base_addr)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
-    _cw_marker("Enter br_add_file()");
+    _cw_marker("Enter br_add_brbs()");
   }
   _cw_check_ptr(a_br_o);
   rwl_wlock(&a_br_o->rw_lock);
   
-
+  retval = TRUE; /* XXX */
   
   rwl_wunlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
-    _cw_marker("Exit br_add_file()");
+    _cw_marker("Exit br_add_brbs()");
   }
-  return TRUE; /* XXX */
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Set *a_brbs_o to the brbs with filename *a_filename, if it exists, and
+ * return FALSE.  Otherwise, return TRUE.
+ *
+ ****************************************************************************/
+cw_bool_t
+br_get_brbs_p(cw_br_t * a_br_o, char * a_filename, cw_brbs_t ** a_brbs_o)
+{
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_get_brbs_p()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+  
+  retval = TRUE; /* XXX */
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_get_brbs_p()");
+  }
+  return retval;
 }
 
 /****************************************************************************
@@ -331,7 +366,7 @@ br_add_file(cw_br_t * a_br_o, char * a_filename,
 cw_bool_t
 br_rm_file(cw_br_t * a_br_o, char * a_filename)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_rm_file()");
   }
@@ -341,7 +376,7 @@ br_rm_file(cw_br_t * a_br_o, char * a_filename)
 
   
   rwl_wunlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_rm_file()");
   }
@@ -351,27 +386,32 @@ br_rm_file(cw_br_t * a_br_o, char * a_filename)
 /****************************************************************************
  * <<< Description >>>
  *
- * Allocates a block as used and points *a_brblk_o to it.
+ * Allocates a block as used and points *a_brblk_o to it.  The block is
+ * returned with a t-lock to assure that no other threads grab a lock on
+ * the block before the creating thread gets a chance to.  This is
+ * exceedingly unlikely, but is nonetheless necessary for correctness. 
  *
  ****************************************************************************/
 cw_bool_t
 br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_block_destroy()");
   }
   _cw_check_ptr(a_br_o);
   rwl_rlock(&a_br_o->rw_lock);
   
-
+  retval = TRUE; /* XXX */
   
   rwl_runlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_destroy()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -384,21 +424,23 @@ br_block_create(cw_br_t * a_br_o, cw_brblk_t ** a_brblk_o)
 cw_bool_t
 br_block_destroy(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_block_destroy()");
   }
   _cw_check_ptr(a_br_o);
   rwl_rlock(&a_br_o->rw_lock);
   
-
+  retval = TRUE; /* XXX */
   
   rwl_runlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_destroy()");
   }
-  return TRUE; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -412,21 +454,23 @@ br_block_slock(cw_br_t * a_br_o,
 	       cw_uint64_t a_logical_addr,
 	       cw_brblk_t ** a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_block_slock()");
   }
   _cw_check_ptr(a_br_o);
   rwl_rlock(&a_br_o->rw_lock);
   
-
+  retval = TRUE; /* XXX */
   
   rwl_runlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_slock()");
   }
-  return NULL; /* XXX */
+  return retval;
 }
 
 /****************************************************************************
@@ -440,19 +484,51 @@ br_block_tlock(cw_br_t * a_br_o,
 	       cw_uint64_t a_logical_addr,
 	       cw_brblk_t ** a_brblk_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Enter br_block_tlock()");
   }
   _cw_check_ptr(a_br_o);
   rwl_rlock(&a_br_o->rw_lock);
   
-
+  retval = TRUE; /* XXX */
   
   rwl_runlock(&a_br_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BR_FUNC))
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
   {
     _cw_marker("Exit br_block_tlock()");
   }
-  return NULL; /* XXX */
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Flushes the block pointed to by a_brblk_o.  The caller must have already 
+ * attained an s or t lock fo the block, or else the results of this
+ * function call are undefined, and likely to wreak serious havoc.
+ *
+ ****************************************************************************/
+cw_bool_t
+br_block_flush(cw_br_t * a_br_o, cw_brblk_t * a_brblk_o)
+{
+  cw_bool_t retval;
+  
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Enter br_block_flush()");
+  }
+  _cw_check_ptr(a_br_o);
+  rwl_rlock(&a_br_o->rw_lock);
+  
+  retval = TRUE; /* XXX */
+  
+  rwl_runlock(&a_br_o->rw_lock);
+  if (_cw_pmatch(_CW_DBG_R_BR_FUNC))
+  {
+    _cw_marker("Exit br_block_flush()");
+  }
+  return retval;
 }
