@@ -113,6 +113,9 @@ cw_bool_t
 nxo_stack_exch(cw_nxo_t *a_nxo);
 
 cw_bool_t
+nxo_stack_rot(cw_nxo_t *a_nxo, cw_uint32_t a_count);
+
+cw_bool_t
 nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount);
 #endif
 
@@ -242,18 +245,21 @@ nxo_stack_bpush(cw_nxo_t *a_nxo)
 	/* Use spare. */
 	stacko = qr_prev(ql_first(&stack->stack), link);
 	qr_remove(stacko, link);
-
 	stack->nspare--;
     }
     else
     {
 	/* A spare needs to be created.  Do this in a separate function to keep
 	 * this one small, since this code path is rarely executed. */
-	stacko = nxoe_p_stack_push(stack);
+	stacko = nxoe_p_stack_bpush(stack);
     }
 
     nxo_no_new(&stacko->nxo);
     qr_before_insert(&stack->under, stacko, link);
+    if (ql_first(&stack->stack) == &stack->under)
+    {
+	ql_first(&stack->stack) = stacko;
+    }
     stack->count++;
     retval = &stacko->nxo;
 
@@ -282,7 +288,7 @@ nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
     nxoe_p_stack_lock(stack);
 #endif
 
-    /* Get an unused stacko.  If there are no spare, create one first. */
+    /* Get an unused stacko.  If there are no spares, create one first. */
     if (qr_prev(ql_first(&stack->stack), link) != &stack->under)
     {
 	/* Use spare. */
@@ -610,6 +616,7 @@ nxo_stack_get(cw_nxo_t *a_nxo)
     stacko = ql_first(&stack->stack);
 
     retval = &stacko->nxo;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
@@ -643,6 +650,7 @@ nxo_stack_bget(cw_nxo_t *a_nxo)
     stacko = qr_prev(&stack->under, link);
 
     retval = &stacko->nxo;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
@@ -680,6 +688,7 @@ nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
     }
 
     retval = &stacko->nxo;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
@@ -717,6 +726,7 @@ nxo_stack_nbget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
     }
 
     retval = &stacko->nxo;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
@@ -769,6 +779,7 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
     }
 
     retval = &stacko->nxo;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
@@ -821,6 +832,7 @@ nxo_stack_up_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
     }
 
     retval = &stacko->nxo;
+    cw_dassert(retval->magic == CW_NXO_MAGIC);
     RETURN:
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
@@ -892,6 +904,7 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
 #endif
     qr_split(ql_first(&stack->stack), below, link);
     ql_first(&stack->stack) = top;
+    mb_write();
     qr_meld(top, below, link);
 #ifdef CW_THREADS
     mb_write();
@@ -902,6 +915,100 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
     retval = FALSE;
     ERROR:
     return retval;
+}
+
+CW_INLINE void
+nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
+{
+    cw_nxoe_stack_t *stack;
+    cw_nxoe_stacko_t *top;
+    cw_uint32_t i;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    stack = (cw_nxoe_stack_t *) a_nxo->o.nxoe;
+    cw_dassert(stack->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(stack->nxoe.type == NXOT_STACK);
+
+#ifdef CW_THREADS
+    nxoe_p_stack_lock(stack);
+#endif
+
+    cw_assert(stack->count > 0);
+
+    /* Calculate the current index of the element that will end up on top of the
+     * stack.  This allows us to save a pointer to it as we iterate down/up the
+     * stack on the way to the new stack top.  This code also has the side
+     * effect of 'mod'ing the rotate amount, so that we don't spend a bunch of
+     * time rotating the stack if the user specifies a rotate amount larger than
+     * the stack.  A decent program will never do this, so it's not worth
+     * specifically optimizing, but it falls out of these calculations with no
+     * extra work, since we already have to deal with upward versus downward
+     * rotating calculations. */
+    if (a_amount < 0)
+    {
+	/* Convert a_amount to a positive equivalent. */
+	a_amount += ((a_amount - stack->count) / stack->count) * stack->count;
+    }
+    a_amount %= stack->count;
+    a_amount += stack->count;
+    a_amount %= stack->count;
+
+    /* Do this check after the above calculations, just in case the rotate
+     * amount is an even multiple of the stack size. */
+    if (a_amount == 0)
+    {
+	/* Noop. */
+	return;
+    }
+
+    /* Get a pointer to the new top of the stack. */
+    /* Start from whichever end is closest to what will be the new top of
+     * stack. */
+    if (a_amount < stack->count / 2)
+    {
+	/* Iterate down from the top. */
+	for (i = 0, top = ql_first(&stack->stack); i < a_amount; i++)
+	{
+	    top = qr_next(top, link);
+	}
+    }
+    else
+    {
+	/* Iterate up from the bottom. */
+	for (i = 1, top = qr_prev(&stack->under, link);
+	     i < stack->count - a_amount;
+	     i++)
+	{
+	    top = qr_prev(top, link);
+	}
+    }
+
+    /* We now have:
+     *
+     * ql_first(&stack->stack) --> /----------\ \  \
+     *                             |          | |  |
+     *                             |          | |   \
+     *                             |          | |   / a_amount
+     *                             |          | |  |
+     *                             |          | |  /
+     *                             \----------/  \
+     *                     top --> /----------\  / stack->count
+     *                             |          | |  \
+     *                             |          | |  |
+     *                             |          | |   \
+     *                             |          | |   / stack->count - a_amount
+     *                             |          | |  |
+     *                             \----------/ /  /
+     */
+    qr_split(ql_first(&stack->stack), &stack->under, link);
+    ql_first(&stack->stack) = top;
+    mb_write();
+    qr_meld(top, &stack->under, link);
+#ifdef CW_THREADS
+    nxoe_p_stack_unlock(stack);
+#endif
 }
 
 CW_INLINE cw_bool_t
@@ -1003,6 +1110,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 #endif
     qr_split(ql_first(&stack->stack), below, link);
     ql_first(&stack->stack) = top;
+    mb_write();
     qr_meld(top, below, link);
 #ifdef CW_THREADS
     mb_write();
