@@ -31,9 +31,9 @@ performance.
 
 Internally, \fBlibsock\fR works by running a separate thread that asynchronously
 manages I/O.  A simple message passing mechanism is used to communicate control
-events to the I/O thread.  Data is managed and buffered with \fBlibstash\fR's
+events to the I/O thread.  Data are managed and buffered with \fBlibstash\fR's
 \fBbuf\fR code.  As such, all library interfaces for injecting and extracting
-data require the use of \Bbuf\fR's.
+data require the use of \fBbuf\fR's.
 
 A simple mechanism for multiplexing connection handling onto a set of threads is
 provided as part of the sockb interface.  This mechanism can be thought of as a
