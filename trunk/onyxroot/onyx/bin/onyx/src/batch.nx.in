@@ -34,7 +34,7 @@
 
 `
 # Die with an exit code of 1 on error.
-currenterror begin
+errordict begin
     $stop {
 	1 die
     } def
