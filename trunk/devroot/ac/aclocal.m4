@@ -23,9 +23,9 @@ AC_DEFUN(CW_USE_LIBSTASH_R,
   AC_CHECK_HEADERS(libstash/libstash_r.h, , \
                    AC_MSG_ERROR(Cannot build without libstash/libstash_r.h))
 
-  AC_CHECK_FILE([$3/libstash],$2="-lstash_r$1",
+  AC_CHECK_FILE([$3/libstash],$2="$$2 -lstash_r$1",
     echo Was hoping for $3/libstash
-    AC_CHECK_LIB(stash$1, main, $2="-lstash_r$1", \
+    AC_CHECK_LIB(stash$1, main, $2="$$2 -lstash_r$1", \
       AC_MSG_ERROR(Cannot find the stash_r$1 library)))
 ])
 
@@ -38,9 +38,9 @@ AC_DEFUN(CW_USE_LIBSOCK,
   AC_CHECK_HEADERS(libsock/libsock.h, , \
                    AC_MSG_ERROR(Cannot build without libsock/libsock.h))
 
-  AC_CHECK_FILE([$3/libsock],$2="-lsock$1",
+  AC_CHECK_FILE([$3/libsock],$2="$$2 -lsock$1",
     echo Was hoping for $3/libsock
-    AC_CHECK_LIB(sock$1, main, $2="-lsock$1", \
+    AC_CHECK_LIB(sock$1, main, $2="$$2 -lsock$1", \
       AC_MSG_ERROR(Cannot find the sock$1 library)))
 ])
 

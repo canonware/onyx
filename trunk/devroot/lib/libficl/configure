@@ -1514,7 +1514,7 @@ fi
 fi
 if eval "test \"`echo '$ac_cv_file_'$ac_safe`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-lstash_r_d"
+  TEST_LIBS="$TEST_LIBS -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 echo Was hoping for ../libstash
@@ -1549,7 +1549,7 @@ LIBS="$ac_save_LIBS"
 fi
 if eval "test \"`echo '$ac_cv_lib_'$ac_lib_var`\" = yes"; then
   echo "$ac_t""yes" 1>&6
-  TEST_LIBS="-lstash_r_d"
+  TEST_LIBS="$TEST_LIBS -lstash_r_d"
 else
   echo "$ac_t""no" 1>&6
 \
