@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 64 $
- * $Date: 1998-05-01 21:20:21 -0700 (Fri, 01 May 1998) $
+ * $Revision: 76 $
+ * $Date: 1998-05-02 22:34:39 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -40,5 +40,11 @@
 
 #ifndef _BR_PRIV_H_
 #define _BR_PRIV_H_
+
+/* brblk private methods. */
+cw_uint32_t brblk_get_dlocks(cw_brblk_t * a_brblk_o);
+cw_uint32_t brblk_set_dlocks(cw_brblk_t * a_brblk_o, cw_uint32_t a_dlocks);
+
+/* br private methods. */
 
 #endif /* _BR_PRIV_H_ */
