@@ -511,6 +511,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(undef),
     ENTRY(under),
+    ENTRY(unless),
 #ifdef CW_POSIX
     ENTRY(unlink),
 #endif
@@ -2378,8 +2379,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 	    nxo_array_copy(nxo, orig);
 
-	    nxo_stack_exch(ostack);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, orig);
 	    break;
 	}
 	case NXOT_DICT:
@@ -2395,8 +2395,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 	    nxo_dict_copy(nxo, orig, nxo_thread_nx_get(a_thread));
 		
-	    nxo_stack_exch(ostack);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, orig);
 	    break;
 	}
 	case NXOT_STACK:
@@ -2412,8 +2411,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 	    nxo_stack_copy(nxo, orig);
 
-	    nxo_stack_exch(ostack);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, orig);
 	    break;
 	}
 	case NXOT_STRING:
@@ -2434,8 +2432,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 
 	    nxo_string_copy(nxo, orig);
 
-	    nxo_stack_exch(ostack);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, orig);
 	    break;
 	}
 	default:
@@ -4360,8 +4357,7 @@ systemdict_get(cw_nxo_t *a_thread)
 	    }
 	    nxo_array_el_get(from, index, with);
 
-	    nxo_stack_exch(ostack);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, from);
 	    break;
 	}
 	case NXOT_DICT:
@@ -4399,8 +4395,7 @@ systemdict_get(cw_nxo_t *a_thread)
 	    nxo_string_el_get(from, index, &el);
 	    nxo_integer_set(with, (cw_nxoi_t) el);
 
-	    nxo_stack_exch(ostack);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, from);
 	    break;
 	}
 	default:
@@ -8019,163 +8014,6 @@ systemdict_rename(cw_nxo_t *a_thread)
 
     nxo_stack_npop(tstack, 2);
     nxo_stack_npop(ostack, 2);
-}
-#endif
-
-#ifdef CW_REGEX
-void
-systemdict_regex(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack, *pattern, *nxo;
-    cw_nxn_t error;
-    cw_uint32_t npop;
-    cw_bool_t cont, global, insensitive, multiline, singleline;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-
-    NXO_STACK_GET(pattern, ostack, a_thread);
-    switch (nxo_type_get(pattern))
-    {
-	case NXOT_DICT:
-	{
-	    cw_nxo_t *flags;
-
-	    flags = pattern;
-	    npop = 2;
-	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, pattern);
-	    if (nxo_type_get(pattern) != NXOT_STRING)
-	    {
-		nxo_thread_nerror(a_thread, NXN_typecheck);
-		return;
-	    }
-
-	    error = systemdict_p_regex_flags_get(flags, a_thread, &cont,
-						 &global, &insensitive,
-						 &multiline, &singleline);
-	    if (error)
-	    {
-		nxo_thread_nerror(a_thread, error);
-		return;
-	    }
-	    break;
-	}
-	case NXOT_STRING:
-	{
-	    npop = 1;
-
-	    cont = FALSE;
-	    global = FALSE;
-	    insensitive = FALSE;
-	    multiline = FALSE;
-	    singleline = FALSE;
-	    break;
-	}
-	default:
-	{
-	    nxo_thread_nerror(a_thread, NXN_typecheck);
-	    return;
-	}
-    }
-
-    /* Create the regex object. */
-    nxo = nxo_stack_under_push(ostack, pattern);
-    nxo_string_lock(pattern);
-    error = nxo_regex_new(nxo, nxo_thread_nx_get(a_thread),
-			  nxo_string_get(pattern),
-			  nxo_string_len_get(pattern), cont, global,
-			  insensitive, multiline, singleline);
-    nxo_string_unlock(pattern);
-    if (error)
-    {
-	nxo_stack_remove(ostack, nxo);
-	nxo_thread_nerror(a_thread, error);
-	return;
-    }
-
-    nxo_stack_npop(ostack, npop);
-}
-#endif
-
-#ifdef CW_REGEX
-void
-systemdict_regsub(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack, *pattern, *template, *nxo;
-    cw_nxn_t error;
-    cw_uint32_t npop;
-    cw_bool_t global, insensitive, multiline, singleline;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-
-    NXO_STACK_GET(template, ostack, a_thread);
-    switch (nxo_type_get(template))
-    {
-	case NXOT_DICT:
-	{
-	    cw_nxo_t *flags;
-
-	    flags = template;
-	    npop = 3;
-	    NXO_STACK_DOWN_GET(template, ostack, a_thread, template);
-	    if (nxo_type_get(template) != NXOT_STRING)
-	    {
-		nxo_thread_nerror(a_thread, NXN_typecheck);
-		return;
-	    }
-
-	    error = systemdict_p_regex_flags_get(flags, a_thread, NULL,
-						 &global, &insensitive,
-						 &multiline, &singleline);
-	    if (error)
-	    {
-		nxo_thread_nerror(a_thread, error);
-		return;
-	    }
-	    break;
-	}
-	case NXOT_STRING:
-	{
-	    npop = 2;
-
-	    global = FALSE;
-	    insensitive = FALSE;
-	    multiline = FALSE;
-	    singleline = FALSE;
-	    break;
-	}
-	default:
-	{
-	    nxo_thread_nerror(a_thread, NXN_typecheck);
-	    return;
-	}
-    }
-    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, template);
-    if (nxo_type_get(pattern) != NXOT_STRING)
-    {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
-	return;
-    }
-
-    /* Create the regex object. */
-    nxo = nxo_stack_under_push(ostack, pattern);
-    nxo_string_lock(pattern);
-    nxo_string_lock(template);
-    error = nxo_regsub_new(nxo, nxo_thread_nx_get(a_thread),
-			   nxo_string_get(pattern),
-			   nxo_string_len_get(pattern), global,
-			   insensitive, multiline, singleline,
-			   nxo_string_get(template),
-			   nxo_string_len_get(template));
-    nxo_string_unlock(template);
-    nxo_string_unlock(pattern);
-    if (error)
-    {
-	nxo_stack_remove(ostack, nxo);
-	nxo_thread_nerror(a_thread, error);
-	return;
-    }
-
-    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -12520,6 +12358,38 @@ systemdict_under(cw_nxo_t *a_thread)
     NXO_STACK_NGET(under, ostack, a_thread, 1);
     nxo = nxo_stack_under_push(ostack, under);
     nxo_dup(nxo, under);
+}
+
+void
+systemdict_unless(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *cond, *exec;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(exec, ostack, a_thread);
+    NXO_STACK_DOWN_GET(cond, ostack, a_thread, exec);
+    if (nxo_type_get(cond) != NXOT_BOOLEAN)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    if (nxo_boolean_get(cond) == FALSE)
+    {
+	cw_nxo_t *estack;
+	cw_nxo_t *nxo;
+
+	estack = nxo_thread_estack_get(a_thread);
+	nxo = nxo_stack_push(estack);
+	nxo_dup(nxo, exec);
+	nxo_stack_npop(ostack, 2);
+	nxo_thread_loop(a_thread);
+    }
+    else
+    {
+	nxo_stack_npop(ostack, 2);
+    }
 }
 
 #ifdef CW_POSIX
