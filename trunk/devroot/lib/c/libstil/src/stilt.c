@@ -537,8 +537,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 					 * Always push literal objects onto the
 					 * data stack.
 					 */
-					tstilo =
-					    stils_push(&a_stilt->ostack);
+					tstilo = stils_push(&a_stilt->ostack);
 					stilo_dup(tstilo, &array[i]);
 					continue;
 				}
@@ -772,21 +771,18 @@ stilt_loop(cw_stilt_t *a_stilt)
 			break;
 		}
 		case STILOT_NAME: {
-			cw_stilo_t	*val;
+			cw_stilo_t	*name;
 
 			/*
-			 * Search for a value associated with the name
-			 * in the dictionary stack, push it onto the
-			 * execution stack, and execute it.
+			 * Search for a value associated with the name in the
+			 * dictionary stack, put it on the execution stack, and
+			 * execute it.
 			 */
-			val = stils_push(&a_stilt->tstack);
-			if (stilt_dict_stack_search(a_stilt, stilo, val)) {
+			name = stils_push(&a_stilt->tstack);
+			stilo_dup(name, stilo);
+			if (stilt_dict_stack_search(a_stilt, name, stilo))
 				stilt_error(a_stilt, STILTE_UNDEFINED);
-				stils_pop(&a_stilt->estack);
-			} else {
-				stilo_dup(stilo, val);
-				stils_pop(&a_stilt->tstack);
-			}
+			stils_pop(&a_stilt->tstack);
 			break;
 		}
 		case STILOT_OPERATOR:

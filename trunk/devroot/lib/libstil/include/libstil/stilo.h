@@ -95,6 +95,24 @@ struct cw_stilo_s {
 #endif
 
 	/*
+	 * This should be before the bit fields so that in stilo_dup(), where
+	 * memcpy() is used, the stiloe pointer will be valid before the type is
+	 * set.  That way, the GC won't go chasing bad pointers.
+	 */
+	union {
+		struct {
+			cw_bool_t	val;
+		}	boolean;
+		struct {
+			cw_sint64_t	i;
+		}	integer;
+		struct {
+			cw_op_t		*f;
+		}	operator;
+		cw_stiloe_t	*stiloe;
+	}	o;
+
+	/*
 	 * Type.
 	 */
 	cw_stilot_t	type:4;
@@ -133,26 +151,16 @@ struct cw_stilo_s {
 	 * reference to the extension.
 	 */
 	cw_bool_t	watchpoint:1;
-
-	union {
-		struct {
-			cw_bool_t	val;
-		}	boolean;
-		struct {
-			cw_sint64_t	i;
-		}	integer;
-		struct {
-			cw_op_t		*f;
-		}	operator;
-		cw_stiloe_t	*stiloe;
-	}	o;
 };
 
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t
     *a_stilt);
+/* XXX The critical section probably isn't necessary. */
 #define		stilo_dup(a_to, a_from) do {				\
 	/* Copy. */							\
+	thd_crit_enter();						\
 	memcpy((a_to), (a_from), sizeof(cw_stilo_t));			\
+	thd_crit_leave();						\
 									\
 	/* Reset debug flags on new copy. */				\
 	(a_to)->breakpoint = FALSE;					\
@@ -182,8 +190,8 @@ cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 #ifdef _LIBSTIL_DBG
 #define	stilo_no_new(a_stilo) do {					\
 	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
-	(a_stilo)->type = STILOT_NO;					\
 	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+	(a_stilo)->type = STILOT_NO;					\
 } while (0)
 #else
 #define	stilo_no_new(a_stilo) do {					\
@@ -302,15 +310,15 @@ cw_stilte_t	stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 #ifdef _LIBSTIL_DBG
 #define	stilo_integer_new(a_stilo, a_val) do {				\
 	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
-	(a_stilo)->type = STILOT_INTEGER;				\
 	(a_stilo)->magic = _CW_STILO_MAGIC;				\
 	(a_stilo)->o.integer.i = (a_val);				\
+	(a_stilo)->type = STILOT_INTEGER;				\
 } while (0)
 #else
 #define	stilo_integer_new(a_stilo, a_val) do {				\
 	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
-	(a_stilo)->type = STILOT_INTEGER;				\
 	(a_stilo)->o.integer.i = (a_val);				\
+	(a_stilo)->type = STILOT_INTEGER;				\
 } while (0)
 #endif
 
@@ -346,8 +354,8 @@ cw_uint32_t	stilo_name_len_get(cw_stilo_t *a_stilo);
 #ifdef _LIBSTIL_DBG
 #define	stilo_null_new(a_stilo) do {					\
 	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
-	(a_stilo)->type = STILOT_NULL;					\
 	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+	(a_stilo)->type = STILOT_NULL;					\
 } while (0)
 #else
 #define	stilo_null_new(a_stilo) do {					\

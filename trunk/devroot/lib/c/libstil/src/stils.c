@@ -43,7 +43,7 @@ stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 	ql_first(&a_stils->stack) = &a_stils->under;
 	/* Fill spares. */
 	stils_p_spares_create(a_stils);
-	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
+/*  	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link); */
 
 #ifdef _LIBSTIL_DBG
 	a_stils->magic = _CW_STILS_MAGIC;
@@ -84,29 +84,16 @@ stils_l_ref_iter(cw_stils_t *a_stils, cw_bool_t a_reset)
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
+	retval = NULL;
 	if (a_reset) {
 		a_stils->ref_stilso = ql_first(&a_stils->stack);
-		a_stils->ref_iter = 0;
+		if (a_stils->ref_stilso != &a_stils->under)
+			retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
 	}
 
-	for (retval = NULL; retval == NULL && a_stils->ref_iter <
-	    a_stils->count; a_stils->ref_stilso = qr_next(a_stils->ref_stilso,
-	    link), a_stils->ref_iter++) {
-		switch (stilo_type_get(&a_stils->ref_stilso->stilo)) {
-		case STILOT_ARRAY:
-		case STILOT_CONDITION:
-		case STILOT_DICT:
-		case STILOT_FILE:
-		case STILOT_HOOK:
-		case STILOT_MUTEX:
-		case STILOT_NAME:
-		case STILOT_STRING:
-			retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
-			break;
-		default:
-			break;
-		}
-	}
+	for (; retval == NULL && a_stils->ref_stilso != &a_stils->under;
+	    a_stils->ref_stilso = qr_next(a_stils->ref_stilso, link))
+		retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
 
 	return retval;
 }
@@ -203,9 +190,11 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 *                               |          |
 	 *                               \----------/
 	 */
+	thd_crit_enter();
 	qr_split(ql_first(&a_stils->stack), noroll, link);
 	qr_meld(top, noroll, link);
 	ql_first(&a_stils->stack) = top;
+	thd_crit_leave();
 
 	RETURN:
 }

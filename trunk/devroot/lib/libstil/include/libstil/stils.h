@@ -59,7 +59,6 @@ struct cw_stils_s {
 	 * Used for remembering the current state of reference iteration.
 	 */
 	cw_stilso_t		*ref_stilso;
-	cw_uint32_t		ref_iter;
 };
 
 void		stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
@@ -91,16 +90,14 @@ stils_push(cw_stils_t *a_stils)
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-	_cw_assert(ql_first(&a_stils->stack) != &a_stils->under);
 
 	/* Get an unused stilso.  If there are no spares, create some first. */
 	if (qr_prev(ql_first(&a_stils->stack), link) == &a_stils->under)
 		stils_p_spares_create(a_stils);
-	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
-	stilso = ql_first(&a_stils->stack);
-	a_stils->count++;
-
+	stilso = qr_prev(ql_first(&a_stils->stack), link);
 	stilo_no_new(&stilso->stilo);
+	ql_first(&a_stils->stack) = stilso;
+	a_stils->count++;
 
 	return &stilso->stilo;
 }
@@ -118,17 +115,17 @@ stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 		stils_p_spares_create(a_stils);
 	if (a_stilo != NULL) {
 		stilso = qr_prev(ql_first(&a_stils->stack), link);
+		stilo_no_new(&stilso->stilo);
 		qr_remove(stilso, link);
 		qr_after_insert((cw_stilso_t *)a_stilo, stilso, link);
 	} else {
 		/* Same as stils_push(). */
-		ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack),
-		    link);
-		stilso = ql_first(&a_stils->stack);
+		stilso = qr_prev(ql_first(&a_stils->stack), link);
+		stilo_no_new(&stilso->stilo);
+		ql_first(&a_stils->stack) = stilso;
 	}
 	a_stils->count++;
 
-	stilo_no_new(&stilso->stilo);
 
 	return &stilso->stilo;
 }
