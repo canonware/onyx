@@ -42,14 +42,6 @@ LIBSOCK_SRCS = sock.c sockb.c socks.c;
 LIBSOCK_SRCS = [fromto % [srcdir]/lib/c/libsock/src/% [LIBSOCK_SRCS]];
 SRCS = [SRCS] [LIBSOCK_SRCS];
 
-/* Executables. */
-{
-  local bins = ;
-  bins = [fromto % [srcdir]/lib/c/libsock/bin/% [bins]];
-
-  BINS = [BINS] [bins];
-}
-
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;

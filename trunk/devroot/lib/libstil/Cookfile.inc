@@ -48,14 +48,6 @@ LIBSTIL_SRCS = stil.c stilo.c stiloe.c stiloe_array.c stiloe_condition.c
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 
-/* Executables. */
-{
-  local bins = ;
-  bins = [fromto % [srcdir]/lib/c/libstil/bin/% [bins]];
-
-  BINS = [BINS] [bins];
-}
-
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;

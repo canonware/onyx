@@ -80,7 +80,7 @@ AC_DEFUN(CW_BUILD_BIN,
 if test -d "$srcdir/bin/$1" ; then
   AC_MSG_RESULT(include $1 in build... yes)
   $2=1
-  cfghdrs="$cfghdrs $objdir/bin/$1/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
   mkdir -p $objdir/bin/$1/include
 else
   AC_MSG_RESULT(include $1 in build... no)

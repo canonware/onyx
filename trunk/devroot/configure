@@ -571,7 +571,7 @@ fi
 if test -d "$srcdir/bin/blow" ; then
   echo "$ac_t""include blow in build... yes" 1>&6
   bin_blow=1
-  cfghdrs="$cfghdrs $objdir/bin/blow/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/blow/include/blow_defs.h"
   mkdir -p $objdir/bin/blow/include
 else
   echo "$ac_t""include blow in build... no" 1>&6
@@ -583,7 +583,7 @@ fi
 if test -d "$srcdir/bin/echos" ; then
   echo "$ac_t""include echos in build... yes" 1>&6
   bin_echos=1
-  cfghdrs="$cfghdrs $objdir/bin/echos/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/echos/include/echos_defs.h"
   mkdir -p $objdir/bin/echos/include
 else
   echo "$ac_t""include echos in build... no" 1>&6
@@ -595,7 +595,7 @@ fi
 if test -d "$srcdir/bin/ncat" ; then
   echo "$ac_t""include ncat in build... yes" 1>&6
   bin_ncat=1
-  cfghdrs="$cfghdrs $objdir/bin/ncat/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/ncat/include/ncat_defs.h"
   mkdir -p $objdir/bin/ncat/include
 else
   echo "$ac_t""include ncat in build... no" 1>&6
@@ -607,7 +607,7 @@ fi
 if test -d "$srcdir/bin/proxy" ; then
   echo "$ac_t""include proxy in build... yes" 1>&6
   bin_proxy=1
-  cfghdrs="$cfghdrs $objdir/bin/proxy/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/proxy/include/proxy_defs.h"
   mkdir -p $objdir/bin/proxy/include
 else
   echo "$ac_t""include proxy in build... no" 1>&6
@@ -619,7 +619,7 @@ fi
 if test -d "$srcdir/bin/stil" ; then
   echo "$ac_t""include stil in build... yes" 1>&6
   bin_stil=1
-  cfghdrs="$cfghdrs $objdir/bin/stil/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/stil/include/stil_defs.h"
   mkdir -p $objdir/bin/stil/include
 else
   echo "$ac_t""include stil in build... no" 1>&6
@@ -631,7 +631,7 @@ fi
 if test -d "$srcdir/bin/suck" ; then
   echo "$ac_t""include suck in build... yes" 1>&6
   bin_suck=1
-  cfghdrs="$cfghdrs $objdir/bin/suck/include/config.h"
+  cfghdrs="$cfghdrs $objdir/bin/suck/include/suck_defs.h"
   mkdir -p $objdir/bin/suck/include
 else
   echo "$ac_t""include suck in build... no" 1>&6

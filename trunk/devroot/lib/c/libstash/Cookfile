@@ -45,14 +45,6 @@ LIBSTASH_SRCS = libstash.c bhp.c buf.c ch.c cnd.c dch.c dbg.c mem.c mq.c mtx.c
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
 
-/* Executables. */
-{
-  local bins = ;
-  bins = [fromto % [srcdir]/lib/c/libstash/bin/% [bins]];
-
-  BINS = [BINS] [bins];
-}
-
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c c_buf_d.c
