@@ -442,7 +442,6 @@ void
 nxo_thread_thread(cw_nxo_t *a_nxo)
 {
 	cw_nxoe_thread_t	*thread;
-	sigset_t		sig_mask, old_mask;
 
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
@@ -463,17 +462,8 @@ nxo_thread_thread(cw_nxo_t *a_nxo)
 	thread->entry->detached = FALSE;
 	thread->entry->joined = FALSE;
 
-	/*
-	 * Block all signals during thread creation, so that the thread doesn't
-	 * swallow signals.  Doing this here rather than in the new thread
-	 * itself avoids a race condition where signals can be delivered to the
-	 * new thread.
-	 */
-	sigfillset(&sig_mask);
-	thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 	thread->entry->thd = thd_new(nxo_p_thread_entry, (void
 	    *)thread->entry, TRUE);
-	thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 }
 
 void
