@@ -13,3 +13,5 @@
  * Defined if Darren Reed's ipfilter is present.
  */
 #undef _CW_IPFILTER
+
+#undef _CW_HAVE_INET_ATON

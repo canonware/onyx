@@ -129,6 +129,7 @@ main(int argc, char **argv)
 			} else if (strcmp(optarg, "LOOPBACK") == 0)
 				opt_ip = htonl(INADDR_LOOPBACK);
 			else {
+#ifdef _CW_HAVE_INET_ATON
 				struct in_addr	addr;
 
 				if (inet_aton(optarg, &addr) == 0) {
@@ -141,6 +142,9 @@ main(int argc, char **argv)
 					goto CLERROR;
 				}
 				opt_ip = addr.s_addr;
+#else
+				opt_ip = inet_addr(optarg);
+#endif
 			}
 			break;
 		case 'p':
