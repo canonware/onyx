@@ -1107,7 +1107,8 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   }
 #endif
   
-  return ntohl(retval);
+/*    return ntohl(retval); */
+  return retval;
 }
 
 cw_uint64_t
@@ -1230,7 +1231,8 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
     mtx_unlock(&a_buf->lock);
   }
 #endif
-  return _cw_ntohq(retval);
+/*    return _cw_ntohq(retval); */
+  return retval;
 }
 
 static void
