@@ -31,6 +31,10 @@
  *
  * $FreeBSD: src/lib/libedit/tty.c,v 1.4.6.1 2000/08/16 14:43:40 ache Exp $
  */
+/*  #define DEBUG_TTY */
+#ifdef DEBUG_TTY
+#include <errno.h>
+#endif
 
 /*
  * tty.c: tty interface stuff
@@ -501,7 +505,7 @@ tty_setup(el)
     el->el_tty.t_ed.c_lflag |=  el->el_tty.t_t[ED_IO][M_LIN].t_setmask;
 
     tty__setchar(&el->el_tty.t_ed, el->el_tty.t_c[ED_IO]);
-    return 0;
+   return 0;
 }
 
 protected int
@@ -1016,11 +1020,13 @@ tty_stty(el, argc, argv)
 		cu = strlen(m->m_name) + (x != '\0') + 1;
 
 		if (len + cu >= el->el_term.t_size.h) {
-/*  		    _cw_out_put_f(el->el_outfile, "\n%*s", st, ""); */
-			_cw_out_put_fn(el->el_outfile, st,
-			    "                                        "
-			    "                                        ");
-		    len = st + cu;
+			char	*format;
+
+			out_put_sa(NULL, &format, "\n[[s|w:[i]]", st);
+			_cw_out_put_f(el->el_outfile, format, "");
+			_cw_free(format);
+/*  			_cw_out_put_f(el->el_outfile, "\n%*s", st, ""); */
+			len = st + cu;
 		}
 		else
 		    len += cu;

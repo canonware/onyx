@@ -1060,9 +1060,14 @@ term__putc(c)
     int c;
 {
 	char s[1];
+	int error;
 
 	s[0] = c;
-	return write(term_outfile, s, 1);
+	error = write(term_outfile, s, 1);
+	if (error)
+		return EOF;
+	else
+		return c;
 } /* end term__putc */
 
 

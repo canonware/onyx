@@ -113,6 +113,7 @@ c_delbefore(el, num)
     EditLine *el;
     int num;
 {
+	out_put_fe(cw_g_out, 2, __FILE__, __LINE__, __FUNCTION__, "Got here\n");
 
     if (el->el_line.cursor - num < el->el_line.buffer)
 	num = el->el_line.cursor - el->el_line.buffer;

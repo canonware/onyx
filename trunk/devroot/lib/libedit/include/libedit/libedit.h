@@ -42,7 +42,7 @@
  */
 #define KSHVI
 #define VIDEFAULT
-#define ANCHOR
+/*  #define ANCHOR */
 
 #include <stdio.h>
 #include <sys/types.h>

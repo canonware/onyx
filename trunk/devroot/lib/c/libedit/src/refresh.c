@@ -49,11 +49,11 @@ private	void	re_fastputc		__P((EditLine *, int));
 
 private	void	re__strncopy		__P((char *, char *, size_t));
 private	void	re__copy_and_pad	__P((char *, char *, size_t));
-
+#define DEBUG_REFRESH
 #ifdef DEBUG_REFRESH
 private	void	re_printstr		__P((EditLine *, char *, char *,
 					     char *));
-# define __F el->el_errfile
+# define __F 2
 # define _REFRESH_DEBUG(a, b, c)	do 				\
 				    if (a) {			\
 					_cw_out_put_f b;	\
@@ -160,7 +160,7 @@ re_refresh(el)
     int i;
     char *cp;
     coord_t     cur;
-
+/*      _cw_out_put_f(2, ":[s]:\n", el->el_line.buffer); */
     _REFRESH_DEBUG(1,(__F, "el->el_line.buffer = :[s]:\r\n",
         el->el_line.buffer),);
 
@@ -191,7 +191,7 @@ re_refresh(el)
     re_putc(el, '\0');		/* put NUL on end */
 
     _REFRESH_DEBUG(1,(__F,
-	     "term.h=[i] vcur.h=[i] vcur.v=[i] vdisplay[[0]=\r\n:[s|w:80]:\r\n",
+	     "term.h=[i] vcur.h=[i] vcur.v=[i] vdisplay[[0]=\r\n:[s|w:80|j:l]:\r\n",
 	     el->el_term.t_size.h, el->el_refresh.r_cursor.h,
 	     el->el_refresh.r_cursor.v, el->el_vdisplay[0]),);
 

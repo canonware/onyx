@@ -286,8 +286,8 @@ private el_action_t  el_map_emacs[] = {
     /* 238 */	ED_UNASSIGNED,		/* M-o */
     /* 239 */	ED_SEARCH_PREV_HISTORY,	/* M-p */
     /* 240 */	ED_UNASSIGNED,		/* M-q */
-    /* 241 */	ED_UNASSIGNED,		/* M-r */
-    /* 242 */	ED_UNASSIGNED,		/* M-s */
+    /* 241 */	EM_INC_SEARCH_PREV,	/* M-r */
+    /* 242 */	EM_INC_SEARCH_NEXT,	/* M-s */
     /* 243 */	ED_UNASSIGNED,		/* M-t */
     /* 244 */	EM_UPPER_CASE,		/* M-u */
     /* 245 */	ED_UNASSIGNED,		/* M-v */

@@ -67,19 +67,7 @@ el_init(prog, fin, fout)
     el->el_infd  = fin;
     el->el_outfile = fout;
     el->el_prog = strdup(prog);
-
-#ifdef DEBUG
-    if (issetugid() == 0 && (tty = getenv("DEBUGTTY")) != NULL) {
-	el->el_errfile = fopen(tty, "w");
-	if (el->el_errfile == NULL) {
-		_cw_out_put_f(stderr, "Cannot open [s] ([s]).\n",
-			       tty, strerror(errno));
-		return NULL;
-	}
-    }
-    else
-#endif
-	el->el_errfile = 2;
+    el->el_errfile = 2;
 
     /*
      * Initialize all the modules. Order is important!!!
