@@ -647,31 +647,34 @@ operand stack. \\
 \hline \hline
 & {\bf \htmlref{fino}{systemdict:fino}} & & \\
 \hline
-& {\bf \htmlref{{\lt}[}{systemdict:sym_lt_lb}} & & \\
+-- & {\bf \htmlref{(}{systemdict:sym_lp}} & fino & Begin a stack declaration. \\
 \hline
-& {\bf \htmlref{]{\gt}}{systemdict:sym_rb_gt}} & & \\
+fino objects & {\bf \htmlref{)}{systemdict:sym_rp}} & stack & Create a stack. \\
 \hline
-& {\bf \htmlref{stack}{systemdict:stack}} & & \\
+-- & {\bf \htmlref{stack}{systemdict:stack}} & stack & Create a stack. \\
 \hline
-& {\bf \htmlref{spush}{systemdict:spush}} & & \\
+stack object & {\bf \htmlref{spush}{systemdict:spush}} & stack & Push an object
+onto a stack. \\
 \hline
-& {\bf \htmlref{sroll}{systemdict:sroll}} & & \\
+stack & {\bf \htmlref{scount}{systemdict:scount}} & stack count & Get the number
+of objects on a stack. \\
+\hline
+stack & {\bf \htmlref{sdup}{systemdict:sdup}} & stack & Duplicate an object. \\
 \hline
 & {\bf \htmlref{sindex}{systemdict:sindex}} & & \\
 \hline
-& {\bf \htmlref{spop}{systemdict:spop}} & & \\
+& {\bf \htmlref{sexch}{systemdict:sexch}} & & \\
+\hline
+& {\bf \htmlref{sroll}{systemdict:sroll}} & & \\
+\hline
+& {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & & \\
+\hline
+stack & {\bf \htmlref{spop}{systemdict:spop}} & stack & Pop an object off
+a stack. \\
 \hline
 & {\bf \htmlref{sclear}{systemdict:sclear}} & & \\
 \hline
 & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & & \\
-\hline
-& {\bf \htmlref{scount}{systemdict:scount}} & & \\
-\hline
-& {\bf \htmlref{scounttomark}{systemdict:scounttomark}} & & \\
-\hline
-& {\bf \htmlref{sdup}{systemdict:sdup}} & & \\
-\hline
-& {\bf \htmlref{sexch}{systemdict:sexch}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Polymorphic operators} \\
 \hline \hline
@@ -934,23 +937,66 @@ operand stack. \\
 
 		\end{verbatim}
 	\end{description}
-\label{systemdict:}
-\index{\stilop{}{}{}}
-\item[{\stilop{}{}{}} ]
+\label{systemdict:sym_lp}
+\index{\stilop{}{(}{}}
+\item[{\stilop{--}{(}{fino}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[fino: ]
+			A fino object.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Push a fino object onto the operand stack to denote the bottom
+		of a stack that has not yet been constructed.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> (
+s:1> pstack
+-fino-
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sym_rp}
+\index{\stilop{}{)}{}}
+\item[{\stilop{fino objects}{)}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[fino: ]
+			A fino object, usually created by the ) operator.
+		\item[objects: ]
+			0 or more objects.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{stackunderflow}.]
+		\item[\htmlref{unmatchedfino}{unmatchedfino}.]
 		\end{description}
 	\item[Description: ]
+		Create a stack object and move all objects from the operand
+		stack down to the first fino object to the new stack.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> ()
+s:1> 1 sprint
+()
+s:0> (1 2
+s:3> pstack
+2
+1
+-fino-
+s:3> )
+s:1> 1 sprint
+(1 2)
+s:0>
+		\end{verbatim}
 	\end{description}
 \label{systemdict:pop}
 \index{\stilop{}{pop}{}}
@@ -1038,6 +1084,182 @@ s:4> pstack
 1
 3
 s:4>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:scount}
+\index{\stilop{}{scount}{}}
+\item[{\stilop{stack}{scount}{stack count}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The same stack as was passed in.
+		\item[count: ]
+			The number of objects on \oparg{stack}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get the number of objects on \oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> (1 2) scount
+s:2> pstack
+2
+(1 2)
+s:2>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sdup}
+\index{\stilop{}{sdup}{}}
+\item[{\stilop{stack}{sdup}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The same stack as was passed in.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Duplicate the top object on \oparg{stack} and push it onto
+		\oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> (1) sdup
+s:1> pstack
+(1 1)
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sindex}
+\index{\stilop{}{sindex}{}}
+\item[{\stilop{stack index}{sindex}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\item[index: ]
+			Depth (count starts at 0) of the object to duplicate in
+			\oparg{stack}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The same stack as was passed in.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a duplicate of the object on \oparg{stack} at depth
+		\oparg{index} and push it onto \oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> (3 2 1 0) 2 sindex
+s:1> pstack
+(3 2 1 0 2)
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:spop}
+\index{\stilop{}{spop}{}}
+\item[{\stilop{stack}{spop}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The same stack as was passed in.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Pop an object off of \oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> (1 2) spop
+s:1> pstack
+(1)
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:spush}
+\index{\stilop{}{spush}{}}
+\item[{\stilop{stack object}{spush}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\item[object: ]
+			An object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The same stack as was passed in.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Push \oparg{object} onto \oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> () 1 spush
+s:1> pstack
+(1)
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:stack}
+\index{\stilop{}{stack}{}}
+\item[{\stilop{--}{stack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			An empty stack object.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Create a new stack object and push it onto the operand stack.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> stack
+s:1> pstack
+()
 		\end{verbatim}
 	\end{description}
 \end{description}
