@@ -65,23 +65,24 @@
 	} while (0)
 
 struct cw_stilt_entry_s {
-	cw_thd_t thd;
-	cw_stilt_t *stilt;
-	cw_buf_t buf;
+	cw_thd_t	thd;
+	cw_stilt_t	*stilt;
+	cw_buf_t	buf;
 };
 
-static cw_sint32_t stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str,
+static cw_sint32_t	stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str,
     cw_uint32_t a_len);
-static void stilt_p_reset_tok_buffer(cw_stilt_t *a_stilt);
+static void		stilt_p_reset_tok_buffer(cw_stilt_t *a_stilt);
 
 #ifndef _CW_STILT_INLINE
-static cw_uint8_t stilt_p_getc(cw_stilt_t *a_stilt, cw_uint32_t a_index);
+static cw_uint8_t	stilt_p_getc(cw_stilt_t *a_stilt, cw_uint32_t a_index);
 #endif
-static cw_sint32_t stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c);
-static void stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length,
-    const char *a_note);
-static void stilt_p_print_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t a_c);
-static void * stilt_p_entry(void *a_arg);
+static cw_sint32_t	stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c);
+static void		stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t
+    a_length, const char *a_note);
+static void		stilt_p_print_syntax_error(cw_stilt_t *a_stilt,
+    cw_uint8_t a_c);
+static void		*stilt_p_entry(void *a_arg);
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILT_MAGIC 0x978fdbe0
@@ -91,22 +92,22 @@ static void * stilt_p_entry(void *a_arg);
  * Size and fullness control of initial name cache hash table.  This starts out
  * empty, but should be expected to grow rather quickly to start with.
  */
-#define _CW_STILT_STILN_BASE_TABLE  256
-#define _CW_STILT_STILN_BASE_GROW   200
-#define _CW_STILT_STILN_BASE_SHRINK  64
+#define _CW_STILT_STILN_BASE_TABLE	256
+#define _CW_STILT_STILN_BASE_GROW	200
+#define _CW_STILT_STILN_BASE_SHRINK	 64
 
 /*
  * Size and fullness control of initial root set for local VM.  Local VM is
  * empty to begin with.
  */
-#define _CW_STILT_ROOTS_BASE_TABLE  32
-#define _CW_STILT_ROOTS_BASE_GROW   24
-#define _CW_STILT_ROOTS_BASE_SHRINK  8
+#define _CW_STILT_ROOTS_BASE_TABLE	 32
+#define _CW_STILT_ROOTS_BASE_GROW	 24
+#define _CW_STILT_ROOTS_BASE_SHRINK	  8
 
 cw_stilt_t *
 stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 {
-	cw_stilt_t *retval;
+	cw_stilt_t	*retval;
 
 	if (a_stilt != NULL) {
 		retval = a_stilt;
@@ -185,7 +186,7 @@ stilt_set_position(cw_stilt_t *a_stilt, cw_uint32_t a_line, cw_uint32_t
 cw_bool_t
 stilt_interp_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 {
-	cw_bool_t retval;
+	cw_bool_t	retval;
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
@@ -198,8 +199,8 @@ stilt_interp_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 cw_bool_t
 stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 {
-	cw_bool_t retval;
-	int     iov_cnt, i;
+	cw_bool_t	retval;
+	int		iov_cnt, i;
 	const struct iovec *iov;
 
 	_cw_check_ptr(a_stilt);
@@ -217,7 +218,6 @@ stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 	}
 
 	retval = FALSE;
-
 	RETURN:
 	return retval;
 }
@@ -225,8 +225,8 @@ stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 cw_bool_t
 stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 {
-	cw_bool_t retval;
-	cw_buf_t buf;
+	cw_bool_t	retval;
+	cw_buf_t	buf;
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
@@ -247,7 +247,7 @@ stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 cw_bool_t
 stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 {
-	struct cw_stilt_entry_s *entry_arg;
+	struct cw_stilt_entry_s	*entry_arg;
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
@@ -275,9 +275,9 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 static cw_sint32_t
 stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 {
-	cw_sint32_t retval;
-	cw_uint32_t i;
-	cw_uint8_t c;
+	cw_sint32_t	retval;
+	cw_uint32_t	i;
+	cw_uint8_t	c;
 
 	for (i = 0; i < a_len; i++, a_stilt->column++) {
 		c = a_str[i];
@@ -411,7 +411,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			}
 			break;
 		case _CW_STILT_STATE_LT_CONT:
-			_cw_assert(0 == a_stilt->index);
+			_cw_assert(a_stilt->index == 0);
 
 			switch (c) {
 			case '<':
@@ -548,7 +548,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				_CW_STILT_PUTC(c);
 				break;
 			case '#':{
-				cw_uint32_t ndigits;
+				cw_uint32_t	ndigits;
 
 				ndigits = a_stilt->index -
 				    a_stilt->meta.number.begin_offset;
@@ -564,7 +564,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					a_stilt->meta.name.is_literal = FALSE;
 					a_stilt->meta.name.is_immediate = FALSE;
 				} else {
-					cw_uint32_t i, digit;
+					cw_uint32_t	i, digit;
 
 					/*
 					 * Convert the string to a base
@@ -821,7 +821,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f':{
-				cw_uint8_t val;
+				cw_uint8_t	val;
 
 				a_stilt->state =
 				    _CW_STILT_STATE_ASCII_STRING;
@@ -971,7 +971,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 static void
 stilt_p_reset_tok_buffer(cw_stilt_t *a_stilt)
 {
-	if (_CW_STIL_BUFC_SIZE < a_stilt->index)
+	if (a_stilt->index > _CW_STIL_BUFC_SIZE)
 		buf_delete(&a_stilt->tok_buffer.buf);
 	a_stilt->index = 0;
 }
@@ -980,7 +980,7 @@ stilt_p_reset_tok_buffer(cw_stilt_t *a_stilt)
 static cw_uint8_t
 stilt_p_getc(cw_stilt_t *a_stilt, cw_uint32_t a_index)
 {
-	cw_uint8_t retval;
+	cw_uint8_t	retval;
 
 	if (a_stilt->index < _CW_STIL_BUFC_SIZE)
 		retval = a_stilt->tok_buffer.str[a_index];
@@ -994,7 +994,7 @@ stilt_p_getc(cw_stilt_t *a_stilt, cw_uint32_t a_index)
 static cw_sint32_t
 stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 {
-	cw_sint32_t retval;
+	cw_sint32_t	retval;
 
 #ifndef _CW_STILT_INLINE
 	if (a_stilt->index < _CW_STIL_BUFC_SIZE)
@@ -1003,7 +1003,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 #endif
 	{
 		if (a_stilt->index == _CW_STIL_BUFC_SIZE) {
-			cw_stil_bufc_t *kbufc;
+			cw_stil_bufc_t	*kbufc;
 
 			kbufc = stil_get_stil_bufc(a_stilt->stil);
 			memcpy(kbufc->buffer, a_stilt->tok_buffer.str,
@@ -1018,7 +1018,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 			bufc_delete(&kbufc->bufc);
 		}
 		if (buf_get_size(&a_stilt->tok_buffer.buf) == a_stilt->index) {
-			cw_stil_bufc_t *kbufc;
+			cw_stil_bufc_t	*kbufc;
 
 			kbufc = stil_get_stil_bufc(a_stilt->stil);
 			if (buf_append_bufc(&a_stilt->tok_buffer.buf,
@@ -1039,11 +1039,11 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 }
 
 static void
-stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length,
-    const char *a_note)
+stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length, const char
+    *a_note)
 {
 #ifdef _LIBSTIL_DBG
-	cw_uint32_t line, col;
+	cw_uint32_t	line, col;
 
 	stilt_get_position(a_stilt, &line, &col);
 	_cw_out_put("-->");
@@ -1074,7 +1074,7 @@ stilt_p_print_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t a_c)
 static void *
 stilt_p_entry(void *a_arg)
 {
-	struct cw_stilt_entry_s *arg = (struct cw_stilt_entry_s *)a_arg;
+	struct cw_stilt_entry_s	*arg = (struct cw_stilt_entry_s *)a_arg;
 
 	if (stilt_interp_buf(arg->stilt, &arg->buf)) {
 		/* XXX OOM error needs delivered in interpreter. */

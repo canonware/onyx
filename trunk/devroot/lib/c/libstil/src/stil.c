@@ -17,36 +17,37 @@
 #endif
 
 /* Number of stil_bufc structures to allocate at a time via the pezz code. */
-#define _CW_STIL_BUFC_CHUNK_COUNT 16
+#define _CW_STIL_BUFC_CHUNK_COUNT	 16
 
 /*
  * Size and fullness control of initial name cache hash table.  We know for sure
  * that there will be about 175 names referenced by systemdict and threaddict to
  * begin with.
  */
-#define _CW_STIL_STILN_BASE_TABLE  512
-#define _CW_STIL_STILN_BASE_GROW   400
-#define _CW_STIL_STILN_BASE_SHRINK 128
+#define _CW_STIL_STILN_BASE_TABLE	512
+#define _CW_STIL_STILN_BASE_GROW	400
+#define _CW_STIL_STILN_BASE_SHRINK	128
 
 /*
  * Size and fullness control of initial root set for global VM.  Global VM is
  * empty to begin with.
  */
-#define _CW_STIL_ROOTS_BASE_TABLE  32
-#define _CW_STIL_ROOTS_BASE_GROW   24
-#define _CW_STIL_ROOTS_BASE_SHRINK  8
+#define _CW_STIL_ROOTS_BASE_TABLE	 32
+#define _CW_STIL_ROOTS_BASE_GROW	 24
+#define _CW_STIL_ROOTS_BASE_SHRINK	  8
 
-cw_stiln_t * stil_p_stiln_new(cw_stil_t *a_stil);
-void	stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln);
-cw_bool_t stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void
-    *a_key, const void *a_data);
-static cw_uint32_t stilnk_p_hash(const void *a_key);
-static cw_bool_t stilnk_p_key_comp(const void *a_k1, const void *a_k2);
+static cw_stiln_t	*stil_p_stiln_new(cw_stil_t *a_stil);
+static void		stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t
+    *a_stiln);
+static cw_bool_t	stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t
+    *a_stiln, const void *a_key, const void *a_data);
+static cw_uint32_t	stilnk_p_hash(const void *a_key);
+static cw_bool_t	stilnk_p_key_comp(const void *a_k1, const void *a_k2);
 
 cw_stil_t *
 stil_new(cw_stil_t *a_stil)
 {
-	cw_stil_t *retval;
+	cw_stil_t	*retval;
 
 	if (a_stil != NULL) {
 		retval = a_stil;
@@ -85,18 +86,18 @@ stil_new(cw_stil_t *a_stil)
 
 	return retval;
 
-OOM_6:
+	OOM_6:
 	dch_delete(&retval->stiln_dch);
-OOM_5:
+	OOM_5:
 	pezz_delete(&retval->stiln_pezz);
-OOM_4:
+	OOM_4:
 	pezz_delete(&retval->chi_pezz);
-OOM_3:
+	OOM_3:
 	pezz_delete(&retval->stil_bufc_pezz);
-OOM_2:
+	OOM_2:
 	if (retval->is_malloced)
 		_cw_free(retval);
-OOM_1:
+	OOM_1:
 	return NULL;
 }
 
@@ -157,18 +158,18 @@ stil_get_stil_bufc(cw_stil_t *a_stil)
 	bufc_set_buffer(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
 	    NULL, NULL);
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 const cw_stiln_t *
 stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
-    cw_bool_t a_force, cw_bool_t a_is_static, const void *a_key,
-    const void *a_data)
+    cw_bool_t a_force, cw_bool_t a_is_static, const void *a_key, const void
+    *a_data)
 {
-	cw_stiln_t *retval;
-	cw_stiln_t search_key, *data;
-	cw_uint8_t *name;
+	cw_stiln_t	*retval;
+	cw_stiln_t	search_key, *data;
+	cw_uint8_t	*name;
 
 	_cw_check_ptr(a_stil);
 	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
@@ -187,7 +188,7 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 		if (a_key != NULL) {
 			mtx_lock(&data->lock);
 			if (stil_p_stiln_kref(a_stil, data, a_key,
-			    a_data) == TRUE) {
+			    a_data)) {
 				mtx_unlock(&data->lock);
 				goto OOM_1;
 			}
@@ -208,8 +209,8 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 			memcpy(name, a_name, a_len);
 		} else {
 			/*
-			 * Cast away the const, though it gets picked right
-			 * back up in the call to stilnk_init() below.
+			 * Cast away the const, though it gets picked right back
+			 * up in the call to stilnk_init() below.
 			 */
 			name = (cw_uint8_t *)a_name;
 			data->is_static_name = TRUE;
@@ -222,9 +223,9 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 		data->ref_count++;
 
 		/*
-		 * Add a keyed reference if necessary.  We don't need to
-		 * lock the stiln, because it hasn't been inserted into the
-		 * hash table yet, so no other threads can get to it.
+		 * Add a keyed reference if necessary.  We don't need to lock
+		 * the stiln, because it hasn't been inserted into the hash
+		 * table yet, so no other threads can get to it.
 		 */
 		if (a_key != NULL) {
 			if (stil_p_stiln_kref(a_stil, data, a_key, a_data))
@@ -241,22 +242,22 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 	mtx_unlock(&a_stil->lock);
 	return retval;
 
-OOM_4:
+	OOM_4:
 	if (data->keyed_refs != NULL)
 		dch_delete(data->keyed_refs);
-OOM_3:
+	OOM_3:
 	if (a_is_static == FALSE)
 		_cw_free(name);
-OOM_2:
+	OOM_2:
 	stil_p_stiln_delete(a_stil, data);
-OOM_1:
+	OOM_1:
 	mtx_unlock(&a_stil->lock);
 	return NULL;
 }
 
 void
-stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln,
-    const void *a_key)
+stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
+    *a_key)
 {
 	cw_stiln_t	*stiln = (cw_stiln_t *)a_stiln;
 	cw_chi_t	*chi;
@@ -344,7 +345,7 @@ stilnk_get_len(cw_stilnk_t *a_stilnk)
 	return a_stilnk->len;
 }
 
-cw_stiln_t *
+static cw_stiln_t *
 stil_p_stiln_new(cw_stil_t *a_stil)
 {
 	cw_stiln_t *retval;
@@ -359,11 +360,11 @@ stil_p_stiln_new(cw_stil_t *a_stil)
 	retval->magic = _CW_STILN_MAGIC;
 #endif
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
-void
+static void
 stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 {
 	_cw_check_ptr(a_stiln);
@@ -376,8 +377,8 @@ stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 		    a_stiln->ref_count, (a_stiln->ref_count == 1) ? "" : "s");
 	}
 	if (a_stiln->keyed_refs != NULL) {
-		cw_uint32_t i;
-		void   *key;
+		cw_uint32_t	i;
+		void		*key;
 
 		_cw_out_put_e("Name \"");
 		_cw_out_put_n(a_stiln->key.len, "[s]", a_stiln->key.name);
@@ -396,15 +397,15 @@ stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 	_cw_pezz_put(&a_stil->stiln_pezz, a_stiln);
 }
 
-cw_bool_t
+static cw_bool_t
 stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
     const void *a_data)
 {
-	cw_bool_t retval, is_new_dch = FALSE;
+	cw_bool_t	retval, is_new_dch = FALSE;
 
 	/*
-	 * Assume that a_stiln is locked, or that no other threads can get
-	 * to it.
+	 * Assume that a_stiln is locked, or that no other threads can get to
+	 * it.
 	 */
 
 	if (a_stiln->keyed_refs == NULL) {
@@ -429,16 +430,16 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 	}
 	retval = FALSE;
 
-RETURN:
+	RETURN:
 	return retval;
 }
 
 static cw_uint32_t
 stilnk_p_hash(const void *a_key)
 {
-	cw_uint32_t retval, i;
-	cw_stilnk_t *key = (cw_stilnk_t *)a_key;
-	const char *str;
+	cw_uint32_t	retval, i;
+	cw_stilnk_t	*key = (cw_stilnk_t *)a_key;
+	const char	*str;
 
 	_cw_check_ptr(a_key);
 
@@ -451,9 +452,9 @@ stilnk_p_hash(const void *a_key)
 static cw_bool_t
 stilnk_p_key_comp(const void *a_k1, const void *a_k2)
 {
-	cw_stilnk_t *k1 = (cw_stilnk_t *)a_k1;
-	cw_stilnk_t *k2 = (cw_stilnk_t *)a_k2;
-	size_t  len;
+	cw_stilnk_t	*k1 = (cw_stilnk_t *)a_k1;
+	cw_stilnk_t	*k2 = (cw_stilnk_t *)a_k2;
+	size_t		len;
 
 	_cw_check_ptr(a_k1);
 	_cw_check_ptr(a_k2);

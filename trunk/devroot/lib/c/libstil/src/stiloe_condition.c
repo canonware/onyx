@@ -14,7 +14,7 @@
 cw_stiloe_condition_t *
 stiloe_condition_new(cw_stiloe_condition_t *a_stiloe_condition)
 {
-	return NULL;		/* XXX */
+	return NULL;	/* XXX */
 }
 
 void

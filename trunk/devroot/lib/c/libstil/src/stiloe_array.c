@@ -14,7 +14,7 @@
 cw_stiloe_array_t *
 stiloe_array_new(cw_stiloe_array_t *a_stiloe_array)
 {
-	return NULL;		/* XXX */
+	return NULL;	/* XXX */
 }
 
 void

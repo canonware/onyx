@@ -15,8 +15,8 @@ typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 #endif
 
 struct cw_stiloe_condition_s {
-	cw_stiloe_t stiloe;
-	cw_cnd_t condition;
+	cw_stiloe_t	stiloe;
+	cw_cnd_t	condition;
 };
 
 cw_stiloe_condition_t *stiloe_condition_new(cw_stiloe_condition_t

@@ -15,7 +15,7 @@ typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 #endif
 
 struct cw_stiloe_array_s {
-	cw_stiloe_t stiloe;
+	cw_stiloe_t	stiloe;
 };
 
 cw_stiloe_array_t	*stiloe_array_new(cw_stiloe_array_t *a_stiloe_array);

@@ -42,23 +42,23 @@ typedef enum {
 	_CW_STILOT_OPERATORTYPE = 13,
 	_CW_STILOT_PACKEDARRAYTYPE = 14,
 	_CW_STILOT_STRINGTYPE = 15
-} cw_stilot_t;
+}	cw_stilot_t;
 
 /*
  * Main object structure.
  */
 struct cw_stilo_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	cw_uint32_t magic;
+	cw_uint32_t	magic;
 #endif
 
-	cw_stilot_t type:4;
+	cw_stilot_t	type:4;
 	/*
 	 * If non-zero, this is an extended number or mstate.  Both number and
 	 * mstate objects can switch between simple and extended
 	 * representations.
 	 */
-	cw_bool_t extended:1;
+	cw_bool_t	extended:1;
 	/*
 	 * Name objects use this bit to indicate if a name is an indirect
 	 * reference.  Each stilt maintains a cache of stiln pointers, each
@@ -70,13 +70,13 @@ struct cw_stilo_s {
 	 * unreferencing operation.  This is safe, because this stilt is
 	 * guaranteed to be holding a reference to the stiln.
 	 */
-	cw_bool_t indirect_name:1;
+	cw_bool_t	indirect_name:1;
 	/*
 	 * If TRUE, there is a breakpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode.
 	 */
-	cw_bool_t breakpoint:1;
+	cw_bool_t	breakpoint:1;
 	/*
 	 * If TRUE, there is a watchpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
@@ -84,48 +84,48 @@ struct cw_stilo_s {
 	 * extended type only detects changes that are made via that particular
 	 * reference to the extension.
 	 */
-	cw_bool_t watchpoint:1;
+	cw_bool_t	watchpoint:1;
 	/*
 	 * Reference count.  We use only one bit:
 	 *
 	 * 0 == One reference. 1 == Overflow (GC knows about the stiloe).
 	 */
-	cw_uint32_t ref_count:1;
+	cw_uint32_t	ref_count:1;
 	/* Reference to a local or global object? */
-	cw_bool_t global:1;
+	cw_bool_t	global:1;
 	/*
 	 * This bit is used to protect modifications to a stiloe pointer.  Since
 	 * a thread can be suspended at any time, it is critical to mark the
 	 * pointer invalid while modifying it so that the collector knows not to
 	 * try using a possibly corrupt pointer.
 	 */
-	cw_bool_t valid:1;
+	cw_bool_t	valid:1;
 
 	union {
 		struct {
 			cw_stiloe_array_t *stiloe;
-		}       array;
+		}	array;
 		struct {
-			cw_bool_t val;
-		}       boolean;
+			cw_bool_t	val;
+		}	boolean;
 		struct {
 			cw_stiloe_condition_t *stiloe;
-		}       condition;
+		}	condition;
 		struct {
 			cw_stiloe_dict_t *stiloe;
-		}       dict;
+		}	dict;
 		struct {
-			cw_sint32_t fd;
-		}       file;
+			cw_sint32_t	fd;
+		}	file;
 		struct {
 			cw_stiloe_hook_t *stiloe;
 		}	hook;
 		struct {
 			cw_stiloe_lock_t *stiloe;
-		}       lock;
+		}	lock;
 		struct {
-			cw_uint32_t garbage;
-		}       mark;
+			cw_uint32_t	garbage;
+		}	mark;
 		struct {
 			/*
 			 * If not extended, the mstate is:
@@ -137,19 +137,20 @@ struct cw_stilo_s {
 			 * Otherwise, the mstate is in ext.
 			 */
 			cw_stiloe_mstate_t *stiloe;
-		}       mstate;
+		}	mstate;
 		struct {
 			union {
-				const void *key; /*
-						  * Key used for global names.
-						  */
-				cw_stilt_t *stilt;
+				const void	*key; /*
+						       * Key used for global
+						       * names.
+						       */
+				cw_stilt_t	*stilt;
 			}	s;
-			cw_stiln_t *stiln;
-		}       name;
+			cw_stiln_t	*stiln;
+		}	name;
 		struct {
-			cw_uint32_t garbage;
-		}       null;
+			cw_uint32_t	garbage;
+		}	null;
 		struct {
 			/*
 			 * If not (flags.extended), this number is representable
@@ -158,19 +159,19 @@ struct cw_stilo_s {
 			 */
 			union {
 				cw_stiloe_number_t *stiloe;
-				cw_sint32_t s32;
-			}       val;
-		}       number;
+				cw_sint32_t	s32;
+			}	val;
+		}	number;
 		struct {
-			void    (*f) (cw_stilt_t *);
-		}       operator;
+			void	(*f)(cw_stilt_t *);
+		}	operator;
 		struct {
 			cw_stiloe_packedarray_t *stiloe;
-		}       packedarray;
+		}	packedarray;
 		struct {
 			cw_stiloe_string_t *stiloe;
-		}       string;
-	}       o;
+		}	string;
+	}	o;
 };
 
 void		stilo_new(cw_stilo_t *a_stilo);

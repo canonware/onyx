@@ -20,7 +20,6 @@
  */
 
 #include <libstash/libstash.h>
-/*  #include <libsock/libsock.h> */
 
 /*
  * Include files.  These must be listed in reverse dependency order (for

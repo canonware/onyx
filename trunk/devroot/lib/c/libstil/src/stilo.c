@@ -34,8 +34,7 @@ stilo_delete(cw_stilo_t *a_stilo)
 	
 	/*
 	 * Delete extended types if they only have one reference.  Otherwise,
-	 * the GC is responsible for determining when an object can be
-	 * deleted.
+	 * the GC is responsible for determining when an object can be deleted.
 	 */
 	if (a_stilo->ref_count == 0) {
 		switch (a_stilo->type) {
@@ -118,5 +117,5 @@ stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot)
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	return TRUE;		/* XXX */
+	return TRUE;	/* XXX */
 }

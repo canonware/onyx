@@ -20,32 +20,32 @@ typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
 typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 
 struct cw_stiloe_dict_s {
-	cw_stiloe_t stiloe;
+	cw_stiloe_t	stiloe;
 
 	/* stiloe_dicto's are allocated from here. */
-	cw_pezz_t *stiloe_dicto_pezz;
+	cw_pezz_t	*stiloe_dicto_pezz;
 
 	/*
-	 * Name/value pairs.  The keys are (cw_stiloe_name_t *), and the
-	 * values are (cw_stiloe_dicto_t *).  The stilo from which the key
-	 * is filched resides in the stiloe_dicto structure.
+	 * Name/value pairs.  The keys are (cw_stiloe_name_t *), and the values
+	 * are (cw_stiloe_dicto_t *).  The stilo from which the key is filched
+	 * resides in the stiloe_dicto structure.
 	 *
 	 * Must be the last field since the hash table is embedded and can vary
 	 * in size.
 	 */
-	cw_ch_t hash;
+	cw_ch_t		hash;
 };
 
 struct cw_stiloe_dicto_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	cw_uint32_t magic;
+	cw_uint32_t	magic;
 #endif
 
 	/* stiloe_dict this stiloe_dicto is contained in. */
 	cw_stiloe_dict_t *stiloe_dict;
 
-	cw_stilo_t name;
-	cw_stilo_t value;
+	cw_stilo_t	name;
+	cw_stilo_t	value;
 };
 
 cw_stiloe_dict_t *stiloe_dict_new(cw_stiloe_dict_t *a_stiloe_dict, cw_pezz_t

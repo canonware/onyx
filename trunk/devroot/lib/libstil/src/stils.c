@@ -28,7 +28,7 @@ static void		 stilso_p_new(cw_stilso_t *a_stilso);
 cw_stils_t *
 stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
 {
-	cw_stils_t *retval;
+	cw_stils_t	*retval;
 
 	_cw_check_ptr(a_stils);
 	_cw_check_ptr(a_stilsc_pezz);
@@ -104,7 +104,8 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 * Iterate through the entire stack, moving stilso's to the new stack.
 	 * Along the way, report any extended objects to the GC.
 	 */
-	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link), i++) {
+	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso,
+	    link), i++) {
 		new_stilo = stils_push(a_stils);
 		stilo_move(new_stilo, &old_stilso->stilo);
 
@@ -194,7 +195,7 @@ stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	a_stils->count -= a_count;
 
 	retval = FALSE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -216,13 +217,13 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	/*
 	 * Calculate the current index of the element that will end up on top of
 	 * the stack.  This allows us to save a pointer to it as we iterate down
-	 * the stack on the way to the bottom of the roll region.  This code also
-	 * has the side effect of 'mod'ing the roll amount, so that we don't
-	 * spend a bunch of time rolling the stack if the user specifies a roll
-	 * amount larger than the roll region.  A decent program will never do
-	 * this, so it's not worth specifically optimizing, but it falls out of
-	 * these calculations with no extra work, since we already have to deal
-	 * with upward versus downward rolling calculations.
+	 * the stack on the way to the bottom of the roll region.  This code
+	 * also has the side effect of 'mod'ing the roll amount, so that we
+	 * don't spend a bunch of time rolling the stack if the user specifies a
+	 * roll amount larger than the roll region.  A decent program will never
+	 * do this, so it's not worth specifically optimizing, but it falls out
+	 * of these calculations with no extra work, since we already have to
+	 * deal with upward versus downward rolling calculations.
 	 */
 	a_amount %= a_count;
 	a_amount = a_amount + a_count;
@@ -239,8 +240,8 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	}
 
 	/*
-	 * Get a pointer to the new top of the stack.  Then continue on
-	 * to find the end of the roll region.
+	 * Get a pointer to the new top of the stack.  Then continue on to find
+	 * the end of the roll region.
 	 */
 	for (i = 0, stilso = a_stils->stack; i < a_amount; i++)
 		stilso = qr_next(stilso, link);
@@ -255,14 +256,13 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 			stilso = qr_next(stilso, link);
 
 		qr_split(stilso, a_stils->stack, link);
-
 		qr_meld(top, stilso, link);
 	}
 
 	a_stils->stack = top;
 
 	retval = FALSE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -293,7 +293,7 @@ stils_dup(cw_stils_t *a_stils, cw_uint32_t a_count, cw_uint32_t a_index)
 	stilo_copy((cw_stilo_t *)dup, (cw_stilo_t *)orig);
 
 	retval = FALSE;
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -323,7 +323,7 @@ stils_get(cw_stils_t *a_stils, cw_uint32_t a_index)
 	for (i = 0, stilso = a_stils->stack; i < a_index; i++)
 		stilso = qr_next(stilso, link);
 
-RETURN:
+	RETURN:
 	return &stilso->stilo;
 }
 
@@ -350,7 +350,7 @@ stils_get_down(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	}
 
 	retval = &stilso->stilo;
-RETURN:
+	RETURN:
 	return retval;
 }
 
@@ -377,7 +377,7 @@ stils_get_up(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	stilso = qr_prev(stilso, link);
 
 	retval = &stilso->stilo;
-RETURN:
+	RETURN:
 	return retval;
 }
 

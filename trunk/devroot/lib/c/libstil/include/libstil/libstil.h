@@ -25,7 +25,7 @@ extern  "C" {
 #include "libstil_defs.h"
 #include "libstil_incs.h"
 
-#endif				/* _LIBSTIL_H_ */
+#endif	/* _LIBSTIL_H_ */
 
 #ifdef __cplusplus
 };

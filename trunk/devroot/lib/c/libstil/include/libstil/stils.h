@@ -43,7 +43,7 @@ struct cw_stilso_s {
 
 struct cw_stilsc_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	cw_uint32_t magic;
+	cw_uint32_t	magic;
 #endif
 
 	cw_pezz_t	*allocator;
@@ -65,7 +65,7 @@ struct cw_stils_s {
 	cw_stilso_t	*stack;		/* Pointer to the top of the stack. */
 	cw_uint32_t	count;		/* Number of stack elements. */
 	
-	cw_stilso_t	*spares;	/* Pointer to the ring of spare slots. */
+	cw_stilso_t	*spares;	/* Pointer to a ring of spare slots. */
 	cw_uint32_t	nspares;	/* Number of spares. */
 
 	cw_pezz_t	*stilsc_pezz;	/* Allocator for stilsc's. */
