@@ -93,12 +93,6 @@ the application:
 \item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
 \end{description}
 
-\section{Object instantiation}
-Many classes provide a means for external memory allocation, and in some cases
-for automatic cleanup during destruction.  This feature enables improved
-performance and cache locality, but if misunderstood, can result in mysterious
-memory corruption and leaks.
-
 \section{Threads}
 \libname{libonyx} encapsulates each interpreter instance in an \classname{nx}
 object.  An \classname{nx} object supports running multiple concurrent threads.
