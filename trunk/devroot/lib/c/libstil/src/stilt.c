@@ -134,6 +134,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	stils_new(&retval->exec_stils, stil_get_stilsc_pezz(a_stil));
 	stils_new(&retval->data_stils, stil_get_stilsc_pezz(a_stil));
 	stils_new(&retval->dict_stils, stil_get_stilsc_pezz(a_stil));
+	retval->stdout_fd = 1;
 	retval->stil = a_stil;
 	retval->state = _CW_STILT_STATE_START;
 	retval->line = 1;
@@ -283,6 +284,13 @@ stilt_malloc(cw_stilt_t *a_stilt, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
 	return mem_malloc(cw_g_mem, a_size, a_filename, a_line_num);
+}
+
+void
+stilt_free(cw_stilt_t *a_stilt, void *a_ptr, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	mem_free(cw_g_mem, a_ptr, a_filename, a_line_num);
 }
 
 const cw_stiln_t *
@@ -714,7 +722,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->meta.string.paren_depth--;
 				if (a_stilt->meta.string.paren_depth == 0) {
 					cw_stilo_t	*stilo;
-					cw_stiloe_string_t *stiloe;
+					cw_stiloe_t	*stiloe;
 
 					/*
 					 * Matched opening paren; not part of
@@ -727,7 +735,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					    stils_push(&a_stilt->data_stils);
 					stilo_type_set(stilo,
 					    _CW_STILOT_STRINGTYPE);
-					stiloe = stiloe_string_new(a_stilt);
+					stiloe = stiloe_new(a_stilt,
+					    _CW_STILOT_STRINGTYPE);
 					stiloe_string_len_set(stiloe, a_stilt,
 					    a_stilt->index);
 					if (a_stilt->index <=
@@ -737,8 +746,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 						    a_stilt->index);
 					} else
 						_cw_error("XXX Unimplemented");
-					stilo_extended_set(stilo, (cw_stiloe_t
-					    *)stiloe);
+					stilo_extended_set(stilo, stiloe);
 					stilt_p_reset_tok_buffer(a_stilt);
 				} else
 					_CW_STILT_PUTC(c);

@@ -47,6 +47,11 @@ struct cw_stilt_s {
 	cw_stils_t	dict_stils;
 
 	/*
+	 * File handles.
+	 */
+	cw_sint32_t	stdout_fd;
+
+	/*
 	 * Tokenizer state.  If a token is broken across two or more input
 	 * strings, data are copied to an internal buffer, and state machine
 	 * state is preserved so that the buffered data need not be
@@ -164,6 +169,21 @@ void		*stilt_malloc(cw_stilt_t *a_stilt, size_t a_size, const char
 	stilt_malloc((a_stilt), (a_size), NULL, 0)
 #endif
 
+void		stilt_free(cw_stilt_t *a_stilt, void *a_ptr, const char
+    *a_filename, cw_uint32_t a_line_num);
+#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+#define		_cw_stilt_free(a_stilt, a_ptr)				\
+	stilt_free((a_stilt), (a_ptr), __FILE__, __LINE__)
+#else
+#define		_cw_stilt_free(a_stilt, a_ptr)				\
+	stilt_free((a_stilt), (a_ptr), NULL, 0)
+#endif
+
+#define stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
+
+#define stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
+
+/* stiltn. */
 const cw_stiln_t	*stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t
     *a_name, cw_uint32_t a_len, cw_bool_t a_force);
 

@@ -9,11 +9,6 @@
  *
  ****************************************************************************/
 
-/* Defined in stilo.h to resolve a circular dependency. */
-#if (0)
-typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
-#endif
-
 struct cw_stiloe_hook_s {
 	cw_stiloe_t	stiloe;
 	void		*data;

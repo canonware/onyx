@@ -11,50 +11,146 @@
 
 #include "../include/libstil/libstil.h"
 
-cw_stiloe_string_t *
-stiloe_string_new(cw_stilt_t *a_stilt)
+void
+stiloe_l_string_init(cw_stiloe_t *a_stiloe)
 {
-	cw_stiloe_string_t	*retval;
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
 
-	retval = (cw_stiloe_string_t *)_cw_stilt_malloc(a_stilt,
-	    sizeof(cw_stiloe_string_t));
-	stiloe_new(&retval->stiloe, a_stilt, _CW_STILOT_STRINGTYPE);
-	
-	retval->e.s.str = NULL;
-	retval->e.s.len = -1;
+	stiloe->prev_ref = NULL;
+	stiloe->e.s.str = NULL;
+	stiloe->e.s.len = -1;
+}
+
+void
+stiloe_l_string_delete(cw_stiloe_t *a_stiloe)
+{
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+
+	/* If this isn't a composite object, delete the string. */
+	if (a_stiloe->composite == FALSE && stiloe->e.s.len != -1)
+		_cw_stilt_free(a_stiloe->stilt, stiloe->e.s.str);
+}
+
+cw_stiloe_t *
+stiloe_string_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
+{
+	cw_stiloe_t	*retval;
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+
+	if (a_reset)
+		stiloe->prev_ref = NULL;
+
+	if (a_stiloe->composite == FALSE)
+		retval = NULL;
+	else if (stiloe->prev_ref == NULL)
+		retval = stiloe->prev_ref = stiloe->e.stiloec.stiloe;
+	else
+		retval = stiloe->prev_ref = NULL;
+
+	return retval;
+}
+
+cw_sint32_t
+stiloe_string_len_get(cw_stiloe_t *a_stiloe)
+{
+	cw_sint32_t		retval;
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+
+	if (a_stiloe->composite == FALSE)
+		retval = stiloe->e.s.len;
+	else
+		retval = stiloe->e.stiloec.len;
 
 	return retval;
 }
 
 void
-stiloe_string_delete(cw_stiloe_string_t *a_stiloe_string)
+stiloe_string_len_set(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt, cw_uint32_t
+    a_len)
 {
-	/* XXX */
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+	_cw_assert(a_stiloe->composite == FALSE);
+	_cw_assert(stiloe->e.s.len == -1);
+
+	if (a_len > 0) {
+		stiloe->e.s.str = (cw_uint8_t *)_cw_stilt_malloc(a_stilt,
+		    a_len);
+	}
+	stiloe->e.s.len = a_len;
 }
 
-cw_sint32_t
-stiloe_string_len_get(cw_stiloe_string_t *a_stiloe_string)
+cw_uint8_t
+stiloe_string_el_get(cw_stiloe_t *a_stiloe, cw_uint32_t a_offset)
 {
-	/* XXX Assert. */
-	return a_stiloe_string->e.s.len;
+	cw_uint8_t		retval;
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+
+	if (a_stiloe->composite == FALSE) {
+		_cw_assert(stiloe->e.s.len > a_offset);
+		retval = stiloe->e.s.str[a_offset];
+	} else {
+		retval = stiloe_string_el_get(stiloe->e.stiloec.stiloe,
+		    a_offset) + stiloe->e.stiloec.beg_offset;
+	}
+
+	return retval;
+}
+
+cw_uint8_t *
+stiloe_string_get(cw_stiloe_t *a_stiloe)
+{
+	cw_uint8_t		*retval;
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+
+	if (a_stiloe->composite == FALSE) {
+		_cw_assert(stiloe->e.s.len != -1);
+		retval = stiloe->e.s.str;
+	} else {
+		retval = stiloe_string_get(stiloe->e.stiloec.stiloe) +
+		    stiloe->e.stiloec.beg_offset;
+	}
+
+	return retval;
 }
 
 void
-stiloe_string_len_set(cw_stiloe_string_t *a_stiloe_string, cw_stilt_t *a_stilt,
-    cw_uint32_t a_len)
+stiloe_string_set(cw_stiloe_t *a_stiloe, cw_uint32_t a_offset, const cw_uint8_t
+    *a_str, cw_uint32_t a_len)
 {
-	_cw_assert(stiloe_is_composite(&(a_stiloe_string->stiloe)) == FALSE);
-	_cw_assert(a_stiloe_string->e.s.len == -1);
-	
-	a_stiloe_string->e.s.str = (cw_uint8_t *)_cw_stilt_malloc(a_stilt,
-	    a_len);
-	a_stiloe_string->e.s.len = a_len;
-}
+	cw_stiloe_string_t	*stiloe = (cw_stiloe_string_t *)a_stiloe;
+	cw_uint8_t		*str;
 
-void
-stiloe_string_set(cw_stiloe_string_t *a_stiloe_string, cw_uint32_t a_offset,
-    const char *a_str, cw_uint32_t a_len)
-{
-	/* XXX Bounds assert. */
-	memcpy(&a_stiloe_string->e.s.str[a_offset], a_str, a_len);
+	_cw_check_ptr(a_stiloe);
+	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
+
+	/* Get the string pointer. */
+	if (a_stiloe->composite == FALSE) {
+		_cw_assert(stiloe->e.s.len >= a_len);
+		str = stiloe->e.s.str;
+	} else {
+		_cw_assert(stiloe->e.stiloec.len >= a_len);
+		str = stiloe_string_get(stiloe->e.stiloec.stiloe) +
+		    stiloe->e.stiloec.beg_offset;
+	}
+
+	/* Set the string. */
+	memcpy(str, a_str, a_len);
 }

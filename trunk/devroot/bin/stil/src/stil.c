@@ -30,7 +30,8 @@ main(int argc, char **argv)
 	cw_bool_t	is_tty;
 
 	libstash_init();
-/*    dbg_register(cw_g_dbg, "pezz_verbose"); */
+	dbg_register(cw_g_dbg, "mem_verbose");
+	dbg_register(cw_g_dbg, "pezz_verbose");
 
 	/* XXX Set up oom handler. */
 
@@ -42,21 +43,18 @@ main(int argc, char **argv)
 	if (is_tty) {
 		out_put(&out, "stil, version [s].\n", _LIBSTIL_VERSION);
 		out_put(&out,
-		    "See http://www.canonware.com/software/stil/ for"
-		    " information.\n");
+		    "See http://www.canonware.com/stil/ for information.\n");
 	}
 	stil_new(&stil);
 	stilt_new(&stilt, &stil);
 
-#if (1)
+#if (0)
 	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));
 	_cw_out_put("sizeof(cw_stiloe_t): [i]\n", sizeof(cw_stiloe_t));
 	_cw_out_put("sizeof(cw_stiloe_array_t): [i]\n",
 	    sizeof(cw_stiloe_array_t));
 	_cw_out_put("sizeof(cw_stiloe_condition_t): [i]\n",
 	    sizeof(cw_stiloe_condition_t));
-	_cw_out_put("sizeof(cw_stiloe_dict_t): [i]\n",
-	    sizeof(cw_stiloe_dict_t));
 	_cw_out_put("sizeof(cw_stiloe_dict_t): [i]\n",
 	    sizeof(cw_stiloe_dict_t));
 	_cw_out_put("sizeof(cw_stiloe_dict_t)[[[i]]: [i]\n", 256,
@@ -109,6 +107,7 @@ main(int argc, char **argv)
 		if (bytes_read <= 0)
 			break;
 		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
+		stil_op_pstack(&stilt);
 	}
 
 	stilt_delete(&stilt);

@@ -11,21 +11,49 @@
 
 #include "../include/libstil/libstil.h"
 
-#ifdef _LIBSTIL_DBG
-#define _CW_STILOE_MAGIC 0x0fa6e798
-#endif
+void	stiloe_l_string_init(cw_stiloe_t *a_stiloe);
+void	stiloe_l_string_delete(cw_stiloe_t *a_stiloe);
 
-void
-stiloe_new(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt, cw_stilot_t a_type)
+cw_stiloe_t *
+stiloe_new(cw_stilt_t *a_stilt, cw_stilot_t a_type)
 {
-	memset(a_stiloe, 0, sizeof(cw_stiloe_t));
+	cw_stiloe_t	*retval;
 
-	a_stiloe->type = a_type;
-	a_stiloe->stilt = a_stilt;
+	switch (a_type) {
+	case _CW_STILOT_ARRAYTYPE:
+	case _CW_STILOT_CONDITIONTYPE:
+	case _CW_STILOT_DICTTYPE:
+	case _CW_STILOT_HOOKTYPE:
+	case _CW_STILOT_LOCKTYPE:
+	case _CW_STILOT_MSTATETYPE:
+	case _CW_STILOT_NUMBERTYPE:
+	case _CW_STILOT_OPERATORTYPE:
+		/* XXX */
+		_cw_error("Programming error");
+	case _CW_STILOT_STRINGTYPE:
+		retval = (cw_stiloe_t *)_cw_stilt_malloc(a_stilt,
+		    sizeof(cw_stiloe_string_t));
+		stiloe_l_string_init(retval);
+		break;
+	case _CW_STILOT_NOTYPE:
+	case _CW_STILOT_BOOLEANTYPE:
+	case _CW_STILOT_FILETYPE:
+	case _CW_STILOT_MARKTYPE:
+	case _CW_STILOT_NAMETYPE:
+	case _CW_STILOT_NULLTYPE:
+	default:
+		_cw_error("Programming error");
+	}
+
+	memset(retval, 0, sizeof(cw_stiloe_t));
+
+	retval->type = a_type;
+	retval->stilt = a_stilt;
 
 #ifdef _LIBSTIL_DBG
-	a_stiloe->magic = _CW_STILOE_MAGIC;
+	retval->magic = _CW_STILOE_MAGIC;
 #endif
+	return retval;
 }
 
 void

@@ -9,13 +9,12 @@
  *
  ****************************************************************************/
 
-/* Defined in stilo.h to resolve a circular dependency. */
-#if (0)
-typedef struct cw_stiloe_string_s cw_stiloe_string_t;
-#endif
-
 struct cw_stiloe_string_s {
 	cw_stiloe_t	stiloe;
+	cw_stiloe_t	*prev_ref;	/*
+					 * Previous stiloe_string_ref_iterate()
+					 * result.
+					 */
 	union {
 		cw_stiloec_t	stiloec;
 		struct {
@@ -25,14 +24,18 @@ struct cw_stiloe_string_s {
 	}	e;
 };
 
-cw_stiloe_string_t *stiloe_string_new(cw_stilt_t *a_stilt);
+cw_stiloe_t	*stiloe_string_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
+    a_reset);
 
-void		stiloe_string_delete(cw_stiloe_string_t *a_stiloe_string);
+cw_sint32_t	stiloe_string_len_get(cw_stiloe_t *a_stiloe);
 
-cw_sint32_t	stiloe_string_len_get(cw_stiloe_string_t *a_stiloe_string);
+void		stiloe_string_len_set(cw_stiloe_t *a_stiloe, cw_stilt_t
+    *a_stilt, cw_uint32_t a_len);
 
-void		stiloe_string_len_set(cw_stiloe_string_t *a_stiloe_string,
-    cw_stilt_t *a_stilt, cw_uint32_t a_len);
+cw_uint8_t	stiloe_string_el_get(cw_stiloe_t *a_stiloe, cw_uint32_t
+    a_offset);
 
-void		stiloe_string_set(cw_stiloe_string_t *a_stiloe_string,
-    cw_uint32_t a_offset, const char *a_str, cw_uint32_t a_len);
+cw_uint8_t	*stiloe_string_get(cw_stiloe_t *a_stiloe);
+
+void		stiloe_string_set(cw_stiloe_t *a_stiloe, cw_uint32_t a_offset,
+    const cw_uint8_t *a_str, cw_uint32_t a_len);

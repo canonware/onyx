@@ -24,7 +24,8 @@
 {
   local incs = libstil.h libstil_incs.h stil.h stilo.h stiloe.h stiloe_array.h
                stiloe_condition.h stiloe_dict.h stiloe_hook.h stiloe_lock.h
-               stiloe_mstate.h stiloe_number.h stiloe_string.h stils.h stilt.h;
+               stiloe_mstate.h stiloe_number.h stiloe_string.h stils.h stilt.h
+               stil_op.h;
   incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [incs]];
   incs = [incs] [objdir]/lib/c/libstil/include/libstil/libstil_defs.h;
 
@@ -43,7 +44,7 @@
 /* Source files. */
 LIBSTIL_SRCS = stil.c stilo.c stiloe.c stiloe_array.c stiloe_condition.c
                stiloe_dict.c stiloe_hook.c stiloe_lock.c stiloe_mstate.c
-               stiloe_number.c stiloe_string.c stils.c stilt.c;
+               stiloe_number.c stiloe_string.c stils.c stilt.c stil_op.c;
 LIBSTIL_SRCS = [fromto % [srcdir]/lib/c/libstil/src/% [LIBSTIL_SRCS]];
 SRCS = [SRCS] [LIBSTIL_SRCS];
 

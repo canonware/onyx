@@ -39,7 +39,6 @@ stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
 	retval->spares = NULL;
 	retval->nspares = 0;
 	retval->stilsc_pezz = a_stilsc_pezz;
-	_cw_out_put_e("a_stilsc_pezz: 0x[p]\n", retval->stilsc_pezz);
 	qq_init(&retval->chunks);
 
 #ifdef _LIBSTIL_DBG

@@ -9,9 +9,8 @@
  *
  ****************************************************************************/
 
-#if (0)
-typedef struct cw_stiloe_s cw_stiloe_t;
-typedef struct cw_stiloei_s cw_stiloei_t;
+#ifdef _LIBSTIL_DBG
+#define _CW_STILOE_MAGIC 0x0fa6e798
 #endif
 
 typedef enum {
@@ -34,7 +33,7 @@ struct cw_stiloec_s {
 
 	cw_stiloe_t	*stiloe;
 	cw_uint32_t	beg_offset;
-	cw_uint32_t	end_offset;
+	cw_uint32_t	len;
 };
 
 /*
@@ -76,10 +75,7 @@ struct cw_stiloe_s {
 	cw_stilt_t	*stilt;
 };
 
-void	stiloe_new(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt, cw_stilot_t
-    a_type);
+cw_stiloe_t	*stiloe_new(cw_stilt_t *a_stilt, cw_stilot_t a_type);
 void	stiloe_delete(cw_stiloe_t *a_stiloe);
 
 void	stiloe_gc_register(cw_stiloe_t *a_stiloe);
-
-#define	stiloe_is_composite(a_stiloe) (a_stiloe)->composite
