@@ -7,7 +7,7 @@
 #
 # Version: Onyx <Version = onyx>
 #
-# Usage: libonyx_init_gen.nx
+# Usage: oonyx_config_gen.nx
 #
 # Read onyx code from stdin and output a revised version to stdout.
 #
