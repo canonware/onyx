@@ -160,7 +160,7 @@ struct cw_stiloe_name_s {
 	 * is a reference (local) or the root (global).  This allows fast access
 	 * to what is effectively the key for name comparisions.
 	 */
-	cw_stiloe_t	*val;
+	cw_stiloe_name_t *val;
 	union {
 		/* Thread-specific (local) name.  Indirect object. */
 		struct {
@@ -1599,6 +1599,21 @@ stilo_name_key_comp(const void *a_k1, const void *a_k2)
 	else
 		len = k2->e.n.len;
 
+#if (0)
+	{
+		cw_bool_t	equal;
+
+		equal = strncmp((char *)k1->e.n.name, (char *)k2->e.n.name, len)
+		    ? FALSE : TRUE;
+
+		_cw_out_put_e("\"");
+		_cw_out_put_n(k1->e.n.len, "[s]", k1->e.n.name);
+		_cw_out_put("\" [c]= \"", equal ? '=' : '!');
+		_cw_out_put_n(k2->e.n.len, "[s]", k2->e.n.name);
+		_cw_out_put("\"\n");
+	}
+#endif
+
 	return strncmp((char *)k1->e.n.name, (char *)k2->e.n.name, len) ? FALSE
 	    : TRUE;
 }
@@ -1638,14 +1653,12 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 			name = (cw_stiloe_name_t *)_cw_stilt_malloc(a_stilt,
 			    sizeof(cw_stiloe_name_t));
 
-			name->val = (cw_stiloe_t *)gname;
+			name->val = gname;
 
-			/* XXX stilo-internal initialization. */
-			memset(&name->e.i.stilo, 0, sizeof(cw_stilo_t));
-			name->e.i.stilo.type = _CW_STILOT_NAMETYPE;
+			/* stilo-internal initialization. */
+			stilo_p_new(&name->e.i.stilo, _CW_STILOT_NAMETYPE);
 			name->e.i.stilo.o.stiloe = (cw_stiloe_t *)gname;
 
-			/* XXX */
 			stiloe_p_new(&name->stiloe, _CW_STILOT_NAMETYPE);
 			name->stiloe.indirect = TRUE;
 
@@ -1659,7 +1672,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 		name = stilo_p_name_gref(a_stilt, a_name, a_len, a_is_static);
 
 /*  	thd_crit_enter(); */
-	a_stilo->o.stiloe = &name->stiloe;
+	a_stilo->o.stiloe = (cw_stiloe_t *)name;
 /*  	thd_crit_leave(); */
 }
 
@@ -1715,14 +1728,15 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	cw_stiloe_name_t	*name;
 
 	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
-	name = (cw_stiloe_name_t *)name->val;
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = name->val;
+	_cw_assert(name == name->val);
 	
 	if (a_syntactic)
 		_cw_out_put_f(a_fd, "/");
 
-	_cw_out_put_f(a_fd, "0x[p], len [i]\n", name->e.n.name, name->e.n.len);
-/*  	_cw_out_put_fn(a_fd, name->e.n.len, "[s]", name->e.n.name); */
+/*  	_cw_out_put_f(a_fd, "0x[p], len [i]\n", name->e.n.name, name->e.n.len); */
+	_cw_out_put_fn(a_fd, name->e.n.len, "[s]", name->e.n.name);
 
 	if (a_newline)
 		_cw_out_put_f(a_fd, "\n");
@@ -1735,9 +1749,10 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 	cw_stiloe_name_t	*retval, key;
 	cw_stilng_t		*stilng;
 
-/*  	_cw_out_put_e("Reference \""); */
+/*  	_cw_out_put_e("Reference ([s] VM) \"", stilt_currentglobal(a_stilt) ? */
+/*  	    "global" : "local"); */
 /*  	_cw_out_put_n(a_len, "[s]", a_str); */
-/*  	_cw_out_put("\"\n"); */
+/*  	_cw_out_put("\" (len [i])\n", a_len); */
 
 	/* Fake up a key so that we can search the hash tables. */
 	key.e.n.name = a_str;
@@ -1762,7 +1777,7 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 		    sizeof(cw_stiloe_name_t));
 		memset(retval, 0, sizeof(cw_stiloe_name_t));
 
-		retval->val = (cw_stiloe_t *)retval;
+		retval->val = retval;
 
 		retval->e.n.is_static_name = a_is_static;
 		retval->e.n.len = a_len;
@@ -1800,8 +1815,8 @@ stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 	cw_stiloe_name_t	*name;
 
 	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
-	name = (cw_stiloe_name_t *)name->val;
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = name->val;
 
 	stiloe_p_lock(&name->stiloe);
 	if (name->e.n.keyed_refs == NULL) {
@@ -1834,8 +1849,8 @@ stilo_p_name_kref_search(cw_stilo_t *a_stilo, const cw_stiloe_dict_t *a_dict)
 	cw_stiloe_name_t	*name;
 
 	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
-	name = (cw_stiloe_name_t *)name->val;
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = name->val;
 
 	stiloe_p_lock(&name->stiloe);
 	if ((name->e.n.keyed_refs == NULL) || dch_search(name->e.n.keyed_refs,
@@ -1861,8 +1876,8 @@ stilo_p_name_kref_remove(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 	cw_stiloe_name_t	*name;
 
 	/* Chase down the name. */
-	name = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
-	name = (cw_stiloe_name_t *)name->val;
+	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	name = name->val;
 
 	stiloe_p_lock(&name->stiloe);
 	_cw_check_ptr(name->e.n.keyed_refs);
