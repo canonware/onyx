@@ -1,0 +1,103 @@
+/*
+ * Standard definitions.
+ */
+
+srcdir = @top_srcdir@;
+objdir = @objdir@;
+
+
+PREFIX = @prefix@;
+CC = @CC@;
+AR = @AR@;
+RANLIB = @RANLIB@;
+INSTALL = @INSTALL@;
+PERL = @PERL@;
+CAT = @CAT@;
+DIFF = @DIFF@;
+VERIFY = @VERIFY@;
+
+INCS = ;
+PRIV_INCS = ;
+SRCS = ;
+CTESTS = ;
+PTESTS = ;
+BTESTS = ;
+MANPAGES_3 = ;
+
+CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
+D_CPPFLAGS = ;
+A_CPPFLAGS = ;
+P_CPPFLAGS = ;
+S_CPPFLAGS = ;
+
+CFLAGS = -Wall -pipe -g3 @CFLAGS@;
+D_CFLAGS = [CFLAGS];
+A_CFLAGS = [CFLAGS] -O2;
+P_CFLAGS = [CFLAGS] -O2 -pg;
+S_CFLAGS = [CFLAGS] -fPIC -DPIC;
+
+/*
+ * User targets.
+ */
+
+all : libs
+
+clean :
+{
+  [print Would rm -rf [objdir]];
+  /* rm -rf [objdir]; */
+}
+
+%0%.pl : %0%.pl.in
+  set mkdir
+{
+  echo '#!"[PERL]" -w' > [target];
+  [CAT] [need] >> [target];
+  chmod u+x [target];
+}
+
+[objdir]/%0%.o_d : [srcdir]/%0%.c
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [need] -o [target];
+
+  c_incl --no-cache [need]
+       "--prefix='"[target]" : "[need]"'"
+       "--suffix='set nodefault;'"
+       -o [fromto %0%.o_d %0%.d_d [target]];
+}
+
+[objdir]/%0%.o_a : [srcdir]/%0%.c
+  set mkdir
+{
+  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [need] -o [target];
+
+  c_incl --no-cache [need]
+       "--prefix='"[target]" : "[need]"'"
+       "--suffix='set nodefault;'"
+       -o [fromto %0%.o_a %0%.d_a [target]];
+}
+
+[objdir]/%0%.o_p : [srcdir]/%0%.c
+  set mkdir
+{
+  [CC] [P_CFLAGS] [CPPFLAGS] [P_CPPFLAGS] -c [need] -o [target];
+
+  c_incl --no-cache [need]
+       "--prefix='"[target]" : "[need]"'"
+       "--suffix='set nodefault;'"
+       -o [fromto %0%.o_p %0%.d_p [target]];
+}
+
+[objdir]/%0%.o_s : [srcdir]/%0%.c
+  set mkdir
+{
+  [CC] [S_CFLAGS] [CPPFLAGS] [S_CPPFLAGS] -c [need] -o [target];
+
+  c_incl --no-cache [need]
+       "--prefix='"[target]" : "[need]"'"
+       "--suffix='set nodefault;'"
+       -o [fromto %0%.o_s %0%.d_s [target]];
+}
+
+#include-cooked-nowarn [objdir]/lib/c/libstash/Howto.cook

@@ -5,8 +5,19 @@ dnl
 dnl Version: <Version>
 dnl
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(include/libstash/libstash.h)
-AC_CONFIG_HEADER(include/libstash/libstash_defs.h)
+AC_INIT(Howto.cook.in)
+
+objdir=.
+AC_SUBST(objdir)
+echo "objdir: $objdir"
+echo "srcdir: $srcdir"
+
+outfiles=
+if test -d "$srcdir/lib/c/libstash" ; then
+  outfiles="$outfiles $objdir/lib/c/libstash/Howto.cook"
+  mkdir -p $objdir/lib/c/libstash/include/libstash
+  AC_CONFIG_HEADER($objdir/lib/c/libstash/include/libstash/libstash_defs.h)
+fi
 
 AC_CANONICAL_HOST
 case "${host}" in
@@ -34,28 +45,16 @@ AC_PROG_RANLIB
 AC_PATH_PROG(AR, ar, , $PATH)
 AC_PATH_PROG(PERL, perl, , $PATH)
 AC_PATH_PROG(CHMOD, chmod, , $PATH)
-AC_PATH_PROG(BASENAME, basename, , $PATH)
-AC_PATH_PROG(DIFF, diff, , $PATH)
 AC_PATH_PROG(CAT, cat, , $PATH)
+AC_PATH_PROG(DIFF, diff, , $PATH)
 AC_PATH_PROG(ETAGS, etags, , $PATH)
 
-dnl Comment out threaded dependency includes in Makefile.in if
-dnl --without-pthreads is defined.
-AC_ARG_WITH(pthreads, [  --with-pthreads         Build threaded libstash libraries
-  --without-pthreads      Do not build threaded libstash libraries],
-if test "x$with_pthreads" = "xno" ; then
-  without_threads="[#]"
-else
-  CW_USE_PTHREADS()
-  without_threads=""
-fi
-, 
-CW_USE_PTHREADS()
-without_threads=""
-)
-AC_SUBST(without_threads)
+VERIFY="$objdir/test/verify"
+AC_SUBST(VERIFY)
 
-CW_DISABLE_SHARED()
+CW_USE_PTHREADS()
+
+dnl CW_DISABLE_SHARED()
 
 dnl Define preprocessor macros.
 
@@ -136,14 +135,18 @@ AC_MSG_RESULT()
 AC_MSG_RESULT(Prefix   : ${prefix})
 AC_MSG_RESULT(===============================================================================)
 
-CW_SET_MAKEFILE
+dnl CW_SET_MAKEFILE
+
+mkdir -p $objdir/test
 
 dnl Process the following files.
-AC_OUTPUT(Makefile.bsd \
-Makefile.gnu \
-test/verify)
+
+AC_OUTPUT(Howto.cook \
+test/verify \
+$outfiles \
+)
 
 dnl autoconf doesn't keep the execute bit if it's set for the input file, so do
 dnl it manually.
-echo chmod u+x test/verify
-chmod u+x test/verify
+echo chmod u+x $srcdir/test/verify
+chmod u+x $srcdir/test/verify

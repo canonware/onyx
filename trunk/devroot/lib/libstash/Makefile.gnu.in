@@ -58,7 +58,6 @@ RANLIB	:= @RANLIB@
 INSTALL	:= @INSTALL@
 CAT     := @CAT@
 PERL    := @PERL@
-BASENAME:= @BASENAME@
 DIFF    := @DIFF@
 VERIFY  := test/verify
 
