@@ -1168,7 +1168,6 @@ handle_client_send(void * a_arg)
 /*    JOIN: */
   /* Join on the recv thread. */
   thd_join(&conn->recv_thd);
-  thd_delete(&conn->recv_thd);
 
   RETURN:
   /* Don't do this if the socket wasn't created. */

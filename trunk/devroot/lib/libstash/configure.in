@@ -46,16 +46,16 @@ AC_ARG_WITH(pthreads, [  --with-pthreads         Build threaded libstash librari
 if test "x$with_pthreads" = "xno" ; then
   without_threads="[#]"
 else
-  SQRL_USE_PTHREADS()
+  CW_USE_PTHREADS()
   without_threads=""
 fi
 , 
-SQRL_USE_PTHREADS()
+CW_USE_PTHREADS()
 without_threads=""
 )
 AC_SUBST(without_threads)
 
-SQRL_DISABLE_SHARED()
+CW_DISABLE_SHARED()
 
 dnl Define preprocessor macros.
 
@@ -124,14 +124,19 @@ AC_MSG_RESULT(_LIBSTASH_MAX_IOV... $maxiov)
 AC_DEFINE_UNQUOTED(_LIBSTASH_MAX_IOV, $maxiov)
 rm -f _LIBSTASH_MAX_IOV
 
-AC_MSG_RESULT(================================================================)
-AC_MSG_RESULT(Extra libraries to link in: ${LIBS})
-AC_MSG_RESULT(Extra ld flags: ${LDFLAGS})
-AC_MSG_RESULT(Compiler flags: ${CFLAGS})
-AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})
-AC_MSG_RESULT(================================================================)
+dnl
+dnl Print out the results of configuration.
+dnl
+AC_MSG_RESULT(===============================================================================)
+AC_MSG_RESULT(CFLAGS   : ${CFLAGS})
+AC_MSG_RESULT(CPPFLAGS : ${CPPFLAGS})
+AC_MSG_RESULT(LDFLAGS  : ${LDFLAGS})
+AC_MSG_RESULT(LIBS     : ${LIBS})
+AC_MSG_RESULT()
+AC_MSG_RESULT(Prefix   : ${prefix})
+AC_MSG_RESULT(===============================================================================)
 
-SQRL_SET_MAKEFILE
+CW_SET_MAKEFILE
 
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \

@@ -67,16 +67,15 @@ EXTRALIBS := @LDFLAGS@ @LIBS@
 TEST_LIBS := @TEST_LIBS@
 BIN_LIBS := @BIN_LIBS@
 BIN_LIBSOCK := @BIN_LIBSOCK@
-INCPATH := -Iinclude @CPPFLAGS@
 
-DEFINES :=
-ST_DEFINES := 
-SH_DEFINES := 
-D_DEFINES := -D_LIBSTASH_DEBUG -D_LIBSOCK_DBG
-O_DEFINES := 
-P_DEFINES := 
-TEST_DEFINES := -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
-BIN_DEFINES := @BIN_DEFINES@
+CPPFLAGS := -Iinclude @CPPFLAGS@
+ST_CPPFLAGS :=
+SH_CPPFLAGS :=
+D_CPPFLAGS := -D_LIBSTASH_DEBUG -D_LIBSOCK_DBG
+O_CPPFLAGS :=
+P_CPPFLAGS :=
+TEST_CPPFLAGS := -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
+BIN_CPPFLAGS := @BIN_CPPFLAGS@
 
 CFLAGS := -Wall -pipe @CFLAGS@
 ST_CFLAGS :=
@@ -114,31 +113,31 @@ test/% : test/%.o
 	$(CC) -o $@ $< $(LIBPATH) $(LIB_ST_D) $(TEST_LIBS) $(EXTRALIBS)
 
 test/%.o : test/%.c
-	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $@
-	@$(SHELL) -ec "$(CC) -M $(DEFINES) $(TEST_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+	$(CC) $(CFLAGS) $(TEST_CFLAGS) $(CPPFLAGS) $(TEST_CPPFLAGS) -c $< -o $@
+	@$(SHELL) -ec "$(CC) -M $(CPPFLAGS) $(TEST_CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
 
 bin/% : bin/%.o
 	$(CC) -o $@ $< $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) $(EXTRALIBS)
 
 bin/%.o : bin/%.c
-	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $< -o $(@)
-	@$(SHELL) -ec "$(CC) -M $(DEFINES) $(BIN_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
+	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(CPPFLAGS) $(BIN_CPPFLAGS) -c $< -o $(@)
+	@$(SHELL) -ec "$(CC) -M $(CPPFLAGS) $(BIN_CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o \2/g\" > $(@:%.o=%.d)"
 
 src/%.o_st_d : src/%.c
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d \2/g\" > $(@:%.o_st_d=%.d_st_d)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) -c $< -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_d \2/g\" > $(@:%.o_st_d=%.d_st_d)"
 
 src/%.o_st_o : src/%.c
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $< -o $@		
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o \2/g\" > $(@:%.o_st_o=%.d_st_o)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(O_CPPFLAGS) -c $< -o $@		
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(O_CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_o \2/g\" > $(@:%.o_st_o=%.d_st_o)"
 
 src/%.o_sh_o : src/%.c
-	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $< -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o \2/g\" > $(@:%.o_sh_o=%.d_sh_o)"
+	$(CC) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(CPPFLAGS) $(SH_CPPFLAGS) $(O_CPPFLAGS) -c $< -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(SH_CPPFLAGS) $(O_CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_sh_o \2/g\" > $(@:%.o_sh_o=%.d_sh_o)"
 
 src/%.o_st_p : src/%.c
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $< -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p \2/g\" > $(@:%.o_st_p=%.d_st_p)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(P_CPPFLAGS) -c $< -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(P_CPPFLAGS) $< | sed \"s/\($(subst /,\/,$(notdir $(basename $@)))\)\.o\([ :]*\)/$(subst /,\/,$(strip $(dir $@)))\1.o_st_p \2/g\" > $(@:%.o_st_p=%.d_st_p)"
 
 .pl.in.pl :
 	$(PERL) -w $(PMERGE) $(PERL) $(PSTUB) $< $@

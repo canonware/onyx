@@ -2274,12 +2274,14 @@ EOF
 
 rm -f _LIBSTASH_MAX_IOV
 
-echo "$ac_t""================================================================" 1>&6
-echo "$ac_t""Extra libraries to link in: ${LIBS}" 1>&6
-echo "$ac_t""Extra ld flags: ${LDFLAGS}" 1>&6
-echo "$ac_t""Compiler flags: ${CFLAGS}" 1>&6
-echo "$ac_t""C preprocessor flags: ${CPPFLAGS}" 1>&6
-echo "$ac_t""================================================================" 1>&6
+echo "$ac_t""===============================================================================" 1>&6
+echo "$ac_t""CFLAGS   : ${CFLAGS}" 1>&6
+echo "$ac_t""CPPFLAGS : ${CPPFLAGS}" 1>&6
+echo "$ac_t""LDFLAGS  : ${LDFLAGS}" 1>&6
+echo "$ac_t""LIBS     : ${LIBS}" 1>&6
+echo "$ac_t""" 1>&6
+echo "$ac_t""Prefix   : ${prefix}" 1>&6
+echo "$ac_t""===============================================================================" 1>&6
 
 
 # Check whether --with-gnu-make or --without-gnu-make was given.
@@ -2304,7 +2306,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:2308: checking host system type" >&5
+echo "configure:2310: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in

@@ -73,16 +73,15 @@ VERIFY  := test/verify
 
 LIBPATH := -Llib
 EXTRALIBS := @LDFLAGS@ @LIBS@
-INCPATH := -Iinclude @CPPFLAGS@
+CPPFLAGS := -Iinclude @CPPFLAGS@
 
-DEFINES :=
-ST_DEFINES := 
-SH_DEFINES := 
-D_DEFINES := -D_LIBSTASH_DBG
-O_DEFINES := 
-P_DEFINES := 
-R_DEFINES := -D_CW_REENTRANT
-TEST_DEFINES := -D_LIBSTASH_DEBUG
+ST_CPPFLAGS := 
+SH_CPPFLAGS := 
+D_CPPFLAGS := -D_LIBSTASH_DBG
+O_CPPFLAGS := 
+P_CPPFLAGS := 
+R_CPPFLAGS := -D_CW_REENTRANT
+TEST_CPPFLAGS := -D_LIBSTASH_DEBUG
 
 CFLAGS := -Wall -pipe @CFLAGS@
 ST_CFLAGS := 
@@ -118,45 +117,45 @@ all : all_s @without_threads@all_r
 # This rule is used to build the tests.
 .for bin in $(CTESTS) $(BTESTS)
 $(bin) : $(LIB_ST_R_D) $(bin:S/$/&.c/)
-	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $(bin:S/$/&.c/) -o $(@:S/$/&.o/)
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(CPPFLAGS) $(R_CPPFLAGS) $(TEST_CPPFLAGS) -c $(bin:S/$/&.c/) -o $(@:S/$/&.o/)
 	$(CC) -o $@ $(@:S/$/&.o/) $(LIB_ST_R_D) $(LIBPATH) $(EXTRALIBS)
-	@$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(bin:S/$/&.c/) | sed \"s/\($(bin:T)\)\.o\([ :]*\)/$(bin:H:S!/!\\/!g)\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
+	@$(SHELL) -ec "$(CC) -M $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) $(bin:S/$/&.c/) | sed \"s/\($(bin:T)\)\.o\([ :]*\)/$(bin:H:S!/!\\/!g)\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
 .endfor
 
 .for srcfile in $(SRCS)
 $(srcfile:R:S/$/&.o_st_d/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_d \2/g\" > $(@:R:S/$/&.d_st_d/)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_d \2/g\" > $(@:R:S/$/&.d_st_d/)"
 
 $(srcfile:R:S/$/&.o_st_o/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_o \2/g\" > $(@:R:S/$/&.d_st_o/)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(O_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(O_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_o \2/g\" > $(@:R:S/$/&.d_st_o/)"
 
 $(srcfile:R:S/$/&.o_sh_o/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_sh_o \2/g\" > $(@:R:S/$/&.d_sh_o/)"
+	$(CC) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(CPPFLAGS) $(SH_CPPFLAGS) $(O_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(SH_CPPFLAGS) $(O_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_sh_o \2/g\" > $(@:R:S/$/&.d_sh_o/)"
 
 $(srcfile:R:S/$/&.o_st_p/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_p \2/g\" > $(@:R:S/$/&.d_st_p/)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(P_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(P_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_p \2/g\" > $(@:R:S/$/&.d_st_p/)"
 .endfor
 
 .for srcfile in $(SRCS) $(SRCS_R)
 $(srcfile:R:S/$/&.o_st_r_d/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_r_d \2/g\" > $(@:R:S/$/&.d_st_r_d/)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) $(R_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(D_CPPFLAGS) $(R_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_r_d \2/g\" > $(@:R:S/$/&.d_st_r_d/)"
 
 $(srcfile:R:S/$/&.o_st_r_o/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_r_o \2/g\" > $(@:R:S/$/&.d_st_r_o/)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(O_CPPFLAGS) $(R_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(O_CPPFLAGS) $(R_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_r_o \2/g\" > $(@:R:S/$/&.d_st_r_o/)"
 
 $(srcfile:R:S/$/&.o_sh_r_o/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(SH_DEFINES) $(O_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_sh_r_o \2/g\" > $(@:R:S/$/&.d_sh_r_o/)"
+	$(CC) $(CFLAGS) $(SH_CFLAGS) $(O_CFLAGS) $(R_CFLAGS) $(CPPFLAGS) $(SH_CPPFLAGS) $(O_CPPFLAGS) $(R_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(SH_CPPFLAGS) $(O_CPPFLAGS) $(R_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_sh_r_o \2/g\" > $(@:R:S/$/&.d_sh_r_o/)"
 
 $(srcfile:R:S/$/&.o_st_r_p/) : $(srcfile)
-	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
-	@$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_r_p \2/g\" > $(@:R:S/$/&.d_st_r_p/)"
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(CPPFLAGS) $(ST_CPPFLAGS) $(P_CPPFLAGS) $(R_CPPFLAGS) -c $(srcfile) -o $@
+	@$(SHELL) -ec "$(CC) -MM $(CPPFLAGS) $(ST_CPPFLAGS) $(P_CPPFLAGS) $(R_CPPFLAGS) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(srcfile:H:S!/!\\/!g)\/\1.o_st_r_p \2/g\" > $(@:R:S/$/&.d_st_r_p/)"
 .endfor
 
 .pl.in.pl :

@@ -28,7 +28,7 @@ AC_PATH_PROG(ETAGS, etags, , $PATH)
 
 AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 
-SQRL_DISABLE_SHARED()
+CW_DISABLE_SHARED()
 
 AC_ARG_WITH(libstash-prefix, [  --with-libstash-prefix  Path to libstash])
 if test ! -z "$with_libstash_prefix"; then
@@ -46,29 +46,29 @@ else
   fi
 fi
 
-SQRL_USE_PTHREADS()
+CW_USE_PTHREADS()
 
 AC_ARG_WITH(debug, [  --with-debug            Define debugging macros and link binaries with
                           debugging libraries])
 
 dnl Check for libraries.
-SQRL_USE_LIBSTASH_R(_d, TEST_LIBS, ..)
+CW_USE_LIBSTASH_R(_d, TEST_LIBS, ..)
 AC_SUBST(TEST_LIBS)
 
 if test "x$with_debug" = "xyes"; then
-  SQRL_USE_LIBSTASH_R(_d, BIN_LIBS, ..)
+  CW_USE_LIBSTASH_R(_d, BIN_LIBS, ..)
   BIN_LIBSOCK="lib/libsock_d.a"
-  BIN_DEFINES="\$(TEST_DEFINES)"
+  BIN_CPPFLAGS="\$(TEST_CPPFLAGS)"
   BIN_CFLAGS="\$(TEST_CFLAGS)"
 else
-  SQRL_USE_LIBSTASH_R(, BIN_LIBS, ..)
+  CW_USE_LIBSTASH_R(, BIN_LIBS, ..)
   BIN_LIBSOCK="lib/libsock.a"
-  BIN_DEFINES=""
+  BIN_CPPFLAGS=""
   BIN_CFLAGS="\$(ST_CFLAGS) \$(O_CFLAGS)"
 fi
 AC_SUBST(BIN_LIBS)
 AC_SUBST(BIN_LIBSOCK)
-AC_SUBST(BIN_DEFINES)
+AC_SUBST(BIN_CPPFLAGS)
 AC_SUBST(BIN_CFLAGS)
 
 dnl Extra libraries for particular platforms.
@@ -90,17 +90,22 @@ AC_CHECK_HEADERS(poll.h, , AC_MSG_ERROR(Cannot build without unistd.h))
 dnl Check for typedefs, structures, and compiler characteristics.
 dnl AC_C_BIGENDIAN
 
-AC_MSG_RESULT(================================================================)
-AC_MSG_RESULT(Extra libraries to link in: ${LIBS})
-AC_MSG_RESULT(Extra libraries for binaries: ${BIN_LIBS})
-AC_MSG_RESULT(Version of libsock to link bins with: ${BIN_LIBSOCK})
-AC_MSG_RESULT(Extra libraries for tests: ${TEST_LIBS})
-AC_MSG_RESULT(Extra ld flags: ${LDFLAGS})
-AC_MSG_RESULT(Compiler flags: ${CFLAGS})
-AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})
-AC_MSG_RESULT(================================================================)
+dnl
+dnl Print out the results of configuration.
+dnl
+AC_MSG_RESULT(===============================================================================)
+AC_MSG_RESULT(CFLAGS      : ${CFLAGS})
+AC_MSG_RESULT(CPPFLAGS    : ${CPPFLAGS})
+AC_MSG_RESULT(LDFLAGS     : ${LDFLAGS})
+AC_MSG_RESULT(LIBS        : ${LIBS})
+AC_MSG_RESULT(BIN_LIBS    : ${BIN_LIBS})
+AC_MSG_RESULT(BIN_LIBSOCK : ${BIN_LIBSOCK})
+AC_MSG_RESULT(TEST_LIBS   : ${TEST_LIBS})
+AC_MSG_RESULT()
+AC_MSG_RESULT(Prefix      : ${prefix})
+AC_MSG_RESULT(===============================================================================)
 
-SQRL_SET_MAKEFILE
+CW_SET_MAKEFILE
 
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \

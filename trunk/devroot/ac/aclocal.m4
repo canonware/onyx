@@ -2,10 +2,10 @@ dnl Must be defined, since each directory's aclocal.m4 looks for it, and exits
 dnl if not found.  This hack is necessary since autoconf undefines 'include',
 dnl leaving only 'sinclude', which doesn't cause an error if the file to be
 dnl included can't be found.
-AC_DEFUN(SQRL_INIT,[])
+AC_DEFUN(CW_INIT,[])
 
 dnl Use pthreads.
-AC_DEFUN(SQRL_USE_PTHREADS,
+AC_DEFUN(CW_USE_PTHREADS,
 [
   AC_CHECK_HEADERS(pthread.h, , AC_MSG_ERROR(Cannot build without pthread.h))
 
@@ -14,23 +14,37 @@ AC_DEFUN(SQRL_USE_PTHREADS,
       LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
 ])
 
-dnl SQRL_USE_LIBSTASH_R(libsuffix, libvar, relpath)
+dnl CW_USE_LIBSTASH_R(libsuffix, libvar, relpath)
 dnl libsuffix : _d, _p.
 dnl libvar : Name of variable to append -lstash<libsuffix> to.
 dnl relpath : Relative path to libstash's parent dir if in the same build tree.
-AC_DEFUN(SQRL_USE_LIBSTASH_R,
+AC_DEFUN(CW_USE_LIBSTASH_R,
 [
   AC_CHECK_HEADERS(libstash/libstash_r.h, , \
                    AC_MSG_ERROR(Cannot build without libstash/libstash_r.h))
 
   AC_CHECK_FILE([$3/libstash],$2="-lstash_r$1",
-    echo Was hoping for $ac_config_dir/lib/libstash
+    echo Was hoping for $3/libstash
     AC_CHECK_LIB(stash$1, main, $2="-lstash_r$1", \
       AC_MSG_ERROR(Cannot find the stash_r$1 library)))
 ])
 
+dnl CW_USE_LIBSOCK(libsuffix, libvar, relpath)
+dnl libsuffix : _d, _p.
+dnl libvar : Name of variable to append -lstash<libsuffix> to.
+dnl relpath : Relative path to libsock's parent dir if in the same build tree.
+AC_DEFUN(CW_USE_LIBSOCK,
+[
+  AC_CHECK_HEADERS(libsock/libsock.h, , \
+                   AC_MSG_ERROR(Cannot build without libsock/libsock.h))
 
-AC_DEFUN(SQRL_DISABLE_SHARED,
+  AC_CHECK_FILE([$3/libsock],$2="-lsock$1",
+    echo Was hoping for $3/libsock
+    AC_CHECK_LIB(sock$1, main, $2="-lsock$1", \
+      AC_MSG_ERROR(Cannot find the sock$1 library)))
+])
+
+AC_DEFUN(CW_DISABLE_SHARED,
 [
 dnl Comment out target dependencies on shared libraries if --disable-shared
 dnl is defined.
@@ -46,7 +60,7 @@ disable_shared=""
 AC_SUBST(disable_shared)
 ])
 
-AC_DEFUN(SQRL_SET_MAKEFILE,
+AC_DEFUN(CW_SET_MAKEFILE,
 [
 AC_ARG_WITH(gnu-make, [  --with-gnu-make         Always generate a Makefile compatiple with gnu make],
 if test "x$with_gnu_make" != "xno" ; then
