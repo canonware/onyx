@@ -418,23 +418,23 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 %end{latexonly}
 \multicolumn{4}{|l|}{Control operators} \\
 \hline \hline
-& stop & & \\
+& {\bf \htmlref{stop}{currenterror:stop}} & & \\
 \hline
-& recordstacks & & \\
+& {\bf \htmlref{recordstacks}{currenterror:recordstacks}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{State operators} \\
 \hline \hline
-& newerror & & \\
+& {\bf \htmlref{newerror}{currenterror:newerror}} & & \\
 \hline
-& errorname & & \\
+& {\bf \htmlref{errorname}{currenterror:errorname}} & & \\
 \hline
-& command & & \\
+& {\bf \htmlref{command}{currenterror:command}} & & \\
 \hline
-& ostack & & \\
+& {\bf \htmlref{ostack}{currenterror:ostack}} & & \\
 \hline
-& estack & & \\
+& {\bf \htmlref{estack}{currenterror:estack}} & & \\
 \hline
-& dstack & & \\
+& {\bf \htmlref{dstack}{currenterror:dstack}} & & \\
 \end{longtable}
 
 \subsection{envdict}
@@ -455,45 +455,45 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-& dstackunderflow & & \\
+& {\bf \htmlref{dstackunderflow}{errordict:dstackunderflow}} & & \\
 \hline
-& estackunderflow & & \\
+& {\bf \htmlref{estackunderflow}{errordict:estackunderflow}} & & \\
 \hline
-& handleerror & & \\
+& {\bf \htmlref{handleerror}{errordict:handleerror}} & & \\
 \hline
-& interrupt & & \\
+& {\bf \htmlref{interrupt}{errordict:interrupt}} & & \\
 \hline
-& invalidaccess & & \\
+& {\bf \htmlref{invalidaccess}{errordict:invalidaccess}} & & \\
 \hline
-& invalidcontext & & \\
+& {\bf \htmlref{invalidcontext}{errordict:invalidcontext}} & & \\
 \hline
-& invalidexit & & \\
+& {\bf \htmlref{invalidexit}{errordict:invalidexit}} & & \\
 \hline
-& invalidfileaccess & & \\
+& {\bf \htmlref{invalidfileaccess}{errordict:invalidfileaccess}} & & \\
 \hline
-& ioerror & & \\
+& {\bf \htmlref{ioerror}{errordict:ioerror}} & & \\
 \hline
-& limitcheck & & \\
+& {\bf \htmlref{limitcheck}{errordict:limitcheck}} & & \\
 \hline
-& rangecheck & & \\
+& {\bf \htmlref{rangecheck}{errordict:rangecheck}} & & \\
 \hline
-& stackunderflow & & \\
+& {\bf \htmlref{stackunderflow}{errordict:stackunderflow}} & & \\
 \hline
-& syntaxerror & & \\
+& {\bf \htmlref{syntaxerror}{errordict:syntaxerror}} & & \\
 \hline
-& timeout & & \\
+& {\bf \htmlref{timeout}{errordict:timeout}} & & \\
 \hline
-& typecheck & & \\
+& {\bf \htmlref{typecheck}{errordict:typecheck}} & & \\
 \hline
-& undefined & & \\
+& {\bf \htmlref{undefined}{errordict:undefined}} & & \\
 \hline
-& undefinedfilename & & \\
+& {\bf \htmlref{undefinedfilename}{errordict:undefinedfilename}} & & \\
 \hline
-& undefinedresult & & \\
+& {\bf \htmlref{undefinedresult}{errordict:undefinedresult}} & & \\
 \hline
-& unmatchedmark & & \\
+& {\bf \htmlref{unmatchedmark}{errordict:unmatchedmark}} & & \\
 \hline
-& unregistered & & \\
+& {\bf \htmlref{unregistered}{errordict:unregistered}} & & \\
 \hline
 \end{longtable}
 
@@ -517,35 +517,35 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 %end{latexonly}
 \multicolumn{4}{|l|}{Control operators} \\
 \hline \hline
-& collect & & \\
+& {\bf \htmlref{collect}{gcdict:collect}} & & \\
 \hline
-& setactive & & \\
+& {\bf \htmlref{setactive}{gcdict:setactive}} & & \\
 \hline
-& setperiod & & \\
+& {\bf \htmlref{setperiod}{gcdict:setperiod}} & & \\
 \hline
-& setthreshold & & \\
+& {\bf \htmlref{setthreshold}{gcdict:setthreshold}} & & \\
 \hline
-& dump & & \\
+& {\bf \htmlref{dump}{gcdict:dump}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{State operators} \\
 \hline \hline
-& active & & \\
+& {\bf \htmlref{active}{gcdict:active}} & & \\
 \hline
-& period & & \\
+& {\bf \htmlref{period}{gcdict:period}} & & \\
 \hline
-& threshold & & \\
+& {\bf \htmlref{threshold}{gcdict:threshold}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Statistics operators} \\
 \hline \hline
-& collections & & \\
+& {\bf \htmlref{collections}{gcdict:collections}} & & \\
 \hline
-& new & & \\
+& {\bf \htmlref{new}{gcdict:new}} & & \\
 \hline
-& current & & \\
+& {\bf \htmlref{current}{gcdict:current}} & & \\
 \hline
-& maximum & & \\
+& {\bf \htmlref{maximum}{gcdict:maximum}} & & \\
 \hline
-& sum & & \\
+& {\bf \htmlref{sum}{gcdict:sum}} & & \\
 \end{longtable}
 
 \subsection{globaldict}
@@ -561,9 +561,8 @@ are of general use.  Although there are no mechanisms that prevent modification
 of systemdict, programs should not normally need to modify systemdict, since
 globaldict provides a place for storing globally shared objects.
 
-\begin{longtable}{|r|l|l|p{4in}|}
-\caption[systemdict summary]{systemdict summary by functional
-group} \\
+\begin{longtable}{|r|l|l|p{3in}|}
+\caption[systemdict summary]{systemdict summary by functional group} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
@@ -579,300 +578,435 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 %end{latexonly}
 \multicolumn{4}{|l|}{Operand stack operators} \\
 \hline \hline
-& roll & & \\
+\oparg{region} \oparg{count} \oparg{amount} & {\bf
+\htmlref{roll}{systemdict:roll}} & \oparg{rolled} & Roll the top
+\oparg{count} objects up by \oparg{amount}. \\
 \hline
-& mark & & \\
+& {\bf \htmlref{mark}{systemdict:mark}} & & \\
 \hline
-& index & & \\
+& {\bf \htmlref{index}{systemdict:index}} & & \\
 \hline
-any & pop & - & Pop an object off the operand stack. \\
+any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove the top object from the
+operand stack. \\
 \hline
-& clear & & \\
+& {\bf \htmlref{clear}{systemdict:clear}} & & \\
 \hline
-& cleartomark & & \\
+& {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & & \\
 \hline
-& count & & \\
+& {\bf \htmlref{count}{systemdict:count}} & & \\
 \hline
-& counttomark & & \\
+& {\bf \htmlref{counttomark}{systemdict:counttomark}} & & \\
 \hline
-& dup & & \\
+& {\bf \htmlref{dup}{systemdict:dup}} & & \\
 \hline
-& exch & & \\
+& {\bf \htmlref{exch}{systemdict:exch}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
-& waitpid & & \\
+& {\bf \htmlref{waitpid}{systemdict:waitpid}} & & \\
 \hline
-& system & & \\
+& {\bf \htmlref{system}{systemdict:system}} & & \\
 \hline
-& stopped & & \\
+& {\bf \htmlref{stopped}{systemdict:stopped}} & & \\
 \hline
-& start & & \\
+& {\bf \htmlref{start}{systemdict:start}} & & \\
 \hline
-& stop & & \\
+& {\bf \htmlref{stop}{systemdict:stop}} & & \\
 \hline
-& run & & \\
+& {\bf \htmlref{run}{systemdict:run}} & & \\
 \hline
-& repeat & & \\
+& {\bf \htmlref{repeat}{systemdict:repeat}} & & \\
 \hline
-& realtime & & \\
+& {\bf \htmlref{realtime}{systemdict:realtime}} & & \\
 \hline
-& quit & & \\
+& {\bf \htmlref{quit}{systemdict:quit}} & & \\
 \hline
-& nsleep & & \\
+& {\bf \htmlref{nsleep}{systemdict:nsleep}} & & \\
 \hline
-& loop & & \\
+& {\bf \htmlref{loop}{systemdict:loop}} & & \\
 \hline
-& if & & \\
+& {\bf \htmlref{if}{systemdict:if}} & & \\
 \hline
-& ifelse & & \\
+& {\bf \htmlref{ifelse}{systemdict:ifelse}} & & \\
 \hline
-& fork & & \\
+& {\bf \htmlref{fork}{systemdict:fork}} & & \\
 \hline
-& for & & \\
+& {\bf \htmlref{for}{systemdict:for}} & & \\
 \hline
-& exit & & \\
+& {\bf \htmlref{exit}{systemdict:exit}} & & \\
 \hline
-& exec & & \\
+& {\bf \htmlref{exec}{systemdict:exec}} & & \\
 \hline
-& estack & & \\
+& {\bf \htmlref{estack}{systemdict:estack}} & & \\
 \hline
-& eval & & \\
+& {\bf \htmlref{eval}{systemdict:eval}} & & \\
 \hline
-& countestack & & \\
+& {\bf \htmlref{countestack}{systemdict:countestack}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Polymorphic operators} \\
 \hline \hline
-& token & & \\
+& {\bf \htmlref{token}{systemdict:token}} & & \\
 \hline
-& store & & \\
+& {\bf \htmlref{store}{systemdict:store}} & & \\
 \hline
-& put & & \\
+& {\bf \htmlref{put}{systemdict:put}} & & \\
 \hline
-& putinterval & & \\
+& {\bf \htmlref{putinterval}{systemdict:putinterval}} & & \\
 \hline
-& length & & \\
+& {\bf \htmlref{length}{systemdict:length}} & & \\
 \hline
-& get & & \\
+& {\bf \htmlref{get}{systemdict:get}} & & \\
 \hline
-& getinterval & & \\
+& {\bf \htmlref{getinterval}{systemdict:getinterval}} & & \\
 \hline
-& foreach & & \\
+& {\bf \htmlref{foreach}{systemdict:foreach}} & & \\
 \hline
-& copy & & \\
+& {\bf \htmlref{copy}{systemdict:copy}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Integer and math operators} \\
 \hline \hline
-& sub & & \\
+& {\bf \htmlref{sub}{systemdict:sub}} & & \\
 \hline
-& srand & & \\
+& {\bf \htmlref{srand}{systemdict:srand}} & & \\
 \hline
-& rand & & \\
+& {\bf \htmlref{rand}{systemdict:rand}} & & \\
 \hline
-& neg & & \\
+& {\bf \htmlref{neg}{systemdict:neg}} & & \\
 \hline
-& mod & & \\
+& {\bf \htmlref{mod}{systemdict:mod}} & & \\
 \hline
-& mul & & \\
+& {\bf \htmlref{mul}{systemdict:mul}} & & \\
 \hline
-& exp & & \\
+& {\bf \htmlref{exp}{systemdict:exp}} & & \\
 \hline
-& abs & & \\
+& {\bf \htmlref{abs}{systemdict:abs}} & & \\
 \hline
-& div & & \\
+& {\bf \htmlref{div}{systemdict:div}} & & \\
 \hline
-& add & & \\
+& {\bf \htmlref{add}{systemdict:add}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{String operators} \\
 \hline \hline
-& string & & \\
+& {\bf \htmlref{string}{systemdict:string}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Array operators} \\
 \hline \hline
-& [ & & \\
+& {\bf \htmlref{[}{systemdict:sym_lb}} & & \\
 \hline
-& ] & & \\
+& {\bf \htmlref{]}{systemdict:sym_rb}} & & \\
 \hline
-& aload & & \\
+& {\bf \htmlref{aload}{systemdict:aload}} & & \\
 \hline
-& array & & \\
+& {\bf \htmlref{array}{systemdict:array}} & & \\
 \hline
-& astore & & \\
+& {\bf \htmlref{astore}{systemdict:astore}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
-& gcdict & & \\
+& {\bf \htmlref{gcdict}{systemdict:gcdict}} & & \\
 \hline
-& globaldict & & \\
+& {\bf \htmlref{globaldict}{systemdict:globaldict}} & & \\
 \hline
-& where & & \\
+& {\bf \htmlref{where}{systemdict:where}} & & \\
 \hline
-& undef & & \\
+& {\bf \htmlref{undef}{systemdict:undef}} & & \\
 \hline
-& {\lt}{\lt} & & \\
+& {\bf \htmlref{{\lt}{\lt}}{systemdict:sym_lt_lt}} & & \\
 \hline
-& {\gt}{\gt} & & \\
+& {\bf \htmlref{{\gt}{\gt}}{systemdict:sym_gt_gt}} & & \\
 \hline
-& load & & \\
+& {\bf \htmlref{load}{systemdict:load}} & & \\
 \hline
-& known & & \\
+& {\bf \htmlref{known}{systemdict:known}} & & \\
 \hline
-& end & & \\
+& {\bf \htmlref{end}{systemdict:end}} & & \\
 \hline
-& dstack & & \\
+& {\bf \htmlref{dstack}{systemdict:dstack}} & & \\
 \hline
-& dict & & \\
+& {\bf \htmlref{dict}{systemdict:dict}} & & \\
 \hline
-& def & & \\
+& {\bf \htmlref{def}{systemdict:def}} & & \\
 \hline
-& currentdict & & \\
+& {\bf \htmlref{currentdict}{systemdict:currentdict}} & & \\
 \hline
-& countdstack & & \\
+& {\bf \htmlref{countdstack}{systemdict:countdstack}} & & \\
 \hline
-& begin & & \\
+& {\bf \htmlref{begin}{systemdict:begin}} & & \\
 \hline
-& cleardstack & & \\
+& {\bf \htmlref{cleardstack}{systemdict:cleardstack}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{File and filesystem operators} \\
 \hline \hline
-& truncate & & \\
+& {\bf \htmlref{truncate}{systemdict:truncate}} & & \\
 \hline
-& unlink & & \\
+& {\bf \htmlref{unlink}{systemdict:unlink}} & & \\
 \hline
-& write & & \\
+& {\bf \htmlref{write}{systemdict:write}} & & \\
 \hline
-& tell & & \\
+& {\bf \htmlref{tell}{systemdict:tell}} & & \\
 \hline
-& test & & \\
+& {\bf \htmlref{test}{systemdict:test}} & & \\
 \hline
-& symlink & & \\
+& {\bf \htmlref{symlink}{systemdict:symlink}} & & \\
 \hline
-& stat & & \\
+& {\bf \htmlref{stat}{systemdict:stat}} & & \\
 \hline
-& spop & & \\
+& {\bf \htmlref{spop}{systemdict:spop}} & & \\
 \hline
-& seek & & \\
+& {\bf \htmlref{seek}{systemdict:seek}} & & \\
 \hline
-& renamefile & & \\
+& {\bf \htmlref{renamefile}{systemdict:renamefile}} & & \\
 \hline
-& read & & \\
+& {\bf \htmlref{read}{systemdict:read}} & & \\
 \hline
-& readline & & \\
+& {\bf \htmlref{readline}{systemdict:readline}} & & \\
 \hline
-& pstack & & \\
+& {\bf \htmlref{pstack}{systemdict:pstack}} & & \\
 \hline
-& print & & \\
+& {\bf \htmlref{print}{systemdict:print}} & & \\
 \hline
-& open & & \\
+& {\bf \htmlref{open}{systemdict:open}} & & \\
 \hline
-& mkdir & & \\
+& {\bf \htmlref{mkdir}{systemdict:mkdir}} & & \\
 \hline
-& link & & \\
+& {\bf \htmlref{link}{systemdict:link}} & & \\
 \hline
-& flush & & \\
+& {\bf \htmlref{flush}{systemdict:flush}} & & \\
 \hline
-& flushfile & & \\
+& {\bf \htmlref{flushfile}{systemdict:flushfile}} & & \\
 \hline
-& dirforeach & & \\
+& {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & & \\
 \hline
-& currentfile & & \\
+& {\bf \htmlref{currentfile}{systemdict:currentfile}} & & \\
 \hline
-& bytesavailable & & \\
+& {\bf \htmlref{bytesavailable}{systemdict:bytesavailable}} & & \\
 \hline
-& chmod & & \\
+& {\bf \htmlref{chmod}{systemdict:chmod}} & & \\
 \hline
-& chown & & \\
+& {\bf \htmlref{chown}{systemdict:chown}} & & \\
 \hline
-& closefile & & \\
+& {\bf \htmlref{closefile}{systemdict:closefile}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
-& xor & & \\
+& {\bf \htmlref{xor}{systemdict:xor}} & & \\
 \hline
-& shift & & \\
+& {\bf \htmlref{shift}{systemdict:shift}} & & \\
 \hline
-& or & & \\
+& {\bf \htmlref{or}{systemdict:or}} & & \\
 \hline
-& not & & \\
+& {\bf \htmlref{not}{systemdict:not}} & & \\
 \hline
-& ne & & \\
+& {\bf \htmlref{ne}{systemdict:ne}} & & \\
 \hline
-& le & & \\
+& {\bf \htmlref{le}{systemdict:le}} & & \\
 \hline
-& gt & & \\
+& {\bf \htmlref{gt}{systemdict:gt}} & & \\
 \hline
-& eq & & \\
+& {\bf \htmlref{eq}{systemdict:eq}} & & \\
 \hline
-& lt & & \\
+& {\bf \htmlref{lt}{systemdict:lt}} & & \\
 \hline
-& ge & & \\
+& {\bf \htmlref{ge}{systemdict:ge}} & & \\
 \hline
-& and & & \\
+& {\bf \htmlref{and}{systemdict:and}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Type, conversion, and attribute operators} \\
 \hline \hline
-& type & & \\
+& {\bf \htmlref{type}{systemdict:type}} & & \\
 \hline
-& xcheck & & \\
+& {\bf \htmlref{xcheck}{systemdict:xcheck}} & & \\
 \hline
-& lcheck & & \\
+& {\bf \htmlref{lcheck}{systemdict:lcheck}} & & \\
 \hline
-& cvlit & & \\
+& {\bf \htmlref{cvlit}{systemdict:cvlit}} & & \\
 \hline
-& cvn & & \\
+& {\bf \htmlref{cvn}{systemdict:cvn}} & & \\
 \hline
-& cvrs & & \\
+& {\bf \htmlref{cvrs}{systemdict:cvrs}} & & \\
 \hline
-& cvs & & \\
+& {\bf \htmlref{cvs}{systemdict:cvs}} & & \\
 \hline
-& cvx & & \\
+& {\bf \htmlref{cvx}{systemdict:cvx}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Threading and synchronization operators} \\
 \hline \hline
-& wait & & \\
+& {\bf \htmlref{wait}{systemdict:wait}} & & \\
 \hline
-& thread & & \\
+& {\bf \htmlref{thread}{systemdict:thread}} & & \\
 \hline
-& timedwait & & \\
+& {\bf \htmlref{timedwait}{systemdict:timedwait}} & & \\
 \hline
-& unlock & & \\
+& {\bf \htmlref{unlock}{systemdict:unlock}} & & \\
 \hline
-& yield & & \\
+& {\bf \htmlref{yield}{systemdict:yield}} & & \\
 \hline
-& trylock & & \\
+& {\bf \htmlref{trylock}{systemdict:trylock}} & & \\
 \hline
-& signal & & \\
+& {\bf \htmlref{signal}{systemdict:signal}} & & \\
 \hline
-& self & & \\
+& {\bf \htmlref{self}{systemdict:self}} & & \\
 \hline
-& setlocking & & \\
+& {\bf \htmlref{setlocking}{systemdict:setlocking}} & & \\
 \hline
-& mutex & & \\
+& {\bf \htmlref{mutex}{systemdict:mutex}} & & \\
 \hline
-& lock & & \\
+& {\bf \htmlref{lock}{systemdict:lock}} & & \\
 \hline
-& join & & \\
+& {\bf \htmlref{join}{systemdict:join}} & & \\
 \hline
-& detach & & \\
+& {\bf \htmlref{detach}{systemdict:detach}} & & \\
 \hline
-& currentlocking & & \\
+& {\bf \htmlref{currentlocking}{systemdict:currentlocking}} & & \\
 \hline
-& broadcast & & \\
+& {\bf \htmlref{broadcast}{systemdict:broadcast}} & & \\
 \hline
-& condition & & \\
+& {\bf \htmlref{condition}{systemdict:condition}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Miscellaneous operators} \\
 \hline \hline
-& version & & \\
+& {\bf \htmlref{version}{systemdict:version}} & & \\
 \hline
-& product & & \\
+& {\bf \htmlref{product}{systemdict:product}} & & \\
 \hline
-& promptstring & & \\
+& {\bf \htmlref{promptstring}{systemdict:promptstring}} & & \\
 \hline
-& handleerror & & \\
+& {\bf \htmlref{handleerror}{systemdict:handleerror}} & & \\
 \hline
-& bind & & \\
+& {\bf \htmlref{bind}{systemdict:bind}} & & \\
 \end{longtable}
+
+\begin{description}
+\label{systemdict:XXX}
+\index{\stilop{}{XXX}{}}
+\item[{\stilop{--}{XXX}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:}
+\index{\stilop{}{}{}}
+\item[{\stilop{}{}{}} ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\end{description}
+\label{systemdict:pop}
+\index{\stilop{}{pop}{}}
+\item[{\stilop{any}{pop}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[any: ]
+			Any object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		Remove the top object off the operand stack and discard it.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> 1 2
+s:2> pstack
+2
+1
+s:2> pop
+s:1> pstack
+1
+s:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:roll}
+\index{\stilop{}{roll}{}}
+\item[{\stilop{region count amount}{roll}{rolled}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[region: ]
+			0 or more objects to be rolled.
+		\item[count: ]
+			Number of objects in \oparg{region}.
+		\item[amount: ]
+			Amount by which to roll.  If positive, roll
+			upward.  If negative, roll downward.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[rolled: ]
+			Rolled version of \oparg{region}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Roll the top \oparg{count} objects on the operand stack
+		(not counting \oparg{count} and \oparg{amount}) by
+		\oparg{amount} positions.  A positive \oparg{amount}
+		indicates an upward roll, whereas a negative \oparg{amount}
+		indicates a downward roll.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> 3 2 1 0 
+s:4> pstack
+0
+1
+2
+3
+s:4> 3 1 roll
+s:4> pstack
+1
+2
+0
+3
+s:4> 3 -2 roll
+s:4> pstack
+2
+0
+1
+3
+s:4> 4 0 roll
+s:4> pstack
+2
+0
+1
+3
+s:4>
+		\end{verbatim}
+	\end{description}
+\end{description}
+
+\label{systemdict:pop}
 
 \subsection{threaddict}
 
@@ -890,13 +1024,13 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
-& errordict & & \\
+& {\bf \htmlref{errordict}{threaddict:errordict}} & & \\
 \hline
-& currenterror & & \\
+& {\bf \htmlref{currenterror}{threaddict:currenterror}} & & \\
 \hline
-& userdict & & \\
+& {\bf \htmlref{userdict}{threaddict:userdict}} & & \\
 \hline
-& threaddict & & \\
+& {\bf \htmlref{threaddict}{threaddict:threaddict}} & & \\
 \hline
 \end{longtable}
 
