@@ -255,13 +255,14 @@ main(int argc, char **argv, char **envp)
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);
+#ifdef _STIL_SIGHANDLER
 	/*
 	 * Tell the signal handler thread to quit, then join on it.
 	 */
-/*  	handler_arg.quit = TRUE; */
-/*  	raise(SIGINT); */
-/*  	thd_join(handler_arg.sig_thd); */
-
+	handler_arg.quit = TRUE;
+	raise(SIGINT);
+	thd_join(handler_arg.sig_thd);
+#endif
 	libstash_shutdown();
 	return retval;
 }
