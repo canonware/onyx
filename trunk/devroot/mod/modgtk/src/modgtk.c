@@ -16,7 +16,7 @@
 static const cw_uint8_t dict_name[] = "gtkdict";
 
 void
-_cw_modnxgtk_init (void *a_arg, cw_nxo_t *a_thread)
+_cw_modgtk_init (void *a_arg, cw_nxo_t *a_thread)
 {
 	cw_nxo_t *ostack, *tstack;
 	cw_nx_t *nx;

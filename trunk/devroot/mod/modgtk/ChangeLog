@@ -1,3 +1,7 @@
+2001-07-13  Chris Toshok  <toshok@toshok.org>
+
+	* src/modgtk.c (_cw_modgtk_init): rename from _cw_modnxgtk_init.
+
 2001-07-12  Jason Evans  <jasone@canonware.com>
 
 	* : Rename module from nxgtk to gtk.
