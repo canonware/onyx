@@ -636,7 +636,14 @@ sockb_p_entry_func(void * a_arg)
 	  sock = message->data.sock;
       
 	  sockfd = sock_get_fd(sock);
-	  _cw_assert(max_fds > sockfd);
+	  if (max_fds <= sockfd)
+	  {
+	    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		      "Maximum file descriptor exceeded ([i] <= [i])\n",
+		      max_fds, sockfd);
+	    abort();
+	  }
+	  
 	  if ((-1 == regs[sockfd].pollfd_pos) && (max_fds > nfds))
 	  {
 	    /* The sock isn't registered.  Register it. */
