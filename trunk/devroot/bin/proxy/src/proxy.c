@@ -988,7 +988,7 @@ handle_client_send(void *a_arg)
 	thd_new(&conn->recv_thd, handle_client_recv, (void *)conn);
 
 	/*
-	 * Continually read data from the socket, create a out string, print to
+	 * Continually read data from the socket, create an out string, print to
 	 * out, then send the data on.
 	 */
 	while (conn->should_quit == FALSE) {
@@ -1119,7 +1119,7 @@ usage(void)
 	_cw_out_put("[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
-	    "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>] -p <port> -r [[<rhost>:]<rport>\n"
+	    "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>] [[-p <port>] -r [[<rhost>:]<rport>\n"
 	    "\n"
 	    "    Option               | Description\n"
 	    "    ---------------------+------------------------------------------\n"
@@ -1143,7 +1143,7 @@ usage(void)
 void
 version(void)
 {
-	_cw_out_put("[s], version [s]\n", g_progname, _LIBSOCK_VERSION);
+	_cw_out_put("[s], version [s]\n", g_progname, "<Version>");
 }
 
 /* Doesn't strip trailing '/' characters. */

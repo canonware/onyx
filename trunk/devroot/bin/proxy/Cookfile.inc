@@ -66,7 +66,7 @@ SRCS = [SRCS] [PROXY_SRCS];
 
 /* Man pages. */
 {
-  local manpages_1 = ;
+  local manpages_1 = proxy.1;
   manpages_1 = [fromto % [srcdir]/bin/proxy/man/man1/% [manpages_1]];
 
   PROXY_MANPAGES_1 = [manpages_1];

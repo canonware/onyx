@@ -1,0 +1,52 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH ncat 1 "ncat, version <Version>"
+.Nm ncat
+.hy 1
+.SH NAME
+ncat - catenate and print using TCP/IP
+.SH SYNOPSIS
+.B ncat \-h
+.br
+.B ncat \-V
+.br
+.B ncat
+.RI [ <common-flags> ]
+.B \-r
+.RI [ <rhost> :] <rport>
+.br
+.B ncat
+.RI [ <common-flags> ]
+.B \-p
+.I <port>
+.br
+.IP \fI<common-flags>\fP:
+.RB [[ \-v
+.RB [ \-v ]]
+|
+.BR \-q ]
+.RB [ \-l
+.IR <logfile> ]
+.RB [ \-f
+.RB { p | h | a }]
+.RB [ \-t
+.IR <timeout> ]
+
+.SH DESCRIPTION
+.B ncat
+is much like
+.IR cat (1) ,
+<XXX Description>
+
+.SH USAGE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

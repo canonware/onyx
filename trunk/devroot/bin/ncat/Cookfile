@@ -66,7 +66,7 @@ SRCS = [SRCS] [NCAT_SRCS];
 
 /* Man pages. */
 {
-  local manpages_1 = ;
+  local manpages_1 = ncat.1;
   manpages_1 = [fromto % [srcdir]/bin/ncat/man/man1/% [manpages_1]];
 
   NCAT_MANPAGES_1 = [manpages_1];

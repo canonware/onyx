@@ -1140,7 +1140,7 @@ usage(void)
 void
 version(void)
 {
-	_cw_out_put("[s]: Version [s]\n", g_progname, _LIBSOCK_VERSION);
+	_cw_out_put("[s]: Version [s]\n", g_progname, "<Version>");
 }
 
 /* Doesn't strip trailing '/' characters. */
