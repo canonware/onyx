@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 173 $
- * Last modified: $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * Current revision: $Revision: 182 $
+ * Last modified: $Date: 1998-08-29 21:03:04 -0700 (Sat, 29 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -165,8 +165,7 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
 {
   cw_bool_t retval = FALSE, state_mach_error;
   int error;
-  FILE * fd;
-    
+  
   if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
   {
     _cw_marker("Enter res_merge_file()");
@@ -174,8 +173,8 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
   _cw_check_ptr(a_res_o);
   rwl_wlock(&a_res_o->rw_lock);
 
-  fd = fopen(a_filename, "r");
-  if (fd == NULL)
+  a_res_o->fd = fopen(a_filename, "r");
+  if (a_res_o->fd == NULL)
   {
     retval = TRUE;
   }
@@ -189,7 +188,7 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
     }
 
     /* Close the file. */
-    error = fclose(fd);
+    error = fclose(a_res_o->fd);
     if (error)
     {
       retval = TRUE;
@@ -297,28 +296,67 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
 /****************************************************************************
  * <<< Description >>>
  *
- * Dumps the resource database.
- *
- * XXX Since the database is stored in a hash table, the only reliable way
- * to achieve this is to iteratively delete the items in the table and
- * build a new one.  This is rather ugly, and I'm not so sure I want to do
- * it.  Therefore, this function is unimplemented for the time being.
+ * Dumps the resource database.  If a_filename is non-NULL, attempts to
+ * open the specified file and write to it.  Otherwise, uses g_log_o.
  *
  ****************************************************************************/
-void
-res_dump(cw_res_t * a_res_o)
+cw_bool_t
+res_dump(cw_res_t * a_res_o, char * a_filename)
 {
+  cw_bool_t retval;
+  cw_log_t * t_log_o;
+  
   if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
   {
     _cw_marker("Enter res_dump()");
   }
   _cw_check_ptr(a_res_o);
+  rwl_wlock(&a_res_o->rw_lock);
 
-  _cw_error("Not implemented.");
+  if (a_filename != NULL)
+  {
+    t_log_o = log_new(NULL);
+    if (log_set_logfile(t_log_o, a_filename, TRUE) == TRUE)
+    {
+      log_leprintf(g_log_o, NULL, 0, "res_dump",
+		   "Error opening file \"%s\"\n", a_filename);
+      retval = TRUE;
+      goto RETURN;
+    }
+  }
+  else
+  {
+    t_log_o = g_log_o;
+  }
+
+  retval = FALSE;
+
+  /* Now dump the resources to t_log_o. */
+  {
+    cw_uint64_t num_items, i;
+    char * key, * val;
+    
+    num_items = oh_get_num_items(&a_res_o->hash_o);
+
+    for (i = 0; i < num_items; i++)
+    {
+      oh_item_delete_iterate(&a_res_o->hash_o, (void *) &key, (void *) &val);
+      log_printf(t_log_o, "%s:%s\n", key, val);
+      oh_item_insert(&a_res_o->hash_o, key, val);
+    }
+  }
+
+ RETURN:  
+  if (a_filename != NULL)
+  {
+    log_delete(t_log_o);
+  }
+  rwl_wunlock(&a_res_o->rw_lock);
   if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
   {
     _cw_marker("Exit res_dump()");
   }
+  return retval;
 }
 
 /****************************************************************************

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 156 $
- * Last modified: $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * Current revision: $Revision: 182 $
+ * Last modified: $Date: 1998-08-29 21:03:04 -0700 (Sat, 29 Aug 1998) $
  *
  * Description: 
  *              
@@ -19,8 +19,8 @@
  ****************************************************************************
  */
 
-#ifndef _RESOURCE_H_
-#  define _RESOURCE_H_
+#ifndef _RES_H_
+#  define _RES_H_
 
 /* Pseudo-opaque type. */
 typedef struct cw_res_s cw_res_t;
@@ -49,6 +49,6 @@ void res_delete(cw_res_t * a_res_o);
 cw_bool_t res_merge_file(cw_res_t * a_res_o, char * a_filename);
 cw_bool_t res_merge_list(cw_res_t * a_res_o, ...);
 char * res_get_res_val(cw_res_t * a_res_o, char * a_res_name);
-void res_dump(cw_res_t * a_res_o);
+cw_bool_t res_dump(cw_res_t * a_res_o, char * a_filename);
 
-#endif /* _RESOURCE_H_ */
+#endif /* _RES_H_ */
