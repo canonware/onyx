@@ -469,15 +469,31 @@ server_setup(int a_port, struct timespec * a_timeout)
 	return retval;
 }
 
-char   *
+char *
 get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
 	char		*retval, *p, *p_a, *p_b, *t_str;
 	char		*c_trans, line_a[81], line_b[81];
-	char		line_sep[81] =
-	    "         |                 |                 |                 |\n";
+	char		line_sep[81] = "         |                 |        "
+	    "         |                 |\n";
 	cw_uint32_t	str_len, buf_size, i, j;
 	cw_uint8_t	c;
+	static char *c_strs[] = {"nul", "soh", "stx", "etx", "eot", "enq",
+				 "ack", "bel", "bs", "ht", "lf", "vt", "ff",
+				 "cr", "so", "si", "dle", "dc1", "dc2", "dc3",
+				 "dc4", "ack", "syn", "etb", "can", "em", "sub",
+				 "ec", "fs", "gs", "rs", "us", "sp", "!", "\"",
+				 "#", "$", "%", "&", "'", "(", ")", "*", "+",
+				 ",", "-", ".", "/", "0", "1", "2", "3", "4",
+				 "5", "6", "7", "8", "9", ":", ";", "<", "=",
+				 ">", "?", "@", "A", "B", "C", "D", "E", "F",
+				 "G", "H", "I", "J", "K", "L", "M", "N", "O",
+				 "P", "Q", "R", "S", "T", "U", "V", "W", "X",
+				 "Y", "Z", "[", "\\", "]", "^", "_", "`", "a",
+				 "b", "c", "d", "e", "f", "g", "h", "i", "j",
+				 "k", "l", "m", "n", "o", "p", "q", "r", "s",
+				 "t", "u", "v", "w", "x", "y", "z", "{", "|",
+				 "}", "~", "del"};
 	size_t		len;
 
 	buf_size = buf_size_get(a_buf);
@@ -512,9 +528,8 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	memcpy(p, t_str, len);
 	p += len;
 
-	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-	    (is_send) ? "send" : "recv", buf_size, buf_size, (buf_size != 1) ?
-	    "s" : "");
+	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n", (is_send)
+	    ? "send" : "recv", buf_size, buf_size, (buf_size != 1) ? "s" : "");
 	memcpy(p, line_a, len);
 	p += len;
 
@@ -551,404 +566,10 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 				p_b += len;
 			}
 			c = buf_uint8_get(a_buf, i + j);
-
-			switch (c) {
-			case 0x00:
-				c_trans = "nul";
-				break;
-			case 0x01:
-				c_trans = "soh";
-				break;
-			case 0x02:
-				c_trans = "stx";
-				break;
-			case 0x03:
-				c_trans = "etx";
-				break;
-			case 0x04:
-				c_trans = "eot";
-				break;
-			case 0x05:
-				c_trans = "enq";
-				break;
-			case 0x06:
-				c_trans = "ack";
-				break;
-			case 0x07:
-				c_trans = "bel";
-				break;
-			case 0x08:
-				c_trans = "bs";
-				break;
-			case 0x09:
-				c_trans = "ht";
-				break;
-			case 0x0a:
-				c_trans = "lf";
-				break;
-			case 0x0b:
-				c_trans = "vt";
-				break;
-			case 0x0c:
-				c_trans = "ff";
-				break;
-			case 0x0d:
-				c_trans = "cr";
-				break;
-			case 0x0e:
-				c_trans = "so";
-				break;
-			case 0x0f:
-				c_trans = "si";
-				break;
-
-			case 0x10:
-				c_trans = "dle";
-				break;
-			case 0x11:
-				c_trans = "dc1";
-				break;
-			case 0x12:
-				c_trans = "dc2";
-				break;
-			case 0x13:
-				c_trans = "dc3";
-				break;
-			case 0x14:
-				c_trans = "dc4";
-				break;
-			case 0x15:
-				c_trans = "ack";
-				break;
-			case 0x16:
-				c_trans = "syn";
-				break;
-			case 0x17:
-				c_trans = "etb";
-				break;
-			case 0x18:
-				c_trans = "can";
-				break;
-			case 0x19:
-				c_trans = "em";
-				break;
-			case 0x1a:
-				c_trans = "sub";
-				break;
-			case 0x1b:
-				c_trans = "ec";
-				break;
-			case 0x1c:
-				c_trans = "fs";
-				break;
-			case 0x1d:
-				c_trans = "gs";
-				break;
-			case 0x1e:
-				c_trans = "rs";
-				break;
-			case 0x1f:
-				c_trans = "us";
-				break;
-
-			case 0x20:
-				c_trans = "sp";
-				break;
-			case 0x21:
-				c_trans = "!";
-				break;
-			case 0x22:
-				c_trans = "\"";
-				break;
-			case 0x23:
-				c_trans = "#";
-				break;
-			case 0x24:
-				c_trans = "$";
-				break;
-			case 0x25:
-				c_trans = "%";
-				break;
-			case 0x26:
-				c_trans = "&";
-				break;
-			case 0x27:
-				c_trans = "'";
-				break;
-			case 0x28:
-				c_trans = "(";
-				break;
-			case 0x29:
-				c_trans = ")";
-				break;
-			case 0x2a:
-				c_trans = "*";
-				break;
-			case 0x2b:
-				c_trans = "+";
-				break;
-			case 0x2c:
-				c_trans = ",";
-				break;
-			case 0x2d:
-				c_trans = "-";
-				break;
-			case 0x2e:
-				c_trans = ".";
-				break;
-			case 0x2f:
-				c_trans = "/";
-				break;
-
-			case 0x30:
-				c_trans = "0";
-				break;
-			case 0x31:
-				c_trans = "1";
-				break;
-			case 0x32:
-				c_trans = "2";
-				break;
-			case 0x33:
-				c_trans = "3";
-				break;
-			case 0x34:
-				c_trans = "4";
-				break;
-			case 0x35:
-				c_trans = "5";
-				break;
-			case 0x36:
-				c_trans = "6";
-				break;
-			case 0x37:
-				c_trans = "7";
-				break;
-			case 0x38:
-				c_trans = "8";
-				break;
-			case 0x39:
-				c_trans = "9";
-				break;
-			case 0x3a:
-				c_trans = ":";
-				break;
-			case 0x3b:
-				c_trans = ";";
-				break;
-			case 0x3c:
-				c_trans = "<";
-				break;
-			case 0x3d:
-				c_trans = "=";
-				break;
-			case 0x3e:
-				c_trans = ">";
-				break;
-			case 0x3f:
-				c_trans = "?";
-				break;
-
-			case 0x40:
-				c_trans = "@";
-				break;
-			case 0x41:
-				c_trans = "A";
-				break;
-			case 0x42:
-				c_trans = "B";
-				break;
-			case 0x43:
-				c_trans = "C";
-				break;
-			case 0x44:
-				c_trans = "D";
-				break;
-			case 0x45:
-				c_trans = "E";
-				break;
-			case 0x46:
-				c_trans = "F";
-				break;
-			case 0x47:
-				c_trans = "G";
-				break;
-			case 0x48:
-				c_trans = "H";
-				break;
-			case 0x49:
-				c_trans = "I";
-				break;
-			case 0x4a:
-				c_trans = "J";
-				break;
-			case 0x4b:
-				c_trans = "K";
-				break;
-			case 0x4c:
-				c_trans = "L";
-				break;
-			case 0x4d:
-				c_trans = "M";
-				break;
-			case 0x4e:
-				c_trans = "N";
-				break;
-			case 0x4f:
-				c_trans = "O";
-				break;
-
-			case 0x50:
-				c_trans = "P";
-				break;
-			case 0x51:
-				c_trans = "Q";
-				break;
-			case 0x52:
-				c_trans = "R";
-				break;
-			case 0x53:
-				c_trans = "S";
-				break;
-			case 0x54:
-				c_trans = "T";
-				break;
-			case 0x55:
-				c_trans = "U";
-				break;
-			case 0x56:
-				c_trans = "V";
-				break;
-			case 0x57:
-				c_trans = "W";
-				break;
-			case 0x58:
-				c_trans = "X";
-				break;
-			case 0x59:
-				c_trans = "Y";
-				break;
-			case 0x5a:
-				c_trans = "Z";
-				break;
-			case 0x5b:
-				c_trans = "[";
-				break;
-			case 0x5c:
-				c_trans = "\\";
-				break;
-			case 0x5d:
-				c_trans = "]";
-				break;
-			case 0x5e:
-				c_trans = "^";
-				break;
-			case 0x5f:
-				c_trans = "_";
-				break;
-
-			case 0x60:
-				c_trans = "`";
-				break;
-			case 0x61:
-				c_trans = "a";
-				break;
-			case 0x62:
-				c_trans = "b";
-				break;
-			case 0x63:
-				c_trans = "c";
-				break;
-			case 0x64:
-				c_trans = "d";
-				break;
-			case 0x65:
-				c_trans = "e";
-				break;
-			case 0x66:
-				c_trans = "f";
-				break;
-			case 0x67:
-				c_trans = "g";
-				break;
-			case 0x68:
-				c_trans = "h";
-				break;
-			case 0x69:
-				c_trans = "i";
-				break;
-			case 0x6a:
-				c_trans = "j";
-				break;
-			case 0x6b:
-				c_trans = "k";
-				break;
-			case 0x6c:
-				c_trans = "l";
-				break;
-			case 0x6d:
-				c_trans = "m";
-				break;
-			case 0x6e:
-				c_trans = "n";
-				break;
-			case 0x6f:
-				c_trans = "o";
-				break;
-
-			case 0x70:
-				c_trans = "p";
-				break;
-			case 0x71:
-				c_trans = "q";
-				break;
-			case 0x72:
-				c_trans = "r";
-				break;
-			case 0x73:
-				c_trans = "s";
-				break;
-			case 0x74:
-				c_trans = "t";
-				break;
-			case 0x75:
-				c_trans = "u";
-				break;
-			case 0x76:
-				c_trans = "v";
-				break;
-			case 0x77:
-				c_trans = "w";
-				break;
-			case 0x78:
-				c_trans = "x";
-				break;
-			case 0x79:
-				c_trans = "y";
-				break;
-			case 0x7a:
-				c_trans = "z";
-				break;
-			case 0x7b:
-				c_trans = "{";
-				break;
-			case 0x7c:
-				c_trans = "|";
-				break;
-			case 0x7d:
-				c_trans = "}";
-				break;
-			case 0x7e:
-				c_trans = "~";
-				break;
-			case 0x7f:
-				c_trans = "del";
-				break;
-
-			default:
+			if (c < 128)
+				c_trans = c_strs[(cw_uint32_t)c];
+			else
 				c_trans = "---";
-				break;
-			}
 
 			p_a += _cw_out_put_s(p_a, "  [i|b:16|w:2|p:0]", c);
 			p_b += _cw_out_put_s(p_b, " [s|w:3]", c_trans);
