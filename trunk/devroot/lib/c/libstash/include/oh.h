@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 17 $
- * $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 24 $
+ * $Date: 1998-04-12 01:44:39 -0700 (Sun, 12 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -40,6 +40,8 @@
 
 #ifndef _OH_H_
 #define _OH_H_
+
+#define _OH_PERF_
 
 typedef struct oh_s oh_t;
 
@@ -66,39 +68,59 @@ typedef struct oh_s oh_t;
 #define oh_item_delete _CW_NS_CMN(oh_delete)
 #define oh_item_search _CW_NS_CMN(oh_search)
 
+#define oh_dump _CW_NS_CMN(oh_dump)
+
+#ifdef _OH_PERF_
+#  define oh_get_num_collisions _CW_NS_CMN(oh_get_num_collisions)
+#  define oh_get_num_inserts _CW_NS_CMN(oh_get_num_inserts)
+#  define oh_get_num_deletes _CW_NS_CMN(oh_get_num_deletes)
+#  define oh_get_num_grows _CW_NS_CMN(oh_get_num_grows)
+#  define oh_get_num_shrinks _CW_NS_CMN(oh_get_num_shrinks)
+#  define oh_get_num_rehashes _CW_NS_CMN(oh_get_num_rehashes)
+#endif
+
 typedef cw_uint32_t oh_h1_t(oh_t *, cw_uint32_t);
 
 oh_t * oh_new();
-void oh_delete(oh_t * arg_ohash_obj);
-cw_bool_t oh_rehash(oh_t * arg_ohash_obj);
-cw_uint32_t oh_get_size(oh_t * arg_ohash_obj);
-cw_uint32_t oh_get_num_items(oh_t * arg_ohash_obj);
-cw_uint32_t oh_get_num_invalid(oh_t * arg_ohash_obj);
+void oh_delete(oh_t * arg_oh_obj);
+cw_bool_t oh_rehash(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_size(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_items(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_invalid(oh_t * arg_oh_obj);
 
-oh_h1_t * oh_get_h1(oh_t * arg_ohash_obj);
-cw_sint32_t oh_get_base_h2(oh_t * arg_ohash_obj);
-cw_sint32_t oh_get_base_shrink_point(oh_t * arg_ohash_obj);
-cw_sint32_t oh_get_base_grow_point(oh_t * arg_ohash_obj);
-cw_sint32_t oh_get_base_rehash_point(oh_t * arg_ohash_obj);
+oh_h1_t * oh_get_h1(oh_t * arg_oh_obj);
+cw_sint32_t oh_get_base_h2(oh_t * arg_oh_obj);
+cw_sint32_t oh_get_base_shrink_point(oh_t * arg_oh_obj);
+cw_sint32_t oh_get_base_grow_point(oh_t * arg_oh_obj);
+cw_sint32_t oh_get_base_rehash_point(oh_t * arg_oh_obj);
 
-cw_bool_t oh_set_h1(oh_t * arg_ohash_obj,
+cw_bool_t oh_set_h1(oh_t * arg_oh_obj,
 		 oh_h1_t * arg_new_h1);
-cw_bool_t oh_set_base_h2(oh_t * arg_ohash_obj,
+cw_bool_t oh_set_base_h2(oh_t * arg_oh_obj,
 		      cw_uint32_t arg_h2);
-cw_bool_t oh_set_base_shrink_point(oh_t * arg_ohash_obj,
+cw_bool_t oh_set_base_shrink_point(oh_t * arg_oh_obj,
 				cw_sint32_t arg_shrink_point);
-cw_bool_t oh_set_base_grow_point(oh_t * arg_ohash_obj,
+cw_bool_t oh_set_base_grow_point(oh_t * arg_oh_obj,
 			      cw_sint32_t arg_grow_point);
-cw_bool_t oh_set_base_rehash_point(oh_t * arg_ohash_obj,
+cw_bool_t oh_set_base_rehash_point(oh_t * arg_oh_obj,
 				cw_sint32_t arg_rehash_point);
 
-cw_bool_t oh_item_insert(oh_t * arg_ohash_obj, cw_uint32_t arg_key,
+cw_bool_t oh_item_insert(oh_t * arg_oh_obj, cw_uint32_t arg_key,
 		      void * arg_data_addr);
-cw_bool_t oh_item_delete(oh_t * arg_ohash_obj, cw_uint32_t arg_key,
+cw_bool_t oh_item_delete(oh_t * arg_oh_obj, cw_uint32_t arg_key,
 		      void ** arg_data);
-cw_bool_t oh_item_search(oh_t * arg_ohash_obj, cw_uint32_t arg_key,
+cw_bool_t oh_item_search(oh_t * arg_oh_obj, cw_uint32_t arg_key,
 		      void ** arg_data);
 
-void oh_dump(oh_t * arg_ohash_obj);
+void oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all);
+
+#ifdef _OH_PERF_
+cw_uint32_t oh_get_num_collisions(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_inserts(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_deletes(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_grows(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_shrinks(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_rehashes(oh_t * arg_oh_obj);
+#endif
 
 #endif /* _OH_H_ */

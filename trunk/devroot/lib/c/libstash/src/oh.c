@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 18 $
- * $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 24 $
+ * $Date: 1998-04-12 01:44:39 -0700 (Sun, 12 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -399,7 +399,7 @@ oh_item_search(oh_t * arg_oh_obj,
 }
 
 void
-oh_dump(oh_t * arg_oh_obj)
+oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all)
 {
   cw_uint32_t i;
 
@@ -455,37 +455,40 @@ oh_dump(oh_t * arg_oh_obj)
 	  arg_oh_obj->num_shrinks,
 	  arg_oh_obj->num_rehashes);
 #endif
-  
-  fprintf(stderr, "slot is_valid key        value\n");
-  fprintf(stderr, "---- -------- ---------- ----------\n");
-  
-  for (i = 0; i < arg_oh_obj->size; i++)
+
+  if (arg_all)
   {
-    fprintf(stderr, "%4d ", i);
-    if (arg_oh_obj->items[i] != NULL)
+    fprintf(stderr, "slot is_valid key        value\n");
+    fprintf(stderr, "---- -------- ---------- ----------\n");
+  
+    for (i = 0; i < arg_oh_obj->size; i++)
     {
-      if (arg_oh_obj->items[i]->is_valid == FALSE)
+      fprintf(stderr, "%4d ", i);
+      if (arg_oh_obj->items[i] != NULL)
       {
-	fprintf(stderr, "FALSE    ");
+	if (arg_oh_obj->items[i]->is_valid == FALSE)
+	{
+	  fprintf(stderr, "FALSE    ");
+	}
+	else
+	{
+	  fprintf(stderr, "TRUE     ");
+	}
+#ifdef _PEDANTIC
+	fprintf(stderr, "0x%08x %10p\n",
+		arg_oh_obj->items[i]->key,
+		arg_oh_obj->items[i]->data);
+#else
+	fprintf(stderr, "0x%08x %010p\n",
+		arg_oh_obj->items[i]->key,
+		arg_oh_obj->items[i]->data);
+#endif
       }
       else
       {
-	fprintf(stderr, "TRUE     ");
+	fprintf(stderr, "\n");
+	/*       fprintf(stderr, "<-------------------------->\n"); */
       }
-#ifdef _PEDANTIC
-      fprintf(stderr, "0x%08x %10p\n",
-	      arg_oh_obj->items[i]->key,
-	      arg_oh_obj->items[i]->data);
-#else
-      fprintf(stderr, "0x%08x %010p\n",
-	      arg_oh_obj->items[i]->key,
-	      arg_oh_obj->items[i]->data);
-#endif
-    }
-    else
-    {
-      fprintf(stderr, "\n");
-      /*       fprintf(stderr, "<-------------------------->\n"); */
     }
   }
   fprintf(stderr,
@@ -884,3 +887,43 @@ oh_rehash_priv(oh_t * arg_oh_obj, cw_bool_t arg_force)
  RETURN:
   return retval;
 }
+
+#ifdef _OH_PERF_
+cw_uint32_t
+oh_get_num_collisions(oh_t * arg_oh_obj)
+{
+  _cw_check_ptr(arg_oh_obj);
+  return arg_oh_obj->num_collisions;
+}
+
+cw_uint32_t oh_get_num_inserts(oh_t * arg_oh_obj)
+{
+  _cw_check_ptr(arg_oh_obj);
+  return arg_oh_obj->num_inserts;
+}
+
+cw_uint32_t oh_get_num_deletes(oh_t * arg_oh_obj)
+{
+  _cw_check_ptr(arg_oh_obj);
+  return arg_oh_obj->num_deletes;
+}
+
+cw_uint32_t oh_get_num_grows(oh_t * arg_oh_obj)
+{
+  _cw_check_ptr(arg_oh_obj);
+  return arg_oh_obj->num_grows;
+}
+
+cw_uint32_t oh_get_num_shrinks(oh_t * arg_oh_obj)
+{
+  _cw_check_ptr(arg_oh_obj);
+  return arg_oh_obj->num_shrinks;
+}
+
+cw_uint32_t oh_get_num_rehashes(oh_t * arg_oh_obj)
+{
+  _cw_check_ptr(arg_oh_obj);
+  return arg_oh_obj->num_rehashes;
+}
+
+#endif
