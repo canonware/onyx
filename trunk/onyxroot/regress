@@ -16,7 +16,7 @@ argv length 3 ge {
     $nworker_threads 4 def
 } ifelse
 
-$PREFIX pwd `/regress_' cat SRCDIR cat def
+$PREFIX pwd `/regress_' SRCDIR 3 ncat def
 
 $CONFIGURE_FLAGS `' def
 
@@ -72,7 +72,12 @@ $conf_permute {
     2 npop
 } def
 
+# #thread_num worker_entry -
 $worker_entry {
+    cvs
+
+    `==[regress (thread ' bdup `)]==> Start\n' 3 ncat print flush
+
     {
 	jobs_mutex lock
 	jobs dup scount 0 gt {
@@ -80,12 +85,12 @@ $worker_entry {
 	    sbpop true
 	}{
 	    # No more jobs.
-	    false
+	    pop false
 	} ifelse
 	jobs_mutex unlock
     }{
 	# Launch job.
-	`==[regress]==>' print
+	`==[regress (thread ' bdup `)]==>' 3 ncat print
 	dup {
 	    ` ' print
 	    print
@@ -94,8 +99,8 @@ $worker_entry {
 
 	dup system 0 ne
 	{
-	    `==[regress]==>> Error in: ' print
-	    dup {
+	    `==[regress (thread ' bdup `)]==>> Error in: ' 3 ncat print
+	    {
 		` ' print
 		print
 	    } foreach
@@ -104,8 +109,9 @@ $worker_entry {
 	    # Success.
 	    pop
 	} ifelse
-
     } while
+
+    `==[regress (thread ' exch `)]==> End\n' 3 ncat print flush
 } def
 
 #
@@ -150,7 +156,7 @@ exch {
     exch inc exch
 
     # Create build directory name.
-    PREFIX `_' cat 2 idup <$w 3 $p `0'> outputs cat
+    PREFIX `_' 3 idup <$w 3 $p `0'> outputs 3 ncat
     # #iter #conf #prefix
 
     # Create array for call to system operator.
@@ -168,12 +174,39 @@ exch {
     jobs exch spush
 } foreach
 
+# Create docs jobs.
+#iter
+[
+    [
+	`./regress_docs'
+	PREFIX `_' adn inc dup aup <$w 3 $p `0'> outputs 3 ncat
+	SRCDIR
+	`distclean'
+    ]
+    [
+	`./regress_docs'
+	PREFIX `_' adn inc dup aup <$w 3 $p `0'> outputs 3 ncat
+	SRCDIR
+	`relclean'
+	`--with-docs'
+    ]
+]{
+    jobs exch spush
+} foreach
+#iter
+pop
+
 # Create worker threads.
-nworker_threads {
-    () {$$worker_entry} thread
-} repeat
+1 1 nworker_threads {
+    (over) {$$worker_entry} thread
+} for
 
 # Join on worker threads.
 nworker_threads {
-    join
+    exch cvs
+    `==[regress]==> Joining thread ' over `\n' 3 ncat print flush
+    exch join
+    `==[regress]==> Joined thread ' exch `\n' 3 ncat print flush
 } repeat
+
+`==[regress]==> Shut down\n' print flush
