@@ -287,20 +287,32 @@ buf_p_lines_rel_forward_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
 {
 	cw_uint64_t	apos, nlines;
 
-	/* Move past a_nlines '\n' characters, taking care to avoid the gap. */
-	for (apos = a_apos_beg, nlines = 0; nlines < a_nlines && apos <
-	    a_buf->gap_off; apos++) {
-		if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	/*
+	 * Move to the "a_nlines"th '\n' character after a_apos_beg, taking care
+	 * to avoid the gap.
+	 */
+	for (apos = a_apos_beg, nlines = 0; apos < a_buf->gap_off; apos++) {
+		if (a_buf->b[apos * a_buf->elmsize] == '\n') {
 			nlines++;
+			if (nlines == a_nlines)
+				goto DONE;
+		}
 	}
 
-	if (apos == a_buf->gap_off)
+	if (apos == a_buf->gap_off) {
+		/* Skip the gap. */
 		apos += a_buf->gap_len;
-	for (; nlines < a_nlines; apos++) {
-		if (a_buf->b[apos * a_buf->elmsize] == '\n')
-			nlines++;
 	}
 
+	for (;; apos++) {
+		if (a_buf->b[apos * a_buf->elmsize] == '\n') {
+			nlines++;
+			if (nlines == a_nlines)
+				goto DONE;
+		}
+	}
+
+	DONE:
 	return apos;
 }
 
@@ -311,27 +323,36 @@ buf_p_lines_rel_backward_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
 	cw_uint64_t	apos, nlines;
 
 	/* Move past a_nlines '\n' characters, taking care to avoid the gap. */
-	for (apos = a_apos_beg, nlines = 0; nlines < a_nlines && apos >=
-	    a_buf->gap_off + a_buf->gap_len; apos--) {
-		if (a_buf->b[apos * a_buf->elmsize] == '\n')
+	for (apos = a_apos_beg - 1, nlines = 0; apos >= a_buf->gap_off +
+	    a_buf->gap_len; apos--) {
+		if (a_buf->b[apos * a_buf->elmsize] == '\n') {
 			nlines++;
+			if (nlines == a_nlines)
+				goto DONE;
+		}
 	}
 
-	if (apos == a_buf->gap_off + a_buf->gap_len - 1)
+	if (apos == a_buf->gap_off + a_buf->gap_len - 1) {
+		/* Skip the gap. */
 		apos -= a_buf->gap_len;
-	for (; nlines < a_nlines; apos--) {
-		if (a_buf->b[apos * a_buf->elmsize] == '\n')
-			nlines++;
 	}
 
+	for (;; apos--) {
+		if (a_buf->b[apos * a_buf->elmsize] == '\n') {
+			nlines++;
+			if (nlines == a_nlines)
+				goto DONE;
+		}
+	}
+
+	DONE:
 	/*
-	 * apos is now just before the '\n' but we need to return the apos after
-	 * the '\n'.  Add 1 to apos, then make sure it isn't in the gap.
+	 * apos is now at the '\n', but we need to return the apos
+	 * after the '\n'.  Add 1 to apos, then make sure it isn't in the gap.
 	 */
 	apos++;
-	if (apos == a_buf->gap_off)
+	if (apos >= a_buf->gap_off && apos < a_buf->gap_off + a_buf->gap_len)
 		apos += a_buf->gap_len;
-
 	return apos;
 }
 
@@ -1237,11 +1258,24 @@ bufm_p_insert(cw_bufm_t *a_bufm, cw_bool_t a_after, const cw_uint8_t *a_str,
 
 	if (nlines > 0) {
 		/* Adjust line. */
-		if (a_after == FALSE)
+		if (a_after == FALSE) {
 			a_bufm->line += nlines;
 
+			/* Adjust line for all bufm's at the same position. */
+			for (bufm = ql_next(&buf->bufms, a_bufm, link);
+			     bufm != NULL && bufm->apos == a_bufm->apos;
+			     bufm = ql_next(&buf->bufms, bufm, link))
+				bufm->line += nlines;
+		} else {
+			/* Move past bufm's at the same position. */
+			for (bufm = ql_next(&buf->bufms, a_bufm, link);
+			     bufm != NULL && bufm->apos == a_bufm->apos;
+			     bufm = ql_next(&buf->bufms, bufm, link))
+				; /* Do nothing. */
+		}
+
 		/* Adjust line for all following bufm's. */
-		for (bufm = ql_next(&buf->bufms, a_bufm, link);
+		for (;
 		     bufm != NULL;
 		     bufm = ql_next(&buf->bufms, bufm, link))
 			bufm->line += nlines;
@@ -1294,6 +1328,7 @@ bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from)
 	_cw_assert(a_to->buf == a_from->buf);
 
 	a_to->apos = a_from->apos;
+	a_to->line = a_from->line;
 
 	ql_remove(&a_to->buf->bufms, a_to, link);
 	ql_after_insert(a_from, a_to, link);
@@ -1364,18 +1399,18 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		}
 
 		/*
-		 * Move forward from BOB to just past a_offset '\n' characters.
-		 * For example, if seeking forward 2:
+		 * Move forward from BOB to just short of a_offset '\n'
+		 * characters.  For example, if seeking forward 2:
 		 *
 		 *  \/
 		 *   hello\ngoodbye\nyadda\nblah
-		 *                  /\
+		 *                /\
 		 */
 		a_bufm->apos = buf_p_lines_rel_forward_count(a_bufm->buf,
 		    buf_p_pos_b2a(a_bufm->buf, 1), a_offset);
 
 		/* Set the line number. */
-		a_bufm->line = 1 + a_offset;
+		a_bufm->line = a_offset;
 
 		/*
 		 * Relocate in the bufm list.
@@ -1409,8 +1444,7 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 			/*
 			 * Make sure not to go out of buf bounds.
 			 */
-			if (a_offset > 0 && a_bufm->line + a_offset >
-			    a_bufm->buf->nlines) {
+			if (a_bufm->line + a_offset > a_bufm->buf->nlines) {
 				/*
 				 * Attempt to move to or after EOB.  Move to
 				 * EOB.
@@ -1419,13 +1453,13 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 				break;
 			}
 			/*
-			 * Move forward from the current position to just past
-			 * a_offset '\n' characters.  Fore example, if seeking
-			 * forward 2:
+			 * Move forward from the current position to just short
+			 * of a_offset '\n' characters.  Fore example, if
+			 * seeking forward 2:
 			 *
 			 *            \/
 			 *   hello\ngoodbye\nyadda\nblah
-			 *                         /\
+			 *                       /\
 			 */
 			apos = buf_p_lines_rel_forward_count(a_bufm->buf,
 			    a_bufm->apos, a_offset);
@@ -1462,7 +1496,7 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 			}
 
 			/* Set the line number. */
-			a_bufm->line += a_offset;
+			a_bufm->line += a_offset - 1;
 
 			/*
 			 * Set the apos of the bufm now that the old value isn't
@@ -1556,9 +1590,6 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *                             \/
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                  /\
-		 *
-		 * Stopping short of the '\n' is done to make forward and
-		 * backward line seeking reflexive.
 		 */
 		a_bufm->apos = buf_p_lines_rel_backward_count(a_bufm->buf,
 		    buf_p_pos_b2a(a_bufm->buf, a_bufm->buf->len + 1),
@@ -1783,7 +1814,7 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 			 * Count the number of newlines moved past and adjust
 			 * the line number accordingly.
 			 */
-			a_bufm->line += buf_p_lines_count(a_bufm->buf,
+			a_bufm->line -= buf_p_lines_count(a_bufm->buf,
 			    apos, a_bufm->apos);
 
 			/*
