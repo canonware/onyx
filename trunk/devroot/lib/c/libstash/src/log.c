@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 104 $
+ * $Date: 1998-06-29 21:48:56 -0700 (Mon, 29 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -52,7 +52,6 @@ log_new()
 void
 log_delete(cw_log_t * a_log_o)
 {
-
   _cw_check_ptr(a_log_o);
   
   if ((a_log_o->log_fp != NULL) && (a_log_o->log_fp != stderr))
@@ -140,24 +139,24 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
 {
   va_list ap;
   int retval;
+  FILE * fp;
 
   _cw_check_ptr(a_log_o);
   mtx_lock(&a_log_o->lock);
 
-  if ((a_log_o == NULL) || (a_log_o->log_fp == NULL))
+  if (a_log_o->log_fp == NULL)
   {
-    /* Use stderr. */
-    va_start(ap, a_format);
-    retval = vfprintf(stderr, a_format, ap);
-    va_end(ap);
+    fp = stderr;
   }
   else
   {
-    va_start(ap, a_format);
-    retval = vfprintf(a_log_o->log_fp, a_format, ap);
-    va_end(ap);
-    fflush(a_log_o->log_fp);
+    fp = a_log_o->log_fp;
   }
+
+  va_start(ap, a_format);
+  retval = vfprintf(fp, a_format, ap);
+  va_end(ap);
+  fflush(fp);
 
   mtx_unlock(&a_log_o->lock);
   return retval;
@@ -180,52 +179,38 @@ log_eprintf(cw_log_t * a_log_o,
 {
   va_list ap;
   int retval;
+  FILE * fp;
 
   _cw_check_ptr(a_log_o);
   mtx_lock(&a_log_o->lock);
   
-  if ((a_log_o == NULL) || (a_log_o->log_fp == NULL))
+  if (a_log_o->log_fp == NULL)
   {
-    /* Use stderr. */
-    if (a_filename != NULL)
-    {
-      fprintf(stderr,
-	      "At %s, line %d: ",
-	      a_filename,
-	      a_line_num);
-    }
-    if (a_func_name != NULL)
-    {
-      fprintf(stderr,
-	      "%s(): ",
-	      a_func_name);
-    }
-
-    va_start(ap, a_format);
-    retval = vfprintf(stderr, a_format, ap);
-    va_end(ap);
+    fp = stderr;
   }
   else
   {
-    if (a_filename != NULL)
-    {
-      fprintf(a_log_o->log_fp,
-	      "At %s, line %d: ",
-	      a_filename,
-	      a_line_num);
-    }
-    if (a_func_name != NULL)
-    {
-      fprintf(a_log_o->log_fp,
-	      "%s(): ",
-	      a_func_name);
-    }
-
-    va_start(ap, a_format);
-    retval = vfprintf(a_log_o->log_fp, a_format, ap);
-    va_end(ap);
-    fflush(a_log_o->log_fp);
+    fp = a_log_o->log_fp;
   }
+
+  if (a_filename != NULL)
+  {
+    fprintf(fp,
+	    "At %s, line %d: ",
+	    a_filename,
+	    a_line_num);
+  }
+  if (a_func_name != NULL)
+  {
+    fprintf(fp,
+	    "%s(): ",
+	    a_func_name);
+  }
+
+  va_start(ap, a_format);
+  retval = vfprintf(fp, a_format, ap);
+  va_end(ap);
+  fflush(fp);
 
   mtx_unlock(&a_log_o->lock);
   return retval;
@@ -242,6 +227,7 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
 {
   va_list ap;
   int retval;
+  FILE * fp;
   char time_str[29];
   time_t curr_time;
   struct tm * cts;
@@ -256,22 +242,20 @@ log_lprintf(cw_log_t * a_log_o, char * a_format, ...)
 	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
   
-  if ((a_log_o == NULL) || (a_log_o->log_fp == NULL))
+  if (a_log_o->log_fp == NULL)
   {
-    /* Use stderr. */
-    fprintf(stderr, "%s", time_str);
-    va_start(ap, a_format);
-    retval = vfprintf(stderr, a_format, ap);
-    va_end(ap);
+    fp = stderr;
   }
   else
   {
-    fprintf(a_log_o->log_fp, "%s", time_str);
-    va_start(ap, a_format);
-    retval = vfprintf(a_log_o->log_fp, a_format, ap);
-    va_end(ap);
-    fflush(a_log_o->log_fp);
+    fp = a_log_o->log_fp;
   }
+
+  fprintf(fp, "%s", time_str);
+  va_start(ap, a_format);
+  retval = vfprintf(fp, a_format, ap);
+  va_end(ap);
+  fflush(fp);
 
   mtx_unlock(&a_log_o->lock);
   return retval;
@@ -294,6 +278,7 @@ log_leprintf(cw_log_t * a_log_o,
 {
   va_list ap;
   int retval;
+  FILE * fp;
   char time_str[29];
   time_t curr_time;
   struct tm * cts;
@@ -308,50 +293,34 @@ log_leprintf(cw_log_t * a_log_o,
 	  cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 	  cts->tm_hour, cts->tm_min, cts->tm_sec, cts->tm_zone);
 
-  if ((a_log_o == NULL) || (a_log_o->log_fp == NULL))
+  if (a_log_o->log_fp == NULL)
   {
-    /* Use stderr. */
-    if (a_filename != NULL)
-    {
-      fprintf(stderr,
-	      "%sAt %s, line %d: ",
-	      time_str,
-	      a_filename,
-	      a_line_num);
-    }
-    if (a_func_name != NULL)
-    {
-      fprintf(stderr,
-	      "%s(): ",
-	      a_func_name);
-    }
-
-    va_start(ap, a_format);
-    retval = vfprintf(stderr, a_format, ap);
-    va_end(ap);
+    fp = stderr;
   }
   else
   {
-    if (a_filename != NULL)
-    {
-      fprintf(a_log_o->log_fp,
-	      "%sAt %s, line %d: ",
-	      time_str,
-	      a_filename,
-	      a_line_num);
-    }
-    if (a_func_name != NULL)
-    {
-      fprintf(a_log_o->log_fp,
-	      "%s(): ",
-	      a_func_name);
-    }
-
-    va_start(ap, a_format);
-    retval = vfprintf(a_log_o->log_fp, a_format, ap);
-    va_end(ap);
-    fflush(a_log_o->log_fp);
+    fp = a_log_o->log_fp;
   }
+
+  if (a_filename != NULL)
+  {
+    fprintf(fp,
+	    "%sAt %s, line %d: ",
+	    time_str,
+	    a_filename,
+	    a_line_num);
+  }
+  if (a_func_name != NULL)
+  {
+    fprintf(fp,
+	    "%s(): ",
+	    a_func_name);
+  }
+
+  va_start(ap, a_format);
+  retval = vfprintf(fp, a_format, ap);
+  va_end(ap);
+  fflush(fp);
 
   mtx_unlock(&a_log_o->lock);
   return retval;
