@@ -1,3 +1,11 @@
+2002-11-15 : Jason Evans <jasone@canonware.com>
+
+	* Add the regexerror error.
+
+	* Add the regex operator.
+
+	* lib/libonyx/include/libonyx/nxa_l.h:nxa_l_count_adjust() : Add.
+
 2002-11-03 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Add case for NXOT_REAL
