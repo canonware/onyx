@@ -14,7 +14,7 @@ typedef struct cw_thd_s cw_thd_t;
 
 /*
  * Define whether to use the generic thread suspend/resume mechanism on
- * FreeBSD.
+ * FreeBSD.  The generic version is about 2 orders of magnitude slower.
  */
 #ifdef _CW_OS_FREEBSD
 #define _CW_THD_FREEBSD_SR

@@ -32,9 +32,9 @@ struct cw_thd_s {
 	cw_bool_t	suspendible:1;
 #ifdef _CW_THD_GENERIC_SR
 	sem_t		sem;		/* For suspend/resume. */
-	cw_bool_t	suspended:1;
 #endif
 	cw_mtx_t	crit_lock;
+	cw_bool_t	suspended:1;	/* Suspended by thd_suspend()? */
 	cw_bool_t	singled:1;	/* Suspended by thd_single_enter()? */
 	qr(cw_thd_t)	link;
 	cw_bool_t	delete:1;
@@ -121,9 +121,9 @@ thd_l_init(void)
 		    "Error in sem_init(): [s]\n", strerror(error));
 		abort();
 	}
-	cw_g_thd.suspended = FALSE;
 #endif
 	mtx_new(&cw_g_thd.crit_lock);
+	cw_g_thd.suspended = FALSE;
 	cw_g_thd.singled = FALSE;
 	qr_new(&cw_g_thd, link);
 #ifdef _LIBSTASH_DBG
@@ -182,9 +182,9 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 		    "Error in sem_init(): [s]\n", strerror(error));
 		abort();
 	}
-	retval->suspended = FALSE;
 #endif
 	mtx_new(&retval->crit_lock);
+	retval->suspended = FALSE;
 	retval->singled = FALSE;
 	retval->delete = FALSE;
 #ifdef _LIBSTASH_DBG
@@ -327,31 +327,25 @@ thd_single_enter(void)
 
 	mtx_lock(&cw_g_thd_single_lock);
 	qr_foreach(thd, &cw_g_thd, link) {
-		if (thd != self) {
+		if (thd != self && thd->suspended == FALSE) {
 			mtx_lock(&thd->crit_lock);
 			thd_p_suspend(thd);
 			thd->singled = TRUE;
 		}
 	}
-	mtx_unlock(&cw_g_thd_single_lock);
 }
 
 void
 thd_single_leave(void)
 {
-	cw_thd_t	*self, *thd;
+	cw_thd_t	*thd;
 
 	_cw_assert(cw_g_thd_initialized);
 
-	self = thd_self();
-	_cw_check_ptr(self);
-	_cw_assert(self->magic == _CW_THD_MAGIC);
-
-	mtx_lock(&cw_g_thd_single_lock);
 	qr_foreach(thd, &cw_g_thd, link) {
 		if (thd->singled) {
-			thd_resume(thd);
 			thd->singled = FALSE;
+			thd_resume(thd);
 		}
 	}
 	mtx_unlock(&cw_g_thd_single_lock);
@@ -513,6 +507,7 @@ thd_p_suspend(cw_thd_t *a_thd)
 	}
 #endif
 #ifdef _CW_THD_FREEBSD_SR
+	a_thd->suspended = TRUE;
 	error = pthread_suspend_np(a_thd->thread);
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,

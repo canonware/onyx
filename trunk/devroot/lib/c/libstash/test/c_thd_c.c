@@ -11,7 +11,9 @@
 
 #include "../include/libstash/libstash.h"
 
-#define	NTHREADS	20
+#define	NSUSPENDIBLE	20
+#define	NSUSPENDERS	20
+#define	NTHREADS	(NSUSPENDIBLE + NSUSPENDERS)
 #define	NITERATIONS	200
 
 cw_uint32_t	count = 0;
@@ -39,9 +41,14 @@ main()
 	libstash_init();
 	out_put(out_err, "Test begin\n");
 
-	for (i = 0; i < NTHREADS; i++)
+	/* Create threads that can be suspended. */
+	for (i = 0; i < NSUSPENDIBLE; i++)
+		thds[i] = thd_new(thread_entry_func, NULL, TRUE);
+	/* Create threads that cannot be suspended. */
+	for (; i < NTHREADS; i++)
 		thds[i] = thd_new(thread_entry_func, NULL, FALSE);
 
+	/* The initial thread is suspendible. */
 	thread_entry_func(NULL);
 
 	for (i = 0; i < NTHREADS; i++)
