@@ -94,6 +94,7 @@ sizes:
 the application:
 \begin{description}
 \item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
+\item[cw\_g\_mema: ] \classname{mema} instance, wraps \cvar{cw\_g\_mem}.
 \end{description}
 
 \section{Threads}
@@ -230,7 +231,7 @@ behavior and likely crashes.
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
-		\cvar{cw\_g\_mem}.
+		\cvar{cw\_g\_mem} and \cvar{cw\_g\_mema}.
 	\end{capilist}
 \label{libonyx_shutdown}
 \index{libonyx_shutdown@\cfunc{libonyx\_shutdown}{}}

@@ -33,6 +33,9 @@ cw_mem_t *cw_g_mem = NULL;
 static cw_mem_t *cw_g_mem_mem = NULL;
 #endif
 
+cw_mema_t *cw_g_mema = NULL;
+static cw_mema_t mema;
+
 #if (defined(CW_SOCKET) && defined(CW_THREADS))
 cw_mtx_t cw_g_gethostbyname_mtx;
 cw_mtx_t cw_g_getprotobyname_mtx;
@@ -88,6 +91,13 @@ libonyx_init(void)
     }
     xep_end();
 
+    cw_g_mema = mema_new(&mema,
+			 (cw_opaque_alloc_t *) mem_malloc_e,
+			 (cw_opaque_calloc_t *) mem_calloc_e,
+			 (cw_opaque_realloc_t *) mem_realloc_e,
+			 (cw_opaque_dealloc_t *) mem_free_e,
+			 cw_g_mem);
+
 #ifdef CW_POSIX
     /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
      * program. */
@@ -111,6 +121,8 @@ libonyx_shutdown(void)
     mtx_delete(&cw_g_getprotobyname_mtx);
     mtx_delete(&cw_g_gethostbyname_mtx);
 #endif
+
+    mema_delete(cw_g_mema);
 
     mem_delete(cw_g_mem);
     cw_g_mem = NULL;

@@ -1,3 +1,7 @@
+2003-04-17 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/libonyx.c : Add the cw_g_mema global variable.
+
 2003-04-05 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.4.3 released.

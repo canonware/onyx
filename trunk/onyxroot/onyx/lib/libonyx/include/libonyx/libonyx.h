@@ -278,6 +278,7 @@ libonyx_shutdown(void);
 
 /* Global variables. */
 extern cw_mem_t *cw_g_mem;
+extern cw_mema_t *cw_g_mema;
 
 #if (defined(CW_POSIX) && defined(CW_THREADS))
 extern cw_mtx_t cw_g_gethostbyname_mtx;
