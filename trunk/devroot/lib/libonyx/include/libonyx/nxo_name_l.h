@@ -110,7 +110,7 @@ nxoe_l_name_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_name_t *name;
 
     name = (cw_nxoe_name_t *) a_nxoe;
-    
+
     cw_check_ptr(name);
     cw_dassert(name->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(name->nxoe.type == NXOT_NAME);

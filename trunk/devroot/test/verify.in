@@ -240,7 +240,7 @@ foreach $test (@ARGV)
 	@FAILED_TESTS = (@FAILED_TESTS, $test);
     }
 
-    # If there were historical data, add the run time to the total time to 
+    # If there were historical data, add the run time to the total time to
     # compare against the historical run time.
     if (0 < ($hutime + $hstime))
     {
@@ -353,7 +353,7 @@ sub print_stats
 	$pass_str = $pass_str . " ($failed_subtests/$subtests failed)";
     }
     $pass_str = $pass_str . ' ' x (39 - length($pass_str));
-    
+
     if (-r "$test.perf")
     {
 	if (!open (TEST_PERF, "<$opt_objdir/$test.perf"))

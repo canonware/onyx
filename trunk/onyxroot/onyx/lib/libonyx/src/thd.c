@@ -370,7 +370,7 @@ thd_delete(cw_thd_t *a_thd)
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_set(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
-    }	
+    }
     if (pth_attr_destroy(attr) == FALSE)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in pth_attr_destroy(): %s\n",
@@ -622,7 +622,7 @@ thd_p_delete(cw_thd_t *a_thd)
 	a_thd->delete = TRUE;
     }
     mtx_unlock(&a_thd->mtx);
-	
+
     if (delete)
     {
 	mtx_delete(&a_thd->mtx);

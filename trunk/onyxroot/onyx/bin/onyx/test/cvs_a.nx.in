@@ -27,7 +27,6 @@
 	`mark'
 	`null'
 	`()'
-	
 ]{
 	dup 1 sprint
 	cvx eval

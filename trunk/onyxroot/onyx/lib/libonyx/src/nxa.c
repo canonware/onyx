@@ -716,7 +716,7 @@ nxa_stats_get(cw_nxoi_t *r_collections, cw_nxoi_t *r_count,
 	      cw_nxoi_t *r_scount, cw_nxoi_t *r_smark)
 {
     cw_assert(cw_g_nxa_initialized);
-	
+
 #ifdef CW_THREADS
     mtx_lock(&s_lock);
 #endif

@@ -273,7 +273,7 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
     }
 #endif
     cw_assert(array->nxoe.indirect == FALSE);
-    
+
     cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
     nxo_dup(r_el, &array->e.a.arr[a_offset]);
 #ifdef CW_THREADS

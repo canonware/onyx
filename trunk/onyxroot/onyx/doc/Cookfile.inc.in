@@ -86,12 +86,12 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
   rm -f @objroot@/%0latex/%1/texput.log;
 
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @PDFLATEX@
-                                   %.tex;
-  cd @objroot@/%0latex/%1/\; @MAKEINDEX@ -c -l 
-                                        -s @abs_srcroot@/%0latex/%1/%.mst
-                                        %.idx;
+                                    %.tex;
+  cd @objroot@/%0latex/%1/\; @MAKEINDEX@ -c -l
+                                         -s @abs_srcroot@/%0latex/%1/%.mst
+                                         %.idx;
   cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @PDFLATEX@
-                                   %.tex;
+                                    %.tex;
   cp @objroot@/%0latex/%1/%.pdf @objroot@/%0pdf/%1/%.pdf;
 }
 

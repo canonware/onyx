@@ -27,7 +27,7 @@
 	` snpop --> ' print
 
 	over () copy dup dn snbpop
-	
+
 	exch 1 sprints print
 	` ' print
 	1 sprint

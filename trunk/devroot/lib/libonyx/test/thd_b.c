@@ -45,7 +45,7 @@ main()
 {
     cw_uint32_t j, count;
     struct timespec tout = {0, 1000000};
-		
+
     libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
@@ -70,7 +70,7 @@ main()
 	cw_assert(count <= i);
 	thd_resume(thd);
     }
-	
+
     fprintf(stderr, "thd_trysuspend()\n");
     for (j = 0; j < 7; j++)
     {

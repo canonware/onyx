@@ -182,7 +182,7 @@ nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 
     cw_check_ptr(a_to);
     cw_dassert(a_to->magic == CW_NXO_MAGIC);
-	  
+
     to = (cw_nxoe_stack_t *) a_to->o.nxoe;
     cw_dassert(to->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(to->nxoe.type == NXOT_STACK);

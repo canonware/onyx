@@ -51,7 +51,7 @@ main()
     {
 	thds[i] = thd_new(thread_entry_func, NULL, TRUE);
     }
-	
+
     for (i = 0; i < NTHREADS; i++)
     {
 	thd_join(thds[i]);

@@ -393,7 +393,7 @@ mq_put(cw_mq_t *a_mq, ...)
 		void *x; /* Don't care. */
 	    } t_msgs;
 	    cw_uint32_t i, offset;
-			
+
 	    /* Array overflow.  Double the array and copy the messages. */
 	    t_msgs.x = (void *) cw_opaque_alloc(mema_alloc_get(a_mq->mema),
 						mema_arg_get(a_mq->mema),

@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-0 mark put 
+0 mark put
 
 `Test end\n' print

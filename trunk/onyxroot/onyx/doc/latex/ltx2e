@@ -40,7 +40,7 @@ $SIG{'QUIT'} = 'rm_temp_files_and_exit';
 
 sub die_gracefully {
     local($msg) = @_;
-    
+
     print STDERR $msg;
     &rm_temp_files_and_exit();
 }
@@ -48,7 +48,7 @@ sub die_gracefully {
 # must read through root file to see if a \bibliography
 # is there...
 $Bibliography_requested = 0;
-open(TEXIF, "<$TeX_input") 
+open(TEXIF, "<$TeX_input")
     || &die_gracefully("$Pgm: Can't read $TeX_input\n");
 while (<TEXIF>) {
     $Bibliography_requested = 1 if /^\\bibliography/;
@@ -69,7 +69,7 @@ while (&something_more_needed()) {
     }
     if ($MakeIndex_run_needed) {
 	unlink "$TeX_root.ind";
-	(system("makeindex $TeX_root.idx") >> 8) 
+	(system("makeindex $TeX_root.idx") >> 8)
 	    && &die_gracefully("$Pgm: makeindex $TeX_root.idx had errors\n");
     }
 
@@ -107,8 +107,8 @@ sub run_latex {
     print STDERR "$Pgm: *** running LaTeX...\n" if $Verbose;
     unlink "$TeX_root.dvi";
 
-    open(LTXPIPE, "$latex $TeX_input 2>&1 |") 
-    	|| &die_gracefully("$Pgm: Can't run latex pipe\n");
+    open(LTXPIPE, "$latex $TeX_input 2>&1 |")
+	|| &die_gracefully("$Pgm: Can't run latex pipe\n");
     while (<LTXPIPE>) {
 	$Multiply_defined_labels = 1 if /^LaTeX Warning: Label .* multiply defined/;
 	$Says_labels_changed = 1 if /^LaTeX Warning: Label\(s\) may have changed/
@@ -139,15 +139,15 @@ sub run_bibtex { # ugly because bibtex doesn't return a correct error status
     unlink "$TeX_root.bbl";
 
     $| = 1; # no buffering
-    open(BIBTXPIPE, "bibtex $TeX_root 2>&1 |") 
-    	|| &die_gracefully("$Pgm: Can't run bibtex pipe\n");
+    open(BIBTXPIPE, "bibtex $TeX_root 2>&1 |")
+	|| &die_gracefully("$Pgm: Can't run bibtex pipe\n");
     while (<BIBTXPIPE>) {
 	$bibtex_had_errors = 1 if /^\(There.*error message(s)?\)$/;
 	print STDERR $_;
     }
     close(BIBTXPIPE);
     &die_gracefully("$Pgm: BibTeX run had errors\n")
-    	if $? >> 8 || $bibtex_had_errors;
+	if $? >> 8 || $bibtex_had_errors;
 }
 
 sub something_more_needed {

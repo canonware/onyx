@@ -26,7 +26,7 @@
 	` snup --> ' print
 
 	over () copy dup dn snup
-	
+
 	1 sprint
     } for
     clear

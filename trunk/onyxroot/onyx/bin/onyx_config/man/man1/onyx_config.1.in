@@ -10,7 +10,7 @@ Version: Onyx <Version = onyx>
 .SH NAME
 onyx_config - configuration helper for building with libonyx
 .SH SYNOPSIS
-.B onyx_config 
+.B onyx_config
 .BR [ \-\-help ]
 .BR [ \-\-prefix ]
 .BR [ \-\-version ]

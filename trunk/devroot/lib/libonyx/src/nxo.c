@@ -217,7 +217,6 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 		    {
 			retval = 1;
 		    }
-		    
 		    break;
 		}
 #endif
@@ -295,7 +294,7 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 	    cw_not_reached();
 	}
     }
-	
+
     return retval;
 }
 

@@ -21,7 +21,7 @@ $foo (`a' `b' `c' `d' `e' `f' `g' `h' `i' `j'
      ) def
 
 foo 16 snpop pop
-     
+
 foo {
     1 sprint
     foo spop pop foo 1 sprint

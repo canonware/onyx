@@ -3467,10 +3467,10 @@ onyx:0>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8@755 mkdir 
+onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' status $mode get 1 sprint
 16877
-onyx:0> `/tmp/tdir' `r' open 
+onyx:0> `/tmp/tdir' `r' open
 onyx:1> dup 8@555 chmod
 onyx:1> `/tmp/tdir' status $mode get 1 sprint
 16749
@@ -3507,7 +3507,7 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/tmp/tdir' 8@755 mkdir
-onyx:0> `/tmp/tdir' status 
+onyx:0> `/tmp/tdir' status
 onyx:1> dup $uid get 1 sprint
 1001
 onyx:1> $gid get 1 sprint
@@ -4005,7 +4005,7 @@ onyx:5>
 		Get the topmost dictionary on dstack.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> <$foo `foo'> begin 
+onyx:0> <$foo `foo'> begin
 onyx:0> currentdict 1 sprint
 <$foo `foo'>
 onyx:0>
@@ -6058,7 +6058,7 @@ onyx:0>
 		Remove the \oparg{obj} at \oparg{index} from ostack.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> 2 1 0 
+onyx:0> 2 1 0
 onyx:3> 1 ipop pstack
 0
 2
@@ -6224,7 +6224,7 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{class} is in \oparg{instance}'s 
+			True if \oparg{class} is in \oparg{instance}'s
 			inheritance hierarchy, false otherwise.
 		\end{description}
 	\item[Errors(s): ]
@@ -6603,7 +6603,7 @@ onyx:0> $date {
 
     over $hour get <$w 2 $p `0'> outputs
     `:' 3 ncat
-    
+
     over $min get <$w 2 $p `0'> outputs
     `:' 3 ncat
 
@@ -7904,7 +7904,7 @@ onyx:0> 4242 <$s $+> outputs print `\n' print flush
 +4242
 onyx:0> `0x' print 4242 <$b 16> outputs print `\n' print flush
 0x1092
-onyx:0> `0x' 4242 <$b 16> outputs cat <$w 10 $p `.'> outputs 
+onyx:0> `0x' 4242 <$b 16> outputs cat <$w 10 $p `.'> outputs
 onyx:1> print `\n' print flush
 ....0x1092
 onyx:0> `0x' print 4242 <$w 8 $p `0' $b 16> outputs print `\n' print flush
@@ -8798,7 +8798,7 @@ onyx:0>
 		Rename a file or directory from \oparg{old} to \oparg{new}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8@755 mkdir 
+onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' `/tmp/ndir' rename
 onyx:0> `/tmp/ndir' {1 sprint} dirforeach
 `.'
@@ -8936,7 +8936,7 @@ onyx:0>
 		negative \oparg{amount} indicates a downward roll.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> 3 2 1 0 
+onyx:0> 3 2 1 0
 onyx:4> pstack
 0
 1
@@ -9772,8 +9772,7 @@ onyx:0>
 
 lawine:~> cat /tmp/stdin
 1 2 3 pstack
-lawine:~> onyx 
-Canonware Onyx, version 3.1.0.
+lawine:~> onyx
 onyx:0> `/tmp/stdin' `r' open cvx setgstdin
 onyx:0> () {stdin eval} thread join
 3
@@ -10069,7 +10068,7 @@ onyx:1>
 onyx:0> $AF_INET $SOCK_STREAM socket
 onyx:1> dup $SO_OOBINLINE sockopt 1 sprint
 0
-onyx:1> dup $SO_OOBINLINE 1 setsockopt 
+onyx:1> dup $SO_OOBINLINE 1 setsockopt
 onyx:1> dup $SO_OOBINLINE sockopt 1 sprint
 1
 onyx:1>
@@ -10130,8 +10129,7 @@ onyx:0>
 
 lawine:~> cat /tmp/stdin
 1 2 3 pstack
-lawine:~> onyx 
-Canonware Onyx, version 3.1.0.
+lawine:~> onyx
 onyx:0> `/tmp/stdin' `r' open cvx setstdin
 onyx:0> stdin eval
 3
@@ -12534,7 +12532,7 @@ onyx:0>
 		if \oparg{mutex} cannot be acquired, rather than blocking.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> mutex dup 
+onyx:0> mutex dup
 onyx:2> trylock 1 sprint
 false
 onyx:1> trylock 1 sprint
@@ -12567,7 +12565,7 @@ onyx:0>
 		the second object on ostack.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `a' `b' `c' 
+onyx:0> `a' `b' `c'
 oonyx:3> tuck pstack
 `c'
 `b'

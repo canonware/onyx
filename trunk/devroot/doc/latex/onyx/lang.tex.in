@@ -471,7 +471,7 @@ Examples include:
 `'
 `A string.'
 `An embedded \n newline.'
-`Another embedded 
+`Another embedded
 newline.'
 `An ignored \
 newline.'

@@ -323,7 +323,7 @@ main()
 	}
 	fprintf(stderr, "\n");
     }
-	
+
     fprintf(stderr, "Test end\n");
     libonyx_shutdown();
     return 0;

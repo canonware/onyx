@@ -28,7 +28,7 @@
     {`Input String' `([a-j])' `\\\1' <$g true> subst pstack 2 npop}
 
     {`Input String' `([a-j])' `\1\\' <$g true> subst pstack 2 npop}
-    
+
     {`Input String' `i' `>\1<' <$g true> subst pstack 2 npop}
     {`Input String' `i' `>\1<' <$g true $i true> subst pstack 2 npop}
 

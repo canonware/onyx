@@ -47,7 +47,7 @@ xep_l_shutdown(void)
 #ifdef CW_DBG
     s_xep_initialized = FALSE;
 #endif
-}	
+}
 
 void
 xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,

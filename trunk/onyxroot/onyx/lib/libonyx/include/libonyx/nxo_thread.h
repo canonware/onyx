@@ -96,7 +96,7 @@ struct cw_nxoe_thread_s
 
     /* Execution index stack. */
     cw_nxo_t istack;
-    
+
     /* Operand stack. */
     cw_nxo_t ostack;
 
@@ -212,7 +212,7 @@ struct cw_nxoe_thread_s
 #endif
 		ACTION_IMMEDIATE
 	    } action;
-	} m;	
+	} m;
     } m;
 };
 

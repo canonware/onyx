@@ -91,7 +91,7 @@ mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
     {
 	cw_check_ptr(a_alloc);
 	cw_check_ptr(a_dealloc);
-    	retval = (cw_mema_t *) cw_opaque_alloc(a_alloc, a_arg,
+	retval = (cw_mema_t *) cw_opaque_alloc(a_alloc, a_arg,
 					       sizeof(cw_mema_t));
 	retval->is_malloced = TRUE;
     }
@@ -165,7 +165,7 @@ mem_l_init(void)
 			 NULL);
 
 #ifdef CW_MEM_ERROR
-    mema_new(&s_mem_mema, 
+    mema_new(&s_mem_mema,
 	     (cw_opaque_alloc_t *) mem_p_malloc_e,
 	     (cw_opaque_calloc_t *) mem_p_calloc_e,
 	     (cw_opaque_realloc_t *) mem_p_realloc_e,

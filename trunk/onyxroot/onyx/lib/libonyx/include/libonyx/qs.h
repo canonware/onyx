@@ -24,7 +24,7 @@ struct									\
 {									\
     a_type *qse_down;							\
 }
- 
+
 /* Stack functions. */
 #define qs_new(a_head)							\
     do									\

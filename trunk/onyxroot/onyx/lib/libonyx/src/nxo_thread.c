@@ -115,14 +115,11 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
     {
 	case THREADTS_START:
 	{
-	    
 	    /* No problem. */
 	    break;
 	}
-	
 	case THREADTS_COMMENT:
 	{
-	    
 	    /* No problem. */
 	    nxoe_p_thread_reset(thread);
 	    break;
@@ -2321,7 +2318,6 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			CW_NXO_THREAD_PUTC(c - 'A' + 1);
 			break;
 		    }
-		    
 		    default:
 		    {
 			nxoe_p_thread_syntax_error(a_thread, a_threadp,
@@ -2831,7 +2827,7 @@ nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 
 	/* Create an integer on ostack. */
 	nxo = nxo_stack_push(&a_thread->ostack);
- 	nxo_integer_new(nxo, val);
+	nxo_integer_new(nxo, val);
 	nxoe_p_thread_reset(a_thread);
     }
     else

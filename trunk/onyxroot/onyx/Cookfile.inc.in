@@ -28,7 +28,7 @@ function filter_cppdefs =
   return [cppflags];
 }
 
-/* 
+/*
  * Make sure file timestamps are at least 1 second apart for all adjacent
  * dependency nodes.
  */
@@ -124,7 +124,7 @@ if [not [defined LDFLAGS]] then
         [filter_out @objroot@/config.stamp @cfghdrs@]]
   : @srcroot@/configure.in;
 
-@objroot@/config.stamp : [fromto @objroot@/%0% @srcroot@/%0%.in 
+@objroot@/config.stamp : [fromto @objroot@/%0% @srcroot@/%0%.in
                           [filter_out @objroot@/config.stamp @cfghdrs@]]
                          @objroot@/config.status
 {
@@ -177,7 +177,7 @@ clean : [addsuffix _clean docs tests bins mods libs]
 {
   /*
    * Delete .cook.fp files from the source tree and object tree.
-   * Delete Cookfile.list files from the object tree. 
+   * Delete Cookfile.list files from the object tree.
    */
   [SHELL] -e;
 data

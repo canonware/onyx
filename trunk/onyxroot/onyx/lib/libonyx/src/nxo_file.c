@@ -1590,7 +1590,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 	retval = NXN_ioerror;
 	goto RETURN;
     }
-	
+
     if (a_file->buffer != NULL)
     {
 	/* Only write if the buffered data is for writing. */

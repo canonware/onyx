@@ -516,7 +516,7 @@ modprompt_signal_handle(int a_signal)
     {
 	case SIGWINCH:
 	{
- 	    el_resize(synth->el);
+	    el_resize(synth->el);
 	    break;
 	}
 	case SIGTSTP:

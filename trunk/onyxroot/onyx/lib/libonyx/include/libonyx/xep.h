@@ -84,7 +84,7 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 #define xep_handled() xep_p_handled(&_xep)
 
 /* Private, but visible here so that the cpp macros above don't cause
- * compilation warnings. */ 
+ * compilation warnings. */
 void
 xep_p_retry(cw_xep_t *a_xep);
 

@@ -129,6 +129,6 @@ nxo_condition_timedwait(cw_nxo_t *a_nxo, cw_nxo_t *a_mutex,
     cw_assert(mutex->nxoe.type == NXOT_MUTEX);
 
     retval = cnd_timedwait(&condition->condition, &mutex->lock, a_timeout);
-	
+
     return retval;
 }

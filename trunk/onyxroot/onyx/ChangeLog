@@ -774,7 +774,7 @@
 	* lib/libonyx/src/systemdict.c : Add operators:
 	  + bpop, nbpop, ipop, nip, tuck, under, over, up, nup, dn, ndn, bdup,
 	    ibdup, ibpop, bpush
-	  + sbpop, snbpop, sipop, snip, stuck, sunder, sover, sup, snup, sdn, 
+	  + sbpop, snbpop, sipop, snip, stuck, sunder, sover, sup, snup, sdn,
 	    sndn, sndup, snpop, sbdup, sibdup, sibpop, sbpush
 
 	* lib/libonyx/include/libonyx/nxo_stack.h : Add functions:
@@ -1078,7 +1078,7 @@
 2001-10-04 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_iobuf() : Add.
-	
+
 	systemdict_setiobuf() : Add.
 
 	* bin/onyx/src/onyx.c:signal_handle() : Reset the terminal before

@@ -414,7 +414,7 @@ $outputsdict <
 	6
 	} ifelse
 	#real #flags #precision
-	
+
 	# Determine whether to use decimal or exponential notation.
 	over $e known {
 	over $e get

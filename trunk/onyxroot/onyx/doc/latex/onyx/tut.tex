@@ -564,7 +564,7 @@ onyx:0> 3 factorial 1 sprint
 onyx:0> $factorial load 2 sprint
 {dup 1 gt {dup 1 sub factorial} {1} ifelse mul}
 onyx:0> $factorial load 4 {1 pstack} put
-onyx:0> 3 factorial 
+onyx:0> 3 factorial
 1
 1
 2
@@ -740,7 +740,7 @@ Now the estack contents should be back to normal.
 \begin{verbatim}
 onyx:1> estack 1 sprint
 (--start-- -file- --estack--)
-onyx:1> 
+onyx:1>
 \end{verbatim}
 
 The above example only demonstrates the flavor of typical interactive debugging,
