@@ -43,6 +43,7 @@ $optclass clopt <
 progname usage:
     progname [--foo] [--bar[=<arg>]] [--biz=<arg>]
     padchars [-a] [-b <arg>]
+    padchars [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
 '
 	`progname' ;progname_get <$g true> subst pop
 	`padchars' ;progname_get `.' ` ' <$g true> subst pop <$g true> subst pop
@@ -91,6 +92,34 @@ progname usage:
 	` --> -b ==> ' print
 	this:arg_get 1 sprint
     }
+
+    #instance#
+    #- `--enum?' -
+    `--enum?' {
+	this:index_get cvs print
+	` --> --enum ==> ' print
+	<
+	    $default `default'
+	    `hi' `HI'
+	    `bye' `BYE'
+	> ;arg_enum_get 1 sprint
+    }
+
+    #instance#
+    #- `--int=' -
+    `--int=' {
+	this:index_get cvs print
+	` --> --int ==> ' print
+	;arg_int_get 1 sprint
+    }
+
+    #instance#
+    #- `--uint=' -
+    `--uint=' {
+	this:index_get cvs print
+	` --> --uint ==> ' print
+	;arg_uint_get 1 sprint
+    }
 > cdef
 
 # Instantiate optclass.
@@ -126,6 +155,30 @@ optclass:new
     [`fake_argv_12' `-b' `bam' `remainder' `arguments']
 
     [`fake_argv_13' `--foo' `--bar' `--' `--biz=bang' `more' `remainder']
+
+    [`fake_argv_14' `--enum']
+
+    [`fake_argv_15' `--enum=hi']
+
+    [`fake_argv_16' `--enum=blah']
+
+    [`fake_argv_17' `--int=-42']
+
+    [`fake_argv_18' `--int=0']
+
+    [`fake_argv_19' `--int=777']
+
+    [`fake_argv_20' `--int=']
+
+    [`fake_argv_21' `--int=foo']
+
+    [`fake_argv_22' `--uint=0']
+
+    [`fake_argv_23' `--uint=888']
+
+    [`fake_argv_24' `--uint=-5']
+
+    [`fake_argv_25' `--uint=bar']
 ]{
     `=== ' print
     dup 1 sprints print
