@@ -40,9 +40,6 @@ v:data 1 sprint
 `v:isa --> ' print
 v:isa 1 sprint
 
-`mclass v:setisa\n' print
-mclass v:setisa
-
 `v:isa --> ' print
 v:isa 1 sprint
 
@@ -54,9 +51,6 @@ v:isa 1 sprint
 
 `vclass v:kind --> ' print
 vclass v:kind 1 sprint
-
-`mclass v:kind --> ' print
-mclass v:kind 1 sprint
 
 #
 # Class-related methods.
@@ -101,9 +95,6 @@ $fooclass fooclass:setclassname
 
 `fooclass:super --> ' print
 fooclass:super 1 sprint
-
-`mclass fooclass:setsuper\n' print
-mclass fooclass:setsuper
 
 `fooclass:super --> ' print
 fooclass:super 1 sprint
