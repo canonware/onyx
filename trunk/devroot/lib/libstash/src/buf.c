@@ -700,7 +700,7 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
       if (bufel_offset != 0)
       {
 #ifdef _LIBSTASH_DBG
-	/* Copy the bufel back to a_b, since the data is split and the original
+	/* Copy the bufel back to a_b, since the data are split and the original
 	 * bufel must still remain valid. */
 	memcpy(&a_b->bufel_array[a_b_index],
 	       &a_a->bufel_array[a_a_index],
@@ -1185,11 +1185,6 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   /* Prepare a byte for logical or into retval.
    * o: Offset from bufel_offset.
    * s: Number of bytes to left shift. */
-/*  #define _LIBSTASH_BUF_OR_BYTE(o, s) \ */
-/*    (((cw_uint32_t) *(a_buf->bufel_array[array_element].bufc->buf \ */
-/*                      + bufel_offset + (o)) << ((s) << 3)) \ */
-/*     & (0xff << ((s) << 3))) */
-
 #define _LIBSTASH_BUF_OR_BYTE(o, s) \
   ((cw_uint32_t) *(a_buf->bufel_array[array_element].bufc->buf \
                    + bufel_offset + (o)) << ((s) << 3))
@@ -1671,7 +1666,6 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
     a_buf->bufel_array[a_buf->array_end].beg_offset = 0;
     a_buf->bufel_array[a_buf->array_end].end_offset = a_length;
     a_buf->bufel_array[a_buf->array_end].bufc = bufc;
-/*      bufc_p_ref_increment(bufc); */
     
     a_buf->size += a_length;
     a_buf->array_num_valid++;
@@ -2295,7 +2289,7 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
   else
   {
     if ((is_a_wrapped)
-	&& ((a_b->array_size - a_b_start) < (a_a->array_size - a_a_start)))
+	&& ((a_b->array_size - a_b_start) > (a_a->array_size - a_a_start)))
     {
       /* The first chunk of a_b wraps into a_a.
        *
@@ -2364,7 +2358,7 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
 #endif
     }
     else if ((is_a_wrapped)
-	     && ((a_b->array_size - a_b_start) > (a_a->array_size - a_a_start)))
+	     && ((a_b->array_size - a_b_start) < (a_a->array_size - a_a_start)))
     {
       /* The second chunk of a_b wraps into a_a.
        *
@@ -2400,7 +2394,7 @@ buf_p_copy_array(cw_buf_t * a_a, cw_buf_t * a_b,
       third_chunk_size = a_num_elements - second_chunk_size - first_chunk_size;
 
       memcpy(&a_a->bufel_array[a_a_start],
-	     &a_a->bufel_array[a_b_start],
+	     &a_b->bufel_array[a_b_start],
 	     first_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
       if (a_is_destructive)

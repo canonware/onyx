@@ -1,3 +1,8 @@
+1999-12-28  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c (buf_p_copy_array): memcpy() from the source buf, not
+	the destination buf.  Also, unreverse two wrapping cases.
+
 1999-10-02  Jason Evans  <jasone@canonware.com>
 
 	* : Remove the log class (was deprecated on 29 July 1999).
