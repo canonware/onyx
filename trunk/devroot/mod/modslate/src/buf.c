@@ -1558,7 +1558,7 @@ buf_p_bufv_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
 							 vsplit.len, FALSE);
 
-	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len == 0)
+	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len != 0)
 	    {
 		/* No more space in this bufp, or no more remaining data in
 		 * bufv[v]. */
@@ -1656,7 +1656,7 @@ buf_p_bufv_rinsert(cw_buf_t *a_buf, cw_bufp_t *a_bufp, cw_bufp_t *a_pastp,
 	    nlines += (cw_uint64_t) bufp_p_simple_insert(bufp, &vsplit, 1,
 							 vsplit.len, TRUE);
 
-	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len == 0)
+	    if (CW_BUFP_SIZE - bufp->len == 0 || vremain.len != 0)
 	    {
 		/* No more space in this bufp, or no more remaining data in
 		 * bufv[v]. */
