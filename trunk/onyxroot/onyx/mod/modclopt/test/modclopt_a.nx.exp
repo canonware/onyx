@@ -136,4 +136,11 @@ fake_argv_25 usage:
                  [-a] [-b <arg>]
                  [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
 1 --> --uint ==> Parse error
+=== [`fake_argv_26' `--optint'] ===
+fake_argv_26: Missing value for option --optint
+fake_argv_26 usage:
+    fake_argv_26 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --optint ==> Parse error
 Test end

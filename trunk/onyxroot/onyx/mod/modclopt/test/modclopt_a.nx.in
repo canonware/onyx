@@ -120,6 +120,14 @@ progname usage:
 	` --> ' ;flag_get ` ==> ' 3 ncat print
 	;arg_uint_get 1 sprint
     }
+
+    #instance#
+    #- `--optint?' -
+    `--optint?' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	;arg_int_get 1 sprint
+    }
 > cdef
 
 # Instantiate optclass.
@@ -179,6 +187,8 @@ optclass:new
     [`fake_argv_24' `--uint=-5']
 
     [`fake_argv_25' `--uint=bar']
+
+    [`fake_argv_26' `--optint']
 ]{
     `=== ' print
     dup 1 sprints print

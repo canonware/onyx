@@ -370,7 +370,6 @@ clopt <
 		`Unsupported value \`' ,arg `\' for option ' ,flag 4 ncat
 		;error_escape
 	    } ifelse
-	    
 	} ifelse
     } bind
 
@@ -379,32 +378,37 @@ clopt <
     #instance#
     #- arg_int_get #int
     $arg_int_get {
-	,arg token {
-	    dup type $integertype eq {
-		# Stash the result until the error checking is done.
-		aup
+	,arg dup type $stringtype eq {
+	    token {
+		dup type $integertype eq {
+		    # Stash the result until the error checking is done.
+		    aup
 
-		# Make sure that there is no trailing garbage after the integer
-		# token.
-		dup `' eq {
-		    # No trailing garbage.
-		    pop
+		    # Make sure that there is no trailing garbage after the
+		    # integer token.
+		    dup `' eq {
+			# No trailing garbage.
+			pop
+		    }{
+			`Trailing garbage \`' exch `\' for option ' ,flag 4 ncat
+			;error_escape
+		    } ifelse
 		}{
-		    `Trailing garbage \`' exch `\' for option ' ,flag 4 ncat
+		    `Error parsing value \`' ;arg_get `\' for option ' ,flag
+		    4 ncat
 		    ;error_escape
 		} ifelse
 	    }{
-		`Error parsing value \`' ;arg_get `\' for option ' ,flag
-		4 ncat
+		`Error parsing value \`' ;arg_get `\' for option ' ,flag 4 ncat
 		;error_escape
 	    } ifelse
+
+	    # Unstash the result.
+	    adn
 	}{
-	    `Error parsing value \`' ;arg_get `\' for option ' ,flag 4 ncat
+	    `Missing value for option ' ,flag cat
 	    ;error_escape
 	} ifelse
-
-	# Unstash the result.
-	adn
     } bind
 
     # Return the current option argument as an unsigned integer.
