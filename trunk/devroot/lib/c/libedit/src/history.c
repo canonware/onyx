@@ -240,7 +240,7 @@ history_def_delete(h, hp)
 	abort();
     hp->prev->next = hp->next;
     hp->next->prev = hp->prev;
-    free((ptr_t) hp->ev.str);
+    h_free((ptr_t) hp->ev.str);
     h_free(hp);
     h->cur--;
 }
@@ -255,7 +255,8 @@ history_def_insert(h, str)
     const char *str;
 {
     h->cursor = (hentry_t *) h_malloc(sizeof(hentry_t));
-    h->cursor->ev.str = strdup(str);
+    h->cursor->ev.str = (char *)h_malloc(strlen(str) + 1);
+    strcpy((char *)h->cursor->ev.str, str);
     h->cursor->next = h->list.next;
     h->cursor->prev = &h->list;
     h->list.next->prev = h->cursor;
