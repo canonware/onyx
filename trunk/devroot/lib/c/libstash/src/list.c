@@ -73,7 +73,6 @@ void
 list_item_set(cw_list_item_t * a_list_item_o, void * a_data)
 {
   _cw_check_ptr(a_list_item_o);
-  _cw_check_ptr(a_data);
 
   a_list_item_o->item = a_data;
 }
@@ -132,25 +131,25 @@ list_new(cw_list_t * a_list_o)
 void
 list_delete(cw_list_t * a_list_o)
 {
+  cw_list_item_t * item;
+  cw_uint64_t i;
   _cw_check_ptr(a_list_o);
 
   /* Delete whatever items are still in the list.  This does *not* free
    * memory pointed to by the item pointers. */
-  while(a_list_o->count > 0)
+  for(i = 0; i < a_list_o->count; i++)
   {
-    _cw_free(list_p_hpop(a_list_o));
+    item = a_list_o->head;
+    a_list_o->head = list_item_p_get_next(a_list_o->head);
+    list_item_delete(item);
   }
   
   /* Delete the spares list. */
+  for (i = 0; i < a_list_o->spares_count; i++)
   {
-    cw_list_item_t * item;
-    
-    for (; a_list_o->spares_count > 0; a_list_o->spares_count--)
-    {
-      item = a_list_o->spares_head;
-      a_list_o->spares_head = a_list_o->spares_head->next;
-      _cw_free(item);
-    }
+    item = a_list_o->spares_head;
+    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
+    list_item_delete(item);
   }
 
 #ifdef _CW_REENTRANT
@@ -205,30 +204,30 @@ list_hpush(cw_list_t * a_list_o, void * a_data)
   {
     /* A spare item is available, so use it. */
     retval = a_list_o->spares_head;
-    a_list_o->spares_head = a_list_o->spares_head->next;
+    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
     a_list_o->spares_count--;
   }
   else
   {
     /* No spares available.  Create a new item. */
-    retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
+    retval = list_item_new();
   }
-  retval->item = a_data;
+  list_item_set(retval, a_data);
 
   /* Link things together. */
   if (a_list_o->head != NULL)
   {
     /* The list isn't empty. */
-    retval->prev = NULL;
-    retval->next = a_list_o->head;
-    a_list_o->head->prev = retval;
+    list_item_p_set_prev(retval, NULL);
+    list_item_p_set_next(retval, a_list_o->head);
+    list_item_p_set_prev(a_list_o->head, retval);
     a_list_o->head = retval;
   }
   else
   {
     /* The list is empty. */
-    retval->prev = NULL;
-    retval->next = NULL;
+    list_item_p_set_prev(retval, NULL);
+    list_item_p_set_next(retval, NULL);
     a_list_o->head = retval;
     a_list_o->tail = retval;
   }
@@ -297,7 +296,7 @@ list_hpeek(cw_list_t * a_list_o)
   }
   else
   {
-    retval = a_list_o->head->item;
+    retval = list_item_get(a_list_o->head);
   }
 
 #ifdef _CW_REENTRANT
@@ -332,30 +331,30 @@ list_tpush(cw_list_t * a_list_o, void * a_data)
   {
     /* A spare item is available, so use it. */
     retval = a_list_o->spares_head;
-    a_list_o->spares_head = a_list_o->spares_head->next;
+    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
     a_list_o->spares_count--;
   }
   else
   {
     /* No spares available.  Create a new item. */
-    retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
+    retval = list_item_new();
   }
-  retval->item = a_data;
+  list_item_set(retval, a_data);
   
   /* Link things together. */
   if (a_list_o->tail != NULL)
   {
     /* The list isn't empty. */
-    retval->next = NULL;
-    retval->prev = a_list_o->tail;
-    a_list_o->tail->next = retval;
+    list_item_p_set_next(retval, NULL);
+    list_item_p_set_prev(retval, a_list_o->tail);
+    list_item_p_set_next(a_list_o->tail, retval);
     a_list_o->tail = retval;
   }
   else
   {
     /* The list is empty. */
-    retval->prev = NULL;
-    retval->next = NULL;
+    list_item_p_set_prev(retval, NULL);
+    list_item_p_set_next(retval, NULL);
     a_list_o->head = retval;
     a_list_o->tail = retval;
   }
@@ -424,8 +423,71 @@ list_tpeek(cw_list_t * a_list_o)
   }
   else
   {
-    retval = a_list_o->tail->item;
+    retval = list_item_get(a_list_o->tail);
   }
+
+#ifdef _CW_REENTRANT
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_unlock(&a_list_o->lock);
+  }
+#endif
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * Inserts an item before the list node pointed to by a_in_list.
+ *
+ ****************************************************************************/
+cw_list_item_t *
+list_insert_before(cw_list_t * a_list_o,
+		  cw_list_item_t * a_in_list,
+		  void * a_data)
+{
+  cw_list_item_t * retval;
+  
+  _cw_check_ptr(a_list_o);
+  _cw_check_ptr(a_in_list);
+#ifdef _CW_REENTRANT
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_lock(&a_list_o->lock);
+  }
+#endif
+
+  /* Find a list item somewhere. */
+  if (a_list_o->spares_count > 0)
+  {
+    /* A spare item is available, so use it. */
+    retval = a_list_o->spares_head;
+    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
+    a_list_o->spares_count--;
+  }
+  else
+  {
+    /* No spares available.  Create a new item. */
+    retval = list_item_new();
+  }
+  list_item_set(retval, a_data);
+
+  if (list_item_p_get_prev(a_in_list) == NULL)
+  {
+    /* Inserting at the beginning of the list. */
+    list_item_p_set_prev(a_in_list, retval);
+    list_item_p_set_next(retval, a_in_list);
+    list_item_p_set_prev(retval, NULL);
+    a_list_o->head = retval;
+  }
+  else
+  {
+    /* Not at the beginning of the list. */
+    list_item_p_set_next(retval, a_in_list);
+    list_item_p_set_prev(retval, list_item_p_get_prev(a_in_list));
+    list_item_p_set_prev(a_in_list, retval);
+    list_item_p_set_next(list_item_p_get_prev(retval), retval);
+  }
+  a_list_o->count++;
 
 #ifdef _CW_REENTRANT
   if (a_list_o->is_thread_safe)
@@ -462,30 +524,31 @@ list_insert_after(cw_list_t * a_list_o,
   {
     /* A spare item is available, so use it. */
     retval = a_list_o->spares_head;
-    a_list_o->spares_head = a_list_o->spares_head->next;
+    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
     a_list_o->spares_count--;
   }
   else
   {
     /* No spares available.  Create a new item. */
-    retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
+    retval = list_item_new();
   }
-  retval->item = a_data;
+  list_item_set(retval, a_data);
   
-  if (a_in_list->next == NULL)
+  if (list_item_p_get_next(a_in_list) == NULL)
   {
     /* Inserting at the end of the list. */
-    a_in_list->next = retval;
-    retval->prev = a_in_list;
-    retval->next = NULL;
+    list_item_p_set_next(a_in_list, retval);
+    list_item_p_set_prev(retval, a_in_list);
+    list_item_p_set_next(retval, NULL);
+    a_list_o->tail = retval;
   }
   else
   {
     /* Not at the end of the list. */
-    retval->prev = a_in_list;
-    retval->next = a_in_list->next;
-    a_in_list->next = retval;
-    retval->next->prev = retval;
+    list_item_p_set_prev(retval, a_in_list);
+    list_item_p_set_next(retval, list_item_p_get_next(a_in_list));
+    list_item_p_set_next(a_in_list, retval);
+    list_item_p_set_prev(list_item_p_get_next(retval), retval);
   }
   a_list_o->count++;
 
@@ -518,12 +581,12 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
   }
 #endif
 
-  if (a_to_remove->prev == NULL)
+  if (list_item_p_get_prev(a_to_remove) == NULL)
   {
     /* Removing from the beginning of the list. */
     retval = list_p_hpop(a_list_o);
   }
-  else if (a_to_remove->next == NULL)
+  else if (list_item_p_get_next(a_to_remove) == NULL)
   {
     /* Removing from the end of the list. */
     retval = list_p_tpop(a_list_o);
@@ -531,13 +594,15 @@ list_remove(cw_list_t * a_list_o, cw_list_item_t * a_to_remove)
   else
   {
     /* Removing from the middle of the list. */
-    retval = a_to_remove->item;
-    
-    a_to_remove->prev->next = a_to_remove->next;
-    a_to_remove->next->prev = a_to_remove->prev;
+    retval = list_item_get(a_to_remove);
+
+    list_item_p_set_next(list_item_p_get_prev(a_to_remove),
+			 list_item_p_get_next(a_to_remove));
+    list_item_p_set_prev(list_item_p_get_next(a_to_remove),
+			 list_item_p_get_prev(a_to_remove));
 
     /* Put item on the spares list. */
-    a_to_remove->next = a_list_o->spares_head;
+    list_item_p_set_next(a_to_remove, a_list_o->spares_head);
     a_list_o->spares_head = a_to_remove;
     a_list_o->spares_count++;
     
@@ -574,8 +639,8 @@ list_purge_spares(cw_list_t * a_list_o)
   for (; a_list_o->spares_count > 0; a_list_o->spares_count--)
   {
     item = a_list_o->spares_head;
-    a_list_o->spares_head = a_list_o->spares_head->next;
-    _cw_free(item);
+    a_list_o->spares_head = list_item_p_get_next(a_list_o->spares_head);
+    list_item_delete(item);
   }
 
 #ifdef _CW_REENTRANT
@@ -624,7 +689,7 @@ list_dump(cw_list_t * a_list_o)
   if (a_list_o->count > 0)
   {
     log_printf(g_log_o, "head->item: [%010p]  tail->item: [%010p]\n",
-	       a_list_o->head->item, a_list_o->tail->item);
+	       list_item_get(a_list_o->head), list_item_get(a_list_o->tail));
   }
   else
   {
@@ -659,10 +724,10 @@ list_p_hpop(cw_list_t * a_list_o)
   else if (a_list_o->head == a_list_o->tail)
   {
     /* Only one item in the list. */
-    retval = a_list_o->head->item;
+    retval = list_item_get(a_list_o->head);
 
     /* Put the item on the spares list. */
-    a_list_o->head->next = a_list_o->spares_head;
+    list_item_p_set_next(a_list_o->head, a_list_o->spares_head);
     a_list_o->spares_head = a_list_o->head;
     a_list_o->spares_count++;
 
@@ -676,16 +741,16 @@ list_p_hpop(cw_list_t * a_list_o)
     cw_list_item_t * temp_ptr;
     
     /* More than one item in the list. */
-    retval = a_list_o->head->item;
+    retval = list_item_get(a_list_o->head);
 
     temp_ptr = a_list_o->spares_head;
     a_list_o->spares_head = a_list_o->head;
 
-    a_list_o->head = a_list_o->head->next;
-    a_list_o->head->prev = NULL;
+    a_list_o->head = list_item_p_get_next(a_list_o->head);
+    list_item_p_set_prev(a_list_o->head, NULL);
     /* Done with main list. */
     
-    a_list_o->spares_head->next = temp_ptr;
+    list_item_p_set_next(a_list_o->spares_head, temp_ptr);
     a_list_o->spares_count++;
     /* Done with spares list. */
 
@@ -713,10 +778,10 @@ list_p_tpop(cw_list_t * a_list_o)
   else if (a_list_o->tail == a_list_o->head)
   {
     /* Only one item in the list. */
-    retval = a_list_o->tail->item;
+    retval = list_item_get(a_list_o->tail);
 
     /* Put the item on the spares list. */
-    a_list_o->head->next = a_list_o->spares_head;
+    list_item_p_set_next(a_list_o->head, a_list_o->spares_head);
     a_list_o->spares_head = a_list_o->tail;
     a_list_o->spares_count++;
     
@@ -730,16 +795,16 @@ list_p_tpop(cw_list_t * a_list_o)
     cw_list_item_t * temp_ptr;
 
     /* More than one item in the list. */
-    retval = a_list_o->tail->item;
+    retval = list_item_get(a_list_o->tail);
 
     temp_ptr = a_list_o->spares_head;
     a_list_o->spares_head = a_list_o->tail;
 
-    a_list_o->tail = a_list_o->tail->prev;
-    a_list_o->tail->next = NULL;
+    a_list_o->tail = list_item_p_get_prev(a_list_o->tail);
+    list_item_p_set_next(a_list_o->tail, NULL);
     /* Done with main list. */
 
-    a_list_o->spares_head->next = temp_ptr;
+    list_item_p_set_next(a_list_o->spares_head, temp_ptr);
     a_list_o->spares_count++;
     /* Done with spares list. */
       

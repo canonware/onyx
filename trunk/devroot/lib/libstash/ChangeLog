@@ -1,3 +1,21 @@
+1998-12-04  Jason Evans  <jasone@canonware.com>
+
+	* src/list.c (list_insert_after): Set the lists tail if inserting
+	at the end of the list.
+	: Use the list_item methods inside of list instead of mucking with
+	list_item internals.
+
+	* test/c_list_a.c: Added unit tests for the list_item and list
+	public methods.
+
+	* src/list.c (list_item_set): Remove pointer check for a_data.
+	(list_delete): Stop trying to free what the data pointers point
+	to, and delete the list_item's instead.
+
+1998-12-03  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/list.h (list_insert_before): Add.
+
 1998-12-02  Jason Evans  <jasone@canonware.com>
 
 	* src/list.c (list_delete): Fix a bug that caused a_list_o->count

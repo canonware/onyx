@@ -14,8 +14,10 @@
  *
  ****************************************************************************/
 
-/* Pseudo-opaque types. */
+/* Opaque type. */
 typedef struct cw_list_item_s cw_list_item_t;
+
+/* Pseudo-opaque type. */
 typedef struct cw_list_s cw_list_t;
 
 struct cw_list_s
@@ -50,6 +52,7 @@ struct cw_list_s
 #define list_tpush _CW_NS_STASH(list_tpush)
 #define list_tpop _CW_NS_STASH(list_tpop)
 #define list_tpeek _CW_NS_STASH(list_tpeek)
+#define list_insert_before _CW_NS_STASH(list_insert_before)
 #define list_insert_after _CW_NS_STASH(list_insert_after)
 #define list_remove _CW_NS_STASH(list_remove)
 #define list_purge_spares _CW_NS_STASH(list_purge_spares)
@@ -73,6 +76,9 @@ void * list_hpeek(cw_list_t * a_list_o);
 cw_list_item_t * list_tpush(cw_list_t * a_list_o, void * a_data);
 void * list_tpop(cw_list_t * a_list_o);
 void * list_tpeek(cw_list_t * a_list_o);
+cw_list_item_t * list_insert_before(cw_list_t * a_list_o,
+				    cw_list_item_t * a_in_list,
+				    void * a_data);
 cw_list_item_t * list_insert_after(cw_list_t * a_list_o,
 		       cw_list_item_t * a_in_list,
 		       void * a_data);
