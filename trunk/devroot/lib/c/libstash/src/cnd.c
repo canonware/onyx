@@ -32,7 +32,7 @@ cnd_new(cw_cnd_t *a_cnd)
 
 	error = pthread_cond_init(&retval->condition, NULL);
 	if (error) {
-		_cw_out_put_e(NULL, 0, __FUNCTION__,
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_init(): [s]\n", strerror(error));
 		abort();
 	}
@@ -49,7 +49,7 @@ cnd_delete(cw_cnd_t *a_cnd)
 
 	error = pthread_cond_destroy(&a_cnd->condition);
 	if (error) {
-		_cw_out_put_e(NULL, 0, __FUNCTION__,
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_destroy(): [s]\n", strerror(error));
 		abort();
 	}
@@ -66,7 +66,7 @@ cnd_signal(cw_cnd_t *a_cnd)
 
 	error = pthread_cond_signal(&a_cnd->condition);
 	if (error) {
-		_cw_out_put_e(NULL, 0, __FUNCTION__,
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_signal(): [s]\n", strerror(error));
 		abort();
 	}
@@ -81,7 +81,7 @@ cnd_broadcast(cw_cnd_t *a_cnd)
 
 	error = pthread_cond_broadcast(&a_cnd->condition);
 	if (error) {
-		_cw_out_put_e(NULL, 0, __FUNCTION__,
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_broadcast(): [s]\n",
 		    strerror(error));
 		abort();
@@ -124,7 +124,7 @@ cnd_timedwait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx, const struct timespec
 	else if (error == ETIMEDOUT)
 		retval = TRUE;
 	else {
-		_cw_out_put_e(NULL, 0, __FUNCTION__,
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_timedwait(): [s]\n",
 		    strerror(error));
 		abort();
@@ -143,7 +143,7 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
 
 	error = pthread_cond_wait(&a_cnd->condition, &a_mtx->mutex);
 	if (error) {
-		_cw_out_put_e(NULL, 0, __FUNCTION__,
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_cond_wait: [s]\n", strerror(error));
 		abort();
 	}
