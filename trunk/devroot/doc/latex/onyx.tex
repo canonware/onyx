@@ -409,8 +409,7 @@ composite object:
 \item[array: ] Array copying is protected.  Array element modifications are
 protected, but element reads are not protected.
 \item[condition: ] No implicit locking is done for conditions.
-\item[dict: ] All dict operations are protected, except that copying only
-protects the source, not the destination.
+\item[dict: ] All dict operations are protected.
 \item[file: ] All file operations are protected.  There are no potential
 deadlocks due to implicit file locking.
 \item[hook: ] No implicit locking is done for hooks.
