@@ -126,4 +126,40 @@ systemdict begin
 	} ifelse
 } bind def
 
+% :: and : implement a simple mechanism for qualified namespaces.  For example,
+% one can type:
+%
+%   ::/systemdict/gcdict/dump :
+%
+/:: {
+	mark
+} bind def
+
+/: {
+	% Prime the loop.
+	counttomark
+	dup 0 eq {
+		pop
+		errordict /unmatchedmark get eval
+	}{
+		-1 roll load
+		{
+			counttomark
+
+			% If there are no more names to look up, break out of
+			% the loop.
+			dup 1 le {
+				pop
+				exit
+			} if
+
+			% Collapse the two top level names.
+			-1 roll get
+		} loop
+
+		exch pop
+		eval
+	} ifelse
+} bind def
+
 end % systemdict
