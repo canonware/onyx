@@ -35,23 +35,23 @@ buf, bufc - Reference-counted extensible buffer.
 
 .I cw_sint32_t
 .br
-.B buf_get_size
+.B buf_size_get
 .RI ( "cw_buf_t *a_buf" )
 
 .I cw_uint32_t
 .br
-.B buf_get_num_bufels
+.B buf_num_bufels_get
 .RI ( "cw_buf_t *a_buf" )
 
 .I const struct iovec *
 .br
-.B buf_get_iovec
+.B buf_iovec_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_max_data" ", "
 .IR "cw_bool_t a_is_sys_iovec" ", " "int *r_iovec_count" )
 
 .I cw_bool_t
 .br
-.B buf_catenate_buf
+.B buf_buf_catenate
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_bool_t a_preserve" )
 
 .I cw_bool_t
@@ -61,62 +61,62 @@ buf, bufc - Reference-counted extensible buffer.
 
 .I cw_bool_t
 .br
-.B buf_prepend_bufc
+.B buf_bufc_prepend
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 
 .I cw_bool_t
 .br
-.B buf_append_bufc
+.B buf_bufc_append
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 
 .I cw_bool_t
 .br
-.B buf_release_head_data
+.B buf_head_data_release
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_amount" )
 
 .I cw_bool_t
 .br
-.B buf_release_tail_data
+.B buf_tail_data_release
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_amount" )
 
 .I cw_uint8_t
 .br
-.B buf_get_uint8
+.B buf_uint8_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 
 .I cw_uint32_t
 .br
-.B buf_get_uint32
+.B buf_uint32_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 
 .I cw_uint64_t
 .br
-.B buf_get_uint64
+.B buf_uint64_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 
 .I cw_bool_t
 .br
-.B buf_set_uint8
+.B buf_uint8_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint_t32 a_val" )
 
 .I cw_bool_t
 .br
-.B buf_set_uint32
+.B buf_uint32_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_val" )
 
 .I cw_bool_t
 .br
-.B buf_set_uint64
+.B buf_uint64_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint64_t a_val" )
 
 .I cw_bool_t
 .br
-.B buf_set_range
+.B buf_range_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_length" ", " "cw_uint8_t *a_val" ", "
 .IR "cw_bool_t a_is_writeable" )
@@ -135,7 +135,7 @@ buf, bufc - Reference-counted extensible buffer.
 
 .I void
 .br
-.B bufc_set_buffer
+.B bufc_buffer_set
 .RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", "
 .IR "cw_uint32_t a_size" ", " "cw_bool_t a_is_writeable" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
@@ -143,7 +143,7 @@ buf, bufc - Reference-counted extensible buffer.
 
 .I cw_uint32_t
 .br
-.B bufc_get_size
+.B bufc_size_get
 .RI ( "cw_bufc_t *a_bufc" )
 
 .SS Debugging (dbg) symbols
@@ -166,7 +166,7 @@ are passed among buf's, references are added to the affected bufc's, but no data
 are actually copied.
 
 When data are modified, they must be copied if there are multiple references, or
-if the bufc was marked as non-writeable in the \fBbufc_set_buffer\fR() call.
+if the bufc was marked as non-writeable in the \fBbufc_buffer_set\fR() call.
 Otherwise, data can be modified in place.
 
 Random access to data is O(log n), where n is the number of bufel's in the buf.
@@ -270,7 +270,7 @@ Dump the internal state of a_buf to cw_g_out.
 
 .I cw_sint32_t
 .br
-.B buf_get_size
+.B buf_size_get
 .RI ( "cw_buf_t *a_buf" )
 .RS
 Input(s):
@@ -295,7 +295,7 @@ Return the amout of valid data in bytes.
 
 .I cw_uint32_t
 .br
-.B buf_get_num_bufels
+.B buf_num_bufels_get
 .RI ( "cw_buf_t *a_buf" )
 .RS
 Input(s):
@@ -310,7 +310,7 @@ Output(s):
 .IR retval :
 .RS
 Number of bufel's (internal buffer elements) in a_buf (same as iovec count in
-\fBbuf_get_iovec\fR()).
+\fBbuf_iovec_get\fR()).
 .RE
 .RE
 Description:
@@ -321,7 +321,7 @@ Return the number of bufel's in a_buf.
 
 .I const struct iovec *
 .br
-.B buf_get_iovec
+.B buf_iovec_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_max_data" ", "
 .IR "cw_bool_t a_is_sys_iovec" ", " "int *r_iovec_count" )
 .RS
@@ -365,7 +365,7 @@ Build an iovec array that represents the valid data in a_buf's internal buffers
 
 .I cw_bool_t
 .br
-.B buf_catenate_buf
+.B buf_buf_catenate
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_bool_t a_preserve" )
 .RS
 Input(s):
@@ -438,7 +438,7 @@ the remainder in a_b.
 
 .I cw_bool_t
 .br
-.B buf_prepend_bufc
+.B buf_bufc_prepend
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 .RS
@@ -478,7 +478,7 @@ Prepend a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 
 .I cw_bool_t
 .br
-.B buf_append_bufc
+.B buf_bufc_append
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 .RS
@@ -518,7 +518,7 @@ Append a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 
 .I cw_bool_t
 .br
-.B buf_release_head_data
+.B buf_head_data_release
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_amount" )
 .RS
 Input(s):
@@ -538,7 +538,7 @@ Output(s):
 .RS
 FALSE: Success.
 .br
-TRUE: Error.  (a_amount > buf_get_size(a_buf)).
+TRUE: Error.  (a_amount > buf_size_get(a_buf)).
 .RE
 .RE
 Description:
@@ -549,7 +549,7 @@ Release a_amount bytes from the head of a_buf.
 
 .I cw_bool_t
 .br
-.B buf_release_tail_data
+.B buf_tail_data_release
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_amount" )
 .RS
 Input(s):
@@ -569,7 +569,7 @@ Output(s):
 .RS
 FALSE: Success.
 .br
-TRUE: Error.  (a_amount > buf_get_size(a_buf)).
+TRUE: Error.  (a_amount > buf_size_get(a_buf)).
 .RE
 .RE
 Description:
@@ -580,7 +580,7 @@ Release a_amount bytes from the tail of a_buf.
 
 .I cw_uint8_t
 .br
-.B buf_get_uint8
+.B buf_uint8_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 .RS
 Input(s):
@@ -609,7 +609,7 @@ Return the uint8 at offset a_offset.
 
 .I cw_uint32_t
 .br
-.B buf_get_uint32
+.B buf_uint32_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 .RS
 Input(s):
@@ -638,7 +638,7 @@ Return the uint32 at offset a_offset.
 
 .I cw_uint64_t
 .br
-.B buf_get_uint64
+.B buf_uint64_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
 .RS
 Input(s):
@@ -667,7 +667,7 @@ Return the uint64 at offset a_offset.
 
 .I cw_bool_t
 .br
-.B buf_set_uint8
+.B buf_uint8_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint_t32 a_val" )
 .RS
@@ -679,7 +679,7 @@ Pointer to a buf.
 .RE
 .IR a_offset :
 .RS
-Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+Offset in bytes of data to set. (a_offset <= buf_size_get(a_buf)).
 .RE
 .IR a_val :
 .RS
@@ -703,7 +703,7 @@ Set the uint8 at a_offset to a_val.
 
 .I cw_bool_t
 .br
-.B buf_set_uint32
+.B buf_uint32_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_val" )
 .RS
@@ -715,7 +715,7 @@ Pointer to a buf.
 .RE
 .IR a_offset :
 .RS
-Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+Offset in bytes of data to set. (a_offset <= buf_size_get(a_buf)).
 .RE
 .IR a_val :
 .RS
@@ -739,7 +739,7 @@ Set the uint32 at a_offset to a_val.
 
 .I cw_bool_t
 .br
-.B buf_set_uint64
+.B buf_uint64_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint64_t a_val" )
 .RS
@@ -751,7 +751,7 @@ Pointer to a buf.
 .RE
 .IR a_offset :
 .RS
-Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+Offset in bytes of data to set. (a_offset <= buf_size_get(a_buf)).
 .RE
 .IR a_val :
 .RS
@@ -775,7 +775,7 @@ Set the uint64 at a_offset to a_val.
 
 .I cw_bool_t
 .br
-.B buf_set_range
+.B buf_range_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_length" ", " "cw_uint8_t *a_val" ", "
 .IR "cw_bool_t a_is_writeable" )
@@ -788,7 +788,7 @@ Pointer to a buf.
 .RE
 .IR a_offset :
 .RS
-Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+Offset in bytes of data to set. (a_offset <= buf_size_get(a_buf)).
 .RE
 .IR a_length :
 .RS
@@ -889,7 +889,7 @@ Destructor.
 
 .I void
 .br
-.B bufc_set_buffer
+.B bufc_buffer_set
 .RI ( "cw_bufc_t *a_bufc" ", " "void *a_buffer" ", "
 .IR "cw_uint32_t a_size" ", " "cw_bool_t a_is_writeable" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
@@ -943,7 +943,7 @@ call this function after the bufc has been inserted into one or more buf's.
 
 .I cw_uint32_t
 .br
-.B bufc_get_size
+.B bufc_size_get
 .RI ( "cw_bufc_t *a_bufc" )
 .RS
 Input(s):

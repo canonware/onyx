@@ -273,7 +273,7 @@ libsock_shutdown(void)
 }
 
 cw_bufc_t *
-libsock_get_spare_bufc(void)
+libsock_spare_bufc_get(void)
 {
 	cw_bufc_t	*retval;
 	void		*buffer;
@@ -293,8 +293,8 @@ libsock_get_spare_bufc(void)
 		retval = NULL;
 		goto RETURN;
 	}
-	bufc_set_buffer(retval,
-	    buffer,pezz_get_buffer_size(&g_libsock->buffer_pool), TRUE,
+	bufc_buffer_set(retval,
+	    buffer, pezz_buffer_size_get(&g_libsock->buffer_pool), TRUE,
 	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_libsock->buffer_pool);
 
 	RETURN:
@@ -364,14 +364,14 @@ libsock_l_wakeup(void)
 }
 
 cw_bool_t
-libsock_l_register_sock(cw_sock_t *a_sock)
+libsock_l_sock_register(cw_sock_t *a_sock)
 {
 	cw_bool_t		retval;
 	struct cw_libsock_msg_s	*message;
 
 	_cw_check_ptr(a_sock);
 	_cw_check_ptr(g_libsock);
-	_cw_assert(sock_get_fd(a_sock) >= 0);
+	_cw_assert(sock_fd_get(a_sock) >= 0);
 
 	message = (struct cw_libsock_msg_s
 	    *)_cw_pezz_get(&g_libsock->messages_pezz);
@@ -398,7 +398,7 @@ libsock_l_register_sock(cw_sock_t *a_sock)
 }
 
 cw_bool_t
-libsock_l_unregister_sock(cw_uint32_t a_sockfd)
+libsock_l_sock_unregister(cw_uint32_t a_sockfd)
 {
 	cw_bool_t		retval;
 	struct cw_libsock_msg_s	*message;
@@ -493,7 +493,7 @@ libsock_l_in_space(cw_uint32_t a_sockfd)
 }
 
 cw_bool_t
-libsock_l_get_host_ip(const char *a_host_str, cw_uint32_t *r_host_ip)
+libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	host_ip;
@@ -639,7 +639,7 @@ libsock_p_entry_func(void *a_arg)
 			case REGISTER:
 				sock = message->data.sock;
 
-				sockfd = sock_get_fd(sock);
+				sockfd = sock_fd_get(sock);
 				if (sockfd >= max_fds) {
 					out_put_e(cw_g_out, NULL, 0,
 					    __FUNCTION__,
@@ -662,14 +662,14 @@ libsock_p_entry_func(void *a_arg)
 					 * If the buffer size is 0, don't ever
 					 * try to read on this descriptor.
 					 */
-					if (sock_l_get_in_max_buf_size(sock) !=
+					if (sock_l_in_max_buf_size_get(sock) !=
 					    0) {
 #ifdef _LIBSOCK_CONFESS
 						out_put_e(cw_g_out, __FILE__,
 						    __LINE__, NULL,
 						    "Register [i] ([i] byte "
 						    "input buffer)\n", sockfd,
-						    sock_l_get_in_max_buf_size(sock));
+						    sock_l_in_max_buf_size_get(sock));
 #endif
 						fds[nfds].events = POLLIN;
 					} else {
@@ -807,7 +807,7 @@ libsock_p_entry_func(void *a_arg)
 					mtx_unlock(message->data.in_notify.mtx);
 
 					if (NULL != regs[sockfd].notify_mq) {
-						if (sock_l_get_in_size(regs[sockfd].sock)
+						if (sock_l_in_size_get(regs[sockfd].sock)
 						    > 0) {
 							/*
 							 * Send an out
@@ -1032,16 +1032,16 @@ libsock_p_entry_func(void *a_arg)
 					 * incoming buffer.
 					 */
 					max_read =
-					    sock_l_get_in_space(regs[sockfd].sock);
+					    sock_l_in_space_get(regs[sockfd].sock);
 
 					/*
 					 * Build up buf_in to be at least large
 					 * enough for the readv().
 					 */
-					while (buf_get_size(&buf_in) <
+					while (buf_size_get(&buf_in) <
 					    max_read) {
 						while ((bufc =
-						    libsock_get_spare_bufc()) ==
+						    libsock_spare_bufc_get()) ==
 						    NULL) {
 							if (dbg_is_registered(cw_g_dbg,
 							    "libsock_error"))
@@ -1049,9 +1049,9 @@ libsock_p_entry_func(void *a_arg)
 							thd_yield();
 						}
 
-						while (buf_append_bufc(&buf_in,
+						while (buf_bufc_append(&buf_in,
 						        bufc, 0,
-							pezz_get_buffer_size(&g_libsock->buffer_pool))) {
+							pezz_buffer_size_get(&g_libsock->buffer_pool))) {
 							if (dbg_is_registered(cw_g_dbg,
 								    "libsock_error"))
 								_cw_out_put_e("Memory allocation error; yielding\n");
@@ -1071,7 +1071,7 @@ libsock_p_entry_func(void *a_arg)
 					 * references to the byte ranges of the
 					 * buffers we are writing to.
 					 */
-					iov = buf_get_iovec(&buf_in, max_read,
+					iov = buf_iovec_get(&buf_in, max_read,
 					    TRUE, &iov_cnt);
 
 					bytes_read = readv(sockfd, iov,
@@ -1084,7 +1084,7 @@ libsock_p_entry_func(void *a_arg)
 					if (bytes_read > 0) {
 						cw_uint32_t	in_buf_free;
 
-						_cw_assert(buf_get_size(&tmp_buf)
+						_cw_assert(buf_size_get(&tmp_buf)
 						    == 0);
 
 						while (buf_split(&tmp_buf,
@@ -1099,7 +1099,7 @@ libsock_p_entry_func(void *a_arg)
 						 * Append to the sock's in_buf.
 						 */
 						in_buf_free =
-						    sock_l_put_in_data(regs[sockfd].sock,
+						    sock_l_in_data_put(regs[sockfd].sock,
 						    &tmp_buf);
 						if (in_buf_free == 0) {
 							/*
@@ -1121,7 +1121,7 @@ libsock_p_entry_func(void *a_arg)
 						 * sock buffer was empty before
 						 * we put data in it.
 						 */
-						if ((sock_l_get_in_max_buf_size(regs[sockfd].sock)
+						if ((sock_l_in_max_buf_size_get(regs[sockfd].sock)
 						    - (in_buf_free +
 						    bytes_read)) == 0) {
 							if (regs[sockfd].notify_mq
@@ -1134,7 +1134,7 @@ libsock_p_entry_func(void *a_arg)
 								}
 							}
 						}
-						_cw_assert(buf_get_size(&tmp_buf)
+						_cw_assert(buf_size_get(&tmp_buf)
 						    == 0);
 					} else if (bytes_read == 0) {
 						/* readv() error. */
@@ -1215,17 +1215,17 @@ libsock_p_entry_func(void *a_arg)
 					 */
 
 					buffer_size =
-					    pezz_get_buffer_size(&g_libsock->buffer_pool);
+					    pezz_buffer_size_get(&g_libsock->buffer_pool);
 
 					do {
 						/*
 						 * Add some more space to
 						 * &buf_in if necessary.
 						 */
-						if (buf_get_size(&buf_in) ==
+						if (buf_size_get(&buf_in) ==
 						    0) {
 							while ((bufc =
-							    libsock_get_spare_bufc())
+							    libsock_spare_bufc_get())
 							    == NULL) {
 								if (dbg_is_registered(cw_g_dbg,
 								    "libsock_error"))
@@ -1233,7 +1233,7 @@ libsock_p_entry_func(void *a_arg)
 								thd_yield();
 							}
 
-							while (buf_append_bufc(&buf_in,
+							while (buf_bufc_append(&buf_in,
 							    bufc, 0,
 							    buffer_size)) {
 
@@ -1247,7 +1247,7 @@ libsock_p_entry_func(void *a_arg)
 							 */
 							bufc_delete(bufc);
 						}
-						iov = buf_get_iovec(&buf_in,
+						iov = buf_iovec_get(&buf_in,
 						    buffer_size, TRUE,
 						    &iov_cnt);
 
@@ -1259,7 +1259,7 @@ libsock_p_entry_func(void *a_arg)
 						    bytes_read, (0 < bytes_read)
 						    ? ", " : ")");
 #endif
-						_cw_assert(buf_get_size(&tmp_buf)
+						_cw_assert(buf_size_get(&tmp_buf)
 						    == 0);
 
 						while (buf_split(&tmp_buf,
@@ -1269,7 +1269,7 @@ libsock_p_entry_func(void *a_arg)
 								_cw_out_put_e("Memory allocation error; yielding\n");
 							thd_yield();
 						}
-						sock_l_put_in_data(regs[sockfd].sock,
+						sock_l_in_data_put(regs[sockfd].sock,
 						    &tmp_buf);
 					} while (bytes_read > 0);
 
@@ -1328,13 +1328,13 @@ libsock_p_entry_func(void *a_arg)
 					/* Ready for writing. */
 
 					/* Get the socket's buf. */
-					_cw_assert(buf_get_size(&tmp_buf) == 0);
-					sock_l_get_out_data(regs[sockfd].sock,
+					_cw_assert(buf_size_get(&tmp_buf) == 0);
+					sock_l_out_data_get(regs[sockfd].sock,
 					    &tmp_buf);
 
 					/* Build an iovec for writing. */
-					iov = buf_get_iovec(&tmp_buf,
-					    buf_get_size(&tmp_buf), TRUE,
+					iov = buf_iovec_get(&tmp_buf,
+					    buf_size_get(&tmp_buf), TRUE,
 					    &iov_cnt);
 
 					/*
@@ -1350,14 +1350,14 @@ libsock_p_entry_func(void *a_arg)
 #ifdef _LIBSOCK_CONFESS
 					_cw_out_put("([i|s:s]/[i])",
 					    bytes_written,
-					    buf_get_size(&tmp_buf));
+					    buf_size_get(&tmp_buf));
 #endif
 
 					if (bytes_written >= 0) {
-						buf_release_head_data(&tmp_buf,
+						buf_head_data_release(&tmp_buf,
 						    bytes_written);
 
-						if (sock_l_put_back_out_data(regs[sockfd].sock,
+						if (sock_l_out_data_put_back(regs[sockfd].sock,
 						    &tmp_buf) == 0) {
 							/*
 							 * The socket has no
@@ -1378,8 +1378,8 @@ libsock_p_entry_func(void *a_arg)
 							_cw_out_put("i");
 #endif
 					} else {/* if (bytes_written == -1) */
-						buf_release_head_data(&tmp_buf,
-						    buf_get_size(&tmp_buf));
+						buf_head_data_release(&tmp_buf,
+						    buf_size_get(&tmp_buf));
 
 						if (dbg_is_registered(cw_g_dbg,
 						    "libsock_verbose")) {
@@ -1418,7 +1418,7 @@ libsock_p_entry_func(void *a_arg)
 							}
 						}
 					}
-					_cw_assert(buf_get_size(&tmp_buf) == 0);
+					_cw_assert(buf_size_get(&tmp_buf) == 0);
 				}
 			}
 #ifdef _LIBSOCK_CONFESS

@@ -36,7 +36,7 @@ cc -pg
 
 .I cw_bufc_t *
 .br
-.B libsock_get_spare_bufc
+.B libsock_spare_bufc_get
 .RI ( "void" )
 
 .I cw_bool_t
@@ -68,7 +68,7 @@ events to the I/O thread.  Data are managed and buffered with \fBlibstash\fR's
 data require the use of \fBbuf\fR's.  The I/O thread handles (almost) all of the
 reading/writing of data from/to sockets.
 
-\fBlibsock_get_spare_bufc\fR() provides a method of globally managing memory
+\fBlibsock_spare_bufc_get\fR() provides a method of globally managing memory
 buffers.
 
 A simple mechanism for multiplexing connection handling onto a set of threads is
@@ -162,7 +162,7 @@ Global shutdown for libsock.
 
 .I cw_bufc_t *
 .br
-.B libsock_get_spare_bufc
+.B libsock_spare_bufc_get
 .RI ( "void" )
 .RS
 Input(s):

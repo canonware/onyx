@@ -30,7 +30,7 @@ handle_client(void *a_arg)
 	for (;;) {
 		if (sock_read(sock, &buf, 0, NULL) < 0)
 			break;
-		iovec = buf_get_iovec(&buf, 0xffffffff, buf_get_size(&buf),
+		iovec = buf_iovec_get(&buf, 0xffffffff, buf_size_get(&buf),
 		    &iovec_count);
 
 		_cw_out_put("Got :");
@@ -42,7 +42,7 @@ handle_client(void *a_arg)
 
 		if (sock_write(sock, &buf))
 			break;
-		_cw_assert(buf_get_size(&buf) == 0);
+		_cw_assert(buf_size_get(&buf) == 0);
 	}
 
 	buf_delete(&buf);

@@ -55,11 +55,11 @@ main()
 	res_new(&res, cw_g_mem);
 
 	_cw_out_put("Merging in a list...\n");
-	_cw_assert(res_merge_list(&res, s1, s2, s3, s4, s5, s6, s7, s8, NULL) ==
+	_cw_assert(res_list_merge(&res, s1, s2, s3, s4, s5, s6, s7, s8, NULL) ==
 	    FALSE);
 
 	_cw_out_put("Searching for a resource...\n");
-	str = res_get_res_val(&res, "simple");
+	str = res_res_val_get(&res, "simple");
 
 	_cw_check_ptr(str);
 	_cw_out_put("simple:[s]\n", str);
@@ -67,22 +67,22 @@ main()
 
 	_cw_out_put("Testing invalid resources handling...\n");
 
-	_cw_assert(res_merge_list(&res, es1, NULL));
-	_cw_assert(res_merge_list(&res, es2, NULL));
-	_cw_assert(res_merge_list(&res, es3, NULL));
-	_cw_assert(res_merge_list(&res, es4, NULL));
-	_cw_assert(res_merge_list(&res, es5, NULL));
-	_cw_assert(res_merge_list(&res, es6, NULL));
-	_cw_assert(res_merge_list(&res, es7, NULL));
-	_cw_assert(res_merge_list(&res, es8, NULL));
-	_cw_assert(res_merge_list(&res, es9, NULL));
-	_cw_assert(res_merge_list(&res, es10, NULL));
-	_cw_assert(res_merge_list(&res, es11, NULL));
-	_cw_assert(res_merge_list(&res, es12, NULL));
-	_cw_assert(res_merge_list(&res, es13, NULL));
-	_cw_assert(res_merge_list(&res, es14, NULL));
-	_cw_assert(res_merge_list(&res, es15, NULL));
-	_cw_assert(res_merge_list(&res, es16, NULL));
+	_cw_assert(res_list_merge(&res, es1, NULL));
+	_cw_assert(res_list_merge(&res, es2, NULL));
+	_cw_assert(res_list_merge(&res, es3, NULL));
+	_cw_assert(res_list_merge(&res, es4, NULL));
+	_cw_assert(res_list_merge(&res, es5, NULL));
+	_cw_assert(res_list_merge(&res, es6, NULL));
+	_cw_assert(res_list_merge(&res, es7, NULL));
+	_cw_assert(res_list_merge(&res, es8, NULL));
+	_cw_assert(res_list_merge(&res, es9, NULL));
+	_cw_assert(res_list_merge(&res, es10, NULL));
+	_cw_assert(res_list_merge(&res, es11, NULL));
+	_cw_assert(res_list_merge(&res, es12, NULL));
+	_cw_assert(res_list_merge(&res, es13, NULL));
+	_cw_assert(res_list_merge(&res, es14, NULL));
+	_cw_assert(res_list_merge(&res, es15, NULL));
+	_cw_assert(res_list_merge(&res, es16, NULL));
 
 	res_delete(&res);
 	_cw_out_put("Test end\n");

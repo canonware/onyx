@@ -30,7 +30,7 @@ sock - Asynchronous TCP/IP socket I/O.
 
 .I cw_uint32_t
 .br
-.B sock_get_port
+.B sock_port_get
 .RI ( "cw_sock_t *a_sock" )
 
 .I cw_sint32_t
@@ -67,12 +67,12 @@ sock - Asynchronous TCP/IP socket I/O.
 
 .I cw_bool_t
 .br
-.B sock_flush_out
+.B sock_out_flush
 .RI ( "cw_sock_t *a_sock" )
 
 .I int
 .br
-.B sock_get_fd
+.B sock_fd_get
 .RI ( "cw_sock_t *a_sock" )
 
 .SS Debugging (dbg) symbols
@@ -172,7 +172,7 @@ Return TRUE if a_sock is connected.
 
 .I cw_uint32_t
 .br
-.B sock_get_port
+.B sock_port_get
 .RI ( "cw_sock_t *a_sock" )
 .RS
 Input(s):
@@ -225,7 +225,7 @@ Output(s):
 .IR retval :
 .RS
 -1: Already connected, \fBsocket\fR() error, \fBclose\fR() error,
-\fBsock_p_config_socket\fR() error, \fBlibsock_l_get_host_ip\fR() error, or
+\fBsock_p_config_socket\fR() error, \fBlibsock_l_host_ip_get\fR() error, or
 \fBconnect\fR() error.
 .br
 0: Success.
@@ -409,7 +409,7 @@ queue, notify the I/O thread.
 
 .I cw_bool_t
 .br
-.B sock_flush_out
+.B sock_out_flush
 .RI ( "cw_sock_t *a_sock" )
 .RS
 Input(s):
@@ -437,7 +437,7 @@ and don't return until done.
 
 .I int
 .br
-.B sock_get_fd
+.B sock_fd_get
 .RI ( "cw_sock_t *a_sock" )
 .RS
 Input(s):

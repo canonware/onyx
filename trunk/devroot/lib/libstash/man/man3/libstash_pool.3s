@@ -26,7 +26,7 @@ pool - Cached memory allocation of equal-size buffers.
 
 .I cw_uint32_t
 .br
-.B pool_get_buffer_size
+.B pool_buffer_size_get
 .RI ( "cw_pool_t *a_pool" )
 
 .I void
@@ -135,7 +135,7 @@ Destructor.
 
 .I cw_uint32_t
 .br
-.B pool_get_buffer_size
+.B pool_buffer_size_get
 .RI ( "cw_pool_t *a_pool" )
 .RS
 Input(s):

@@ -45,41 +45,41 @@ main()
 
 	bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 	_cw_check_ptr(bufc);
-	bufc_set_buffer(bufc, longs, sizeof(longs), TRUE, NULL, NULL);
-	_cw_assert(buf_append_bufc(buf, bufc, 0, sizeof(longs)) == FALSE);
+	bufc_buffer_set(bufc, longs, sizeof(longs), TRUE, NULL, NULL);
+	_cw_assert(buf_bufc_append(buf, bufc, 0, sizeof(longs)) == FALSE);
 	bufc_delete(bufc);
 
 	bufc = bufc_new(NULL, cw_g_mem, NULL, NULL);
 	_cw_check_ptr(bufc);
-	bufc_set_buffer(bufc, quads, sizeof(quads), TRUE, NULL, NULL);
-	_cw_assert(buf_append_bufc(buf, bufc, 0, sizeof(quads)) == FALSE);
+	bufc_buffer_set(bufc, quads, sizeof(quads), TRUE, NULL, NULL);
+	_cw_assert(buf_bufc_append(buf, bufc, 0, sizeof(quads)) == FALSE);
 	bufc_delete(bufc);
 
 	_cw_out_put("longs[[0-3]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
 	    "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n", longs[0], longs[1],
 	    longs[2], longs[3]);
 	_cw_out_put("buf[[0-3]32: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
-	    "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n", buf_get_uint32(buf, 0),
-	    buf_get_uint32(buf, 4), buf_get_uint32(buf, 8), buf_get_uint32(buf,
+	    "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n", buf_uint32_get(buf, 0),
+	    buf_uint32_get(buf, 4), buf_uint32_get(buf, 8), buf_uint32_get(buf,
 	    12));
 
 	_cw_out_put("longs[[4-7]: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
 	    "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n", longs[4], longs[5],
 	    longs[6], longs[7]);
 	_cw_out_put("buf[[4-7]32: 0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0] "
-	    "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n", buf_get_uint32(buf, 16),
-	    buf_get_uint32(buf, 20), buf_get_uint32(buf, 24),
-	    buf_get_uint32(buf, 28));
+	    "0x[i|b:16|w:8|p:0] 0x[i|b:16|w:8|p:0]\n", buf_uint32_get(buf, 16),
+	    buf_uint32_get(buf, 20), buf_uint32_get(buf, 24),
+	    buf_uint32_get(buf, 28));
 
 	_cw_out_put("quads[[0-1]: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
 	    quads[0], quads[1]);
 	_cw_out_put("buf[[0-1]64: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
-	    buf_get_uint64(buf, 32), buf_get_uint64(buf, 40));
+	    buf_uint64_get(buf, 32), buf_uint64_get(buf, 40));
 
 	_cw_out_put("quads[[2-3]: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
 	    quads[2], quads[3]);
 	_cw_out_put("buf[[2-3]64: 0x[q|b:16|w:16|p:0] 0x[q|b:16|w:16|p:0]\n",
-	    buf_get_uint64(buf, 48), buf_get_uint64(buf, 56));
+	    buf_uint64_get(buf, 48), buf_uint64_get(buf, 56));
 
 	buf_delete(buf);
 

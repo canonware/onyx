@@ -24,7 +24,7 @@
 #define _CW_STILT_GETC(a_i)						\
 	((a_stilt->index <= _CW_STIL_BUFC_SIZE)				\
 	    ? a_stilt->tok_buffer.str[(a_i)]				\
-	    : buf_get_uint8(&a_stilt->tok_buffer.buf, (a_i)))
+	    : buf_uint8_get(&a_stilt->tok_buffer.buf, (a_i)))
 #else
 #define _CW_STILT_GETC(a_i)						\
 	stilt_p_getc(a_stilt, a_i)
@@ -226,7 +226,7 @@ stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 	_cw_check_ptr(a_buf);
 
-	iov = buf_get_iovec(a_buf, UINT_MAX, FALSE, &iov_cnt);
+	iov = buf_iovec_get(a_buf, UINT_MAX, FALSE, &iov_cnt);
 
 	for (i = 0; i < iov_cnt; i++) {
 		if (stilt_p_feed(a_stilt, iov[i].iov_base,
@@ -252,7 +252,7 @@ stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	_cw_check_ptr(a_str);
 
 	buf_new(&buf, stilt_mem_get(a_stilt));
-	if (buf_set_range(&buf, 0, a_len, (cw_uint8_t *)a_str, FALSE)) {
+	if (buf_range_set(&buf, 0, a_len, (cw_uint8_t *)a_str, FALSE)) {
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -278,7 +278,7 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 	if (entry_arg == NULL)
 		goto OOM_1;
 	buf_new(&entry_arg->buf, stilt_mem_get(a_stilt));
-	if (buf_catenate_buf(&entry_arg->buf, a_buf, TRUE))
+	if (buf_buf_catenate(&entry_arg->buf, a_buf, TRUE))
 		goto OOM_2;
 	stilt_p_entry((void *)entry_arg);
 
@@ -1074,7 +1074,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 			    _CW_STIL_BUFC_SIZE);
 			buf_new(&a_stilt->tok_buffer.buf,
 			    stilt_mem_get(a_stilt));
-			if (buf_append_bufc(&a_stilt->tok_buffer.buf,
+			if (buf_bufc_append(&a_stilt->tok_buffer.buf,
 			    &kbufc->bufc, 0, _CW_STIL_BUFC_SIZE)) {
 				bufc_delete(&kbufc->bufc);
 				retval = -1;
@@ -1082,11 +1082,11 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 			}
 			bufc_delete(&kbufc->bufc);
 		}
-		if (buf_get_size(&a_stilt->tok_buffer.buf) == a_stilt->index) {
+		if (buf_size_get(&a_stilt->tok_buffer.buf) == a_stilt->index) {
 			cw_stil_bufc_t	*kbufc;
 
 			kbufc = stil_stil_bufc_get(a_stilt->stil);
-			if (buf_append_bufc(&a_stilt->tok_buffer.buf,
+			if (buf_bufc_append(&a_stilt->tok_buffer.buf,
 			    &kbufc->bufc, 0, _CW_STIL_BUFC_SIZE)) {
 				bufc_delete(&kbufc->bufc);
 				retval = -1;
@@ -1094,7 +1094,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 			}
 			bufc_delete(&kbufc->bufc);
 		}
-		buf_set_uint8(&a_stilt->tok_buffer.buf, a_stilt->index, a_c);
+		buf_uint8_set(&a_stilt->tok_buffer.buf, a_stilt->index, a_c);
 	}
 	a_stilt->index++;
 

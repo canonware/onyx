@@ -47,7 +47,7 @@ void		libsock_l_wakeup(void);
  * Register a_sock with the I/O thread.
  *
  ****************************************************************************/
-cw_bool_t	libsock_l_register_sock(cw_sock_t *a_sock);
+cw_bool_t	libsock_l_sock_register(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -65,7 +65,7 @@ cw_bool_t	libsock_l_register_sock(cw_sock_t *a_sock);
  * Unregister the sock corresponding to a_sockfd with the I/O thread.
  *
  ****************************************************************************/
-cw_bool_t	libsock_l_unregister_sock(cw_uint32_t a_sockfd);
+cw_bool_t	libsock_l_sock_unregister(cw_uint32_t a_sockfd);
 
 /****************************************************************************
  *
@@ -133,5 +133,5 @@ cw_bool_t	libsock_l_in_space(cw_uint32_t a_sockfd);
  * doesn't even bother with gethostbyname_r().
  *
  ****************************************************************************/
-cw_bool_t	libsock_l_get_host_ip(const char *a_host_str, cw_uint32_t
+cw_bool_t	libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t
     *r_host_ip);

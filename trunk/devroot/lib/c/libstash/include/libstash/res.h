@@ -25,9 +25,9 @@ cw_res_t	*res_new(cw_res_t *a_res, cw_mem_t *a_mem);
 void		res_delete(cw_res_t *a_res);
 void		res_clear(cw_res_t *a_res);
 cw_bool_t	res_is_equal(cw_res_t *a_a, cw_res_t *a_b);
-cw_bool_t	res_merge_file(cw_res_t *a_res, const char *a_filename);
-cw_bool_t	res_merge_list(cw_res_t *a_res,...);
-const char	*res_get_res_val(cw_res_t *a_res, const char *a_res_name);
-cw_bool_t	res_extract_res(cw_res_t *a_res, const char *a_res_key, char
+cw_bool_t	res_file_merge(cw_res_t *a_res, const char *a_filename);
+cw_bool_t	res_list_merge(cw_res_t *a_res,...);
+const char	*res_res_val_get(cw_res_t *a_res, const char *a_res_name);
+cw_bool_t	res_res_extract(cw_res_t *a_res, const char *a_res_key, char
     **r_res_name, char **r_res_val);
 cw_bool_t	res_dump(cw_res_t *a_res, const char *a_filename);

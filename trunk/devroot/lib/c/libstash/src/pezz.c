@@ -149,7 +149,7 @@ pezz_delete(cw_pezz_t *a_pezz)
 }
 
 cw_uint32_t
-pezz_get_buffer_size(cw_pezz_t *a_pezz)
+pezz_buffer_size_get(cw_pezz_t *a_pezz)
 {
 	_cw_check_ptr(a_pezz);
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);

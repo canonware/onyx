@@ -57,5 +57,5 @@ cw_uint32_t	sock_buffered_in(cw_sock_t *a_sock);
 cw_sint32_t	sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t
     a_max_read, struct timespec *a_timeout);
 cw_bool_t	sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf);
-cw_bool_t	sock_flush_out(cw_sock_t *a_sock);
-int		sock_get_fd(cw_sock_t *a_sock);
+cw_bool_t	sock_out_flush(cw_sock_t *a_sock);
+int		sock_fd_get(cw_sock_t *a_sock);

@@ -131,7 +131,7 @@ main(int argc, char **argv)
 				    0, &tout);
 				if (bytes_read > 0) {
 					/* Throw the data away. */
-					buf_release_head_data(&buf, bytes_read);
+					buf_head_data_release(&buf, bytes_read);
 				} else if (bytes_read < 0) {
 					while (libsock_in_notify(NULL, sockfd))
 						thd_yield();
@@ -165,9 +165,9 @@ accept_entry_func(void *a_arg)
 		if (socks_accept(socks, NULL, sock) == sock) {
 			_cw_out_put_l("New connection\n");
 
-			sock_vec[sock_get_fd(sock)] = sock;
+			sock_vec[sock_fd_get(sock)] = sock;
 
-			while (libsock_in_notify(mq, sock_get_fd(sock)))
+			while (libsock_in_notify(mq, sock_fd_get(sock)))
 				thd_yield();
 
 			/*

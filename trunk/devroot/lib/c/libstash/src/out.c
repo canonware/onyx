@@ -1628,7 +1628,7 @@ out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 	buf = *(cw_buf_t **)a_arg;
 	_cw_check_ptr(buf);
 
-	rlen = buf_get_size(buf);
+	rlen = buf_size_get(buf);
 
 	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
 		/* Width specified. */
@@ -1655,7 +1655,7 @@ out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 			olen = rlen;
 		else
 			olen = owidth - offset;
-		iov = buf_get_iovec(buf, olen, FALSE, &iov_cnt);
+		iov = buf_iovec_get(buf, olen, FALSE, &iov_cnt);
 		r_buf += offset;
 		for (i = 0; i < iov_cnt; i++) {
 			memcpy(r_buf, iov[i].iov_base, iov[i].iov_len);

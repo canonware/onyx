@@ -14,9 +14,9 @@
 #include <stdarg.h>
 #include <fcntl.h>
 
-static cw_bool_t	res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file);
+static cw_bool_t	res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file);
 static cw_uint32_t	res_p_char_type(char a_char);
-static cw_bool_t	res_p_merge_res(cw_res_t *a_res, const char *a_name,
+static cw_bool_t	res_p_res_merge(cw_res_t *a_res, const char *a_name,
     const char *a_val);
 
 /*
@@ -155,7 +155,7 @@ res_is_equal(cw_res_t *a_a, cw_res_t *a_b)
 			dch_remove_iterate(&a_a->hash, (void **)&key, (void
 			    **)&val, NULL);
 
-			if (res_get_res_val(a_b, key) == NULL)
+			if (res_res_val_get(a_b, key) == NULL)
 				retval = TRUE;
 			if (dch_insert(&a_a->hash, key, val, NULL)) {
 				retval = TRUE;
@@ -171,7 +171,7 @@ res_is_equal(cw_res_t *a_a, cw_res_t *a_b)
 }
 
 cw_bool_t
-res_merge_file(cw_res_t *a_res, const char *a_filename)
+res_file_merge(cw_res_t *a_res, const char *a_filename)
 {
 	cw_bool_t	retval = FALSE, state_mach_error;
 	int		error;
@@ -184,7 +184,7 @@ res_merge_file(cw_res_t *a_res, const char *a_filename)
 		retval = TRUE;
 	else {
 		/* Run the state machine on the file. */
-		state_mach_error = res_p_parse_res(a_res, TRUE);
+		state_mach_error = res_p_res_parse(a_res, TRUE);
 		if (state_mach_error == TRUE)
 			retval = TRUE;
 		/* Close the file. */
@@ -198,7 +198,7 @@ res_merge_file(cw_res_t *a_res, const char *a_filename)
 }
 
 cw_bool_t
-res_merge_list(cw_res_t *a_res,...)
+res_list_merge(cw_res_t *a_res,...)
 {
 	va_list		ap;
 	cw_bool_t	retval = FALSE, state_mach_error;
@@ -210,7 +210,7 @@ res_merge_list(cw_res_t *a_res,...)
 	va_start(ap, a_res);
 	for (a_res->str = va_arg(ap, char *); ((a_res->str != NULL) && (retval
 	    != TRUE)); a_res->str = va_arg(ap, char *)) {
-		state_mach_error = res_p_parse_res(a_res, FALSE);
+		state_mach_error = res_p_res_parse(a_res, FALSE);
 		if (state_mach_error == TRUE)
 			retval = TRUE;
 	}
@@ -221,7 +221,7 @@ res_merge_list(cw_res_t *a_res,...)
 }
 
 const char *
-res_get_res_val(cw_res_t *a_res, const char *a_res_name)
+res_res_val_get(cw_res_t *a_res, const char *a_res_name)
 {
 	char		*retval;
 	cw_bool_t	error;
@@ -238,7 +238,7 @@ res_get_res_val(cw_res_t *a_res, const char *a_res_name)
 }
 
 cw_bool_t
-res_extract_res(cw_res_t *a_res, const char *a_res_key,
+res_res_extract(cw_res_t *a_res, const char *a_res_key,
     char **r_res_name, char **r_res_val)
 {
 	cw_bool_t	retval;
@@ -345,7 +345,7 @@ res_dump(cw_res_t *a_res, const char *a_filename)
  * results into the hash table.
  */
 static cw_bool_t
-res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
+res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 {
 	cw_bool_t	retval = FALSE;
 	size_t		i, name_pos = 0, val_pos = 0;
@@ -659,7 +659,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * jump to the trailing comment state.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_merge_res(a_res, name, val)) {
+				if (res_p_res_merge(a_res, name, val)) {
 					retval = TRUE;
 					goto RETURN;
 				}
@@ -677,7 +677,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 				line_num++;
 				col_num = 1;
 				val[val_pos] = '\0';
-				if (res_p_merge_res(a_res, name, val)) {
+				if (res_p_res_merge(a_res, name, val)) {
 					retval = TRUE;
 					goto RETURN;
 				}
@@ -689,7 +689,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * resource.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_merge_res(a_res, name, val)) {
+				if (res_p_res_merge(a_res, name, val)) {
 					retval = TRUE;
 					goto RETURN;
 				}
@@ -735,7 +735,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * comment state.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_merge_res(a_res, name, val)) {
+				if (res_p_res_merge(a_res, name, val)) {
 					retval = TRUE;
 					goto RETURN;
 				}
@@ -755,7 +755,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 				line_num++;
 				col_num = 1;
 				val[val_pos] = '\0';
-				if (res_p_merge_res(a_res, name, val)) {
+				if (res_p_res_merge(a_res, name, val)) {
 					retval = TRUE;
 					goto RETURN;
 				}
@@ -767,7 +767,7 @@ res_p_parse_res(cw_res_t *a_res, cw_bool_t a_is_file)
 				 * that we want the state machine to exit.
 				 */
 				val[val_pos] = '\0';
-				if (res_p_merge_res(a_res, name, val)) {
+				if (res_p_res_merge(a_res, name, val)) {
 					retval = TRUE;
 					goto RETURN;
 				}
@@ -1051,7 +1051,7 @@ res_p_char_type(char a_char)
  * replaces.
  */
 static cw_bool_t
-res_p_merge_res(cw_res_t *a_res, const char *a_name, const char *a_val)
+res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 {
 	cw_bool_t	retval;
 	char		*temp_name, *temp_val;
@@ -1073,7 +1073,7 @@ res_p_merge_res(cw_res_t *a_res, const char *a_name, const char *a_val)
 	strcpy(temp_val, a_val);
 
 	if (dbg_is_registered(cw_g_dbg, "res_state")) {
-		_cw_out_put("res_merge_res(): Merging name == :[s]:, "
+		_cw_out_put("res_res_merge(): Merging name == :[s]:, "
 		    "value == :[s]:\n", a_name, a_val);
 	}
 	/* Insert the resource into the hash table. */

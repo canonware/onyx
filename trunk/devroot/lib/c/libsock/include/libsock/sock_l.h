@@ -28,7 +28,7 @@
  * Return the minimum incoming buffer space available.
  *
  ****************************************************************************/
-cw_uint32_t	sock_l_get_in_space(cw_sock_t *a_sock);
+cw_uint32_t	sock_l_in_space_get(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -45,7 +45,7 @@ cw_uint32_t	sock_l_get_in_space(cw_sock_t *a_sock);
  * Return the number of bytes of incoming data buffered for a_sock.
  *
  ****************************************************************************/
-cw_uint32_t	sock_l_get_in_size(cw_sock_t *a_sock);
+cw_uint32_t	sock_l_in_size_get(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -62,7 +62,7 @@ cw_uint32_t	sock_l_get_in_size(cw_sock_t *a_sock);
  * Return the maximum number of bytes of data to buffer for a_sock.
  *
  ****************************************************************************/
-cw_uint32_t	sock_l_get_in_max_buf_size(cw_sock_t *a_sock);
+cw_uint32_t	sock_l_in_max_buf_size_get(cw_sock_t *a_sock);
 
 /****************************************************************************
  *
@@ -87,7 +87,7 @@ cw_uint32_t	sock_l_get_in_max_buf_size(cw_sock_t *a_sock);
  * output buffer.
  *
  ****************************************************************************/
-void		sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf);
+void		sock_l_out_data_get(cw_sock_t *a_sock, cw_buf_t *r_buf);
 
 /****************************************************************************
  *
@@ -106,7 +106,7 @@ void		sock_l_get_out_data(cw_sock_t *a_sock, cw_buf_t *r_buf);
  * Push data back into out_buf.
  *
  ****************************************************************************/
-cw_uint32_t	sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf);
+cw_uint32_t	sock_l_out_data_put_back(cw_sock_t *a_sock, cw_buf_t *a_buf);
 
 /****************************************************************************
  *
@@ -125,7 +125,7 @@ cw_uint32_t	sock_l_put_back_out_data(cw_sock_t *a_sock, cw_buf_t *a_buf);
  * Append data to the incoming data buffer.
  *
  ****************************************************************************/
-cw_uint32_t	sock_l_put_in_data(cw_sock_t *a_sock, cw_buf_t *a_buf);
+cw_uint32_t	sock_l_in_data_put(cw_sock_t *a_sock, cw_buf_t *a_buf);
 
 /****************************************************************************
  *

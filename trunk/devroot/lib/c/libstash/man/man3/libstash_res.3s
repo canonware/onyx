@@ -35,22 +35,22 @@ res - Simple resource class.
 
 .I cw_bool_t
 .br
-.B res_merge_file
+.B res_file_merge
 .RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
 
 .I cw_bool_t
 .br
-.B res_merge_list
+.B res_list_merge
 .RI ( "cw_res_t *a_res" ", " "..." )
 
 .I const char *
 .br
-.B res_get_res_val
+.B res_res_val_get
 .RI ( "cw_res_t *a_res" ", " "const char *a_res_name" )
 
 .I cw_bool_t
 .br
-.B res_extract_res
+.B res_res_extract
 .RI ( "cw_res_t *a_res" ", " "const char *a_res_key" ", " 
 .IR "char **r_res_name" ", " "char **r_res_val" )
 
@@ -313,7 +313,7 @@ If a_res and a_other are equivalent, return TRUE, otherwise FALSE.
 
 .I cw_bool_t
 .br
-.B res_merge_file
+.B res_file_merge
 .RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
 .RS
 Input(s):
@@ -344,7 +344,7 @@ Merge the resources contained in a_filename into the resource database.
 
 .I cw_bool_t
 .br
-.B res_merge_list
+.B res_list_merge
 .RI ( "cw_res_t *a_res" ", " "..." )
 .RS
 Input(s):
@@ -375,7 +375,7 @@ Merge the resources (...) into the resource database (a_res).
 
 .I const char *
 .br
-.B res_get_res_val
+.B res_res_val_get
 .RI ( "cw_res_t *a_res" ", " "const char *a_res_name" )
 .RS
 Input(s):
@@ -406,7 +406,7 @@ Return the value associoted with a_res_name if it exists.
 
 .I cw_bool_t
 .br
-.B res_extract_res
+.B res_res_extract
 .RI ( "cw_res_t *a_res" ", " "const char *a_res_key" ", " 
 .IR "char **r_res_name" ", " "char **r_res_val" )
 .RS

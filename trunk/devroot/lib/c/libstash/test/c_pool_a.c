@@ -23,17 +23,17 @@ main()
 	dbg_register(cw_g_dbg, "pool_error");
 /*  	dbg_register(cw_g_dbg, "pool_verbose"); */
 
-	/* pool_new(), pool_delete(), pool_get_buffer_size(). */
+	/* pool_new(), pool_delete(), pool_buffer_size_get(). */
 	{
 		cw_pool_t	pool, *pool_p;
 
 		_cw_assert(pool_new(&pool, cw_g_mem, 123) == &pool);
-		_cw_assert(pool_get_buffer_size(&pool) == 123);
+		_cw_assert(pool_buffer_size_get(&pool) == 123);
 		pool_delete(&pool);
 
 		pool_p = pool_new(NULL, cw_g_mem, 234);
 		_cw_check_ptr(pool_p);
-		_cw_assert(pool_get_buffer_size(pool_p) == 234);
+		_cw_assert(pool_buffer_size_get(pool_p) == 234);
 		pool_delete(pool_p);
 	}
 
@@ -44,7 +44,7 @@ main()
 		cw_uint32_t	i;
 
 		pool_new(&pool, cw_g_mem, 4096);
-		_cw_assert(pool_get_buffer_size(&pool) == 4096);
+		_cw_assert(pool_buffer_size_get(&pool) == 4096);
 		for (i = 0; i < 100; i++) {
 			pointers[i] = _cw_pool_get(&pool);
 			_cw_check_ptr(pointers[i]);

@@ -328,7 +328,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	cw_uint8_t	c;
 	size_t		len;
 
-	buf_size = buf_get_size(a_buf);
+	buf_size = buf_size_get(a_buf);
 
 	/* Re-alloc enough space to hold the out string. */
 	str_len = (81		/* First dashed line. */
@@ -397,7 +397,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 				memcpy(p_b, t_str, len);
 				p_b += len;
 			}
-			c = buf_get_uint8(a_buf, i + j);
+			c = buf_uint8_get(a_buf, i + j);
 
 			switch (c) {
 			case 0x00:
@@ -845,7 +845,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	cw_uint32_t	str_len, buf_size, i;
 	cw_uint8_t	c;
 
-	buf_size = buf_get_size(a_buf);
+	buf_size = buf_size_get(a_buf);
 
 	/* Calculate the total size of the output. */
 	str_len = (1		/* '<' or '>'. */
@@ -870,7 +870,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 
 	/* Hex dump. */
 	for (i = 0; i < buf_size; i++) {
-		c = buf_get_uint8(a_buf, i);
+		c = buf_uint8_get(a_buf, i);
 		p[0] = syms[c >> 4];
 		p++;
 		p[0] = syms[c & 0xf];
@@ -893,7 +893,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	char		*retval, *t_str, *p;
 	cw_uint32_t	str_len, buf_size, i;
 
-	buf_size = buf_get_size(a_buf);
+	buf_size = buf_size_get(a_buf);
 
 	/* Calculate the total size of the output. */
 	str_len = (81		/* First dashed line. */
@@ -926,7 +926,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 
 	/* Data. */
 	for (i = 0; i < buf_size; i++) {
-		*p = buf_get_uint8(a_buf, i);
+		*p = buf_uint8_get(a_buf, i);
 		p++;
 	}
 
@@ -1020,7 +1020,7 @@ handle_client_send(void *a_arg)
 				out_put(conn->out, "[s]", str);
 			}
 			if ((sock_write(&conn->remote_sock, &buf)) ||
-			    (sock_flush_out(&conn->remote_sock))) {
+			    (sock_out_flush(&conn->remote_sock))) {
 				mtx_lock(&conn->lock);
 				conn->should_quit = TRUE;
 				mtx_unlock(&conn->lock);
@@ -1097,7 +1097,7 @@ handle_client_recv(void *a_arg)
 				out_put(conn->out, "[s]", str);
 			}
 			if ((sock_write(&conn->client_sock, &buf)) ||
-			    (sock_flush_out(&conn->client_sock))) {
+			    (sock_out_flush(&conn->client_sock))) {
 				mtx_lock(&conn->lock);
 				conn->should_quit = TRUE;
 				mtx_unlock(&conn->lock);

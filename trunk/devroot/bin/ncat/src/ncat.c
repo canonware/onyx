@@ -260,13 +260,13 @@ main(int argc, char **argv)
 
 		sock_stdin = sock_new(NULL, 16384);
 		sock_wrap(sock_stdin, dup(0), FALSE);
-		fd_sock_stdin = sock_get_fd(sock_stdin);
+		fd_sock_stdin = sock_fd_get(sock_stdin);
 		libsock_in_notify(mq, fd_sock_stdin);
 
 		sock_stdout = sock_new(NULL, 0);
 		sock_wrap(sock_stdout, 1, FALSE);
 
-		fd_sock = sock_get_fd(sock);
+		fd_sock = sock_fd_get(sock);
 		libsock_in_notify(mq, fd_sock);
 
 		zero.tv_sec = 0;
@@ -312,7 +312,7 @@ main(int argc, char **argv)
 					}
 
 					if (sock_write(sock, buf)) {
-						sock_flush_out(sock_stdout);
+						sock_out_flush(sock_stdout);
 
 						/*
 						 * We're two loops deep here, so
@@ -327,7 +327,7 @@ main(int argc, char **argv)
 				} while (sock_buffered_in(sock_stdin) > 0);
 
 				if (bytes_read < 0) {
-					sock_flush_out(sock_stdout);
+					sock_out_flush(sock_stdout);
 					done_reading = TRUE;
 				}
 			} else if (fd == fd_sock) {
@@ -367,7 +367,7 @@ main(int argc, char **argv)
 					 * The peer has disconnected.  Flush any
 					 * buffered data to stdout, then quit.
 					 */
-					sock_flush_out(sock_stdout);
+					sock_out_flush(sock_stdout);
 					break;
 				}
 			} else {
@@ -485,7 +485,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	cw_uint8_t	c;
 	size_t		len;
 
-	buf_size = buf_get_size(a_buf);
+	buf_size = buf_size_get(a_buf);
 
 	/* Re-alloc enough space to hold the out string. */
 	str_len = (81		/* First dashed line. */
@@ -555,7 +555,7 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 				memcpy(p_b, t_str, len);
 				p_b += len;
 			}
-			c = buf_get_uint8(a_buf, i + j);
+			c = buf_uint8_get(a_buf, i + j);
 
 			switch (c) {
 			case 0x00:
@@ -1003,7 +1003,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	cw_uint32_t	str_len, buf_size, i;
 	cw_uint8_t	c;
 
-	buf_size = buf_get_size(a_buf);
+	buf_size = buf_size_get(a_buf);
 
 	/* Calculate the total size of the output. */
 	str_len = (1		/* '<' or '>'. */
@@ -1028,7 +1028,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 
 	/* Hex dump. */
 	for (i = 0; i < buf_size; i++) {
-		c = buf_get_uint8(a_buf, i);
+		c = buf_uint8_get(a_buf, i);
 		p[0] = syms[c >> 4];
 		p++;
 		p[0] = syms[c & 0xf];
@@ -1051,7 +1051,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	char		*retval, *t_str, *p;
 	cw_uint32_t	str_len, buf_size, i;
 
-	buf_size = buf_get_size(a_buf);
+	buf_size = buf_size_get(a_buf);
 
 	/* Calculate the total size of the output. */
 	str_len = (81		/* First dashed line. */
@@ -1084,7 +1084,7 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 
 	/* Data. */
 	for (i = 0; i < buf_size; i++) {
-		*p = buf_get_uint8(a_buf, i);
+		*p = buf_uint8_get(a_buf, i);
 		p++;
 	}
 

@@ -38,7 +38,7 @@ extern cw_libsock_t	*g_libsock;
 cw_bool_t	libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
     cw_uint32_t a_max_spare_bufcs);
 void		libsock_shutdown(void);
-cw_bufc_t	*libsock_get_spare_bufc(void);
+cw_bufc_t	*libsock_spare_bufc_get(void);
 cw_bool_t	libsock_in_notify(cw_mq_t *a_mq, int a_sockfd);
 	
 #endif /* _LIBSOCK_H_ */

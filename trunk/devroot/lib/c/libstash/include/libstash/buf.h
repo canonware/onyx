@@ -85,60 +85,42 @@ struct cw_buf_s {
 };
 
 cw_buf_t	*buf_new(cw_buf_t *a_buf, cw_mem_t *a_mem);
-
 cw_buf_t	*buf_new_r(cw_buf_t *a_buf, cw_mem_t *a_mem);
-
 void		buf_delete(cw_buf_t *a_buf);
 
 void		buf_dump(cw_buf_t *a_buf, const char *a_prefix);
 
-cw_uint32_t	buf_get_size(cw_buf_t *a_buf);
-
-cw_uint32_t	buf_get_num_bufels(cw_buf_t *a_buf);
-
-const struct iovec *buf_get_iovec(cw_buf_t *a_buf, cw_uint32_t a_max_data,
+cw_uint32_t	buf_size_get(cw_buf_t *a_buf);
+cw_uint32_t	buf_num_bufels_get(cw_buf_t *a_buf);
+const struct iovec *buf_iovec_get(cw_buf_t *a_buf, cw_uint32_t a_max_data,
     cw_bool_t a_is_sys_iovec, int *r_iovec_count);
 
-cw_bool_t	buf_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
+cw_bool_t	buf_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
     a_preserve);
-
 cw_bool_t	buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset);
-
-cw_bool_t	buf_prepend_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t
+cw_bool_t	buf_bufc_prepend(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t
     a_beg_offset, cw_uint32_t a_end_offset);
-
-cw_bool_t	buf_append_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t
+cw_bool_t	buf_bufc_append(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t
     a_beg_offset, cw_uint32_t a_end_offset);
+cw_bool_t	buf_head_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount);
+cw_bool_t	buf_tail_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount);
 
-cw_bool_t	buf_release_head_data(cw_buf_t *a_buf, cw_uint32_t a_amount);
-
-cw_bool_t	buf_release_tail_data(cw_buf_t *a_buf, cw_uint32_t a_amount);
-
-cw_uint8_t	buf_get_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset);
-
-cw_uint32_t	buf_get_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset);
-
-cw_uint64_t	buf_get_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset);
-
-cw_bool_t	buf_set_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint8_t
+cw_uint8_t	buf_uint8_get(cw_buf_t *a_buf, cw_uint32_t a_offset);
+cw_uint32_t	buf_uint32_get(cw_buf_t *a_buf, cw_uint32_t a_offset);
+cw_uint64_t	buf_uint64_get(cw_buf_t *a_buf, cw_uint32_t a_offset);
+cw_bool_t	buf_uint8_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint8_t
     a_val);
-
-cw_bool_t	buf_set_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset,
+cw_bool_t	buf_uint32_set(cw_buf_t *a_buf, cw_uint32_t a_offset,
     cw_uint32_t a_val);
-
-cw_bool_t	buf_set_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset,
+cw_bool_t	buf_uint64_set(cw_buf_t *a_buf, cw_uint32_t a_offset,
     cw_uint64_t a_val);
-
-cw_bool_t	buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
+cw_bool_t	buf_range_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
     a_length, cw_uint8_t *a_val, cw_bool_t a_is_writeable);
 
 cw_bufc_t	*bufc_new(cw_bufc_t *a_bufc, cw_mem_t *a_mem,
     cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg);
-
 void		bufc_delete(cw_bufc_t *a_bufc);
-
-void		bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t
+void		bufc_buffer_set(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t
     a_size, cw_bool_t a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func, void
     *a_dealloc_arg);
-
-cw_uint32_t	bufc_get_size(cw_bufc_t *a_bufc);
+cw_uint32_t	bufc_size_get(cw_bufc_t *a_bufc);

@@ -151,9 +151,9 @@ main(int argc, char **argv)
 	buffer = _cw_malloc(opt_bsize);
 	if (buffer == NULL)
 		_cw_error("Memory allocation error");
-	bufc_set_buffer(&bufc, buffer, opt_bsize, TRUE, (cw_opaque_dealloc_t
+	bufc_buffer_set(&bufc, buffer, opt_bsize, TRUE, (cw_opaque_dealloc_t
 	    *)mem_free, cw_g_mem);
-	if (buf_append_bufc(&buf, &bufc, 0, opt_bsize))
+	if (buf_bufc_append(&buf, &bufc, 0, opt_bsize))
 		_cw_error("Memory allocation error");
 	bufc_delete(&bufc);
 
@@ -166,13 +166,13 @@ main(int argc, char **argv)
 	for (i = 0; i < opt_nblocks; i++) {
 		if ((i & 0xf) == 0xf) {
 			for (j = 0; j < opt_nsocks; j++) {
-				if (sock_flush_out(&sock_array[j])) {
+				if (sock_out_flush(&sock_array[j])) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
 					    NULL, "Error in sock_flush_out() "
 					    "for connection [i]\n", j);
 					goto SHUTDOWN;
 				}
-				if (buf_catenate_buf(&t_buf, &buf, TRUE))
+				if (buf_buf_catenate(&t_buf, &buf, TRUE))
 					_cw_error("Memory allocation error");
 				if (sock_write(&sock_array[j], &t_buf)) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
@@ -183,7 +183,7 @@ main(int argc, char **argv)
 			}
 		} else {
 			for (j = 0; j < opt_nsocks; j++) {
-				if (buf_catenate_buf(&t_buf, &buf, TRUE))
+				if (buf_buf_catenate(&t_buf, &buf, TRUE))
 					_cw_error("Memory allocation error");
 				if (sock_write(&sock_array[j], &t_buf)) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
@@ -199,7 +199,7 @@ main(int argc, char **argv)
 	SHUTDOWN:
 	/* Flush and close all the sockets. */
 	for (i = 0; i < opt_nsocks; i++) {
-		sock_flush_out(&sock_array[i]);
+		sock_out_flush(&sock_array[i]);
 		sock_delete(&sock_array[i]);
 		_cw_out_put_l("Connection closed ([i])\n", i);
 	}

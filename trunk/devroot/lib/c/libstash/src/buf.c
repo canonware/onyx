@@ -24,25 +24,25 @@
 
 static cw_buf_t	*buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t
     a_is_threadsafe);
-static void	buf_p_rebuild_cumulative_index(cw_buf_t *a_buf);
-static void	buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset,
+static void	buf_p_cumulative_index_rebuild(cw_buf_t *a_buf);
+static void	buf_p_data_position_get(cw_buf_t *a_buf, cw_uint32_t a_offset,
     cw_uint32_t *a_array_element, cw_uint32_t *a_bufel_offset);
-static cw_bool_t buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size);
-static cw_bool_t buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
+static cw_bool_t buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size);
+static cw_bool_t buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
     a_preserve);
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-static void	buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
+static void	buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
     a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t
     a_is_destructive);
 #else
-static void	buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
+static void	buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t
     a_num_elements, cw_uint32_t a_a_start, cw_uint32_t a_b_start);
 #endif
-static cw_bool_t buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t
+static cw_bool_t buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t
     a_offset, cw_uint32_t a_length);
 static void	bufc_p_dump(cw_bufc_t *a_bufc, const char *a_prefix);
-static cw_bool_t bufc_p_get_is_writeable(cw_bufc_t *a_bufc);
-static cw_uint32_t bufc_p_get_ref_count(cw_bufc_t *a_bufc);
+static cw_bool_t bufc_p_is_writeable(cw_bufc_t *a_bufc);
+static cw_uint32_t bufc_p_ref_count_get(cw_bufc_t *a_bufc);
 static void	bufc_p_ref_increment(cw_bufc_t *a_bufc);
 
 cw_buf_t *
@@ -186,7 +186,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 }
 
 cw_uint32_t
-buf_get_size(cw_buf_t *a_buf)
+buf_size_get(cw_buf_t *a_buf)
 {
 	cw_uint32_t	retval;
 
@@ -205,7 +205,7 @@ buf_get_size(cw_buf_t *a_buf)
 }
 
 cw_uint32_t
-buf_get_num_bufels(cw_buf_t *a_buf)
+buf_num_bufels_get(cw_buf_t *a_buf)
 {
 	cw_uint32_t retval;
 
@@ -225,7 +225,7 @@ buf_get_num_bufels(cw_buf_t *a_buf)
 }
 
 const struct iovec *
-buf_get_iovec(cw_buf_t *a_buf, cw_uint32_t a_max_data, cw_bool_t a_is_sys_iovec,
+buf_iovec_get(cw_buf_t *a_buf, cw_uint32_t a_max_data, cw_bool_t a_is_sys_iovec,
     int *r_iovec_count)
 {
 	cw_uint32_t	array_index, num_bytes;
@@ -267,7 +267,7 @@ buf_get_iovec(cw_buf_t *a_buf, cw_uint32_t a_max_data, cw_bool_t a_is_sys_iovec,
 }
 
 cw_bool_t
-buf_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
+buf_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 {
 	cw_bool_t	retval;
 
@@ -286,7 +286,7 @@ buf_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 	if (a_b->is_threadsafe)
 		mtx_lock(&a_b->lock);
 
-	retval = buf_p_catenate_buf(a_a, a_b, a_preserve);
+	retval = buf_p_buf_catenate(a_a, a_b, a_preserve);
 
 	if (a_b->is_threadsafe)
 		mtx_unlock(&a_b->lock);
@@ -310,7 +310,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 	_cw_assert(a_b->magic_a == _CW_BUF_MAGIC);
 	_cw_assert(a_b->size_of == sizeof(cw_buf_t));
 	_cw_assert(a_b->magic_b == _CW_BUF_MAGIC);
-	_cw_assert(a_offset <= buf_get_size(a_b));
+	_cw_assert(a_offset <= buf_size_get(a_b));
 	_cw_assert(a_a != a_b);
 
 	if (a_a->is_threadsafe)
@@ -319,7 +319,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 		mtx_lock(&a_b->lock);
 
 	if ((a_offset > 0) && (a_offset < a_b->size)) {
-		buf_p_get_data_position(a_b, a_offset, &array_element,
+		buf_p_data_position_get(a_b, a_offset, &array_element,
 		    &bufel_offset);
 
 		num_bufels_to_move = (((array_element >= a_b->array_start) ?
@@ -333,7 +333,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 		 * might be expanding the arrays unnecessarily.  However, error
 		 * recovery after the bufel merge is particularly nasty.
 		 */
-		if (buf_p_fit_array(a_a, a_a->array_num_valid +
+		if (buf_p_array_fit(a_a, a_a->array_num_valid +
 		    num_bufels_to_move)) {
 			retval = TRUE;
 			goto RETURN;
@@ -448,17 +448,17 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 			/*
 			 * Non-destructively copy all the bufel's we care about.
 			 */
-			buf_p_copy_array(a_a, a_b, num_bufels_to_move,
+			buf_p_array_copy(a_a, a_b, num_bufels_to_move,
 			    a_a->array_end, a_b->array_start, FALSE);
 			/*
 			 * Destructively copy all but perhaps the last bufel, in
 			 * order to zero out a_b's copy.
 			 */
-			buf_p_copy_array(a_a, a_b, num_bufels_to_move -
+			buf_p_array_copy(a_a, a_b, num_bufels_to_move -
 			    (bufel_offset == 0 ? 0 : 1), a_a->array_end,
 			    a_b->array_start, TRUE);
 #else
-			buf_p_copy_array(a_a, a_b, num_bufels_to_move,
+			buf_p_array_copy(a_a, a_b, num_bufels_to_move,
 			    a_a->array_end, a_b->array_start);
 #endif
 
@@ -544,7 +544,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 		}
 	} else if ((a_offset > 0) && (a_offset == a_b->size)) {
 		/* Same as catenation. */
-		if (buf_p_catenate_buf(a_a, a_b, FALSE)) {
+		if (buf_p_buf_catenate(a_a, a_b, FALSE)) {
 			retval = TRUE;
 			goto RETURN;
 		}
@@ -560,7 +560,7 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 }
 
 cw_bool_t
-buf_prepend_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
+buf_bufc_prepend(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
     cw_uint32_t a_end_offset)
 {
 	cw_bool_t	retval;
@@ -599,7 +599,7 @@ buf_prepend_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
 			a_buf->cumulative_index[a_buf->array_start] =
 			    a_buf->size;
 		} else {
-			if (buf_p_fit_array(a_buf, a_buf->array_num_valid +
+			if (buf_p_array_fit(a_buf, a_buf->array_num_valid +
 			    1)) {
 				retval = TRUE;
 				goto RETURN;
@@ -638,7 +638,7 @@ buf_prepend_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
 }
 
 cw_bool_t
-buf_append_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
+buf_bufc_append(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
     cw_uint32_t a_end_offset)
 {
 	cw_bool_t	retval;
@@ -688,7 +688,7 @@ buf_append_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
 			}
 		}
 		if (did_bufel_merge == FALSE) {
-			if (buf_p_fit_array(a_buf, a_buf->array_num_valid +
+			if (buf_p_array_fit(a_buf, a_buf->array_num_valid +
 			    1)) {
 				retval = TRUE;
 				goto RETURN;
@@ -727,7 +727,7 @@ buf_append_bufc(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t a_beg_offset,
 }
 
 cw_bool_t
-buf_release_head_data(cw_buf_t *a_buf, cw_uint32_t a_amount)
+buf_head_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	array_index, bufel_valid_data, amount_left;
@@ -798,7 +798,7 @@ buf_release_head_data(cw_buf_t *a_buf, cw_uint32_t a_amount)
 }
 
 cw_bool_t
-buf_release_tail_data(cw_buf_t *a_buf, cw_uint32_t a_amount)
+buf_tail_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	array_index, bufel_valid_data, amount_left;
@@ -865,7 +865,7 @@ buf_release_tail_data(cw_buf_t *a_buf, cw_uint32_t a_amount)
 }
 
 cw_uint8_t
-buf_get_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset)
+buf_uint8_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 {
 	cw_uint8_t	retval;
 	cw_uint32_t	array_element, bufel_offset;
@@ -879,7 +879,7 @@ buf_get_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	if (a_buf->is_threadsafe)
 		mtx_lock(&a_buf->lock);
 
-	buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
 	retval = *(a_buf->bufel_array[array_element].bufc->buf + bufel_offset);
 
@@ -889,7 +889,7 @@ buf_get_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset)
 }
 
 cw_uint32_t
-buf_get_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset)
+buf_uint32_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 {
 	cw_uint32_t	retval, array_element, bufel_offset;
 
@@ -910,7 +910,7 @@ buf_get_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	((cw_uint32_t) *(a_buf->bufel_array[array_element].bufc->buf	\
 	    + bufel_offset + (o)) << ((s) << 3))
 
-	buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
 	if (bufel_offset + 3 <
 	    a_buf->bufel_array[array_element].end_offset) {
@@ -928,24 +928,24 @@ buf_get_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	} else {
 #ifdef WORDS_BIGENDIAN
 		retval = _LIBSTASH_BUF_OR_BYTE(0, 3);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 0);
 #else
 		retval = _LIBSTASH_BUF_OR_BYTE(0, 0);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 3);
 #endif
@@ -958,7 +958,7 @@ buf_get_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset)
 }
 
 cw_uint64_t
-buf_get_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset)
+buf_uint64_get(cw_buf_t *a_buf, cw_uint32_t a_offset)
 {
 	cw_uint64_t	retval;
 	cw_uint32_t	array_element, bufel_offset;
@@ -980,7 +980,7 @@ buf_get_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	((cw_uint64_t) *(a_buf->bufel_array[array_element].bufc->buf	\
 	    + bufel_offset + (o)) << ((s) << 3))
 
-	buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
 	if (bufel_offset + 7 < a_buf->bufel_array[array_element].end_offset) {
 #ifdef WORDS_BIGENDIAN
@@ -1005,48 +1005,48 @@ buf_get_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset)
 	} else {
 #ifdef WORDS_BIGENDIAN
 		retval = _LIBSTASH_BUF_OR_BYTE(0, 7);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 6);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 5);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 4);
-		buf_p_get_data_position(a_buf, a_offset + 4, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 3);
-		buf_p_get_data_position(a_buf, a_offset + 5, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
-		buf_p_get_data_position(a_buf, a_offset + 6, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
-		buf_p_get_data_position(a_buf, a_offset + 7, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 0);
 #else
 		retval = _LIBSTASH_BUF_OR_BYTE(0, 0);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 1);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 2);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 3);
-		buf_p_get_data_position(a_buf, a_offset + 4, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 4);
-		buf_p_get_data_position(a_buf, a_offset + 5, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 5);
-		buf_p_get_data_position(a_buf, a_offset + 6, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 6);
-		buf_p_get_data_position(a_buf, a_offset + 7, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
 		retval |= _LIBSTASH_BUF_OR_BYTE(0, 7);
 #endif
@@ -1059,7 +1059,7 @@ buf_get_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset)
 }
 
 cw_bool_t
-buf_set_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
+buf_uint8_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	array_element, bufel_offset;
@@ -1073,11 +1073,11 @@ buf_set_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
 	if (a_buf->is_threadsafe)
 		mtx_lock(&a_buf->lock);
 
-	if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint8_t))) {
+	if (buf_p_writeable_range_make(a_buf, a_offset, sizeof(cw_uint8_t))) {
 		retval = TRUE;
 		goto RETURN;
 	}
-	buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
 	a_buf->bufel_array[array_element].bufc->buf[bufel_offset] = a_val;
 
@@ -1089,7 +1089,7 @@ buf_set_uint8(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
 }
 
 cw_bool_t
-buf_set_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
+buf_uint32_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	array_element, bufel_offset;
@@ -1103,14 +1103,14 @@ buf_set_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 	if (a_buf->is_threadsafe)
 		mtx_lock(&a_buf->lock);
 
-	if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint32_t))) {
+	if (buf_p_writeable_range_make(a_buf, a_offset, sizeof(cw_uint32_t))) {
 		retval = TRUE;
 		goto RETURN;
 	}
 	/* Get a byte from a_val and put in in the least significant byte. */
 #define _LIBSTASH_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
 
-	buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
 	if (bufel_offset + 3 < a_buf->bufel_array[array_element].end_offset) {
 		/* The whole thing is in one bufel. */
@@ -1138,30 +1138,30 @@ buf_set_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 #ifdef WORDS_BIGENDIAN
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(3);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(2);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(1);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(0);
 #else
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(0);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(1);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(2);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(3);
@@ -1177,7 +1177,7 @@ buf_set_uint32(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
 }
 
 cw_bool_t
-buf_set_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
+buf_uint64_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	array_element, bufel_offset;
@@ -1191,14 +1191,14 @@ buf_set_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 	if (a_buf->is_threadsafe)
 		mtx_lock(&a_buf->lock);
 
-	if (buf_p_make_range_writeable(a_buf, a_offset, sizeof(cw_uint64_t))) {
+	if (buf_p_writeable_range_make(a_buf, a_offset, sizeof(cw_uint64_t))) {
 		retval = TRUE;
 		goto RETURN;
 	}
 	/* Get a byte from a_val and put in in the least significant byte. */
 #define _LIBSTASH_BUF_BYTE(s) ((a_val >> ((s) << 3)) & 0xff)
 
-	buf_p_get_data_position(a_buf, a_offset, &array_element, &bufel_offset);
+	buf_p_data_position_get(a_buf, a_offset, &array_element, &bufel_offset);
 
 	if (bufel_offset + 7 < a_buf->bufel_array[array_element].end_offset) {
 		/* The whole thing is in one bufel. */
@@ -1242,62 +1242,62 @@ buf_set_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 #ifdef WORDS_BIGENDIAN
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(7);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(6);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(5);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(4);
-		buf_p_get_data_position(a_buf, a_offset + 4, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(3);
-		buf_p_get_data_position(a_buf, a_offset + 5, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(2);
-		buf_p_get_data_position(a_buf, a_offset + 6, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(1);
-		buf_p_get_data_position(a_buf, a_offset + 7, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(0);
 #else
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(0);
-		buf_p_get_data_position(a_buf, a_offset + 1, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 1, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(1);
-		buf_p_get_data_position(a_buf, a_offset + 2, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 2, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(2);
-		buf_p_get_data_position(a_buf, a_offset + 3, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 3, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(3);
-		buf_p_get_data_position(a_buf, a_offset + 4, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 4, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(4);
-		buf_p_get_data_position(a_buf, a_offset + 5, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 5, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(5);
-		buf_p_get_data_position(a_buf, a_offset + 6, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 6, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(6);
-		buf_p_get_data_position(a_buf, a_offset + 7, &array_element,
+		buf_p_data_position_get(a_buf, a_offset + 7, &array_element,
 		    &bufel_offset);
 		a_buf->bufel_array[array_element].bufc->buf[bufel_offset]
 		    = _LIBSTASH_BUF_BYTE(7);
@@ -1313,7 +1313,7 @@ buf_set_uint64(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
 }
 
 cw_bool_t
-buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
+buf_range_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
     cw_uint8_t *a_val, cw_bool_t a_is_writeable)
 {
 	cw_bool_t	retval;
@@ -1339,10 +1339,10 @@ buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 			retval = TRUE;
 			goto RETURN;
 		}
-		bufc_set_buffer(bufc, (void *)a_val, a_length, TRUE, NULL,
+		bufc_buffer_set(bufc, (void *)a_val, a_length, TRUE, NULL,
 		    NULL);
 
-		if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1)) {
+		if (buf_p_array_fit(a_buf, a_buf->array_num_valid + 1)) {
 			bufc_delete(bufc);
 			retval = TRUE;
 			goto RETURN;
@@ -1369,14 +1369,14 @@ buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 	} else {
 		cw_uint32_t	bytes_copied, array_element, bufel_offset;
 
-		if (buf_p_make_range_writeable(a_buf, a_offset, a_length)) {
+		if (buf_p_writeable_range_make(a_buf, a_offset, a_length)) {
 			retval = TRUE;
 			goto RETURN;
 		}
 		/* March through the bufel_array and memcpy in a_val. */
 		bytes_copied = 0;
 		while (bytes_copied < a_length) {
-			buf_p_get_data_position(a_buf, a_offset +
+			buf_p_data_position_get(a_buf, a_offset +
 			    bytes_copied, &array_element, &bufel_offset);
 			if (((a_buf->bufel_array[array_element].end_offset -
 			    bufel_offset) + bytes_copied) > a_length) {
@@ -1462,7 +1462,7 @@ buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 }
 
 static void
-buf_p_rebuild_cumulative_index(cw_buf_t *a_buf)
+buf_p_cumulative_index_rebuild(cw_buf_t *a_buf)
 {
 	cw_uint32_t	i, cumulative, index;
 
@@ -1477,7 +1477,7 @@ buf_p_rebuild_cumulative_index(cw_buf_t *a_buf)
 }
 
 static void
-buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
+buf_p_data_position_get(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
     *a_array_element, cw_uint32_t *a_bufel_offset)
 {
 	if ((a_buf->is_cached_bufel_valid) && (a_offset <
@@ -1494,7 +1494,7 @@ buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		cw_uint32_t	first, last, index;
 
 		if (a_buf->is_cumulative_valid == FALSE)
-			buf_p_rebuild_cumulative_index(a_buf);
+			buf_p_cumulative_index_rebuild(a_buf);
 		if (a_buf->array_start < a_buf->array_end) {
 			/*
 			 * bufel_array is not wrapped, which means we can do a
@@ -1560,7 +1560,7 @@ buf_p_get_data_position(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 }
 
 static cw_bool_t
-buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
+buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	i;
@@ -1696,13 +1696,13 @@ buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 }
 
 static cw_bool_t
-buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
+buf_p_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 {
 	cw_bool_t	retval;
 	cw_uint32_t	i, a_a_index, a_b_index;
 	cw_uint32_t	did_bufel_merge = 0;
 
-	if (buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid)) {
+	if (buf_p_array_fit(a_a, a_a->array_num_valid + a_b->array_num_valid)) {
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -1751,20 +1751,20 @@ buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 	}
 #ifdef _LIBSTASH_DBG
 	if (did_bufel_merge) {
-		buf_p_copy_array(a_a, a_b, a_b->array_num_valid - 1,
+		buf_p_array_copy(a_a, a_b, a_b->array_num_valid - 1,
 		    a_a->array_end, (a_b->array_start + 1) & (a_b->array_size -
 		    1), !a_preserve);
 	} else {
-		buf_p_copy_array(a_a, a_b, a_b->array_num_valid, a_a->array_end,
+		buf_p_array_copy(a_a, a_b, a_b->array_num_valid, a_a->array_end,
 		    a_b->array_start, !a_preserve);
 	}
 #else
 	if (did_bufel_merge) {
-		buf_p_copy_array(a_a, a_b, a_b->array_num_valid - 1,
+		buf_p_array_copy(a_a, a_b, a_b->array_num_valid - 1,
 		    a_a->array_end, (a_b->array_start + 1) & (a_b->array_size -
 		    1));
 	} else {
-		buf_p_copy_array(a_a, a_b, a_b->array_num_valid, a_a->array_end,
+		buf_p_array_copy(a_a, a_b, a_b->array_num_valid, a_a->array_end,
 		    a_b->array_start);
 	}
 #endif
@@ -1809,11 +1809,11 @@ buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 
 #ifdef _LIBSTASH_DBG
 static void
-buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
+buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
     cw_uint32_t a_a_start, cw_uint32_t a_b_start, cw_bool_t a_is_destructive)
 #else
 static void
-buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
+buf_p_array_copy(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
     cw_uint32_t a_a_start, cw_uint32_t a_b_start)
 #endif
 {
@@ -2147,7 +2147,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 }
 
 static cw_bool_t
-buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
+buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
     a_length)
 {
 	cw_bool_t	retval;
@@ -2177,11 +2177,11 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 			retval = TRUE;
 			goto RETURN;
 		}
-		bufc_set_buffer(bufc, buffer, (a_offset + a_length) -
+		bufc_buffer_set(bufc, buffer, (a_offset + a_length) -
 		    a_buf->size, TRUE, (cw_opaque_dealloc_t *)mem_free,
 		    cw_g_mem);
 
-		if (buf_p_fit_array(a_buf, a_buf->array_num_valid + 1)) {
+		if (buf_p_array_fit(a_buf, a_buf->array_num_valid + 1)) {
 			bufc_delete(bufc);
 			retval = TRUE;
 			goto RETURN;
@@ -2216,9 +2216,9 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 	 * used in situations where a bufc is unwriteable (reference count
 	 * greater than one or marked unwriteable).
 	 */
-	buf_p_get_data_position(a_buf, a_offset, &first_array_element,
+	buf_p_data_position_get(a_buf, a_offset, &first_array_element,
 	    &bufel_offset);
-	buf_p_get_data_position(a_buf, a_offset + a_length - 1,
+	buf_p_data_position_get(a_buf, a_offset + a_length - 1,
 	    &last_array_element, &bufel_offset);
 
 	num_iterations = (((last_array_element + a_buf->array_size) -
@@ -2226,8 +2226,8 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 	for (i = 0; i < num_iterations; i++) {
 		bufel = &a_buf->bufel_array[((first_array_element + i) &
 		    (a_buf->array_size - 1))];
-		if ((bufc_p_get_is_writeable(bufel->bufc) == FALSE) ||
-		    (bufc_p_get_ref_count(bufel->bufc) > 1)) {
+		if ((bufc_p_is_writeable(bufel->bufc) == FALSE) ||
+		    (bufc_p_ref_count_get(bufel->bufc) > 1)) {
 			buffer = _cw_mem_malloc(a_buf->mem, bufel->end_offset -
 			    bufel->beg_offset);
 			if (buffer == NULL) {
@@ -2240,7 +2240,7 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 				retval = TRUE;
 				goto RETURN;
 			}
-			bufc_set_buffer(bufc, buffer, bufel->end_offset -
+			bufc_buffer_set(bufc, buffer, bufel->end_offset -
 			    bufel->beg_offset, TRUE, (cw_opaque_dealloc_t
 			    *)mem_free, cw_g_mem);
 
@@ -2254,7 +2254,7 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 			bufel->beg_offset = 0;
 		}
 		_cw_assert(bufel->bufc->is_writeable);
-		_cw_assert(1 == bufc_p_get_ref_count(bufel->bufc));
+		_cw_assert(1 == bufc_p_ref_count_get(bufel->bufc));
 	}
 
 	retval = FALSE;
@@ -2335,7 +2335,7 @@ bufc_delete(cw_bufc_t *a_bufc)
 }
 
 void
-bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t a_size, cw_bool_t
+bufc_buffer_set(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t a_size, cw_bool_t
     a_is_writeable, cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg)
 {
 	_cw_check_ptr(a_bufc);
@@ -2353,7 +2353,7 @@ bufc_set_buffer(cw_bufc_t *a_bufc, void *a_buffer, cw_uint32_t a_size, cw_bool_t
 }
 
 cw_uint32_t
-bufc_get_size(cw_bufc_t *a_bufc)
+bufc_size_get(cw_bufc_t *a_bufc)
 {
 	cw_uint32_t	retval;
 
@@ -2412,7 +2412,7 @@ bufc_p_dump(cw_bufc_t *a_bufc, const char *a_prefix)
 }
 
 static cw_bool_t
-bufc_p_get_is_writeable(cw_bufc_t *a_bufc)
+bufc_p_is_writeable(cw_bufc_t *a_bufc)
 {
 	_cw_check_ptr(a_bufc);
 	_cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
@@ -2423,7 +2423,7 @@ bufc_p_get_is_writeable(cw_bufc_t *a_bufc)
 }
 
 static cw_uint32_t
-bufc_p_get_ref_count(cw_bufc_t *a_bufc)
+bufc_p_ref_count_get(cw_bufc_t *a_bufc)
 {
 	cw_uint32_t	retval;
 

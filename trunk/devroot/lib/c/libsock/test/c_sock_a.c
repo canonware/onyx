@@ -31,11 +31,11 @@ handle_client(void *a_arg)
 
 	for (i = 0; i < _CW_NCONNS; i++) {
 		_cw_assert(socks_accept(socks, NULL, &sock) != NULL);
-		buf_release_head_data(&buf, buf_get_size(&buf));
+		buf_head_data_release(&buf, buf_size_get(&buf));
 		while (sock_read(&sock, &buf, 0, NULL) > 0);
 
-		_cw_assert(buf_get_size(&buf) >= 4);
-		message = buf_get_uint32(&buf, 0);
+		_cw_assert(buf_size_get(&buf) >= 4);
+		message = buf_uint32_get(&buf, 0);
 		out_put(cw_g_out, "Connection [i], message [i]\n", i, message);
 
 		_cw_assert(sock_disconnect(&sock) == FALSE);
@@ -81,10 +81,10 @@ main()
 		_cw_assert(sock_connect(&sock, "localhost", port, NULL) == 0);
 
 		/* Write some data. */
-		buf_set_uint32(&buf, 0, i);
+		buf_uint32_set(&buf, 0, i);
 		_cw_assert(sock_write(&sock, &buf) == FALSE);
 
-		_cw_assert(sock_flush_out(&sock) == FALSE);
+		_cw_assert(sock_out_flush(&sock) == FALSE);
 		_cw_assert(sock_disconnect(&sock) == FALSE);
 	}
 	sock_delete(&sock);

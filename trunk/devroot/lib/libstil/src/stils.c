@@ -474,7 +474,7 @@ stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc)
 	_cw_check_ptr(a_stilsc);
 	_cw_assert(a_stilsc->magic == _CW_STILSC_MAGIC);
 
-	return _CW_STILSC_SIZEOF2O(pool_get_buffer_size(a_stilsc->stilsc_pool));
+	return _CW_STILSC_SIZEOF2O(pool_buffer_size_get(a_stilsc->stilsc_pool));
 }
 
 static cw_stilso_t *

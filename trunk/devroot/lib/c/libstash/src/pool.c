@@ -117,7 +117,7 @@ pool_delete(cw_pool_t *a_pool)
 }
 
 cw_uint32_t
-pool_get_buffer_size(cw_pool_t *a_pool)
+pool_buffer_size_get(cw_pool_t *a_pool)
 {
 	_cw_check_ptr(a_pool);
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);

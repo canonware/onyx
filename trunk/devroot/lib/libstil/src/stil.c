@@ -106,7 +106,7 @@ stil_stil_bufc_get(cw_stil_t *a_stil)
 	    (cw_opaque_dealloc_t *)pool_put,
 	    stilag_stil_bufc_pool_get(&a_stil->stilag));
 	memset(retval->buffer, 0, sizeof(retval->buffer));
-	bufc_set_buffer(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
+	bufc_buffer_set(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
 	    NULL, NULL);
 
 	RETURN:
