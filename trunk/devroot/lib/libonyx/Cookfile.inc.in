@@ -137,7 +137,7 @@ libonyx_libs_check_update : libonyx_libs_tests
            [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
 }
 
-libonyx_libs_install : libonyx_install_a libonyx_install_s;
+libonyx_libs_install : libonyx_libs_install_a libonyx_libs_install_s;
 
 libonyx_libs_uninstall :
 {
@@ -185,7 +185,7 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/libonyx/include
  * Build rules.
  */
 
-libonyx_install_common :
+libonyx_libs_install_common :
 {
   [SHELL] -e;
 data
@@ -204,12 +204,12 @@ echo @INSTALL@ -d [PREFIX]/lib
 dataend
 }
 
-libonyx_install_a : [LIBONYX_A] libonyx_install_common
+libonyx_libs_install_a : [LIBONYX_A] libonyx_libs_install_common
 {
   @INSTALL@ -m 0444 [LIBONYX_A] [PREFIX]/lib;
 }
 
-libonyx_install_s : [LIBONYX_S] libonyx_install_common
+libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 {
 #if [matches macho [abi]]
   /* Set install_name correctly before installing. */
