@@ -218,7 +218,7 @@ hist_p_redo_flush(cw_hist_t *a_hist)
     /* Flush redo state, if any. */
     if (mkr_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
     {
-	mkr_seek(&a_hist->htmp, 0, BUFW_END);
+	mkr_seek(&a_hist->htmp, 0, BUFW_EOB);
 	mkr_remove(&a_hist->hcur, &a_hist->htmp);
     }
 }
@@ -452,7 +452,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    }
 
 		    /* Actually take action, now that the log is updated. */
-		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 		    switch (hst_tag_get(uhdr))
 		    {
 			case HST_TAG_INS:
@@ -544,7 +544,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    mkr_dup(&a_hist->hcur, &a_hist->htmp);
 
 		    /* Move. */
-		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 
 		    break;
 		}
@@ -672,7 +672,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    }
 
 		    /* Actually take action, now that the log is updated. */
-		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 		    switch (hst_tag_get(rhdr))
 		    {
 			case HST_TAG_INS:
@@ -764,7 +764,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    mkr_dup(&a_hist->hcur, &a_hist->htmp);
 
 		    /* Move. */
-		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
+ 		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 
 		    break;
 		}
@@ -788,8 +788,8 @@ hist_flush(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
 
-    mkr_seek(&a_hist->hcur, 0, BUFW_BEG);
-    mkr_seek(&a_hist->htmp, 0, BUFW_END);
+    mkr_seek(&a_hist->hcur, 0, BUFW_BOB);
+    mkr_seek(&a_hist->htmp, 0, BUFW_EOB);
     mkr_remove(&a_hist->hcur, &a_hist->htmp);
     a_hist->hbpos = 0;
     a_hist->gdepth = 0;

@@ -871,28 +871,28 @@ marker_p_whence(cw_nxo_t *a_whence)
     cw_uint32_t len;
     const cw_uint8_t *str;
 
-    /* a_whence is a name.  Determine whether it is /SEEK_SET, /SEEK_CUR, or
-     * /SEEK_END. */
+    /* a_whence is a name.  Determine whether it is /SEEK_BOB, /SEEK_REL, or
+     * /SEEK_EOB. */
     len = nxo_name_len_get(a_whence);
     /* All the valid names are the same length, so a single length works. */
-    if (len != strlen("SEEK_SET"))
+    if (len != strlen("SEEK_BOB"))
     {
 	retval = BUFW_NONE;
 	goto RETURN;
     }
 
     str = nxo_name_str_get(a_whence);
-    if (strncmp(str, "SEEK_CUR", len) == 0)
+    if (strncmp(str, "SEEK_REL", len) == 0)
     {
 	retval = BUFW_REL;
     }
-    else if (strncmp(str, "SEEK_SET", len) == 0)
+    else if (strncmp(str, "SEEK_BOB", len) == 0)
     {
-	retval = BUFW_BEG;
+	retval = BUFW_BOB;
     }
-    else if (strncmp(str, "SEEK_END", len) == 0)
+    else if (strncmp(str, "SEEK_EOB", len) == 0)
     {
-	retval = BUFW_END;
+	retval = BUFW_EOB;
     }
     else
     {

@@ -30,13 +30,13 @@ typedef enum
     BUFW_NONE,
 
     /* Offset from BOB, must be positive. */
-    BUFW_BEG,
+    BUFW_BOB,
 
     /* Relative to marker, positive or negative. */
     BUFW_REL,
 
     /* Offset from EOB, must be negative. */
-    BUFW_END
+    BUFW_EOB
 } cw_bufw_t;
 
 struct cw_mkr_s
@@ -53,7 +53,7 @@ struct cw_mkr_s
     cw_uint64_t ppos;
 
     /* Line number, relative to the beginning of bufp (>= 0). */
-    cw_uint64_t line;
+    cw_uint64_t pline;
 
     /* Ordered mkr tree and list linkage. */
     rb_node(cw_mkr_t) node;

@@ -376,6 +376,36 @@ bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 }
 
 /* buf. */
+static cw_uint64_t
+buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_offset)
+{
+    cw_error("XXX Not implemented");
+}
+
+static cw_uint64_t
+buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_offset)
+{
+    cw_error("XXX Not implemented");
+}
+
+static void
+buf_p_bufp_cache_validate(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
+{
+    cw_error("XXX Not implemented");
+}
+
+static cw_uint32_t
+buf_p_line_cache_validate(cw_buf_t *a_buf, cw_uint64_t a_bpos)
+{
+    cw_error("XXX Not implemented");
+}
+
+static cw_uint32_t
+buf_p_bpos_cache_validate(cw_buf_t *a_buf, cw_uint64_t a_bpos)
+{
+    cw_error("XXX Not implemented");
+}
+
 cw_buf_t *
 buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 	cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
@@ -678,6 +708,20 @@ buf_hist_group_end(cw_buf_t *a_buf)
 }
 
 /* mkr. */
+/* XXX Make inline? */
+static cw_uint64_t
+mkr_p_bpos(cw_mkr_t *a_mkr)
+{
+    cw_error("XXX Not implemented");
+}
+
+/* XXX Make inline? */
+static cw_uint64_t
+mkr_p_line(cw_mkr_t *a_mkr)
+{
+    cw_error("XXX Not implemented");
+}
+
 static cw_sint32_t
 mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
 {
@@ -781,7 +825,7 @@ mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
     bufp = a_buf->bufps[0];
     a_mkr->bufp = bufp;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
-    a_mkr->line = 0;
+    a_mkr->pline = 0;
     rb_node_new(&bufp->mtree, a_mkr, node);
     ql_elm_new(a_mkr, link);
 
@@ -807,7 +851,7 @@ mkr_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from)
 
     a_to->bufp = a_from->bufp;
     a_to->ppos = a_from->ppos;
-    a_to->line = a_from->line;
+    a_to->pline = a_from->pline;
 
     mkr_p_insert(a_to);
 }
@@ -839,7 +883,144 @@ mkr_buf(const cw_mkr_t *a_mkr)
 cw_uint64_t
 mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
-    cw_error("XXX Not implemented");
+    cw_uint64_t retval, bpos;
+    cw_uint32_t pindex;
+
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->bufp);
+
+    switch (a_whence)
+    {
+	case BUFW_BOB:
+	{
+	    /* Make sure not to go out of buf bounds. */
+	    if (a_offset <= 0)
+	    {
+		/* Attempt to move to or before BOB.  Move to BOB. */
+		retval = mkr_seek(a_mkr, 0, BUFW_BOB);
+		goto RETURN;
+	    }
+	    else if (a_offset >= a_mkr->bufp->buf->nlines)
+	    {
+		/* Attempt to move to or past EOB.  Move to EOB. */
+		retval = mkr_seek(a_mkr, 0, BUFW_EOB);
+		goto RETURN;
+	    }
+
+	    /* Move forward from BOB to just short of a_offset '\n' characters.
+	     * For example, if seeking forward 2:
+	     *
+	     *  \/
+	     *   hello\ngoodbye\nyadda\nblah
+	     *                /\
+	     */
+	    bpos = buf_p_bpos_before_lf(a_mkr->bufp->buf, a_offset);
+	    break;
+	}
+	case BUFW_REL:
+	{
+	    buf_p_bufp_cache_validate(a_mkr->bufp->buf, a_mkr->bufp);
+	    if (a_offset > 0)
+	    {
+		/* Make sure not to go out of buf bounds. */
+		if (mkr_p_line(a_mkr) + a_offset > a_mkr->bufp->buf->nlines)
+		{
+		    /* Attempt to move to or after EOB.  Move to EOB. */
+		    retval = mkr_seek(a_mkr, 0, BUFW_EOB);
+		    goto RETURN;
+		}
+
+		/* Move forward from the current position to just short of
+		 * a_offset '\n' characters.  For example, if seeking forward 2:
+		 *
+		 *            \/
+		 *   hello\ngoodbye\nyadda\nblah
+		 *                       /\
+		 */
+		bpos = buf_p_bpos_before_lf(a_mkr->bufp->buf,
+					    mkr_p_line(a_mkr) - 1 + a_offset);
+	    }
+	    else if (a_offset < 0)
+	    {
+		/* Make sure not to go out of buf bounds. */
+		if (-a_offset >= mkr_p_line(a_mkr))
+		{
+		    /* Attempt to move to or before BOB.  Move to BOB. */
+		    retval = mkr_seek(a_mkr, 0, BUFW_BOB);
+		    goto RETURN;
+		}
+
+		/* Move backward from the current position to just short
+		 * of a_offset '\n' characters.  For example, if
+		 * seeking backward 2:
+		 *
+		 *                     \/
+		 *   hello\ngoodbye\nyadda\nblah
+		 *         /\
+		 */
+		bpos = buf_p_bpos_after_lf(a_mkr->bufp->buf,
+					   mkr_p_line(a_mkr) - a_offset + 1);
+	    }
+	    else
+	    {
+		/* Do nothing. */
+		retval = mkr_pos(a_mkr);
+		goto RETURN;
+	    }
+
+	    break;
+	}
+	case BUFW_EOB:
+	{
+	    /* Make sure not to go out of buf bounds. */
+	    if (a_offset >= 0)
+	    {
+		/* Attempt to move to or after EOB.  Move to EOB. */
+		retval = mkr_seek(a_mkr, 0, BUFW_EOB);
+		goto RETURN;
+	    }
+	    else if (a_offset >= a_mkr->bufp->buf->nlines)
+	    {
+		/* Attempt to move to or past BOB.  Move to BOB. */
+		retval = mkr_seek(a_mkr, 0, BUFW_BOB);
+		goto RETURN;
+	    }
+
+	    /* Move backward from EOB to just short of a_offset '\n'
+	     * characters.  For example if seeking backward 2:
+	     *
+	     *                             \/
+	     *   hello\ngoodbye\nyadda\nblah
+	     *                  /\
+	     */
+	    bpos = buf_p_bpos_after_lf(a_mkr->bufp->buf,
+				       a_mkr->bufp->buf->nlines + a_offset + 1);
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+		
+    /* Get the index of the bufp that contains bpos. */
+    pindex = buf_p_line_cache_validate(a_mkr->bufp->buf, bpos);
+
+    /* Remove a_mkr from the tree and list of the bufp at its old location. */
+    mkr_p_remove(a_mkr);
+
+    /* Update the internal state of a_mkr. */
+    a_mkr->bufp = a_mkr->bufp->buf->bufps[pindex];
+    a_mkr->ppos = bpos - a_mkr->bufp->bpos;
+    a_mkr->pline = 1 + a_offset - a_mkr->bufp->line;
+
+    /* Insert a_mkr into the bufp's tree and list. */
+    mkr_p_insert(a_mkr);
+
+    retval = bpos;
+    RETURN:
+    return retval;
 }
 
 cw_uint64_t
@@ -852,7 +1033,7 @@ mkr_line(cw_mkr_t *a_mkr)
     cw_check_ptr(a_mkr->bufp);
 
     bufp_p_cache_validate(a_mkr->bufp);
-    retval = a_mkr->bufp->line + a_mkr->line;
+    retval = a_mkr->bufp->line + a_mkr->pline;
 
     return retval;
 }
