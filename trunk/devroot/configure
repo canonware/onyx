@@ -1540,10 +1540,45 @@ else
   echo "$ac_t""no" 1>&6
 fi
 
+# Extract the first word of "pdflatex", so it can be a program name with args.
+set dummy pdflatex; ac_word=$2
+echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
+echo "configure:1547: checking for $ac_word" >&5
+if eval "test \"`echo '$''{'ac_cv_path_PDFLATEX'+set}'`\" = set"; then
+  echo $ac_n "(cached) $ac_c" 1>&6
+else
+  case "$PDFLATEX" in
+  /*)
+  ac_cv_path_PDFLATEX="$PDFLATEX" # Let the user override the test with a path.
+  ;;
+  ?:/*)			 
+  ac_cv_path_PDFLATEX="$PDFLATEX" # Let the user override the test with a dos path.
+  ;;
+  *)
+  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
+  ac_dummy="$PATH"
+  for ac_dir in $ac_dummy; do 
+    test -z "$ac_dir" && ac_dir=.
+    if test -f $ac_dir/$ac_word; then
+      ac_cv_path_PDFLATEX="$ac_dir/$ac_word"
+      break
+    fi
+  done
+  IFS="$ac_save_ifs"
+  ;;
+esac
+fi
+PDFLATEX="$ac_cv_path_PDFLATEX"
+if test -n "$PDFLATEX"; then
+  echo "$ac_t""$PDFLATEX" 1>&6
+else
+  echo "$ac_t""no" 1>&6
+fi
+
 # Extract the first word of "dvips", so it can be a program name with args.
 set dummy dvips; ac_word=$2
 echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1547: checking for $ac_word" >&5
+echo "configure:1582: checking for $ac_word" >&5
 if eval "test \"`echo '$''{'ac_cv_path_DVIPS'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
@@ -1571,41 +1606,6 @@ fi
 DVIPS="$ac_cv_path_DVIPS"
 if test -n "$DVIPS"; then
   echo "$ac_t""$DVIPS" 1>&6
-else
-  echo "$ac_t""no" 1>&6
-fi
-
-# Extract the first word of "dvipdfm", so it can be a program name with args.
-set dummy dvipdfm; ac_word=$2
-echo $ac_n "checking for $ac_word""... $ac_c" 1>&6
-echo "configure:1582: checking for $ac_word" >&5
-if eval "test \"`echo '$''{'ac_cv_path_DVIPDFM'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  case "$DVIPDFM" in
-  /*)
-  ac_cv_path_DVIPDFM="$DVIPDFM" # Let the user override the test with a path.
-  ;;
-  ?:/*)			 
-  ac_cv_path_DVIPDFM="$DVIPDFM" # Let the user override the test with a dos path.
-  ;;
-  *)
-  IFS="${IFS= 	}"; ac_save_ifs="$IFS"; IFS=":"
-  ac_dummy="$PATH"
-  for ac_dir in $ac_dummy; do 
-    test -z "$ac_dir" && ac_dir=.
-    if test -f $ac_dir/$ac_word; then
-      ac_cv_path_DVIPDFM="$ac_dir/$ac_word"
-      break
-    fi
-  done
-  IFS="$ac_save_ifs"
-  ;;
-esac
-fi
-DVIPDFM="$ac_cv_path_DVIPDFM"
-if test -n "$DVIPDFM"; then
-  echo "$ac_t""$DVIPDFM" 1>&6
 else
   echo "$ac_t""no" 1>&6
 fi
@@ -2980,8 +2980,8 @@ s%@CAT@%$CAT%g
 s%@DIFF@%$DIFF%g
 s%@ETAGS@%$ETAGS%g
 s%@LATEX@%$LATEX%g
+s%@PDFLATEX@%$PDFLATEX%g
 s%@DVIPS@%$DVIPS%g
-s%@DVIPDFM@%$DVIPDFM%g
 s%@FIG2DEV@%$FIG2DEV%g
 s%@LATEX2HTML@%$LATEX2HTML%g
 s%@MAKEINDEX@%$MAKEINDEX%g

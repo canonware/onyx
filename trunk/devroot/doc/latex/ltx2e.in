@@ -9,6 +9,9 @@ if ($ARGV[0] eq '-v') {
     shift(@ARGV);
 }
 #
+$latex = $ARGV[0];
+shift(@ARGV);
+#
 die "$Pgm: must have exactly one argument\n" if $#ARGV != 0;
 # figure out input file and its filename root
 if (-f $ARGV[0]) {
@@ -104,8 +107,7 @@ sub run_latex {
     print STDERR "$Pgm: *** running LaTeX...\n" if $Verbose;
     unlink "$TeX_root.dvi";
 
-    open(LTXPIPE, "@LATEX@ $TeX_input 2>&1 |") 
-#    open(LTXPIPE, "latex2e $TeX_input 2>&1 |") 
+    open(LTXPIPE, "$latex $TeX_input 2>&1 |") 
     	|| &die_gracefully("$Pgm: Can't run latex pipe\n");
     while (<LTXPIPE>) {
 	$Multiply_defined_labels = 1 if /^LaTeX Warning: Label .* multiply defined/;

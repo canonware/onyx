@@ -37,8 +37,8 @@ CAT = @CAT@;
 DIFF = @DIFF@;
 VERIFY = @VERIFY@;
 LATEX = @LATEX@;
+PDFLATEX = @PDFLATEX@;
 DVIPS = @DVIPS@;
-DVIPDFM = @DVIPDFM@;
 FIG2DEV = @FIG2DEV@;
 LATEX2HTML = @LATEX2HTML@;
 MAKEINDEX = @MAKEINDEX@;
@@ -83,7 +83,7 @@ standard : libs bins_a
   set default
 ;
 
-all : libs bins tests docs;
+all : libs bins tests doc_all;
 
 libs_d : [D_LIBS];
 libs_a : [A_LIBS];
@@ -121,25 +121,25 @@ check_update : tests
            [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
 }
 
-release : docs;
+release : doc_all;
 
-docs : docs_p docs_f docs_h;
-docs_p : [P_MANUAL];
-docs_f : [F_MANUAL];
-docs_h : [H_MANUAL];
+doc_all : doc_ps doc_pdf doc_html;
+doc_ps : [PS_MANUAL];
+doc_pdf : [PDF_MANUAL];
+doc_html : [HTML_MANUAL];
 
 install_bins : [addsuffix _install_a @bins@];
 install_libs : [addsuffix _install @libs@];
-install : install_bins install_libs install_docs;
+install : install_bins install_libs install_doc;
 
 uninstall_bins : [addsuffix _uninstall @bins@];
 uninstall_libs : [addsuffix _uninstall @libs@];
-uninstall : uninstall_bins uninstall_libs uninstall_docs
+uninstall : uninstall_bins uninstall_libs uninstall_doc
 {
   rm -rf [PREFIX]/share/canonware;
 }
 
-clean : [addsuffix _clean docs test @bins@ @libs@]
+clean : [addsuffix _clean doc test @bins@ @libs@]
 {
   rm -f core *.core;
   rm -f TAGS;
@@ -186,7 +186,7 @@ done
 dataend
 }
 
-distclean : clean [addsuffix _distclean docs test @bins@ @libs@]
+distclean : clean [addsuffix _distclean doc test @bins@ @libs@]
 {
   rm -f [objdir]/Cookfile;
   rm -f [objdir]/config.cache;
@@ -196,7 +196,7 @@ distclean : clean [addsuffix _distclean docs test @bins@ @libs@]
   rm -f @cfghdrs@;
 }
 
-relclean : distclean [addsuffix _relclean docs]
+relclean : distclean [addsuffix _relclean doc]
 {
 }
 

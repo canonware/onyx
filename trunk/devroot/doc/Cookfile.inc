@@ -20,9 +20,10 @@ FIG_SRCS = ;
 
 T_MANUAL = [objdir]/doc/latex/manual.tex;
 D_MANUAL = [objdir]/doc/latex/manual.dvi;
-P_MANUAL = [objdir]/doc/ps/manual.ps;
-F_MANUAL = [objdir]/doc/pdf/manual.pdf;
-H_MANUAL = [objdir]/doc/html/manual.html;
+P_MANUAL = [objdir]/doc/latex/manual.pdf;
+PS_MANUAL = [objdir]/doc/ps/manual.ps;
+PDF_MANUAL = [objdir]/doc/pdf/manual.pdf;
+HTML_MANUAL = [objdir]/doc/html/manual.html;
 
 /* LaTeX source files. */
 {
@@ -40,20 +41,20 @@ H_MANUAL = [objdir]/doc/html/manual.html;
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
-install_docs : doc_install_p doc_install_f doc_install_h;
-doc_install_p : /* [P_MANUAL] */
+install_doc : doc_install_ps doc_install_pdf doc_install_html;
+doc_install_ps : /* [PS_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
-  [INSTALL] -m 0444 [P_MANUAL] [PREFIX]/share/canonware/doc/ps;
+  [INSTALL] -m 0444 [PS_MANUAL] [PREFIX]/share/canonware/doc/ps;
 }
 
-doc_install_f : /* [F_MANUAL] */
+doc_install_pdf : /* [PDF_MANUAL] */
 {
   [INSTALL] -d [PREFIX]/share/canonware/doc/pdf;
-  [INSTALL] -m 0444 [F_MANUAL] [PREFIX]/share/canonware/doc/pdf;
+  [INSTALL] -m 0444 [PDF_MANUAL] [PREFIX]/share/canonware/doc/pdf;
 }
 
-doc_install_h : /* [H_MANUAL] */
+doc_install_html : /* [HTML_MANUAL] */
 {
   [SHELL] -e;
 data
@@ -69,7 +70,7 @@ done
 dataend
 }
 
-uninstall_docs :
+uninstall_doc :
 {
   [SHELL] -e;
 data
@@ -80,7 +81,7 @@ rm -rf [PREFIX]/share/canonware/doc
 dataend
 }
 
-docs_clean :
+doc_clean :
 {
   rm -f [objdir]/doc/latex/manual.alg;
   rm -f [objdir]/doc/latex/manual.aux;
@@ -92,17 +93,19 @@ docs_clean :
   rm -f [objdir]/doc/latex/manual.ind;
   rm -f [objdir]/doc/latex/manual.lof;
   rm -f [objdir]/doc/latex/manual.log;
+  rm -f [objdir]/doc/latex/manual.out;
+  rm -f [objdir]/doc/latex/manual.pdf;
   rm -f [objdir]/doc/latex/manual.toc;
   rm -f [objdir]/doc/latex/texput.log;
 }
 
-docs_distclean :
+doc_distclean :
 {
   rm -f [objdir]/doc/latex/manual.tex;
   rm -f [objdir]/doc/latex/ltx2e;
 }
 
-docs_relclean :
+doc_relclean :
 {
   rm -rf [objdir]/doc/html;
   rm -rf [objdir]/doc/pdf;
@@ -112,11 +115,14 @@ docs_relclean :
 [D_MANUAL] : [T_MANUAL] [TEX_SRCS]
              [fromto [srcdir]/%0%.fig [objdir]/%0%.ps [FIG_SRCS]];
 
-[P_MANUAL] : [D_MANUAL];
+[P_MANUAL] : [T_MANUAL] [TEX_SRCS]
+             [fromto [srcdir]/%0%.fig [objdir]/%0%.ps [FIG_SRCS]];
 
-[F_MANUAL] : [D_MANUAL];
+[PS_MANUAL] : [D_MANUAL];
 
-[H_MANUAL] : [P_MANUAL];
+[PDF_MANUAL] : [P_MANUAL];
+
+[HTML_MANUAL] : [D_MANUAL];
 
 [objdir]/%0%.ps : [objdir]/%0%.fig
   set mkdir
@@ -131,11 +137,55 @@ docs_relclean :
    * Change directory to the object tree, since latex can't be made to use a
    * different location for output files.
    *
-   * Delete the index file so that it won't trip up the first run of ltx2e.
+   * Clean up the temp files to keep latex from stumbling over them, in case
+   * the last run was building a pdf.
    */
-  cd [objdir]/%0\; ./ltx2e [objdir]/%.tex;
+
+  rm -f [objdir]/doc/latex/manual.alg;
+  rm -f [objdir]/doc/latex/manual.aux;
+  rm -f [objdir]/doc/latex/manual.aux-prev;
+  rm -f [objdir]/doc/latex/manual.idx;
+  rm -f [objdir]/doc/latex/manual.idx-prev;
+  rm -f [objdir]/doc/latex/manual.ilg;
+  rm -f [objdir]/doc/latex/manual.ind;
+  rm -f [objdir]/doc/latex/manual.lof;
+  rm -f [objdir]/doc/latex/manual.log;
+  rm -f [objdir]/doc/latex/manual.out;
+  rm -f [objdir]/doc/latex/manual.toc;
+  rm -f [objdir]/doc/latex/texput.log;
+
+  cd [objdir]/%0\; ./ltx2e [LATEX] [objdir]/%.tex;
   cd [objdir]/%0\; [MAKEINDEX] -c -l [objdir]/%.idx;
-  cd [objdir]/%0\; ./ltx2e [objdir]/%.tex;
+  cd [objdir]/%0\; ./ltx2e [LATEX] [objdir]/%.tex;
+}
+
+[objdir]/%0%.pdf : [objdir]/%0%.tex
+  set mkdir
+{
+  /*
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   *
+   * Clean up the temp files to keep latex from stumbling over them, in case
+   * the last run was building a dvi.
+   */
+
+  rm -f [objdir]/doc/latex/manual.alg;
+  rm -f [objdir]/doc/latex/manual.aux;
+  rm -f [objdir]/doc/latex/manual.aux-prev;
+  rm -f [objdir]/doc/latex/manual.idx;
+  rm -f [objdir]/doc/latex/manual.idx-prev;
+  rm -f [objdir]/doc/latex/manual.ilg;
+  rm -f [objdir]/doc/latex/manual.ind;
+  rm -f [objdir]/doc/latex/manual.lof;
+  rm -f [objdir]/doc/latex/manual.log;
+  rm -f [objdir]/doc/latex/manual.out;
+  rm -f [objdir]/doc/latex/manual.toc;
+  rm -f [objdir]/doc/latex/texput.log;
+
+  cd [objdir]/%0\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
+  cd [objdir]/%0\; [MAKEINDEX] -c -l [objdir]/%.idx;
+  cd [objdir]/%0\; ./ltx2e [PDFLATEX] [objdir]/%.tex;
 }
 
 [objdir]/%0ps/%.ps : [objdir]/%0latex/%.dvi
@@ -144,13 +194,13 @@ docs_relclean :
   [DVIPS] [objdir]/%0latex/%.dvi -o [objdir]/%0ps/%.ps;
 }
 
-[objdir]/%0pdf/%.pdf : [objdir]/%0latex/%.dvi
+[objdir]/%0pdf/%.pdf : [objdir]/%0latex/%.pdf
   set mkdir
 {
-  [DVIPDFM] -o [objdir]/%0pdf/%.pdf [objdir]/%0latex/%.dvi;
+  cp [objdir]/%0latex/%.pdf [objdir]/%0pdf/%.pdf;
 }
 
-[objdir]/%0html/%.html : [objdir]/%0ps/%.ps
+[objdir]/%0html/%.html : [objdir]/%0latex/%.pdf
   set mkdir
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
