@@ -83,15 +83,14 @@ sockb_shutdown(void);
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a cw_bufel_t instance, or NULL.
+ * retval : Pointer to a cw_bufc_t instance, or NULL.
  *          NULL : Memory allocation error.
  *
  * <<< Description>>>
  *
- * Get a bufel, using internal bufpool's.  bufel's are guaranteed to be of the
- * size specified by the a_bufel_size parameter passed to sockb_init(), and the
- * beginning and end offsets are guaranteed to be 0.
+ * Get a bufc, using internal pezz's.  bufc's are guaranteed to be of the size
+ * specified by the a_bufel_size parameter passed to sockb_init().
  *
  ****************************************************************************/
-cw_bufel_t *
-sockb_get_spare_bufel(void);
+cw_bufc_t *
+sockb_get_spare_bufc(void);

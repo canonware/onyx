@@ -146,19 +146,10 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
      * to the pipe in order to force a return from select(). */
     sem_new(&g_sockb->pipe_sem, 1);
 
-    /* Create the spare bufel pool and initialize associated variables. */
-    if (NULL == pezz_new(&g_sockb->bufel_pool,
-			 sizeof(cw_bufel_t), a_max_spare_bufels))
-    {
-      _cw_free(g_sockb);
-      g_sockb = NULL;
-      retval = TRUE;
-      goto RETURN;
-    }
+    /* Create the spare bufc pool and initialize associated variables. */
     if (NULL == pezz_new(&g_sockb->bufc_pool,
 			 sizeof(cw_bufc_t), a_max_spare_bufels))
     {
-      pezz_delete(&g_sockb->bufel_pool);
       _cw_free(g_sockb);
       g_sockb = NULL;
       retval = TRUE;
@@ -168,7 +159,6 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 			 a_bufel_size, a_max_spare_bufels))
     {
       pezz_delete(&g_sockb->bufc_pool);
-      pezz_delete(&g_sockb->bufel_pool);
       _cw_free(g_sockb);
       g_sockb = NULL;
       retval = TRUE;
@@ -206,8 +196,7 @@ sockb_shutdown(void)
 
   sem_delete(&g_sockb->pipe_sem);
   
-  /* Clean up the spare bufel's. */
-  pezz_delete(&g_sockb->bufel_pool);
+  /* Clean up the spare bufc's. */
   pezz_delete(&g_sockb->bufc_pool);
   pezz_delete(&g_sockb->buffer_pool);
   
@@ -230,47 +219,35 @@ sockb_shutdown(void)
   _cw_free(g_sockb);
 }
 
-cw_bufel_t *
-sockb_get_spare_bufel(void)
+cw_bufc_t *
+sockb_get_spare_bufc(void)
 {
-  cw_bufel_t * retval;
-  cw_bufc_t * bufc;
+  cw_bufc_t * retval;
   void * buffer;
   
   _cw_check_ptr(g_sockb);
 
-  retval = bufel_new((cw_bufel_t *) pezz_get(&g_sockb->bufel_pool),
-		     pezz_put,
-		     (void *) &g_sockb->bufel_pool);
-  if (NULL == retval)
-  {
-    goto RETURN;
-  }
-  bufc = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
+  retval = bufc_new((cw_bufc_t *) pezz_get(&g_sockb->bufc_pool),
 		  pezz_put,
 		  (void *) &g_sockb->bufc_pool);
-  if (NULL == bufc)
+  if (NULL == retval)
   {
-    bufel_delete(retval);
     retval = NULL;
     goto RETURN;
   }
   buffer = pezz_get(&g_sockb->buffer_pool);
   if (NULL == buffer)
   {
-    bufc_delete(bufc);
-    bufel_delete(retval);
+    bufc_delete(retval);
     retval = NULL;
     goto RETURN;
   }
-  bufc_set_buffer(bufc,
+  bufc_set_buffer(retval,
 		  buffer,
 		  pezz_get_buffer_size(&g_sockb->buffer_pool),
 		  TRUE,
 		  pezz_put,
 		  (void *) &g_sockb->buffer_pool);
-  bufel_set_bufc(retval, bufc);
-  bufel_set_beg_offset(retval, 0);
 
   RETURN:
   return retval;
@@ -647,7 +624,8 @@ sockb_p_entry_func(void * a_arg)
 	  int iovec_count;
 	  ssize_t bytes_read;
 	  cw_sint32_t max_read;
-	  cw_bufel_t * bufel;
+	  cw_bufc_t * bufc;
+/*  	  cw_bufel_t * bufel; */
 	  
 	  j++;
 
@@ -663,8 +641,10 @@ sockb_p_entry_func(void * a_arg)
 	  /* Build up buf_in to be at least large enough for the readv(). */
 	  while (buf_get_size(&buf_in) < max_read)
 	  {
-	    bufel = sockb_get_spare_bufel();
-	    if (NULL == bufel)
+/*  	    bufel = sockb_get_spare_bufel(); */
+	    bufc = sockb_get_spare_bufc();
+/*  	    if (NULL == bufel) */
+	    if (NULL == bufc)
 	    {
 	      /* There isn't enough free memory to make the incoming buffer as
 	       * big as we would like.  As long as the incoming buffer has at
@@ -688,11 +668,15 @@ sockb_p_entry_func(void * a_arg)
 		_cw_error("No space in &buf_in");
 	      }
 	    }
-	    if (TRUE == buf_append_bufel(&buf_in, bufel))
+/*  	    if (TRUE == buf_append_bufel(&buf_in, bufel)) */
+	    if (TRUE
+		== buf_append_bufc(&buf_in, bufc, 0,
+				   pezz_get_buffer_size(&g_sockb->buffer_pool)))
 	    {
-	      /* As above, we have a memory allocation problem.  Clean up bufel,
+	      /* As above, we have a memory allocation problem.  Clean up bufc,
 	       * but otherwise take the same approach. */
-	      bufel_delete(bufel);
+/*  	      bufel_delete(bufel); */
+	      bufc_delete(bufc);
 	      
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	      {
@@ -711,7 +695,8 @@ sockb_p_entry_func(void * a_arg)
 		_cw_error("No space in &buf_in");
 	      }
 	    }
-	    bufel_delete(bufel);
+/*  	    bufel_delete(bufel); */
+	    bufc_delete(bufc);
 	  }
 
 	  /* Get an iovec for reading.  This somewhat goes against the idea of
