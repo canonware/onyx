@@ -1199,6 +1199,50 @@ sockb_p_entry_func(void * a_arg)
 	    }
 	  }
 	}
+	else if (fds[i].revents & POLLHUP)
+	{
+	  /* Linux (seemingly correctly) sets POLLHUP instead of POLLIN when a
+	   * socket is closed. */
+
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	  out_put(cw_g_out, "c");
+#endif
+
+	  if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
+	  {
+	    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		      "POLLHUP.  Closing sockfd [i]\n", sockfd);
+	  }
+
+	  /* Fill this hole, decrement i, continue. */
+	  nfds--;
+	  if (regs[sockfd].pollfd_pos != nfds)
+	  {
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	    out_put(cw_g_out, "h([i]-->[i])", nfds, i);
+#endif
+	      
+	    regs[fds[nfds].fd].pollfd_pos = i;
+	    memcpy(&fds[i], &fds[nfds], sizeof(struct pollfd));
+	    i--;
+	  }
+	  regs[sockfd].pollfd_pos = -1;
+
+	  sock_l_error_callback(regs[sockfd].sock);
+	    
+	  if (NULL != regs[sockfd].notify_mq)
+	  {
+	    if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+	    {
+	      regs[sockfd].notify_mq = NULL;
+	    }
+	  }
+
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	  out_put(cw_g_out, "\n");
+#endif
+	  continue;
+	}
 	if (fds[i].revents & POLLOUT)
 	{
 	  const struct iovec * iovec;
