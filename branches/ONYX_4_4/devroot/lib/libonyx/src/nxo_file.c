@@ -84,7 +84,7 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 
 #ifdef CW_POSIX_FILE
 void
-nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
+nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd, cw_bool_t a_close)
 {
     cw_nxoe_file_t *file;
     int flags;
@@ -112,7 +112,7 @@ nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
     }
 
     file->f.p.fd = a_fd;
-    file->f.p.wrapped = TRUE;
+    file->f.p.close = a_close;
 }
 #endif
 
@@ -295,7 +295,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 
     file->mode = FILE_POSIX;
     file->nonblocking = FALSE;
-    file->f.p.wrapped = FALSE;
+    file->f.p.close = TRUE;
 
     retval = NXN_ZERO;
     URETURN:
@@ -359,13 +359,10 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	{
 	    file->mode = FILE_NONE;
 	    file->nonblocking = FALSE;
-	    if (file->f.p.wrapped == FALSE)
+	    if (close(file->f.p.fd) == -1)
 	    {
-		if (close(file->f.p.fd) == -1)
-		{
-		    retval = NXN_ioerror;
-		    goto RETURN;
-		}
+		retval = NXN_ioerror;
+		goto RETURN;
 	    }
 	    break;
 	}
@@ -1129,7 +1126,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	}
 
 	/* Use the internal buffer.  If a_str won't entirely fit, do a writev()
-	 * for a normal file descriptor, or a straight write for a wrapped
+	 * for a normal file descriptor, or a straight write for a synthetic
 	 * file. */
 	if (a_len <= file->buffer_size - file->buffer_offset)
 	{
