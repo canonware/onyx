@@ -550,8 +550,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
     if (nxo_stack_count(&thread->estack) == CW_LIBONYX_ESTACK_MAX + 1)
     {
 	nxo_thread_nerror(a_nxo, NXN_estackoverflow);
+	nxo_stack_pop(&thread->estack);
+	goto DONE;
     }
-    
+
     RESTART:
     nxo = nxo_stack_get(&thread->estack);
     if (nxo_attr_get(nxo) == NXOA_LITERAL)
@@ -884,6 +886,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		{
 		    nxo_thread_nerror(a_nxo, NXN_undefined);
 		    nxo_stack_pop(&thread->estack);
+		    nxo_stack_pop(&thread->tstack);
+		    break;
 		}
 		nxo_stack_pop(&thread->tstack);
 		goto RESTART;
@@ -926,6 +930,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	}
 	cw_assert(nxo_stack_count(&thread->tstack) == tdepth);
     }
+    DONE:
 
     /* Pop the execution index for this onyx stack frame. */
     nxo_stack_pop(&thread->istack);
