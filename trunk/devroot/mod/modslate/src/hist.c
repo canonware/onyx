@@ -11,12 +11,11 @@
  * Undo/redo history:
  *
  * Since slate supports infinite undo (within the memory limitations of the
- * system, or up to 4 GB of history storage, whichever is less), buffer history
- * can become quite long.  Therefore, the buffer history mechanism aims to be as
- * compact as possible, at the expense of complexity.  Internally, the history
- * mechanism is a combination of a state machine that maintains enough state to
- * be able to play the history in either direction, along with a compact log of
- * buffer changes.
+ * system), buffer history can become quite long.  Therefore, the buffer history
+ * mechanism aims to be as compact as possible, at the expense of complexity.
+ * Internally, the history mechanism is a combination of a state machine that
+ * maintains enough state to be able to play the history in either direction,
+ * along with a compact log of buffer changes.
  *
  * User input that does not involve explicit point movement causes the history
  * log to grow by approximately one byte per inserted/deleted character
@@ -59,13 +58,22 @@
  *
  * If there are redo records, it may be that one record that is partly
  * undone/redone must be split into an undo and a redo portion.  In this case,
- * an extra byte is necessary to store the extra record header.  For example,
+ * extra space is necessary to store the extra record header.  For example,
  * consider an insert record in its original state, partly undone, and
  * completely undone:
  *
  *   (hello)R
  *   (hel)RI[lo]
  *   I[hello]
+ *
+ * As can be seen, when an undo record is converted to a redo record, the
+ * operation is inverted: insert <--> remove and yank <--> kill.  In addition,
+ * the order of the characters in the record is logically reversed.  However,
+ * the characters are really only needed when doing an insert or yank operation
+ * (regardless of whether undoing or redoing).  Therefore, records are always
+ * stored such that the data bytes are in the correct order to be used directly
+ * when inserting or yanking.  Logically, this has no impact on the history
+ * code, but internally, the data ordering is impacted.
  *
  * Following are several examples of history logs and translations of their
  * meanings.  The /\ characters denote the current position (hcur):
@@ -192,11 +200,11 @@
 
 /* The upper 3 bits are used to denote the record type, 1 bit is used to denote
  * short versus extended header, and the lower 4 bits are used to record the
- * number of characters for insert/delete, or the length of an extended header.
- * 4 bits for data length isn't much, but it makes for very compact storage in
- * the common case, and extended headers are used instead for longer data runs.
- * In order to make the most of the length bits, they are interpreted with a
- * bias of 1 since 0 is never needed.
+ * number of characters for insert/delete for a short header, or the length of
+ * an extended header.  4 bits for data length isn't much, but it makes for very
+ * compact storage in the common case, and extended headers are used instead for
+ * longer data runs.  In order to make the most of the data length bits, they
+ * are interpreted with a bias of 1 since 0 is never needed.
  *
  * The record headers for insert, yank, remove, and delete can take 3 forms,
  * depending on the amount of data in the record.  Following is a bit
@@ -204,27 +212,33 @@
  *
  *   T : Tag.
  *   E : Extended tag.
- *   L : Number of data bytes
- *   N : Number of bytes in extended header data length field.
+ *   N : Number of data bytes (bias of 1).
  *
- *   Maximum 16 data bytes:
+ *   Maximum 32 data bytes:
  *
- *                                         TTT0LLLL
+ *                                       [Data] TTTNNNNN
  *
  *   Maximum 256 data bytes:
  *
- *                                NNNNNNNN TTT10001
+ *                              [Data] NNNNNNNN TTT10001
  *
  *   Maximum 2^32 data bytes (N bytes are in network byte order):
  *
- *     NNNNNNNN NNNNNNNN NNNNNNNN NNNNNNNN TTT10100
+ *   [Data] NNNNNNNN NNNNNNNN NNNNNNNN NNNNNNNN TTT10100
+ *
+ *   Maximum 2^64 data bytes (N bytes are in network byte order):
+ *
+ *   [Data] NNNNNNNN NNNNNNNN NNNNNNNN NNNNNNNN
+ *          NNNNNNNN NNNNNNNN NNNNNNNN NNNNNNNN TTT11000
  *
  * The tag numbering is fragile, since bitwise xor is used in
  * hst_tag_inverse(). */
 #define HST_TAG_MASK    0xe0
-#define HST_ETAG_MASK	0x10
+#define HST_EXT_MASK	0x10
 #define HST_CNT_MASK	0x0f
 #define HST_CNT_MAX	16
+
+#define HST_TAG_NONE	0x00
 #define HST_TAG_GRP_BEG 0x20
 #define HST_TAG_GRP_END 0x40
 #define HST_TAG_POS     0x60
@@ -232,6 +246,9 @@
 #define HST_TAG_YNK     0xa0
 #define HST_TAG_REM     0xc0
 #define HST_TAG_DEL     0xe0
+
+#define HST_EXT_FALSE	0x00
+#define HST_EXT_TRUE	0x10
 
 /* hst_tag_init() isn't strictly necessary, since it merely clears unused
  * bits. */
@@ -243,11 +260,397 @@
 #define hst_tag_get(a_hdr) ((a_hdr) & HST_TAG_MASK)
 #define hst_tag_set(a_hdr, a_tag)					\
     (a_hdr) = ((a_hdr) & HST_CNT_MASK) | (a_tag)
+#define hst_ext_get(a_hdr) ((a_hdr) & HST_EXT_MASK)
+#define hst_ext_set(a_hdr, a_ext)					\
+    (a_hdr) = ((a_hdr) & HST_CNT_MASK) | (a_ext)
 /* Only meant for HST_TAG_{INS,YNK,REM,DEL}. */
 #define hst_tag_inverse(a_hdr) ((a_hdr) ^ 0x40)
-#define hst_cnt_get(a_hdr) (((a_hdr) & HST_CNT_MASK) + 1)
+#define hst_cnt_raw_get(a_hdr) ((a_hdr) & HST_CNT_MASK)
+#define hst_cnt_get(a_hdr) (hst_cnt_raw_get(a_hdr) + 1)
+#define hst_cnt_raw_set(a_hdr, a_cnt)					\
+    (a_hdr) = ((a_hdr) & HST_TAG_MASK) | (a_cnt)
 #define hst_cnt_set(a_hdr, a_cnt)					\
     (a_hdr) = ((a_hdr) & HST_TAG_MASK) | ((a_cnt) - 1)
+
+CW_P_INLINE cw_uint32_t
+hist_p_hdr_len(cw_uint8_t *a_hdr)
+{
+    cw_uint32_t retval;
+
+    switch (hst_tag_get(*a_hdr))
+    {
+	case HST_TAG_GRP_BEG:
+	case HST_TAG_GRP_END:
+	case HST_TAG_POS:
+	{
+	    retval = 1;
+	    break;
+	}
+	case HST_TAG_INS:
+	case HST_TAG_YNK:
+	case HST_TAG_REM:
+	case HST_TAG_DEL:
+	{
+	    if (hst_ext_get(*a_hdr))
+	    {
+		retval = hst_cnt_raw_get(*a_hdr) + 1;
+	    }
+	    else
+	    {
+		retval = 1;
+	    }
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    return retval;
+}
+
+/* Set undo data count for an I, Y, R or D record. */
+static cw_uint32_t
+hist_p_undo_cnt_set(cw_hist_t *a_hist, cw_uint64_t a_cnt)
+{
+    cw_uint8_t *p, tag, hdr;
+    cw_uint32_t hdr_len, hdr_newlen, pbufvcnt;
+    cw_bufv_t pbufv[2];
+
+    cw_assert(mkr_pos(&a_hist->hcur) > 1);
+
+    p = mkr_before_get(&a_hist->hcur);
+    tag = hst_tag_get(*p);
+
+    cw_assert(tag == HST_TAG_INS
+	      || tag == HST_TAG_YNK
+	      || tag == HST_TAG_REM
+	      || tag == HST_TAG_DEL);
+
+    /* Determine how large the header needs to be. */
+    if (hst_ext_get(*p))
+    {
+	hdr_len = hst_cnt_raw_get(*p) + 1;
+    }
+    else
+    {
+	hdr_len = 1;
+    }
+
+    if (a_cnt <= 16)
+    {
+	hdr_newlen = 1;
+    }
+    else if (a_cnt <= 256)
+    {
+	hdr_newlen = 2;
+    }
+    else if (a_cnt <= 0x100000000ULL)
+    {
+	hdr_newlen = 5;
+    }
+    else
+    {
+	hdr_newlen = 9;
+    }
+
+    /* Update the count. */
+    if (hdr_len != hdr_newlen)
+    {
+	union
+	{
+	    cw_uint8_t c;
+	    cw_uint32_t l;
+	    cw_uint64_t q;
+	} u;
+
+	/* Discard the old header and insert a new one. */
+	mkr_dup(&a_hist->htmp, &a_hist->hcur);
+	mkr_seek(&a_hist->htmp, -hdr_len, BUFW_REL);
+	mkr_remove(&a_hist->htmp, &a_hist->hcur);
+
+	hst_tag_init(hdr);
+	hst_tag_set(hdr, tag);
+	switch (hdr_newlen)
+	{
+	    case 1:
+	    {
+		hst_cnt_set(hdr, ((cw_uint8_t) a_cnt));
+
+		pbufv[0].data = &hdr;
+		pbufv[0].len = 1;
+		pbufvcnt = 1;
+
+		break;
+	    }
+	    case 2:
+	    {
+		hst_ext_set(hdr, HST_EXT_TRUE);
+		hst_cnt_raw_set(hdr, 1);
+
+		u.c = a_cnt - 1ULL;
+
+		pbufv[0].data = &u.c;
+		pbufv[0].len = 1;
+		pbufv[1].data = &hdr;
+		pbufv[1].len = 1;
+		pbufvcnt = 2;
+
+		break;
+	    }
+	    case 5:
+	    {
+		hst_ext_set(hdr, HST_EXT_TRUE);
+		hst_cnt_raw_set(hdr, 4);
+
+		u.l = a_cnt - 1ULL;
+		u.l = htonl(u.l);
+
+		pbufv[0].data = (cw_uint8_t *) &u.l;
+		pbufv[0].len = 4;
+		pbufv[1].data = &hdr;
+		pbufv[1].len = 1;
+		pbufvcnt = 2;
+
+		break;
+	    }
+	    case 9:
+	    {
+		hst_ext_set(hdr, HST_EXT_TRUE);
+		hst_cnt_raw_set(hdr, 8);
+
+		u.q = a_cnt - 1ULL;
+		u.q = cw_htonq(u.q);
+
+		pbufv[0].data = (cw_uint8_t *) &u.q;
+		pbufv[0].len = 8;
+		pbufv[1].data = &hdr;
+		pbufv[1].len = 1;
+		pbufvcnt = 2;
+
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+	mkr_before_insert(&a_hist->hcur, pbufv, pbufvcnt);
+    }
+    else
+    {
+	/* Update the count in place. */
+    }
+
+    return hdr_newlen;
+}
+
+/* Get undo data count for an I, Y, R or D record. */
+static cw_uint64_t
+hist_p_undo_cnt_get(cw_hist_t *a_hist)
+{
+    cw_uint64_t retval;
+    cw_uint8_t *p;
+    cw_bufv_t *bufv, pbufv;
+    cw_uint32_t bufvcnt;
+
+    cw_assert(mkr_pos(&a_hist->hcur) > 1);
+
+    p = mkr_before_get(&a_hist->hcur);
+    cw_assert(hst_tag_get(*p) == HST_TAG_INS
+	      || hst_tag_get(*p) == HST_TAG_YNK
+	      || hst_tag_get(*p) == HST_TAG_REM
+	      || hst_tag_get(*p) == HST_TAG_DEL);
+
+    if (hst_ext_get(*p))
+    {
+	mkr_seek(&a_hist->hcur, -1, BUFW_REL);
+	mkr_dup(&a_hist->htmp, &a_hist->hcur);
+
+	switch (hst_cnt_raw_get(*p))
+	{
+	    case 1:
+	    {
+		union
+		{
+		    cw_uint8_t cnt;
+		    cw_uint8_t str[1];
+		} u;
+
+		/* Get the extended count. */
+		mkr_seek(&a_hist->htmp, -1, BUFW_REL);
+		bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur, &bufvcnt);
+
+		/* Copy count to u. */
+		pbufv.data = u.str;
+		pbufv.len = 1;
+		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
+
+		retval = ((cw_uint64_t) u.cnt) + 1ULL;
+
+		break;
+	    }
+	    case 4:
+	    {
+		union
+		{
+		    cw_uint32_t cnt;
+		    cw_uint8_t str[4];
+		} u;
+
+		/* Get the extended count. */
+		mkr_seek(&a_hist->htmp, -4, BUFW_REL);
+		bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur, &bufvcnt);
+
+		/* Copy count to u. */
+		pbufv.data = u.str;
+		pbufv.len = 4;
+		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
+
+		retval = ((cw_uint64_t) ntohl(u.cnt)) + 1ULL;
+
+		break;
+	    }
+	    case 8:
+	    {
+		union
+		{
+		    cw_uint64_t cnt;
+		    cw_uint8_t str[8];
+		} u;
+
+		/* Get the extended count. */
+		mkr_seek(&a_hist->htmp, -8, BUFW_REL);
+		bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur, &bufvcnt);
+
+		/* Copy count to u. */
+		pbufv.data = u.str;
+		pbufv.len = 8;
+		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
+
+		retval = cw_ntohq(u.cnt) + 1ULL;
+
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+
+	mkr_seek(&a_hist->hcur, 1, BUFW_REL);
+    }
+    else
+    {
+	retval = (cw_uint64_t) hst_cnt_get(*p);
+    }
+
+    return retval;
+}
+
+/* Get redo data count for an I, Y, R or D record. */
+static cw_uint64_t
+hist_p_redo_cnt_get(cw_hist_t *a_hist)
+{
+    cw_uint64_t retval;
+    cw_uint8_t *p;
+    cw_bufv_t *bufv, pbufv;
+    cw_uint32_t bufvcnt;
+
+    cw_assert(mkr_pos(&a_hist->hcur) < buf_len(&a_hist->h) + 1);
+
+    p = mkr_after_get(&a_hist->hcur);
+    cw_assert(hst_tag_get(*p) == HST_TAG_INS
+	      || hst_tag_get(*p) == HST_TAG_YNK
+	      || hst_tag_get(*p) == HST_TAG_REM
+	      || hst_tag_get(*p) == HST_TAG_DEL);
+
+    if (hst_ext_get(*p))
+    {
+	mkr_seek(&a_hist->hcur, 1, BUFW_REL);
+	mkr_dup(&a_hist->htmp, &a_hist->hcur);
+
+	switch (hst_cnt_raw_get(*p))
+	{
+	    case 1:
+	    {
+		union
+		{
+		    cw_uint8_t cnt;
+		    cw_uint8_t str[1];
+		} u;
+
+		/* Get the extended count. */
+		mkr_seek(&a_hist->htmp, 1, BUFW_REL);
+		bufv = mkr_range_get(&a_hist->hcur, &a_hist->htmp, &bufvcnt);
+
+		/* Copy count to u. */
+		pbufv.data = u.str;
+		pbufv.len = 1;
+		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
+
+		retval = ((cw_uint64_t) u.cnt) + 1ULL;
+
+		break;
+	    }
+	    case 4:
+	    {
+		union
+		{
+		    cw_uint32_t cnt;
+		    cw_uint8_t str[4];
+		} u;
+
+		/* Get the extended count. */
+		mkr_seek(&a_hist->htmp, 4, BUFW_REL);
+		bufv = mkr_range_get(&a_hist->hcur, &a_hist->htmp, &bufvcnt);
+
+		/* Copy count to u. */
+		pbufv.data = u.str;
+		pbufv.len = 4;
+		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
+
+		retval = ((cw_uint64_t) ntohl(u.cnt)) + 1ULL;
+
+		break;
+	    }
+	    case 8:
+	    {
+		union
+		{
+		    cw_uint64_t cnt;
+		    cw_uint8_t str[8];
+		} u;
+
+		/* Get the extended count. */
+		mkr_seek(&a_hist->htmp, 8, BUFW_REL);
+		bufv = mkr_range_get(&a_hist->hcur, &a_hist->htmp, &bufvcnt);
+
+		/* Copy count to u. */
+		pbufv.data = u.str;
+		pbufv.len = 8;
+		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
+
+		retval = cw_ntohq(u.cnt) + 1ULL;
+
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+
+	mkr_seek(&a_hist->hcur, -1, BUFW_REL);
+    }
+    else
+    {
+	retval = (cw_uint64_t) hst_cnt_get(*p);
+    }
+
+    return retval;
+}
 
 CW_P_INLINE void
 hist_p_redo_flush(cw_hist_t *a_hist)
@@ -407,117 +810,130 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	    case HST_TAG_REM:
 	    case HST_TAG_DEL:
 	    {
-		/* Read (or synthesize) the undo header, redo header, and
-		 * character, then remove them from the history buffer.  Then
-		 * re-insert them in their new order and state.
-		 *
-		 * There are four possible variations.  In all cases, hcur is
-		 * positioned before the character, and htmp is positioned after
-		 * the redo header (if it exists and is being re-used).  This
-		 * allows an unconditional call to mkr_remove().
-		 *
-		 * rhdr's count is updated before the mkr_remove(), whereas
-		 * uhdr's count is updated later.  This is necessary because the
-		 * count can never be 0.
-		 *
-		 * There are more efficient ways of doing this, but it requires
-		 * more special case code. */
-
-		/* Set rhdr and move htmp to the appropriate position. */
-		mkr_dup(&a_hist->htmp, &a_hist->hcur);
-		if (mkr_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
+		if (a_hist->gdepth == 0
+		    || 1 /* XXX */
+		    )
 		{
-		    p = mkr_after_get(&a_hist->htmp);
-		    rhdr = *p;
-		    if (hst_tag_get(rhdr) == hst_tag_inverse(hst_tag_get(uhdr))
-			&& hst_cnt_get(rhdr) < HST_CNT_MAX)
+		    /* Read (or synthesize) the undo header, redo header, and
+		     * character, then remove them from the history buffer.
+		     * Then re-insert them in their new order and state.
+		     *
+		     * There are four possible variations.  In all cases, hcur
+		     * is positioned before the character, and htmp is
+		     * positioned after the redo header (if it exists and is
+		     * being re-used).  This allows an unconditional call to
+		     * mkr_remove().
+		     *
+		     * rhdr's count is updated before the mkr_remove(), whereas
+		     * uhdr's count is updated later.  This is necessary because
+		     * the count can never be 0.
+		     *
+		     * There are more efficient ways of doing this, but it
+		     * requires more special case code. */
+
+		    /* Set rhdr and move htmp to the appropriate position. */
+		    mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		    if (mkr_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
 		    {
-			hst_cnt_set(rhdr, hst_cnt_get(rhdr) + 1);
-			mkr_seek(&a_hist->htmp, 1, BUFW_REL);
+			p = mkr_after_get(&a_hist->htmp);
+			rhdr = *p;
+			if (hst_tag_get(rhdr)
+			    == hst_tag_inverse(hst_tag_get(uhdr))
+			    && hst_cnt_get(rhdr) < HST_CNT_MAX)
+			{
+			    hst_cnt_set(rhdr, hst_cnt_get(rhdr) + 1);
+			    mkr_seek(&a_hist->htmp, 1, BUFW_REL);
+			}
+			else
+			{
+			    /* Synthesize a redo header. */
+			    hst_tag_set(rhdr, hst_tag_inverse(uhdr));
+			    hst_cnt_set(rhdr, 1);
+			}
 		    }
 		    else
 		    {
 			/* Synthesize a redo header. */
+			hst_tag_init(rhdr);
 			hst_tag_set(rhdr, hst_tag_inverse(uhdr));
 			hst_cnt_set(rhdr, 1);
+		    }
+
+		    /* Set c and move hcur to the appropriate position. */
+		    mkr_seek(&a_hist->hcur, -2, BUFW_REL);
+		    p = mkr_after_get(&a_hist->hcur);
+		    c = *p;
+
+		    /* Remove the character and header(s). */
+		    mkr_remove(&a_hist->hcur, &a_hist->htmp);
+
+		    /* Insert the character. */
+		    bufv.data = &c;
+		    bufv.len = sizeof(c);
+		    mkr_after_insert(&a_hist->hcur, &bufv, 1);
+		    /* Insert the redo header. */
+		    bufv.data = &rhdr;
+		    bufv.len = sizeof(rhdr);
+		    mkr_after_insert(&a_hist->hcur, &bufv, 1);
+		    /* Insert the undo header if necessary. */
+		    if (hst_cnt_get(uhdr) > 1)
+		    {
+			hst_cnt_set(uhdr, hst_cnt_get(uhdr) - 1);
+			bufv.data = &uhdr;
+			bufv.len = sizeof(uhdr);
+			mkr_before_insert(&a_hist->hcur, &bufv, 1);
+		    }
+
+		    /* Actually take action, now that the log is updated. */
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
+		    switch (hst_tag_get(uhdr))
+		    {
+			case HST_TAG_INS:
+			{
+			    bufv.data = &c;
+			    bufv.len = sizeof(c);
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1);
+			    a_hist->hbpos++;
+			    break;
+			}
+			case HST_TAG_REM:
+			{
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -1, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
+			    a_hist->hbpos--;
+			    break;
+			}
+			case HST_TAG_YNK:
+			{
+			    bufv.data = &c;
+			    bufv.len = sizeof(c);
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1);
+			    break;
+			}
+			case HST_TAG_DEL:
+			{
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, 1, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
+			    break;
+			}
+			default:
+			{
+			    cw_not_reached();
+			}
+		    }
+
+		    if (a_hist->gdepth == 0)
+		    {
+			retval++;
 		    }
 		}
 		else
 		{
-		    /* Synthesize a redo header. */
-		    hst_tag_init(rhdr);
-		    hst_tag_set(rhdr, hst_tag_inverse(uhdr));
-		    hst_cnt_set(rhdr, 1);
-		}
-
-		/* Set c and move hcur to the appropriate position. */
-		mkr_seek(&a_hist->hcur, -2, BUFW_REL);
-		p = mkr_after_get(&a_hist->hcur);
-		c = *p;
-
-		/* Remove the character and header(s). */
-		mkr_remove(&a_hist->hcur, &a_hist->htmp);
-
-		/* Insert the character. */
-		bufv.data = &c;
-		bufv.len = sizeof(c);
-		mkr_after_insert(&a_hist->hcur, &bufv, 1);
-		/* Insert the redo header. */
-		bufv.data = &rhdr;
-		bufv.len = sizeof(rhdr);
-		mkr_after_insert(&a_hist->hcur, &bufv, 1);
-		/* Insert the undo header if necessary. */
-		if (hst_cnt_get(uhdr) > 1)
-		{
-		    hst_cnt_set(uhdr, hst_cnt_get(uhdr) - 1);
-		    bufv.data = &uhdr;
-		    bufv.len = sizeof(uhdr);
-		    mkr_before_insert(&a_hist->hcur, &bufv, 1);
-		}
-
-		/* Actually take action, now that the log is updated. */
-		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
-		switch (hst_tag_get(uhdr))
-		{
-		    case HST_TAG_INS:
-		    {
-			bufv.data = &c;
-			bufv.len = sizeof(c);
-			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1);
-			a_hist->hbpos++;
-			break;
-		    }
-		    case HST_TAG_REM:
-		    {
-			mkr_dup(&tmkr, a_mkr);
-			mkr_seek(&tmkr, -1, BUFW_REL);
-			mkr_l_remove(&tmkr, a_mkr, FALSE);
-			a_hist->hbpos--;
-			break;
-		    }
-		    case HST_TAG_YNK:
-		    {
-			bufv.data = &c;
-			bufv.len = sizeof(c);
-			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1);
-			break;
-		    }
-		    case HST_TAG_DEL:
-		    {
-			mkr_dup(&tmkr, a_mkr);
-			mkr_seek(&tmkr, 1, BUFW_REL);
-			mkr_l_remove(a_mkr, &tmkr, FALSE);
-			break;
-		    }
-		    default:
-		    {
-			cw_not_reached();
-		    }
-		}
-
-		if (a_hist->gdepth == 0)
-		{
-		    retval++;
+		    /* The entire record can be undone, since the group depth is
+		     * non-zero. */
+		    /* XXX */
 		}
 		break;
 	    }
@@ -913,7 +1329,7 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	hist_p_pos(a_hist, a_buf, a_bpos);
     }
 
-    /* Iterate throught the bufv elements.  It is possible to unroll the nested
+    /* Iterate through the bufv elements.  It is possible to unroll the nested
      * loops for a bit more efficiency, but at the cost of significantly more
      * code. */
     for (i = 0; i < a_bufvcnt; i++)
@@ -1083,6 +1499,64 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
     }
 }
 
+/* Create (or append to) an I record in the undo log. */
+static void
+hist_p_ins_undo_record(cw_hist_t *a_hist, const cw_bufv_t *a_bufv,
+		       cw_uint32_t a_bufvcnt)
+{
+    cw_uint8_t *p, hdr;
+    cw_uint32_t i, hdr_len;
+    cw_uint64_t cnt, hcnt;
+    cw_bool_t grow;
+    cw_bufv_t bufv;
+
+    /* Get the number of characters to be inserted into the undo record. */
+    for (cnt = 0, i = 0; i < a_bufvcnt; i++)
+    {
+	cnt += (cw_uint64_t) a_bufv[i].len;
+    }
+
+    /* If the last record in the undo log is an I record, grow it rather than
+     * creating a new record. */
+    if (mkr_pos(&a_hist->hcur) > 1)
+    {
+	p = mkr_before_get(&a_hist->hcur);
+	if (hst_tag_get(*p) == HST_TAG_INS)
+	{
+	    grow = TRUE;
+	}
+	else
+	{
+	    grow = FALSE;
+	}
+    }
+    else
+    {
+	grow = FALSE;
+    }
+
+    if (grow)
+    {
+	/* Grow existing record.  Update the header. */
+	hcnt = hist_p_undo_cnt_get(a_hist);
+	hdr_len = hist_p_undo_cnt_set(a_hist, hcnt + cnt);
+
+    }
+    else
+    {
+	/* Create a new record.  Create the header. */
+//	hdr_len = hst_p_ins_undo_hdr_insert(a_hist, cnt);
+    }
+
+    /* Insert data into the undo log. */
+    mkr_dup(&a_hist->htmp, &a_hist->hcur);
+    mkr_seek(&a_hist->htmp, -hdr_len, BUFW_REL);
+    mkr_before_insert(&a_hist->htmp, a_bufv, a_bufvcnt);
+
+    /* Update the recorded position. */
+    a_hist->hbpos -= cnt;
+}
+    
 void
 hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	 cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
@@ -1103,6 +1577,10 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
     {
 	hist_p_pos(a_hist, a_buf, a_bpos);
     }
+
+    hist_p_ins_undo_record(a_hist, a_bufv, a_bufvcnt);
+
+    /* XXX Remove code below. */
 
     /* Iterate throught the bufv elements.  It is possible to unroll the nested
      * loops for a bit more efficiency, but at the cost of significantly more
