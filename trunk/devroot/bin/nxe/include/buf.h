@@ -9,14 +9,38 @@
  *
  ******************************************************************************/
 
+typedef struct cw_bufhi_s cw_bufhi_t;
+typedef struct cw_bufh_s cw_bufh_t;
 typedef cw_uint8_t cw_char_t;
 typedef cw_uint32_t cw_bufc_t;
 typedef struct cw_bufm_s cw_bufm_t;
-typedef struct cw_bufe_s cw_bufe_t;
-typedef struct cw_bufhi_s cw_bufhi_t;
-typedef struct cw_bufh_s cw_bufh_t;
-typedef struct cw_bufp_s cw_bufp_t;
 typedef struct cw_buf_s cw_buf_t;
+
+struct cw_bufhi_s {
+	qs_elm(cw_bufhi_t) link;
+
+	enum {
+		BUFH_GROUP_START,
+		BUFH_GROUP_END,
+		BUFH_SEEK,
+		BUFH_INSERT,
+		BUFH_REMOVE
+	}		mod;
+	union {
+		struct {
+			cw_uint64_t	from;
+			cw_uint64_t	to;
+		}	seek;
+		struct {
+			cw_bufc_t	bufc;
+		}	insert;
+	}		data;
+};
+
+struct cw_bufh_s {
+	qs_head(cw_bufhi_t) undo;
+	qs_head(cw_bufhi_t) redo;
+};
 
 /*
  * The bits of a bufc are defined as follows:
@@ -93,79 +117,36 @@ typedef struct cw_buf_s cw_buf_t;
 	(a_bufc) = ((a_bufc) & 0xefffffff) | ((a_underlined) << 28);	\
 } while (0)
 
+/* Enumeration for seek operations. */
+typedef enum {
+	BUFW_BEG,	/* Offset from BOB, must be positive. */
+	BUFW_REL,	/* Relative to marker, positive or negative. */
+	BUFW_END	/* Offset from EOB, must be negative. */
+} cw_bufw_t;
+
 struct cw_bufm_s {
 #ifdef _CW_DBG
 	cw_uint32_t	magic;
 #define _CW_BUFM_MAGIC	0x2e84a3c9
 #endif
 
-	ql_elm(cw_bufm_t) link;
-	cw_buf_t	*buf;
+	ql_elm(cw_bufm_t) link;		/* Ordered bufm list linkage. */
+	cw_buf_t	*buf;		/* NULL if buf has been deleted. */
 
+	/* Allocator state. */
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
-	cw_uint64_t	bpos;
+	cw_uint64_t	apos;		/* Gap movement can change this. */
+	cw_uint64_t	line;		/* Always kept up to date. */
 
-	/*
-	 * If non-NULL, this points to the bufp that corresponds to the bufm.
-	 */
-	cw_bufp_t	*bufp;
-
-	/* Message queue to send notifications to. */
-	cw_msgq_t	*msgq;
+	cw_msgq_t	*msgq;		/* Notify of manual marker movement. */
 };
 
-struct cw_bufhi_s {
-	qs_elm(cw_bufhi_t) link;
-
-	enum {
-		BUFH_GROUP_START,
-		BUFH_GROUP_END,
-		BUFH_SEEK,
-		BUFH_INSERT,
-		BUFH_REMOVE
-	}		mod;
-	union {
-		struct {
-			cw_uint64_t	from;
-			cw_uint64_t	to;
-		}	seek;
-		struct {
-			cw_bufc_t	bufc;
-		}	insert;
-	}		data;
-};
-
-struct cw_bufh_s {
-	qs_head(cw_bufhi_t) undo;
-	qs_head(cw_bufhi_t) redo;
-};
-
-/*
- * Make each bufp structure a multiple of the page size, which avoids memory
- * fragmentation with most malloc implementations.
- */
 #ifndef PAGESIZE
 #define	PAGESIZE		4096
 #endif
-#define	_CW_BUFP_SIZE		PAGESIZE
-#define	_CW_BUFP_OVERHEAD	28
-#define	_CW_BUFP_DATA		(_CW_BUFP_SIZE - _CW_BUFP_OVERHEAD)
-#define	_CW_BUFP_NBUFC		(_CW_BUFP_DATA / sizeof(cw_bufc_t))
-struct cw_bufp_s {
-	/*
-	 * The epos and eline fields aren't maintained by the bufp code at all;
-	 * for them to be valid, they must be explicitly set by external logic.
-	 */
-	cw_uint64_t	ecpos;			/* Last character position. */
-	cw_uint64_t	eline;			/* Last line number. */
-	cw_uint32_t	nlines;			/* Number of newlines. */
-	cw_uint32_t	gap_off;		/* Gap offset, in bufc's. */
-	cw_uint32_t	gap_len;		/* Gap length, in bufc's. */
-	cw_bufc_t	data[_CW_BUFP_NBUFC];	/* Text data, with gap. */
-};
-
+#define	_CW_BUF_MINBUFCS	(PAGESIZE / sizeof(cw_bufc_t))
 struct cw_buf_s {
 #ifdef _CW_DBG
 	cw_uint32_t	magic;
@@ -179,31 +160,26 @@ struct cw_buf_s {
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
-	/* Message queue to send notifications to. */
-	cw_msgq_t	*msgq;
+	cw_msgq_t	*msgq;		/* Notify of buffer changes. */
 
-	/* Implicit lock. */
-	cw_mtx_t	mtx;
+	cw_mtx_t	mtx;		/* Implicit lock. */
 
-	/* Actual data. */
-	cw_uint64_t	len;		/* Number of characters. */
-	cw_uint64_t	bufp_count;	/* Number of valid bufp's. */
-	cw_uint64_t	bufp_veclen;	/* Number of elements in bufp_vec. */
-	cw_bufp_t	**bufp_vec;	/* Vector of bufp pointers. */
-	cw_uint64_t	ncached;	/* # of bufp's w/ valid ecpos/eline. */
+	cw_bufc_t	*b;		/* Text buffer, with gap. */
+	cw_uint64_t	len;		/* Length (also last valid cpos). */
+	cw_uint64_t	nlines; 	/* Number of lines (>= 1). */
+	cw_uint64_t	gap_off;	/* Gap offset, in bufc's. */
+	cw_uint64_t	gap_len;	/* Gap length, in bufc's. */
 
-	/* Ordered list of all marks. */
-	ql_head(cw_bufm_t) bufms;
+	ql_head(cw_bufm_t) bufms;	/* Ordered list of all markers. */
 
-	/* History. */
-	cw_bool_t	hist_active:1;
-	cw_bufh_t	hist;
+	cw_bool_t	hist_active:1;	/* History is active if TRUE. */
+	cw_bufh_t	hist;		/* History state. */
 };
 
 /* buf. */
 cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
-    cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc, void
-    *a_arg, cw_msgq_t *a_msgq);
+    cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc, void *a_arg,
+    cw_msgq_t *a_msgq);
 void	buf_delete(cw_buf_t *a_buf);
 
 cw_uint64_t buf_len(cw_buf_t *a_buf);
@@ -222,11 +198,12 @@ void	bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from);
 void	bufm_delete(cw_bufm_t *a_bufm);
 cw_buf_t *bufm_buf(cw_bufm_t *a_bufm);
 
-cw_uint64_t bufm_line_seek(cw_bufm_t *a_bufm, cw_uint64_t a_line);
+cw_uint64_t bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t
+    a_whence);
 cw_uint64_t bufm_line(cw_bufm_t *a_bufm);
 
-cw_uint64_t bufm_rel_seek(cw_bufm_t *a_bufm, cw_sint64_t a_amount);
-cw_uint64_t bufm_abs_seek(cw_bufm_t *a_bufm, cw_uint64_t a_pos);
+cw_uint64_t bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t
+    a_whence);
 cw_uint64_t bufm_pos(cw_bufm_t *a_bufm);
 
 cw_bool_t bufm_before_get(cw_bufm_t *a_bufm, cw_bufc_t *r_bufc);
