@@ -19,8 +19,12 @@
 #include "hist.h"
 
 #include "buffer.h"
+#include "slate.h"
+#include "display.h"
+#include "frame.h"
+#include "window.h"
 
-#define	ENTRY(name)	{#name, slate_##name}
+#define	SLATE_ENTRY(name)	{#name, slate_##name}
 
 struct cw_slate_entry {
 	const cw_uint8_t	*name;

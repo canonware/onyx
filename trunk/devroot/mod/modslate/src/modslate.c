@@ -77,12 +77,9 @@ slate_init (void *a_arg, cw_nxo_t *a_thread)
 	nxo_no_new(&hook_data);
 	nxo_dup(&hook_data, nxo_stack_get(estack));
 
+	slate_slate_init(a_thread);
 	slate_buffer_init(a_thread);
-
-	/* XXX Temporary hack. */
-	if (tcgetattr(0, &t))
-		fprintf(stderr, "tcgetattr() error\n");
-	cfmakeraw(&t);
-	if (tcsetattr(0, TCSANOW, &t))
-		fprintf(stderr, "tcsetattr() error\n");
+	slate_display_init(a_thread);
+	slate_frame_init(a_thread);
+	slate_window_init(a_thread);
 }

@@ -499,8 +499,6 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 	retval->dealloc = a_dealloc;
 	retval->arg = a_arg;
 
-	mtx_new(&retval->mtx);
-
 	retval->elmsize = 1;
 	retval->b = (cw_uint8_t *)_cw_opaque_alloc(a_alloc, a_arg,
 	    _CW_BUF_MINELMS * retval->elmsize);
@@ -535,8 +533,6 @@ buf_delete(cw_buf_t *a_buf)
 	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, (a_buf->len +
 	    a_buf->gap_len) * a_buf->elmsize);
 	
-	mtx_delete(&a_buf->mtx);
-
 	if (a_buf->alloced) {
 		_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf,
 		    sizeof(cw_buf_t));
@@ -560,8 +556,8 @@ void
 buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 {
 	cw_uint8_t	*b;
-	cw_uint64_t	i, size;
-	cw_uint32_t	min_elmsize;
+	cw_uint64_t	size;
+	cw_bufv_t	bufv_to, bufv_fr;
 
 	_cw_check_ptr(a_buf);
 	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
@@ -574,28 +570,24 @@ buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize)
 
 	size = a_buf->len + a_buf->gap_len;
 
-	/* Move the gap to the end to make things easier. */
+	/*
+	 * Move the gap to the end to make things easier.  It would be
+	 * possible to leave the gap where it is, but this is an uncommon
+	 * operation, so optimizing it isn't very important.
+	 */
 	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
 
 	/* Allocate the new buffer. */
 	b = (cw_uint8_t *)_cw_opaque_alloc(a_buf->alloc, a_buf->arg, size *
 	    a_elmsize);
 
-	/* XXX Use bufv_copy(). */
-	/*
-	 * Iteratively move data from the old buffer to the new one.  Preserve
-	 * as many bytes per element as possible, which is the lesser of the two
-	 * element sizes.
-	 */
-	if (a_elmsize > a_buf->elmsize)
-		min_elmsize = a_buf->elmsize;
-	else
-		min_elmsize = a_elmsize;
-
-	for (i = 0; i < a_buf->len; i++) {
-		memcpy(&b[i * a_elmsize], &a_buf->b[i * a_buf->elmsize],
-		    min_elmsize);
-	}
+	/* Copy data from the old buffer to the new one. */
+	bufv_to.data = b;
+	bufv_to.len = a_buf->len;
+	bufv_fr.data = a_buf->b;
+	bufv_fr.len = a_buf->len;
+	bufv_copy(&bufv_to, 1, a_elmsize, &bufv_fr, 1, a_buf->elmsize,
+	    a_buf->len);
 
 	/* Free the old buffer. */
 	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->b, size *

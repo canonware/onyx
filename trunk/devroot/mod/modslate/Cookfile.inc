@@ -20,7 +20,8 @@
 
 /* Include files (not installed). */
 {
-  local incs = buf.h buffer.h hist.h modslate.h;
+  local incs = buf.h buffer.h display.h frame.h hist.h modslate.h slate.h
+               window.h;
   incs = [fromto % [srcdir]/mod/modslate/include/% [incs]];
   incs = [incs] [objdir]/mod/modslate/include/modslate_defs.h;
 
@@ -29,7 +30,8 @@
 }
 
 /* Source files. */
-MODSLATE_MSRCS = buf.c buffer.c hist.c modslate.c;
+MODSLATE_MSRCS = buf.c buffer.c display.c frame.c hist.c modslate.c slate.c
+                 window.c;
 
 MODSLATE_MSRCS = [fromto % [srcdir]/mod/modslate/src/% [MODSLATE_MSRCS]];
 MSRCS = [MSRCS] [MODSLATE_MSRCS];
