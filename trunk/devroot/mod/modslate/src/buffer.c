@@ -89,6 +89,9 @@ static const struct cw_modslate_entry modslate_buffer_hooks[] = {
     MODSLATE_ENTRY(buffer_history_startgroup),
     MODSLATE_ENTRY(buffer_history_endgroup),
     MODSLATE_ENTRY(buffer_history_flush),
+#ifdef CW_BUF_DUMP
+    MODSLATE_ENTRY(buffer_dump),
+#endif
 
     /* marker. */
     MODSLATE_ENTRY(marker),
@@ -107,6 +110,9 @@ static const struct cw_modslate_entry modslate_buffer_hooks[] = {
     MODSLATE_ENTRY(marker_after_insert),
     MODSLATE_ENTRY(marker_range_get),
     MODSLATE_ENTRY(marker_range_cut),
+#ifdef CW_BUF_DUMP
+    MODSLATE_ENTRY(marker_dump),
+#endif
 
     /* extent. */
     MODSLATE_ENTRY(extent),
@@ -770,6 +776,58 @@ modslate_buffer_history_flush(void *a_data, cw_nxo_t *a_thread)
     buffer->seq++;
     buffer_p_unlock(buffer);
 }
+
+#ifdef CW_BUF_DUMP
+/* =/buffer= `prefix'?  buffer_dump - */
+void
+modslate_buffer_dump(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *tstack, *nxo, *tnxo;
+    cw_uint8_t *prefix;
+    cw_nxn_t error;
+    struct cw_buffer *buffer;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_STRING)
+    {
+	tnxo = nxo_stack_push(tstack);
+	nxo_string_cstring(tnxo, nxo, a_thread);
+	prefix = nxo_string_get(tnxo);
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	tnxo = NULL;
+	prefix = "";
+    }
+
+    error = buffer_type(nxo);
+    if (error)
+    {
+	if (tnxo != NULL)
+	{
+	    nxo_stack_pop(tstack);
+	}
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+    buffer = (struct cw_buffer *) nxo_hook_data_get(nxo);
+
+    buf_dump(&buffer->buf, prefix, NULL, NULL);
+
+    if (tnxo != NULL)
+    {
+	nxo_stack_npop(ostack, 2);
+	nxo_stack_pop(tstack);
+    }
+    else
+    {
+	nxo_stack_pop(ostack);
+    }
+}
+#endif
 
 /* marker. */
 static cw_nxoe_t *
@@ -1599,6 +1657,7 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 
     /* Get a pointer to the buffer range and calculate its length. */
     bufv = mkr_range_get(&marker_a->mkr, &marker_b->mkr, &bufvcnt);
+//    fprintf(stderr, "%s:%d:%s(): %llu..%llu, bufvcnt: %u\n", __FILE__, __LINE__, __FUNCTION__, mkr_pos(&marker_a->mkr), mkr_pos(&marker_b->mkr), bufvcnt);
     pos_a = mkr_pos(&marker_a->mkr);
     pos_b = mkr_pos(&marker_b->mkr);
     str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
@@ -1695,6 +1754,58 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 
     nxo_stack_pop(ostack);
 }
+
+#ifdef CW_BUF_DUMP
+/* =/marker= `prefix'?  marker_dump - */
+void
+modslate_marker_dump(void *a_data, cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *tstack, *nxo, *tnxo;
+    cw_uint8_t *prefix;
+    cw_nxn_t error;
+    struct cw_marker *marker;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_STRING)
+    {
+	tnxo = nxo_stack_push(tstack);
+	nxo_string_cstring(tnxo, nxo, a_thread);
+	prefix = nxo_string_get(tnxo);
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	tnxo = NULL;
+	prefix = "";
+    }
+
+    error = marker_type(nxo);
+    if (error)
+    {
+	if (tnxo != NULL)
+	{
+	    nxo_stack_pop(tstack);
+	}
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+    marker = (struct cw_marker *) nxo_hook_data_get(nxo);
+
+    mkr_dump(&marker->mkr, prefix, NULL, NULL);
+
+    if (tnxo != NULL)
+    {
+	nxo_stack_npop(ostack, 2);
+	nxo_stack_pop(tstack);
+    }
+    else
+    {
+	nxo_stack_pop(ostack);
+    }
+}
+#endif
 
 /* extent. */
 #ifdef NOT_YET

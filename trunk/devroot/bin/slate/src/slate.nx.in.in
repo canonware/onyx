@@ -81,11 +81,11 @@ dstack saup
     exch -1 marker_seekline
     sub cvs print
 
-    # Character.
-    ` c' print
+    # Position.
+    ` p' print
     bpoint marker_position cvs print
     `/' print
-    scratch buffer_length cvs print
+    scratch buffer_length inc cvs print
 
     # Mark.
     ` m' print
@@ -123,6 +123,7 @@ dstack saup
     status_line
 
     scratch b2s
+#    stderr over 1 sprints write stderr `\n' write
     srender
 
     hs
@@ -141,12 +142,20 @@ dstack saup
 
 # #string self_insert_char -
 /insert_string {
+#    stderr `insert_string a\n' write
     bpoint exch marker_before_insert
+#    stderr `insert_string b\n' write
 } def
 
 # Undefined characters are inserted literally.
 /keytable <
     `\b' {
+	bmark dup 0 bpoint marker_seek pop
+	bpoint dup -1 marker_seek pop
+	marker_range_cut pop
+    }
+    # Delete.
+    `\x7f' {
 	bmark dup 0 bpoint marker_seek pop
 	bpoint dup -1 marker_seek pop
 	marker_range_cut pop
@@ -208,6 +217,7 @@ dstack saup
     }{
 	insert_string
     } ifelse
+#    stderr `finish interpc\n' write
 } def
 
 /scratch buffer def
@@ -222,10 +232,11 @@ scratch <
 
 2 gcdict /setperiod get eval
 
-# scratch true buffer_history_setactive
+scratch true buffer_history_setactive
 
 stdin 0 setiobuf {
     redisplay
     getc
     interpc
+    scratch `I ' buffer_dump
 } loop

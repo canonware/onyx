@@ -186,6 +186,9 @@
 #ifndef HAVE_ASPRINTF
 #include "../../../lib/libonyx/src/asprintf.c"
 #endif
+#ifdef CW_BUF_DUMP
+#include <ctype.h>
+#endif
 
 /* The upper 3 bits are used to denote the record type, and the lower 5 bits are
  * used to record the number of characters for insert/delete.  5 bits isn't
@@ -241,6 +244,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     cw_assert(mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1);
     cw_assert(a_bpos != a_hist->hbpos);
 
+fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
     if (a_hist->hbpos == 0)
     {
 	/* There's no need for an initial position record. */
@@ -252,8 +256,10 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     u.bpos = cw_htonq(a_hist->hbpos);
     bufv.data = u.str;
     bufv.len = sizeof(u.bpos);
+    buf_dump(&a_hist->h, "wuh ", NULL, NULL);
+    fprintf(stderr, "bufv.len: %u\n", bufv.len);
     mkr_before_insert(&a_hist->hcur, &bufv, 1);
-
+    buf_dump(&a_hist->h, "uhh ", NULL, NULL);
     /* Record header. */
     hst_tag_set(hdr, HST_TAG_POS);
     bufv.data = &hdr;
@@ -264,6 +270,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     a_hist->hbpos = a_bpos;
 
     RETURN:
+fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
 }
 
 cw_hist_t *
@@ -1238,8 +1245,9 @@ void
 hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	  const char *a_end)
 {
+    const char hchars[] = "0123456789abcdef";
     const char *beg, *mid, *end;
-    cw_uint8_t hdr, *p;
+    cw_uint8_t hdr, *p, c;
     union
     {
 	cw_uint64_t bpos;
@@ -1248,7 +1256,8 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     cw_bufv_t *bufv, pbufv, cbufv;
     cw_uint8_t text[32];
     cw_mkr_t tmkr, ttmkr;
-    cw_uint32_t i, bufvcnt;
+    cw_sint32_t i;
+    cw_uint32_t bufvcnt;
     char *tbeg, *tmid;
 
     beg = (a_beg != NULL) ? a_beg : "";
@@ -1331,7 +1340,18 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
+		{
+		    c = text[hst_cnt_get(hdr) - 1 - i];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1343,7 +1363,18 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
+		{
+		    c = text[hst_cnt_get(hdr) - 1 - i];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1351,11 +1382,28 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	    {
 		fprintf(stderr, "R%d(", hst_cnt_get(hdr));
 		mkr_dup(&ttmkr, &tmkr);
+		fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
+		fprintf(stderr, "%llu, seek %d\n", mkr_pos(&tmkr),
+			-1 - hst_cnt_get(hdr));
 		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
+fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
+fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
+		{
+		    c = text[hst_cnt_get(hdr) - 1 - i];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1367,7 +1415,18 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
+		{
+		    c = text[hst_cnt_get(hdr) - 1 - i];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1420,7 +1479,19 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[i + 1]);
+		{
+		    c = text[i + 1];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
+
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1432,7 +1503,18 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[i + 1]);
+		{
+		    c = text[i + 1];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}		
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1444,7 +1526,18 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[i + 1]);
+		{
+		    c = text[i + 1];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
 		fprintf(stderr, ")");
 		break;
 	    }
@@ -1456,7 +1549,18 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
-		fprintf(stderr, "%c", text[i + 1]);
+		{
+		    c = text[i + 1];
+		    if (isprint(c))
+		    {
+			fprintf(stderr, "%c", c);
+		    }
+		    else
+		    {
+			fprintf(stderr, "\\x%c%c",
+				hchars[c >> 4], hchars[c & 0xf]);
+		    }
+		}
 		fprintf(stderr, ")");
 		break;
 	    }
