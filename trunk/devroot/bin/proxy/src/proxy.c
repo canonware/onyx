@@ -75,6 +75,7 @@ main(int argc, char **argv)
 	cw_bool_t	opt_verbose = FALSE, opt_quiet = FALSE, opt_log = FALSE;
 	format_t	opt_format = PRETTY;
 	int		opt_port = 0, opt_rport = 0;
+	cw_uint32_t	opt_ip = htonl(INADDR_ANY);
 	char		*opt_rhost = NULL, *opt_dirname = NULL;
 
 	libstash_init();
@@ -88,7 +89,7 @@ main(int argc, char **argv)
 /*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
 
 	/* Parse command line. */
-	while ((c = getopt(argc, argv, "hVvqp:r:lf:d:")) != -1) {
+	while ((c = getopt(argc, argv, "hVvqi:p:r:lf:d:")) != -1) {
 		switch (c) {
 		case 'h':
 			opt_help = TRUE;
@@ -112,6 +113,28 @@ main(int argc, char **argv)
 			dbg_unregister(cw_g_dbg, "libsock_error");
 			dbg_unregister(cw_g_dbg, "socks_error");
 			dbg_unregister(cw_g_dbg, "sock_error");
+			break;
+		case 'i':
+			if (strcmp(optarg, "INADDR_ANY") == 0) {
+				/* Same as default. */
+				opt_ip = htonl(INADDR_ANY);
+			} else if (strcmp(optarg, "INADDR_LOOPBACK") == 0)
+				opt_ip = htonl(INADDR_LOOPBACK);
+			else if (strcmp(optarg, "INADDR_BROADCAST") == 0)
+				opt_ip = htonl(INADDR_BROADCAST);
+			else {
+				struct in_addr	addr;
+
+				if (inet_aton(optarg, &addr) == 0) {
+					/* Conversion error. */
+					_cw_out_put("Invalid IP address "
+					    "specified with \"-i\" flag\n");
+					usage();
+					retval = 1;
+					goto CLERROR;
+				}
+				opt_ip = addr.s_addr;
+			}
 			break;
 		case 'p':
 			opt_port = strtoul(optarg, NULL, 10);
@@ -231,7 +254,7 @@ main(int argc, char **argv)
 	if (libsock_init(1024, 2048, 4096))
 		_cw_error("Initialization failure");
 	socks = socks_new();
-	if (socks_listen(socks, INADDR_ANY, &opt_port))
+	if (socks_listen(socks, opt_ip, &opt_port))
 		exit(1);
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
 		_cw_out_put_l("[s]: Listening on port [i]\n", argv[0],
@@ -735,12 +758,14 @@ usage(void)
 	    "    -V                   | Print version information and exit.\n"
 	    "    -v                   | Verbose.\n"
 	    "    -q                   | Quiet.\n"
+	    "    -l                   | Write logs to stderr.\n"
+	    "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
 	    "    -f <format>          | Data logging format.\n"
 	    "                         |   p : Pretty (default).\n"
 	    "                         |   h : Hex.\n"
 	    "                         |   a : Ascii.\n"
-	    "    -l                   | Write logs to stderr.\n"
-	    "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
+	    "    -i <ip>              | Bind to interface with address <ip>.\n"
+	    "                         | (Default INADDR_ANY.)\n"
 	    "    -p <port>            | Listen on port <port>.\n"
 	    "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
 	    "                         | port <rport>.\n",

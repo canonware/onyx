@@ -79,9 +79,9 @@ socks_delete(cw_socks_t *a_socks)
 cw_bool_t
 socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 {
-	cw_bool_t	retval;
-	int		val;
-	struct sockaddr_in server_addr;
+	cw_bool_t		retval;
+	int			val;
+	struct sockaddr_in	server_addr;
 
 	_cw_check_ptr(a_socks);
 	_cw_assert(a_socks->magic == _LIBSOCK_SOCKS_MAGIC);
@@ -108,16 +108,23 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 		retval = TRUE;
 		goto RETURN;
 	}
+
 	/* Bind the socket's local address. */
 	server_addr.sin_family = AF_INET;
-	server_addr.sin_addr.s_addr = htonl(a_mask);
+	server_addr.sin_addr.s_addr = a_mask;
 	server_addr.sin_port = htons(*r_port);
+	if (dbg_is_registered(cw_g_dbg, "socks_verbose")) {
+		_cw_out_put("Binding to IP [s]\n",
+		    inet_ntoa(server_addr.sin_addr));
+	}
 
 	if (bind(a_socks->sockfd, (struct sockaddr *)&server_addr,
-	    sizeof(server_addr))) {
+	    sizeof(server_addr)) == -1) {
 		if (dbg_is_registered(cw_g_dbg, "socks_error")) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "Error in bind(): [s]\n", strerror(errno));
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in bind(): [i]\n", errno);
 		}
 		retval = TRUE;
 		goto RETURN;
@@ -159,7 +166,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 }
 
 cw_sock_t *
-socks_accept(cw_socks_t *a_socks, struct timespec * a_timeout, cw_sock_t
+socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
     *r_sock)
 {
 	cw_sock_t	*retval;

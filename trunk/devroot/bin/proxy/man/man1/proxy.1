@@ -25,6 +25,8 @@ proxy - transparent logging TCP/IP proxy
 .IR <dirpath> ]
 .RB [ \-f
 .RB { p | h | a }]
+.RB [ \-i
+.IR <ip> ]
 .RB [ \-p
 .IR <port> ]
 .B \-r
@@ -68,6 +70,15 @@ Display usage information and exit.
 .PP
 .IP \-l
 Write logs to stderr.
+.PP
+.B \-i
+.I <ip>
+.RS
+Bind to IP address
+.IR <ip> .
+The special values of INADDR_ANY (default), INADDR_LOOPBACK, and
+INADDR_BROADCAST are supported.
+.RE
 .PP
 .B \-p
 .I <port>

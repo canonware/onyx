@@ -16,6 +16,7 @@
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 
 /*
  * Include libstash.h now so that any dependencies on its classes are
