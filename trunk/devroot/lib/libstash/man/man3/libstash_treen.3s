@@ -6,58 +6,55 @@
 Version: <Version>
 ..
 .TH libstash_treen 3s "libstash, version <Version>"
-.Nm libstash_treen
 .hy 1
 .SH NAME
 treen - Arbitrary tree (tree node).
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_new
 .RI ( "cw_treen_t *a_treen" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", " 
 .IR "void *a_dealloc_arg" )
-
+.PP
 .I void
 .br
 .B treen_delete
 .RI ( "cw_treen_t *a_treen" )
-
+.PP
 .I void
 .br
 .B treen_link
 .RI ( "cw_treen_t *a_treen" ", " "cw_treen_t *a_parent" )
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_parent_get
 .RI ( "cw_treen_t *a_treen" )
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_child_get
 .RI ( "cw_treen_t *a_treen" )
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_sibling_get
 .RI ( "cw_treen_t *a_treen" )
-
+.PP
 .I void *
 .br
 .B treen_data_ptr_get
 .RI ( "cw_treen_t *a_treen" )
-
+.PP
 .I void
 .br
 .B treen_data_ptr_set
 .RI ( "cw_treen_t *a_treen" ", " "void *a_data" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 Implementation of arbitrary trees.  Each treen (tree node) can have an arbitrary
 number of children.  In actuality, each treen only has one child pointer, so
@@ -65,7 +62,6 @@ children must be accessed by traversing to the child, then iterating on a
 sibling ring.  This allows the treen structure to be a constant size, regardless
 of the fan-out.  Care must be taken when iterating on the sibling ring with
 \fBtreen_sibling_get\fR() to detect the point of wrap-around.
-
 .SH USAGE
 .I cw_treen_t *
 .br
@@ -113,7 +109,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B treen_delete
@@ -139,7 +135,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B treen_link
@@ -171,7 +167,7 @@ a_treen is inserted into the sibling ring such that iterating on the sibling
 ring, starting at \fBtreen_child_get\fR(a_parent) will get to a_treen last.
 .RE
 .RE
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_parent_get
@@ -202,7 +198,7 @@ Description:
 Return a pointer to a_treen's parent.
 .RE
 .RE
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_child_get
@@ -233,7 +229,7 @@ Description:
 Return a pointer to a_treen's first child.
 .RE
 .RE
-
+.PP
 .I cw_treen_t *
 .br
 .B treen_sibling_get
@@ -264,7 +260,7 @@ Description:
 Return a pointer to a_treen's sibling.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B treen_data_ptr_get
@@ -293,7 +289,7 @@ Description:
 Return a pointer to the data for a_treen.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B treen_data_ptr_set
@@ -323,9 +319,7 @@ Description:
 Set the pointer for data for a_treen.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s), libstash_mem(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

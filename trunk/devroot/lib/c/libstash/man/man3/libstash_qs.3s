@@ -6,68 +6,63 @@
 Version: <Version>
 ..
 .TH libstash_qs 3s "libstash, version <Version>"
-.Nm libstash_qs
 .hy 1
 .SH NAME
 qs - Stack macros
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
 .SS Data structures
 .B qs_head
 .RI ( "<qs_type> a_type" )
-
+.PP
 .B qs_head_initializer
 .RI ( "<qs_type> *a_head" )
-
+.PP
 .B qs_elm
 .RI ( "<qs_elm_type> a_type" )
-
 .SS Operations
 .I void
 .br
 .B qs_new
 .RI ( "<qs_type> *a_head" )
-
+.PP
 .I void
 .br
 .B qs_elm_new
 .RI ( "<qs_elm_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I <qs_type> *
 .br
 .B qs_top
 .RI ( "<qs_type> *a_head" )
-
+.PP
 .I <qs_type> *
 .br
 .B qs_down
 .RI ( "<qs_elm_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qs_push
 .RI ( "<qs_type> *a_head" ", " "<qs_elm_type> *a_elm" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qs_under_push
 .RI ( "<qs_elm_type> *a_qselm" ", " "<qs_elm_type> *a_elm" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qs_pop
 .RI ( "<qs_type> *a_head" ", " "<field_name> a_field" )
-
+.PP
 .B qs_foreach
 .RI ( "<qs_elm_type> *a_var" ", " "<qs_type> *a_head" ", "
 .IR "<field_name> a_field" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 The \fBqs\fR macros implement operations on a stack.  The type of the stack
 elements and which field of the elements to use are determined by arguments that
@@ -75,7 +70,6 @@ are passed into the macros.  The macros are optimized for speed and code size,
 which means that there is minimal error checking built in.  As a result, care
 must be taken to assure that these macros are used as intended, or strange
 things can happen.
-
 .SH USAGE
 .SS Data structures
 .B qs_head
@@ -97,7 +91,7 @@ Description:
 Generate code for a \fBqs\fR head data structure.
 .RE
 .RE
-
+.PP
 .B qs_head_initializer
 .RI ( "<qs_type> *a_head" )
 .RS
@@ -117,7 +111,7 @@ Description:
 Statically initialize a \fBqs\fR head.
 .RE
 .RE
-
+.PP
 .B qs_elm
 .RI ( "<qs_elm_type> a_type" )
 .RS
@@ -137,7 +131,6 @@ Description:
 Generate code for a \fBqs\fR element data structure.
 .RE
 .RE
-
 .SS Operations
 .I void
 .br
@@ -160,7 +153,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qs_elm_new
@@ -186,7 +179,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I <qs_type> *
 .br
 .B qs_top
@@ -211,7 +204,7 @@ Description:
 Return a pointer to the top element in the \fBqs\fR.
 .RE
 .RE
-
+.PP
 .I <qs_type> *
 .br
 .B qs_down
@@ -242,7 +235,7 @@ Description:
 Return a pointer to the next element in the \fBqs\fR below a_elm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qs_push
@@ -273,7 +266,7 @@ Description:
 Push a_elm onto the \fBqs\fR.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qs_under_push
@@ -304,7 +297,7 @@ Description:
 Push a_elm under a_qselm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qs_pop
@@ -330,7 +323,7 @@ Description:
 Pop an element off of a_head.
 .RE
 .RE
-
+.PP
 .B qs_foreach
 .RI ( "<qs_elm_type> *a_var" ", " "<qs_type> *a_head" ", "
 .IR "<field_name> a_field" )
@@ -360,9 +353,7 @@ Iterate down the \fBqs\fR, storing a pointer to each element in a_var along the
 way.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -6,41 +6,37 @@
 Version: <Version>
 ..
 .TH libstash_tsd 3s "libstash, version <Version>"
-.Nm libstash_tsd
 .hy 1
 .SH NAME
 tsd - Thread-specific data.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I void
 .br
 .B tsd_new
 .RI ( "cw_tsd_t *a_tsd" ", " "void (*a_func)(void *)" )
-
+.PP
 .I void
 .br
 .B tsd_delete
 .RI ( "cw_tsd_t *a_tsd" )
-
+.PP
 .I void *
 .br
 .B tsd_get
 .RI ( "cw_tsd_t *a_tsd" )
-
+.PP
 .I void
 .br
 .B tsd_set
 .RI ( "cw_tsd_t *a_tsd" ", " "void *a_val" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBtsd\fR implements thread-specific data.  A \fBtsd\fR instance can be created,
 then any number of threads can use that same instance to store and retrieve a
 thread-specific pointer to data.
-
 .SH USAGE
 .I void
 .br
@@ -71,7 +67,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B tsd_delete
@@ -97,7 +93,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B tsd_get
@@ -126,7 +122,7 @@ Description:
 Get thread-specific data pointer.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B tsd_set
@@ -156,9 +152,7 @@ Description:
 Set thread-specific data pointer.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -6,75 +6,73 @@
 Version: <Version>
 ..
 .TH libsock_sock 3s "libsock, version <Version>"
-.Nm libsock
 .hy 1
 .SH NAME
 sock - Asynchronous TCP/IP socket I/O.
 .SH SYNOPSIS
 \fB#include <libsock/libsock.h>\fR
-
+.PP
 .I cw_sock_t *
 .br
 .B sock_new
 .RI ( "cw_sock_t *a_sock" ", " "cw_uint32_t a_in_max_buf_size" )
-
+.PP
 .I void
 .br
 .B sock_delete
 .RI ( "cw_sock_t *a_sock" )
-
+.PP
 .I cw_bool_t
 .br
 .B sock_is_connected
 .RI ( "cw_sock_t *a_sock" )
-
+.PP
 .I cw_uint32_t
 .br
 .B sock_port_get
 .RI ( "cw_sock_t *a_sock" )
-
+.PP
 .I cw_sint32_t
 .br
 .B sock_connect
 .RI ( "cw_sock_t *a_sock" ", " "const char *a_server_host" ", " "int a_port"
 .RI ", " "struct timespec *a_timeout" )
-
+.PP
 .I cw_bool_t
 .br
 .B sock_wrap
 .RI ( "cw_sock_t *a_sock" ", " "int a_sockfd" ", " "cw_bool_t a_init" )
-
+.PP
 .I cw_bool_t
 .br
 .B sock_disconnect
 .RI ( "cw_sock_t *a_sock" )
-
+.PP
 .I cw_uint32_t
 .br
 .B sock_buffered_in
 .RI ( "cw_sock_t *a_sock" )
-
+.PP
 .I cw_sint32_t
 .br
 .B sock_read
 .RI ( "cw_sock_t *a_sock" ", " "cw_buf_t *a_spare" ", "
 .IR "cw_sint32_t a_max_read" ", " "struct timespec *a_timeout" )
-
+.PP
 .I cw_bool_t
 .br
 .B sock_write
 .RI ( "cw_sock_t *a_sock" ", " "cw_buf_t *a_buf" )
-
+.PP
 .I cw_bool_t
 .br
 .B sock_out_flush
 .RI ( "cw_sock_t *a_sock" )
-
+.PP
 .I int
 .br
 .B sock_fd_get
 .RI ( "cw_sock_t *a_sock" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqsock_error\*(rq
@@ -83,11 +81,9 @@ problem, or that there is something going wrong with the application.
 .TP
 \*(lqsock_sockopt\*(rq
 Diagnostic information regarding sockets.
-
 .SH DESCRIPTION
 \fBsock\fR encapsulates a TCP/IP socket and provides an abstracted API that
 allows completely asynchronous socket I/O.
-
 .SH USAGE
 .I cw_sock_t *
 .br
@@ -123,7 +119,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B sock_delete
@@ -145,7 +141,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sock_is_connected
@@ -172,7 +168,7 @@ Description:
 Return TRUE if a_sock is connected.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B sock_port_get
@@ -197,7 +193,7 @@ Description:
 Return the local port number for the socket.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B sock_connect
@@ -242,7 +238,7 @@ Connect to a remote socket.  If (retval == 1), \fBsock_connect\fR() can be
 called again in order to attempt completing a non-blocking connect.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sock_wrap
@@ -279,7 +275,7 @@ Description:
 Wrap an open socket descriptor inside a sock.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sock_disconnect
@@ -306,7 +302,7 @@ Description:
 Disconnect a_sock.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B sock_buffered_in
@@ -331,7 +327,7 @@ Description:
 Return the number of bytes of buffered incoming data.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B sock_read
@@ -379,7 +375,7 @@ Read data from the socket, and don't return until there is data (not necessarily
 a_max_read), or the timeout expires.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sock_write
@@ -411,7 +407,7 @@ Queue the data in a_buf for writing.  Once the data has been added to the write
 queue, notify the I/O thread.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sock_out_flush
@@ -439,7 +435,7 @@ Flush the outgoing data queue (actually, just wait until it has all been sent),
 and don't return until done.
 .RE
 .RE
-
+.PP
 .I int
 .br
 .B sock_fd_get
@@ -466,9 +462,7 @@ Description:
 Return the number of the file descriptor for a_sock's socket.
 .RE
 .RE
-
 .SH SEE ALSO
 libsock(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -6,52 +6,48 @@
 Version: <Version>
 ..
 .TH libstash_rwl 3s "libstash, version <Version>"
-.Nm libstash_rwl
 .hy 1
 .SH NAME
 rwl - Read/write lock.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I void
 .br
 .B rwl_new
 .RI ( "cw_rwl_t *a_rwl" )
-
+.PP
 .I void
 .br
 .B rwl_delete
 .RI ( "cw_rwl_t *a_rwl" )
-
+.PP
 .I void
 .br
 .B rwl_rlock
 .RI ( "cw_rwl_t *a_rwl" )
-
+.PP
 .I void
 .br
 .B rwl_runlock
 .RI ( "cw_rwl_t *a_rwl" )
-
+.PP
 .I void
 .br
 .B rwl_wlock
 .RI ( "cw_rwl_t *a_rwl" )
-
+.PP
 .I void
 .br
 .B rwl_wunlock
 .RI ( "cw_rwl_t *a_rwl" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBrwl\fR implements read/write locks.  Multiple simultaneous readers are
 allowed, but only one locker (with no readers) is allowed.  This implementation
 toggles back and forth between read locks and write locks to assure
 deterministic locking.
-
 .SH USAGE
 .I void
 .br
@@ -78,7 +74,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B rwl_delete
@@ -104,7 +100,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B rwl_rlock
@@ -130,7 +126,7 @@ Description:
 Get a r-lock.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B rwl_runlock
@@ -156,7 +152,7 @@ Description:
 Release a r-lock.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B rwl_wlock
@@ -182,7 +178,7 @@ Description:
 Get a w-lock.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B rwl_wunlock
@@ -208,9 +204,7 @@ Description:
 Release a w-lock.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

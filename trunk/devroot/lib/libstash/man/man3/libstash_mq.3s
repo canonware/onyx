@@ -6,71 +6,67 @@
 Version: <Version>
 ..
 .TH libstash_mq 3s "libstash, version <Version>"
-.Nm libstash_mq
 .hy 1
 .SH NAME
 mq - Message queue.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_mq_t *
 .br
 .B mq_new
 .RI ( "cw_mq_t *a_mq" ", " "cw_mem_t *a_mem" ", " "cw_uint32_t a_msg_size" )
-
+.PP
 .I void
 .br
 .B mq_delete
 .RI ( "cw_mq_t *a_mq" )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_tryget
 .RI ( "cw_mq_t *a_mq" ", " "..." )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_timedget
 .RI ( "cw_mq_t *a_mq" ", " "const struct timespec *a_timeout" ", " "..." )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_get
 .RI ( "cw_mq_t *a_mq" ", " "..." )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_put
 .RI ( "cw_mq_t *a_mq" ", " "..." )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_get_start
 .RI ( "cw_mq_t *a_mq" )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_get_stop
 .RI ( "cw_mq_t *a_mq" )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_put_start
 .RI ( "cw_mq_t *a_mq" )
-
+.PP
 .I cw_bool_t
 .br
 .B mq_put_stop
 .RI ( "cw_mq_t *a_mq" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBmq\fR implements a simple unidirectional message queue.  In addition to
 putting and getting messages, there are methods that control the ability to get
 or put.  This provides a simple out of band state transition capability.
-
 .SH USAGE
 .I cw_mq_t *
 .br
@@ -109,7 +105,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mq_delete
@@ -135,7 +131,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_tryget
@@ -174,7 +170,7 @@ Description:
 Try to get a message, but return TRUE if none are available.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_timedget
@@ -218,7 +214,7 @@ Get a message.  If none are available, block until a message is available, or
 until timeout.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_get
@@ -257,7 +253,7 @@ Description:
 Get a message.  If none are available, block until a message is available.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_put
@@ -292,7 +288,7 @@ Description:
 Put a message in a_mq.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_get_start
@@ -324,7 +320,7 @@ Change the get operation to the start state (\fBmq_get\fR() will not return
 NULL).
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_get_stop
@@ -355,7 +351,7 @@ Description:
 Change the get operation to the stop state (\fBmq_get\fR() will return NULL).
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_put_start
@@ -386,7 +382,7 @@ Description:
 Change the put operation to the start state (\fBmq_put\fR() will not return 1).
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mq_put_stop
@@ -417,7 +413,7 @@ Description:
 Change the put operation to the stop state (mq_put() will return 1).
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mq_dump
@@ -447,9 +443,7 @@ Description:
 Print the internal state of a_mq to cw_g_out.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

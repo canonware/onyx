@@ -76,6 +76,7 @@ AC_PATH_PROG(INSTALL, install, , $PATH)
 AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(DIFF, diff, , $PATH)
 AC_PATH_PROG(ETAGS, etags, , $PATH)
+AC_PATH_PROG(UNROFF, unroff, , $PATH)
 
 VERIFY="$objdir/test/verify"
 AC_SUBST(VERIFY)

@@ -6,85 +6,82 @@
 Version: <Version>
 ..
 .TH libstash_ch 3s "libstash, version <Version>"
-.Nm libstash_ch
 .hy 1
 .SH NAME
 ch - Chained hashing.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_ch_t *
 .br
 .B ch_new
 .RI ( "cw_ch_t *a_ch" ", " "cw_mem_t *a_mem" ", " "cw_uint32_t a_table_size"
 .RI ", " "cw_ch_hash_t *a_hash" ", " "cw_ch_key_comp_t *a_key_comp" )
-
+.PP
 .I void
 .br
 .B ch_delete
 .RI ( "cw_ch_t *a_ch" )
-
+.PP
 .I cw_uint32_t
 .br
 .B ch_count
 .RI ( "cw_ch_t *a_ch" )
-
+.PP
 .I void
 .br
 .B ch_insert
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_key" ", " "const void *a_data" 
 .RI ", " "cw_chi_t *a_chi" )
-
+.PP
 .I cw_bool_t
 .br
 .B ch_remove
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_search_key" ", " "void **r_key" ", "
 .IR "void **r_data" ", " "cw_chi_t **r_chi" )
-
+.PP
 .I cw_bool_t
 .br
 .B ch_search
 .RI ( "cw_ch_t *a_ch" ", " "const void *a_key" ", " "void **r_data" )
-
+.PP
 .I cw_bool_t
 .br
 .B ch_get_iterate
 .RI ( "cw_ch_t *a_ch" ", "  "void **r_key" ", " "void **r_data" )
-
+.PP
 .I cw_bool_t
 .br
 .B ch_remove_iterate
 .RI ( "cw_ch_t *a_ch" ", " "void **r_key" ", " "void **r_data" ", "
 .IR "cw_chi_t **r_chi" )
-
+.PP
 .I void
 .br
 .B ch_dump
 .RI ( "cw_ch_t *a_ch" ", " "const char *a_prefix" )
-
+.PP
 .I cw_uint32_t
 .br
 .B ch_string_hash
 .RI ( "const void *a_key" )
-
+.PP
 .I cw_uint32_t
 .br
 .B ch_direct_hash
 .RI ( "const void *a_key" )
-
+.PP
 .I cw_bool_t
 .br
 .B ch_string_key_comp
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
-
+.PP
 .I cw_bool_t
 .br
 .B ch_direct_key_comp
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 Chained hashing class.  This is a simple bucket chaining hash table
 implementation.  Table size is set at creation time, and cannot be changed, so
@@ -92,18 +89,19 @@ performance will suffer if a \fBch\fR is over-filled.  The main \fBcw_ch_t\fR
 data structure and the table are contiguously allocated, which means that care
 must be taken when manually pre-allocating space for the structure (see details
 in the USAGE section).  Each item that is inserted into the \fBch\fR is
-encapsulated by a \fBcw_chi_t\fR object, for which space can optionally be passed in as a parameter to \fBch_insert\fR().  If no space for the \fBchi\fR is passed in, the \fBmem\fR class is used internally for allocation.
-
+encapsulated by a \fBcw_chi_t\fR object, for which space can optionally be
+passed in as a parameter to \fBch_insert\fR().  If no space for the \fBchi\fR is
+passed in, the \fBmem\fR class is used internally for allocation.
+.PP
 Multiple entries with the same key are allowed and are stored in LIFO order.
-
+.PP
 Calling \fBch_remove_iterate\fR() and \fBch_get_iterate\fR() are guaranteed to
 operate on the oldest item in the hash table, which means that the hash code has
 an integrated FIFO queue.
-
+.PP
 \fBch\fR is meant to be as small and simple as reasonably possible without
 compromising performance.  Note that it is not well suited for situations where
 the number of items can vary wildly.
-
 .SH USAGE
 .I cw_ch_t *
 .br
@@ -152,7 +150,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ch_delete
@@ -178,7 +176,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B ch_count
@@ -207,7 +205,7 @@ Description:
 Return the number of items in a_ch.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ch_insert
@@ -247,7 +245,7 @@ Insert a_data into a_ch, using key a_key.  Use a_chi for the internal chi
 container if non-NULL.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B ch_remove
@@ -315,7 +313,7 @@ a_search_key.  If successful, set *r_key and *r_data to point to the key,
 data, and externally allocated chi, respectively.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B ch_search
@@ -359,7 +357,7 @@ Search for the most recently inserted item with key a_key.  If found, *r_data to
 point to the associated data.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B ch_get_iterate
@@ -411,7 +409,7 @@ Set *r_key and *r_data to point to the oldest item in a_ch.  Promote the item so
 that it is the newest item in a_ch.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B ch_remove_iterate
@@ -474,7 +472,7 @@ Set *r_key and *r_data to point to the oldest item in a_ch, set *r_chi to point
 to the item's container, if externally allocated, and remove the item from a_ch.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ch_dump
@@ -504,7 +502,7 @@ Description:
 Print the internal state of a_ch.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B ch_string_hash
@@ -533,7 +531,7 @@ Description:
 NULL-terminated string hashing function.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B ch_direct_hash
@@ -562,7 +560,7 @@ Description:
 Direct (pointer) hashing function.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B ch_string_key_comp
@@ -597,7 +595,7 @@ Description:
 Test two keys (NULL-terminated strings) for equality.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B ch_direct_key_comp
@@ -632,9 +630,7 @@ Description:
 Test two keys (pointers) for equality.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

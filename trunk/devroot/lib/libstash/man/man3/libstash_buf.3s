@@ -6,133 +6,132 @@
 Version: <Version>
 ..
 .TH libstash_buf 3s "libstash, version <Version>"
-.Nm libstash_buf
 .hy 1
 .SH NAME
 buf, bufc - Reference-counted extensible buffer.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_buf_t *
 .br
 .B buf_new
 .RI ( "cw_buf_t *a_buf" ", " "cw_mem_t *a_mem" )
-
+.PP
 .I cw_buf_t *
 .br
 .B buf_new_r
 .RI ( "cw_buf_t *a_buf" ", " "cw_mem_t *a_mem" )
-
+.PP
 .I void
 .br
 .B buf_delete
 .RI ( "cw_buf_t *a_buf" )
-
+.PP
 .I void
 .br
 .B buf_dump
 .RI ( "cw_buf_t *a_buf" ", " "const char *a_prefix" )
-
+.PP
 .I cw_sint32_t
 .br
 .B buf_size_get
 .RI ( "cw_buf_t *a_buf" )
-
+.PP
 .I cw_uint32_t
 .br
 .B buf_num_bufels_get
 .RI ( "cw_buf_t *a_buf" )
-
+.PP
 .I const struct iovec *
 .br
 .B buf_iovec_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_max_data" ", "
 .IR "cw_bool_t a_is_sys_iovec" ", " "int *r_iovec_count" )
-
+.PP
 .I void
 .br
 .B buf_buf_catenate
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_bool_t a_preserve" )
-
+.PP
 .I void
 .br
 .B buf_split
 .RI ( "cw_buf_t *a_a" ", " "cw_buf_t *a_b" ", " "cw_uint32_t a_offset" )
-
+.PP
 .I void
 .br
 .B buf_bufc_prepend
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
-
+.PP
 .I void
 .br
 .B buf_bufc_append
 .RI ( "cw_buf_t *a_buf" ", " "cw_bufc_t *a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
-
+.PP
 .I cw_bool_t
 .br
 .B buf_head_data_release
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_amount" )
-
+.PP
 .I cw_bool_t
 .br
 .B buf_tail_data_release
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_amount" )
-
+.PP
 .I cw_uint8_t
 .br
 .B buf_uint8_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
-
+.PP
 .I cw_uint32_t
 .br
 .B buf_uint32_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
-
+.PP
 .I cw_uint64_t
 .br
 .B buf_uint64_get
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" )
-
+.PP
 .I void
 .br
 .B buf_uint8_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint_t32 a_val" )
-
+.PP
 .I void
 .br
 .B buf_uint32_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_val" )
-
+.PP
 .I void
 .br
 .B buf_uint64_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint64_t a_val" )
-
+.PP
 .I void
 .br
 .B buf_range_set
 .RI ( "cw_buf_t *a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_length" ", " "cw_uint8_t *a_val" ", "
 .IR "cw_bool_t a_is_writeable" )
-
+.PP
 .I cw_bufc_t *
 .br
 .B bufc_new
 .RI ( "cw_bufc_t *a_bufc" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg)" )
-
+.PP
 .I void
 .br
 .B bufc_delete
 .RI ( "cw_bufc_t *a_bufc" )
-
+.PP
 .I void
 .br
 .B bufc_buffer_set
@@ -140,15 +139,13 @@ buf, bufc - Reference-counted extensible buffer.
 .IR "cw_uint32_t a_size" ", " "cw_bool_t a_is_writeable" ", "
 .IR "cw_opaque_dealloc_t *a_dealloc_func" ", "
 .IR "void *a_dealloc_arg" )
-
+.PP
 .I cw_uint32_t
 .br
 .B bufc_size_get
 .RI ( "cw_bufc_t *a_bufc" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 The buf and bufc classes implement a buffer abstraction.  These classes are
 designed specifically to handle streaming and transparent extensible buffering
@@ -157,31 +154,30 @@ extensible and contractible, as well as reference counted.  This means that data
 can be passed and internally shared among buf's without copying or worry of
 memory leaks.  Depending on the application, this also allows for very compact
 use of memory buffers.
-
+.PP
 Internally, a buf consists of an array of buffer elements, bufels, that
 reference bufc's.  The bufc's are reference counted, such that each bufel
 reference to a bufc increases the bufc reference count.  In addition, the
 library user has a reference to each bufc as when it is initialized.  When data
 are passed among buf's, references are added to the affected bufc's, but no data
 are actually copied.
-
+.PP
 When data are modified, they must be copied if there are multiple references, or
 if the bufc was marked as non-writeable in the \fBbufc_buffer_set\fR() call.
 Otherwise, data can be modified in place.
-
+.PP
 Random access to data is O(log n), where n is the number of bufel's in the buf.
 Linear access, either forward or backward, is optimized to be fast in the
 general case.  The most recent access is cached, so if the next access is in the
 same bufel, the cost for that access is O(1).
-
+.PP
 The buf code provides an iovec (see \fBreadv\fR(2)/\fBwritev\fR(2)) interface
 for accessing the internals for read-only operations.  In general, this
 interface shouldn't be needed except when using the \fBwritev\fR() function.
-
+.PP
 Once a bufc has been passed to \fBbuf_{pre,ap}pend_bufc\fR(), its data must be
 treated as read-only.  That is, the bufc must be treated as opaque as soon as
 any buf has a reference to it.
-
 .SH USAGE
 .I cw_buf_t *
 .br
@@ -220,7 +216,7 @@ Description:
 Non-thread-safe and thread-safe constructors.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_delete
@@ -247,7 +243,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_dump
@@ -278,7 +274,7 @@ Description:
 Dump the internal state of a_buf to cw_g_out.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B buf_size_get
@@ -307,7 +303,7 @@ Description:
 Return the amout of valid data in bytes.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B buf_num_bufels_get
@@ -337,7 +333,7 @@ Description:
 Return the number of bufel's in a_buf.
 .RE
 .RE
-
+.PP
 .I const struct iovec *
 .br
 .B buf_iovec_get
@@ -385,7 +381,7 @@ Build an iovec array that represents the valid data in a_buf's internal buffers
 (up to a_max_data bytes) and return a pointer to it.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_buf_catenate
@@ -421,7 +417,7 @@ Catenate two buf's.  a_b is left unmodifed if a_preserve is TRUE; otherwise a_b
 is emptied.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_split
@@ -456,7 +452,7 @@ Split a_b at offset a_offset.  Append the data before a_offset to a_a, and leave
 the remainder in a_b.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_bufc_prepend
@@ -495,7 +491,7 @@ Description:
 Prepend a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_bufc_append
@@ -534,7 +530,7 @@ Description:
 Append a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B buf_head_data_release
@@ -569,7 +565,7 @@ Description:
 Release a_amount bytes from the head of a_buf.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B buf_tail_data_release
@@ -604,7 +600,7 @@ Description:
 Release a_amount bytes from the tail of a_buf.
 .RE
 .RE
-
+.PP
 .I cw_uint8_t
 .br
 .B buf_uint8_get
@@ -637,7 +633,7 @@ Description:
 Return the uint8 at offset a_offset.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B buf_uint32_get
@@ -670,7 +666,7 @@ Description:
 Return the uint32 at offset a_offset.
 .RE
 .RE
-
+.PP
 .I cw_uint64_t
 .br
 .B buf_uint64_get
@@ -703,7 +699,7 @@ Description:
 Return the uint64 at offset a_offset.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_uint8_set
@@ -738,7 +734,7 @@ Description:
 Set the uint8 at a_offset to a_val.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_uint32_set
@@ -773,7 +769,7 @@ Description:
 Set the uint32 at a_offset to a_val.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_uint64_set
@@ -808,7 +804,7 @@ Description:
 Set the uint64 at a_offset to a_val.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B buf_range_set
@@ -854,7 +850,7 @@ Description:
 Copy a_offset bytes from a_val to a_buf at offset a_offset.
 .RE
 .RE
-
+.PP
 .I cw_bufc_t *
 .br
 .B bufc_new
@@ -901,7 +897,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bufc_delete
@@ -927,7 +923,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bufc_buffer_set
@@ -979,13 +975,13 @@ Description:
 .RS
 Set a_bufc's internal data buffer to a_buffer, with size a_size, and
 deallocation function a_dealloc_func(a_dealloc_arg, a_buffer).
-
+.PP
 This function is not reentrant, and assumes that no other references to a_bufc
 exist (or at least they don't rely on the bufc's state).  In other words, don't
 call this function after the bufc has been inserted into one or more buf's.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B bufc_size_get
@@ -1014,9 +1010,7 @@ Description:
 Return the number of bytes in a_bufc's internal buffer.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s), libstash_mem(3s), readv(2), writev(2).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

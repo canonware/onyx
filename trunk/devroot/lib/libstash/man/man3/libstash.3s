@@ -6,7 +6,6 @@
 Version: <Version>
 ..
 .TH libstash 3s "libstash, version <Version>"
-.Nm libstash
 .hy 1
 .SH NAME
 libstash - Library of algorithms and data structures.
@@ -22,87 +21,83 @@ cc -g -D_LIBSTASH_DEBUG
 cc -pg
 .I file
 -lstash_p -lpthread
-
+.PP
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .SS General
 .I cw_bool_t
 .br
 .B libstash_init
 .RI ( void )
-
+.PP
 .I void
 .br
 .B libstash_shutdown
 .RI ( void )
-
+.PP
 .SS Preprocessor macros
 .I void
 .br
 .B _cw_assert
 .RI ( "<expression>" )
-
+.PP
 .I void
 .br
 .B _cw_check_ptr
 .RI ( "void *a_ptr" )
-
+.PP
 .I void
 .br
 .B _cw_not_reached
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B _cw_error
 .RI ( "const char *a_str" )
-
+.PP
 .I cw_uint64_t
 .br
 .B _cw_ntohq
 .RI ( "cw_uint64_t a_val" )
-
+.PP
 .I cw_uint64_t
 .br
 .B _cw_htonq
 .RI ( "cw_uint64_t a_val" )
-
 .SH DESCRIPTION
 The \fBlibstash\fR library defines a number of algorithms and data structures
 that are useful for many purposes.
-
+.PP
 \fBlibstash\fR is designed to run on *nix platforms, and is known to work on
 FreeBSD, Linux, and Solaris.  The \fBpthreads\fR library is required for the
 multi-threaded versions of \fBlibstash\fR.
-
 .SH USAGE
 Detailed usage of the various available classes is discussed in detail in other
 man pages.  Regardless of what classes are used, at least the following minimal
 shell of C code should be used.
-
+.PP
 .RS
+.nf
 #include <libstash/libstash.h>
 
 int
-.br
 main()
-.br
 {
-.br
-	libstash_init();
+.in +8
+libstash_init();
 
-	/* Do stuff. */
+/* Do stuff. */
 
-	libstash_shutdown();
-.br
-	return 0;
-.br
+libstash_shutdown();
+return 0;
+.in -8
 }
+.fi
 .RE
-
-
+.PP
 \fBlibstash_init\fR() must be called in order for things to work properly.
-
+.PP
 .I void
 .br
 .B libstash_init
@@ -126,7 +121,7 @@ Initialize various global variables.  In particular, initialize cw_g_mem,
 cw_g_dbg, and cw_g_out.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B libstash_shutdown
@@ -149,7 +144,7 @@ Description:
 Clean up the global variables that are initialized by \fBlibstash_init\fR().
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B _cw_assert
@@ -174,11 +169,11 @@ Description:
 .RS
 If \fI<expression>\fR evaluates to zero, print an error message to
 \fIcw_g_out\fR and \fIabort\fR().
-
+.PP
 Note: This macro is optimized out of the non-debug versions of the library.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B _cw_check_ptr
@@ -203,11 +198,11 @@ Description:
 .RS
 if \fIa_ptr\fR is NULL, print an error message to \fIcw_g_out\fR and
 \fIabort\fR().
-
+.PP
 Note: This macro is optimized out of the non-debug versions of the library.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B _cw_not_reached
@@ -230,7 +225,7 @@ Description:
 Abort with an error message, if a debugging version of \fBlibstash\fR.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B _cw_error
@@ -256,7 +251,7 @@ Description:
 Print the contents of \fIa_str\fR to \fIcw_g_out\fR.
 .RE
 .RE
-
+.PP
 .I cw_uint64_t
 .br
 .B _cw_ntohq
@@ -286,7 +281,7 @@ Convert \fIa_val\fR from network byte order to host byte order and return the
 result.
 .RE
 .RE
-
+.PP
 .I cw_uint64_t
 .br
 .B _cw_htonq
@@ -316,7 +311,6 @@ Convert \fIa_val\fR from host byte order to network byte order and return the
 result.
 .RE
 .RE
-
 \"  .SH RETURN VALUES
 \"  .SH EXIT STATUS
 \"  .SH FILES
@@ -326,18 +320,17 @@ The algorithms and data structures in \fBlibstash\fR are architected in an
 object-oriented manner, though all the actual code is C.  Since C doesn't
 directly support object-oriented design, a number of stylistic conventions
 are used.
-
+.PP
 Each class is referred to by a name, which is used as a prefix for all member
 methods.  For example, dynamic chained hashing is implemented by the \fBdch\fR
 class, and member methods of \fBdch\fR are named \fBdch_new()\fR,
 \fBdch_delete()\fR, \fBdch_insert()\fR, etc.
-
 .SS Variable types
 \fBlibstash\fR is careful to use the following data types rather than the
 built-in types (other than when using system library functions and string
 pointers (char *)) to allow easy porting and explicit knowledge of variable
 sizes.
-
+.PP
 .TS
 center box linesize(6) tab(@);
 cb s s.
@@ -359,18 +352,15 @@ l | r | l.
  cw_sint64_t@8@Signed 64 bit variable.  
  cw_uint64_t@8@Unsigned 64 bit variable.
 .TE
-
 .SS Object instantiation
 Many classes provide a means for external memory allocation, and in some cases
 for automatic cleanup during destruction.  This feature enables improved
 performance and cache locality, but if misunderstood, can result in mysterious
 memory corruption and leaks.
-
 .SS Variable naming
 Though the variable naming conventions used in \fBlibstash\fR are far short of
 what Hungarian and other naming conventions attempt, there are a few to take
 note of.
-
 .TS
 center box linesize(6) tab(@);
 cb s s.
@@ -386,9 +376,7 @@ l | l.
  a_@Function argument.
  t_@Temporary variable.
 .TE
-
 .SH SEE ALSO
-\"  .TS
 .TS H
 center box linesize(6) tab(@);
 cb s s.
@@ -425,7 +413,6 @@ l | l | l.
  tsd@libstash_tsd(3s)@Thread-specific data.
  xep@libstash_xep(3s)@Exception handling.
 .TE
-
 \"  .SH DIAGNOSTICS
 \"  .SH BUGS
 .SH HISTORY

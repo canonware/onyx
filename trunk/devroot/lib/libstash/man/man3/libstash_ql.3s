@@ -6,102 +6,97 @@
 Version: <Version>
 ..
 .TH libstash_ql 3s "libstash, version <Version>"
-.Nm libstash_ql
 .hy 1
 .SH NAME
 ql - List macros
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
 .SS Data structures
 .B ql_head
 .RI ( "<ql_type> a_type" )
-
+.PP
 .B ql_head_initializer
 .RI ( "cw_ql_t *a_ql" )
-
+.PP
 .B ql_elm
 .RI ( "<ql_type> a_type" )
-
 .SS Operations
 .I void
 .br
 .B ql_new
 .RI ( "cw_ql_t *a_head" )
-
+.PP
 .I void
 .br
 .B ql_elm_new
 .RI ( "<ql_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I <ql_type> *
 .br
 .B ql_first
 .RI ( "cw_ql_t *a_head" )
-
+.PP
 .I <ql_type> *
 .br
 .B ql_last
 .RI ( "cw_ql_t *a_head" )
-
+.PP
 .I <ql_type> *
 .br
 .B ql_next
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I <ql_type> *
 .br
 .B ql_prev
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_before_insert
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> *a_qlelm" ", " "<ql_type> *a_elm"
 .RI ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_after_insert
 .RI ( "<ql_type> *a_qlelm" ", " "<ql_type> *a_elm" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_head_insert
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_tail_insert
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_remove
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> *a_elm" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_head_remove
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> a_type" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B ql_tail_remove
 .RI ( "cw_ql_t *a_head" ", " "<ql_type> a_type" ", " "<field_name> a_field" )
-
+.PP
 .B ql_foreach
 .RI ( "<ql_type> *a_var" ", " "<ql_type> *a_ql" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .B ql_foreach_reverse
 .RI ( "<ql_type> *a_var" ", " "<ql_type> *a_ql" ", "
 .IR "<field_name> a_field" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 The \fBql\fR macros implement operations on a list.  The type of the list
 elements and which field of the elements to use are determined by arguments that
@@ -109,14 +104,13 @@ are passed into the macros.  The macros are optimized for speed and code size,
 which means that there is minimal error checking built in.  As a result, care
 must be taken to assure that these macros are ussed as intended, or strange
 things can happen.
-
+.PP
 Internally, the list is represented as a ring, so with some care, the \fBql\fR
 and \fBqr\fR interfaces can be used in conjunction with each other.
-
+.PP
 Since a \fBql\fR is actually a ring, it is possible to have multiple \fBql\fR
 heads that share the same ring.  This works just fine, with the caveat that
 operations on one \fBql\fR can have side-effects on another.
-
 .SH USAGE
 .SS Data structures
 .B ql_head
@@ -138,7 +132,7 @@ Description:
 Generate code for a \fBql\fR head data structure.
 .RE
 .RE
-
+.PP
 .B ql_head_initializer
 .RI ( "<ql_type> *a_head" )
 .RS
@@ -158,7 +152,7 @@ Description:
 Statically initialize a \fBql\fR head.
 .RE
 .RE
-
+.PP
 .B ql_elm
 .RI ( "<ql_type> a_type" )
 .RS
@@ -178,7 +172,7 @@ Description:
 Generate code for a \fBql\fR element data structure.
 .RE
 .RE
-
+.PP
 .SS Operations
 .I void
 .br
@@ -201,7 +195,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_elm_new
@@ -227,7 +221,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I <ql_type> *
 .br
 .B ql_first
@@ -254,7 +248,7 @@ Description:
 Return a pointer to the first element in the \fBql\fR.
 .RE
 .RE
-
+.PP
 .I <ql_type> *
 .br
 .B ql_last
@@ -281,7 +275,7 @@ Description:
 Return a pointer to the last element in the \fBql\fR.
 .RE
 .RE
-
+.PP
 .I <ql_type> *
 .br
 .B ql_next
@@ -316,7 +310,7 @@ Description:
 Return a pointer to the element in a_head after a_elm.
 .RE
 .RE
-
+.PP
 .I <ql_type> *
 .br
 .B ql_prev
@@ -351,7 +345,7 @@ Description:
 Return a pointer to the element in a_head before a_elm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_before_insert
@@ -386,7 +380,7 @@ Description:
 Insert a_elm into a_head before a_qlelm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_after_insert
@@ -421,7 +415,7 @@ Description:
 Insert a_elm into a_head after a_qlelm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_head_insert
@@ -451,7 +445,7 @@ Description:
 Insert a_elm at the head of a_head.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_tail_insert
@@ -481,7 +475,7 @@ Description:
 Insert a_elm at the tail of a_head.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_remove
@@ -511,7 +505,7 @@ Description:
 Remove a_elm from a_head.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_head_remove
@@ -541,7 +535,7 @@ Description:
 Remove the head element of a_head.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B ql_tail_remove
@@ -571,7 +565,7 @@ Description:
 Remove the tail element of a_head.
 .RE
 .RE
-
+.PP
 .B ql_foreach
 .RI ( "<ql_type> *a_var" ", " "<ql_type> *a_head" ", "
 .IR "<field_name> a_field" )
@@ -600,7 +594,7 @@ Iterate through the \fBql\fR, storing a pointer to each element in a_var along
 the way.
 .RE
 .RE
-
+.PP
 .B ql_foreach_reverse
 .RI ( "<ql_type> *a_var" ", " "<ql_type> *a_head" ", "
 .IR "<field_name> a_field" )
@@ -629,9 +623,7 @@ Iterate through the \fBql\fR in the reverse direction, storing a pointer to each
 element in a_var along the way.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -6,13 +6,12 @@
 Version: <Version>
 ..
 .TH libstash_dch 3s "libstash, version <Version>"
-.Nm libstash_dch
 .hy 1
 .SH NAME
 dch - Dynamic chained hashing.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_dch_t *
 .br
 .B dch_new
@@ -20,59 +19,56 @@ dch - Dynamic chained hashing.
 .IR "cw_uint32_t a_base_table" ", " "cw_uint32_t a_base_grow" ", "
 .IR "cw_uint32_t a_base_shrink" ", " "cw_ch_hash_t *a_hash" ", "
 .IR "cw_ch_key_comp_t *a_key_comp" )
-
+.PP
 .I void
 .br
 .B dch_delete
 .RI ( "cw_dch_t *a_dch" )
-
+.PP
 .I cw_uint32_t
 .br
 .B dch_count
 .RI ( "cw_dch_t *a_dch" )
-
+.PP
 .I void
 .br
 .B dch_insert
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " 
 .IR "const void *a_data" ", " "cw_chi_t *a_chi" )
-
+.PP
 .I cw_bool_t
 .br
 .B dch_remove
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_search_key" ", " "void **r_key"
 .RI ", " "void **r_data" ", " "cw_chi_t **r_chi" )
-
+.PP
 .I cw_bool_t
 .br
 .B dch_search
 .RI ( "cw_dch_t *a_dch" ", " "const void *a_key" ", " "void **r_data" )
-
+.PP
 .I cw_bool_t
 .br
 .B dch_get_iterate
 .RI ( "cw_dch_t *a_dch" ", "  "void **r_key" ", " "void **r_data" )
-
+.PP
 .I cw_bool_t
 .br
 .B dch_remove_iterate
 .RI ( "cw_dch_t *a_dch" ", " "void **r_key" ", " "void **r_data" ", "
 .IR "cw_chi_t **r_chi" )
-
+.PP
 .I void
 .br
 .B dch_dump
 .RI ( "cw_dch_t *a_dch" ", " "const char *a_prefix" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 Dynamic chained hashing class.  The \fBdch\fR class is a wrapper around the
 \fBch\fR class that enforces fullness/emptiness constraints and rebuilds the
 hash table when necessary.  Other than this added functionality, the \fBdch\fR
-class behaves almost exactly like the \fBch\f class.
-
+class behaves almost exactly like the \fBch\fR class.
 .SH USAGE
 .I cw_dch_t *
 .br
@@ -132,7 +128,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B dch_delete
@@ -158,7 +154,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B dch_count
@@ -187,7 +183,7 @@ Description:
 Return the number of items in a_dch.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B dch_insert
@@ -226,7 +222,7 @@ Description:
 Insert a_data into a_dch, using key a_key.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B dch_remove
@@ -294,7 +290,7 @@ a_search_key.  If successful, set *r_key and *r_data to point to the key and
 data, respectively.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B dch_search
@@ -338,7 +334,7 @@ Search for the most recently inserted item with key a_key.  If found, *r_data to
 point to the associated data.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B dch_get_iterate
@@ -390,7 +386,7 @@ Set *r_key and *r_data to point to the oldest item in a_dch.  Promote the item
 so that it is the newest item in a_dch.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B dch_remove_iterate
@@ -453,7 +449,7 @@ Set *r_key and *r_data to point to the oldest item in a_dch, and remove the item
 from a_dch.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B dch_dump
@@ -483,9 +479,7 @@ Description:
 Print the internal state of a_dch.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s), libstash_ch(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -66,7 +66,7 @@ SRCS = [SRCS] [XVX_SRCS];
 
 /* Man pages. */
 {
-  local manpages_1 = xvx.1;
+  local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/xvx/man/man1/% [manpages_1]];
 
   XVX_MANPAGES_1 = [manpages_1];

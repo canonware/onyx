@@ -6,29 +6,28 @@
 Version: <Version>
 ..
 .TH libstash_pezz 3s "libstash, version <Version>"
-.Nm libstash_pezz
 .hy 1
 .SH NAME
 pezz - Grouped memory allocation of equal-size buffers.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_pezz_t *
 .br
 .B pezz_new
 .RI ( "cw_pezz_t *a_pezz" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_uint32_t a_buffer_size" ", " "cw_uint32_t a_num_buffers" )
-
+.PP
 .I void
 .br
 .B pezz_delete
 .RI ( "cw_pezz_t *a_pezz" )
-
+.PP
 .I cw_uint32_t
 .br
 .B pezz_buffer_size_get
 .RI ( "cw_pezz_t *a_pezz" )
-
+.PP
 .I void *
 .br
 .B pezz_get_e
@@ -39,7 +38,7 @@ pezz - Grouped memory allocation of equal-size buffers.
 .br
 .B pezz_get
 .RI ( "cw_pezz_t *a_pezz" )
-
+.PP
 .I void
 .br
 .B pezz_put_e
@@ -50,12 +49,11 @@ pezz - Grouped memory allocation of equal-size buffers.
 .br
 .B pezz_put
 .RI ( "cw_pezz_t *a_pezz" ", " "void *a_buffer" )
-
+.PP
 .I void
 .br
 .B pezz_dump
 .RI ( "cw_pezz_t *a_pezz" ", " "const char *a_prefix" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqpezz_verbose\*(rq
@@ -65,12 +63,10 @@ allocation and deallocation.
 \*(lqpezz_error\*(rq
 In the debug versions of libstash, print out information about memory leaks and
 other detectable errors or inconsistencies.
-
 .SH DESCRIPTION
 The \fBpezz\fR class provides cached allocation for equal-size buffers.  It does
 incremental block allocation, then carves buffers from those blocks.  No memory
 is freed until \fBpezz_delete\fR() is called.
-
 .SH USAGE
 .I cw_pezz_t *
 .br
@@ -114,7 +110,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pezz_delete
@@ -140,7 +136,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B pezz_buffer_size_get
@@ -169,7 +165,7 @@ Description:
 Return the size of the buffers that a_pezz is using.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B pezz_get_e
@@ -212,7 +208,7 @@ Description:
 Allocate a memory buffer and return a pointer to it.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pezz_put_e
@@ -256,7 +252,7 @@ Description:
 Put back (deallocate) a_buffer.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pezz_dump
@@ -286,9 +282,7 @@ Description:
 Dump the internal state of a_pezz to cw_g_out.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

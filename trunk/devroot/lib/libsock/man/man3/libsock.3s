@@ -6,7 +6,6 @@
 Version: <Version>
 ..
 .TH libsock_<template> 3s "libsock, version <Version>"
-.Nm libsock
 .hy 1
 .SH NAME
 libsock - Multi-threaded TCP/IP networking library.
@@ -22,37 +21,34 @@ cc -g -D_LIBSTASH_DEBUG -D_LIBSOCK_DEBUG
 cc -pg
 .I file
 -lsock_p -lstash_p -lpthread
-
+.PP
 .I void
 .br
 .B libsock_init
 .RI ( "cw_uint32_t a_max_fds" ", " "cw_uint32_t a_bufc_size" ", "
 .IR "cw_uint32_t a_max_spare_bufcs" )
-
+.PP
 .I void
 .br
 .B libsock_shutdown
 .RI ( "void" )
-
+.PP
 .I cw_bufc_t *
 .br
 .B libsock_spare_bufc_get
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B libsock_in_notify
 .RI ( "cw_mq_t *a_mq" ", " "int a_sockfd" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqlibsock_error\*(rq
 Unusual error conditions that indicate something is going wrong.
-
 .TP
 \*(lqlibsock_verbose\*(rq
 Common events such as remote disconnection and DNS lookup results.
-
 .SH DESCRIPTION
 The \fBlibsock\fR library implements a streamlined interface for multi-threaded
 TCP/IP socket programming.  The main purpose of the library is to abstract the
@@ -60,48 +56,48 @@ complexities of threaded network server programming without compromising
 performance.  \fBlibsock\fR centrally handles all of the \fBpoll\fR() waiting in
 one thread to improve performance, at the same time as making reading and
 writing seem completely asynchronous at the \fBsock\fR interface level.
-
+.PP
 Internally, \fBlibsock\fR works by running a separate thread that asynchronously
 manages I/O.  A simple message passing mechanism is used to communicate control
 events to the I/O thread.  Data are managed and buffered with \fBlibstash\fR's
 \fBbuf\fR code.  As such, all library interfaces for injecting and extracting
 data require the use of \fBbuf\fR's.  The I/O thread handles (almost) all of the
 reading/writing of data from/to sockets.
-
+.PP
 \fBlibsock_spare_bufc_get\fR() provides a method of globally managing memory
 buffers.
-
+.PP
 A simple mechanism for multiplexing connection handling onto a set of threads is
 provided.  This mechanism can be thought of as a way of hooking into the I/O
 thread's poll loop.
-
 .SH USAGE
 Detailed usage of the various available classes is discussed in detail in other
 man pages.  Regardless of what classes are used, at least the following minimal
 shell of C code should be used.
-
 .RS
+.nf
 #include <libsock/libsock.h>
 
 int
-.br
 main()
-.br
 {
-  libstash_init();
-  libsock_init(1024, /* Max fd number, plus one. */
-               4096, /* bufc size. */
-               16);  /* Maximum bufc's to cache. */
+.in +8
+libstash_init();
+libsock_init(
+    1024, /* Max fd number, plus one. */
+    4096, /* bufc size. */
+    16);  /* Maximum bufc's to cache. */
 
-  /* Do stuff. */
+/* Do stuff. */
 
-  libsock_shutdown();
-  libstash_shutdown();
-  return 0;
-.br
+libsock_shutdown();
+libstash_shutdown();
+return 0;
+.in -8
 }
+.fi
 .RE
-
+.PP
 .I void
 .br
 .B libsock_init
@@ -139,7 +135,7 @@ Description:
 Global initializer for libsock and the I/O thread.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B libsock_shutdown
@@ -158,7 +154,7 @@ Description:
 Global shutdown for libsock.
 .RE
 .RE
-
+.PP
 .I cw_bufc_t *
 .br
 .B libsock_spare_bufc_get
@@ -186,7 +182,7 @@ be of the size specified by the a_bufc_size parameter passed to
 \fBlibsock_init\fR().
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B libsock_in_notify
@@ -220,9 +216,7 @@ simply a socket descriptor number.  To stop receiving notifications, pass a NULL
 .br
 Note: Only one mq at a time can be notified of events on a particular sockfd.
 .RE
-
 .SH SEE ALSO
 libsock_sock(3s), libsock_socks(3s), libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

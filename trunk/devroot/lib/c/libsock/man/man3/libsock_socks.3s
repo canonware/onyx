@@ -6,44 +6,40 @@
 Version: <Version>
 ..
 .TH libsock_socks 3s "libsock, version <Version>"
-.Nm libsock
 .hy 1
 .SH NAME
 socks - Socket server class.
 .SH SYNOPSIS
 \fB#include <libsock/libsock.h>\fR
-
+.PP
 .I cw_socks_t *
 .br
 .B socks_new
 .RI ( "cw_socks_t *a_socks" )
-
+.PP
 .I void
 .br
 .B socks_delete
 .RI ( "cw_socks_t *a_socks" )
-
+.PP
 .I cw_bool_t
 .br
 .B socks_listen
 .RI ( "cw_socks_t *a_socks" ", " "cw_uint32_t a_mask" ", " "int *r_port" )
-
+.PP
 .I cw_sock_t *
 .br
 .B socks_accept
 .RI ( "cw_socks_t *a_socks" ", " "struct timespec *a_timeout" ", "
 .IR "cw_sock_t *r_sock" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqsocks_error\*(rq
 Errors that indicate a programming or network error.
-
 .SH DESCRIPTION
 \fBsocks\fR implements a socket listener (server).  \fBsocks\fR is used to
 accept connections to a port and create a \fBsock\fR instance for each
 connection.
-
 .SH USAGE
 .I cw_socks_t *
 .br
@@ -73,7 +69,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B socks_delete
@@ -95,7 +91,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B socks_listen
@@ -137,7 +133,7 @@ OS choose what port number to use, and assign the number to *r_port before
 returning.
 .RE
 .RE
-
+.PP
 .I cw_sock_t *
 .br
 .B socks_accept
@@ -176,9 +172,7 @@ Accept a connection.  Don't return until someone connects, or the timeout
 expires.
 .RE
 .RE
-
 .SH SEE ALSO
 libsock(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

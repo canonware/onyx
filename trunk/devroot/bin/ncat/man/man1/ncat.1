@@ -6,7 +6,6 @@
 Version: <Version>
 ..
 .TH ncat 1 "ncat, version <Version>"
-.Nm ncat
 .hy 1
 .SH NAME
 ncat - catenate and print using TCP/IP
@@ -22,7 +21,7 @@ ncat - catenate and print using TCP/IP
 .br
 .B ncat
 .RI [ <common-flags> ]
-.RI [ -\i
+.RI [ \-i
 .IR <ip> ]
 .B \-p
 .I <port>
@@ -38,7 +37,6 @@ ncat - catenate and print using TCP/IP
 .RB { p | h | a }]
 .RB [ \-t
 .IR <timeout> ]
-
 .SH DESCRIPTION
 .B ncat
 is much like
@@ -124,6 +122,5 @@ This flag can be specified twice for extra verbosity.
 This flag is incompatible with the
 .B \-q
 flag.
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -66,7 +66,7 @@ SRCS = [SRCS] [COVER_SRCS];
 
 /* Man pages. */
 {
-  local manpages_1 = cover.1;
+  local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/cover/man/man1/% [manpages_1]];
 
   COVER_MANPAGES_1 = [manpages_1];

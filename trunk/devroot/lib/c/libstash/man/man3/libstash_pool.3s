@@ -6,34 +6,33 @@
 Version: <Version>
 ..
 .TH libstash_pool 3s "libstash, version <Version>"
-.Nm libstash_pool
 .hy 1
 .SH NAME
 pool - Cached memory allocation of equal-size buffers.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_pool_t *
 .br
 .B pool_new
 .RI ( "cw_pool_t *a_pool" ", " "cw_mem_t *a_mem" ", "
 .IR "cw_uint32_t a_buffer_size" )
-
+.PP
 .I void
 .br
 .B pool_delete
 .RI ( "cw_pool_t *a_pool" )
-
+.PP
 .I cw_uint32_t
 .br
 .B pool_buffer_size_get
 .RI ( "cw_pool_t *a_pool" )
-
+.PP
 .I void
 .br
 .B pool_drain
 .RI ( "cw_pool_t *a_pool" )
-
+.PP
 .I void *
 .br
 .B pool_get_e
@@ -44,7 +43,7 @@ pool - Cached memory allocation of equal-size buffers.
 .br
 .B pool_get
 .RI ( "cw_pool_t *a_pool" )
-
+.PP
 .I void
 .br
 .B pool_put_e
@@ -55,12 +54,11 @@ pool - Cached memory allocation of equal-size buffers.
 .br
 .B pool_put
 .RI ( "cw_pool_t *a_pool" ", " "void *a_buffer" )
-
+.PP
 .I void
 .br
 .B pool_dump
 .RI ( "cw_pool_t *a_pool" ", " "const char *a_prefix" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqpool_verbose\*(rq
@@ -70,10 +68,10 @@ allocation and deallocation.
 \*(lqpool_error\*(rq
 In the debug versions of libstash, print out information about memory leaks and
 other detectable errors or inconsistencies.
-
 .SH DESCRIPTION
-The \fBpool\fR class provides cached allocation for equal-size buffers.  Each allocation is done via \fBmalloc\fR(), and deallocated buffers are cached.  The cache can be discarded via \fBpool_drain\fR().
-
+The \fBpool\fR class provides cached allocation for equal-size buffers.  Each
+allocation is done via \fBmalloc\fR(), and deallocated buffers are cached.  The
+cache can be discarded via \fBpool_drain\fR().
 .SH USAGE
 .I cw_pool_t *
 .br
@@ -112,7 +110,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pool_delete
@@ -138,7 +136,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I cw_uint32_t
 .br
 .B pool_buffer_size_get
@@ -167,7 +165,7 @@ Description:
 Return the size of the buffers that a_pool is using.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pool_drain
@@ -193,7 +191,7 @@ Description:
 Discard internally cached buffers, if any.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B pool_get_e
@@ -236,7 +234,7 @@ Description:
 Allocate a memory buffer and return a pointer to it.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pool_put_e
@@ -280,7 +278,7 @@ Description:
 Put back (deallocate) a_buffer.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B pool_dump
@@ -310,9 +308,7 @@ Description:
 Dump the internal state of a_pool to cw_g_out.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

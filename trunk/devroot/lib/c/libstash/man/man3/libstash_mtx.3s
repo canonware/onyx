@@ -6,46 +6,42 @@
 Version: <Version>
 ..
 .TH libstash_mtx 3s "libstash, version <Version>"
-.Nm libstash_mtx
 .hy 1
 .SH NAME
 mtx - Mutex (mutual exclusion lock).
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I void
 .br
 .B mtx_new
 .RI ( "cw_mtx_t *a_mtx" )
-
+.PP
 .I void
 .br
 .B mtx_delete
 .RI ( "cw_mtx_t *a_mtx" )
-
+.PP
 .I void
 .br
 .B mtx_lock
 .RI ( "cw_mtx_t *a_mtx" )
-
+.PP
 .I cw_bool_t
 .br
 .B mtx_trylock
 .RI ( "cw_mtx_t *a_mtx" )
-
+.PP
 .I void
 .br
 .B mtx_unlock
 .RI ( "cw_mtx_t *a_mtx" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBmtx\fR is a typical mutual exclusion lock.  Only one thread can hold the lock
 at a time, and attempting to attain the lock while already owing it has
 undefined results.
-
 .SH USAGE
 .I void
 .br
@@ -72,7 +68,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mtx_delete
@@ -98,7 +94,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mtx_lock
@@ -124,7 +120,7 @@ Description:
 Lock a_mtx.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B mtx_trylock
@@ -156,7 +152,7 @@ Try to lock a_mtx, but return immediately instead of blocking if a_mtx is
 already locked.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mtx_unlock
@@ -182,9 +178,7 @@ Description:
 Unlock a_mtx.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

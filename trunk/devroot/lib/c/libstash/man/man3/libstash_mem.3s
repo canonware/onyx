@@ -6,25 +6,22 @@
 Version: <Version>
 ..
 .TH libstash_mem 3s "libstash, version <Version>"
-.Nm libstash_mem
 .hy 1
 .SH NAME
 mem - malloc wrapper.
-
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
-.SS General
+.PP
 .I cw_mem_t *
 .br
 .B mem_new
 .RI ( "cw_mem_t *a_mem" )
-
+.PP
 .I void
 .br
 .B mem_delete
 .RI ( "cw_mem_t *a_mem" )
-
+.PP
 .I void *
 .br
 .B mem_malloc_e
@@ -40,7 +37,7 @@ mem - malloc wrapper.
 .br
 .B _cw_malloc
 .RI ( "size_t a_size" )
-
+.PP
 .I void *
 .br
 .B mem_calloc_e
@@ -56,7 +53,7 @@ mem - malloc wrapper.
 .br
 .B _cw_calloc
 .RI ( "size_t a_number" ", " "size_t a_size" )
-
+.PP
 .I void *
 .br
 .B mem_realloc_e
@@ -72,7 +69,7 @@ mem - malloc wrapper.
 .br
 .B _cw_realloc
 .RI ( "void *a_ptr" ", " "size_t a_size" )
-
+.PP
 .I void
 .br
 .B mem_free_e
@@ -88,7 +85,6 @@ mem - malloc wrapper.
 .br
 .B _cw_free
 .RI ( "void *a_ptr" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqmem_verbose\*(rq
@@ -98,12 +94,11 @@ allocation and deallocation.
 \*(lqmem_error\*(rq
 In the debug versions of libstash, print out information about memory leaks and
 other detectable errors or inconsistencies.
-
 .SH DESCRIPTION
 Public interface for a memory allocation (malloc) wrapper class.  For the debug
 versions of libstash, extra information is hashed for each memory allocation
 that allows tracking of the following:
-
+.PP
 .RS
 - File/line number of allocation.
 .br
@@ -111,16 +106,15 @@ that allows tracking of the following:
 .br
 - Memory leaks (memory left allocated at mem destruction time).
 .RE
-
+.PP
 Also, the debug versions of the library set all newly allocated bytes to 0xa5,
 and all deallocated bytes to 0x5a (except in the case of \fBmem_calloc\fR()).
 This tends to cause things to break sooner when uninitialized or deallocated
 memory is referenced.
-
+.PP
 In general, this class doesn't need to be used directly.  Instead, there are
 several preprocessor macros that can be used: \fB_cw_malloc\fR(),
 \fB_cw_calloc\fR(), \fB_cw_realloc\fR(), and \fB_cw_free\fR().
-
 .SH USAGE
 .I cw_mem_t *
 .br
@@ -150,7 +144,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mem_delete
@@ -176,7 +170,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B mem_malloc_e
@@ -228,7 +222,7 @@ Description:
 \fBmalloc\fR() wrapper.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B mem_calloc_e
@@ -284,7 +278,7 @@ Description:
 \fBcalloc\fR() wrapper.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B mem_realloc_e
@@ -340,7 +334,7 @@ Description:
 \fBrealloc\fR() wrapper.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B mem_free_e
@@ -393,9 +387,7 @@ Description:
 \fBfree\fR() wrapper.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -73,7 +73,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 
 /* Man pages. */
 {
-  local manpages_3 = editline.3;
+  local manpages_3 = /*editline.3*/;
   manpages_3 = [fromto % [srcdir]/lib/c/libedit/man/man3/% [manpages_3]];
 
   LIBEDIT_MANPAGES_3 = [manpages_3];

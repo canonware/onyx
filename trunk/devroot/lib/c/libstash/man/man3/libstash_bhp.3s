@@ -6,13 +6,12 @@
 Version: <Version>
 ..
 .TH libstash_bhp 3s "libstash, version <Version>"
-.Nm libstash_bhp
 .hy 1
 .SH NAME
 bhp, bhpi - Binomial heap.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_bhpi_t *
 .br
 .B bhpi_new
@@ -20,84 +19,81 @@ bhp, bhpi - Binomial heap.
 .IR "const void *a_priority" ", " "const void *a_data" ", " 
 .IR "void (*a_dealloc_func)(void *dealloc_arg, void *bhpi)" ", " 
 .IR "void *a_dealloc_arg" )
-
+.PP
 .I void
 .br
 .B bhpi_delete
 .RI ( "cw_bhpi_t *a_bhpi" )
-
+.PP
 .I cw_bhp_t *
 .br
 .B bhp_new
 .RI ( "cw_bhp_t *a_bhp" ", " "cw_mem_t *a_mem" ", "
 .IR "bhp_prio_comp_t *a_prio_comp" )
-
+.PP
 .I cw_bhp_t *
 .br
 .B bhp_new_r
 .RI ( "cw_bhp_t *a_bhp" ", " "cw_mem_t *a_mem" ", "
 .IR "bhp_prio_comp_t *a_prio_comp" )
-
+.PP
 .I void
 .br
 .B bhp_delete
 .RI ( "cw_bhp_t *a_bhp" )
-
+.PP
 .I void
 .br
 .B bhp_dump
 .RI ( "cw_bhp_t *a_bhp" )
-
+.PP
 .I void
 .br
 .B bhp_insert
 .RI ( "cw_bhp_t *a_bhp" ", " "cw_bhpi_t *a_bhpi" )
-
+.PP
 .I cw_bool_t
 .br
 .B bhp_min_find
 .RI ( "cw_bhp_t *a_bhp" ", " "void **r_priority" ", " "void **r_data" )
-
+.PP
 .I cw_bool_t
 .br
 .B bhp_min_del
 .RI ( "cw_bhp_t *a_bhp" ", " "void **r_priority" ", " "void **r_data" )
-
+.PP
 .I cw_uint64_t
 .br
 .B bhp_size_get
 .RI ( "cw_bhp_t *a_bhp" )
-
+.PP
 .I void
 .br
 .B bhp_union
 .RI ( "cw_bhp_t *a_a" ", " "cw_bhp_t *a_b" )
-
+.PP
 .I cw_sint32_t
 .br
 .B bhp_priority_compare_uint32
 .RI ( "const void *a_a" ", " "const void *a_b" )
-
+.PP
 .I cw_sint32_t
 .br
 .B bhp_priority_compare_sint32
 .RI ( "const void *a_a" ", " "const void *a_b" )
-
+.PP
 .I cw_sint32_t
 .br
 .B bhp_priority_compare_uint64
 .RI ( "const void *a_a" ", " "const void *a_b" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 The bhp and bhpi classes implement binomial heaps.  The bhpi class encapsulates
 the internal nodes of bhp instances.  Pointer casting is used to allow arbitrary
 data types to be used.  A priority comparison function must be specified during
 creation of a bhp.  libstash includes priority comparison functions for
 cw_uint32_t, cw_sint32_t, and cw_uint64_t.
-
 .SH USAGE
 .I cw_bhpi_t *
 .br
@@ -152,7 +148,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bhpi_delete
@@ -177,12 +173,12 @@ Description:
 .RS
 Destructor.  If the bhpi has been inserted into a bhp, do not call this method,
 since the bhp code will eventually do it.
-
+.PP
 Note: No attempt is made to free data pointed to by the priority or data
 pointers.
 .RE
 .RE
-
+.PP
 .I cw_bhp_t *
 .br
 .B bhp_new
@@ -226,7 +222,7 @@ Description:
 Non-thread-safe and thread-safe constructors.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bhp_delete
@@ -252,7 +248,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bhp_dump
@@ -278,7 +274,7 @@ Description:
 Print the internal tree to cw_g_out.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bhp_insert
@@ -308,7 +304,7 @@ Description:
 Insert an item into a_bhp.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B bhp_min_find
@@ -355,7 +351,7 @@ Description:
 Set *r_priority and *r_data to point to a minimum node in a_bhp.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B bhp_min_del
@@ -403,7 +399,7 @@ Set *r_priority and *r_data to point to a minimum node in a_bhp and remove the
 item from a_bhp.
 .RE
 .RE
-
+.PP
 .I cw_uint64_t
 .br
 .B bhp_size_get
@@ -432,7 +428,7 @@ Description:
 Return the number of items in a_bhp.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B bhp_union
@@ -463,7 +459,7 @@ Merge a_b into a_a.  a_b is invalid after this call, and does not need to be
 deleted.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B bhp_priority_compare_uint32
@@ -500,7 +496,7 @@ Description:
 Compare *a_a and *a_b as unsigned 32 bit integers.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B bhp_priority_compare_sint32
@@ -537,7 +533,7 @@ Description:
 Compare *a_a and *a_b as signed 32 bit integers.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B bhp_priority_compare_uint64
@@ -574,9 +570,7 @@ Description:
 Compare *a_a and *a_b as unsigned 64 bit integers.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -6,61 +6,57 @@
 Version: <Version>
 ..
 .TH libstash_sema 3s "libstash, version <Version>"
-.Nm libstash_sema
 .hy 1
 .SH NAME
 sema - Semaphore.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_sema_t *
 .br
 .B sema_new
 .RI ( "cw_sema_t *a_sema" ", " "cw_sint32_t a_count" )
-
+.PP
 .I void
 .br
 .B sema_delete
 .RI ( "cw_sema_t *a_sema" )
-
+.PP
 .I void
 .br
 .B sema_post
 .RI ( "cw_sema_t *a_sema" )
-
+.PP
 .I void
 .br
 .B sema_wait
 .RI ( "cw_sema_t *a_sema" )
-
+.PP
 .I cw_bool_t
 .br
 .B sema_timedwait
 .RI ( "cw_sema_t *a_sema" ", " "struct timespec *a_timeout" )
-
+.PP
 .I cw_bool_t
 .br
 .B sema_trywait
 .RI ( "cw_sema_t *a_sema" )
-
+.PP
 .I cw_sint32_t
 .br
 .B sema_getvalue
 .RI ( "cw_sema_t *a_sema" )
-
+.PP
 .I void
 .br
 .B sema_adjust
 .RI ( "cw_sema_t *a_sema" ", " "cw_sint32_t a_adjust" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBsem\fR implements semaphores.  This implementation is a bit different than
 normal, in that it is possible to decrement the count to less than zero.  This
 allows dynamic modification of resource pools locked by semaphores.
-
 .SH USAGE
 .I cw_sema_t *
 .br
@@ -94,7 +90,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B sema_delete
@@ -120,7 +116,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B sema_post
@@ -146,7 +142,7 @@ Description:
 Post (increment) a_sema.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B sema_wait
@@ -172,7 +168,7 @@ Description:
 Wait on (block until able to decrement) a_sema.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sema_timedwait
@@ -208,7 +204,7 @@ Try to wait on (decrement) a_sema, but return after a_timeout has expired if
 unable to.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B sema_trywait
@@ -240,7 +236,7 @@ Try to wait on (decrement) a_sema, but return immediately instead of blocking if
 unable to.
 .RE
 .RE
-
+.PP
 .I cw_sint32_t
 .br
 .B sema_getvalue
@@ -269,7 +265,7 @@ Description:
 Get value of a_sema.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B sema_adjust
@@ -299,9 +295,7 @@ Description:
 Adjust a_sema by a_adjust.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

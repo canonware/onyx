@@ -6,51 +6,47 @@
 Version: <Version>
 ..
 .TH libstash_cnd 3s "libstash, version <Version>"
-.Nm libstash_cnd
 .hy 1
 .SH NAME
 cnd - Condition variable.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I void
 .br
 .B cnd_new
 .RI ( "cw_cnd_t *a_cnd" )
-
+.PP
 .I void
 .br
 .B cnd_delete
 .RI ( "cw_cnd_t *a_cnd" )
-
+.PP
 .I void
 .br
 .B cnd_signal
 .RI ( "cw_cnd_t *a_cnd" )
-
+.PP
 .I void
 .br
 .B cnd_broadcast
 .RI ( "cw_cnd_t *a_cnd" )
-
+.PP
 .I cw_bool_t
 .br
 .B cnd_timedwait
 .RI ( "cw_cnd_t *a_cnd" ", " "cw_mtx_t *a_mtx" ", " 
 .IR "const struct timespec *a_timeout" )
-
+.PP
 .I void
 .br
 .B cnd_wait
 .RI ( "cw_cnd_t *a_cnd" ", " "cw_mtx_t *a_mtx" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBcnd\fR implements condition variables, which can be used in conjunction with
 the \fBmtx\fR class to wait for a condition to occur.
-
 .SH USAGE
 .I void
 .br
@@ -77,7 +73,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B cnd_delete
@@ -103,7 +99,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B cnd_signal
@@ -129,7 +125,7 @@ Description:
 Signal one thread waiting on a_cnd.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B cnd_broadcast
@@ -155,7 +151,7 @@ Description:
 Signal all threads waiting on a_cnd.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B cnd_timedwait
@@ -195,7 +191,7 @@ Description:
 Wait for a_cnd for at least a_time.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B cnd_wait
@@ -225,9 +221,7 @@ Description:
 Wait for a_cnd.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

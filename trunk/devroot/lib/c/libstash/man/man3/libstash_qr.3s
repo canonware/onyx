@@ -6,73 +6,68 @@
 Version: <Version>
 ..
 .TH libstash_qr 3s "libstash, version <Version>"
-.Nm libstash_qr
 .hy 1
 .SH NAME
 qr - Ring macros
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
 .SS Data structures
 .B qr
 .RI ( "<qr_type> a_type" )
-
 .SS Operations
 .I void
 .br
 .B qr_new
 .RI ( "<qr_type> *a_qr" ", " "<field_name> a_field" )
-
+.PP
 .I <qr_type> *
 .br
 .B qr_next
 .RI ( "<qr_type> *a_qr" ", " "<field_name> a_field" )
-
+.PP
 .I <qr_type> *
 .br
 .B qr_prev
 .RI ( "<qr_type> *a_qr" ", " "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qr_before_insert
 .RI ( "<qr_type> *a_qrelm" ", " "<qr_type> *a_qr" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qr_after_insert
 .RI ( "<qr_type> *a_qrelm" ", " "<qr_type> *a_qr" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qr_meld
 .RI ( "<qr_type> *a_qr_a" ", " "<qr_type> *a_qr_b" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qr_split
 .RI ( "<qr_type> *a_qr_a" ", " "<qr_type> *a_qr_b" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .I void
 .br
 .B qr_remove
 .RI ( "<qr_type> *a_qr" ", " "<field_name> a_field" )
-
+.PP
 .B qr_foreach
 .RI ( "<qr_type> *a_var" ", " "<qr_type> *a_qr" ", "
 .IR "<field_name> a_field" )
-
+.PP
 .B qr_foreach_reverse
 .RI ( "<qr_type> *a_var" ", " "<qr_type> *a_qr" ", "
 .IR "<field_name> a_field" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 The \fBqr\fR macros implement operations on a ring.  The type of the ring
 elements and which field of the elements to use are determined by arguments that
@@ -80,7 +75,6 @@ are passed into the macros.  The macros are optimized for speed and code size,
 which means that there is minimal error checking built in.  As a result, care
 must be taken to assure that these macros are used as intended, or strange
 things can happen.
-
 .SH USAGE
 .SS Data structures
 .B qr
@@ -102,7 +96,7 @@ Description:
 Generate code for a \fBqr\fR data structure.
 .RE
 .RE
-
+.PP
 .SS Operations
 .I void
 .br
@@ -129,7 +123,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I <qr_type> *
 .br
 .B qr_next
@@ -158,7 +152,7 @@ Description:
 Return a pointer to the next element in the \fBqr\fR.
 .RE
 .RE
-
+.PP
 .I <qr_type> *
 .br
 .B qr_prev
@@ -187,7 +181,7 @@ Description:
 Return a pointer to the previous element in the \fBqr\fR.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qr_before_insert
@@ -218,7 +212,7 @@ Description:
 Insert a_qr before a_qrelm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qr_after_insert
@@ -249,7 +243,7 @@ Description:
 Insert a_qr after a_qrelm.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qr_meld
@@ -280,7 +274,7 @@ Description:
 Meld a_qr_a and a_qr_b into one ring.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qr_split
@@ -311,7 +305,7 @@ Description:
 Meld a_qr_a and a_qr_b into one ring.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B qr_remove
@@ -337,7 +331,7 @@ Description:
 Remove a_qr from the ring.
 .RE
 .RE
-
+.PP
 .B qr_foreach
 .RI ( "<qr_type> *a_var" ", " "<qr_type> *a_qr" ", "
 .IR "<field_name> a_field" )
@@ -367,7 +361,7 @@ Iterate through the \fBqr\fR, storing a pointer to each element in a_var along
 the way.
 .RE
 .RE
-
+.PP
 .B qr_foreach_reverse
 .RI ( "<qr_type> *a_var" ", " "<qr_type> *a_qr" ", "
 .IR "<field_name> a_field" )
@@ -397,9 +391,7 @@ Iterate through the \fBqr\fR in the reverse direction, storing a pointer to each
 element in a_var along the way.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

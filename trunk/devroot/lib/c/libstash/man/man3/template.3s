@@ -6,28 +6,23 @@
 Version: <Version>
 ..
 .TH libstash_<template> 3s "libstash, version <Version>"
-.Nm libstash_<template>
 .hy 1
 .SH NAME
 <template> - <XXX Description>
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I <return type>
 .br
 .B <template>_<func>
 .RI ( "cw_<template>_t *a_<template>" ", " <args> )
-
 .SS Debugging (dbg) symbols
 .TP \" XXX
 \*(lq<XXX symbol>\*(rq
 <XXX Symbol description>
-
 .SH DESCRIPTION
 <XXX Description>
-
 .SH USAGE
-
 .RS
 Input(s):
 .RS
@@ -56,9 +51,9 @@ Description:
 <description>
 .RE
 .RE
+.PP
 
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

@@ -6,204 +6,200 @@
 Version: <Version>
 ..
 .TH libstash_res 3s "libstash, version <Version>"
-.Nm libstash_res
 .hy 1
 .SH NAME
 res - Simple resource class.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_res_t *
 .br
 .B res_new
 .RI ( "cw_res_t *a_res" ", " "cw_mem_t *a_mem" )
-
+.PP
 .I void
 .br
 .B res_delete
 .RI ( "cw_res_t *a_res" )
-
+.PP
 .I void
 .br
 .B res_clear
 .RI ( "cw_res_t *a_res" )
-
+.PP
 .I cw_bool_t
 .br
 .B res_is_equal
 .RI ( "cw_res_t *a_a" ", " "cw_res_t *a_b" )
-
+.PP
 .I cw_bool_t
 .br
 .B res_file_merge
 .RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
-
+.PP
 .I cw_bool_t
 .br
 .B res_list_merge
 .RI ( "cw_res_t *a_res" ", " "..." )
-
+.PP
 .I const char *
 .br
 .B res_res_val_get
 .RI ( "cw_res_t *a_res" ", " "const char *a_res_name" )
-
+.PP
 .I cw_bool_t
 .br
 .B res_res_extract
 .RI ( "cw_res_t *a_res" ", " "const char *a_res_key" ", " 
 .IR "char **r_res_name" ", " "char **r_res_val" )
-
+.PP
 .I cw_bool_t
 .br
 .B res_dump
 .RI ( "cw_res_t *a_res" ", " "const char *a_filename" )
-
 .SS Debugging (dbg) symbols
 .TP
 \*(lqres_state\*(rq
 Print internal parsing state machine information.
-
 .SH DESCRIPTION
 \fBres\fR implements resources, also known as name/value pairs.  Following is a
 BNF specification of a resource:
-
+.PP
 <resource> ::=
 .RS
 <^> <whitespaces> <name> <whitespaces> <linebreaks> <colon> <whitespaces>
 <linebreaks> <value> <comment>
-
+.br
 | <^> <whitespaces> <comment>
 .RE
-
+.PP
 <name> ::=
 .RS
 { <caps> | <lower> | <numbers> | <under> | <period> }+
 .RE
-
+.PP
 <value> ::=
 .RS
 { <caps> | <lower> | <numbers> | <under> | <period>
-
+.br
 | <backslash> <hash> | <whitespace> | <colon>
-
+.br
 | <backslash> <backslash> | <backslash> <n>
-
+.br
 | <legal_in_name> | <linebreak> }+
-
+.br
 | <e>
 .RE
-
+.PP
 <comment> ::=
 .RS
-<hash> { <caps> | <lower> | <numbers> | <under> | <period>
-
+<hash> { <caps> | <lower> | <numbers> | <under> | <period> }
+.br
 | <hash> | <whitespace> | <colon>
-
+.br
 | <backslash> | <legal_in_name> }+
-
+.br
 | <hash> <e>
 .RE
-
+.PP
 <linebreak> ::= 
 .RS
 <backslash> <whitespaces> <newline>
 .RE
-
+.PP
 <linebreaks> ::=
 .RS
 <linebreak> <linebreaks>
-
+.br
 | <e>
 .RE
-
+.PP
 <^> ::=
 .RS
 Bound to beginning of line.
 .RE
-
+.PP
 <e> ::=
 .RS
 Epsilon.
 .RE
-
+.PP
 <n> ::=
 .RS
 [n]
 .RE
-
+.PP
 <caps> ::=
 .RS
 [A-Z]
 .RE
-
+.PP
 <lower> ::=
 .RS
 [a-z]
 .RE
-
+.PP
 <numbers> ::=
 .RS
 [0-9]
 .RE
-
+.PP
 <under> ::=
 .RS
 [_]
 .RE
-
+.PP
 <period> ::=
 .RS
 [.]
 .RE
-
+.PP
 <hash> ::=
 .RS
 [#]
 .RE
-
+.PP
 <whitespace> ::=
 .RS
 [ \\t] 
-
+.br
 | <whitespace> [ \\t]
 .RE
-
+.PP
 <whitespaces> ::=
 .RS
 <whitespace> <whitespaces>
-
+.br
 | <e>
 .RE
-
+.PP
 <colon> ::=
 .RS
 [:]
 .RE
-
+.PP
 <backslash> ::=
 .RS
 [\\]
 .RE
-
+.PP
 <legal_in_name> ::=
 .RS
 [!\\*(rq$%&'()*+,-/;<=>?@[]^`{|}~]
 .RE
-
+.PP
 <newline> ::=
 .RS
 [\\n]
 .RE
-
+.PP
 <null> ::=
 .RS
 [\\0]
 .RE
-
+.PP
 `\\' is a special character within <name>.  `\\' protects [#\\\\\\n] and
 [ ]+[\\n], but a `\\' followed by anything else is an error.
-
 .SH USAGE
 .I cw_res_t *
 .br
@@ -237,7 +233,7 @@ Description:
 Constructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B res_delete
@@ -263,7 +259,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B res_clear
@@ -289,7 +285,7 @@ Description:
 Clear all resources.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B res_is_equal
@@ -324,7 +320,7 @@ Description:
 If a_res and a_other are equivalent, return TRUE, otherwise FALSE.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B res_file_merge
@@ -359,7 +355,7 @@ Description:
 Merge the resources contained in a_filename into the resource database.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B res_list_merge
@@ -394,7 +390,7 @@ Description:
 Merge the resources (...) into the resource database (a_res).
 .RE
 .RE
-
+.PP
 .I const char *
 .br
 .B res_res_val_get
@@ -429,7 +425,7 @@ Description:
 Return the value associoted with a_res_name if it exists.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B res_res_extract
@@ -487,7 +483,7 @@ Find a resource name/value pair, remove it from the resource database, and set
 TRUE.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B res_dump
@@ -524,9 +520,7 @@ Dump the resource database.  If a_filename is non-NULL, attempt to open the
 specified file and write to it.  Otherwise, use cw_g_out.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

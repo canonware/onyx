@@ -6,46 +6,45 @@
 Version: <Version>
 ..
 .TH libstash_xep 3s "libstash, version <Version>"
-.Nm libstash_xep
 .hy 1
 .SH NAME
 xep - Exception handling.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I void
 .br
 .B xep_begin
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B xep_end
 .RI ( "void" )
-
+.PP
 .B xep_try
 .I "..."
-
+.PP
 .B xep_catch
 .RI ( "cw_xepv_t a_xepv" )
 .I "..."
-
+.PP
 .B xep_mcatch
 .RI ( "cw_xepv_t a_xepv" )
 .I "..."
-
+.PP
 .B xep_acatch
 .RI ( "void" )
 .I "..."
-
+.PP
 .B xep_finally
 .I "..."
-
+.PP
 .I cw_xepv_t
 .br
 .B xep_value
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B xep_throw_e
@@ -56,20 +55,18 @@ xep - Exception handling.
 .br
 .B xep_throw
 .RI ( "cw_xepv_t a_xepv" )
-
+.PP
 .I void
 .br
 .B xep_retry
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B xep_handled
 .RI ( "void" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 The \fBxep\fR class implements exception handling, with support for
 .IR xep_try ,
@@ -77,76 +74,69 @@ The \fBxep\fR class implements exception handling, with support for
 and
 .I xep_finally
 blocks.  Minimal use must include at least:
-
+.PP
 .RS
+.nf
 xep_begin();
-.br
 xep_try {
-.RS
+.in +8
 /* Code that might throw an exception. */
-.RE
+.in -8
 }
-.br
 xep_end();
+.fi
 .RE
-
+.PP
 A more complete skeleton looks like:
-
+.PP
 .RS
+.nf
 xep_begin();
-.br
 xep_try {
-.RS
+.in +8
 /* Code that might throw an exception. */
-.RE
+.in -8
 }
-.br
 xep_catch(_CW_XEPV_SOME_EXCEPTION) {
-.RS
+.in +8
 /* Handle exception... */
-.br
 xep_handled();
-.RE
+.in -8
 }
-.br
 xep_catch(_CW_XEPV_ANOTHER_EXCEPTION)
 xep_mcatch(_CW_XEPV_YET_ANOTHER) {
-.RS
+.in +8
 /* React to exception, but propagate... */
-.RE
+.in -8
 }
-.br
 xep_acatch {
-.RS
+.in +8
 /* Handle all exceptions not explicitly handled above... */
-.br
 xep_handled();
-.RE
+.in -8
 }
-.br
 xep_finally {
-.RS
+.in +8
 /* Execute after everything else. */
-.RE
+.in -8
 }
-.br
 xep_end();
+.fi
 .RE
-
+.PP
 Note that there is some serious cpp macro magic behind the \fBxep\fR interface,
 and as such, if usage deviates significantly from the above templates, compiler
 errors may result.
-
+.PP
 Exception values are of type cw_xepv_t.
 -1 to -127 are reserved by \fBlibstash\fR, and other ranges may be reserved by
 other libraries.
 See their documentation for details.
-
+.PP
 An exception is not implicitly handled if an exception handler is executed for
 that exception.
 Instead, \fBxep_handled\fR() must be manually called to avoid propagating the
 exception up the handler chain.
-
 .SH USAGE
 .I void
 .br
@@ -170,7 +160,7 @@ Description:
 Begin an exception handling code block.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B xep_end
@@ -193,7 +183,7 @@ Description:
 End an exception handling block.
 .RE
 .RE
-
+.PP
 .B xep_try
 .I "..."
 .RS
@@ -215,7 +205,7 @@ Begin a block of code that is to be executed, with the possibility that an
 exception might be thrown.
 .RE
 .RE
-
+.PP
 .B xep_catch
 .RI ( "cw_xepv_t a_xepv" )
 .I "..."
@@ -241,7 +231,7 @@ Begin a block of code that catches an exception.
 The exception is not considered handled unless \fBxep_handled\fR() is called.
 .RE
 .RE
-
+.PP
 .B xep_mcatch
 .RI ( "cw_xepv_t a_xepv" )
 .I "..."
@@ -270,7 +260,7 @@ handled by the same code block.
 The exception is not considered handled unless \fBxep_handled\fR() is called.
 .RE
 .RE
-
+.PP
 .B xep_acatch
 .RI ( "void" )
 .I "..."
@@ -295,7 +285,7 @@ There may only be one \fBxep_acatch\fR() block within a try/catch block.
 The exception is not considered handled unless \fBxep_handled\fR() is called.
 .RE
 .RE
-
+.PP
 .B xep_finally
 .I "..."
 .RS
@@ -317,7 +307,7 @@ Begin a block of code that is executed if no exceptions are thrown in the
 exception handling code block or if an exception handler is executed.
 .RE
 .RE
-
+.PP
 .I cw_xepv_t
 .br
 .B xep_value
@@ -343,7 +333,7 @@ Description:
 Return the value of the current exception being handled.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B xep_throw_e
@@ -383,7 +373,7 @@ Description:
 Throw an exception.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B xep_retry
@@ -406,7 +396,7 @@ Description:
 Implicitly handle the current exception and retry the xep_try code block.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B xep_handled
@@ -427,9 +417,7 @@ Description:
 Mark the current exception as handled.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.

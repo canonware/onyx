@@ -76,6 +76,16 @@ all : bins_a;
 
 everything : libs bins tests;
 
+release : html;
+
+html : [fromto [srcdir]/%0man/man1/%1.1 [objdir]/%0doc/html/%1.html
+         [MANPAGES_1]]
+       [fromto [srcdir]/%0man/man3/%1.3 [objdir]/%0doc/html/%1.html
+         [filter [srcdir]/%0man/man3/%1.3 [MANPAGES_3]]]
+       [fromto [srcdir]/%0man/man3/%1.3s [objdir]/%0doc/html/%1.html
+         [filter [srcdir]/%0man/man3/%1.3s [MANPAGES_3]]]
+;
+
 libs_d : [D_LIBS];
 libs_a : [A_LIBS];
 libs_p : [P_LIBS];
@@ -193,6 +203,16 @@ distclean : clean [addsuffix _distclean @bins@ @libs@]
   rm -f @cfghdrs@;
 }
 
+relclean : distclean
+{
+  rm -f [fromto [srcdir]/%0man/man1/%1.1 [objdir]/%0doc/html/%1.html
+          [MANPAGES_1]];
+  rm -f [fromto [srcdir]/%0man/man3/%1.3 [objdir]/%0doc/html/%1.html
+          [filter [srcdir]/%0man/man3/%1.3 [MANPAGES_3]]]
+        [fromto [srcdir]/%0man/man3/%1.3s [objdir]/%0doc/html/%1.html
+          [filter [srcdir]/%0man/man3/%1.3s [MANPAGES_3]]];
+}
+
 etags : [INCS] [PRIV_INCS] [SRCS]
 {
   @ETAGS@ [INCS] [PRIV_INCS] [SRCS];
@@ -211,6 +231,27 @@ echo \"#![PERL] -w\" > [target]
 [CAT] [srcdir]/%0%.pl.in >> [target];
 chmod u+x [target];
 dataend
+}
+
+/*
+ * Convert man pages to html.
+ */
+[objdir]/%0doc/html/%1.html : [srcdir]/%0man/man1/%1.1
+  set mkdir
+{
+  [CAT] [need] | @UNROFF@ -man -fhtml - > [target];
+}
+
+[objdir]/%0doc/html/%1.html : [srcdir]/%0man/man3/%1.3
+  set mkdir
+{
+  [CAT] [need] | @UNROFF@ -man -fhtml - > [target];
+}
+
+[objdir]/%0doc/html/%1.html : [srcdir]/%0man/man3/%1.3s
+  set mkdir
+{
+  [CAT] [need] | @UNROFF@ -man -fhtml - > [target];
 }
 
 /*

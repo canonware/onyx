@@ -6,75 +6,71 @@
 Version: <Version>
 ..
 .TH libstash_thd 3s "libstash, version <Version>"
-.Nm libstash_thd
 .hy 1
 .SH NAME
 thd - Thread.
 .SH SYNOPSIS
 \fB#include <libstash/libstash.h>\fR
-
+.PP
 .I cw_thd_t *
 .br
 .B thd_new
 .RI ( "cw_thd_t *a_thd" ", " "void *(*a_start_func)(void *)" ", " 
 .IR "void *a_arg" )
-
+.PP
 .I void
 .br
 .B thd_delete
 .RI ( "cw_thd_t *a_thd" )
-
+.PP
 .I void *
 .br
 .B thd_join
 .RI ( "cw_thd_t *a_thd" )
-
+.PP
 .I cw_thd_t *
 .br
 .B thd_self
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B thd_yield
 .RI ( "void" )
-
+.PP
 .I int
 .br
 .B thd_sigmask
 .RI ( "int a_action" ", " "sigset_t *a_sigset" )
-
+.PP
 .I void
 .br
 .B thd_crit_enter
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B thd_crit_leave
 .RI ( "void" )
-
+.PP
 .I void
 .br
 .B thd_suspend
 .RI ( "cw_thd_t *a_thd" )
-
+.PP
 .I cw_bool_t
 .br
 .B thd_trysuspend
 .RI ( "cw_thd_t *a_thd" )
-
+.PP
 .I void
 .br
 .B thd_resume
 .RI ( "cw_thd_t *a_thd" )
-
 .SS Debugging (dbg) symbols
 None.
-
 .SH DESCRIPTION
 \fBthd\fR implements a thread creation and deletion interface.
-
 .SH USAGE
 .I cw_thd_t *
 .br
@@ -113,7 +109,7 @@ Description:
 Constructor (creates new thread).
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B thd_delete
@@ -139,7 +135,7 @@ Description:
 Destructor.
 .RE
 .RE
-
+.PP
 .I void *
 .br
 .B thd_join
@@ -168,7 +164,7 @@ Description:
 Join (wait for) the thread associated with a_thd.
 .RE
 .RE
-
+.PP
 .I cw_thd_t *
 .br
 .B thd_self
@@ -194,7 +190,7 @@ Description:
 Return a pointer to the thd structure that corresponds to the calling thread.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B thd_yield
@@ -217,7 +213,7 @@ Description:
 Give up the rest of this thread's time slice.
 .RE
 .RE
-
+.PP
 .I int
 .br
 .B thd_sigmask
@@ -254,7 +250,7 @@ Description:
 Set the current thread's signal mask.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B thd_crit_enter
@@ -273,7 +269,7 @@ Description:
 Enter a critical region where the calling thread may not be suspended.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B thd_crit_leave
@@ -292,7 +288,7 @@ Description:
 Leave a critical section; the calling thread may once again be suspended.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B thd_suspend
@@ -314,7 +310,7 @@ Description:
 Suspend a_thd.
 .RE
 .RE
-
+.PP
 .I cw_bool_t
 .br
 .B thd_trysuspend
@@ -341,7 +337,7 @@ Description:
 Try to suspend a_thd, but fail if a_thd is in a critical section.
 .RE
 .RE
-
+.PP
 .I void
 .br
 .B thd_resume
@@ -363,9 +359,7 @@ Description:
 Resume (make runnable) a_thd.
 .RE
 .RE
-
 .SH SEE ALSO
 libstash(3s).
-
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
