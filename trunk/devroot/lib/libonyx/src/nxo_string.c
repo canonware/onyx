@@ -10,6 +10,8 @@
  *
  ******************************************************************************/
 
+#define CW_NXO_STRING_C_
+
 #include "../include/libonyx/libonyx.h"
 
 #include <stdarg.h>
