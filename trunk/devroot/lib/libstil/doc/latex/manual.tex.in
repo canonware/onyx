@@ -9,7 +9,7 @@
 % Version: <Version>
 %
 % libstil portion of Canonware Software Manual.
-%              
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearemptydoublepage
@@ -140,12 +140,14 @@ more details.
 	\end{description}
 \end{description}
 
-\section{Classes and dictionaries}
-\input{@abs_srcdir@/lib/c/libstil/doc/latex/envdict}
-\input{@abs_srcdir@/lib/c/libstil/doc/latex/gcdict}
+\section{Classes}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stil}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stila}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stilo}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stils}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/stilt}
+
+\section{Dictionaries}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/envdict}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/gcdict}
 \input{@abs_srcdir@/lib/c/libstil/doc/latex/systemdict}
