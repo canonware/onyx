@@ -32,11 +32,18 @@
  *         |   |   |   |   |   |   |   |     |   |   |   |   |   |   |   |
  *         v   v   v   v   v   v   v   v     v   v   v   v   v   v   v   v
  *       /---+---+---+---+---+---+---+---\ /---+---+---+---+---+---+---+---\
- *       | A | B | C |:::|:::|:::| D | E | | F | G |:::|:::|:::|:::| H | I |
+ *       | A | B | \n|:::|:::|:::| C | D | | \n| E |:::|:::|:::|:::| \n| F |
  *       \---+---+---+---+---+---+---+---/ \---+---+---+---+---+---+---+---/
  *       ^   ^   ^               ^   ^     ^   ^                       ^   ^
  *       |   |   |               |   |     |   |                       |   |
  * bpos: 1   2   3               4   5     6   7                       8   9
+ *       |   |   |               |   |     |   |                       |   |
+ * line: 1   1   1               2   2     2   3                       4   4
+ *       |   |   |               |   |     |   |                       |   |
+ * pline:0   0   0               1   1     0   1                       1   2
+ *
+ *       bufp->bpos: 1                     bufp->bpos: 6
+ *       bufp->line: 1                     bufp->line: 2
  *
  ******************************************************************************/
 
@@ -44,25 +51,6 @@
 
 /* Prototypes. */
 /* XXX */
-
-/* Inline functions. */
-CW_INLINE cw_uint64_t
-mkr_p_bpos(cw_mkr_t *a_mkr)
-{
-    cw_assert(a_mkr->bufp->index >= a_mkr->bufp->buf->bob_cached
-	      || a_mkr->bufp->index <= a_mkr->bufp->buf->eob_cached);
-
-    return (a_mkr->bufp->bpos + a_mkr->ppos);
-}
-
-CW_INLINE cw_uint64_t
-mkr_p_line(cw_mkr_t *a_mkr)
-{
-    cw_assert(a_mkr->bufp->index >= a_mkr->bufp->buf->bob_cached
-	      || a_mkr->bufp->index <= a_mkr->bufp->buf->eob_cached);
-
-    return (a_mkr->bufp->line + a_mkr->pline);
-}
 
 /* A simplified version of bufv_copy() that counts '\n' characters that are
  * copied, and returns that rather than the number of elements copied. */
@@ -377,10 +365,9 @@ bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
     cw_dassert(a_bufp->magic == CW_BUFP_MAGIC);
     cw_assert(a_ppos <= a_bufp->gap_off
 	      || a_ppos >= a_bufp->gap_off + a_bufp->gap_len);
-
-    /* Make sure the cached bpos for this bufp is valid before using it for
-     * calculations below. */
-    bufp_p_cache_validate(a_bufp);
+    /* The bufp's cached bpos must be valid. */
+    cw_assert(a_bufp->index >= a_bufp->buf->bob_cached
+	      || a_bufp->index <= a_bufp->buf->eob_cached);
 
     if (a_ppos <= a_bufp->gap_off)
     {
@@ -396,32 +383,95 @@ bufp_p_pos_p2b(cw_bufp_t *a_bufp, cw_uint64_t a_ppos)
 
 /* buf. */
 static cw_uint64_t
-buf_p_bpos_before_lf(cw_buf_t *a_buf, cw_uint64_t a_offset)
+buf_p_bpos_before_lf_validate(cw_buf_t *a_buf, cw_uint64_t a_offset)
 {
+    /* Find the bufp that the \n resides in.  If the cache is valid for the
+     * resulting bufp, it is possible to do a binary search of the bufp array,
+     * whether:
+     *
+     *   Beginning cached range: 0 <= bufp <= a_buf->bob_cached
+     *
+     * or
+     *
+     *   Ending cached range: a_buf->eob_cached <= bufp <= a_buf->bufps
+     *
+     * If the resulting bufp does not have a valid cache, start at
+     * buf->bufbs[bob_cached] and extend the cached range until the resulting
+     * bufp is sure to be <= a_buf->bob_cached.  It may be that starting at
+     * eob_cached and working backward would be faster, and it would even be
+     * possible to heuristically determine which end to start from, but the fact
+     * that this function is finding the bpos *before* a \n means that it the
+     * operation is a forward seek.  Therefore, working from bob_cached is
+     * likely to result in a more useful cache for future operations, since all
+     * bufp's between the original position and the seek position will then have
+     * a valid cache. */
+
     cw_error("XXX Not implemented");
 }
 
 static cw_uint64_t
-buf_p_bpos_after_lf(cw_buf_t *a_buf, cw_uint64_t a_offset)
+buf_p_bpos_after_lf_validate(cw_buf_t *a_buf, cw_uint64_t a_offset)
 {
+    /* Find the bufp that the \n resides in.  If the cache is valid for the
+     * resulting bufp, it is possible to do a binary search of the bufp array,
+     * whether:
+     *
+     *   Beginning cached range: 0 <= bufp <= a_buf->bob_cached
+     *
+     * or
+     *
+     *   Ending cached range: a_buf->eob_cached <= bufp <= a_buf->bufps
+     *
+     * If the resulting bufp does not have a valid cache, start at
+     * buf->bufbs[eob_cached] and extend the cached range until the resulting
+     * bufp is sure to be >= a_buf->eob_cached.  It may be that starting at
+     * bob_cached and working foreward would be faster, and it would even be
+     * possible to heuristically determine which end to start from, but the fact
+     * that this function is finding the bpos *after* a \n means that it the
+     * operation is a backward seek.  Therefore, working from eob_cached is
+     * likely to result in a more useful cache for future operations, since all
+     * bufp's between the original position and the seek position will then have
+     * a valid cache.
+     *
+     * An important side effect of working backward is that the cache is
+     * guaranteed to be valid for the bpos *after* the \n (even if the \n is the
+     * last character in the bufp), which is what this function finds, after
+     * all.  If a different search algorithm is used, it must also make sure
+     * that the cache is valid for the resulting bpos. */
+
     cw_error("XXX Not implemented");
 }
 
 static void
 buf_p_bufp_cache_validate(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 {
-    cw_error("XXX Not implemented");
-}
-
-static cw_uint32_t
-buf_p_line_cache_validate(cw_buf_t *a_buf, cw_uint64_t a_bpos)
-{
+    /* If the cache for a_bufp is not valid, validate it in the quickest way
+     * possible, whether that means working forward from bob_cached, or backward
+     * from eob_cached. */
     cw_error("XXX Not implemented");
 }
 
 static cw_uint32_t
 buf_p_bpos_cache_validate(cw_buf_t *a_buf, cw_uint64_t a_bpos)
 {
+    /* Find the bufp that a_bpos resides in.  If the cache is valid for the
+     * resulting bufp, it is possible to do a binary search of the bufp array,
+     * whether:
+     *
+     *   Beginning cached range: 0 <= bufp <= a_buf->bob_cached
+     *
+     * or
+     *
+     *   Ending cached range: a_buf->eob_cached <= bufp <= a_buf->bufps
+     *
+     * If the resulting bufp does not have a valid cache, validate it in the
+     * quickest way possible, whether that means working forward from
+     * bob_cached, or backward from eob_cached.  Start from the end whose bpos
+     * is closest to a_bpos.  Determining which end to start from is somewhat
+     * heuristic, since bufp's are only guaranteed to be an average of least 50%
+     * full.  However, the variability of bufp fullness is small enough that
+     * even if the non-optimal end is started from, a worst case scenario only
+     * approaches a factor of 4 more work. */
     cw_error("XXX Not implemented");
 }
 
@@ -727,6 +777,23 @@ buf_hist_group_end(cw_buf_t *a_buf)
 }
 
 /* mkr. */
+static cw_uint64_t
+mkr_p_bpos(cw_mkr_t *a_mkr)
+{
+    cw_assert(a_mkr->bufp->index >= a_mkr->bufp->buf->bob_cached
+	      || a_mkr->bufp->index <= a_mkr->bufp->buf->eob_cached);
+
+    return (a_mkr->bufp->bpos + a_mkr->ppos);
+}
+
+static cw_uint64_t
+mkr_p_line(cw_mkr_t *a_mkr)
+{
+    cw_assert(a_mkr->bufp->index >= a_mkr->bufp->buf->bob_cached
+	      || a_mkr->bufp->index <= a_mkr->bufp->buf->eob_cached);
+
+    return (a_mkr->bufp->line + a_mkr->pline);
+}
 
 static cw_sint32_t
 mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b)
@@ -922,7 +989,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                /\
 		 */
-		bpos = buf_p_bpos_before_lf(buf, a_offset);
+		bpos = buf_p_bpos_before_lf_validate(buf, a_offset);
 	    }
 	    break;
 	}
@@ -946,8 +1013,9 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		     *   hello\ngoodbye\nyadda\nblah
 		     *                       /\
 		     */
-		    bpos = buf_p_bpos_before_lf(buf, mkr_p_line(a_mkr) - 1
-						+ a_offset);
+		    bpos = buf_p_bpos_before_lf_validate(buf,
+							 mkr_p_line(a_mkr) - 1
+							 + a_offset);
 		}
 	    }
 	    else if (a_offset < 0)
@@ -967,8 +1035,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		     *   hello\ngoodbye\nyadda\nblah
 		     *         /\
 		     */
-		    bpos = buf_p_bpos_after_lf(buf, mkr_p_line(a_mkr)
-					       - a_offset + 1);
+		    bpos = buf_p_bpos_after_lf_validate(buf, mkr_p_line(a_mkr)
+							- a_offset + 1);
 		}
 	    }
 	    else
@@ -1000,7 +1068,8 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                  /\
 		 */
-		bpos = buf_p_bpos_after_lf(buf, buf->nlines + a_offset + 1);
+		bpos = buf_p_bpos_after_lf_validate(buf,
+						    buf->nlines + a_offset + 1);
 	    }
 	    break;
 	}
@@ -1011,7 +1080,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
     }
 
     /* Get the index of the bufp that contains bpos. */
-    pindex = buf_p_line_cache_validate(buf, bpos);
+    pindex = buf_p_bpos_cache_validate(buf, bpos);
 
     /* Remove a_mkr from the tree and list of the bufp at its old location. */
     mkr_p_remove(a_mkr);
@@ -1038,7 +1107,7 @@ mkr_line(cw_mkr_t *a_mkr)
     cw_check_ptr(a_mkr->bufp);
 
     bufp_p_cache_validate(a_mkr->bufp);
-    retval = a_mkr->bufp->line + a_mkr->pline;
+    retval = mkr_p_line(a_mkr);
 
     return retval;
 }
@@ -1164,7 +1233,7 @@ mkr_pos(const cw_mkr_t *a_mkr)
     cw_check_ptr(a_mkr->bufp);
 
     bufp_p_cache_validate(a_mkr->bufp);
-    retval = a_mkr->bufp->bpos + bufp_p_pos_p2b(a_mkr->bufp, a_mkr->ppos);
+    retval = bufp_p_pos_p2b(a_mkr->bufp, a_mkr->ppos);
 
     return retval;
 }
