@@ -266,6 +266,15 @@ nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 #define nxo_thread_currentlocking(a_nxo) FALSE
 #endif
 
+void
+nxo_thread_stdin_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stdin);
+
+void
+nxo_thread_stdout_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stdout);
+
+void
+nxo_thread_stderr_set(cw_nxo_t *a_nxo, cw_nxo_t *a_stderr);
+
 #ifndef CW_USE_INLINES
 cw_nx_t *
 nxo_thread_nx_get(cw_nxo_t *a_nxo);

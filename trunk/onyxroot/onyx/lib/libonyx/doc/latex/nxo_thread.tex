@@ -649,6 +649,23 @@ a\_locking}}
 	\item[Description: ]
 		Return a pointer to the stdin associated with \cvar{a\_nxo}.
 	\end{capilist}
+\label{nxo_thread_stdin_set}
+\index{nxo_thread_stdin_set@\cfunc{nxo\_thread\_stdin\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_stdin\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+ *a\_stdin}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_stdin: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s stdin to \cvar{a\_stdin}.
+	\end{capilist}
 \label{nxo_thread_stdout_get}
 \index{nxo_thread_stdout_get@\cfunc{nxo\_thread\_stdout\_get}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_stdout\_get}{cw\_nxo\_t *a\_nxo}}
@@ -668,6 +685,23 @@ a\_locking}}
 	\item[Description: ]
 		Return a pointer to the stdout associated with \cvar{a\_nxo}.
 	\end{capilist}
+\label{nxo_thread_stdout_set}
+\index{nxo_thread_stdout_set@\cfunc{nxo\_thread\_stdout\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_stdout\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+ *a\_stdout}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_stdout: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s stdout to \cvar{a\_stdout}.
+	\end{capilist}
 \label{nxo_thread_stderr_get}
 \index{nxo_thread_stderr_get@\cfunc{nxo\_thread\_stderr\_get}{}}
 \citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_stderr\_get}{cw\_nxo\_t *a\_nxo}}
@@ -686,5 +720,22 @@ a\_locking}}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return a pointer to the stderr associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_stderr_set}
+\index{nxo_thread_stderr_set@\cfunc{nxo\_thread\_stderr\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_stderr\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+ *a\_stderr}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_stderr: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s stderr to \cvar{a\_stderr}.
 	\end{capilist}
 \end{capi}
