@@ -1,0 +1,26 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Make sure that implicit locking is on.
+currentlocking true setlocking
+% %currentlocking
+
+% Define gtkdict in globaldict, and push it onto dstack.
+globaldict /gtkdict dict dup begin put
+
+% Initialize hooks.
+`modgtk.nxm' `modgtk_init' mrequire
+
+`modgtk/modgtk_defs.nx' require
+
+% Pop panedict off dstack and restore currentlocking.
+setlocking
+end

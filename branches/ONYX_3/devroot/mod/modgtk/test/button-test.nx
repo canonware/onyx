@@ -1,0 +1,33 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = toshok>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`gtk.nxm' `_cw_modgtk_init' mrequire
+
+gtkdict begin
+
+%%% create our window
+/window GTK_WINDOW_TOPLEVEL gtk_window_new def
+
+%%% and the button
+/button `Click Me' gtk_button_new_with_label def
+%%% add the clicked signal handler
+`gtk_main_quit' `clicked' button gtk_signal_connect
+
+%%% add the button to the window, and show it all
+button window gtk_container_add
+window gtk_widget_show_all
+
+%%% run the mainloop
+gtk_main
+
+%%% ... and when the button is pressed, exit
+`exiting\n' print flush
