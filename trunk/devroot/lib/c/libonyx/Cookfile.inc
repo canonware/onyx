@@ -147,7 +147,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 }
 
 /* Libraries. */
-LIBONYX_REV = 2;
+LIBONYX_REV = 3;
 
 LIBONYX_A = [objdir]/lib/c/libonyx/lib/libonyx.a;
 LIBONYX_S = [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_REV];
