@@ -108,7 +108,8 @@ SRCS = [SRCS] [ONYX_SRCS];
                  sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in sroll_d.nx.in
                  sroll_e.nx.in sroll_f.nx.in sroll_g.nx.in sroll_h.nx.in
                  sroll_i.nx.in stack_a.nx.in start_a.nx.in start_b.nx.in
-                 stopped_a.nx.in stopped_b.nx.in stopped_c.nx.in sub_a.nx.in
+                 stopped_a.nx.in stopped_b.nx.in stopped_c.nx.in string_a.nx.in
+                 string_b.nx.in string_c.nx.in string_d.nx.in sub_a.nx.in
                  sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
                  sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
                  syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in

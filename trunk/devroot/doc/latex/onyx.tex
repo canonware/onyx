@@ -2225,17 +2225,21 @@ estack depth. \\
 -- & {\bf \htmlref{istack}{systemdict:istack}} & stack & Get a current istack
 snapshot. \\
 \hline
-& {\bf \htmlref{die}{systemdict:die}} & & \\
+status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
 \hline
-& {\bf \htmlref{fork}{systemdict:fork}} & & \\
+-- & {\bf \htmlref{fork}{systemdict:fork}} & pid & Fork a new process. \\
 \hline
-& {\bf \htmlref{exec}{systemdict:exec}} & & \\
+args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
+execute it. \\
 \hline
-& {\bf \htmlref{waitpid}{systemdict:waitpid}} & & \\
+pid & {\bf \htmlref{waitpid}{systemdict:waitpid}} & status & Wait for a program
+to terminate. \\
 \hline
-& {\bf \htmlref{system}{systemdict:system}} & & \\
+args & {\bf \htmlref{system}{systemdict:system}} & status & Execute a
+program. \\
 \hline
-& {\bf \htmlref{realtime}{systemdict:realtime}} & & \\
+-- & {\bf \htmlref{realtime}{systemdict:realtime}} & nsecs & Get the number of
+nanoseconds since the epoch. \\
 \hline
 nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 \hline \hline
@@ -2326,7 +2330,8 @@ number. \\
 \hline \hline
 \multicolumn{4}{|l|}{String operators} \\
 \hline \hline
-& {\bf \htmlref{string}{systemdict:string}} & & \\
+length & {\bf \htmlref{string}{systemdict:string}} & string & Create a
+string. \\
 \hline \hline
 \multicolumn{4}{|l|}{Array operators} \\
 \hline \hline
@@ -3678,23 +3683,26 @@ onyx:0>
 	\end{description}
 \label{systemdict:die}
 \index{die@\onyxop{}{die}{}}
-\item[{\onyxop{--}{die}{--}}: ]
+\item[{\onyxop{status}{die}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[status: ]
+			A integer from 0 to 255 that is used as the program exit
+			code.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Exit the program with exit code \oparg{status}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 die
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dirforeach}
@@ -4018,23 +4026,31 @@ onyx:2>
 	\end{description}
 \label{systemdict:exec}
 \index{exec@\onyxop{}{exec}{}}
-\item[{\onyxop{--}{exec}{--}}: ]
+\item[{\onyxop{args}{exec}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[args: ]
+			An array of strings.  The first string in \oparg{args}
+			is the path of the program to invoke, and any additional
+			array elements are passed as command line arguments to
+			the invoked program.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None (this operator does not return).
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Overlay a new program and execute it.  The current contents of
+		envdict are used to construct the new program's environment.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `Old program'
+onyx:1> [`/usr/local/bin/onyx'] exec
+Canonware onyx, version 2.0.0.
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exit}
@@ -4245,23 +4261,36 @@ onyx:0>
 	\end{description}
 \label{systemdict:fork}
 \index{fork@\onyxop{}{fork}{}}
-\item[{\onyxop{--}{fork}{--}}: ]
+\item[{\onyxop{--}{fork}{pid}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pid: ]
+			Process identifier for the new process, or 0 if the
+			child process.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
 		\end{description}
 	\item[Description: ]
+		Fork a new process.  Care must be taken when using the fork
+		operator due to the fact that onyx consumes programs on the
+		fly.  The child process cannot reliably scan onyx code from the
+		same source as the parent, so the child process should be forked
+		into an environment where it is executing an object that has
+		already been constructed by the interpreter, which in turn
+		avoids unwinding the onyx execution stack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {fork dup 0 eq
+        {pop `Child\n' print flush}
+        {`Parent\n' print flush waitpid}
+        ifelse} eval
+Parent
+Child
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:gcdict}
@@ -5426,23 +5455,23 @@ onyx:0>
 	\end{description}
 \label{systemdict:realtime}
 \index{realtime@\onyxop{}{realtime}{}}
-\item[{\onyxop{--}{realtime}{--}}: ]
+\item[{\onyxop{--}{realtime}{nsecs}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[nsecs: ]
+			Number of nanoseconds since the epoch (midnight on 1
+			January 1970).
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the number of nanoseconds since the epoch.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> realtime 1 sprint
+993539837806479000
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rename}
@@ -6335,23 +6364,35 @@ onyx:0>
 	\end{description}
 \label{systemdict:string}
 \index{string@\onyxop{}{string}{}}
-\item[{\onyxop{--}{string}{--}}: ]
+\item[{\onyxop{length}{string}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[length: ]
+			Non-negative number of bytes.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[string: ]
+			A string of \oparg{length} bytes.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a string of \oparg{length} bytes.  The bytes are
+		initialized to 0.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 string 1 sprint
+`\x00\x00\x00'
+onyx:0>
+onyx:0> 0 string 1 sprint
+`'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sub}
@@ -6405,6 +6446,45 @@ onyx:0>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+		\end{verbatim}
+	\end{description}
+\label{systemdict:system}
+\index{system@\onyxop{}{system}{}}
+\item[{\onyxop{args}{system}{status}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[args: ]
+			An array of strings.  The first string in \oparg{args}
+			is the path of the program to invoke, and any additional
+			array elements are passed as command line arguments to
+			the invoked program.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[status: ]
+			Exit code of terminated process.  A negative value
+			indicates that the process was terminated by a signal
+			(use the \htmlref{\onyxop{}{neg}{}}{systemdict:neg}
+			operator to get the signal number), and a non-negative
+			value is the exit code of a program that terminated
+			normally.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Execute a program as a child process and wait for it to
+		terminate.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> [`/usr/bin/which' `onyx'] system
+/usr/local/bin/onyx
+onyx:1> 1 sprint
+0
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:tell}
@@ -6816,23 +6896,38 @@ onyx:1>
 	\end{description}
 \label{systemdict:waitpid}
 \index{waitpid@\onyxop{}{waitpid}{}}
-\item[{\onyxop{--}{waitpid}{--}}: ]
+\item[{\onyxop{pid}{waitpid}{status}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pid: ]
+			Process identifier.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[status: ]
+			Exit code of terminated process.  A negative value
+			indicates that the process was terminated by a signal
+			(use the \htmlref{\onyxop{}{neg}{}}{systemdict:neg}
+			operator to get the signal number), and a non-negative
+			value is the exit code of a program that terminated
+			normally.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {fork dup 0 eq
+        {pop `Child\n' print flush}
+        {`Parent\n' print flush waitpid}
+        ifelse} eval
+Parent
+Child
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:where}
