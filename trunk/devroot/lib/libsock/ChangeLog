@@ -1,3 +1,7 @@
+1999-04-09  Jason Evans  <jasone@canonware.com>
+
+	* configure.in: Add --disable-shared.
+
 1999-04-06  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c (sock_read_block, sock_read_noblock): Set retval

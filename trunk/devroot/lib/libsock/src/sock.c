@@ -786,10 +786,13 @@ sock_p_config_socket(cw_sock_t * a_sock)
     }
 
     _CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
-#ifndef _CW_OS_SOLARIS
+#ifdef SO_REUSEPORT
     _CW_SOCK_GETSOCKOPT(SO_REUSEPORT);
 #endif
     _CW_SOCK_GETSOCKOPT(SO_KEEPALIVE);
+
+    /* Apparently, this causes a blocking close(), so take it out. */
+#if (0)
     /* SO_LINGER uses a different data structure, so handle this one
      * separately. */
     len = sizeof(linger_struct);
@@ -810,13 +813,20 @@ sock_p_config_socket(cw_sock_t * a_sock)
 		  linger_struct.l_linger,
 		  linger_struct.l_linger != 1 ? "s" : "");
     }
+#endif
     _CW_SOCK_GETSOCKOPT(SO_OOBINLINE);
     _CW_SOCK_GETSOCKOPT(SO_SNDBUF);
     _CW_SOCK_GETSOCKOPT(SO_RCVBUF);
-#ifndef _CW_OS_SOLARIS
+#ifdef SO_SNDLOWAIT
     _CW_SOCK_GETSOCKOPT(SO_SNDLOWAT);
+#endif
+#ifdef SO_RCVLOWAIT
     _CW_SOCK_GETSOCKOPT(SO_RCVLOWAT);
+#endif
+#ifdef SO_SNDTIMEO
     _CW_SOCK_GETSOCKOPT(SO_SNDTIMEO);
+#endif
+#ifdef SO_RCVTIMEO
     _CW_SOCK_GETSOCKOPT(SO_RCVTIMEO);
 #endif
 
@@ -879,7 +889,7 @@ sock_p_config_socket(cw_sock_t * a_sock)
 		linger_struct.l_linger != 1 ? "s" : "");
   }
 
-#ifndef _CW_OS_SOLARIS
+#ifdef SO_SNDLOWAIT
   /* Set the socket to not buffer outgoing data without trying to send it. */
   val = 1;
   if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT,

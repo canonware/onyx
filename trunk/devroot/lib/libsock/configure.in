@@ -24,6 +24,8 @@ AC_PATH_PROG(DIFF, diff, , $PATH)
 AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(ETAGS, etags, , $PATH)
 
+SQRL_DISABLE_SHARED()
+
 AC_ARG_WITH(libstash-prefix, [  --with-libstash-prefix  Path to libstash])
 if test ! -z "$with_libstash_prefix"; then
   CPPFLAGS="$CPPFLAGS -I$with_libstash_prefix/include"

@@ -26,12 +26,17 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <signal.h>
 
-#ifdef _CW_OS_FREEBSD
+#ifdef UIO_MAXIOV
+#  define _LIBSOCK_SOCKB_MAX_IOV UIO_MAXIOV
+#else
+#  ifdef _CW_OS_FREEBSD
 /* XXX */
 /*  #include <sys/uio.h> */
 /*  #define _LIBSOCK_SOCKB_MAX_IOV UIO_MAXIOV */
-#define _LIBSOCK_SOCKB_MAX_IOV 1024
+#    define _LIBSOCK_SOCKB_MAX_IOV 1024
+#  endif
 #endif
 
 #include "libsock/sockb_p.h"

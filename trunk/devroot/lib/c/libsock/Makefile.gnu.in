@@ -212,7 +212,7 @@ FORCE :
 
 default : libs
 
-libs : stat_dbg stat_opt shar_opt stat_prof
+libs : stat_dbg stat_opt stat_prof @disable_shared@shar_opt
 
 bins : $(BINS)
 
