@@ -471,10 +471,17 @@ thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
 
 	/* Make a local copy of the signal mask, then modify it appropriately to
 	 * keep from breaking suspend/resume. */
-	memcpy(&set, a_set, sizeof(sigset_t));
-	sigdelset(&set, CW_THD_SIGSUSPEND);
-	sigdelset(&set, CW_THD_SIGRESUME);
-	pthread_sigmask(a_how, &set, r_oset);
+	if (a_set != NULL)
+	{
+	    memcpy(&set, a_set, sizeof(sigset_t));
+	    sigdelset(&set, CW_THD_SIGSUSPEND);
+	    sigdelset(&set, CW_THD_SIGRESUME);
+	    pthread_sigmask(a_how, &set, r_oset);
+	}
+	else
+	{
+	    pthread_sigmask(a_how, NULL, r_oset);
+	}
     }
 #else
     pthread_sigmask(a_how, a_set, r_oset);
