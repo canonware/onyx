@@ -1215,24 +1215,15 @@ systemdict_div(cw_stilo_t *a_thread)
 void
 systemdict_dstack(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack, *dstack;
-	cw_stilo_t	*array, *stilo;
-	cw_sint32_t	i, count;
+	cw_stilo_t	*ostack, *dstack, *stack;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	dstack = stilo_thread_dstack_get(a_thread);
 
-	/* Create array. */
-	count = stilo_stack_count(dstack);
-	array = stilo_stack_push(ostack);
-	stilo_array_new(array, stilo_thread_stil_get(a_thread),
-	    stilo_thread_currentlocking(a_thread), count);
-
-	/* Copy dstack to array. */
-	for (i = count - 1, stilo = NULL; i >= 0; i--) {
-		stilo = stilo_stack_down_get(dstack, stilo);
-		stilo_array_el_set(array, stilo, i);
-	}
+	stack = stilo_stack_push(ostack);
+	stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread));
+	stilo_stack_copy(stack, dstack);
 }
 
 void
@@ -1284,24 +1275,15 @@ systemdict_eq(cw_stilo_t *a_thread)
 void
 systemdict_estack(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack, *estack;
-	cw_stilo_t	*array, *stilo;
-	cw_sint32_t	i, count;
+	cw_stilo_t	*ostack, *estack, *stack;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	estack = stilo_thread_estack_get(a_thread);
 
-	/* Create array. */
-	count = stilo_stack_count(estack);
-	array = stilo_stack_push(ostack);
-	stilo_array_new(array, stilo_thread_stil_get(a_thread),
-	    stilo_thread_currentlocking(a_thread), count);
-
-	/* Copy estack to array. */
-	for (i = count - 1, stilo = NULL; i >= 0; i--) {
-		stilo = stilo_stack_down_get(estack, stilo);
-		stilo_array_el_set(array, stilo, i);
-	}
+	stack = stilo_stack_push(ostack);
+	stilo_stack_new(stack, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread));
+	stilo_stack_copy(stack, estack);
 }
 
 void
