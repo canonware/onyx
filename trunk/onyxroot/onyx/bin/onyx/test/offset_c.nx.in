@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-offsets
+offset
 
 `Test end\n' print
 pstack
