@@ -87,14 +87,11 @@ struct cw_buf_s {
 cw_buf_t	*buf_new(cw_buf_t *a_buf, cw_mem_t *a_mem);
 cw_buf_t	*buf_new_r(cw_buf_t *a_buf, cw_mem_t *a_mem);
 void		buf_delete(cw_buf_t *a_buf);
-
 void		buf_dump(cw_buf_t *a_buf, const char *a_prefix);
-
 cw_uint32_t	buf_size_get(cw_buf_t *a_buf);
 cw_uint32_t	buf_num_bufels_get(cw_buf_t *a_buf);
 const struct iovec *buf_iovec_get(cw_buf_t *a_buf, cw_uint32_t a_max_data,
     cw_bool_t a_is_sys_iovec, int *r_iovec_count);
-
 cw_bool_t	buf_buf_catenate(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t
     a_preserve);
 cw_bool_t	buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset);
@@ -104,7 +101,6 @@ cw_bool_t	buf_bufc_append(cw_buf_t *a_buf, cw_bufc_t *a_bufc, cw_uint32_t
     a_beg_offset, cw_uint32_t a_end_offset);
 cw_bool_t	buf_head_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount);
 cw_bool_t	buf_tail_data_release(cw_buf_t *a_buf, cw_uint32_t a_amount);
-
 cw_uint8_t	buf_uint8_get(cw_buf_t *a_buf, cw_uint32_t a_offset);
 cw_uint32_t	buf_uint32_get(cw_buf_t *a_buf, cw_uint32_t a_offset);
 cw_uint64_t	buf_uint64_get(cw_buf_t *a_buf, cw_uint32_t a_offset);

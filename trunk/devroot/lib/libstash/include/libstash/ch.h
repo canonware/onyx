@@ -75,9 +75,7 @@ typedef cw_bool_t	cw_ch_key_comp_t (const void *, const void *);
 cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t
     a_table_size, cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 void		ch_delete(cw_ch_t *a_ch);
-
 cw_uint32_t	ch_count(cw_ch_t *a_ch);
-
 cw_bool_t	ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     cw_chi_t *a_chi);
 cw_bool_t	ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key,
@@ -87,7 +85,6 @@ cw_bool_t	ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data);
 cw_bool_t	ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data);
 cw_bool_t	ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data,
     cw_chi_t **r_chi);
-
 void		ch_dump(cw_ch_t *a_ch, const char *a_prefix);
 
 cw_uint32_t	ch_string_hash(const void *a_key);

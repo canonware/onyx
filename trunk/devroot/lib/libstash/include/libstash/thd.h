@@ -42,10 +42,8 @@ void	*thd_join(cw_thd_t *a_thd);
 cw_thd_t *thd_self(void);
 #define	thd_yield() sched_yield()
 #define	thd_sigmask(a, b) pthread_sigmask((a), (b), NULL)
-
 void	thd_crit_enter(void);
 void	thd_crit_leave(void);
-
 void	thd_suspend(cw_thd_t *a_thd);
 cw_bool_t thd_trysuspend(cw_thd_t *a_thd);
 void	thd_resume(cw_thd_t *a_thd);

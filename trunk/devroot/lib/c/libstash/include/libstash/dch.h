@@ -49,17 +49,13 @@ cw_dch_t	*dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t
     a_base_table, cw_uint32_t a_base_grow, cw_uint32_t a_base_shrink,
     cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 void		dch_delete(cw_dch_t *a_dch);
-
 cw_uint32_t	dch_count(cw_dch_t *a_dch);
-
 cw_bool_t	dch_insert(cw_dch_t *a_dch, const void *a_key, const void
     *a_data, cw_chi_t *a_chi);
 cw_bool_t	dch_remove(cw_dch_t *a_dch, const void *a_search_key, void
     **r_key, void **r_data, cw_chi_t **r_chi);
 cw_bool_t	dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data);
-
 cw_bool_t	dch_get_iterate(cw_dch_t *a_dch, void **r_key, void **r_data);
 cw_bool_t	dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void
     **r_data, cw_chi_t **r_chi);
-
 void		dch_dump(cw_dch_t *a_dch, const char *a_prefix);

@@ -58,7 +58,6 @@ struct cw_bhpi_s {
 cw_bhpi_t	*bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void
     *a_priority, const void *a_data, cw_opaque_dealloc_t *a_dealloc_func, void
     *a_dealloc_arg);
-
 void		bhpi_delete(cw_bhpi_t *a_bhpi);
 
 cw_bhp_t	*bhp_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
@@ -66,15 +65,11 @@ cw_bhp_t	*bhp_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
 cw_bhp_t	*bhp_new_r(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
     *a_prio_comp);
 void		bhp_delete(cw_bhp_t *a_bhp);
-
 void		bhp_dump(cw_bhp_t *a_bhp);
-
 void		bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi);
 cw_bool_t	bhp_min_find(cw_bhp_t *a_bhp, void **r_priority, void **r_data);
 cw_bool_t	bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data);
-
 cw_uint64_t	bhp_size_get(cw_bhp_t *a_bhp);
-
 void		bhp_union(cw_bhp_t *a_a, cw_bhp_t *a_b);
 
 cw_sint32_t	bhp_uint32_priority_compare(const void *a_a, const void *a_b);

@@ -44,16 +44,12 @@ typedef struct {
 cw_pool_t	*pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t
     a_buffer_size);
 void		pool_delete(cw_pool_t *a_pool);
-
 cw_uint32_t	pool_buffer_size_get(cw_pool_t *a_pool);
-
 void		pool_drain(cw_pool_t *a_pool);
-
 void		*pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t
     a_line_num);
 void		pool_put(cw_pool_t *a_pool, void *a_buffer, const char
     *a_filename, cw_uint32_t a_line_num);
-
 void		pool_dump(cw_pool_t *a_pool, const char *a_prefix);
 
 /*

@@ -61,14 +61,11 @@ typedef struct {
 cw_pezz_t *pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t
     a_buffer_size, cw_uint32_t a_num_buffers);
 void	pezz_delete(cw_pezz_t *a_pezz);
-
 cw_uint32_t pezz_buffer_size_get(cw_pezz_t *a_pezz);
-
 void	*pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t
     a_line_num);
 void	pezz_put(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
     cw_uint32_t a_line_num);
-
 void	pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix);
 
 /*
