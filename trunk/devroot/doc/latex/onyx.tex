@@ -1771,9 +1771,11 @@ objects on stack. \\
 stack & {\bf \htmlref{spop}{systemdict:spop}} & stack object & Pop an object off
 a stack. \\
 \hline
-& {\bf \htmlref{sclear}{systemdict:sclear}} & & \\
+stack & {\bf \htmlref{sclear}{systemdict:sclear}} & stack & Remove all objects
+on stack. \\
 \hline
-& {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & & \\
+stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & stack & Remove
+objecs from stack down through first mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Polymorphic operators} \\
 \hline \hline
@@ -4476,44 +4478,62 @@ onyx:4>
 	\end{description}
 \label{systemdict:sclear}
 \index{sclear@\onyxop{}{sclear}{}}
-\item[{\onyxop{--}{sclear}{--}}: ]
+\item[{\onyxop{stack}{sclear}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			The same stack as was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Remove all objects on \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2 3 4) pstack
+(1 2 3 4)
+onyx:1> sclear pstack
+()
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scleartomark}
 \index{scleartomark@\onyxop{}{scleartomark}{}}
-\item[{\onyxop{--}{scleartomark}{--}}: ]
+\item[{\onyxop{stack}{scleartomark}{stack}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			The same stack as was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
 		\end{description}
 	\item[Description: ]
+		Remove objects from \oparg{stack} down to and including the
+		topmost mark.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (3 mark 1 0) scleartomark pstack
+(3)
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:scount}
