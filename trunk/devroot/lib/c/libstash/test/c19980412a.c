@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 212 $
- * $Date: 1998-09-08 20:22:03 -0700 (Tue, 08 Sep 1998) $
+ * $Revision: 216 $
+ * $Date: 1998-09-11 00:22:46 -0700 (Fri, 11 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -29,7 +29,6 @@
 
 struct foo_s
 {
-  cw_rwl_t * lock;
   cw_oh_t * hash_o;
   cw_uint32_t thread_num;
 };
@@ -46,10 +45,8 @@ insert_items(void * a_arg)
     string = (char *) _cw_malloc(40);
     sprintf(string, "thread %u, string %u",
 	    foo_var->thread_num, i);
-    rwl_wlock(foo_var->lock);
     _cw_assert(FALSE == oh_item_insert(foo_var->hash_o,
 				       (void *) string, (void *) string));
-    rwl_wunlock(foo_var->lock);
 /*     log_eprintf(g_log_o, NULL, 0, "insert_items", */
 /* 		"thread %u, end iteration %u\n", foo_var->thread_num, i); */
   }
@@ -73,7 +70,6 @@ main()
   for (i = 0; i < NUM_THREADS; i++)
   {
     foo_var = (struct foo_s *) _cw_malloc(sizeof(struct foo_s));
-    foo_var->lock = &lock;
     foo_var->hash_o = hash_o;
     foo_var->thread_num = i;
     
