@@ -557,7 +557,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 } while (0)
 
 #define	NXO_STACK_NPOP(a_nxo, a_thread, a_count) do {			\
-	if (nxo_stack_npop((a_nxo), (a_count)) {			\
+	if (nxo_stack_npop((a_nxo), (a_count))) {			\
 		nxo_thread_error((a_thread),				\
 		    NXO_THREADE_STACKUNDERFLOW);			\
 		return;							\

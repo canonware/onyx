@@ -138,9 +138,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(monitor),
 	ENTRY(mul),
 	ENTRY(mutex),
+	ENTRY(ndup),
 	ENTRY(ne),
 	ENTRY(neg),
 	ENTRY(not),
+	ENTRY(npop),
 	ENTRY(nsleep),
 	ENTRY(open),
 	ENTRY(or),
@@ -967,37 +969,6 @@ systemdict_copy(cw_nxo_t *a_thread)
 	NXO_STACK_GET(nxo, ostack, a_thread);
 
 	switch (nxo_type_get(nxo)) {
-#if (0)	/* XXX To become ndup. */
-	case NXOT_INTEGER: {
-		cw_nxo_t	*dup;
-		cw_uint32_t	i;
-		cw_nxoi_t	count;
-
-		/* Dup a range of the stack. */
-		count = nxo_integer_get(nxo);
-		if (count < 0) {
-			nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
-			return;
-		}
-		if (count > nxo_stack_count(ostack) - 1) {
-			nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
-			return;
-		}
-		nxo_stack_pop(ostack);
-
-		/*
-		 * Iterate down the stack, creating dup's along the way.  Since
-		 * we're going down, it's necessary to use
-		 * nxo_stack_under_push() to preserve order.
-		 */
-		for (i = 0, nxo = NULL, dup = NULL; i < count; i++) {
-			nxo = nxo_stack_down_get(ostack, nxo);
-			dup = nxo_stack_under_push(ostack, dup);
-			nxo_dup(dup, nxo);
-		}
-		break;
-	}
-#endif
 	case NXOT_ARRAY: {
 		cw_nxo_t	*orig;
 
@@ -3081,6 +3052,42 @@ systemdict_mutex(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_ndup(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo, *dup;
+	cw_uint32_t	i;
+	cw_nxoi_t	count;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	count = nxo_integer_get(nxo);
+	if (count < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+	if (count > nxo_stack_count(ostack) - 1) {
+		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
+		return;
+	}
+	nxo_stack_pop(ostack);
+
+	/*
+	 * Iterate down the stack, creating dup's along the way.  Since we're
+	 * going down, it's necessary to use nxo_stack_under_push() to preserve
+	 * order.
+	 */
+	for (i = 0, nxo = NULL, dup = NULL; i < count; i++) {
+		nxo = nxo_stack_down_get(ostack, nxo);
+		dup = nxo_stack_under_push(ostack, dup);
+		nxo_dup(dup, nxo);
+	}
+}
+
+void
 systemdict_ne(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -3137,6 +3144,28 @@ systemdict_not(cw_nxo_t *a_thread)
 		nxo_integer_set(nxo, ~nxo_integer_get(nxo));
 	else
 		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+}
+
+void
+systemdict_npop(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *nxo;
+	cw_nxoi_t	count;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) != NXOT_INTEGER) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	count = nxo_integer_get(nxo);
+	if (count < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	/* Pop the argument off as well as the count. */
+	NXO_STACK_NPOP(ostack, a_thread, count + 1);
 }
 
 void

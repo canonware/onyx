@@ -95,9 +95,11 @@ SRCS = [SRCS] [ONYX_SRCS];
                  lt_e.nx.in lt_f.nx.in lt_g.nx.in lt_h.nx.in mark_a.nx.in
                  mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in mod_e.nx.in
                  monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in mul_a.nx.in
-                 mul_b.nx.in mul_c.nx.in mul_d.nx.in ne_a.nx.in ne_b.nx.in
+                 mul_b.nx.in mul_c.nx.in mul_d.nx.in ndup_a.nx.in ndup_b.nx.in
+                 ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in ne_a.nx.in ne_b.nx.in
                  neg_a.nx.in neg_b.nx.in neg_c.nx.in not_a.nx.in not_b.nx.in
-                 not_c.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
+                 not_c.nx.in npop_a.nx.in npop_b.nx.in npop_c.nx.in npop_d.nx.in
+                 npop_e.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
                  nsleep_d.nx.in or_a.nx.in or_b.nx.in or_c.nx.in or_d.nx.in
                  or_e.nx.in or_f.nx.in output_a.nx.in pop_a.nx.in pop_b.nx.in
                  put_a.nx.in put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in

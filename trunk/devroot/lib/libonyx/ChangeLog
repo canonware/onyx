@@ -1,5 +1,9 @@
 2001-07-22  Jason Evans  <jasone@canonware.com>
 
+	* src/systemdict.c: Add the ndup and npop operators.
+
+	* include/libonyx/nxo_stack.h (NXO_STACK_NPOP): Add a missing ")".
+
 	* src/systemdict.c: Add the setenv and unsetenv operators, since
 	direct modifications to envdict will not be visible to programs
 	such as ps.

@@ -2967,6 +2967,9 @@ count & Get the depth of the topmost mark on ostack. \\
 object & {\bf \htmlref{dup}{systemdict:dup}} & object object & Duplicate an
 object. \\
 \hline
+objects count & {\bf \htmlref{ndup}{systemdict:ndup}} & objects objects &
+Duplicate objects. \\
+\hline
 object \dots index & {\bf \htmlref{index}{systemdict:index}} & object \dots
 object & Duplicate object on ostack at a given index. \\
 \hline
@@ -2979,6 +2982,9 @@ on ostack. \\
 \hline
 any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove the top object from the
 operand stack. \\
+\hline
+objects count & {\bf \htmlref{npop}{systemdict:npop}} & -- & Remove objects from
+the operand stack. \\
 \hline
 objects & {\bf \htmlref{clear}{systemdict:clear}} & -- & Pop all objects off
 ostack. \\
@@ -6271,6 +6277,43 @@ onyx:0> mutex 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:ndup}
+\index{ndup@\onyxop{}{ndup}{}}
+\item[{\onyxop{objects count}{ndup}{objects objects}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[objects: ]
+			Zero or more objects.
+		\item[count: ]
+			The number of \oparg{objects} do duplicate.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[objects: ]
+			The same objects that were passed in.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create duplicates of the top \oparg{count} objects on ostack.
+		For composite objects, the new object is a reference to the same
+		composite object.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `a' `b' `c' 2 ndup pstack
+`c'
+`b'
+`c'
+`b'
+`a'
+onyx:5>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:ne}
 \index{ne@\onyxop{}{ne}{}}
 \item[{\onyxop{a b}{ne}{boolean}}: ]
@@ -6394,6 +6437,34 @@ true
 onyx:0> 1 not 1 sprint
 -2
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:npop}
+\index{npop@\onyxop{}{npop}{}}
+\item[{\onyxop{objects count}{npop}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[objects: ]
+			Zero or more objects.
+		\item[count: ]
+			Number of \oparg{objects} to pop.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Remove the top \oparg{count} \oparg{objects} off the operand
+		stack and discard them.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `a' `b' `c' 2 npop pstack
+`a'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:nsleep}
