@@ -418,7 +418,7 @@ onyx_bins_distclean :
 
 [ONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
          [fromto @objroot@/%0%.c @objroot@/%0%.o_a [ONYX_ONLY_SRCS]]
-         libonyx_libs_s
+         liboonyx_libs_s
   set mkdir
 {
   [TCC] [A_CFLAGS] -o [target]
@@ -427,5 +427,5 @@ onyx_bins_distclean :
 #if [count @RPATH@]
        @RPATH@@abs_objroot@/lib/libonyx/lib
 #endif
-       [LDFLAGS] -lonyx @LIBS@;
+       [LDFLAGS] -loonyx @LIBS@;
 }

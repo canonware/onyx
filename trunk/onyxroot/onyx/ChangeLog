@@ -1,3 +1,9 @@
+2003-09-19 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nx.nx.in : Only embed as a string when bootstrapping
+	  or if POSIX support is disabled.  This reduces memory footprint in
+	  exchange for a negligible increase in startup time.
+
 2003-09-18 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_thread.nx.in : Modify errordict's handleerror

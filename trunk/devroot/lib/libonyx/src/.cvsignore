@@ -1,6 +1,10 @@
 *.[do]_[abs]
+nx_gen.nx
 nx.nx
+nx_objdir.c
+nx_dstdir.c
 nxo_thread.nx
-nx_nxcode.c
+libonyx_init_gen.nx
+libonyx_init.nx
 nxo_thread_nxcode.c
 Cookfile.list

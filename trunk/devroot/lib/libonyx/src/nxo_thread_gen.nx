@@ -11,10 +11,8 @@
 #
 #   Option: -B : Not bootstrapping.
 #           -b : Bootstrapping.
-#           -C : Do not compact.
-#           -c : Compact.
 #
-# Read onyx code from stdin and output a compacted version to stdout.  The
+# Read onyx code from stdin and output a revised version to stdout.  The
 # output code defines the C function nxo_p_thread_nxcode().
 #
 # This program is run by the 'bootstrap' build system target.
@@ -23,7 +21,6 @@
 
 # Parse the command line.
 $opt_bootstrap false def
-$opt_compact true def
 
 $opt_dict <
     `-B' {
@@ -31,12 +28,6 @@ $opt_dict <
     }
     `-b' {
 	$opt_bootstrap true def
-    }
-    `-C' {
-	$opt_compact false def
-    }
-    `-c' {
-	$opt_compact true def
     }
 > def
 
@@ -46,7 +37,7 @@ argv length 1 gt {
 	    opt_dict exch get eval
 	}{
 	    # Unknown option.
-	    `nx_gen.nx: Unknown option '
+	    `nxo_thread_gen.nx: Unknown option '
 	    exch 1 sprints cat
 	    `\n' cat
 
@@ -54,9 +45,7 @@ argv length 1 gt {
 	    1 die
 	} ifelse
     } foreach
-}{
-    $opt_bootstrap false def
-} ifelse
+} if
 
 # Output the header.
 `/* -*- mode: c ; c-file-style: "canonware-c-style" -*-

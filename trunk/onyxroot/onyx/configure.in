@@ -54,6 +54,8 @@ AC_SUBST([MANDIR])
 
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
+cfgoutputs="$cfgoutputs lib/libonyx/src/nx_gen.nx"
+cfgoutputs="$cfgoutputs lib/libonyx/src/libonyx_init_gen.nx"
 cfgoutputs="$cfgoutputs lib/libonyx/src/nx.nx lib/libonyx/src/nxo_thread.nx"
 cfgoutputs="$cfgoutputs bin/onyx/src/batch.nx bin/onyx/src/interactive.nx"
 cfgoutputs="$cfgoutputs bin/onyx_config/src/onyx_config.nx.in"
