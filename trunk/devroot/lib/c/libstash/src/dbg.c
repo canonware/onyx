@@ -62,7 +62,7 @@ dbg_delete(cw_dbg_t *a_dbg)
 cw_bool_t
 dbg_register(cw_dbg_t *a_dbg, const char *a_flag)
 {
-	cw_bool_t	retval;
+	cw_bool_t	retval = FALSE;
 	cw_chi_t	*chi;
 
 	if (a_dbg != NULL) {
@@ -72,10 +72,8 @@ dbg_register(cw_dbg_t *a_dbg, const char *a_flag)
 			chi = (cw_chi_t *)_cw_malloc(sizeof(cw_chi_t));
 			if (chi == NULL)
 				retval = TRUE;
-			else {
+			else
 				ch_insert(a_dbg->flag_hash, a_flag, NULL, chi);
-				retval = FALSE;
-			}
 		}
 		mtx_unlock(&a_dbg->lock);
 	} else
