@@ -71,6 +71,7 @@ main(int argc, char ** argv)
   cw_socks_t * socks;
   cw_sock_t * sock, * sock_ptr;
   int port;
+  cw_thd_t * thd;
 
   out_put(cw_g_out, "[s]: pid [i]\n", argv[0], getpid());
 
@@ -95,19 +96,31 @@ main(int argc, char ** argv)
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
   
   socks = socks_new();
-  _cw_assert(FALSE == socks_listen(socks, &port));
+  if (TRUE == socks_listen(socks, &port))
+  {
+    out_put(cw_g_out, "[s]: Error listening on port [i]\n", argv[0], port);
+    goto RETURN;
+  }
+  
   out_put(cw_g_out, "[s]: Listening on port [i]\n", argv[0], port);
 
   for (sock_ptr = NULL; sock_ptr == NULL; sock_ptr = NULL)
   {
     sock = sock_new(NULL, 1024);
-    _cw_assert(NULL != (sock_ptr = socks_accept(socks, NULL, sock)));
-    thd_new(NULL, handle_client, (void *) sock);
+
+    sock_ptr = socks_accept(socks, NULL, sock);
+    _cw_check_ptr(sock_ptr);
+    
+    thd = thd_new(NULL, handle_client, (void *) sock);
+
+    /* Detach the thread. */
+    thd_delete(thd);
   }
 
   sock_delete(sock);
   socks_delete(socks);
-  
+
+  RETURN:
   sockb_shutdown();
   libstash_shutdown();
   return 0;
