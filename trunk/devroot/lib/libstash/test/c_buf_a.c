@@ -24,6 +24,12 @@ main()
 {
   libstash_init();
 
+  /* XXX */
+  /* bufpool_new(), bufpool_delete(). */
+  /* bufpool_get_buffer_size(). */
+  /* bufpool_get_max_spare_buffers(), bufpool_set_max_spare_buffers(). */
+  /* bufpool_get_buffer(), bufpool_put_buffer(). */
+
   /* bufel_new(), bufel_delete(). */
   {
     cw_bufel_t bufel, * bufel_p;
@@ -36,7 +42,7 @@ main()
     bufel_delete(bufel_p);
   }
 
-  /* bufel_get_size(), bufel_set_size(). */
+  /* bufel_get_size(), bufel_set_data_ptr(). */
   {
     cw_bufel_t * bufel_p;
     cw_bufpool_t bufpool;
@@ -54,8 +60,9 @@ main()
 		       bufpool_get_buffer_size(&bufpool),
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
+    _cw_assert(4096 == bufel_get_size(bufel_p));
 
-    /* In order to test error conditions on bufel_set_size(), we must use
+    /* In order to test error conditions on bufel_set_data_ptr(), we must use
      * bufel_set_end_offset(), which isn't tested until later on. */
     _cw_assert(FALSE == bufel_set_end_offset(bufel_p, 4096));
     _cw_assert(TRUE == bufel_set_end_offset(bufel_p, 4097));
@@ -148,8 +155,6 @@ main()
     _cw_assert(50 == bufel_get_end_offset(bufel_p));
     _cw_assert(50 == bufel_get_valid_data_size(bufel_p));
     
-    /* Don't free string, since bufel_p will do it. */
-    
     bufel_delete(bufel_p);
     bufpool_delete(&bufpool);
   }
@@ -215,9 +220,9 @@ main()
 		 i + 4, buf_get_uint32(buf_p, i + 4));
     }
 
-    bufpool_delete(&bufpool);
     buf_delete(buf_p);
     bufel_delete(bufel_p);
+    bufpool_delete(&bufpool);
   }
   
   /* buf_new(), buf_delete(). */
@@ -283,26 +288,47 @@ main()
 		       bufpool_put_buffer,
 		       (void *) &bufpool);
 
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     buf_append_bufel(buf_p, bufel_p_a);
     _cw_assert(1 == buf_get_size(buf_p));
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     buf_append_bufel(buf_p, bufel_p_b);
     _cw_assert(2 == buf_get_size(buf_p));
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     buf_append_bufel(buf_p, bufel_p_c);
     _cw_assert(3 == buf_get_size(buf_p));
-    
+
+/*      _cw_error("Enough"); */
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     buf_prepend_bufel(buf_p, bufel_p_a);
     _cw_assert(4 == buf_get_size(buf_p));
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     buf_prepend_bufel(buf_p, bufel_p_b);
     _cw_assert(5 == buf_get_size(buf_p));
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     buf_prepend_bufel(buf_p, bufel_p_c);
     _cw_assert(6 == buf_get_size(buf_p));
 
+    _cw_marker("Got here");
+    buf_dump(buf_p);
     _cw_assert('C' == buf_get_uint8(buf_p, 0));
+    _cw_marker("Got here");
     _cw_assert('B' == buf_get_uint8(buf_p, 1));
+    _cw_marker("Got here");
     _cw_assert('A' == buf_get_uint8(buf_p, 2));
+    _cw_marker("Got here");
     _cw_assert('A' == buf_get_uint8(buf_p, 3));
+    _cw_marker("Got here");
     _cw_assert('B' == buf_get_uint8(buf_p, 4));
+    _cw_marker("Got here");
     _cw_assert('C' == buf_get_uint8(buf_p, 5));
+    _cw_marker("Got here");
 
     bufel_delete(bufel_p_a);
     bufel_delete(bufel_p_b);

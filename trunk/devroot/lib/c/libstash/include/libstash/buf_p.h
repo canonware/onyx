@@ -34,6 +34,9 @@ bufc_new(void * a_buffer, cw_uint32_t a_size,
 static void
 bufc_delete(cw_bufc_t * a_bufc);
 
+static void
+bufc_dump(cw_bufc_t * a_bufc);
+
 static cw_uint32_t
 bufc_get_size(cw_bufc_t * a_bufc);
 

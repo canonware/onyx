@@ -290,6 +290,25 @@ buf_delete(cw_buf_t * a_buf);
  *
  * <<< Input(s) >>>
  *
+ *
+ *
+ * <<< Output(s) >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+#define buf_dump _CW_NS_LIBSTASH(buf_dump)
+void
+buf_dump(cw_buf_t * a_buf);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
  * a_buf : Pointer to a buf.
  *
  * <<< Output(s) >>>
@@ -340,10 +359,6 @@ buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count);
  *
  * a_preserve : If TRUE, preserve a_b (don't modify it).  If FALSE, release the
  *              data in a_b after catenating a_b to a_a.
- *
- * a_try_bufel_merge : If TRUE, try to merge a_a's last bufel and a_b's first
- *                     bufel, if the two bufel's reference the same internal
- *                     buffer and are consectutive and contiguous.
  *
  * <<< Output(s) >>>
  *
@@ -640,6 +655,25 @@ bufel_delete(cw_bufel_t * a_bufel);
  *
  * <<< Input(s) >>>
  *
+ *
+ *
+ * <<< Output(s) >>>
+ *
+ *
+ *
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+#define bufel_dump _CW_NS_LIBSTASH(bufel_dump)
+void
+bufel_dump(cw_bufel_t * a_bufel);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
  * a_bufel : Pointer to a bufel.
  *
  * <<< Output(s) >>>
@@ -792,7 +826,8 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  *
  * a_size : Size in bytes of a_buf.
  *
- * a_free_func : Pointer to a function that handles reclamation of a_buf.
+ * a_free_func : Pointer to a function that handles reclamation of a_buf, or
+ *               NULL.
  *
  * a_free_arg : First argument to a_free_func().
  *
