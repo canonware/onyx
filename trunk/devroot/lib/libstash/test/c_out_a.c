@@ -630,21 +630,22 @@ main()
 
 		/* p. wjpbs+. */
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 5, "p: [p]", 0x42) >= 0);
-		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
-
-		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 20,"[p] [s]", 0x42,
-		    "<trailing string>") >= 0);
-		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
-
-		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 11, "[p]_16", 0xffffffff) >=
+		_cw_assert(out_put_sn(out_p, str, 5, "p: [p]", (void *)0x42) >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 2, "[p]", 0x42) >= 0);
+		_cw_assert(out_put_sn(out_p, str, 20,"[p] [s]", (void *)0x42,
+		    "<trailing string>") >= 0);
+		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+		memcpy(buf, ibuf, 81);
+		_cw_assert(out_put_sn(out_p, str, 11, "[p]_16", (void
+		    *)0xffffffff) >= 0);
+		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+		memcpy(buf, ibuf, 81);
+		_cw_assert(out_put_sn(out_p, str, 2, "[p]", (void *)0x42) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		out_delete(out_p);
