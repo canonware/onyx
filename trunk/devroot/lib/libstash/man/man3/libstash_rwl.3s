@@ -1,0 +1,201 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_rwl 3s "libstash, version <Version>"
+.Nm libstash_rwl
+.hy 1
+.SH NAME
+rwl - Read/write lock.
+.SH SYNOPSIS
+.SS Single-threaded
+N/A.
+
+.SS Multi-threaded
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_rwl_t *
+.br
+.B rwl_new
+.RI ( "cw_rwl_t * a_rwl" )
+
+.I void
+.br
+.B rwl_delete
+.RI ( "cw_rwl_t * a_rwl" )
+
+.I void
+.br
+.B rwl_rlock
+.RI ( "cw_rwl_t * a_rwl" )
+
+.I void
+.br
+.B rwl_runlock
+.RI ( "cw_rwl_t * a_rwl" )
+
+.I void
+.br
+.B rwl_wlock
+.RI ( "cw_rwl_t * a_rwl" )
+
+.I void
+.br
+.B rwl_wunlock
+.RI ( "cw_rwl_t * a_rwl" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBrwl\fR implements read/write locks.  Multiple simultaneous readers are
+allowed, but only one locker (with no readers) is allowed.  This implementation
+toggles back and forth between read locks and write locks to assure
+deterministic locking.
+
+.SH USAGE
+.I cw_rwl_t *
+.br
+.B rwl_new
+.RI ( "cw_rwl_t * a_rwl" )
+.br
+Input(s):
+.RS
+.IR a_rwl :
+.RS
+Pointer to space for a rwl, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a rwl.
+.br
+NULL: Memory allocation error.  Can only occur if (NULL == a_rwl).
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B rwl_delete
+.RI ( "cw_rwl_t * a_rwl" )
+.br
+Input(s):
+.RS
+.IR a_rwl :
+.RS
+Pointer to a rwl.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void
+.br
+.B rwl_rlock
+.RI ( "cw_rwl_t * a_rwl" )
+.br
+Input(s):
+.RS
+.IR a_rwl :
+.RS
+Pointer to a rwl.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Get a r-lock.
+.RE
+.RE
+
+.I void
+.br
+.B rwl_runlock
+.RI ( "cw_rwl_t * a_rwl" )
+.br
+Input(s):
+.RS
+.IR a_rwl :
+.RS
+Pointer to a rwl.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Release a r-lock.
+.RE
+.RE
+
+.I void
+.br
+.B rwl_wlock
+.RI ( "cw_rwl_t * a_rwl" )
+.br
+Input(s):
+.RS
+.IR a_rwl :
+.RS
+Pointer to a rwl.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Get a w-lock.
+.RE
+.RE
+
+.I void
+.br
+.B rwl_wunlock
+.RI ( "cw_rwl_t * a_rwl" )
+.br
+Input(s):
+.RS
+.IR a_rwl :
+.RS
+Pointer to a rwl.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Release a w-lock.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.
