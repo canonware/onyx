@@ -222,7 +222,7 @@ cw_nxo_t *nxo_thread_estack_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_tstack_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_stdin_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_stdout_get(cw_nxo_t *a_nxo);
-cw_nxo_t *nxo_thread_stdout_get(cw_nxo_t *a_nxo);
+cw_nxo_t *nxo_thread_stderr_get(cw_nxo_t *a_nxo);
 #endif
 
 cw_nxo_t *nxo_thread_userdict_get(cw_nxo_t *a_nxo);
