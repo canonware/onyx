@@ -981,6 +981,8 @@ dup <
     $new {
 	# Create instance.
 	instance dup dn setisa
+
+	dup dict setdata
     }
 
     # Typically called at the beginning of :new in subclasses.  Recursively
