@@ -101,6 +101,7 @@ D_LIBS = [D_LIBS] [LIBSTASH_D];
 A_LIBS = [A_LIBS] [LIBSTASH_A];
 P_LIBS = [P_LIBS] [LIBSTASH_P];
 S_LIBS = [S_LIBS] [LIBSTASH_S];
+S_LINKS = [S_LINKS] [objdir]/lib/c/libstash/lib/libstash.so;
 
 /*
  * User cook'ables.
@@ -145,7 +146,7 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTASH_DBG;
  * Build rules.
  */
 
-libstash_install_common : libstash
+libstash_install_common :
 {
   [SHELL] -e;
 data
@@ -190,6 +191,7 @@ libstash_install_p : [LIBSTASH_P] libstash_install_common
 libstash_install_s : [LIBSTASH_D] libstash_install_common
 {
 	[INSTALL] -m 0444 [LIBSTASH_S] [PREFIX]/lib;
+	[LN] -sf libstash.so.[LIBSTASH_REV] [PREFIX]/lib/libstash.so;
 }
 
 /*
@@ -221,4 +223,5 @@ libstash_install_s : [LIBSTASH_D] libstash_install_common
   set mkdir
 {
   [CC] -shared -o [target] [need];
+  [LN] -sf libstash.so.[LIBSTASH_REV] [objdir]/lib/c/libstash/lib/libstash.so;
 }

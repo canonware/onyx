@@ -69,6 +69,7 @@ SRCS = [SRCS] [PROXY_SRCS];
   local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/proxy/man/man1/% [manpages_1]];
 
+  PROXY_MANPAGES_1 = [manpages_1];
   MANPAGES_1 = [MANPAGES_1] [manpages_1];
 }
 
@@ -88,6 +89,30 @@ P_BINS = [P_BINS] [PROXY_P];
 
 proxy : [PROXY_D] [PROXY_A] [PROXY_P];
 
+proxy_install : proxy_install_d proxy_install_a proxy_install_p;
+
+proxy_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/bin/proxy.dbg
+rm -f [PREFIX]/bin/proxy.dbg
+
+echo rm -f [PREFIX]/bin/proxy
+rm -f [PREFIX]/bin/proxy
+
+echo rm -f [PREFIX]/bin/proxy.prof
+rm -f [PREFIX]/bin/proxy.prof
+
+for i in [PROXY_MANPAGES_1]; do
+	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -97,11 +122,60 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/proxy/include
 D_CPPFLAGS = [D_CPPFLAGS] -D_PROXY_DBG;
 
 /*
+ * Build rules.
+ */
+
+proxy_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/man/man1
+[INSTALL] -d [PREFIX]/man/man1
+
+for i in [PROXY_MANPAGES_1]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
+done
+
+echo [INSTALL] -d [PREFIX]/bin
+[INSTALL] -d [PREFIX]/bin
+dataend
+}
+
+proxy_install_d : [PROXY_D] proxy_install_common
+{
+	[INSTALL] -m 0755 [PROXY_D] [PREFIX]/bin;
+}
+
+proxy_install_a : [PROXY_A] proxy_install_common
+#if [ENABLE_SHARED]
+                  libsock_install_s libstash_install_s
+#endif
+{
+#if [ENABLE_SHARED]
+  [CC] [D_CFLAGS] -o [PREFIX]/bin/proxy
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/proxy;
+#else
+	[INSTALL] -m 0755 [PROXY_A] [PREFIX]/bin;
+#endif
+}
+
+proxy_install_p : [PROXY_P] proxy_install_common
+{
+	[INSTALL] -m 0755 [PROXY_P] [PREFIX]/bin;
+}
+
+/*
  * Dependencies.
  */
 
 [PROXY_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [PROXY_SRCS]]
-            [LIBSOCK_D] [LIBSTASH_D]
+           [LIBSOCK_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
@@ -110,16 +184,24 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_PROXY_DBG;
 }
 
 [PROXY_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-            [LIBSOCK_A] [LIBSTASH_A]
+#if [ENABLE_SHARED]
+           [LIBSOCK_S] [LIBSTASH_S]
+#else
+           [LIBSOCK_A] [LIBSTASH_A]
+#endif
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
+#if [ENABLE_SHARED]
+       -rpath [objdir]/lib/c/libsock/lib
+       -rpath [objdir]/lib/c/libstash/lib
+#endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 
 [PROXY_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [PROXY_SRCS]]
-            [LIBSOCK_P] [LIBSTASH_P]
+           [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]

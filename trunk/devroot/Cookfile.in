@@ -23,9 +23,12 @@ PREFIX = @prefix@;
 ENABLE_SHARED = @enable_shared@;
 CC = @CC@;
 AR = @AR@;
+LD = @LD@;
+LN = @LN@;
 RANLIB = @RANLIB@;
-INSTALL = @INSTALL@;
 BASENAME = @BASENAME@;
+CHMOD = @CHMOD@;
+INSTALL = @INSTALL@;
 PERL = @PERL@;
 CAT = @CAT@;
 DIFF = @DIFF@;
@@ -39,6 +42,7 @@ D_LIBS = ;
 A_LIBS = ;
 P_LIBS = ;
 S_LIBS = ;
+S_LINKS = ;
 D_BINS = ;
 A_BINS = ;
 P_BINS = ;
@@ -107,25 +111,25 @@ install : install_bins install_libs;
 
 install_bins :
 #if @bin_blow@
-          blow_install
+          blow_install_a
 #endif
 #if @bin_echos@
-          echos_install
+          echos_install_a
 #endif
 #if @bin_ncat@
-          ncat_install
+          ncat_install_a
 #endif
 #if @bin_proxy@
-          proxy_install
+          proxy_install_a
 #endif
 #if @bin_stil@
-          stil_install
+          stil_install_a
 #endif
 #if @bin_stile@
-          stile_install
+          stile_install_a
 #endif
 #if @bin_suck@
-          suck_install
+          suck_install_a
 #endif
 ;
 
@@ -188,6 +192,7 @@ clean :
   rm -f [A_LIBS];
   rm -f [P_LIBS];
   rm -f [S_LIBS];
+  rm -f [S_LINKS];
 
   rm -f [D_BINS];
   rm -f [A_BINS];

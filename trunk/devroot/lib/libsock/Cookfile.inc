@@ -26,6 +26,7 @@
   incs = [fromto % [srcdir]/lib/c/libsock/include/libsock/% [incs]];
   incs = [incs] [objdir]/lib/c/libsock/include/libsock/libsock_defs.h;
 
+  LIBSOCK_INCS = [incs];
   INCS = [INCS] [incs];
 }
 
@@ -72,6 +73,7 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
                      libsock_socks.3s;
   manpages_3 = [fromto % [srcdir]/lib/c/libsock/man/man3/% [manpages_3]];
 
+  LIBSOCK_MANPAGES_3 = [manpages_3];
   MANPAGES_3 = [MANPAGES_3] [manpages_3];
 }
 
@@ -89,12 +91,42 @@ D_LIBS = [D_LIBS] [LIBSOCK_D];
 A_LIBS = [A_LIBS] [LIBSOCK_A];
 P_LIBS = [P_LIBS] [LIBSOCK_P];
 S_LIBS = [S_LIBS] [LIBSOCK_S];
+S_LINKS = [S_LINKS] [objdir]/lib/c/libsock/lib/libsock.so;
 
 /*
  * User cook'ables.
  */
 
-libsock : [LIBSOCK_D] [LIBSOCK_A] [LIBSOCK_P] [LIBSOCK_S];
+libsock : [LIBSOCK_D] [LIBSOCK_A] [LIBSOCK_P]
+#if [ENABLE_SHARED]
+          [LIBSOCK_S]
+#endif
+;
+
+libsock_install : libsock_install_d libsock_install_a libsock_install_p
+#if [ENABLE_SHARED]
+                   libsock_install_s
+#endif
+;
+
+libsock_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/lib/libsock*
+rm -f [PREFIX]/lib/libsock*
+
+echo rm -rf [PREFIX]/include/libsock
+rm -rf [PREFIX]/include/libsock
+
+for i in [LIBSOCK_MANPAGES_3]; do
+	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
+done
+dataend
+}
 
 /*
  * Various flags.
@@ -103,6 +135,58 @@ libsock : [LIBSOCK_D] [LIBSOCK_A] [LIBSOCK_P] [LIBSOCK_S];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libsock/include
                       -I[objdir]/lib/c/libsock/include/libsock;
 D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSOCK_DBG;
+
+/*
+ * Build rules.
+ */
+
+libsock_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/include/libsock
+[INSTALL] -d [PREFIX]/include/libsock
+
+for i in [LIBSOCK_INCS]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/include/libsock/
+	[INSTALL] -m 0644 $i [PREFIX]/include/libsock/
+done
+
+echo [INSTALL] -d [PREFIX]/man/man3
+[INSTALL] -d [PREFIX]/man/man3
+
+for i in [LIBSOCK_MANPAGES_3]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
+done
+
+echo [INSTALL] -d [PREFIX]/lib
+[INSTALL] -d [PREFIX]/lib
+dataend
+}
+
+libsock_install_d : [LIBSOCK_D] libsock_install_common
+{
+	[INSTALL] -m 0444 [LIBSOCK_D] [PREFIX]/lib;
+}
+
+libsock_install_a : [LIBSOCK_A] libsock_install_common
+{
+	[INSTALL] -m 0444 [LIBSOCK_A] [PREFIX]/lib;
+}
+
+libsock_install_p : [LIBSOCK_P] libsock_install_common
+{
+	[INSTALL] -m 0444 [LIBSOCK_P] [PREFIX]/lib;
+}
+
+libsock_install_s : [LIBSOCK_D] libsock_install_common
+{
+	[INSTALL] -m 0444 [LIBSOCK_S] [PREFIX]/lib;
+	[LN] -sf libsock.so.[LIBSOCK_REV] [PREFIX]/lib/libsock.so;
+}
 
 /*
  * Dependencies.
@@ -133,4 +217,5 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSOCK_DBG;
   set mkdir
 {
   [CC] -shared -o [target] [need];
+  [LN] -sf libsock.so.[LIBSOCK_REV] [objdir]/lib/c/libsock/lib/libsock.so;
 }

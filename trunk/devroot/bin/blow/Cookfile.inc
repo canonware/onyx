@@ -69,6 +69,7 @@ SRCS = [SRCS] [BLOW_SRCS];
   local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/blow/man/man1/% [manpages_1]];
 
+  BLOW_MANPAGES_1 = [manpages_1];
   MANPAGES_1 = [MANPAGES_1] [manpages_1];
 }
 
@@ -88,6 +89,30 @@ P_BINS = [P_BINS] [BLOW_P];
 
 blow : [BLOW_D] [BLOW_A] [BLOW_P];
 
+blow_install : blow_install_d blow_install_a blow_install_p;
+
+blow_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/bin/blow.dbg
+rm -f [PREFIX]/bin/blow.dbg
+
+echo rm -f [PREFIX]/bin/blow
+rm -f [PREFIX]/bin/blow
+
+echo rm -f [PREFIX]/bin/blow.prof
+rm -f [PREFIX]/bin/blow.prof
+
+for i in [BLOW_MANPAGES_1]; do
+	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -95,6 +120,55 @@ blow : [BLOW_D] [BLOW_A] [BLOW_P];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/blow/include
                       -I[objdir]/bin/blow/include;
 D_CPPFLAGS = [D_CPPFLAGS] -D_BLOW_DBG;
+
+/*
+ * Build rules.
+ */
+
+blow_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/man/man1
+[INSTALL] -d [PREFIX]/man/man1
+
+for i in [BLOW_MANPAGES_1]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
+done
+
+echo [INSTALL] -d [PREFIX]/bin
+[INSTALL] -d [PREFIX]/bin
+dataend
+}
+
+blow_install_d : [BLOW_D] blow_install_common
+{
+	[INSTALL] -m 0755 [BLOW_D] [PREFIX]/bin;
+}
+
+blow_install_a : [BLOW_A] blow_install_common
+#if [ENABLE_SHARED]
+                 libsock_install_s libstash_install_s
+#endif
+{
+#if [ENABLE_SHARED]
+  [CC] [D_CFLAGS] -o [PREFIX]/bin/blow
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BLOW_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/blow;
+#else
+	[INSTALL] -m 0755 [BLOW_A] [PREFIX]/bin;
+#endif
+}
+
+blow_install_p : [BLOW_P] blow_install_common
+{
+	[INSTALL] -m 0755 [BLOW_P] [PREFIX]/bin;
+}
 
 /*
  * Dependencies.
@@ -110,11 +184,19 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_BLOW_DBG;
 }
 
 [BLOW_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BLOW_SRCS]]
+#if [ENABLE_SHARED]
+           [LIBSOCK_S] [LIBSTASH_S]
+#else
            [LIBSOCK_A] [LIBSTASH_A]
+#endif
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BLOW_SRCS]]
+#if [ENABLE_SHARED]
+       -rpath [objdir]/lib/c/libsock/lib
+       -rpath [objdir]/lib/c/libstash/lib
+#endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 

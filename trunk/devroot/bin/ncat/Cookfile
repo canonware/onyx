@@ -69,6 +69,7 @@ SRCS = [SRCS] [NCAT_SRCS];
   local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/ncat/man/man1/% [manpages_1]];
 
+  NCAT_MANPAGES_1 = [manpages_1];
   MANPAGES_1 = [MANPAGES_1] [manpages_1];
 }
 
@@ -88,6 +89,30 @@ P_BINS = [P_BINS] [NCAT_P];
 
 ncat : [NCAT_D] [NCAT_A] [NCAT_P];
 
+ncat_install : ncat_install_d ncat_install_a ncat_install_p;
+
+ncat_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/bin/ncat.dbg
+rm -f [PREFIX]/bin/ncat.dbg
+
+echo rm -f [PREFIX]/bin/ncat
+rm -f [PREFIX]/bin/ncat
+
+echo rm -f [PREFIX]/bin/ncat.prof
+rm -f [PREFIX]/bin/ncat.prof
+
+for i in [NCAT_MANPAGES_1]; do
+	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -95,6 +120,55 @@ ncat : [NCAT_D] [NCAT_A] [NCAT_P];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/ncat/include
                       -I[objdir]/bin/ncat/include;
 D_CPPFLAGS = [D_CPPFLAGS] -D_NCAT_DBG;
+
+/*
+ * Build rules.
+ */
+
+ncat_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/man/man1
+[INSTALL] -d [PREFIX]/man/man1
+
+for i in [NCAT_MANPAGES_1]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
+done
+
+echo [INSTALL] -d [PREFIX]/bin
+[INSTALL] -d [PREFIX]/bin
+dataend
+}
+
+ncat_install_d : [NCAT_D] ncat_install_common
+{
+	[INSTALL] -m 0755 [NCAT_D] [PREFIX]/bin;
+}
+
+ncat_install_a : [NCAT_A] ncat_install_common
+#if [ENABLE_SHARED]
+                 libsock_install_s libstash_install_s
+#endif
+{
+#if [ENABLE_SHARED]
+  [CC] [D_CFLAGS] -o [PREFIX]/bin/ncat
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/ncat;
+#else
+	[INSTALL] -m 0755 [NCAT_A] [PREFIX]/bin;
+#endif
+}
+
+ncat_install_p : [NCAT_P] ncat_install_common
+{
+	[INSTALL] -m 0755 [NCAT_P] [PREFIX]/bin;
+}
 
 /*
  * Dependencies.
@@ -110,11 +184,19 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_NCAT_DBG;
 }
 
 [NCAT_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
+#if [ENABLE_SHARED]
+           [LIBSOCK_S] [LIBSTASH_S]
+#else
            [LIBSOCK_A] [LIBSTASH_A]
+#endif
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [NCAT_SRCS]]
+#if [ENABLE_SHARED]
+       -rpath [objdir]/lib/c/libsock/lib
+       -rpath [objdir]/lib/c/libstash/lib
+#endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 

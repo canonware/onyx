@@ -69,6 +69,7 @@ SRCS = [SRCS] [STIL_SRCS];
   local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/stil/man/man1/% [manpages_1]];
 
+  STIL_MANPAGES_1 = [manpages_1];
   MANPAGES_1 = [MANPAGES_1] [manpages_1];
 }
 
@@ -88,6 +89,30 @@ P_BINS = [P_BINS] [STIL_P];
 
 stil : [STIL_D] [STIL_A] [STIL_P];
 
+stil_install : stil_install_d stil_install_a stil_install_p;
+
+stil_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/bin/stil.dbg
+rm -f [PREFIX]/bin/stil.dbg
+
+echo rm -f [PREFIX]/bin/stil
+rm -f [PREFIX]/bin/stil
+
+echo rm -f [PREFIX]/bin/stil.prof
+rm -f [PREFIX]/bin/stil.prof
+
+for i in [STIL_MANPAGES_1]; do
+	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -95,6 +120,55 @@ stil : [STIL_D] [STIL_A] [STIL_P];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/stil/include
                       -I[objdir]/bin/stil/include;
 D_CPPFLAGS = [D_CPPFLAGS] -D_STIL_DBG;
+
+/*
+ * Build rules.
+ */
+
+stil_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/man/man1
+[INSTALL] -d [PREFIX]/man/man1
+
+for i in [STIL_MANPAGES_1]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
+done
+
+echo [INSTALL] -d [PREFIX]/bin
+[INSTALL] -d [PREFIX]/bin
+dataend
+}
+
+stil_install_d : [STIL_D] stil_install_common
+{
+	[INSTALL] -m 0755 [STIL_D] [PREFIX]/bin;
+}
+
+stil_install_a : [STIL_A] stil_install_common
+#if [ENABLE_SHARED]
+                 libstil_install_s libstash_install_s
+#endif
+{
+#if [ENABLE_SHARED]
+  [CC] [D_CFLAGS] -o [PREFIX]/bin/stil
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lstil -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/stil;
+#else
+	[INSTALL] -m 0755 [STIL_A] [PREFIX]/bin;
+#endif
+}
+
+stil_install_p : [STIL_P] stil_install_common
+{
+	[INSTALL] -m 0755 [STIL_P] [PREFIX]/bin;
+}
 
 /*
  * Dependencies.
@@ -110,11 +184,19 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_STIL_DBG;
 }
 
 [STIL_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
-           [LIBSTIL_D] [LIBSTASH_A]
+#if [ENABLE_SHARED]
+           [LIBSTIL_S] [LIBSTASH_S]
+#else
+           [LIBSTIL_A] [LIBSTASH_A]
+#endif
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
+#if [ENABLE_SHARED]
+       -rpath [objdir]/lib/c/libstil/lib
+       -rpath [objdir]/lib/c/libstash/lib
+#endif
        [LDFLAGS] -lstil -lstash [EXTRALIBS];
 }
 

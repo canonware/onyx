@@ -69,6 +69,7 @@ SRCS = [SRCS] [SUCK_SRCS];
   local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/suck/man/man1/% [manpages_1]];
 
+  SUCK_MANPAGES_1 = [manpages_1];
   MANPAGES_1 = [MANPAGES_1] [manpages_1];
 }
 
@@ -88,6 +89,30 @@ P_BINS = [P_BINS] [SUCK_P];
 
 suck : [SUCK_D] [SUCK_A] [SUCK_P];
 
+suck_install : suck_install_d suck_install_a suck_install_p;
+
+suck_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/bin/suck.dbg
+rm -f [PREFIX]/bin/suck.dbg
+
+echo rm -f [PREFIX]/bin/suck
+rm -f [PREFIX]/bin/suck
+
+echo rm -f [PREFIX]/bin/suck.prof
+rm -f [PREFIX]/bin/suck.prof
+
+for i in [SUCK_MANPAGES_1]; do
+	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -95,6 +120,55 @@ suck : [SUCK_D] [SUCK_A] [SUCK_P];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/suck/include
                       -I[objdir]/bin/suck/include;
 D_CPPFLAGS = [D_CPPFLAGS] -D_SUCK_DBG;
+
+/*
+ * Build rules.
+ */
+
+suck_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/man/man1
+[INSTALL] -d [PREFIX]/man/man1
+
+for i in [SUCK_MANPAGES_1]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
+done
+
+echo [INSTALL] -d [PREFIX]/bin
+[INSTALL] -d [PREFIX]/bin
+dataend
+}
+
+suck_install_d : [SUCK_D] suck_install_common
+{
+	[INSTALL] -m 0755 [SUCK_D] [PREFIX]/bin;
+}
+
+suck_install_a : [SUCK_A] suck_install_common
+#if [ENABLE_SHARED]
+                 libsock_install_s libstash_install_s
+#endif
+{
+#if [ENABLE_SHARED]
+  [CC] [D_CFLAGS] -o [PREFIX]/bin/suck
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/suck;
+#else
+	[INSTALL] -m 0755 [SUCK_A] [PREFIX]/bin;
+#endif
+}
+
+suck_install_p : [SUCK_P] suck_install_common
+{
+	[INSTALL] -m 0755 [SUCK_P] [PREFIX]/bin;
+}
 
 /*
  * Dependencies.
@@ -110,11 +184,19 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_SUCK_DBG;
 }
 
 [SUCK_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]]
+#if [ENABLE_SHARED]
+           [LIBSOCK_S] [LIBSTASH_S]
+#else
            [LIBSOCK_A] [LIBSTASH_A]
+#endif
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]]
+#if [ENABLE_SHARED]
+       -rpath [objdir]/lib/c/libsock/lib
+       -rpath [objdir]/lib/c/libstash/lib
+#endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 

@@ -69,6 +69,7 @@ SRCS = [SRCS] [ECHOS_SRCS];
   local manpages_1 = ;
   manpages_1 = [fromto % [srcdir]/bin/echos/man/man1/% [manpages_1]];
 
+  ECHOS_MANPAGES_1 = [manpages_1];
   MANPAGES_1 = [MANPAGES_1] [manpages_1];
 }
 
@@ -88,6 +89,30 @@ P_BINS = [P_BINS] [ECHOS_P];
 
 echos : [ECHOS_D] [ECHOS_A] [ECHOS_P];
 
+echos_install : echos_install_d echos_install_a echos_install_p;
+
+echos_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/bin/echos.dbg
+rm -f [PREFIX]/bin/echos.dbg
+
+echo rm -f [PREFIX]/bin/echos
+rm -f [PREFIX]/bin/echos
+
+echo rm -f [PREFIX]/bin/echos.prof
+rm -f [PREFIX]/bin/echos.prof
+
+for i in [ECHOS_MANPAGES_1]; do
+	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
+done
+dataend
+}
+
 /*
  * Various flags.
  */
@@ -97,11 +122,60 @@ CPPFLAGS = [CPPFLAGS] -I[srcdir]/bin/echos/include
 D_CPPFLAGS = [D_CPPFLAGS] -D_ECHOS_DBG;
 
 /*
+ * Build rules.
+ */
+
+echos_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/man/man1
+[INSTALL] -d [PREFIX]/man/man1
+
+for i in [ECHOS_MANPAGES_1]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
+done
+
+echo [INSTALL] -d [PREFIX]/bin
+[INSTALL] -d [PREFIX]/bin
+dataend
+}
+
+echos_install_d : [ECHOS_D] echos_install_common
+{
+	[INSTALL] -m 0755 [ECHOS_D] [PREFIX]/bin;
+}
+
+echos_install_a : [ECHOS_A] echos_install_common
+#if [ENABLE_SHARED]
+                  libsock_install_s libstash_install_s
+#endif
+{
+#if [ENABLE_SHARED]
+  [CC] [D_CFLAGS] -o [PREFIX]/bin/echos
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ECHOS_SRCS]]
+       -rpath [PREFIX]/lib
+       [LDFLAGS] -lsock -lstash [EXTRALIBS];
+  [CHMOD] 0755 [PREFIX]/bin/echos;
+#else
+	[INSTALL] -m 0755 [ECHOS_A] [PREFIX]/bin;
+#endif
+}
+
+echos_install_p : [ECHOS_P] echos_install_common
+{
+	[INSTALL] -m 0755 [ECHOS_P] [PREFIX]/bin;
+}
+
+/*
  * Dependencies.
  */
 
 [ECHOS_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [ECHOS_SRCS]]
-            [LIBSOCK_D] [LIBSTASH_D]
+           [LIBSOCK_D] [LIBSTASH_D]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
@@ -110,16 +184,24 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_ECHOS_DBG;
 }
 
 [ECHOS_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ECHOS_SRCS]]
-            [LIBSOCK_A] [LIBSTASH_A]
+#if [ENABLE_SHARED]
+           [LIBSOCK_S] [LIBSTASH_S]
+#else
+           [LIBSOCK_A] [LIBSTASH_A]
+#endif
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ECHOS_SRCS]]
+#if [ENABLE_SHARED]
+       -rpath [objdir]/lib/c/libsock/lib
+       -rpath [objdir]/lib/c/libstash/lib
+#endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
 
 [ECHOS_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [ECHOS_SRCS]]
-            [LIBSOCK_P] [LIBSTASH_P]
+           [LIBSOCK_P] [LIBSTASH_P]
   set mkdir
 {
   [CC] [D_CFLAGS] -o [target]

@@ -29,6 +29,7 @@
   incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [incs]];
   incs = [incs] [objdir]/lib/c/libstil/include/libstil/libstil_defs.h;
 
+  LIBSTIL_INCS = [incs];
   INCS = [INCS] [incs];
 }
 
@@ -77,6 +78,7 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
   local manpages_3 = ;
   manpages_3 = [fromto % [srcdir]/lib/c/libstil/man/man3/% [manpages_3]];
 
+  LIBSTIL_MANPAGES_3 = [manpages_3];
   MANPAGES_3 = [MANPAGES_3] [manpages_3];
 }
 
@@ -94,12 +96,42 @@ D_LIBS = [D_LIBS] [LIBSTIL_D];
 A_LIBS = [A_LIBS] [LIBSTIL_A];
 P_LIBS = [P_LIBS] [LIBSTIL_P];
 S_LIBS = [S_LIBS] [LIBSTIL_S];
+S_LINKS = [S_LINKS] [objdir]/lib/c/libstil/lib/libstil.so;
 
 /*
  * User cook'ables.
  */
 
-libstil : [LIBSTIL_D] [LIBSTIL_A] [LIBSTIL_P] [LIBSTIL_S];
+libstil : [LIBSTIL_D] [LIBSTIL_A] [LIBSTIL_P]
+#if [ENABLE_SHARED]
+          [LIBSTIL_S]
+#endif
+;
+
+libstil_install : libstil_install_d libstil_install_a libstil_install_p
+#if [ENABLE_SHARED]
+                   libstil_install_s
+#endif
+;
+
+libstil_uninstall :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo rm -f [PREFIX]/lib/libstil*
+rm -f [PREFIX]/lib/libstil*
+
+echo rm -rf [PREFIX]/include/libstil
+rm -rf [PREFIX]/include/libstil
+
+for i in [LIBSTIL_MANPAGES_3]; do
+	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
+	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
+done
+dataend
+}
 
 /*
  * Various flags.
@@ -108,6 +140,58 @@ libstil : [LIBSTIL_D] [LIBSTIL_A] [LIBSTIL_P] [LIBSTIL_S];
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libstil/include
                       -I[objdir]/lib/c/libstil/include/libstil;
 D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTIL_DBG;
+
+/*
+ * Build rules.
+ */
+
+libstil_install_common :
+{
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo [INSTALL] -d [PREFIX]/include/libstil
+[INSTALL] -d [PREFIX]/include/libstil
+
+for i in [LIBSTIL_INCS]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/include/libstil/
+	[INSTALL] -m 0644 $i [PREFIX]/include/libstil/
+done
+
+echo [INSTALL] -d [PREFIX]/man/man3
+[INSTALL] -d [PREFIX]/man/man3
+
+for i in [LIBSTIL_MANPAGES_3]; do
+	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
+	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
+done
+
+echo [INSTALL] -d [PREFIX]/lib
+[INSTALL] -d [PREFIX]/lib
+dataend
+}
+
+libstil_install_d : [LIBSTIL_D] libstil_install_common
+{
+	[INSTALL] -m 0444 [LIBSTIL_D] [PREFIX]/lib;
+}
+
+libstil_install_a : [LIBSTIL_A] libstil_install_common
+{
+	[INSTALL] -m 0444 [LIBSTIL_A] [PREFIX]/lib;
+}
+
+libstil_install_p : [LIBSTIL_P] libstil_install_common
+{
+	[INSTALL] -m 0444 [LIBSTIL_P] [PREFIX]/lib;
+}
+
+libstil_install_s : [LIBSTIL_D] libstil_install_common
+{
+	[INSTALL] -m 0444 [LIBSTIL_S] [PREFIX]/lib;
+	[LN] -sf libstil.so.[LIBSTIL_REV] [PREFIX]/lib/libstil.so;
+}
 
 /*
  * Dependencies.
@@ -138,4 +222,5 @@ D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTIL_DBG;
   set mkdir
 {
   [CC] -shared -o [target] [need];
+  [LN] -sf libstil.so.[LIBSTIL_REV] [objdir]/lib/c/libstil/lib/libstil.so;
 }
