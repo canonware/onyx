@@ -17,7 +17,7 @@ void
 envdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, char **a_envp)
 {
 	int		i;
-	char		*key_str, *val_str;
+	char		*val_str;
 	cw_uint8_t	*t_str;
 	cw_uint32_t	key_len, val_len;
 	cw_stilo_t	key_stilo, val_stilo;
@@ -30,18 +30,19 @@ envdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, char **a_envp)
 		 * and insert them into the dictionary.
 		 */
 		for (i = 0; a_envp[i] != NULL; i++) {
-			/* Break the key and value apart. */
-			val_str = a_envp[i];
-			key_str = strsep(&val_str, "=");
-			key_len = val_str - key_str - 1;
-			val_len = strlen(val_str);
+			/* Find the '=' that separates key and value. */
+			val_str = strchr(a_envp[i], '=');
+			key_len = val_str - a_envp[i];
+			val_str++;
 
 			/* Create key. */
-			stilo_name_new(&key_stilo, a_stil, key_str, key_len,
-			    FALSE);
+			stilo_name_new(&key_stilo, a_stil, a_envp[i],
+			    key_len, FALSE);
 
 			/* Create value. */
-			stilo_string_new(&val_stilo, a_stil, TRUE, val_len);
+			val_len = strlen(val_str);
+			stilo_string_new(&val_stilo, a_stil, TRUE,
+			    val_len);
 			t_str = stilo_string_get(&val_stilo);
 			stilo_string_lock(&val_stilo);
 			memcpy(t_str, val_str, val_len);

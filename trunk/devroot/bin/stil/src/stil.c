@@ -137,9 +137,7 @@ end
 		el_set(el, EL_EDITOR, editor);
 /*  		el_set(el, EL_SIGNAL, 1); */
 
-/*  		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void */
-/*  		    *)&arg); */
-		stil_new(&stil, argc, argv, NULL, cl_read, NULL, NULL, (void
+		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
 		    *)&arg);
 		stilt = stil_stilt_get(&stil);
 		stilts_new(&stilts);
