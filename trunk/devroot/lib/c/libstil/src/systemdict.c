@@ -192,7 +192,9 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
 	}
 
-	/* Initialize entries that are not operators. */
+	/*
+	 * Initialize entries that are not operators.
+	 */
 
 	/* globaldict. */
 	stilo_name_new(&name, stilt_stil_get(a_stilt),

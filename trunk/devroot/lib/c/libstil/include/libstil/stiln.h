@@ -179,6 +179,7 @@ typedef enum {
 	STILN_tell,
 	STILN_test,
 	STILN_thread,
+	STILN_threaddict,
 	STILN_timedwait,
 	STILN_timeout,
 	STILN_token,
