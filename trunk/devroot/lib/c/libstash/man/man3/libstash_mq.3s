@@ -11,23 +11,8 @@ Version: <Version>
 .SH NAME
 mq - Message queue.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
-
-.I void *
-.br
-.B mq_timedget
-.RI ( "cw_mq_t * a_mq" ", " "const struct timespec * a_timeout" )
-
-.I void *
-.br
-.B mq_get
-.RI ( "cw_mq_t * a_mq" )
-
-.SS General
 .I cw_mq_t *
 .br
 .B mq_new
@@ -41,6 +26,16 @@ mq - Message queue.
 .I void *
 .br
 .B mq_tryget
+.RI ( "cw_mq_t * a_mq" )
+
+.I void *
+.br
+.B mq_timedget
+.RI ( "cw_mq_t * a_mq" ", " "const struct timespec * a_timeout" )
+
+.I void *
+.br
+.B mq_get
 .RI ( "cw_mq_t * a_mq" )
 
 .I cw_sint32_t

@@ -11,13 +11,8 @@ Version: <Version>
 .SH NAME
 pezz - Grouped memory allocation of equal-size buffers.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
-
-.SS General
 .I cw_pezz_t *
 .br
 .B pezz_new

@@ -10,15 +10,15 @@ AC_INIT(Howto.cook.in)
 objdir=.
 AC_SUBST(objdir)
 
-if test "x$objdir" = "x$srcdir" ; then
-  dnl Clean up the mess that has thus far been made by autoconf.
-  rm -f config.cache config.log confdefs.h
-
-  echo "Object directory same as source directory.  Changing to \"obj\""
-  mkdir -p obj
-  cd obj
-  exec ../configure $@
-fi
+dnl if test "x$objdir" = "x$srcdir" ; then
+dnl   dnl Clean up the mess that has thus far been made by autoconf.
+dnl   rm -f config.cache config.log confdefs.h
+dnl 
+dnl   echo "Object directory same as source directory.  Changing to \"obj\""
+dnl   mkdir -p obj
+dnl   cd obj
+dnl   exec ../configure $@
+dnl fi
 
 cfghdrs=
 if test -d "$srcdir/lib/c/libstash" ; then

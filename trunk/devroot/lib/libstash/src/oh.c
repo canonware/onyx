@@ -873,7 +873,7 @@ oh_h1_direct(const void * a_key)
   retval = (cw_uint64_t) (cw_uint32_t) a_key;
 
   /* Shift right until we've shifted one 1 bit off. */
-  for (i = 0; i < 4 * sizeof(void *); i++)
+  for (i = 0; i < 8 * sizeof(void *); i++)
   {
     if ((retval & 0x1) == 1)
     {
@@ -892,6 +892,9 @@ oh_h1_direct(const void * a_key)
 cw_bool_t
 oh_key_compare_string(const void * a_k1, const void * a_k2)
 {
+  _cw_check_ptr(a_k1);
+  _cw_check_ptr(a_k2);
+  
   return strcmp((char *) a_k1, (char *) a_k2) ? FALSE : TRUE;
 }
 

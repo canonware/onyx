@@ -11,22 +11,17 @@ Version: <Version>
 .SH NAME
 list, list_item - Doubly linked list.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
+.I cw_list_item_t *
+.br
+.B list_item_new
+.RI ( "void" )
 
 .I cw_list_t *
 .br
 .B list_new_r
 .RI ( "cw_list_t * a_list" )
-
-.SS General
-.I cw_list_item_t *
-.br
-.B list_item_new
-.RI ( "void" )
 
 .I void
 .br

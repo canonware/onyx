@@ -12,35 +12,19 @@ Version: <Version>
 libstash - Library of algorithms and data structures designed for transaction
 processing.
 .SH SYNOPSIS
-.SS Single-threaded
 cc
 .I file
--lstash
+-lstash -lpthread
 .br
 cc -g -D_LIBSTASH_DEBUG
 .I file
--lstash_d
+-lstash_d -lpthread
 .br
 cc -pg
 .I file
--lstash_p
+-lstash_p -lpthread
 
 \fB#include <libstash/libstash.h>\fR
-
-.SS Multi-threaded
-cc
-.I file
--lstash_r -lpthread
-.br
-cc -g -D_LIBSTASH_DEBUG
-.I file
--lstash_r_d -lpthread
-.br
-cc -pg
-.I file
--lstash_r_p -lpthread
-
-\fB#include <libstash/libstash_r.h>\fR
 
 .SS General
 .I cw_bool_t
@@ -536,10 +520,10 @@ l | l | l.
  bhpi@libstash_bhp(3s)@Binomial heap node.
  buf@libstash_buf(3s)@Extensible buffer.
  bufc@libstash_buf(3s)@Reference-counted memory buffer.
+ ch@libstash_ch(3s)@Chained hashing.
  cnd@libstash_cnd(3s)@Condition.
  dbg@libstash_dbg(3s)@Runtime debugging symbol lookup.
  list@libstash_list(3s)@Doubly linked list.
- matrix@libstash_matrix(3s)@Matrix.
  mem@libstash_mem(3s)@Memory allocation (malloc(3) wrapper).
  mq@libstash_mq(3s)@Message queue.
  mtx@libstash_mtx(3s)@Mutex.

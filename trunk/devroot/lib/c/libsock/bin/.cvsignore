@@ -1,4 +1,4 @@
-*.d
+*.[do]_*
 *.core
 core
 proxy
@@ -6,3 +6,4 @@ ncat
 blow
 suck
 echos
+.cook.fp

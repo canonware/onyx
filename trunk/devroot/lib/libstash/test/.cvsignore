@@ -6,4 +6,4 @@ b_*_[a-z]
 p*.pl
 *.core
 core
-verify
+.cook.fp

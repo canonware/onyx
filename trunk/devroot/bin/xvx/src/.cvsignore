@@ -1,4 +1,5 @@
-*.[od]
+*.[od]_*
 xvx
 core
 *.core
+.cook.fp

@@ -12,11 +12,7 @@ Version: <Version>
 mem - malloc wrapper.
 
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
-
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
 
 .SS General
 .I cw_mem_t *

@@ -11,22 +11,17 @@ Version: <Version>
 .SH NAME
 arena - Chunk-based memory allocator.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
+.I cw_arena_t *
+.br
+.B arena_new
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
+.IR "cw_uint32_t a_max_chunks" )
 
 .I cw_arena_t *
 .br
 .B arena_new_r
-.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
-.IR "cw_uint32_t a_max_chunks" )
-
-.SS General
-.I cw_arena_t *
-.br
-.B arena_new
 .RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
 .IR "cw_uint32_t a_max_chunks" )
 

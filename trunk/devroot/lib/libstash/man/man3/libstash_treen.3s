@@ -11,13 +11,8 @@ Version: <Version>
 .SH NAME
 treen - Arbitrary tree (tree node).
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
-
-.SS General
 .I cw_treen_t *
 .br
 .B treen_new

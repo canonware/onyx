@@ -12,13 +12,8 @@ Version: <Version>
 out, spec - Formatted output (printf(3) replacement) and format specifier
 helpers.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
-
-.SS General
 .I typedef cw_sint32_t
 .br
 .B cw_out_metric_t
@@ -67,6 +62,11 @@ helpers.
 .br
 .B out_put
 .RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put
+.RI ( "const char * a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
@@ -74,11 +74,23 @@ helpers.
 .RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
 .IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
 .IR "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_e
+.RI ( "const char * a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
+.IR "const char * a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_l
 .RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_l
+.RI ( "const char * a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
@@ -86,11 +98,24 @@ helpers.
 .RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
 .IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
 .IR "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_le
+.RI ( "const char * a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
+.IR "const char * a_format" ", " "..." )
 
 .I cw_sint32_t
 .br
 .B out_put_n
 .RI ( "cw_out_t * a_out" ", " "cw_uint32_t a_size" ", "
+.IR "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_n
+.RI ( "cw_uint32_t a_size" ", "
 .IR "const char * a_format" ", " "..." )
 
 .I cw_sint32_t
@@ -570,6 +595,11 @@ Set a_out's default file descriptor number.
 .B out_put
 .RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
 .br
+.I cw_sint32_t
+.br
+.B _cw_out_put
+.RI ( "const char * a_format" ", " "..." )
+.br
 Input(s):
 .RS
 .IR a_out :
@@ -609,6 +639,13 @@ Print formatted output.
 .br
 .B out_put_e
 .RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
+.IR "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_e
+.RI ( "const char * a_file_name" ", "
 .IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
 .IR "const char * a_format" ", " "..." )
 .br
@@ -668,6 +705,11 @@ prepended to the output.
 .B out_put_l
 .RI ( "cw_out_t * a_out" ", " "const char * a_format" ", " "..." )
 .br
+.I cw_sint32_t
+.br
+.B _cw_out_put_l
+.RI ( "const char * a_format" ", " "..." )
+.br
 Input(s):
 .RS
 .IR a_out :
@@ -708,6 +750,13 @@ the output.
 .br
 .B out_put_le
 .RI ( "cw_out_t * a_out" ", " "const char * a_file_name" ", "
+.IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
+.IR "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_le
+.RI ( "const char * a_file_name" ", "
 .IR "cw_uint32_t a_line_num" ", " "const char * a_func_name" ", "
 .IR "const char * a_format" ", " "..." )
 .br
@@ -763,6 +812,12 @@ Print formatted output, with \*(lq[yy/mm/dd hh:mm:ss (zz)]: \*(rq and optional
 .br
 .B out_put_n
 .RI ( "cw_out_t * a_out" ", " "cw_uint32_t a_size" ", "
+.IR "const char * a_format" ", " "..." )
+.br
+.I cw_sint32_t
+.br
+.B _cw_out_put_n
+.RI ( "cw_uint32_t a_size" ", "
 .IR "const char * a_format" ", " "..." )
 .br
 Input(s):

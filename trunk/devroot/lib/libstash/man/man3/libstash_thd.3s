@@ -11,11 +11,7 @@ Version: <Version>
 .SH NAME
 thd - Thread.
 .SH SYNOPSIS
-.SS Single-threaded
-N/A.
-
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
+\fB#include <libstash/libstash.h>\fR
 
 .I cw_thd_t *
 .br

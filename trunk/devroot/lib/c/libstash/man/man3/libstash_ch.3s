@@ -1,0 +1,506 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_ch 3s "libstash, version <Version>"
+.Nm libstash_ch
+.hy 1
+.SH NAME
+ch - Chained hashing.
+.SH SYNOPSIS
+\fB#include <libstash/libstash.h>\fR
+
+.I cw_ch_t *
+.br
+.B ch_new
+.RI ( "cw_ch_t * a_ch" ", " "cw_uint32_t a_table_size" ", "
+.IR "cw_pezz_t * a_chi_pezz" ", " "ch_hash_t * a_hash" ", "
+.IR "ch_key_comp_t * a_key_comp" )
+
+.I void
+.br
+.B ch_delete
+.RI ( "cw_ch_t * a_ch" )
+
+.I cw_uint32_t
+.br
+.B ch_count
+.RI ( "cw_ch_t * a_ch" )
+
+.I cw_bool_t
+.br
+.B ch_insert
+.RI ( "cw_ch_t * a_ch" ", " "const void * a_key" ", " "const void * a_data" )
+
+.I cw_bool_t
+.br
+.B ch_remove
+.RI ( "cw_ch_t * a_ch" ", " "const void * a_search_key" ", " "void ** r_key"
+.RI ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B ch_search
+.RI ( "cw_ch_t * a_ch" ", " "const void * a_key" ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B ch_get_iterate
+.RI ( "cw_ch_t * a_ch" ", "  "void ** r_key" ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B ch_remove_iterate
+.RI ( "cw_ch_t * a_ch" ", " "void ** r_key" ", " "void ** r_data<args>" )
+
+.I void
+.br
+.B ch_dump
+.RI ( "cw_ch_t * a_ch" ", " "const char * a_prefix" )
+
+.I cw_uint32_t
+.br
+.B ch_hash_string
+.RI ( "const void * a_key" )
+
+.I cw_uint32_t
+.br
+.B ch_hash_direct
+.RI ( "const void * a_key" )
+
+.I cw_bool_t
+.br
+.B ch_key_comp_string
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+
+.I cw_bool_t
+.br
+.B ch_key_comp_direct
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+Chained hashing class.  This is a simple bucket chaining hash table
+implementation.  Table size is set at creation time, and cannot be changed, so
+performance will suffer if a \fBch\fR is over-filled.  The main \fBcw_ch_t\fR
+data structure and the table are contiguously allocated, which means that care
+must be taken when manually pre-allocating space for the structure (see details
+in the USAGE section).  Each item that is inserted into the \fBch\fR is
+encapsulated by a \fBcw_chi_t\fR object, which is allocated from a \fBpezz\fR if
+one is specified in the call to \fBch_new()\fR, or via the \fBmem\fR class
+otherwise.
+
+Multiple entries with the same key are allowed and are stored in LIFO order.
+
+Calling \fBch_remove_iterate\fR() and \fBch_get_iterate\fR() are guaranteed to
+operate on the oldest item in the hash table, which means that the hash code has
+an integrated FIFO queue.
+
+\fBch\fR is meant to be as small and simple as reasonably possible without
+compromising performance.  Note that it is not well suited for situations where
+the number of items can vary wildly.
+
+.SH USAGE
+.I cw_ch_t *
+.br
+.B ch_new
+.RI ( "cw_ch_t * a_ch" ", " "cw_uint32_t a_table_size" ", "
+.IR "cw_pezz_t * a_chi_pezz" ", " "ch_hash_t * a_hash" ", "
+.IR "ch_key_comp_t * a_key_comp" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to space for a ch with a_table_size slots, or NULL.  Use the
+_CW_CH_TABLE2SIZEOF() macro to calculate the total space needed for a given
+table size.
+.RE
+.IR a_table_size :
+.RS
+Number of slots in the hash table.
+.RE
+.IR a_chi_pezz :
+.RS
+Non-NULL: Pointer to a pezz from which to allocate cw_chi_t structures
+.br
+NULL: Allocate cw_chi_t structures using the mem class.
+.RE
+.IR a_hash :
+.RS
+Pointer to a hashing function.
+.RE
+.IR a_key_comp :
+.RS
+Pointer to a key comparison function.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a ch.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B ch_delete
+.RI ( "cw_ch_t * a_ch" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B ch_count
+.RI ( "cw_ch_t * a_ch" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of items in a_ch.
+.RE
+.RE
+Description:
+.RS
+Return the number of items in a_ch.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_insert
+.RI ( "cw_ch_t * a_ch" ", " "const void * a_key" ", " "const void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.IR a_data :
+.RS
+Pointer to data associated with a_key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Insert a_data into a_ch, using key a_key.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_remove
+.RI ( "cw_ch_t * a_ch" ", " "const void * a_search_key" ", " "void ** r_key"
+.RI ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_search
+.RI ( "cw_ch_t * a_ch" ", " "const void * a_key" ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_get_iterate
+.RI ( "cw_ch_t * a_ch" ", "  "void ** r_key" ", " "void ** r_data" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_remove_iterate
+.RI ( "cw_ch_t * a_ch" ", " "void ** r_key" ", " "void ** r_data<args>" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I void
+.br
+.B ch_dump
+.RI ( "cw_ch_t * a_ch" ", " "const char * a_prefix" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B ch_hash_string
+.RI ( "const void * a_key" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B ch_hash_direct
+.RI ( "const void * a_key" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_key_comp_string
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B ch_key_comp_direct
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+.br
+Input(s):
+.RS
+.IR a_ch :
+.RS
+Pointer to a ch.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

@@ -11,18 +11,8 @@ Version: <Version>
 .SH NAME
 bhp, bhpi - Binomial heap.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
-
-.I cw_bhp_t *
-.br
-.B bhp_new_r
-.RI ( "cw_bhp_t * a_bhp" ", " "bhp_prio_comp_t * a_prio_comp" )
-
-.SS General
 .I cw_bhpi_t *
 .br
 .B bhpi_new
@@ -39,6 +29,11 @@ bhp, bhpi - Binomial heap.
 .I cw_bhp_t *
 .br
 .B bhp_new
+.RI ( "cw_bhp_t * a_bhp" ", " "bhp_prio_comp_t * a_prio_comp" )
+
+.I cw_bhp_t *
+.br
+.B bhp_new_r
 .RI ( "cw_bhp_t * a_bhp" ", " "bhp_prio_comp_t * a_prio_comp" )
 
 .I void

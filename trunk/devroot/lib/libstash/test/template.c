@@ -8,10 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- *
- *
  ****************************************************************************/
 
 #include "../include/libstash/libstash.h"

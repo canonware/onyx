@@ -74,9 +74,13 @@ out_get_default_fd(cw_out_t * a_out);
 void
 out_set_default_fd(cw_out_t * a_out, cw_sint32_t a_fd);
 
+#define _cw_out_put(a_format, a_args...) \
+  out_put(cw_g_out, a_format , ## a_args)
 cw_sint32_t
 out_put(cw_out_t * a_out, const char * a_format, ...);
 
+#define _cw_out_put_e(a_format, a_args...) \
+  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__, a_format , ## a_args)
 cw_sint32_t
 out_put_e(cw_out_t * a_out,
 	  const char * a_file_name,
@@ -85,9 +89,13 @@ out_put_e(cw_out_t * a_out,
 	  const char * a_format,
 	  ...);
 
+#define _cw_out_put_l(a_format, a_args...) \
+  out_put_l(cw_g_out, a_format , ## a_args)
 cw_sint32_t
 out_put_l(cw_out_t * a_out, const char * a_format, ...);
 
+#define _cw_out_put_le(a_format, a_args...) \
+  out_put_le(cw_g_out, __FILE__, __LINE__, __FUNCTION__, a_format , ## a_args)
 cw_sint32_t
 out_put_le(cw_out_t * a_out,
 	   const char * a_file_name,
@@ -96,6 +104,8 @@ out_put_le(cw_out_t * a_out,
 	   const char * a_format,
 	   ...);
 
+#define _cw_out_put_n(a_format, a_size, a_args...) \
+  out_put(cw_g_out, a_size, a_format , ## a_args)
 cw_sint32_t
 out_put_n(cw_out_t * a_out, cw_uint32_t a_size,
 	  const char * a_format, ...);

@@ -86,12 +86,12 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 /* Man pages. */
 {
   local manpages_3 = libstash.3s libstash_arena.3s libstash_bhp.3s
-                     libstash_buf.3s libstash_cnd.3s libstash_dbg.3s
-                     libstash_list.3s libstash_mem.3s libstash_mq.3s
-                     libstash_mtx.3s libstash_oh.3s libstash_out.3s
-                     libstash_pezz.3s libstash_res.3s libstash_ring.3s
-                     libstash_rwl.3s libstash_sem.3s libstash_thd.3s
-                     libstash_tsd.3s libstash_treen.3s;
+                     libstash_buf.3s libstash_ch.3s libstash_cnd.3s
+                     libstash_dbg.3s libstash_list.3s libstash_mem.3s
+                     libstash_mq.3s libstash_mtx.3s libstash_oh.3s
+		     libstash_out.3s libstash_pezz.3s libstash_res.3s
+		     libstash_ring.3s libstash_rwl.3s libstash_sem.3s
+		     libstash_thd.3s libstash_tsd.3s libstash_treen.3s;
   manpages_3 = [fromto % [srcdir]/lib/c/libstash/man/man3/% [manpages_3]];
 
   MANPAGES_3 = [MANPAGES_3] [manpages_3];

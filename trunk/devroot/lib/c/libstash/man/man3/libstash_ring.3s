@@ -11,13 +11,8 @@ Version: <Version>
 .SH NAME
 ring - Doubly linked ring, similar to a doubly linked list.
 .SH SYNOPSIS
-.SS Single-threaded
 \fB#include <libstash/libstash.h>\fR
 
-.SS Multi-threaded
-\fB#include <libstash/libstash_r.h>\fR
-
-.SS General
 .I cw_ring_t *
 .br
 .B ring_new
