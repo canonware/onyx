@@ -1,14 +1,15 @@
 /* -*-mode:c-*-
  ****************************************************************************
  *
- * <Copyright>
+ * <Copyright = "jasone">
+ * <License>
  *
  ****************************************************************************
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 121 $
- * Last modified: $Date: 1998-07-01 17:22:38 -0700 (Wed, 01 Jul 1998) $
+ * Current revision: $Revision: 125 $
+ * Last modified: $Date: 1998-07-02 16:55:52 -0700 (Thu, 02 Jul 1998) $
  *
  * <<< Description >>>
  *
