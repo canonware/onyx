@@ -1,3 +1,7 @@
+2001-07-17  Jason Evans  <jasone@canonware.com>
+
+	* man/man1/onyx.1.in: Add man page.
+
 2001-07-14  Jason Evans  <jasone@canonware.com>
 
 	* Cookfile.inc: Link directly with libedit.a rather than using

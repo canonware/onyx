@@ -212,6 +212,9 @@ onyx_install_self : [ONYX]
        [RPATH][PREFIX]/lib
        [LDFLAGS] -lonyx -lstash -lcurses [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/onyx;
+
+  [INSTALL] -d [PREFIX]/man/man1;
+  [INSTALL] -m 0444 [objdir]/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
 }
 
 onyx_install : onyx_install_self
@@ -220,6 +223,7 @@ onyx_install : onyx_install_self
 onyx_uninstall :
 {
   rm -f [PREFIX]/bin/onyx;
+  rm -f [PREFIX]/man/man1/onyx.1;
 }
 
 onyx_clean :
@@ -229,6 +233,7 @@ onyx_clean :
 onyx_distclean :
 {
   rm -f [objdir]/bin/onyx/doc/latex/manual.tex;
+  rm -f [objdir]/bin/onyx/man/man1/onyx.1;
 }
 
 /*

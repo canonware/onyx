@@ -15,6 +15,7 @@
  * Global variables.
  */
 BINS = ;
+MAN1 = ;
 
 /*
  * Build rules for binary C files --> object files.
