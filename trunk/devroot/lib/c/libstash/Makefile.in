@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 225 $
-# Last modified: $Date: 1998-09-19 18:09:09 -0700 (Sat, 19 Sep 1998) $
+# Current revision: $Revision: 231 $
+# Last modified: $Date: 1998-09-19 23:32:24 -0700 (Sat, 19 Sep 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -21,7 +21,7 @@
 #
 
 # Include files that _are_ installed.
-INCS := stash_incs.h bhp.h br.h brblk.h brbs.h brmap.h buf.h dbg.h \
+INCS := stash_incs.h bhp.h br.h brblk.h brbs.h buf.h dbg.h \
 	glob.h jt.h list.h locks.h log.h matrix.h mem.h oh.h res.h \
 	sock.h socks.h thread.h
 
@@ -31,7 +31,7 @@ PRIV_INCS := bhp_priv.h br_priv.h brbs_priv.h \
 	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
 
 # Source files.
-SRCS := bhp.c br.c brblk.c brbs.c brmap.c buf.c dbg.c \
+SRCS := bhp.c br.c brblk.c brbs.c buf.c dbg.c \
 	glob.c jt.c list.c locks.c log.c matrix.c mem.c oh.c res.c sock.c \
 	socks.c thread.c zt.c
 
