@@ -31,6 +31,7 @@ clopt <
 	    #   `--flag' --> [arg? handler]
 	    $handlers dict
 	    $index 0
+	    $flag null
 	    $arg null
 	> over data copy pop
     } bind
@@ -98,7 +99,8 @@ clopt <
 	    # Set index.
 	    $index over ;def
 
-	    # Reset arg.
+	    # Reset flag and arg.
+	    $flag null ;def
 	    $arg null ;def
 
 	    2 ndup get
@@ -214,6 +216,9 @@ clopt <
 	} ifelse
 	#opt #arg #handler
     
+	# Store the flag.
+	$flag 3 idup ;def
+
 	# Store the argument.
 	$arg 2 idup ;def
 
@@ -266,6 +271,9 @@ clopt <
 		    get
 		    #argv #i #elm #class #arg
 
+		    # Set flag.
+		    $flag 1 submatch ;def
+
 		    # Set argument.
 		    $arg exch ;def
 		}{
@@ -275,6 +283,9 @@ clopt <
 		    ;error_escape
 		} ifelse
 	    }{
+		# Set flag.
+		$flag 1 submatch ;def
+
 		# Set argument.
 		$arg 2 submatch ;def
 	    } ifelse
@@ -326,6 +337,14 @@ clopt <
 	,index
     } bind
 
+    # Return the current option flag.  This is provided to aid option handlers.
+    #
+    #instance#
+    #- flag_get #flag
+    $flag_get {
+	,flag
+    } bind
+
     # Return the current option argument.  This is provided to aid option
     # handlers.
     #
@@ -333,5 +352,71 @@ clopt <
     #- arg_get #arg
     $arg_get {
 	,arg
+    } bind
+
+    # Map the current option argument to a value, and return that value.
+    #
+    #instance#
+    #enum arg_enum_get #value
+    $arg_enum_get {
+	,arg 2 ndup known {
+	    get
+	}{
+	    null eq {
+		dup $default known {
+		    $default get
+		}{
+		    `Missing value for option ' ,flag cat ;error_escape
+		} ifelse
+	    }{
+		`Unsupported value \`' ,arg `\' for option ' ,flag 4 ncat
+		;error_escape
+	    } ifelse
+	    
+	} ifelse
+    } bind
+
+    # Return the current option argument as an integer.
+    #
+    #instance#
+    #- arg_int_get #int
+    $arg_int_get {
+	,arg token {
+	    dup type $integertype eq {
+		# Stash the result until the error checking is done.
+		aup
+
+		# Make sure that there is no trailing garbage after the integer
+		# token.
+		dup `' eq {
+		    # No trailing garbage.
+		    pop
+		}{
+		    `Trailing garbage \`' exch `\' for option ' ,flag 4 ncat
+		    ;error_escape
+		} ifelse
+	    }{
+		`Error parsing seed value \`' ;arg_get `\' for option ' ,flag
+		4 ncat
+		;error_escape
+	    } ifelse
+	}{
+	    `Error parsing seed value \`' ;arg_get `\' for option ' ,flag 4 ncat
+	    ;error_escape
+	} ifelse
+
+	# Unstash the result.
+	adn
+    } bind
+
+    # Return the current option argument as an unsigned integer.
+    #
+    #instance#
+    #- arg_uint_get #uint
+    $arg_uint_get {
+	;arg_int_get
+	dup 0 lt {
+	    `Integer must be non-negative for option ' ,flag cat ;error_escape
+	} if
     } bind
 > setmethods
