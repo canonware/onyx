@@ -74,6 +74,7 @@ cw_bool_t
 socks_listen(cw_socks_t * a_socks, int * r_port)
 {
   cw_bool_t retval;
+  int val;
   struct sockaddr_in server_addr;
 
   _cw_check_ptr(a_socks);
@@ -89,6 +90,18 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
       log_eprintf(cw_g_log, NULL, 0, "socks_listen",
 		  "Error in socket(): %s\n", strerror(errno));
     }
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  /* Re-use the socket. */
+  val = 1;
+  if (0 > setsockopt(a_socks->sockfd, SOL_SOCKET, SO_REUSEADDR,
+		     (void *) &val, sizeof(val)))
+  {
+    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
+		"Error for SO_REUSEADDR in setsockopt(): %s\n",
+		strerror(errno));
     retval = TRUE;
     goto RETURN;
   }
