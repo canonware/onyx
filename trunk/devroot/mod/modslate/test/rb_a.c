@@ -134,6 +134,11 @@ tree_iterate(tree_t *a_tree)
 	cw_assert(snode != rb_tree_nil(a_tree));
 	cw_assert(snode->key == key.key);
 
+	/* Test rb_nsearch(). */
+	rb_nsearch(a_tree, &key, node_comp, node_t, link, snode);
+	cw_assert(snode != rb_tree_nil(a_tree));
+	cw_assert(snode->key == key.key);
+
 	rb_next(a_tree, node, node_t, link, node);
     }
 
@@ -164,6 +169,11 @@ tree_reverse_iterate(tree_t *a_tree)
 	cw_assert(snode != rb_tree_nil(a_tree));
 	cw_assert(snode->key == key.key);
 
+	/* Test rb_nsearch(). */
+	rb_nsearch(a_tree, &key, node_comp, node_t, link, snode);
+	cw_assert(snode != rb_tree_nil(a_tree));
+	cw_assert(snode->key == key.key);
+
 	rb_prev(a_tree, node, node_t, link, node);
     }
 
@@ -174,7 +184,7 @@ main()
 {
     tree_t tree;
 #define NNODES 16
-    node_t nodes[NNODES], key, *node_a, *node_b;
+    node_t nodes[NNODES], key, *snode, *node_a, *node_b;
 #define NSETS 1005
     cw_uint32_t set[NSETS][NNODES] =
 	{
@@ -1270,6 +1280,18 @@ main()
 	fprintf(stderr, "rb_search(0) --> %u\n", node_a->key);
     }
 
+    /* rb_nsearch(). */
+    key.key = 0;
+    rb_nsearch(&tree, &key, node_comp, node_t, link, node_a);
+    if (node_a == rb_tree_nil(&tree))
+    {
+	fprintf(stderr, "rb_nsearch(0) --> nil\n");
+    }
+    else
+    {
+	fprintf(stderr, "rb_nsearch(0) --> %u\n", node_a->key);
+    }
+
     /* rb_insert(). */
     for (i = 0; i < NSETS; i++)
     {
@@ -1315,6 +1337,28 @@ main()
 	    fprintf(stderr, "rb_remove(%2u)", nodes[j].key);
 #endif
 	    rb_remove(&tree, &nodes[j], node_t, link);
+
+	    /* Test rb_nsearch(). */
+	    rb_nsearch(&tree, &nodes[j], node_comp, node_t, link, snode);
+	    cw_assert(snode == rb_tree_nil(&tree)
+		      || snode->key >= key.key);
+#if (0)
+	    if (snode != rb_tree_nil(&tree))
+	    {
+		if (snode->key == key.key)
+		{
+		    fprintf(stderr, "=");
+		}
+		else
+		{
+		    fprintf(stderr, ">");
+		}
+	    }
+	    else
+	    {
+		fprintf(stderr, ".");
+	    }
+#endif
 	    nodes[j].key = NODE_UNMAGIC;
 
 #ifdef PRINT_TREE

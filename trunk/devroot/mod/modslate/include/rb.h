@@ -164,6 +164,43 @@ struct									\
 	}								\
     } while (0)
 
+/* Find a match if it exists.  Otherwise, find the next greater node, if one
+ * exists. */
+#define rb_nsearch(a_tree, a_key, a_comp, a_type, a_field, r_node)	\
+    do									\
+    {									\
+	cw_sint32_t t;							\
+	(r_node) = (a_tree)->rbt_root;					\
+	while ((r_node) != &(a_tree)->rbt_nil				\
+	       && (t = (a_comp)((a_key), (r_node))) != 0)		\
+	{								\
+	    if (t == -1)						\
+	    {								\
+		if ((r_node)->a_field.rbn_left == &(a_tree)->rbt_nil)	\
+		{							\
+		    break;						\
+		}							\
+		(r_node) = (r_node)->a_field.rbn_left;			\
+	    }								\
+	    else							\
+	    {								\
+		if ((r_node)->a_field.rbn_right == &(a_tree)->rbt_nil)	\
+		{							\
+		    a_type *n = (r_node);				\
+		    (r_node) = (r_node)->a_field.rbn_par;		\
+		    while ((r_node) != &(a_tree)->rbt_nil		\
+			   && n == (r_node)->a_field.rbn_right)		\
+		    {							\
+			n = (r_node);					\
+			(r_node) = (r_node)->a_field.rbn_par;		\
+		    }							\
+		    break;						\
+		}							\
+		(r_node) = (r_node)->a_field.rbn_right;			\
+	    }								\
+	}								\
+    } while (0)
+
 #define rb_p_left_rotate(a_tree, a_node, a_type, a_field)		\
     do									\
     {									\

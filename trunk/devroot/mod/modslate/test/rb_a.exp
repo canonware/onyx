@@ -6,6 +6,7 @@ rb_last() --> nil
 rb_next() --> nil
 rb_prev() --> nil
 rb_search(0) --> nil
+rb_nsearch(0) --> nil
 Tree 0
 Tree 1
 Tree 2
