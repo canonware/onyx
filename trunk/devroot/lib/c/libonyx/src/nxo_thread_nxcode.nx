@@ -94,7 +94,7 @@ def
 		} if
 
 		% Print the errorname.
-		`Error /' print /errorname load cvs print `\n' print
+		`Error ' print /errorname load 1 sprint
 
 		% If stack recording is active, print ostack and dstack, plus an
 		% estack/istack execution trace.

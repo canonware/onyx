@@ -226,7 +226,7 @@ systemdict begin
 	/newerror true def
 
 	% Set errorname to the argument passed in.
-	/errorname exch cvx def
+	/errorname exch cvlit def
 
 	% If recordstacks is true, snapshot the stacks.
 	/recordstacks load {
