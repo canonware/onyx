@@ -237,8 +237,7 @@ typedef void *cw_opaque_realloc_t (const void *, void *, size_t, size_t, const
 
 /*
  * Generic typedef used for memory deallocation hooks.  This typedef is
- * compatible with functions such as mem_free_e(), pezz_put_e() and
- * pool_put_e().
+ * compatible with functions such as mem_free_e().
  */
 typedef void cw_opaque_dealloc_t (const void *, const void *, size_t, const char
     *, cw_uint32_t);
@@ -273,7 +272,7 @@ extern cw_mem_t	*cw_g_mem;
 
 /*
  * Used for deallocation via an opaque function pointer.  These macros are used
- * to call functions such as mem_free(), pezz_put(), and pool_put().
+ * to call functions such as mem_free_e().
  */
 #ifdef _CW_DBG
 #define	_cw_opaque_alloc(a_func, a_arg, a_size)				\
