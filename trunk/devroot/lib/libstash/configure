@@ -2449,7 +2449,7 @@ cat >> $CONFIG_STATUS <<EOF
 
 EOF
 cat >> $CONFIG_STATUS <<\EOF
-
+echo timestamp > stamp
 exit 0
 EOF
 chmod +x $CONFIG_STATUS

@@ -10,15 +10,25 @@
  *
  * <<< Description >>>
  *
- * Private header for rwl and jtl classes.
+ *
  *
  ****************************************************************************/
 
+struct cw_log_s
+{
+#ifdef _CW_REENTRANT
+  cw_mtx_t lock;
+#endif
+  cw_bool_t is_logfile_open;
+  char * logfile_name;
+  FILE * log_fp;
+};
+
 /****************************************************************************
  *
- * Do the work of lock granting when a lock is released.
+ * Does a base 10 addition of the strings a_a and a_b, and puts the result
+ * into string a_result.
  *
  ****************************************************************************/
-#define jtl_p_qrwx_unlock _CW_NS_STASH(jtl_p_qrwx_unlock)
-void
-jtl_p_qrwx_unlock(cw_jtl_t * a_jtl);
+static void
+log_p_uint64_base10_add(char * a_result, const char * a_a, const char * a_b);

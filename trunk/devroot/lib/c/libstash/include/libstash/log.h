@@ -46,7 +46,8 @@ log_delete(cw_log_t * a_log);
  ****************************************************************************/
 #define log_set_logfile _CW_NS_STASH(log_set_logfile)
 cw_bool_t
-log_set_logfile(cw_log_t * a_log, char * a_logfile, cw_bool_t a_overwrite);
+log_set_logfile(cw_log_t * a_log, const char * a_logfile,
+		cw_bool_t a_overwrite);
 
 /****************************************************************************
  * <<< Description >>>
@@ -56,7 +57,7 @@ log_set_logfile(cw_log_t * a_log, char * a_logfile, cw_bool_t a_overwrite);
  ****************************************************************************/
 #define log_printf _CW_NS_STASH(log_printf)
 int
-log_printf(cw_log_t * a_log, char * a_format, ...);
+log_printf(cw_log_t * a_log, const char * a_format, ...);
 
 /****************************************************************************
  * <<< Description >>>
@@ -68,10 +69,10 @@ log_printf(cw_log_t * a_log, char * a_format, ...);
 #define log_eprintf _CW_NS_STASH(log_eprintf)
 int
 log_eprintf(cw_log_t * a_log, 
-	    char * a_filename, /* Optional, pass NULL if not used. */
+	    const char * a_filename, /* Optional, pass NULL if not used. */
 	    int a_line_num, /* Only used if (a_filename != NULL) */
-	    char * a_func_name, /* Optional, pass NULL if not used. */
-	    char * a_format, 
+	    const char * a_func_name, /* Optional, pass NULL if not used. */
+	    const char * a_format, 
 	    ...);
 
 /****************************************************************************
@@ -93,7 +94,7 @@ log_eprintf(cw_log_t * a_log,
 int
 log_nprintf(cw_log_t * a_log,
 	    cw_uint32_t a_size,
-	    char * a_format,
+	    const char * a_format,
 	    ...);
 
 /****************************************************************************
@@ -104,7 +105,7 @@ log_nprintf(cw_log_t * a_log,
  ****************************************************************************/
 #define log_lprintf _CW_NS_STASH(log_lprintf)
 int
-log_lprintf(cw_log_t * a_log, char * a_format, ...);
+log_lprintf(cw_log_t * a_log, const char * a_format, ...);
 
 /****************************************************************************
  * <<< Description >>>
@@ -116,10 +117,10 @@ log_lprintf(cw_log_t * a_log, char * a_format, ...);
 #define log_leprintf _CW_NS_STASH(log_leprintf)
 int
 log_leprintf(cw_log_t * a_log,
-	     char * a_filename, /* Optional, pass NULL if not used. */
+	     const char * a_filename, /* Optional, pass NULL if not used. */
 	     int a_line_num, /* Only used if (a_filename != NULL) */
-	     char * a_func_name, /* Optional, pass NULL if not used. */
-	     char * a_format, 
+	     const char * a_func_name, /* Optional, pass NULL if not used. */
+	     const char * a_format,
 	     ...);
 
 /****************************************************************************

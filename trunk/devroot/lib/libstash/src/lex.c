@@ -22,7 +22,7 @@
 #  include "libstash/libstash.h"
 #endif
 
-#include "libstash/lex_priv.h"
+#include "libstash/lex_p.h"
 
 cw_lex_t *
 lex_new()
@@ -37,7 +37,7 @@ lex_delete(cw_lex_t * a_lex)
 
 cw_bool_t
 lex_insert_regex(cw_lex_t * a_lex,
-		 char * a_regex,
+		 const char * a_regex,
 		 cw_uint32_t a_tok_val)
 {
   /* Parse a_regex and generate a graph for it. */
@@ -46,8 +46,8 @@ lex_insert_regex(cw_lex_t * a_lex,
   return TRUE; /* XXX */
 }
 
-char *
-lex_delete_regex(cw_lex_t * a_lex, char * a_regex)
+const char *
+lex_delete_regex(cw_lex_t * a_lex, const char * a_regex)
 {
   return NULL; /* XXX */
 }
@@ -115,7 +115,7 @@ lexer_reject(cw_lexer_t * a_lexer)
 
 cw_bool_t
 lexer_push_text(cw_lexer_t * a_lexer, cw_uint32_t a_strlen,
-		char * a_text)
+		const char * a_text)
 {
   return TRUE; /* XXX */
 }
@@ -149,7 +149,7 @@ lexertok_get_tok_val(cw_lexertok_t * a_lexertok)
   return 0; /* XXX */
 }
 
-char *
+const char *
 lexertok_get_str(cw_lexertok_t * a_lexertok)
 {
   return NULL; /* XXX */

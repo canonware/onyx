@@ -17,7 +17,7 @@
 #  include "libstash/libstash.h"
 #endif
 
-#include "libstash/oh_priv.h"
+#include "libstash/oh_p.h"
 
 cw_oh_t *
 #ifdef _CW_REENTRANT
@@ -471,8 +471,7 @@ oh_set_base_grow_point(cw_oh_t * a_oh,
 }
 
 cw_bool_t
-oh_item_insert(cw_oh_t * a_oh, void * a_key,
-	       void * a_data)
+oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
 {
   cw_oh_item_t * item;
   cw_bool_t retval;
@@ -528,7 +527,7 @@ oh_item_insert(cw_oh_t * a_oh, void * a_key,
 
 cw_bool_t
 oh_item_delete(cw_oh_t * a_oh,
-	       void * a_search_key,
+	       const void * a_search_key,
 	       void ** a_key,
 	       void ** a_data)
 {
@@ -554,8 +553,8 @@ oh_item_delete(cw_oh_t * a_oh,
 
     /* Set the return variables, decrement the item count, and delete the
        item. */
-    *a_key = a_oh->items[slot]->key;
-    *a_data = a_oh->items[slot]->data;
+    *a_key = (void *) a_oh->items[slot]->key;
+    *a_data = (void *) a_oh->items[slot]->data;
     list_remove(&a_oh->items_list, a_oh->items[slot]->list_item);
     /* XXX Potentially a good place for an assertion. */
 
@@ -583,7 +582,7 @@ oh_item_delete(cw_oh_t * a_oh,
 
 cw_bool_t
 oh_item_search(cw_oh_t * a_oh,
-	       void * a_key,
+	       const void * a_key,
 	       void ** a_data)
 {
   cw_uint64_t slot;
@@ -603,7 +602,7 @@ oh_item_search(cw_oh_t * a_oh,
     /* Item found. */
     retval = FALSE;
 
-    *a_data = a_oh->items[slot]->data;
+    *a_data = (void *) a_oh->items[slot]->data;
   }
   else
   {
@@ -641,8 +640,8 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 
     item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
 
-    *a_key = item->key;
-    *a_data = item->data;
+    *a_key = (void *) item->key;
+    *a_data = (void *) item->data;
 
     /* Put the item back on the tail of the list. */
     list_tpush(&a_oh->items_list, item);
@@ -682,8 +681,8 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
 
     item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
 
-    *a_key = item->key;
-    *a_data = item->data;
+    *a_key = (void *) item->key;
+    *a_data = (void *) item->data;
 
     /* Do slot shuffling. */
     a_oh->items[item->slot_num] = NULL;
@@ -899,8 +898,8 @@ oh_get_num_shrinks(cw_oh_t * a_oh)
   return retval;
 }
 
-cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh, void * a_key)
+static cw_uint64_t
+oh_p_h1(cw_oh_t * a_oh, const void * a_key)
 {
   cw_uint64_t retval;
   char * str;
@@ -915,8 +914,8 @@ oh_p_h1(cw_oh_t * a_oh, void * a_key)
   return retval;
 }
 #if (0)
-cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh, void * a_key)
+static cw_uint64_t
+oh_p_h1(cw_oh_t * a_oh, const void * a_key)
 {
   cw_uint64_t retval;
 
@@ -928,13 +927,13 @@ oh_p_h1(cw_oh_t * a_oh, void * a_key)
 }
 #endif
 
-cw_bool_t
-oh_p_key_compare(void * a_k1, void * a_k2)
+static cw_bool_t
+oh_p_key_compare(const void * a_k1, const void * a_k2)
 {
   return strcmp((char *) a_k1, (char *) a_k2) ? FALSE : TRUE;
 }
 
-void
+static void
 oh_p_grow(cw_oh_t * a_oh)
 {
   /* Should we grow? */
@@ -975,7 +974,7 @@ oh_p_grow(cw_oh_t * a_oh)
   }
 }
 
-void
+static void
 oh_p_shrink(cw_oh_t * a_oh)
 {
   cw_uint32_t j;
@@ -1048,7 +1047,7 @@ oh_p_shrink(cw_oh_t * a_oh)
   }
 }
 
-void
+static void
 oh_p_item_insert(cw_oh_t * a_oh,
 		 cw_oh_item_t * a_item)
 {
@@ -1086,9 +1085,9 @@ oh_p_item_insert(cw_oh_t * a_oh,
   }
 }
 
-cw_bool_t
+static cw_bool_t
 oh_p_item_search(cw_oh_t * a_oh,
-		 void * a_key,
+		 const void * a_key,
 		 cw_uint64_t * a_slot)
 {
   cw_uint64_t slot, i, j;
@@ -1121,7 +1120,7 @@ oh_p_item_search(cw_oh_t * a_oh,
   return retval;
 }
 
-void
+static void
 oh_p_rehash(cw_oh_t * a_oh)
 {
   cw_uint64_t i;
@@ -1138,7 +1137,7 @@ oh_p_rehash(cw_oh_t * a_oh)
   }
 }
 
-void
+static void
 oh_p_slot_shuffle(cw_oh_t * a_oh, cw_uint64_t a_slot)
 {
   cw_uint64_t i, curr_empty, curr_look, curr_distance;

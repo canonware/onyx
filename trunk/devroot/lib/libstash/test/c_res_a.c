@@ -28,8 +28,8 @@ main()
     s5[80] = "  	much_white_Space : the resource value w/ trailing    ",
     s6[80] = "trailing.comment : value # This is a comment.",
     s7[80] = " 	 #comment:blah",
-    s8[80] = "  #comment with !@#$% other chars",
-    * str;
+    s8[80] = "  #comment with !@#$% other chars";
+  const char * str;
 
   char es1[80] = "bogus space in name: value",
     es2[80] = "bad_*_character_in_name: value blah",

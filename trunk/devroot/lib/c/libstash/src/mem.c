@@ -16,7 +16,7 @@
 
 #include "libstash/libstash.h"
 
-#include "libstash/mem_priv.h"
+#include "libstash/mem_p.h"
 
 cw_mem_t *
 mem_new()

@@ -51,7 +51,7 @@ dbg_delete(cw_dbg_t * a_dbg);
  ****************************************************************************/
 #define dbg_register _CW_NS_STASH(dbg_register)
 void
-dbg_register(cw_dbg_t * a_dbg, char * a_flag);
+dbg_register(cw_dbg_t * a_dbg, const char * a_flag);
 
 /****************************************************************************
  * <<< Description >>>
@@ -61,7 +61,7 @@ dbg_register(cw_dbg_t * a_dbg, char * a_flag);
  ****************************************************************************/
 #define dbg_unregister _CW_NS_STASH(dbg_unregister)
 void
-dbg_unregister(cw_dbg_t * a_dbg, char * a_flag);
+dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag);
 
 /****************************************************************************
  * <<< Description >>>
@@ -71,4 +71,4 @@ dbg_unregister(cw_dbg_t * a_dbg, char * a_flag);
  ****************************************************************************/
 #define dbg_is_registered _CW_NS_STASH(dbg_is_registered)
 cw_bool_t
-dbg_is_registered(cw_dbg_t * a_dbg, char * a_flag);
+dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag);

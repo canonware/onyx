@@ -2,19 +2,19 @@ Merging in a list...
 Searching for a resource...
 simple:value
 Testing invalid resources handling...
-res_parse_res(): Illegal character while in _STASH_RES_STATE_POST_NAME_WHITESPACE, line 1, column 7
-res_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
-res_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
-res_parse_res(): Illegal character while in _STASH_RES_STATE_POST_NAME_WHITESPACE, line 1, column 12
-res_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
-res_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
-res_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
-res_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
-res_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
-res_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
-res_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
-res_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
-res_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
-res_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
-res_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
-res_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_POST_NAME_WHITESPACE, line 1, column 7
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_POST_NAME_WHITESPACE, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_START, line 1, column 1
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_NAME, line 1, column 5
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12
+res_p_parse_res(): Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line 1, column 12

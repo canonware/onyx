@@ -50,8 +50,8 @@ typedef struct
 {
   cw_uint64_t slot_num;
   cw_uint64_t jumps;
-  void * key;
-  void * data;
+  const void * key;
+  const void * data;
   cw_list_item_t * list_item;
 } cw_oh_item_t;
 
@@ -66,8 +66,8 @@ struct cw_oh_s
   cw_list_t items_list;
   cw_list_t spares_list;
 
-  cw_uint64_t (*curr_h1)(cw_oh_t *, void *);
-  cw_bool_t (*key_compare)(void *, void *);
+  cw_uint64_t (*curr_h1)(cw_oh_t *, const void *);
+  cw_bool_t (*key_compare)(const void *, const void *);
 
   cw_uint64_t size;
 
@@ -90,8 +90,8 @@ struct cw_oh_s
 };
 
 /* Typedefs to allow easy function pointer passing. */
-typedef cw_uint64_t oh_h1_t(cw_oh_t *, void *);
-typedef cw_bool_t oh_key_comp_t(void *, void *);
+typedef cw_uint64_t oh_h1_t(cw_oh_t *, const void *);
+typedef cw_bool_t oh_key_comp_t(const void *, const void *);
 
 /****************************************************************************
  *
@@ -226,7 +226,7 @@ oh_set_base_grow_point(cw_oh_t * a_oh, cw_uint32_t a_grow_point);
  ****************************************************************************/
 #define oh_item_insert _CW_NS_STASH(oh_item_insert)
 cw_bool_t
-oh_item_insert(cw_oh_t * a_oh, void * a_key, void * a_data);
+oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data);
 
 /****************************************************************************
  *
@@ -236,7 +236,7 @@ oh_item_insert(cw_oh_t * a_oh, void * a_key, void * a_data);
  ****************************************************************************/
 #define oh_item_delete _CW_NS_STASH(oh_item_delete)
 cw_bool_t
-oh_item_delete(cw_oh_t * a_oh, void * a_search_key, void ** a_key,
+oh_item_delete(cw_oh_t * a_oh, const void * a_search_key, void ** a_key,
 	       void ** a_data);
 
 /****************************************************************************
@@ -247,7 +247,7 @@ oh_item_delete(cw_oh_t * a_oh, void * a_search_key, void ** a_key,
  ****************************************************************************/
 #define oh_item_search _CW_NS_STASH(oh_item_search)
 cw_bool_t
-oh_item_search(cw_oh_t * a_oh, void * a_key, void ** a_data);
+oh_item_search(cw_oh_t * a_oh, const void * a_key, void ** a_data);
 
 /****************************************************************************
  *

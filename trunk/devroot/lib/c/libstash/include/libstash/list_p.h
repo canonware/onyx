@@ -31,8 +31,7 @@ struct cw_list_item_s
  * Pop an item of the head of the list, without locking.
  *
  ****************************************************************************/
-#define list_p_hpop _CW_NS_STASH(list_p_hpop)
-void *
+static void *
 list_p_hpop(cw_list_t * a_list);
 
 /****************************************************************************
@@ -40,6 +39,5 @@ list_p_hpop(cw_list_t * a_list);
  * Pop an item off the tail of the list, without locking.
  *
  ****************************************************************************/
-#define list_p_tpop _CW_NS_STASH(list_p_tpop)
-void *
+static void *
 list_p_tpop(cw_list_t * a_list);

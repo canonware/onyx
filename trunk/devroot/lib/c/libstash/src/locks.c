@@ -11,7 +11,7 @@
  ****************************************************************************/
 
 #include "libstash/libstash_r.h"
-#include "libstash/locks_priv.h"
+#include "libstash/locks_p.h"
 
 cw_rwl_t *
 rwl_new(cw_rwl_t * a_rwl)
@@ -509,7 +509,7 @@ jtl_set_max_dlocks(cw_jtl_t * a_jtl, cw_uint32_t a_dlocks)
   return retval;
 }
 
-void
+static void
 jtl_p_qrwx_unlock(cw_jtl_t * a_jtl)
 {
   /* Grant locks in this order: x, w, r & q. */

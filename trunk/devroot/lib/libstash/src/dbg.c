@@ -42,7 +42,7 @@ dbg_delete(cw_dbg_t * a_dbg)
 }
 
 void
-dbg_register(cw_dbg_t * a_dbg, char * a_flag)
+dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
 {
   _cw_check_ptr(a_dbg);
 
@@ -53,7 +53,7 @@ dbg_register(cw_dbg_t * a_dbg, char * a_flag)
 }
 
 void
-dbg_unregister(cw_dbg_t * a_dbg, char * a_flag)
+dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag)
 {
   char ** junk1 = NULL, ** junk2 = NULL;
 
@@ -66,7 +66,7 @@ dbg_unregister(cw_dbg_t * a_dbg, char * a_flag)
 }
 
 cw_bool_t
-dbg_is_registered(cw_dbg_t * a_dbg, char * a_flag)
+dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag)
 {
   char * junk = NULL;
 

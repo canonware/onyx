@@ -185,7 +185,7 @@ lex_delete(cw_lex_t * a_lex);
  ****************************************************************************/
 #define lex_insert_regex _CW_NS_STASH(lex_insert_regex)
 cw_bool_t
-lex_insert_regex(cw_lex_t * a_lex, char * a_regex, cw_uint32_t a_tok_val);
+lex_insert_regex(cw_lex_t * a_lex, const char * a_regex, cw_uint32_t a_tok_val);
 
 /****************************************************************************
  *
@@ -194,8 +194,8 @@ lex_insert_regex(cw_lex_t * a_lex, char * a_regex, cw_uint32_t a_tok_val);
  *
  ****************************************************************************/
 #define lex_delete_regex _CW_NS_STASH(lex_delete_regex)
-char *
-lex_delete_regex(cw_lex_t * a_lex, char * a_regex);
+const char *
+lex_delete_regex(cw_lex_t * a_lex, const char * a_regex);
 
 /****************************************************************************
  *
@@ -311,7 +311,8 @@ lexer_reject(cw_lexer_t * a_lexer);
  ****************************************************************************/
 #define lexer_push_text _CW_NS_STASH(lexer_push_text)
 cw_bool_t
-lexer_push_text(cw_lexer_t * a_lexer, cw_uint32_t a_strlen, char * a_text);
+lexer_push_text(cw_lexer_t * a_lexer, cw_uint32_t a_strlen,
+		const char * a_text);
 
 /****************************************************************************
  *
@@ -367,5 +368,5 @@ lexertok_get_tok_val(cw_lexertok_t * a_lexertok);
  *
  ****************************************************************************/
 #define lexertok_get_str _CW_NS_STASH(lexertok_get_str)
-char *
+const char *
 lexertok_get_str(cw_lexertok_t * a_lexertok);

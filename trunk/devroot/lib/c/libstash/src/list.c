@@ -17,7 +17,7 @@
 #  include "libstash/libstash.h"
 #endif
 
-#include "libstash/list_priv.h"
+#include "libstash/list_p.h"
 
 cw_list_item_t *
 list_item_new()
@@ -610,7 +610,7 @@ list_dump(cw_list_t * a_list)
 #endif
 }
 
-void *
+static void *
 list_p_hpop(cw_list_t * a_list)
 {
   void * retval;
@@ -659,7 +659,7 @@ list_p_hpop(cw_list_t * a_list)
   return retval;
 }
 
-void *
+static void *
 list_p_tpop(cw_list_t * a_list)
 {
   void * retval;

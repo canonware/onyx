@@ -24,7 +24,7 @@
 #  include "libstash/libstash.h"
 #endif
 
-#include "libstash/bhp_priv.h"
+#include "libstash/bhp_p.h"
 
 /****************************************************************************
  *
@@ -456,7 +456,7 @@ bhp_set_priority_compare(cw_bhp_t * a_bhp,
  * Recursively print out the internal state of the heap (actually do the work).
  *
  ****************************************************************************/
-cw_bhpi_t *
+static cw_bhpi_t *
 bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
 {
   /*    cw_bhpi_t * bhpi_p; */
@@ -501,7 +501,7 @@ bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
  * of degree (n + 1).  a_root points to the root of the resulting heap.
  *
  ****************************************************************************/
-void
+static void
 bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
 {
   a_non_root->parent = a_root;
@@ -516,7 +516,7 @@ bhp_p_bin_link(cw_bhpi_t * a_root, cw_bhpi_t * a_non_root)
  * monotonically increasing order.  The result is stored in a_bhp.
  *
  ****************************************************************************/
-void
+static void
 bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
 {
   cw_bhpi_t * curr_this, * curr_other, * this_marker = NULL, * other_marker;
@@ -614,7 +614,7 @@ bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
  * themselves.  This probably isn't very useful.
  *
  ****************************************************************************/
-cw_sint32_t
+static cw_sint32_t
 bhp_p_priority_compare(void * a_a, void * a_b)
 {
   cw_sint32_t retval;

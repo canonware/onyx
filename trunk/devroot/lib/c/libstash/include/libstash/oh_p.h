@@ -10,7 +10,7 @@
  *
  * <<< Description >>>
  *
- * Private definitions for oh.
+ * Private declarations for oh.
  *
  ****************************************************************************/
 
@@ -30,9 +30,8 @@
  * being used for an oh instance aren't strings, don't use this.
  *
  ****************************************************************************/
-#define oh_p_h1 _CW_NS_STASH(oh_p_h1)
-cw_uint64_t
-oh_p_h1(cw_oh_t * a_oh, void * a_key);
+static cw_uint64_t
+oh_p_h1(cw_oh_t * a_oh, const void * a_key);
 
 /****************************************************************************
  *
@@ -40,17 +39,15 @@ oh_p_h1(cw_oh_t * a_oh, void * a_key);
  * arguments are equal.
  *
  ****************************************************************************/
-#define oh_p_key_compare _CW_NS_STASH(oh_p_key_compare)
-cw_bool_t
-oh_p_key_compare(void * a_k1, void * a_k2);
+static cw_bool_t
+oh_p_key_compare(const void * a_k1, const void * a_k2);
 
 /****************************************************************************
  *
  * If the table is too full, double in size and insert into the new table.
  *
  ****************************************************************************/
-#define oh_p_grow _CW_NS_STASH(oh_p_grow)
-void
+static void
 oh_p_grow(cw_oh_t * a_oh);
 
 /****************************************************************************
@@ -59,8 +56,7 @@ oh_p_grow(cw_oh_t * a_oh);
  * making it so small that the table would need to immediately grow again.
  *
  ****************************************************************************/
-#define oh_p_shrink _CW_NS_STASH(oh_p_shrink)
-void
+static void
 oh_p_shrink(cw_oh_t * a_oh);
 
 /****************************************************************************
@@ -68,8 +64,7 @@ oh_p_shrink(cw_oh_t * a_oh);
  * Find the slot that we should insert into, given a_item, and insert.
  *
  ****************************************************************************/
-#define oh_p_item_insert _CW_NS_STASH(oh_p_item_insert)
-void
+static void
 oh_p_item_insert(cw_oh_t * a_oh, cw_oh_item_t * a_item);
 
 /****************************************************************************
@@ -78,17 +73,15 @@ oh_p_item_insert(cw_oh_t * a_oh, cw_oh_item_t * a_item);
  * key == a_key.
  *
  ****************************************************************************/
-#define oh_p_item_search _CW_NS_STASH(oh_p_item_search)
-cw_bool_t
-oh_p_item_search(cw_oh_t * a_oh, void * a_key, cw_uint64_t * a_slot);
+static cw_bool_t
+oh_p_item_search(cw_oh_t * a_oh, const void * a_key, cw_uint64_t * a_slot);
 
 /****************************************************************************
  *
  * Rehash.
  *
  ****************************************************************************/
-#define oh_p_rehash _CW_NS_STASH(oh_p_rehash)
-void
+static void
 oh_p_rehash(cw_oh_t * a_oh);
 
 /****************************************************************************
@@ -99,6 +92,5 @@ oh_p_rehash(cw_oh_t * a_oh);
  *  slot.
  *
  ****************************************************************************/
-#define oh_p_slot_shuffle _CW_NS_STASH(oh_p_slot_shuffle)
-void
+static void
 oh_p_slot_shuffle(cw_oh_t * a_oh, cw_uint64_t a_slot);

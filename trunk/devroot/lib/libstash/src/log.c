@@ -23,7 +23,7 @@
 #include <stdarg.h>
 #include <time.h>
 
-#include "libstash/log_priv.h"
+#include "libstash/log_p.h"
 
 cw_log_t *
 log_new()
@@ -67,7 +67,7 @@ log_delete(cw_log_t * a_log)
 
 cw_bool_t
 log_set_logfile(cw_log_t * a_log,
-		char * a_logfile,
+		const char * a_logfile,
 		cw_bool_t a_overwrite)
 {
   cw_bool_t retval;
@@ -121,7 +121,7 @@ log_set_logfile(cw_log_t * a_log,
 }
 
 int
-log_printf(cw_log_t * a_log, char * a_format, ...)
+log_printf(cw_log_t * a_log, const char * a_format, ...)
 {
   va_list ap;
   int retval;
@@ -162,10 +162,10 @@ log_printf(cw_log_t * a_log, char * a_format, ...)
 
 int
 log_eprintf(cw_log_t * a_log,
-	    char * a_filename,
+	    const char * a_filename,
 	    int a_line_num,
-	    char * a_func_name,
-	    char * a_format,
+	    const char * a_func_name,
+	    const char * a_format,
 	    ...)
 {
   va_list ap;
@@ -224,7 +224,7 @@ log_eprintf(cw_log_t * a_log,
 int
 log_nprintf(cw_log_t * a_log,
 	    cw_uint32_t a_size,
-	    char * a_format,
+	    const char * a_format,
 	    ...)
 {
   va_list ap;
@@ -272,7 +272,7 @@ log_nprintf(cw_log_t * a_log,
 }
 
 int
-log_lprintf(cw_log_t * a_log, char * a_format, ...)
+log_lprintf(cw_log_t * a_log, const char * a_format, ...)
 {
   va_list ap;
   int retval;
@@ -333,10 +333,10 @@ log_lprintf(cw_log_t * a_log, char * a_format, ...)
 
 int
 log_leprintf(cw_log_t * a_log,
-	     char * a_filename,
+	     const char * a_filename,
 	     int a_line_num,
-	     char * a_func_name,
-	     char * a_format,
+	     const char * a_func_name,
+	     const char * a_format,
 	     ...)
 {
   va_list ap;
@@ -507,8 +507,8 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
   return retval;
 }
 
-void
-log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b)
+static void
+log_p_uint64_base10_add(char * a_result, const char * a_a, const char * a_b)
 {
   cw_sint32_t i;
   cw_uint8_t digit, carry;

@@ -109,4 +109,4 @@ AC_MSG_RESULT(================================================================)
 dnl Process the following files.
 AC_OUTPUT(Makefile \
 bin/pmerge \
-bin/pstub)
+bin/pstub, echo timestamp > stamp)

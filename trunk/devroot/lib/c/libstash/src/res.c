@@ -20,7 +20,7 @@
 
 #include <stdarg.h>
 
-#include "libstash/res_priv.h"
+#include "libstash/res_p.h"
 
 /* Size of buffer to use for name/value parsing.  In practice, this is
  * probably plenty, but in theory, any arbitrary limitation is bad. */
@@ -175,7 +175,7 @@ res_is_equal(cw_res_t * a_res, cw_res_t * a_other)
 }
 
 cw_bool_t
-res_merge_file(cw_res_t * a_res, char * a_filename)
+res_merge_file(cw_res_t * a_res, const char * a_filename)
 {
   cw_bool_t retval = FALSE, state_mach_error;
   int error;
@@ -244,8 +244,8 @@ res_merge_list(cw_res_t * a_res, ...)
   return retval;
 }
 
-char *
-res_get_res_val(cw_res_t * a_res, char * a_res_name)
+const char *
+res_get_res_val(cw_res_t * a_res, const char * a_res_name)
 {
   char * retval;
   cw_bool_t error;
@@ -305,7 +305,7 @@ res_dump(cw_res_t * a_res, char * a_filename)
     t_log = log_new(NULL);
     if (log_set_logfile(t_log, a_filename, TRUE) == TRUE)
     {
-      log_leprintf(g_log, NULL, 0, "res_dump",
+      log_leprintf(g_log, NULL, 0, __FUNCTION__,
 		   "Error opening file \"%s\"\n", a_filename);
       retval = TRUE;
       goto RETURN;
@@ -371,7 +371,7 @@ res_dump(cw_res_t * a_res, char * a_filename)
   return retval;
 }
 
-cw_bool_t
+static cw_bool_t
 res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 {
   cw_bool_t retval = FALSE;
@@ -477,8 +477,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_START, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in _STASH_RES_STATE_START,"
+			" line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -535,8 +536,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  case _STASH_RES_CHAR_OTHER:
 	  default:
 	  {
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_BEGIN_WHITESPACE, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_BEGIN_WHITESPACE,"
+			" line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -581,8 +584,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_BEGIN_COMMENT, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_BEGIN_COMMENT, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -631,8 +635,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_NAME, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in _STASH_RES_STATE_NAME, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -671,8 +676,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_POST_NAME_WHITESPACE, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_POST_NAME_WHITESPACE, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -742,8 +749,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_POST_COLON_WHITESPACE, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_POST_COLON_WHITESPACE, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -812,8 +821,9 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_VALUE, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in _STASH_RES_STATE_VALUE, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -889,8 +899,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_VALUE_BACKSLASH, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_VALUE_BACKSLASH, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -930,8 +942,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_BACKSLASH_WHITESPACE, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_BACKSLASH_WHITESPACE, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -976,8 +990,10 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	  default:
 	  {
 	    /* Error. */
-	    log_eprintf(g_log, NULL, 0, "res_parse_res",
-			"Illegal character while in _STASH_RES_STATE_TRAILING_COMMENT, line %d, column %d\n",
+	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
+			"Illegal character while in "
+			"_STASH_RES_STATE_TRAILING_COMMENT, "
+			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -987,7 +1003,7 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
       }
       default:
       {
-	log_eprintf(g_log, NULL, 0, "res_parse_res",
+	log_eprintf(g_log, NULL, 0, __FUNCTION__,
 		    "Jumped to non-existant state, line %d, column %d\n",
 		    line_num, col_num);
 	retval = TRUE;
@@ -999,7 +1015,7 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
   return retval;
 }
 
-cw_uint32_t
+static cw_uint32_t
 res_p_char_type(char a_char)
 {
   cw_uint32_t retval;
@@ -1111,8 +1127,8 @@ res_p_char_type(char a_char)
   return retval;
 }
 
-void
-res_p_merge_res(cw_res_t * a_res, char * a_name, char * a_val)
+static void
+res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
 {
   char * temp_name, * temp_val;
   cw_bool_t error;
