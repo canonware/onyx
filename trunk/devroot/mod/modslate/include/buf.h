@@ -173,7 +173,7 @@ struct cw_buf_s
 #endif
 
     /* Allocator state. */
-    cw_bool_t alloced:1;
+    cw_bool_t alloced;
     cw_opaque_alloc_t *alloc;
     cw_opaque_realloc_t *realloc;
     cw_opaque_dealloc_t *dealloc;

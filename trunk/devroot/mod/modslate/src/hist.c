@@ -209,6 +209,13 @@
 #define HST_TAG_REM     0xc0
 #define HST_TAG_DEL     0xe0
 
+/* hst_tag_init() isn't strictly necessary, since it merely clears unused
+ * bits. */
+#ifdef CW_DBG
+#define hst_tag_init(a_hdr) (a_hdr) = 0
+#else
+#define hst_tag_init(a_hdr)
+#endif
 #define hst_tag_get(a_hdr) ((a_hdr) & HST_TAG_MASK)
 #define hst_tag_set(a_hdr, a_tag)					\
     (a_hdr) = ((a_hdr) & HST_CNT_MASK) | (a_tag)
@@ -257,6 +264,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     bufv.len = sizeof(u.bpos);
     mkr_before_insert(&a_hist->hcur, &bufv, 1);
     /* Record header. */
+    hst_tag_init(hdr);
     hst_tag_set(hdr, HST_TAG_POS);
     bufv.data = &hdr;
     bufv.len = sizeof(hdr);
@@ -426,6 +434,7 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    else
 		    {
 			/* Synthesize a redo header. */
+			hst_tag_init(rhdr);
 			hst_tag_set(rhdr,
 				    hst_tag_inverse(uhdr));
 			hst_cnt_set(rhdr, 1);
@@ -647,6 +656,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		    else
 		    {
 			/* Synthesize an undo header. */
+			hst_tag_init(uhdr);
 			hst_tag_set(uhdr, hst_tag_inverse(rhdr));
 			hst_cnt_set(uhdr, 1);
 		    }
@@ -822,6 +832,7 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 	hist_p_pos(a_hist, a_buf, mkr_pos(a_mkr));
     }
 
+    hst_tag_init(hdr);
     hst_tag_set(hdr, HST_TAG_GRP_BEG);
     bufv.data = &hdr;
     bufv.len = sizeof(hdr);
@@ -850,6 +861,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
     hist_p_redo_flush(a_hist);
 
+    hst_tag_init(hdr);
     hst_tag_set(hdr, HST_TAG_GRP_END);
     bufv.data = &hdr;
     bufv.len = sizeof(hdr);
@@ -932,6 +944,7 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = HST_CNT_MAX;
 	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_REM);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
@@ -945,6 +958,7 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = a_bufv[i].len - j;
 	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_REM);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
@@ -1024,6 +1038,7 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		bufv.data = &a_bufv[i].data[j + HST_CNT_MAX - 1 - k];
 		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_DEL);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
@@ -1040,6 +1055,7 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		bufv.data = &a_bufv[i].data[a_bufv[i].len - 1 - k];
 		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_DEL);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
@@ -1123,6 +1139,7 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		bufv.data = &a_bufv[i].data[j + HST_CNT_MAX - 1 - k];
 		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_INS);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
@@ -1139,6 +1156,7 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		bufv.data = &a_bufv[i].data[a_bufv[i].len - 1 - k];
 		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_INS);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
@@ -1213,6 +1231,7 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = HST_CNT_MAX;
 	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_YNK);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
@@ -1226,6 +1245,7 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = a_bufv[i].len - j;
 	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
+	    hst_tag_init(hdr);
 	    hst_tag_set(hdr, HST_TAG_YNK);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;

@@ -1523,13 +1523,14 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     if (a_buf != NULL)
     {
 	retval = a_buf;
-/* 	memset(retval, 0, sizeof(cw_buf_t)); */
+#ifdef CW_DBG
+ 	memset(retval, 0xa5, sizeof(cw_buf_t));
+#endif
 	retval->alloced = FALSE;
     }
     else
     {
 	retval = (cw_buf_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_buf_t));
-/* 	memset(retval, 0, sizeof(cw_buf_t)); */
 	retval->alloced = TRUE;
     }
 
@@ -1929,6 +1930,9 @@ mkr_p_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf, cw_mkro_t a_order)
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
     bufp = ql_first(&a_buf->plist);
+#ifdef CW_DBG
+    memset(a_mkr, 0xa5, sizeof(cw_mkr_t));
+#endif
     a_mkr->bufp = bufp;
     a_mkr->order = a_order;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
@@ -2334,7 +2338,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     cw_assert(buf->bufp_cur == bufp);
 
     /* Keep track of the bufp past the range of bufp's being operated on.  This
-     * might be NULL, so can only be used as an interation terminator. */
+     * might be NULL, so can only be used as an iteration terminator. */
     pastp = ql_next(&buf->plist, bufp, plink);
 
     /* Move bufp's gap to the split point. */
@@ -3954,6 +3958,9 @@ ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)
     if (a_ext != NULL)
     {
 	retval = a_ext;
+#ifdef CW_DBG
+ 	memset(retval, 0xa5, sizeof(cw_ext_t));
+#endif
 	retval->alloced = FALSE;
     }
     else
