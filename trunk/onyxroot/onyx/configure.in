@@ -73,7 +73,6 @@ fi
 
 dnl Look for binaries.
 if test "x$enable_posix" = "x1" ; then
-  CW_BUILD_BIN(cover, bin_cover)
   CW_BUILD_BIN(onyx, bin_onyx)
 fi
 CW_BUILD_BIN(nx, bin_nx)
