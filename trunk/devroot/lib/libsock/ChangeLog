@@ -1,3 +1,7 @@
+1999-07-26  Jason Evans  <jasone@canonware.com>
+
+	* Makefile.{gnu,bsd}.in: Quiet noise caused by dependency updating.
+
 1999-07-14  Jason Evans  <jasone@canonware.com>
 
 	* src/sockb.c (sockb_p_entry_func): Do not NULL out the sock
