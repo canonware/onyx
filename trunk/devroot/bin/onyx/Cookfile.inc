@@ -60,7 +60,8 @@ SRCS = [SRCS] [ONYX_SRCS];
                  exch_a.nx.in exch_b.nx.in exch_c.nx.in fino_a.nx.in
                  gc_roll.nx.in hello.nx.in immediate_a.nx.in immediate_b.nx.in
                  index_a.nx.in index_b.nx.in index_c.nx.in index_d.nx.in
-                 index_e.nx.in index_f.nx.in integer.nx.in mark_a.nx.in
+                 index_e.nx.in index_f.nx.in integer.nx.in integer_a.nx.in
+                 integer_b.nx.in integer_c.nx.in integer_d.nx.in mark_a.nx.in
                  monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in nsleep_a.nx.in
                  nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in pop_a.nx.in
                  pop_b.nx.in roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in

@@ -1341,7 +1341,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					/*
 					 * Convert string to integer.  Do the
 					 * conversion before mucking with the
-					 * stack in case there is an exception.
+					 * stack in case the integer has to be
+					 * converted to a name.
 					 */
 					a_thread->tok_str[a_thread->index] =
 					    '\0';
@@ -1349,15 +1350,19 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 
 					val = strtoll(a_thread->tok_str, NULL,
 					    10);
+					token = TRUE;
 					if ((errno == ERANGE) &&
 					    ((val == LLONG_MIN) || (val ==
 					    LLONG_MAX))) {
-						nxoe_p_thread_reset(a_thread);
-						nxo_thread_error(
-						    &a_thread->self,
-						    NXO_THREADE_RANGECHECK);
+						/*
+						 * Number too big or too small.
+						 * Accept as a name.
+						 */
+						a_thread->m.m.action =
+						    ACTION_EXECUTE;
+						nxoe_p_thread_name_accept(
+						    a_thread);
 					} else {
-						token = TRUE;
 						nxo = nxo_stack_push(
 						    &a_thread->ostack);
 						nxo_integer_new(nxo, val);
@@ -1399,6 +1404,20 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				}
 				_CW_NXO_THREAD_PUTC(c);
 				break;
+			case 'A': case 'B': case 'C': case 'D': case 'E':
+			case 'F': case 'G': case 'H': case 'I': case 'J':
+			case 'K': case 'L': case 'M': case 'N': case 'O':
+			case 'P': case 'Q': case 'R': case 'S': case 'T':
+			case 'U': case 'V': case 'W': case 'X': case 'Y':
+			case 'Z':
+				if (a_thread->m.n.base <= (10 +
+				    ((cw_uint32_t)(c - 'A')))) {
+					/* Too big for this base. */
+					a_thread->state = THREADTS_NAME;
+					a_thread->m.m.action = ACTION_EXECUTE;
+				}
+				_CW_NXO_THREAD_PUTC(c);
+				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 				if (a_thread->m.n.base <=
@@ -1432,7 +1451,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					/*
 					 * Convert string to integer.  Do the
 					 * conversion before mucking with the
-					 * stack in case there is an exception.
+					 * stack in case the integer has to be
+					 * converted to a name.
 					 */
 					a_thread->tok_str[a_thread->index] =
 					    '\0';
@@ -1441,15 +1461,19 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 					val = strtoll(&a_thread->tok_str[
 					    a_thread->m.n.b_off], NULL,
 					    a_thread->m.n.base);
+					token = TRUE;
 					if ((errno == ERANGE) &&
 					    ((val == LLONG_MIN) || (val ==
 					    LLONG_MAX))) {
-						nxoe_p_thread_reset(a_thread);
-						nxo_thread_error(
-						    &a_thread->self,
-						    NXO_THREADE_RANGECHECK);
+						/*
+						 * Number too big or too small.
+						 * Accept as a name.
+						 */
+						a_thread->m.m.action =
+						    ACTION_EXECUTE;
+						nxoe_p_thread_name_accept(
+						    a_thread);
 					} else {
-						token = TRUE;
 						nxo = nxo_stack_push(
 						    &a_thread->ostack);
 						nxo_integer_new(nxo, val);
