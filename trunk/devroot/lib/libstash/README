@@ -3,8 +3,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 139 $
-# Last modified: $Date: 1998-07-10 13:45:38 -0700 (Fri, 10 Jul 1998) $
+# Current revision: $Revision: 170 $
+# Last modified: $Date: 1998-08-24 18:05:23 -0700 (Mon, 24 Aug 1998) $
 #
 #############################################################################
 
@@ -14,4 +14,3 @@ The following files may be of direct interest to the user:
 
 * COPYING - Copyright and redistribution information.
 * INSTALL - Installation information.
-* TODO - Work yet to be done.
