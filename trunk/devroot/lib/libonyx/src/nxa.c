@@ -567,8 +567,7 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 }
 
 /*
- * Mark and sweep.  Return a pointer to a ring of garbage, if any, otherwise
- * NULL.
+ * Mark.  Return a pointer to a ring of garbage, if any, otherwise NULL.
  */
 _CW_INLINE cw_nxoe_t *
 nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
