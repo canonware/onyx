@@ -1584,6 +1584,10 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		/* Clean up estack. */
 		nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	}
+	xep_acatch {
+		/* Close the directory. */
+		closedir(dir);
+	}
 	xep_end();
 
 	/* Close the directory. */
@@ -1966,10 +1970,7 @@ systemdict_for(cw_nxo_t *a_thread)
 	nxo_dup(tnxo, exec);
 	nxo_stack_npop(ostack, 4);
 
-	/*
-	 * Record estack's and tstack's depth so that we can clean up if
-	 * necessary.
-	 */
+	/* Record stack depths so that we can clean up if necessary. */
 	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
 
@@ -2020,15 +2021,16 @@ systemdict_for(cw_nxo_t *a_thread)
 	xep_catch(_CW_ONYXX_EXIT) {
 		xep_handled();
 
-		/* Clean up whatever mess was left on the execution stack. */
-		for (i = nxo_stack_count(estack); i > edepth; i--)
-			nxo_stack_pop(estack);
-
-		/* Clean up tstack. */
+		/* Clean up stacks. */
+		nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
+	/*
+	 * An object is pushed before tdepth is stored, so we can
+	 * unconditionally pop it here.
+	 */
 	nxo_stack_pop(tstack);
 }
 
@@ -2037,16 +2039,29 @@ systemdict_foreach(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *estack, *tstack;
 	cw_nxo_t	*nxo, *what, *proc;
-	cw_uint32_t	tdepth;
+	cw_uint32_t	edepth, tdepth;
 	cw_nxoi_t	i, count;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	estack = nxo_thread_estack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
-	tdepth = nxo_stack_count(tstack);
 
 	NXO_STACK_GET(proc, ostack, a_thread);
 	NXO_STACK_DOWN_GET(what, ostack, a_thread, proc);
+	switch (nxo_type_get(what)) {
+	case NXOT_ARRAY:
+	case NXOT_DICT:
+	case NXOT_STACK:
+	case NXOT_STRING:
+		break;
+	default:
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/* Record stack depths so that we can clean up if necessary. */
+	edepth = nxo_stack_count(estack);
+	tdepth = nxo_stack_count(tstack);
 
 	xep_begin();
 	xep_try {
@@ -2177,21 +2192,17 @@ systemdict_foreach(cw_nxo_t *a_thread)
 			break;
 		}
 		default:
-			nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-			/*
-			 * XXX Is it legal to return inside of an exception
-			 * block?
-			 *
-			 * XXX What about cleaning up estack?
-			 */
-			return;
+			_cw_not_reached();
 		}
 	}
 	xep_catch(_CW_ONYXX_EXIT) {
 		xep_handled();
 
-		/* Clean up tstack. */
-		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+		/*
+		 * Clean up estack.  tstack is handled later, so don't bother
+		 * cleaning it up here.
+		 */
+		nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	}
 	xep_end();
 
@@ -2769,7 +2780,7 @@ systemdict_loop(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *estack, *tstack;
 	cw_nxo_t	*exec, *nxo, *tnxo;
-	cw_uint32_t	sdepth, tdepth;
+	cw_uint32_t	edepth, tdepth;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	estack = nxo_thread_estack_get(a_thread);
@@ -2782,7 +2793,8 @@ systemdict_loop(cw_nxo_t *a_thread)
 	nxo_dup(tnxo, exec);
 	nxo_stack_pop(ostack);
 
-	sdepth = nxo_stack_count(estack);
+	/* Record stack depths so that we can clean up later. */
+	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
 
 	/*
@@ -2798,21 +2810,13 @@ systemdict_loop(cw_nxo_t *a_thread)
 		}
 	}
 	xep_catch(_CW_ONYXX_EXIT) {
-		cw_uint32_t	i;
-
 		xep_handled();
-
-		/* Clean up whatever mess was left on the execution stack. */
-		for (i = nxo_stack_count(estack); i > sdepth + 1; i--)
-			nxo_stack_pop(estack);
-
-		/* Clean up tstack. */
-		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
-	nxo_stack_pop(estack);
-	nxo_stack_pop(tstack);
+	/* Clean up stacks. */
+	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
+	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 }
 
 void
@@ -3565,7 +3569,7 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	cw_nxo_t	*ostack, *estack, *tstack;
 	cw_nxo_t	*count, *exec, *nxo, *tnxo;
 	cw_nxoi_t	i, cnt;
-	cw_uint32_t	sdepth, tdepth;
+	cw_uint32_t	edepth, tdepth;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	estack = nxo_thread_estack_get(a_thread);
@@ -3584,7 +3588,8 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	cnt = nxo_integer_get(count);
 	nxo_stack_npop(ostack, 2);
 
-	sdepth = nxo_stack_count(estack);
+	/* Record stack depths so that we can clean up if necessary. */
+	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
 
 	/*
@@ -3602,15 +3607,16 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	xep_catch(_CW_ONYXX_EXIT) {
 		xep_handled();
 
-		/* Clean up whatever mess was left on the execution stack. */
-		for (i = nxo_stack_count(estack); i > sdepth; i--)
-			nxo_stack_pop(estack);
-
-		/* Clean up tstack. */
+		/* Clean up stacks. */
+		nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
 
+	/*
+	 * An object is pushed before tdepth is stored, so we can
+	 * unconditionally pop it here.
+	 */
 	nxo_stack_pop(tstack);
 }
 
@@ -3685,7 +3691,6 @@ systemdict_run(cw_nxo_t *a_thread)
 	cw_nxo_t		*ostack, *estack, *tstack;
 	cw_nxo_t		*nxo, *tfile;
 	cw_nxo_threade_t	error;
-	cw_uint32_t		sdepth, tdepth;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	estack = nxo_thread_estack_get(a_thread);
@@ -3712,9 +3717,6 @@ systemdict_run(cw_nxo_t *a_thread)
 	nxo_attrs_set(tfile, NXOA_EXECUTABLE);
 	nxo = nxo_stack_push(estack);
 
-	sdepth = nxo_stack_count(estack);
-	tdepth = nxo_stack_count(tstack);
-
 	nxo_dup(nxo, tfile);
 
 	xep_begin();
@@ -3723,27 +3725,20 @@ systemdict_run(cw_nxo_t *a_thread)
 	}
 	xep_catch(_CW_ONYXX_EXIT) {
 		nxo_thread_error(a_thread, NXO_THREADE_INVALIDEXIT);
-		/*
-		 * Pop the exit operator off estack to avoid an infinite loop.
-		 */
-		nxo_stack_pop(estack);
+
 		xep_retry();
 	}
 	xep_catch(_CW_ONYXX_STOP)
 	xep_mcatch(_CW_ONYXX_QUIT) {
-		cw_uint32_t	i;
-
 		/* Close the file, but don't handle the exception. */
 		error = nxo_file_close(tfile);
 		if (error)
 			nxo_thread_error(a_thread, error);
 
-		/* Clean up estack. */
-		for (i = nxo_stack_count(estack); i > sdepth; i--)
-			nxo_stack_pop(estack);
-
-		/* Clean up tstack. */
-		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+		/*
+		 * We don't need to clean up the stack, since the exception
+		 * catcher will do it.
+		 */
 	}
 	xep_end();
 
@@ -4193,6 +4188,7 @@ systemdict_start(cw_nxo_t *a_thread)
 	estack = nxo_thread_estack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
 
+	/* Record stack depths so that we can clean up later. */
 	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
 
@@ -4406,7 +4402,7 @@ systemdict_stopped(cw_nxo_t *a_thread)
 	cw_nxo_t	*ostack, *estack, *tstack;
 	cw_nxo_t	*exec, *nxo;
 	cw_bool_t	result = FALSE;
-	cw_uint32_t	tdepth;
+	cw_uint32_t	edepth, tdepth;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	estack = nxo_thread_estack_get(a_thread);
@@ -4417,14 +4413,9 @@ systemdict_stopped(cw_nxo_t *a_thread)
 	nxo_dup(nxo, exec);
 	nxo_stack_pop(ostack);
 
+	/* Record stack depths so that we can clean up if necessary. */
+	edepth = nxo_stack_count(estack);
 	tdepth = nxo_stack_count(tstack);
-
-	/*
-	 * Point exec to the copy on the execution stack, so that it can be used
-	 * as a marker for execution stack cleanup if the stop operator is
-	 * called.
-	 */
-	exec = nxo;
 
 	/* Catch a stop exception, if thrown. */
 	xep_begin();
@@ -4435,13 +4426,8 @@ systemdict_stopped(cw_nxo_t *a_thread)
 		xep_handled();
 		result = TRUE;
 
-		/* Clean up whatever mess was left on the execution stack. */
-		do {
-			nxo = nxo_stack_get(estack);
-			nxo_stack_pop(estack);
-		} while (nxo != exec);
-
-		/* Clean up tstack. */
+		/* Clean up stacks. */
+		nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 	}
 	xep_end();
