@@ -79,8 +79,10 @@ $run =
     . " -f doc/latex/.cvsignore -f doc/latex/Cookfile -f doc/latex/ltx2e"
     . " -f doc/latex/onyx"
     . " -f bin/.cvsignore -f bin/Cookfile.inc.in -f bin/Cookfile -f bin/onyx"
+    . " -f bin/slate"
     . " -f mod/.cvsignore -f mod/Cookfile.inc.in -f mod/Cookfile"
     . " -f mod/modgtk -f mod/modpcre -f mod/modprompt"
+    . " -f mod/modslate"
     ;
 if (defined($opt_verbose))
 {

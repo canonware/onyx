@@ -116,6 +116,7 @@ for d in 0 1 ; do
         conf_d="--disable-real"
         ;;
     esac
+#for e in 0 1 2 ; do
 for e in 0 1 ; do
     # --enable-debug, --enable-profile
     case $e in
@@ -125,9 +126,9 @@ for e in 0 1 ; do
     1)
         conf_e="--enable-debug"
         ;;
-#    2)
-#        conf_e="--enable-profile"
-#        ;;
+    2)
+        conf_e="--enable-profile"
+        ;;
     esac
 for f in 0 1 ; do
     # --disable-modprompt
