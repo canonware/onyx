@@ -264,10 +264,7 @@ stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	/* Make sure destination is large enough. */
 	_cw_assert(len_fr <= len_to);
 
-	/*
-	 * Iteratively copy elements.  Only copy one level deep (not
-	 * recursively), by using dup.
-	 */
+	/* Copy bytes. */
 	stiloe_p_string_lock(string_fr_l);
 	stiloe_p_string_lock(string_to_l);
 	memcpy(str_to, str_fr, len_fr);
