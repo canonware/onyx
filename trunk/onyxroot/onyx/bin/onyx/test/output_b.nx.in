@@ -1,18 +1,18 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% <Copyright = jasone>
-%
-% <License>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Version: Onyx <Version = onyx>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
 
 `Test begin\n' print flush
 
-% Decimal notation.
+# Decimal notation.
 42.5 </s /+ /e false> output `\n' print
 -42.5 </s /+ /e false> output `\n' print
 42.5 </s /-> output `\n' print
@@ -35,7 +35,7 @@
 12345.6 </d 0> output `\n' print
 12345.6 </d -1> output `\n' print
 
-% Exponential notation.
+# Exponential notation.
 42.5 </s /+ /e true> output `\n' print
 -42.5 </s /+ /e true> output `\n' print
 42.5 </s /- /e true> output `\n' print

@@ -3,13 +3,13 @@ Test begin
 0
 `1 0'
 1
-`16#7fffffffffffffff -62'
+`16@7fffffffffffffff -62'
 1
-`16#7fffffffffffffff -63'
+`16@7fffffffffffffff -63'
 0
-`16#7fffffffffffffff -64'
+`16@7fffffffffffffff -64'
 0
-`16#7fffffffffffffff -65'
+`16@7fffffffffffffff -65'
 0
 `1 62'
 4611686018427387904

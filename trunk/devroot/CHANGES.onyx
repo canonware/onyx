@@ -1,3 +1,13 @@
+2002-04-20 : Jason Evans <jasone@canonware.com>
+
+	* Change language syntax:
+	  + Radix integers are <base>@<value> instead of <base>@<value>.
+	  + Comments start with #, not %.
+
+	* Remove operators:
+	  + #!
+	  + !#
+
 2002-04-17 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c :

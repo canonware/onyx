@@ -1,39 +1,39 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% <Copyright = jasone>
-% <License>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Version: Onyx <Version = onyx>
-%
-% This file is processed by batch_gen.nx to produce a more compact embedded
-% version in batch_nxcode.c (normal build) and batch_bootstrap.c (development
-% bootstrap).  In order to make changes to this file take effect in the
-% bootstrap interpreter, either type:
-%
-%   cook bootstrap
-%
-% or
-%
-%   cat batch.nx | onyx batch_gen.nx > batch_boostrap.c
-%
-% The end result of executing this file is a procedure (executable array).  In
-% order to support output that differs according to configuration options, a
-% string is constructed, then evaluated.
-%
-% The output of running sprints on the procedure must be evaluatable, which
-% means that certain language features such as immediate evaluation must be
-% avoided.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+# This file is processed by batch_gen.nx to produce a more compact embedded
+# version in batch_nxcode.c (normal build) and batch_bootstrap.c (development
+# bootstrap).  In order to make changes to this file take effect in the
+# bootstrap interpreter, either type:
+#
+#   cook bootstrap
+#
+# or
+#
+#   cat batch.nx | onyx batch_gen.nx > batch_boostrap.c
+#
+# The end result of executing this file is a procedure (executable array).  In
+# order to support output that differs according to configuration options, a
+# string is constructed, then evaluated.
+#
+# The output of running sprints on the procedure must be evaluatable, which
+# means that certain language features such as immediate evaluation must be
+# avoided.
+#
+################################################################################
 
-% Initial string with an opening brace to defer execution, to which other
-% strings are catenated.
+# Initial string with an opening brace to defer execution, to which other
+# strings are catenated.
 `{'
 
 `
-% Die with an exit code of 1 on error.
+# Die with an exit code of 1 on error.
 currenterror begin
     /stop {
 	1 die
@@ -41,5 +41,5 @@ currenterror begin
 end
 ' cat
 
-% Final closing brace.
+# Final closing brace.
 `}' cat cvx eval

@@ -1,46 +1,46 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% <Copyright = jasone>
-% <License>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Version: Onyx <Version = onyx>
-%
-% This file is processed by nx_gen.nx to produce a more compact embedded version
-% in nx_nxcode.c (normal build) and nx_bootstrap.c (development bootstrap).  In
-% order to make changes to this file take effect in the bootstrap interpreter,
-% either type:
-%
-%   cook bootstrap
-%
-% or
-%
-%   cat nx.nx | onyx nx_gen.nx > nx_boostrap.c
-%
-% The end result of executing this file is a procedure (executable array).  In
-% order to support output that differs according to configuration options, a
-% string is constructed, then evaluated.
-%
-% The output of running sprints on the procedure must be evaluatable, which
-% means that certain language features such as immediate evaluation must be
-% avoided.
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+# This file is processed by nx_gen.nx to produce a more compact embedded version
+# in nx_nxcode.c (normal build) and nx_bootstrap.c (development bootstrap).  In
+# order to make changes to this file take effect in the bootstrap interpreter,
+# either type:
+#
+#   cook bootstrap
+#
+# or
+#
+#   cat nx.nx | onyx nx_gen.nx > nx_boostrap.c
+#
+# The end result of executing this file is a procedure (executable array).  In
+# order to support output that differs according to configuration options, a
+# string is constructed, then evaluated.
+#
+# The output of running sprints on the procedure must be evaluatable, which
+# means that certain language features such as immediate evaluation must be
+# avoided.
+#
+################################################################################
 
-% Initial string with an opening brace to defer execution, to which other
-% strings are catenated.
+# Initial string with an opening brace to defer execution, to which other
+# strings are catenated.
 `{'
 
 `
 systemdict begin
 
-%
-% sprintsdict implements syntactic printing to strings for every type.
-%
+#
+# sprintsdict implements syntactic printing to strings for every type.
+#
 /sprintsdict <
     /arraytype {
-	% %array %depth
+	# #array #depth
 	dup 0 gt {
 	    1 idup dup echeck {
 		pop
@@ -53,33 +53,33 @@ systemdict begin
 	    } ifelse
 	    } ifelse
 
-	    % %array %depth %accum
+	    # #array #depth #accum
 	    2 idup length 1 gt {
-		% %array %depth %accum
+		# #array #depth #accum
 		0 1 4 idup length 2 sub {
-		    % %array %depth %accum %i
+		    # #array #depth #accum #i
 		    3 idup exch get
 		    2 idup 1 sub
-		    % %array %depth %accum %el %rdepth
+		    # #array #depth #accum #el #rdepth
 		    1 idup type sprintsdict exch get eval
 		    cat
-		    % %array %depth %accum %el %rdepth
+		    # #array #depth #accum #el #rdepth
 		` ' cat
 		} for
 	    } if
-	    % %array %depth %accum
+	    # #array #depth #accum
 
 	    2 idup length 0 gt {
 		2 idup dup length 1 sub get
 		2 idup 1 sub
-		% %array %depth %accum %el %rdepth
+		# #array #depth #accum #el #rdepth
 		1 idup type sprintsdict exch get eval
 		cat
 	    } if
-	    % %array %depth %accum
+	    # #array #depth #accum
 
 	    exch pop
-	    % %array %accum
+	    # #array #accum
 	    exch dup echeck {
 		pop
 		`}_'
@@ -91,7 +91,7 @@ systemdict begin
 	    } ifelse
 	    } ifelse
 	    cat
-	    % %accum
+	    # #accum
 	}{
 	    pop pop
 	    `-array-'
@@ -112,48 +112,48 @@ systemdict begin
 } if
 `
     /dicttype {
-	% %dict %depth
+	# #dict #depth
 	dup 0 gt {
-	    % Update recursion depth.
+	    # Update recursion depth.
 	    1 sub
 
 	    0
 	    `<'
 
-	    % %dict %rdepth %i %accum
+	    # #dict #rdepth #i #accum
 	    3 idup {
-		% %dict %rdepth %i %accum %key %value
+		# #dict #rdepth #i #accum #key #value
 		exch 4 idup
-		% %dict %rdepth %i %accum %value %key %rdepth
+		# #dict #rdepth #i #accum #value #key #rdepth
 		1 idup type sprintsdict exch get eval
 		` ' cat
-		% %dict %rdepth %accum %i %value %keystr
+		# #dict #rdepth #accum #i #value #keystr
 		exch 4 idup
-		% %dict %rdepth %i %accum %keystr %value %rdepth
+		# #dict #rdepth #i #accum #keystr #value #rdepth
 		1 idup type sprintsdict exch get eval
-		% %dict %rdepth %i %accum %keystr %valstr
+		# #dict #rdepth #i #accum #keystr #valstr
 		cat cat
-		% %dict %rdepth %i %accum
+		# #dict #rdepth #i #accum
 
-		% Update counter.
+		# Update counter.
 		exch 1 add dup 4 idup length lt {
-		    % %dict %rdepth %accum %i
+		    # #dict #rdepth #accum #i
 		    exch
 		    ` ' cat
-		    % %dict %rdepth %i %accum
+		    # #dict #rdepth #i #accum
 		}{
-		    % Last element.
+		    # Last element.
 		    exch
-		    % %dict %rdepth %accum
+		    # #dict #rdepth #accum
 		} ifelse
 	    } foreach
-	    % %dict %rdepth %i %accum
+	    # #dict #rdepth #i #accum
 
 	    4 1 roll pop pop pop
-	    % %accum
+	    # #accum
 	    `>'
 	    cat
-	    % %accum
+	    # #accum
 	}{
 	    pop pop
 	    `-dict-'
@@ -168,14 +168,14 @@ systemdict begin
 	`-fino-'
     }
     /hooktype {
-	% %hook %depth
+	# #hook #depth
 	exch hooktag
-	% %depth %tag
+	# #depth #tag
 	dup type /nulltype ne {
 	    exch 1 sub
-	    % %tag %rdepth
+	    # #tag #rdepth
 	    1 idup type sprintsdict exch get eval
-	    % %tagstr
+	    # #tagstr
 	    `=' exch cat
 	    `=' cat
 	}{
@@ -236,40 +236,40 @@ systemdict begin
 } if
 `
     /stacktype {
-	% %stack %depth
+	# #stack #depth
 	dup 0 gt {
 	    `('
 
-	    % %stack %depth %accum
+	    # #stack #depth #accum
 	    2 idup scount 1 gt {
-		% %stack %depth %accum
+		# #stack #depth #accum
 		2 idup scount 1 sub -1 1 {
-		    % %stack %depth %accum %i
+		    # #stack #depth #accum #i
 		    3 idup dup 3 2 roll sidup spop
 		    2 idup 1 sub
-		    % %stack %depth %accum %el %rdepth
+		    # #stack #depth #accum #el #rdepth
 		    1 idup type sprintsdict exch get eval
 		    cat
-		    % %stack %depth %accum %el %rdepth
+		    # #stack #depth #accum #el #rdepth
 		` ' cat
 		} for
 	    } if
-	    % %stack %depth %accum
+	    # #stack #depth #accum
 
 	    2 idup scount 0 gt {
 		2 idup dup sdup spop
 		2 idup 1 sub
-		% %stack %depth %accum %el %rdepth
+		# #stack #depth #accum #el #rdepth
 		1 idup type sprintsdict exch get eval
 		cat
 	    } if
-	    % %stack %depth %accum
+	    # #stack #depth #accum
 
 	    3 1 roll pop pop
-	    % %accum
+	    # #accum
 	    `)'
 	    cat
-	    % %accum
+	    # #accum
 	}{
 	    pop pop
 	    `-stack-'
@@ -285,7 +285,7 @@ systemdict begin
     }
 > def
 
-% %object %depth sprints %string
+# #object #depth sprints #string
 /sprints {
     1 idup type sprintsdict exch get eval
 } def
@@ -295,25 +295,25 @@ systemdict begin
     `\n' print flush
 } def
 
-%
-% outputsdict implements formatted output to strings for every type.
-%
+#
+# outputsdict implements formatted output to strings for every type.
+#
 /outputsdict <
     /integertype {
-	% %int %flags
+	# #int #flags
 
-	% Get the base.
+	# Get the base.
 	dup /b known {
 	    dup /b get
 	}{
 	    10
 	} ifelse
-	% %int %flags %base
+	# #int #flags #base
 
 	2 idup exch cvrs
-	% %int %flags %str
+	# #int #flags #str
 
-	% Prepend the sign if necessary.
+	# Prepend the sign if necessary.
 	1 idup /s known {
 	    1 idup /s get /+ eq {
 		2 idup 0 ge {
@@ -321,48 +321,48 @@ systemdict begin
 		} if
 	    } if
 	} if
-	% %int %flags %str
+	# #int #flags #str
 	3 2 roll pop
-	% %flags %str
+	# #flags #str
 	exch
-	% %str %flags
+	# #str #flags
 	outputsdict /stringtype get eval
-	% %str
+	# #str
     }
 ' cat
 @enable_real@ 1 eq {
     `
     /realtype {
-	% %real %flags
+	# #real #flags
 
-	% Determine precision past decimal point.
+	# Determine precision past decimal point.
 	dup /d known {
 	dup /d get
 	}{
 	6
 	} ifelse
-	% %real %flags %precision
+	# #real #flags #precision
 	
-	% Determine whether to use decimal or exponential notation.
+	# Determine whether to use decimal or exponential notation.
 	1 idup /e known {
 	1 idup /e get
 	}{
 	false
 	} ifelse
-	% %real %flags %precision %exp?
+	# #real #flags #precision #exp?
 
 	3 idup 3 1 roll
-	% %real %flags %real %precision %exp?
+	# #real #flags #real #precision #exp?
 	{
-	% Use exponential notation.
+	# Use exponential notation.
 	cves
 	}{
-	% Use decimal notation.
+	# Use decimal notation.
 	cvds
 	} ifelse
-	% %real %flags %str
+	# #real #flags #str
 
-	% Prepend the sign if necessary.
+	# Prepend the sign if necessary.
 	1 idup /s known {
 	1 idup /s get /+ eq {
 	    2 idup 0 ge {
@@ -370,148 +370,148 @@ systemdict begin
 	    } if
 	} if
 	} if
-	% %real %flags %str
+	# #real #flags #str
 	3 2 roll pop exch
-	% %str %flags
+	# #str #flags
 
 	outputsdict /stringtype get eval
-	% %str
+	# #str
     }
     ' cat
 } if
 `
-    % Temporarily define.
+    # Temporarily define.
     /_s {
-	% Check for /w flag.  /w takes precedence over /n.
+	# Check for /w flag.  /w takes precedence over /n.
 	dup /w known {
-	    % Get padding character.
+	    # Get padding character.
 	    dup /p known {
 		dup /p get
 	    }{
 		` '
 	    } ifelse
-	    % %str %flags %pad
+	    # #str #flags #pad
 
 	    1 idup /w get
-	    % %str %flags %pad %width
+	    # #str #flags #pad #width
 	    3 idup length
-	    % %str %flags %pad %width %len
+	    # #str #flags #pad #width #len
 
 	    dup 2 idup le {
-		% Pad string.
-		% %str %flags %pad %width %len
+		# Pad string.
+		# #str #flags #pad #width #len
 
 		1 idup string
-		% %str %flags %pad %width %len %pstr
+		# #str #flags #pad #width #len #pstr
 
-		% Fill %pstr with %pad.
+		# Fill #pstr with #pad.
 		0 1 4 idup 1 sub {
 		    1 idup exch 5 idup putinterval
 		} for
-		% %str %flags %pad %width %len %pstr
+		# #str #flags #pad #width #len #pstr
 		4 3 roll pop
-		% %str %flags %width %len %pstr
+		# #str #flags #width #len #pstr
 
-		% Get the justification.
+		# Get the justification.
 		3 idup /j known {
 		    3 idup /j get
 		}{
 		    /r
 		} ifelse
-		% %str %flags %width %len %pstr %just
+		# #str #flags #width #len #pstr #just
 
 		dup /r eq {
 		    pop
-		    % Right justify.
-		    % %str %flags %width %len %pstr
+		    # Right justify.
+		    # #str #flags #width #len #pstr
 		    3 1 roll sub
 		}{
 		/l eq {
-		    % Left justify.
-		    % %str %flags %width %len %pstr
+		    # Left justify.
+		    # #str #flags #width #len #pstr
 		    3 1 roll pop pop
 		    0
 		}{
-		    % Center.
-		    % %str %flags %width %len %pstr
+		    # Center.
+		    # #str #flags #width #len #pstr
 		    3 1 roll sub 2 idiv
 		} ifelse
 		} ifelse
-		% %str %flags %pstr %offset
+		# #str #flags #pstr #offset
 
 		1 idup exch
-		% %str %flags %pstr %pstr %offset
+		# #str #flags #pstr #pstr #offset
 		5 4 roll
-		% %flags %pstr %pstr %offset %str
+		# #flags #pstr #pstr #offset #str
 		putinterval
-		% %flags %pstr
+		# #flags #pstr
 		exch
-		% %pstr %flags
+		# #pstr #flags
 	    }{
-		% No padding necessary.
+		# No padding necessary.
 		pop pop pop
 	    } ifelse
-	    % %str %flags
+	    # #str #flags
 	}{
-	    % %str %flags
+	    # #str #flags
 	    dup /n known {
-		% Truncate the string if it is too long.
+		# Truncate the string if it is too long.
 		1 idup length
 		1 idup /n get
-		% %str %flags %len %max
+		# #str #flags #len #max
 		dup 2 idup lt {
-		    % Truncate.
+		    # Truncate.
 		    exch pop
 		    dup string
-		    % %str %flags %max %nstr
+		    # #str #flags #max #nstr
 		    dup
-		    % %str %flags %max %nstr %nstr
+		    # #str #flags #max #nstr #nstr
 		    5 4 roll
-		    % %flags %max %nstr %nstr %str
+		    # #flags #max #nstr #nstr #str
 		    4 3 roll
-		    % %flags %nstr %nstr %str %max
+		    # #flags #nstr #nstr #str #max
 		    0 exch getinterval
-		    % %flags %nstr %nstr %substr
+		    # #flags #nstr #nstr #substr
 		    0 exch putinterval
-		    % %flags %nstr
+		    # #flags #nstr
 		    exch
 		}{
 		    pop pop
 		} ifelse
-		% %nstr %flags
+		# #nstr #flags
 	    } if
-	    % %str %flags
+	    # #str #flags
 	} ifelse
-	% %str %flags
+	# #str #flags
 
 	pop
-	% %str
+	# #str
     } def
     /stringtype /_s load
 
-    % Most types can be handled identically.  The following code uses the
-    % same procedure body for all of those types.
-    %
-    % The following block of code looks scary because it avoids deferred
-    % execution in order to "bind" things correctly (we cannot use immediate
-    % evaluation in this file).
+    # Most types can be handled identically.  The following code uses the
+    # same procedure body for all of those types.
+    #
+    # The following block of code looks scary because it avoids deferred
+    # execution in order to "bind" things correctly (we cannot use immediate
+    # evaluation in this file).
     [
-	% %object %flags
+	# #object #flags
 
-	% Get recursion depth.
+	# Get recursion depth.
 	/dup cvx /r /known cvx [
 	    /dup cvx /r /get cvx
 	] cvx [
 	    1
 	] cvx /ifelse cvx
-	% %object %flags %rdepth
+	# #object #flags #rdepth
 
 	3 2 /roll cvx /exch cvx
-	% %flags %object %rdepth
+	# #flags #object #rdepth
 	/sprints cvx /exch cvx
-	% %str %flags
+	# #str #flags
 	/_s load cve
-	% %str
+	# #str
     ] cvx bind
     [
 	/arraytype
@@ -542,63 +542,63 @@ systemdict begin
 	/stacktype
 	/threadtype
     ]{
-	% %proc %name
+	# #proc #name
 	exch dup
-	% %name %proc %proc
+	# #name #proc #proc
     } foreach
-    % Get rid of the extra copy of %proc.
+    # Get rid of the extra copy of #proc.
     pop
 
-    % Now that we are done using _s, undef it.
+    # Now that we are done using _s, undef it.
     currentdict /_s undef
 > def
 
-%
-% Formatted output to a string.  Supported flags:
-%
-% All types:
-%
-% /n : maximum width
-%    : %integer
-% /w : minimum width
-%    : %integer
-% /j : justification
-%    : /l, /c, /r
-% /p : padding character
-%    : `?'
-% /r : recursion depth
-%    : 0..n
-%
-% Integers only:
-%
-% /b : base
-%    : 2..36
-% /s : sign
-%    : /+ /-
-%
-% Reals only:
-%
-% /d : digits of precision past decimal
-%    : %integer (default 6)
-% /e : exponential notation
-%    : %boolean (default false)
-%
-% %obj %flags outputs %string
+#
+# Formatted output to a string.  Supported flags:
+#
+# All types:
+#
+# /n : maximum width
+#    : #integer
+# /w : minimum width
+#    : #integer
+# /j : justification
+#    : /l, /c, /r
+# /p : padding character
+#    : `?'
+# /r : recursion depth
+#    : 0..n
+#
+# Integers only:
+#
+# /b : base
+#    : 2..36
+# /s : sign
+#    : /+ /-
+#
+# Reals only:
+#
+# /d : digits of precision past decimal
+#    : #integer (default 6)
+# /e : exponential notation
+#    : #boolean (default false)
+#
+# #obj #flags outputs #string
 /outputs {
     dup type /dicttype ne {
 	/typecheck throw
     } if
     1 idup type
-    % %obj %flags %type
+    # #obj #flags #type
     outputsdict exch get eval
 } def
 
-%obj %flags output -
+#obj #flags output -
 /output {
     outputs print
 } def
 
-% - product %string
+# - product #string
 /product `Canonware Onyx' def
 
 /pstack {
@@ -608,105 +608,105 @@ systemdict begin
     flush
 } def
 
-%
-% %string %pattern search %post %pattern %pre true
-% %string %pattern search %string false
-%
+#
+# #string #pattern search #post #pattern #pre true
+# #string #pattern search #string false
+#
 /search {
-    % Make sure the arguments are strings.
-    % Pattern.
+    # Make sure the arguments are strings.
+    # Pattern.
     dup type /stringtype ne {
 	/typecheck throw
     } if
-    % String.
+    # String.
     1 idup type /stringtype ne {
 	/typecheck throw
     } if
 
-    % Make sure substring is not longer than string.
+    # Make sure substring is not longer than string.
     dup length 2 idup length le {
-	% Use a nested looping algorithm.  The outer loop advances the
-	% offset %s_i at which to start the search in the string %s,
-	% and the inner loop compares byte by byte with the pattern %p.
-	%
-	% Take care not to cause a rangecheck error.
+	# Use a nested looping algorithm.  The outer loop advances the
+	# offset #s_i at which to start the search in the string #s,
+	# and the inner loop compares byte by byte with the pattern #p.
+	#
+	# Take care not to cause a rangecheck error.
 	0 1 3 idup length 3 idup length sub {
-	    % %s %p %s_i
+	    # #s #p #s_i
 
-	    % Create a substring %s_sub of %s that is the same
-	    % length as %p, starting at %s_i.
+	    # Create a substring #s_sub of #s that is the same
+	    # length as #p, starting at #s_i.
 	    dup 3 idup exch 3 idup length getinterval
 
-	    % %s %p %s_i %s_sub
+	    # #s #p #s_i #s_sub
 	    dup length 1 sub 0 1
 	    3 2 roll
 	    {
-		% %s %p %s_i %s_sub %offset
+		# #s #p #s_i #s_sub #offset
 		dup 2 idup exch get
 		exch 4 idup exch get
 		ne {
-		    % Not equal.  Exit the inner loop.
+		    # Not equal.  Exit the inner loop.
 		    false exit
 		} if
 	    } for
 
-	    % Check to see if the substring match failed.
+	    # Check to see if the substring match failed.
 	    dup type /booleantype eq {
-		% %s %p %s_i %s_sub% false
-		% Failure.  Clean up.
+		# #s #p #s_i #s_sub# false
+		# Failure.  Clean up.
 		pop pop pop
 	    }{
-		% %s %p %s_i %s_sub
-		% Success.
+		# #s #p #s_i #s_sub
+		# Success.
 		3 2 roll pop
-		% %s %s_i% %s_sub
+		# #s #s_i# #s_sub
 
-		% Contstruct pre string %s_pre.
+		# Contstruct pre string #s_pre.
 		3 1 roll dup 2 idup exch 0 exch
-		% %s_sub %s %s_i %s 0 %s_i
+		# #s_sub #s #s_i #s 0 #s_i
 		getinterval
-		% %s_sub %s %s_i %s_pre
+		# #s_sub #s #s_i #s_pre
 		3 1 roll
-		% %s_sub %s_pre %s %s_i
+		# #s_sub #s_pre #s #s_i
 
-		% Contstruct post string %s_post.
+		# Contstruct post string #s_post.
 		3 idup length add dup
 		2 idup length exch sub
 		getinterval
-		% %s_sub %s_pre %s_post
+		# #s_sub #s_pre #s_post
 		3 1 roll
 
 		true
-		% %s_post %s_sub %s_pre true
+		# #s_post #s_sub #s_pre true
 		exit
 	    } ifelse
 	} for
 
-	% Check to see if we succeeded.  If not, set up the stack to
-	% return failure.
+	# Check to see if we succeeded.  If not, set up the stack to
+	# return failure.
 	dup type /booleantype ne {
-	    % Failure.
+	    # Failure.
 	    pop false
 	} if
     }{
-	% Substring is too long.
+	# Substring is too long.
 	pop false
     } ifelse
 } def
 ' cat
 @enable_posix@ 1 eq {
     `
-% [`<path>' `<args>'...] system %exit_code
+# [`<path>' `<args>'...] system #exit_code
 /system {
-    % Make sure argument is an array.
+    # Make sure argument is an array.
     dup type /arraytype ne {
 	/typecheck throw
     } if
-    % Make sure array is non-empty.
+    # Make sure array is non-empty.
     dup length 0 eq {
 	/rangecheck throw
     } if
-    % Make sure array elements are strings.
+    # Make sure array elements are strings.
     dup {
 	{
 	    type /stringtype ne {
@@ -719,35 +719,35 @@ systemdict begin
 
     fork
     dup 0 eq {
-	% Child.
+	# Child.
 	systemdict begin
 	/throw {1 die} def
 	end
 	pop exec
     }{
-	% Parent.
+	# Parent.
 	exch pop waitpid
     } ifelse
 } def
 
-% Define require and mrequire configuration parameters in onyxdict.  By default,
-% the search order is:
-%
-% 1) Absolute path: `'.
-% 2) Relative path: `.'.
-% 3) /ONYX_[MR]PATH: Colon-separated string in envdict.
-% 4) `@prefix@/share/onyx-@onyx_version@/nx[m]': Standard installation location.
+# Define require and mrequire configuration parameters in onyxdict.  By default,
+# the search order is:
+#
+# 1) Absolute path: `'.
+# 2) Relative path: `.'.
+# 3) /ONYX_[MR]PATH: Colon-separated string in envdict.
+# 4) `@prefix@/share/onyx-@onyx_version@/nx[m]': Standard installation location.
 onyxdict begin
 /rpath_pre [`' `.'] def
 /rpath_post [@rpath_post@] def
 
 /mpath_pre [`' `.'] def
 /mpath_post [@mpath_post@] def
-end % onyxdict.
+end # onyxdict.
 
-% %filename require -
+# #filename require -
 /require {
-    % Make sure the argument is a string.
+    # Make sure the argument is a string.
     dup type /stringtype ne {
 	/typecheck throw
     } if
@@ -759,21 +759,21 @@ end % onyxdict.
 	    envdict /ONYX_RPATH 2 ndup known {
 		get
 
-		% Push mark that denotes start of array.
+		# Push mark that denotes start of array.
 		[ exch
 		{
-		    % [ ... %cpath
+		    # [ ... #cpath
 		    `:' search {
-			% %post `:' %dir
+			# #post `:' #dir
 			exch pop exch
-			% [ ... %dir %post
+			# [ ... #dir #post
 		    }{
-			% Last path component.
-			% %dir
+			# Last path component.
+			# #dir
 			exit
 		    } ifelse
 		} loop
-		% Create array.
+		# Create array.
 		]
 	    }{
 		2 npop
@@ -781,36 +781,36 @@ end % onyxdict.
 
 	    onyxdict /rpath_post get
 	]{
-	    % %filename %path
+	    # #filename #path
 	    {
-		% %filename %dir
+		# #filename #dir
 		`/' cat
 		1 idup cat
-		% %filename %full_path
+		# #filename #full_path
 		dup `f' test {
-		    % Found.
-		    % %filename %full_path
+		    # Found.
+		    # #filename #full_path
 		    `r' open cvx eval
-		    % %filename
+		    # #filename
 		    pop
-		    stop % Success.
+		    stop # Success.
 		}{
-		    % Not found.
-		    % %filename %full_path
+		    # Not found.
+		    # #filename #full_path
 		    pop
 		} ifelse
 	    } foreach
 	} foreach
     } stopped not {
-	% Failure.
+	# Failure.
 	/undefinedfilename throw
     } if
-    1 pop % XXX Avoid tail call optimization.
+    1 pop # XXX Avoid tail call optimization.
 } def
 
-% %filename %symbol mrequire -
+# #filename #symbol mrequire -
 /mrequire {
-    % Make sure the arguments are strings.
+    # Make sure the arguments are strings.
     1 idup type /stringtype ne {
 	/typecheck throw
     } if
@@ -819,7 +819,7 @@ end % onyxdict.
     } if
 
     exch
-    % %symbol %filename
+    # #symbol #filename
     {
 	[
 	    onyxdict /mpath_pre get
@@ -827,21 +827,21 @@ end % onyxdict.
 	    envdict /ONYX_MPATH 2 ndup known {
 		get
 
-		% Push mark that denotes start of array.
+		# Push mark that denotes start of array.
 		[ exch
 		{
-		    % [ ... %cpath
+		    # [ ... #cpath
 		    `:' search {
-			% %post `:' %dir
+			# #post `:' #dir
 			exch pop exch
-			% [ ... %dir %post
+			# [ ... #dir #post
 		    }{
-			% Last path component.
-			% %dir
+			# Last path component.
+			# #dir
 			exit
 		    } ifelse
 		} loop
-		% Create array.
+		# Create array.
 		]
 	    }{
 		2 npop
@@ -849,29 +849,29 @@ end % onyxdict.
 
 	    onyxdict /mpath_post get
 	]{
-	    % %symbol %filename %path
+	    # #symbol #filename #path
 	    {
-		% %symbol %filename %dir
+		# #symbol #filename #dir
 		`/' cat
 		1 idup cat
-		% %symbol %filename %full_path
+		# #symbol #filename #full_path
 		dup `f' test {
-		    % Found.
-		    % %symbol %filename %full_path
+		    # Found.
+		    # #symbol #filename #full_path
 		    3 2 roll modload
-		    % %filename
+		    # #filename
 		    pop
-		    stop % Success.
+		    stop # Success.
 		}{
-		    % Not found.
-		    % %symbol %filename %full_path
+		    # Not found.
+		    # #symbol #filename #full_path
 		    pop
 		} ifelse
 	    } foreach
 	} foreach
     } stopped not {
-	% Failure.
-	% %symbol %filename
+	# Failure.
+	# #symbol #filename
 	exch
 	/undefinedfilename throw
     } if
@@ -879,10 +879,10 @@ end % onyxdict.
     ' cat
 } if
 `
-% /errorname throw -
+# /errorname throw -
 /throw {
-    % Do some sanity checking, to try to avoid going infinitely recursive
-    % in the error handling machinery.
+    # Do some sanity checking, to try to avoid going infinitely recursive
+    # in the error handling machinery.
     {
 	{/errordict where {pop true}{false} ifelse}
 	{/errordict load /handleerror known}
@@ -892,7 +892,7 @@ end % onyxdict.
 	eval not {
 	    stderr `Onyx: Missing errordict or currenterror defs\n' write
 
-	    % Print stack dumps.
+	    # Print stack dumps.
 	    stderr `ostack: ' write
 	    ostack 2 sprints stderr exch write
 
@@ -910,62 +910,62 @@ end % onyxdict.
 	} if
     } foreach
 
-    % Make sure the argument is a name.
+    # Make sure the argument is a name.
     dup type /nametype ne {
 	/typecheck /systemdict load /throw get eval
     } if
 
     /currenterror load begin
 
-    % Set newerror to true to indicate there is an error.  It is up to the
-    % application to clear this afterwards if it wants to make newerror
-    % meaningful in the face of multiple errors.
+    # Set newerror to true to indicate there is an error.  It is up to the
+    # application to clear this afterwards if it wants to make newerror
+    # meaningful in the face of multiple errors.
     /newerror true def
 
-    % Set errorname to the argument passed in.
+    # Set errorname to the argument passed in.
     dup /errorname exch cvlit def
 
-    % ostack.  Get rid of /errorname in the snapshot.  Ordering is important
-    % to keep from polluting the snapshot.
+    # ostack.  Get rid of /errorname in the snapshot.  Ordering is important
+    # to keep from polluting the snapshot.
     ostack dup spop pop /ostack exch def
 
-    % dstack.  Do not include the top element, which is the copy of
-    % currenterror that we pushed.
+    # dstack.  Do not include the top element, which is the copy of
+    # currenterror that we pushed.
     /dstack dstack dup spop pop def
 
-    % estack.  Remove this procedure from the snapshot.
+    # estack.  Remove this procedure from the snapshot.
     /estack estack dup spop pop def
 
-    % istack.  Remove this procedure from the snapshot.
+    # istack.  Remove this procedure from the snapshot.
     /istack istack dup spop pop def
 
-    % Push the offending object onto ostack.
+    # Push the offending object onto ostack.
     /estack load dup sdup spop
     exch
-    % %object %errorname
+    # #object #errorname
 
-    end % currenterror.
+    end # currenterror.
 
-    % If there is an error handler for the error name, call it.  Otherwise,
-    % call the errordict handleerror, then call the errordict stop.
+    # If there is an error handler for the error name, call it.  Otherwise,
+    # call the errordict handleerror, then call the errordict stop.
     /errordict load
-    % %object %errorname %errordict
+    # #object #errorname #errordict
     dup 2 idup known {
-	% Call error handler.
+	# Call error handler.
 	exch get eval
     }{
-	% No error handler.
+	# No error handler.
 	exch pop
 	dup /handleerror get eval
 	/stop get eval
     } ifelse
 } def
 
-% - version %string
+# - version #string
 /version `<Version = onyx>' def
 
-end % systemdict.
+end # systemdict.
 ' cat
 
-% Final closing brace.
+# Final closing brace.
 `}' cat cvx eval

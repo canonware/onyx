@@ -340,12 +340,12 @@ reader an idea of the simplicity of the language syntax.
 CRNL (carriage return, newline) pairs are in all important cases converted to
 newlines during scanning.
 
-The characters \%, /, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
+The characters \#, /, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
 special.  In most cases, any of the special characters and whitespace (space,
 tab, newline, formfeed, null) terminate any preceding token.  All other
 characters including non-printing characters are considered regular characters.
 
-A comment starts with a \% character outside of a string context and extends to
+A comment starts with a \# character outside of a string context and extends to
 the next newline or formfeed.
 
 Procedures are actually executable arrays, but Onyx provides special syntax for
@@ -384,10 +384,10 @@ Literal names are simply pushed onto the operand stack.  Immediately evaluated
 names are replaced by their values as defined in the dictionary stack, even if
 execution is deferred.  Examples include:
 \begin{verbatim}
-foo     % executable
-4noth3r % executable
-/bar    % literal
-//biz   % immediately evaluated
+foo     # executable
+4noth3r # executable
+/bar    # literal
+//biz   # immediately evaluated
 \end{verbatim}
 
 If the result of an immediately evaluated name is an executable array, the
@@ -446,16 +446,16 @@ and 36, inclusive, in the range $-2^{63}$ to $2^{63} - 1$.  Integer digits are
 composed of decimal numbers and lower or upper case letters.  The sign is
 optional.  Examples include:
 \begin{verbatim}
-2#101
-16#ff
-16#Ff
-16#FF
--10#42
-10#42
-+10#42
-9#18
-35#7r3x
-35#7R3x
+2@101
+16@ff
+16@Ff
+16@FF
+-10@42
+10@42
++10@42
+9@18
+35@7r3x
+35@7R3x
 \end{verbatim}
 
 \item[{\lt}dec\_real{\gt} : ] Double precision floating point number in decimal
@@ -687,18 +687,18 @@ accessing implicitly locked objects.  For example, if two threads copy two
 implicitly locked strings to the other string, deadlock can result.
 
 \begin{verbatim}
-% Initialization.
+# Initialization.
 /A `aaaaaa'
 /B `bbbbbb'
 
 ...
 
-% In thread A:
+# In thread A:
 A B copy
 
 ...
 
-% In thread B:
+# In thread B:
 B A copy
 \end{verbatim}
 
@@ -3889,12 +3889,6 @@ locked? \\
 \hline \hline
 \multicolumn{4}{|l|}{Miscellaneous operators} \\
 \hline \hline
--- & {\bf \htmlref{\#!}{systemdict:sym_hash_bang}} & mark & Begin interpreter
-magic. \\
-\hline
-mark names & {\bf \htmlref{!\#}{systemdict:sym_bang_hash}} & -- & End
-interpreter magic. \\
-\hline
 -- & {\bf \htmlref{product}{systemdict:product}} & string & Get the product
 string. \\
 \hline
@@ -3931,59 +3925,6 @@ operators. \\
 %% 	\end{description}
 
 \begin{description}
-\label{systemdict:sym_bang_hash}
-\index{"!#@\onyxop{}{"!\#}{}}
-\item[{\onyxop{mark names}{!\#}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[mark: ]
-			A mark object.
-		\item[names: ]
-			Zero or more name objects.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{unmatchedmark}{unmatchedmark}.]
-		\end{description}
-	\item[Description: ]
-		Remove mark and name objects constructed as a side effect of
-		interpreter magic.  This operator is an alias of
-		\htmlref{cleartomark}{systemdict:cleartomark}.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> #!/usr/local/bin/onyx pstack
-/onyx
-/bin
-/local
-/usr
--mark-
-onyx:5> !#
-onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:sym_hash_bang}
-\index{#"!@\onyxop{}{\#"!}{}}
-\item[{\onyxop{--}{\#!}{mark}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[mark: ]
-			A mark object.
-		\end{description}
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Create a mark object in preparation for an interpreter path.
-		This operator is an alias of \htmlref{mark}{systemdict:mark}.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> #! pstack
--mark-
-onyx:1>
-		\end{verbatim}
-	\end{description}
 \label{systemdict:sym_lp}
 \index{(@\onyxop{}{(}{}}
 \item[{\onyxop{--}{(}{fino}}: ]
@@ -4764,11 +4705,11 @@ onyx:0>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8#755 mkdir 
+onyx:0> `/tmp/tdir' 8@755 mkdir 
 onyx:0> `/tmp/tdir' status /mode get 1 sprint
 16877
 onyx:0> `/tmp/tdir' `r' open 
-onyx:1> dup 8#555 chmod
+onyx:1> dup 8@555 chmod
 onyx:1> `/tmp/tdir' status /mode get 1 sprint
 16749
 onyx:1>
@@ -4803,7 +4744,7 @@ onyx:1>
 		Change the owner and group of a file.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8#755 mkdir
+onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' status 
 onyx:1> dup /uid get 1 sprint
 1001
@@ -7433,7 +7374,7 @@ onyx:1>
 		Create a directory.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8#755 mkdir
+onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' {1 sprint} dirforeach
 `.'
 `..'
@@ -8844,7 +8785,7 @@ onyx:0>
 		Rename a file or directory from \oparg{old} to \oparg{new}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8#755 mkdir 
+onyx:0> `/tmp/tdir' 8@755 mkdir 
 onyx:0> `/tmp/tdir' `/tmp/ndir' rename
 onyx:0> `/tmp/ndir' {1 sprint} dirforeach
 `.'
@@ -8944,7 +8885,7 @@ onyx:0>
 		Remove an empty directory.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `/tmp/tdir' 8#755 mkdir
+onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' rmdir
 onyx:0>
 		\end{verbatim}

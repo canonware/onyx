@@ -1,5 +1,5 @@
 Test begin
-At line 5, column 1: Error /syntaxerror
+At line 4, column 1: Error /syntaxerror
 ostack: (-pmark- `\'')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..1):

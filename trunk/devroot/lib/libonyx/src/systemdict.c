@@ -396,7 +396,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sub),
     ENTRY(sunder),
     ENTRY(sup),
-    {NXN_sym_bang_hash, systemdict_cleartomark},
     ENTRY(sym_lp),
     ENTRY(sym_rp),
     ENTRY(sym_gt),
@@ -470,9 +469,9 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 
 /* Number of names that are defined below, but not as operators. */
 #ifdef CW_POSIX
-#define NEXTRA 13
-#else
 #define NEXTRA 12
+#else
+#define NEXTRA 11
 #endif
 #define NFASTOPS							\
 	(sizeof(systemdict_fastops) / sizeof(struct cw_systemdict_entry))
@@ -574,12 +573,6 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 
     /* mark. */
     nxo_name_new(&name, a_nx, nxn_str(NXN_mark), nxn_len(NXN_mark), TRUE);
-    nxo_mark_new(&value);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
-
-    /* #!. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_sym_hash_bang),
-		 nxn_len(NXN_sym_hash_bang), TRUE);
     nxo_mark_new(&value);
     nxo_dict_def(a_dict, a_nx, &name, &value);
 

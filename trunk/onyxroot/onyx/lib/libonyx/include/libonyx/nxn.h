@@ -16,8 +16,6 @@ extern const cw_uint8_t *cw_g_nx_names[];
 typedef enum
 {
     NXN_ZERO,
-    NXN_sym_bang_hash,
-    NXN_sym_hash_bang,
     NXN_sym_lp,
     NXN_sym_rp,
     NXN_sym_lt,

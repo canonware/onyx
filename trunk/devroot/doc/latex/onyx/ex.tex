@@ -43,22 +43,17 @@ target of the build system.
 
 Pure and pseudo-pure programs can be executed by the \htmlref{onyx}{onyxprog}
 program either via {\tt \#!} magic, or by invoking the onyx program directly.
-Typically, onyx is installed as {\tt /usr/local/bin/onyx}, so the first lines of
-an Onyx program normally look like:
+Typically, onyx is installed as {\tt /usr/local/bin/onyx}, so the first line of
+an Onyx program normally looks like:
 
 \begin{verbatim}
 #!/usr/local/bin/onyx
-!#
 \end{verbatim}
 
 The {\tt \#!} characters indicate to the operating system that {\tt
 /usr/local/bin/onyx} should be invoked.  See the execve(2) manual page for
-details on how this works.  From Onyx's perspective, \htmlref{{\tt
-\#!}}{systemdict:sym_hash_bang} pushes a mark object onto the operand stack, the
-path components create literal name objects ({\tt /usr}, {\tt /local}, {\tt
-/bin}, and {\tt /onyx}), and \htmlref{{\tt !\#}}{systemdict:sym_bang_hash} pops
-everything off the operand stack down to and including the topmost mark object,
-which was created by {\tt \#!}.
+details on how this works.  From Onyx's perspective, the line is ignored as a
+comment.
 
 The examples in this chapter do not show the {\tt \#!} magic.  The actual
 example programs in the source tree do include it, though they specify the path

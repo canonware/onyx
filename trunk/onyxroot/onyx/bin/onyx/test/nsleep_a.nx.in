@@ -1,16 +1,16 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% <Copyright = jasone>
-%
-% <License>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%
-% Version: Onyx <Version = onyx>
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
 
-% Check that we're really sleeping long enough.
+# Check that we're really sleeping long enough.
 
 `Test begin\n' print flush
 
@@ -19,7 +19,7 @@
 10 {
 	realtime
 	sleepinterval nsleep
-	realtime exch sub % Actual interval slept.
+	realtime exch sub # Actual interval slept.
 	dup sleepinterval lt {
 		`Didn\'t sleep long enough: ' print
 		cvs print

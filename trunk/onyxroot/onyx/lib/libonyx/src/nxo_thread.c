@@ -1269,7 +1269,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			a_thread->state = THREADTS_SLASH_CONT;
 			break;
 		    }
-		    case '%':
+		    case '#':
 		    {
 			a_thread->state = THREADTS_COMMENT;
 			break;
@@ -1373,7 +1373,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '\0': case '\t': case '\f': case '\r': case ' ':
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '%':
+		    case '[': case ']': case '{': case '}': case '#':
 		    {
 			nxoe_p_thread_syntax_error(a_thread, a_threadp,
 						   defer_base, "", "/", c);
@@ -1437,7 +1437,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
-		    case '#':
+		    case '@':
 		    {
 			cw_uint32_t digit, ndigits;
 
@@ -1537,7 +1537,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '%':
+		    case '[': case ']': case '{': case '}': case '/': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1648,7 +1648,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '%':
+		    case '[': case ']': case '{': case '}': case '/': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1725,7 +1725,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '%':
+		    case '[': case ']': case '{': case '}': case '/': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1820,7 +1820,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '%':
+		    case '[': case ']': case '{': case '}': case '/': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -2149,7 +2149,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '(': case ')': case '`': case '\'': case '"': case '<':
 		    case '>': case '[': case ']': case '{': case '}': case '/':
-		    case '%':
+		    case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */

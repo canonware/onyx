@@ -65,7 +65,6 @@ slate_bins_install : mods_install
   @INSTALL@ -d [PREFIX]/bin;
 
   echo \"#!@ONYX@\" > [PREFIX]/bin/slate-@slate_version@;
-  echo \"!#\" >> [PREFIX]/bin/slate-@slate_version@;
   cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]]
       >> [PREFIX]/bin/slate-@slate_version@;
   chmod 0755 [PREFIX]/bin/slate-@slate_version@;
@@ -123,7 +122,6 @@ slate_bins_distclean :
   set mkdir
 {
   echo \"#!@TONYX@\" > [target];
-  echo \"!#\" >> [target];
   cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]]
       >> [target];
   chmod 0755 [target];
