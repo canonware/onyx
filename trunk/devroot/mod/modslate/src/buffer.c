@@ -847,10 +847,29 @@ modslate_buffer_dump(void *a_data, cw_nxo_t *a_thread)
 #endif
 
 #ifdef CW_BUF_VALIDATE
+/* =/buffer= buffer_validate - */
 void
 modslate_buffer_validate(void *a_data, cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxn_t error;
+    struct cw_buffer *buffer;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    error = buffer_type(nxo);
+    if (error)
+    {
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+    buffer = (struct cw_buffer *) nxo_hook_data_get(nxo);
+
+    buffer_p_lock(buffer);
+    buf_validate(&buffer->buf);
+    buffer_p_unlock(buffer);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -1833,10 +1852,31 @@ modslate_marker_dump(void *a_data, cw_nxo_t *a_thread)
 #endif
 
 #ifdef CW_BUF_VALIDATE
+/* =/marker marker_validate - */
 void
 modslate_marker_validate(void *a_data, cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxn_t error;
+    struct cw_marker *marker;
+    struct cw_buffer *buffer;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    error = marker_type(nxo);
+    if (error)
+    {
+	nxo_thread_nerror(a_thread, error);
+	return;
+    }
+    marker = (struct cw_marker *) nxo_hook_data_get(nxo);
+    buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
+
+    buffer_p_lock(buffer);
+    mkr_validate(&marker->mkr);
+    buffer_p_unlock(buffer);
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
