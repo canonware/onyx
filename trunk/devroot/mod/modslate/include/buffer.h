@@ -14,17 +14,6 @@
 void
 modslate_buffer_init(cw_nxo_t *a_thread);
 
-/* Predicates. */
-
-cw_nxn_t
-buffer_type(cw_nxo_t *a_nxo);
-
-cw_nxn_t
-marker_type(cw_nxo_t *a_nxo);
-
-cw_nxn_t
-extent_type(cw_nxo_t *a_nxo);
-
 /* Hooks. */
 
 /* buffer. */

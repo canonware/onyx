@@ -68,6 +68,56 @@ modslate_hooks_init(cw_nxo_t *a_thread,
     nxo_stack_npop(tstack, 2);
 }
 
+/* Verify that a_nxo is a =a_type=. */
+cw_nxn_t
+modslate_hook_type(cw_nxo_t *a_hook, const cw_uint8_t *a_type)
+{
+    cw_nxn_t retval;
+    cw_nxo_t *tag;
+    cw_uint32_t name_len;
+    const cw_uint8_t *name;
+
+    if (nxo_type_get(a_hook) != NXOT_HOOK)
+    {
+	retval = NXN_typecheck;
+	goto RETURN;
+    }
+
+    tag = nxo_hook_tag_get(a_hook);
+    if (nxo_type_get(tag) != NXOT_NAME)
+    {
+	retval = NXN_typecheck;
+	goto RETURN;
+    }
+
+    name_len = nxo_name_len_get(tag);
+    name = nxo_name_str_get(tag);
+    if ((name_len != strlen(a_type)) || strncmp(a_type, name, name_len))
+    {
+	retval = NXN_typecheck;
+	goto RETURN;
+    }
+
+    retval = NXN_ZERO;
+    RETURN:
+    return retval;
+}
+
+
+/* #object a_type? #boolean */
+void
+modslate_hook_p(void *a_data, cw_nxo_t *a_thread, const cw_uint8_t *a_type)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_nxn_t error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    error = modslate_hook_type(nxo, a_type);
+
+    nxo_boolean_new(nxo, error ? FALSE : TRUE);
+}
+
 void
 modslate_init(void *a_arg, cw_nxo_t *a_thread)
 {

@@ -17,7 +17,7 @@ struct cw_display
     /* For GC iteration. */
     cw_uint32_t iter;
 
-    /* Ref to =display=, prevents premature module unload. */
+    /* Reference to =display=, prevents premature module unload. */
     cw_nxo_t hook;
 
     /* Auxiliary data for display_aux_[gs]et. */
@@ -212,7 +212,7 @@ display_type(cw_nxo_t *a_nxo)
 
 /* #term #infile #outfile display #=display= */
 void
-slate_display(void *a_data, cw_nxo_t *a_thread)
+modslate_display(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *tstack, *tnxo, *tag;
     cw_nxo_t *term, *infile, *outfile;
@@ -298,14 +298,7 @@ slate_display(void *a_data, cw_nxo_t *a_thread)
 void
 modslate_display_p(void *a_data, cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo;
-    cw_nxn_t error;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_GET(nxo, ostack, a_thread);
-    error = display_type(nxo);
-
-    nxo_boolean_new(nxo, error ? FALSE : TRUE);
+    modslate_hook_p(a_data, a_thread, "frame");
 }
 
 void
@@ -318,7 +311,7 @@ modslate_display_aux_get(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    error = display_type(nxo);
+    error = modslate_hook_type(nxo, "display");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
@@ -343,7 +336,7 @@ modslate_display_aux_set(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(aux, ostack, a_thread);
     NXO_STACK_DOWN_GET(nxo, ostack, a_thread, aux);
-    error = display_type(nxo);
+    error = modslate_hook_type(nxo, "display");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
@@ -357,7 +350,7 @@ modslate_display_aux_set(void *a_data, cw_nxo_t *a_thread)
 
 /* #=display= display_start - */
 void
-slate_display_start(void *a_data, cw_nxo_t *a_thread)
+modslate_display_start(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
     cw_nxn_t error;
@@ -365,7 +358,7 @@ slate_display_start(void *a_data, cw_nxo_t *a_thread)
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    error = display_type(nxo);
+    error = modslate_hook_type(nxo, "display");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
@@ -383,7 +376,7 @@ slate_display_start(void *a_data, cw_nxo_t *a_thread)
 
 /* #=display= display_stop - */
 void
-slate_display_stop(void *a_data, cw_nxo_t *a_thread)
+modslate_display_stop(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
     cw_nxn_t error;
@@ -391,7 +384,7 @@ slate_display_stop(void *a_data, cw_nxo_t *a_thread)
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    error = display_type(nxo);
+    error = modslate_hook_type(nxo, "display");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
@@ -405,7 +398,7 @@ slate_display_stop(void *a_data, cw_nxo_t *a_thread)
 
 /* #=display= display_redisplay - */
 void
-slate_display_redisplay(void *a_data, cw_nxo_t *a_thread)
+modslate_display_redisplay(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
     cw_nxn_t error;
@@ -413,7 +406,7 @@ slate_display_redisplay(void *a_data, cw_nxo_t *a_thread)
 
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    error = display_type(nxo);
+    error = modslate_hook_type(nxo, "display");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);

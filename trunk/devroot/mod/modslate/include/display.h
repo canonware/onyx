@@ -14,10 +14,6 @@
 void
 modslate_display_init(cw_nxo_t *a_thread);
 
-/* Predicates. */
-cw_nxn_t
-display_type(cw_nxo_t *a_nxo);
-
 /* Hooks. */
 void
 modslate_display(void *a_data, cw_nxo_t *a_thread);
