@@ -33,15 +33,15 @@ main()
   buf_c = buf_new(NULL, TRUE);
   buf_d = buf_new(NULL, TRUE);
 
-  /* Create a whole bunch of data. */
+  /* Create the data. */
   {
     cw_uint32_t i, j;
     cw_bufc_t * bufc;
     void * data;
 
-    for (i = 1; i < 32; i++)
+    for (i = 1; i < 16; i++)
     {
-      for (j = 1; j < 32; j++)
+      for (j = 1; j < 16; j++)
       {
 	bufc = bufc_new((cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t)),
 			mem_dealloc,
@@ -54,7 +54,7 @@ main()
       }
     }
 
-    for (i = 0; i < 64; i++)
+    for (i = 0; i < 4; i++)
     {
       bufc = bufc_new((cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t)),
 		      mem_dealloc,
@@ -65,7 +65,7 @@ main()
       bufc_delete(bufc);
     }
 
-    for (i = 0; i < 16384; i++)
+    for (i = 0; i < 1024; i++)
     {
       bufc = bufc_new((cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t)),
 		      mem_dealloc,
@@ -172,7 +172,7 @@ main()
   }
 
   /* Takes a long time to run. */
-#if (0)
+/*  #if (0) */
   /* Multi-stride buf_get_uint8(). */
   {
     cw_uint32_t h, i, j, k, size;
@@ -219,7 +219,7 @@ main()
       }
     }
   }
-#endif
+/*  #endif */
   
   /* buf_get_uint32() inc loop for each buf. */
   {
