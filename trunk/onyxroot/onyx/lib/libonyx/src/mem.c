@@ -57,11 +57,11 @@ static cw_mema_t s_mema;
 static cw_bool_t s_mem_initialized = FALSE;
 #endif
 
+#ifdef CW_MEM_ERROR
 #ifdef CW_THREADS
 static cw_mtx_t s_mem_lock;
 #endif
 
-#ifdef CW_MEM_ERROR
 cw_mema_t s_mem_mema;
 
 /* Slots in base hash table. */
@@ -175,9 +175,9 @@ mem_l_init(void)
 			      CW_MEM_BASE_GROW, CW_MEM_BASE_SHRINK,
 			      ch_direct_hash, ch_direct_key_comp);
     ql_new(&s_mem_addr_list);
-#endif
 #ifdef CW_THREADS
     mtx_new(&s_mem_lock);
+#endif
 #endif
 
 #ifdef CW_DBG
