@@ -83,13 +83,20 @@ SRCS = [SRCS] [COVER_SRCS];
   SBTESTS = [SBTESTS] [sbtests];
 }
 
-/* Man pages. */
+/* LaTeX source files. */
 {
-  local manpages_1 = ;
-  manpages_1 = [fromto % [srcdir]/bin/cover/man/man1/% [manpages_1]];
+  local tex_srcs = ;
+  tex_srcs = [fromto % [srcdir]/bin/cover/doc/latex/% [tex_srcs]];
 
-  COVER_MANPAGES_1 = [manpages_1];
-  MANPAGES_1 = [MANPAGES_1] [manpages_1];
+  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/bin/cover/doc/latex/% [fig_srcs]];
+
+  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Binaries. */
@@ -127,11 +134,6 @@ rm -f [PREFIX]/bin/cover
 
 echo rm -f [PREFIX]/bin/cover.prof
 rm -f [PREFIX]/bin/cover.prof
-
-for i in [COVER_MANPAGES_1]; do
-	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
-	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
-done
 dataend
 }
 
@@ -152,14 +154,6 @@ cover_install_common :
   [SHELL] -e;
 data
 #![SHELL]
-
-echo [INSTALL] -d [PREFIX]/man/man1
-[INSTALL] -d [PREFIX]/man/man1
-
-for i in [COVER_MANPAGES_1]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
-	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
-done
 
 echo [INSTALL] -d [PREFIX]/bin
 [INSTALL] -d [PREFIX]/bin

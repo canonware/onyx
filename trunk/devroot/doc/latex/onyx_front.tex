@@ -1,0 +1,132 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% Definitions and front matter of Canonware Software Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[10pt,titlepage]{book}
+\usepackage[dvips]{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+%begin{latexonly}
+\usepackage{ncntrsbk}
+\usepackage{fancyheadings}
+%end{latexonly}
+
+% For latex2html.
+%\providecommand{\clearemptydoublepage}[0]{}
+%\providecommand{\equal}[2]{1}
+
+%begin{latexonly}
+%
+% Configure margins, line spacing, etc.
+%
+\setlength{\topmargin}{0in}
+%\setlength{\headheight}{36pt}
+\setlength{\headheight}{54pt}
+\setlength{\headsep}{12pt}
+\setlength{\topskip}{0in}
+\setlength{\textheight}{8.5in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\parindent}{0pt}
+%\setlength{\parskip}{10pt}
+\setlength{\parskip}{8pt}
+%\renewcommand{\baselinestretch}{1.3}
+\renewcommand{\baselinestretch}{1.0}
+%end{latexonly}
+
+%
+% Title page setup
+%
+\title{Canonware Software Manual, Version <Version>}
+\author{by Jason Evans}
+%\date{\today}
+
+% Control what all ends up in the table of contents.
+\addtocounter{secnumdepth}{1}
+
+%begin{latexonly}
+% Use this to make sure chapter breaks look right.
+\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+
+%
+% Set up the standard page headers.
+%
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\lhead[\bfseries\thepage]{\bfseries\rightmark}
+\rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
+\cfoot{}
+\setlength{\headrulewidth}{2pt}
+\chead[\bfseries{Canonware Software Manual}]{\bfseries{Jason Evans}}
+%\lfoot[\bfseries{Canonware Software Manual}]{}
+%\rfoot[]{\bfseries{Jason Evans}}
+%\setlength{\footrulewidth}{2pt}
+%end{latexonly}
+
+%
+% Create the example float type.
+%
+%\newfloat{example}{htbp}{alg}[chapter]
+%\floatname{example}{Example}
+%\floatplacement{example}{H} % Since we couldn't do it in the \newfloat call.
+
+\begin{document}
+\maketitle
+\clearemptydoublepage
+
+%begin{latexonly}
+\pagestyle{fancy}
+\pagenumbering{roman}
+
+\lhead[\bfseries\thepage]{\bfseries{Table of Contents}}
+\rhead[\bfseries{Table of Contents}]{\bfseries\thepage}
+
+\tableofcontents
+\clearemptydoublepage
+
+%\lhead[\bfseries\thepage]{\bfseries{List of Figures}}
+%\rhead[\bfseries{List of Figures}]{\bfseries\thepage}
+%end{latexonly}
+
+%\listoffigures
+%\clearemptydoublepage
+
+%\listof{example}{List of Examples}
+%\clearemptydoublepage
+
+\lhead[\bfseries\thepage]{\bfseries{Preface}}
+\rhead[\bfseries{Preface}]{\bfseries\thepage}
+
+\chapter{Preface}
+\addcontentsline{toc}{chapter}{Preface}
+
+\subsection*{What this manual is}
+Fu.
+
+\subsection*{How to use this manual}
+This manual is broken into two separate parts:
+
+\begin{itemize}
+\item{\bf{Part I}: Programs}
+\item{\bf{Part II}: Libraries}
+\end{itemize}
+
+%
+% Setup for main body of document.
+%
+\lhead[\bfseries\thepage]{\bfseries\rightmark}
+\rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
+\pagestyle{fancy}
+\pagenumbering{arabic}
+\clearemptydoublepage

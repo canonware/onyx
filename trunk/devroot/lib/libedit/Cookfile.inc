@@ -90,13 +90,20 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
   SBTESTS = [SBTESTS] [sbtests];
 }
 
-/* Man pages. */
+/* LaTeX source files. */
 {
-  local manpages_3 = /*editline.3*/;
-  manpages_3 = [fromto % [srcdir]/lib/c/libedit/man/man3/% [manpages_3]];
+  local tex_srcs = ;
+  tex_srcs = [fromto % [srcdir]/lib/c/libedit/doc/latex/% [tex_srcs]];
 
-  LIBEDIT_MANPAGES_3 = [manpages_3];
-  MANPAGES_3 = [MANPAGES_3] [manpages_3];
+  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/lib/c/libedit/doc/latex/% [fig_srcs]];
+
+  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Libraries. */
@@ -142,11 +149,6 @@ rm -f [PREFIX]/lib/libedit*
 
 echo rm -rf [PREFIX]/include/libedit
 rm -rf [PREFIX]/include/libedit
-
-for i in [LIBEDIT_MANPAGES_3]; do
-	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-done
 dataend
 }
 
@@ -182,14 +184,6 @@ echo [INSTALL] -d [PREFIX]/include/libedit
 for i in [LIBEDIT_INCS]; do
 	echo [INSTALL] -m 0644 $i [PREFIX]/include/libedit/
 	[INSTALL] -m 0644 $i [PREFIX]/include/libedit/
-done
-
-echo [INSTALL] -d [PREFIX]/man/man3
-[INSTALL] -d [PREFIX]/man/man3
-
-for i in [LIBEDIT_MANPAGES_3]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
-	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
 done
 
 echo [INSTALL] -d [PREFIX]/lib

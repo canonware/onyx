@@ -15,13 +15,15 @@
  * Standard definitions.
  */
 
+/* Paths. */
 srcdir = @top_srcdir@;
+abs_srcdir = @abs_srcdir@;
 objdir = @objdir@;
 abs_objdir = @abs_objdir@;
-
-SHELL = /bin/sh;
 PREFIX = @prefix@;
-ENABLE_SHARED = @enable_shared@;
+
+/* Paths to programs used by the build system. */
+SHELL = /bin/sh;
 CC = @CC@;
 AR = @AR@;
 LD = @LD@;
@@ -34,27 +36,12 @@ PERL = @PERL@;
 CAT = @CAT@;
 DIFF = @DIFF@;
 VERIFY = @VERIFY@;
+LATEX = @LATEX@;
+DVIPS = @DVIPS@;
+FIG2DEV = @FIG2DEV@;
+LATEX2HTML = @LATEX2HTML@;
 
-INCS = ;
-PRIV_INCS = ;
-SRCS = ;
-LIBS = ;
-D_LIBS = ;
-A_LIBS = ;
-P_LIBS = ;
-S_LIBS = ;
-S_LINKS = ;
-D_BINS = ;
-A_BINS = ;
-P_BINS = ;
-CTESTS = ;
-STESTS = ;
-PTESTS = ;
-CBTESTS = ;
-SBTESTS = ;
-MANPAGES_1 = ;
-MANPAGES_3 = ;
-
+/* Build parameters. */
 CPPFLAGS = ;
 D_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
 A_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
@@ -71,6 +58,20 @@ S_CFLAGS = [CFLAGS] -fPIC -DPIC;
 LDFLAGS = @LDFLAGS@;
 EXTRALIBS = @LIBS@;
 
+/* Documentation. */
+#include-cooked [srcdir]/doc/Cookfile.inc
+
+/* Tests. */
+#include-cooked [srcdir]/test/Cookfile.inc
+
+/* Libraries. */
+#include-cooked [srcdir]/lib/c/Cookfile.inc
+#include-cooked [fromto % [srcdir]/lib/c/%/Cookfile.inc @libs@]
+
+/* Programs. */
+#include-cooked [srcdir]/bin/Cookfile.inc
+#include-cooked [fromto % [srcdir]/bin/%/Cookfile.inc @bins@]
+
 /*
  * User targets.
  */
@@ -78,16 +79,6 @@ EXTRALIBS = @LIBS@;
 default : libs bins_a;
 
 all : libs bins tests release;
-
-release : html;
-
-html : [fromto [srcdir]/%0man/man1/%1.1 [objdir]/%0doc/html/%1.html
-         [MANPAGES_1]]
-       [fromto [srcdir]/%0man/man3/%1.3 [objdir]/%0doc/html/%1.html
-         [filter [srcdir]/%0man/man3/%1.3 [MANPAGES_3]]]
-       [fromto [srcdir]/%0man/man3/%1.3s [objdir]/%0doc/html/%1.html
-         [filter [srcdir]/%0man/man3/%1.3s [MANPAGES_3]]]
-;
 
 libs_d : [D_LIBS];
 libs_a : [A_LIBS];
@@ -128,6 +119,14 @@ check_update : tests
                     [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];
 }
 
+release : doc;
+
+doc : manual_p manual_h;
+
+manual_p : [P_MANUAL];
+
+manual_h : [H_MANUAL];
+
 install : install_bins install_libs;
 install_bins : [addsuffix _install_a @bins@];
 install_libs : [addsuffix _install @libs@];
@@ -136,7 +135,7 @@ uninstall : uninstall_bins uninstall_libs;
 uninstall_bins : [addsuffix _uninstall @bins@];
 uninstall_libs : [addsuffix _uninstall @libs@];
 
-clean : [addsuffix _clean @bins@ @libs@]
+clean : [addsuffix _clean doc test @bins@ @libs@]
 {
   rm -f core *.core;
   rm -f TAGS;
@@ -159,33 +158,6 @@ clean : [addsuffix _clean @bins@ @libs@]
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [SRCS]];
-
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.out [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.diff [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.perf [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0% [STESTS]];
-
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.perf [PTESTS]];
-  rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
-
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.out [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.diff [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0% [SBTESTS]];
 
   /*
    * Delete .cook.fp files from the source tree and object tree.
@@ -210,7 +182,7 @@ done
 dataend
 }
 
-distclean : clean [addsuffix _distclean @bins@ @libs@]
+distclean : clean [addsuffix _distclean doc test @bins@ @libs@]
 {
   rm -f [objdir]/Cookfile;
   rm -f [objdir]/config.cache;
@@ -220,217 +192,11 @@ distclean : clean [addsuffix _distclean @bins@ @libs@]
   rm -f @cfghdrs@;
 }
 
-relclean : distclean
+relclean : distclean [addsuffix _relclean doc]
 {
-  rm -f [fromto [srcdir]/%0man/man1/%1.1 [objdir]/%0doc/html/%1.html
-          [MANPAGES_1]];
-  rm -f [fromto [srcdir]/%0man/man3/%1.3 [objdir]/%0doc/html/%1.html
-          [filter [srcdir]/%0man/man3/%1.3 [MANPAGES_3]]]
-        [fromto [srcdir]/%0man/man3/%1.3s [objdir]/%0doc/html/%1.html
-          [filter [srcdir]/%0man/man3/%1.3s [MANPAGES_3]]];
 }
 
 etags : [INCS] [PRIV_INCS] [SRCS]
 {
   @ETAGS@ [INCS] [PRIV_INCS] [SRCS];
 }
-
-/*
- * Add magic to perl files.
- */
-[objdir]/%0%.pl : [srcdir]/%0%.pl.in
-  set mkdir
-{
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo \"[srcdir]/%0%.pl.in --> [target]\"
-
-echo \"#![PERL] -w\" > [target]
-[CAT] [srcdir]/%0%.pl.in >> [target];
-chmod u+x [target];
-dataend
-}
-
-/*
- * Add magic to stil files.
- */
-[objdir]/%0%.st : [srcdir]/%0%.st.in [STIL_D]
-  set mkdir
-{
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo \"[srcdir]/%0%.st.in --> [target]\"
-
-echo \"#![abs_objdir]/[STIL_D]\" > [target]
-echo \"!#\" >> [target]
-[CAT] [srcdir]/%0%.st.in >> [target];
-chmod u+x [target];
-dataend
-}
-
-/*
- * Convert man pages to html.
- */
-[objdir]/%0doc/html/%1.html : [srcdir]/%0man/man1/%1.1
-  set mkdir
-{
-  [CAT] [need] | @UNROFF@ -man -fhtml - > [target];
-}
-
-[objdir]/%0doc/html/%1.html : [srcdir]/%0man/man3/%1.3
-  set mkdir
-{
-  [CAT] [need] | @UNROFF@ -man -fhtml - > [target];
-}
-
-[objdir]/%0doc/html/%1.html : [srcdir]/%0man/man3/%1.3s
-  set mkdir
-{
-  [CAT] [need] | @UNROFF@ -man -fhtml - > [target];
-}
-
-/*
- * Build rules for tests.
- */
-[objdir]/%0test/%1 : [objdir]/%0test/%1.o_d [D_LIBS]
-  set mkdir
-{
-  [CC] -o [target] [objdir]/%0test/%1.o_d [D_LIBS] [LDFLAGS] [EXTRALIBS];
-}
-
-[objdir]/%0test/%1.o_d : [srcdir]/%0test/%1.c
-  set mkdir
-{
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0test/%1.c -o [target];
-
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/%0test/%1.c
-         "--prefix='"[target]" : "[srcdir]/%0test/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto %0test/%1.o_d %0test/%1.d_d [target]];
-}
-
-/*
- * Build rules for library C files --> object files.
- */
-[objdir]/lib/c/%0src/%1.o_d : [srcdir]/lib/c/%0src/%1.c
-  set mkdir
-{
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
-       -o [target];
-
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/lib/c/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto lib/c/%0src/%1.o_d lib/c/%0src/%1.d_d [target]];
-}
-
-[objdir]/lib/c/%0src/%1.o_a : [srcdir]/lib/c/%0src/%1.c
-  set mkdir
-{
-  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
-       -o [target];
-
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/lib/c/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto lib/c/%0src/%1.o_a lib/c/%0src/%1.d_a [target]];
-}
-
-[objdir]/lib/c/%0src/%1.o_p : [srcdir]/lib/c/%0src/%1.c
-  set mkdir
-{
-  [CC] [P_CFLAGS] [CPPFLAGS] [P_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
-       -o [target];
-
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/lib/c/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto lib/c/%0src/%1.o_p lib/c/%0src/%1.d_p [target]];
-}
-
-[objdir]/lib/c/%0src/%1.o_s : [srcdir]/lib/c/%0src/%1.c
-  set mkdir
-{
-  [CC] [S_CFLAGS] [CPPFLAGS] [S_CPPFLAGS] -c [srcdir]/lib/c/%0src/%1.c
-       -o [target];
-
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
-         [srcdir]/lib/c/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/lib/c/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto lib/c/%0src/%1.o_s lib/c/%0src/%1.d_s [target]];
-}
-
-/*
- * Build rules for binary C files --> object files.
- */
-[objdir]/bin/%0src/%1.o_d : [srcdir]/bin/%0src/%1.c
-  set mkdir
-{
-  [CC] [D_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-       [D_CPPFLAGS] -D_[upcase [subst "/" "" %0]]_DBG
-       -c [srcdir]/bin/%0src/%1.c -o [target];
-
-  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto bin/%0src/%1.o_d bin/%0src/%1.d_d [target]];
-}
-
-[objdir]/bin/%0src/%1.o_a : [srcdir]/bin/%0src/%1.c
-  set mkdir
-{
-  [CC] [A_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-       [A_CPPFLAGS] -c [srcdir]/bin/%0src/%1.c -o [target];
-
-  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto bin/%0src/%1.o_a bin/%0src/%1.d_a [target]];
-}
-
-[objdir]/bin/%0src/%1.o_p : [srcdir]/bin/%0src/%1.c
-  set mkdir
-{
-  [CC] [P_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-       [P_CPPFLAGS] -c [srcdir]/bin/%0src/%1.c -o [target];
-
-  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto bin/%0src/%1.o_p bin/%0src/%1.d_p [target]];
-}
-
-[objdir]/bin/%0src/%1.o_s : [srcdir]/bin/%0src/%1.c
-  set mkdir
-{
-  [CC] [S_CFLAGS] [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-       [S_CPPFLAGS] -c [srcdir]/bin/%0src/%1.c -o [target];
-
-  c_incl [CPPFLAGS] -I[srcdir]/bin/%0include -I[objdir]/bin/%0include
-         --no-cache -Absent_Local_Ignore -No_System [srcdir]/bin/%0src/%1.c
-         "--prefix='"[target]" : "[srcdir]/bin/%0src/%1.c"'"
-         "--suffix='set nodefault;'"
-         -o [fromto bin/%0src/%1.o_s bin/%0src/%1.d_s [target]];
-}
-
-/*
- * Libraries.
- */
-#include-cooked [fromto % [srcdir]/lib/c/%/Cookfile.inc @libs@]
-
-/*
- * Programs.
- */
-#include-cooked [fromto % [srcdir]/bin/%/Cookfile.inc @bins@]

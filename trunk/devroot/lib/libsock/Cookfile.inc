@@ -86,13 +86,20 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
   SBTESTS = [SBTESTS] [sbtests];
 }
 
-/* Man pages. */
+/* LaTeX source files. */
 {
-  local manpages_3 = libsock.3s libsock_sock.3s libsock_socks.3s;
-  manpages_3 = [fromto % [srcdir]/lib/c/libsock/man/man3/% [manpages_3]];
+  local tex_srcs = manual.tex /*sock.tex socks.tex*/;
+  tex_srcs = [fromto % [srcdir]/lib/c/libsock/doc/latex/% [tex_srcs]];
 
-  LIBSOCK_MANPAGES_3 = [manpages_3];
-  MANPAGES_3 = [MANPAGES_3] [manpages_3];
+  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/lib/c/libsock/doc/latex/% [fig_srcs]];
+
+  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Libraries. */
@@ -138,11 +145,6 @@ rm -f [PREFIX]/lib/libsock*
 
 echo rm -rf [PREFIX]/include/libsock
 rm -rf [PREFIX]/include/libsock
-
-for i in [LIBSOCK_MANPAGES_3]; do
-	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-done
 dataend
 }
 
@@ -178,14 +180,6 @@ echo [INSTALL] -d [PREFIX]/include/libsock
 for i in [LIBSOCK_INCS]; do
 	echo [INSTALL] -m 0644 $i [PREFIX]/include/libsock/
 	[INSTALL] -m 0644 $i [PREFIX]/include/libsock/
-done
-
-echo [INSTALL] -d [PREFIX]/man/man3
-[INSTALL] -d [PREFIX]/man/man3
-
-for i in [LIBSOCK_MANPAGES_3]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
-	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
 done
 
 echo [INSTALL] -d [PREFIX]/lib

@@ -88,13 +88,20 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
   SBTESTS = [SBTESTS] [sbtests];
 }
 
-/* Man pages. */
+/* LaTeX source files. */
 {
-  local manpages_3 = ;
-  manpages_3 = [fromto % [srcdir]/lib/c/libstil/man/man3/% [manpages_3]];
+  local tex_srcs = manual.tex;
+  tex_srcs = [fromto % [srcdir]/lib/c/libstil/doc/latex/% [tex_srcs]];
 
-  LIBSTIL_MANPAGES_3 = [manpages_3];
-  MANPAGES_3 = [MANPAGES_3] [manpages_3];
+  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/lib/c/libstil/doc/latex/% [fig_srcs]];
+
+  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Libraries. */
@@ -140,11 +147,6 @@ rm -f [PREFIX]/lib/libstil*
 
 echo rm -rf [PREFIX]/include/libstil
 rm -rf [PREFIX]/include/libstil
-
-for i in [LIBSTIL_MANPAGES_3]; do
-	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-done
 dataend
 }
 
@@ -180,14 +182,6 @@ echo [INSTALL] -d [PREFIX]/include/libstil
 for i in [LIBSTIL_INCS]; do
 	echo [INSTALL] -m 0644 $i [PREFIX]/include/libstil/
 	[INSTALL] -m 0644 $i [PREFIX]/include/libstil/
-done
-
-echo [INSTALL] -d [PREFIX]/man/man3
-[INSTALL] -d [PREFIX]/man/man3
-
-for i in [LIBSTIL_MANPAGES_3]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
-	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
 done
 
 echo [INSTALL] -d [PREFIX]/lib

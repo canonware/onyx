@@ -84,13 +84,20 @@ SRCS = [SRCS] [STIL_SRCS];
   SBTESTS = [SBTESTS] [sbtests];
 }
 
-/* Man pages. */
+/* LaTeX source files. */
 {
-  local manpages_1 = ;
-  manpages_1 = [fromto % [srcdir]/bin/stil/man/man1/% [manpages_1]];
+  local tex_srcs = manual.tex;
+  tex_srcs = [fromto % [srcdir]/bin/stil/doc/latex/% [tex_srcs]];
 
-  STIL_MANPAGES_1 = [manpages_1];
-  MANPAGES_1 = [MANPAGES_1] [manpages_1];
+  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/bin/stil/doc/latex/% [fig_srcs]];
+
+  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Binaries. */
@@ -128,11 +135,6 @@ rm -f [PREFIX]/bin/stil
 
 echo rm -f [PREFIX]/bin/stil.prof
 rm -f [PREFIX]/bin/stil.prof
-
-for i in [STIL_MANPAGES_1]; do
-	echo rm -f [PREFIX]/man/man1/`[BASENAME] $i`
-	rm -f [PREFIX]/man/man1/`[BASENAME] $i`
-done
 dataend
 }
 
@@ -153,14 +155,6 @@ stil_install_common :
   [SHELL] -e;
 data
 #![SHELL]
-
-echo [INSTALL] -d [PREFIX]/man/man1
-[INSTALL] -d [PREFIX]/man/man1
-
-for i in [STIL_MANPAGES_1]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/man/man1/
-	[INSTALL] -m 0644 $i [PREFIX]/man/man1/
-done
 
 echo [INSTALL] -d [PREFIX]/bin
 [INSTALL] -d [PREFIX]/bin

@@ -1,0 +1,32 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% Body of Canonware Software Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Definitions and front matter.
+\input{@abs_srcdir@/doc/latex/front}
+
+% Programs.
+\part{Programs}
+\input{@abs_srcdir@/bin/ncat/doc/latex/manual}
+\input{@abs_srcdir@/bin/proxy/doc/latex/manual}
+\input{@abs_srcdir@/bin/stil/doc/latex/manual}
+\input{@abs_srcdir@/bin/stile/doc/latex/manual}
+
+% Libraries.
+\part{Libraries}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/manual}
+\input{@abs_srcdir@/lib/c/libsock/doc/latex/manual}
+\input{@abs_srcdir@/lib/c/libstil/doc/latex/manual}
+
+% Back matter.
+\input{@abs_srcdir@/doc/latex/back}

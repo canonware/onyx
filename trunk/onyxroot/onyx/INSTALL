@@ -62,6 +62,8 @@ Cleanup targets include:
 Targets that depend on optional supporting software include:
 
 	all
+	doc
+	manual_[ph]
 	release
 	check
 	check_update

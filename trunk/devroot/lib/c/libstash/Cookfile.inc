@@ -95,20 +95,23 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
   SBTESTS = [SBTESTS] [sbtests];
 }
 
-/* Man pages. */
+/* LaTeX source files. */
 {
-  local manpages_3 = libstash.3s libstash_bhp.3s libstash_buf.3s libstash_ch.3s
-                     libstash_cnd.3s libstash_dch.3s libstash_dbg.3s
-                     libstash_mem.3s libstash_mq.3s libstash_mtx.3s
-                     libstash_out.3s libstash_pezz.3s libstash_pool.3s
-                     libstash_ql.3s libstash_qr.3s libstash_qs.3s
-                     libstash_res.3s libstash_rwl.3s libstash_sema.3s
-                     libstash_thd.3s libstash_tsd.3s libstash_treen.3s
-                     libstash_xep.3s;
-  manpages_3 = [fromto % [srcdir]/lib/c/libstash/man/man3/% [manpages_3]];
+  local tex_srcs = manual.tex /*bhp.tex buf.tex ch.tex cnd.tex dch.tex dbg.tex
+                   mem.tex mq.tex mtx.tex out.tex pezz.tex pool.tex ql.tex
+                   qr.tex qs.tex res.tex rwl.tex sema.tex thd.tex tsd.tex
+                   treen.tex xep.tex*/;
+  tex_srcs = [fromto % [srcdir]/lib/c/libstash/doc/latex/% [tex_srcs]];
 
-  LIBSTASH_MANPAGES_3 = [manpages_3];
-  MANPAGES_3 = [MANPAGES_3] [manpages_3];
+  TEX_SRCS = [TEX_SRCS] [tex_srcs];
+}
+
+/* xfig source files. */
+{
+  local fig_srcs = ;
+  fig_srcs = [fromto % [srcdir]/lib/c/libstash/doc/latex/% [fig_srcs]];
+
+  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Libraries. */
@@ -154,11 +157,6 @@ rm -f [PREFIX]/lib/libstash*
 
 echo rm -rf [PREFIX]/include/libstash
 rm -rf [PREFIX]/include/libstash
-
-for i in [LIBSTASH_MANPAGES_3]; do
-	echo rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-	rm -f [PREFIX]/man/man3/`[BASENAME] $i`
-done
 dataend
 }
 
@@ -194,14 +192,6 @@ echo [INSTALL] -d [PREFIX]/include/libstash
 for i in [LIBSTASH_INCS]; do
 	echo [INSTALL] -m 0644 $i [PREFIX]/include/libstash/
 	[INSTALL] -m 0644 $i [PREFIX]/include/libstash/
-done
-
-echo [INSTALL] -d [PREFIX]/man/man3
-[INSTALL] -d [PREFIX]/man/man3
-
-for i in [LIBSTASH_MANPAGES_3]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/man/man3/
-	[INSTALL] -m 0644 $i [PREFIX]/man/man3/
 done
 
 echo [INSTALL] -d [PREFIX]/lib
