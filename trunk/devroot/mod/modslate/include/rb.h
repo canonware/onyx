@@ -314,7 +314,8 @@ struct									\
     do									\
     {									\
 	a_type *x, *y;							\
-	if ((a_node)->a_field.rbn_left == &(a_tree)->rbt_nil)		\
+	if ((a_node)->a_field.rbn_left == &(a_tree)->rbt_nil		\
+	    || (a_node)->a_field.rbn_right == &(a_tree)->rbt_nil)	\
 	{								\
 	    y = (a_node);						\
 	}								\
@@ -349,13 +350,17 @@ struct									\
 	    y->a_field.rbn_par = (a_node)->a_field.rbn_par;		\
 	    y->a_field.rbn_left = (a_node)->a_field.rbn_left;		\
 	    y->a_field.rbn_right = (a_node)->a_field.rbn_right;		\
-	    if (y->a_field.rbn_par->a_field.rbn_left == (a_node))	\
+	    y->a_field.rbn_red = (a_node)->a_field.rbn_red;		\
+	    if (y->a_field.rbn_par != &(a_tree)->rbt_nil)		\
 	    {								\
-		y->a_field.rbn_par->a_field.rbn_left = y;		\
-	    }								\
-	    else							\
-	    {								\
-		y->a_field.rbn_par->a_field.rbn_right = y;		\
+		if (y->a_field.rbn_par->a_field.rbn_left == (a_node))	\
+		{							\
+		    y->a_field.rbn_par->a_field.rbn_left = y;		\
+		}							\
+		else							\
+		{							\
+		    y->a_field.rbn_par->a_field.rbn_right = y;		\
+		}							\
 	    }								\
 	    y->a_field.rbn_left->a_field.rbn_par = y;			\
 	    y->a_field.rbn_right->a_field.rbn_par = y;			\
@@ -364,14 +369,17 @@ struct									\
 	{								\
 	    /* Fix up. */						\
 	    a_type *v, *w;						\
+fprintf(stderr, "F");\
 	    while (x != (a_tree)->rbt_root				\
 		   && x->a_field.rbn_red == FALSE)			\
 	    {								\
 		if (x == x->a_field.rbn_par->a_field.rbn_left)		\
 		{							\
+fprintf(stderr, "L");\
 		    w = x->a_field.rbn_par->a_field.rbn_right;		\
 		    if (w->a_field.rbn_red)				\
 		    {							\
+fprintf(stderr, "1");\
 			w->a_field.rbn_red = FALSE;			\
 			v = x->a_field.rbn_par;				\
 			v->a_field.rbn_red = TRUE;			\
@@ -383,31 +391,40 @@ struct									\
 			&& w->a_field.rbn_right->a_field.rbn_red	\
 			== FALSE)					\
 		    {							\
+fprintf(stderr, "2");\
 			w->a_field.rbn_red = TRUE;			\
 			x = x->a_field.rbn_par;				\
 		    }							\
-		    else if (w->a_field.rbn_right->a_field.rbn_red	\
-			     == FALSE)					\
+		    else						\
 		    {							\
-			w->a_field.rbn_left->a_field.rbn_red		\
-			    = FALSE;					\
-			w->a_field.rbn_red = TRUE;			\
-			rb_p_right_rotate(a_tree, w, a_type, a_field);	\
-			w = x->a_field.rbn_par->a_field.rbn_right;	\
+			if (w->a_field.rbn_right->a_field.rbn_red	\
+			     == FALSE)					\
+			{						\
+fprintf(stderr, "3");\
+			    w->a_field.rbn_left->a_field.rbn_red	\
+				= FALSE;				\
+			    w->a_field.rbn_red = TRUE;			\
+			    rb_p_right_rotate(a_tree, w, a_type,	\
+					      a_field);			\
+			    w = x->a_field.rbn_par->a_field.rbn_right;	\
+			}						\
+fprintf(stderr, "4");\
+			w->a_field.rbn_red				\
+			    = x->a_field.rbn_par->a_field.rbn_red;	\
+			x->a_field.rbn_par->a_field.rbn_red = FALSE;	\
+			w->a_field.rbn_right->a_field.rbn_red = FALSE;	\
+			v = x->a_field.rbn_par;				\
+			rb_p_left_rotate(a_tree, v, a_type, a_field);	\
+			break;						\
 		    }							\
-		    w->a_field.rbn_red					\
-			= x->a_field.rbn_par->a_field.rbn_red;		\
-		    x->a_field.rbn_par->a_field.rbn_red = FALSE;	\
-		    w->a_field.rbn_right->a_field.rbn_red = FALSE;	\
-		    v = x->a_field.rbn_par;				\
-		    rb_p_left_rotate(a_tree, v, a_type, a_field);	\
-		    x = (a_tree)->rbt_root;				\
 		}							\
 		else							\
 		{							\
+fprintf(stderr, "R");\
 		    w = x->a_field.rbn_par->a_field.rbn_left;		\
 		    if (w->a_field.rbn_red)				\
 		    {							\
+fprintf(stderr, "1");\
 			w->a_field.rbn_red = FALSE;			\
 			v = x->a_field.rbn_par;				\
 			v->a_field.rbn_red = TRUE;			\
@@ -419,27 +436,35 @@ struct									\
 			&& w->a_field.rbn_left->a_field.rbn_red		\
 			== FALSE)					\
 		    {							\
+fprintf(stderr, "2");\
 			w->a_field.rbn_red = TRUE;			\
 			x = x->a_field.rbn_par;				\
 		    }							\
-		    else if (w->a_field.rbn_left->a_field.rbn_red	\
-			     == FALSE)					\
+		    else						\
 		    {							\
-			w->a_field.rbn_right->a_field.rbn_red		\
-			    = FALSE;					\
-			w->a_field.rbn_red = TRUE;			\
-			rb_p_left_rotate(a_tree, w, a_type, a_field);	\
-			w = x->a_field.rbn_par->a_field.rbn_left;	\
+			if (w->a_field.rbn_left->a_field.rbn_red	\
+			     == FALSE)					\
+			{						\
+fprintf(stderr, "3");\
+			    w->a_field.rbn_right->a_field.rbn_red	\
+				= FALSE;				\
+			    w->a_field.rbn_red = TRUE;			\
+			    rb_p_left_rotate(a_tree, w, a_type,		\
+					     a_field);			\
+			    w = x->a_field.rbn_par->a_field.rbn_left;	\
+			}						\
+fprintf(stderr, "4");\
+			w->a_field.rbn_red				\
+			    = x->a_field.rbn_par->a_field.rbn_red;	\
+			x->a_field.rbn_par->a_field.rbn_red = FALSE;	\
+			w->a_field.rbn_left->a_field.rbn_red = FALSE;	\
+			v = x->a_field.rbn_par;				\
+			rb_p_right_rotate(a_tree, v, a_type, a_field);	\
+			break;						\
 		    }							\
-		    w->a_field.rbn_red					\
-			= x->a_field.rbn_par->a_field.rbn_red;		\
-		    x->a_field.rbn_par->a_field.rbn_red = FALSE;	\
-		    w->a_field.rbn_left->a_field.rbn_red = FALSE;	\
-		    v = x->a_field.rbn_par;				\
-		    rb_p_right_rotate(a_tree, v, a_type, a_field);	\
-		    x = (a_tree)->rbt_root;				\
 		}							\
-		x->a_field.rbn_red = FALSE;				\
 	    }								\
+	    x->a_field.rbn_red = FALSE;					\
 	}								\
+fprintf(stderr, ": ");\
     } while (0)
