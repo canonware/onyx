@@ -122,7 +122,7 @@ el_end(el)
     prompt_end(el);
     sig_end(el);
 
-    el_free((ptr_t) el->el_prog);
+    free((ptr_t) el->el_prog);
     el_free((ptr_t) el);
 } /* end el_end */
 
@@ -265,46 +265,6 @@ el_line(el)
 {
     return (const LineInfo *) &el->el_line;
 }
-
-static const char elpath[] = "/.editrc";
-
-/* el_source():
- *	Source a file
- */
-public int
-el_source(el, fname)
-    EditLine *el;
-    const char *fname;
-{
-    FILE *fp;
-    size_t len;
-    char *ptr, path[MAXPATHLEN];
-
-    if (fname == NULL) {
-	if (issetugid() != 0 || (ptr = getenv("HOME")) == NULL)
-	    return -1;
-	_cw_out_put_sn(path, sizeof(path), "[s][s]", ptr, elpath);
-	fname = path;
-    }
-
-    if ((fp = fopen(fname, "r")) == NULL)
-	return -1;
-
-    while ((ptr = fgetln(fp, &len)) != NULL) {
-	if (ptr[len - 1] == '\n')
-	    --len;
-	ptr[len] = '\0';
-
-	if (parse_line(el, ptr) == -1) {
-	    (void) fclose(fp);
-	    return -1;
-	}
-    }
-
-    (void) fclose(fp);
-    return 0;
-}
-
 
 /* el_resize():
  *	Called from program when terminal is resized

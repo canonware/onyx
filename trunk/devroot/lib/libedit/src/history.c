@@ -70,14 +70,12 @@ struct history {
 #define	HENTER(h, str)	(*(h)->h_enter)((h)->h_ref, str)
 #define	HADD(h, str)	(*(h)->h_add)((h)->h_ref, str)
 
-#define h_malloc(a)	malloc(a)
-#define h_free(a)	free(a)
+#define h_malloc(a)	_cw_malloc(a)
+#define h_free(a)	_cw_free(a)
 
 
 private int		 history_set_num	__P((History *, int));
 private int		 history_set_fun	__P((History *, History *));
-private int		 history_load		__P((History *, const char *));
-private int		 history_save		__P((History *, const char *));
 private const HistEvent *history_prev_event	__P((History *, int));
 private const HistEvent *history_next_event	__P((History *, int));
 private const HistEvent *history_next_string	__P((History *, const char *));
@@ -242,7 +240,7 @@ history_def_delete(h, hp)
 	abort();
     hp->prev->next = hp->next;
     hp->next->prev = hp->prev;
-    h_free((ptr_t) hp->ev.str);
+    free((ptr_t) hp->ev.str);
     h_free(hp);
     h->cur--;
 }
@@ -328,6 +326,7 @@ history_def_clear(p)
 	history_def_delete(h, h->list.prev);
     h->eventno = 0;
     h->cur = 0;
+    h_free(h);
 }
 
 /************************************************************************/
@@ -364,6 +363,7 @@ history_end(h)
 {
     if (h->h_next == history_def_next)
 	history_def_clear(h->h_ref);
+    h_free(h);
 }
 
 
@@ -420,64 +420,6 @@ history_set_fun(h, nh)
     h->h_enter = nh->h_enter;
     h->h_add   = nh->h_add;
     return 0;
-}
-
-
-/* history_load():
- *	History load function
- */
-private int
-history_load(h, fname)
-    History *h;
-    const char *fname;
-{
-    FILE *fp;
-    char *line;
-    size_t sz;
-    int i = -1;
-
-    if ((fp = fopen(fname, "r")) == NULL)
-	return i;
-
-    if ((line = fgetln(fp, &sz)) == NULL)
-	goto done;
-
-    if (strncmp(line, hist_cookie, sz) != 0)
-	goto done;
-	
-    for (i = 0; (line = fgetln(fp, &sz)) != NULL; i++) {
-	char c = line[sz];
-	line[sz] = '\0';
-	HENTER(h, line);
-	line[sz] = c;
-    }
-
-done:
-    (void) fclose(fp);
-    return i;
-}
-
-
-/* history_save():
- *	History save function
- */
-private int
-history_save(h, fname)
-    History *h;
-    const char *fname;
-{
-    int	fp;
-    const HistEvent *ev;
-    int i = 0;
-
-    if ((fp = open(fname, O_WRONLY | O_TRUNC | O_CREAT)) == NULL)
-	return -1;
-
-    write(fp, hist_cookie, strlen(hist_cookie));
-    for (ev = HLAST(h); ev != NULL; ev = HPREV(h), i++)
-	_cw_out_put_f(fp, "[s]", ev->str);
-    (void) close(fp);
-    return i;
 }
 
 
@@ -610,16 +552,6 @@ history(va_alist)
 	HCLEAR(h);
 	break;
 	
-    case H_LOAD:
-	sev.num = history_load(h, va_arg(va, const char *));
-	ev = &sev;
-	break;
-	
-    case H_SAVE:
-	sev.num = history_save(h, va_arg(va, const char *));
-	ev = &sev;
-	break;
-
     case H_PREV_EVENT:
 	ev = history_prev_event(h, va_arg(va, int));
 	break;
