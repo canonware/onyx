@@ -12,4 +12,16 @@ Test begin
 1
 2
 3
+`$foo 0 def 0 {dup 1 sprint inc $foo foo inc def foo 3 eq {exit} if\n\t \`bye\' 1 sprint}{dup 5 lt} until pop currentdict $foo undef'
+0
+`bye'
+1
+`bye'
+2
+`$foo 0 def 0 {dup 5 lt}{dup 1 sprint inc\n\t $foo foo inc def foo 3 eq {exit} if \`bye\' 1 sprint} while pop\n\t currentdict $foo undef'
+0
+`bye'
+1
+`bye'
+2
 Test end
