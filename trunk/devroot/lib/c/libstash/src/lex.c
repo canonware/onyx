@@ -169,6 +169,9 @@ lex_insert_regex(cw_lex_t * a_lex_o,
 		 char * a_regex,
 		 cw_uint32_t a_tok_val)
 {
+  /* Parse a_regex and generate a graph for it. */
+
+  
   return TRUE; /* XXX */
 }
 
