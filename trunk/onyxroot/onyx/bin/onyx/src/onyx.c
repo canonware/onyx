@@ -368,8 +368,13 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 
     if (arg->buffer_count == 0)
     {
-	/* Print the prompt if interactive and not in deferred execution
-	 * mode. */
+	/* Print the prompt if interactive and not in deferred execution mode.
+	 *
+	 * This code assumes that only the initial thread reads from stdin.  Bad
+	 * things (likely crashes) will happen if that assumption is broken.
+	 * There isn' really a simple way to solve this, and it probably
+	 * isn't worthwhile, considering that it's a degenerate case of a
+	 * non-standard configuration. */
 	if ((arg->interactive)
 	    && (nxo_thread_deferred(arg->thread) == FALSE)
 	    && (nxo_thread_state(arg->thread) == THREADTS_START))

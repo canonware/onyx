@@ -82,7 +82,10 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
     sigset_t set, oset;
 #endif
 
-    /* Initialize stdin. */
+    /* Initialize stdin.  Only convert the initial thread's stdin, since it
+     * isn't safe for multiple threads to use the synthetic file.  If the
+     * application is crazy enough use the initial thread's stdin in another
+     * thread, crashes are likely. */
     file = nxo_thread_stdin_get(a_thread);
     nxo_file_new(file, nxo_thread_nx_get(a_thread), TRUE);
     nxo_file_synthetic(file, modprompt_read, NULL, modprompt_synth_ref_iter,
