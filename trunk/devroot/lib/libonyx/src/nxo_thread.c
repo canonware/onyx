@@ -956,21 +956,39 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 	    case NXOT_NAME:
 	    {
-		cw_nxo_t *name;
+		cw_uint32_t tailopt;
+		cw_nxo_t *name, *value;
 		cw_nxn_t error;
 
 		/* Search for a value associated with the name in the dictionary
 		 * stack, and put it on the execution stack, in preparation for
-		 * restarting the enclosing switch statement.  Thus, nested name
-		 * lookups work correctly. */
-		name = nxo_stack_push(&thread->tstack);
-		nxo_dup(name, nxo);
+		 * restarting the enclosing switch statement (or recursing, if
+		 * tail optimization is disabled).  Thus, nested name lookups
+		 * work correctly. */
+
+		/* Store a copy of tailopt for later use.  This is only strictly
+		 * necessary for cases in which the interpreter recurses, but
+		 * that never happens here.  Still, it's cleaner. */
+		tailopt = thread->tailopt;
+		if (tailopt)
+		{
+		    name = nxo_stack_push(&thread->tstack);
+		    nxo_dup(name, nxo);
+		    value = nxo;
+		}
+		else
+		{
+		    name = nxo;
+		    value = nxo_stack_push(&thread->estack);
+		}
+
+		/* Handle the name according to attribute. */
 		switch (nxo_attr_get(name))
 		{
 		    case NXOA_EXECUTABLE:
 		    case NXOA_EVALUABLE:
 		    {
-			if (nxo_thread_dstack_search(a_nxo, name, nxo))
+			if (nxo_thread_dstack_search(a_nxo, name, value))
 			{
 			    error = NXN_undefined;
 			    goto NAME_ERROR;
@@ -1008,7 +1026,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    }
 			}
 			if (nxo_thread_class_hier_search(a_nxo, class_, name,
-							 nxo))
+							 value))
 			{
 			    error = NXN_undefined;
 			    goto NAME_ERROR;
@@ -1022,13 +1040,32 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			cw_not_reached();
 		    }
 		}
-		nxo_stack_pop(&thread->tstack);
-		goto RESTART;
+
+		/* Finish up.  Restart the outer switch statement, unless tail
+		 * optimization is disabled; recurse in that case. */
+		if (tailopt)
+		{
+		    nxo_stack_pop(&thread->tstack);
+		    goto RESTART;
+		}
+		else
+		{
+		    nxo_thread_loop(a_nxo);
+		    nxo_stack_pop(&thread->estack);
+		    break;
+		}
 
 		NAME_ERROR:
+		if (tailopt)
+		{
+		    nxo_stack_pop(&thread->tstack);
+		}
+		else
+		{
+		    nxo_stack_pop(&thread->estack);
+		}
 		nxo_thread_nerror(a_nxo, error);
 		nxo_stack_pop(&thread->estack);
-		nxo_stack_pop(&thread->tstack);
 		break;
 	    }
 	    case NXOT_NULL:

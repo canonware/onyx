@@ -39,13 +39,21 @@ estack/istack trace (0..2):
 	$estack
 	--estack--
 	--dup--
-	--spop--
+	--tailopt--
+	1
+	2
+	--ifelse--
+	--snpop--
 	--pop--
 	--def--
 	$istack
 	--istack--
 	--dup--
-	--spop--
+	--tailopt--
+	1
+	2
+	--ifelse--
+	--snpop--
 	--pop--
 	--def--
 	!estack

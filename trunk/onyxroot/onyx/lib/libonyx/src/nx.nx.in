@@ -1121,10 +1121,10 @@ $throw {
     $dstack dstack dup spop pop def
 
     # estack.  Remove this procedure from the snapshot.
-    $estack estack dup spop pop def
+    $estack estack dup tailopt 1 2 ifelse snpop pop def
 
     # istack.  Remove this procedure from the snapshot.
-    $istack istack dup spop pop def
+    $istack istack dup tailopt 1 2 ifelse snpop pop def
 
     # Push the offending object onto ostack.
     !estack dup sdup spop
