@@ -2059,42 +2059,53 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 				struct pollfd	events;
 				struct iovec	iov[2];
 
-				/*
-				 * Finish filling r_str and replenish the
-				 * internal buffer.
-				 */
-				iov[0].iov_base = r_str;
-				iov[0].iov_len = a_len;
-				iov[1].iov_base = file->buffer;
-				iov[1].iov_len = file->buffer_size;
-
-				/*
-				 * Make sure that data are available before
-				 * reading.
-				 */
-				events.fd = file->fd;
-				events.events = POLLRDNORM;
-				while (poll(&events, 1, INFTIM) == -1)
-					; /* EINTR; retry. */
-
-				if (events.revents & POLLRDNORM) {
-					int	val;
-
-					/* Do a non-blocking readv(). */
-					val = fcntl(file->fd, F_GETFL, 0);
-					fcntl(file->fd, F_SETFL, val |
-					    O_NONBLOCK);
-
-					nread = readv(file->fd, iov, 2);
+				if (retval == 0) {
+					/*
+					 * No data read yet.  Sleep until some
+					 * data are available.
+					 */
+					events.fd = file->fd;
+					events.events = POLLRDNORM;
+					while ((poll(&events, 1, INFTIM)) == -1)
+						; /* EINTR; try again. */
 
 					/*
-					 * Switch the fd back to blocking
-					 * mode.
+					 * Finish filling r_str and replenish
+					 * the internal buffer.
 					 */
-					fcntl(file->fd, F_SETFL, val);
+					iov[0].iov_base = r_str;
+					iov[0].iov_len = a_len;
+					iov[1].iov_base = file->buffer;
+					iov[1].iov_len = file->buffer_size;
+
+					nread = readv(file->fd, iov, 2);
 				} else {
-					/* The fd is no longer valid. */
-					nread = -1;
+					int	nready;
+
+					/*
+					 * Only read if data are available.
+					 */
+					events.fd = file->fd;
+					events.events = POLLRDNORM;
+					while ((nready = poll(&events, 1, 0)) ==
+					    -1)
+						; /* EINTR; try again. */
+
+					if (nready == 1) {
+						/*
+						 * Finish filling r_str and
+						 * replenish the internal
+						 * buffer.
+						 */
+						iov[0].iov_base = r_str;
+						iov[0].iov_len = a_len;
+						iov[1].iov_base = file->buffer;
+						iov[1].iov_len =
+						    file->buffer_size;
+
+						nread = readv(file->fd, iov, 2);
+					} else
+						nread = 0;
 				}
 			} else {
 				/* Use the read wrapper function. */
