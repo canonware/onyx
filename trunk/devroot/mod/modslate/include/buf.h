@@ -153,8 +153,8 @@ struct cw_buf_s
     /* An array of bufv's with twice as many elements as there are bufp's.  This
      * is large enough to create a vector for the entire buf, even if all bufp's
      * are split by their gaps. */
-    cw_uint32_t bufv_cnt;
     cw_bufv_t *bufv;
+    cw_uint32_t bufvcnt;
 
     /* bufp tree and list. */
     rb_tree(cw_bufp_t) ptree;

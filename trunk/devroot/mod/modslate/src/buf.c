@@ -642,7 +642,7 @@ buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
     }
 
     /* Resize bufv. */
-    if (a_buf->bufv_cnt == 0)
+    if (a_buf->bufvcnt == 0)
     {
 	a_buf->bufv = (cw_bufv_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
 						    2 * sizeof(cw_bufv_t));
@@ -652,11 +652,11 @@ buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 	a_buf->bufv = (cw_bufv_t *) cw_opaque_realloc(a_buf->realloc,
 						      a_buf->bufv,
 						      a_buf->arg,
-						      a_buf->bufv_cnt,
-						      (a_buf->bufv_cnt + 2)
+						      a_buf->bufvcnt,
+						      (a_buf->bufvcnt + 2)
 						      * sizeof(cw_bufv_t));
     }
-    a_buf->bufv_cnt += 2;
+    a_buf->bufvcnt += 2;
 }
 
 static void
@@ -666,14 +666,14 @@ buf_p_bufp_remove(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
     ql_remove(&a_buf->plist, a_bufp, plink);
 
     /* Resize bufv. */
-    cw_assert(a_buf->bufv_cnt != 2);
+    cw_assert(a_buf->bufvcnt != 2);
     a_buf->bufv = (cw_bufv_t *) cw_opaque_realloc(a_buf->realloc,
 						  a_buf->bufv,
 						  a_buf->arg,
-						  a_buf->bufv_cnt,
-						  (a_buf->bufv_cnt - 2)
+						  a_buf->bufvcnt,
+						  (a_buf->bufvcnt - 2)
 						  * sizeof(cw_bufv_t));
-    a_buf->bufv_cnt -= 2;
+    a_buf->bufvcnt -= 2;
 }
 
 cw_buf_t *
@@ -708,8 +708,8 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     retval->len = 0;
     retval->nlines = 1;
 
-    /* Initialize bufv_cnt, so that buf_p_bufp_insert() will know what to do. */
-    retval->bufv_cnt = 0;
+    /* Initialize bufvcnt, so that buf_p_bufp_insert() will know what to do. */
+    retval->bufvcnt = 0;
 
     /* Initialize bufp tree and list. */
     rb_tree_new(&retval->ptree, pnode);
@@ -730,7 +730,7 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     ql_new(&retval->flist);
     rb_tree_new(&retval->rtree, rnode);
     ql_new(&retval->rlist);
-    
+
     /* Initialize history. */
     retval->hist = NULL;
 
@@ -780,9 +780,10 @@ buf_delete(cw_buf_t *a_buf)
 	bufp_p_delete(bufp);
     }
 
-    /* Delete the bufv array if it exists. */
+    /* Delete the bufv array. */
+    cw_assert(a_buf->bufvcnt >= 2);
     cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufv,
-		      a_buf->bufv_cnt * sizeof(cw_bufv_t));
+		      a_buf->bufvcnt * sizeof(cw_bufv_t));
 
     if (a_buf->alloced)
     {
@@ -1518,7 +1519,236 @@ cw_bufv_t *
 mkr_range_get(const cw_mkr_t *a_start, const cw_mkr_t *a_end,
 	      cw_uint32_t *r_bufvcnt)
 {
-    cw_error("XXX Not implemented");
+    cw_bufv_t *retval;
+    const cw_mkr_t *start, *end;
+    cw_uint32_t alg;
+
+    cw_check_ptr(a_start);
+    cw_dassert(a_start->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_end);
+    cw_dassert(a_end->magic == CW_MKR_MAGIC);
+    cw_check_ptr(r_bufvcnt);
+    cw_assert(a_start->bufp->buf == a_end->bufp->buf);
+
+    /* Set start/end from a_start/a_end so that start is before end.  At the
+     * same time, determine what algorithm will be used to construct the bufv.
+     * There are three basic cases that must be handled:
+     *
+     * 1) start and end point to the same bpos, and therefore the range is
+     *    zero-length.  retval = NULL and *r_bufvcnt = 0;
+     *
+     * 2) start and end are in the same bufp, on the same/opposite sides of the
+     *    gap.
+     *
+     * 3) start and end are in different bufp's.  This has sub-cases:
+     *
+     *    a) start is before/after the gap.
+     *
+     *    b) There are zero or more bufp's in between start's bufp and end's
+     *       bufp.  For each of those bufp's:
+     *
+     *       i) The gap splits the bufp into two regions.
+     *
+     *       ii) The gap is at the beginnning/end of the bufp, leaving the data
+     *           contiguous.
+     *
+     *    c) end is before/after the gap.
+     */
+    if (a_start->bufp == a_end->bufp)
+    {
+	if (a_start->ppos == a_end->ppos)
+	{
+	    alg = 1;
+	}
+	else
+	{
+	    if (a_start->ppos < a_end->ppos)
+	    {
+		start = a_start;
+		end = a_end;
+	    }
+	    else
+	    {
+		start = a_end;
+		end = a_start;
+	    }
+	    alg = 2;
+	}
+    }
+    else
+    {
+	if (bufp_p_bpos(a_start->bufp) < bufp_p_bpos(a_end->bufp))
+	{
+	    start = a_start;
+	    end = a_end;
+	}
+	else
+	{
+	    start = a_end;
+	    end = a_start;
+	}
+	alg = 3;
+    }
+
+    switch (alg)
+    {
+	case 1:
+	{
+	    /* Zero-length range. */
+	    retval = NULL;
+	    *r_bufvcnt = 0;
+	    break;
+	}
+	case 2:
+	{
+	    cw_bufp_t *bufp = start->bufp;
+
+	    /* One bufp involved. */
+	    retval = bufp->buf->bufv;
+
+	    if (start->ppos < bufp->gap_off
+		&& end->ppos >= bufp->gap_off + bufp->gap_len)
+	    {
+		/* Two ranges. */
+		retval[0].data = &bufp->b[start->ppos];
+		retval[0].len = bufp->gap_off - start->ppos;
+
+		retval[1].data = &bufp->b[bufp->gap_off + bufp->gap_len];
+		retval[1].len = end->ppos - (bufp->gap_off + bufp->gap_len);
+
+		*r_bufvcnt = 2;
+	    }
+	    else
+	    {
+		/* One range. */
+		retval[0].data = &bufp->b[start->ppos];
+		retval[0].len = end->ppos - start->ppos;
+
+		*r_bufvcnt = 1;
+	    }
+	    break;
+	}
+	case 3:
+	{
+	    cw_buf_t *buf;
+	    cw_bufp_t *bufp;
+	    cw_uint32_t bufvcnt;
+
+	    /* Two or more bufp's involved. */
+	    buf = start->bufp->buf;
+	    retval = buf->bufv;
+
+	    /* First bufp. */
+	    bufp = start->bufp;
+	    retval[0].data = &bufp->b[start->ppos];
+	    if (start->ppos < start->bufp->gap_off
+		&& bufp->gap_off < CW_BUFP_SIZE - bufp->gap_len)
+	    {
+		/* Two ranges. */
+		retval[0].len = bufp->gap_off - start->ppos;
+
+		retval[1].data = &bufp->b[bufp->gap_off + bufp->gap_len];
+		retval[1].len = CW_BUFP_SIZE - (bufp->gap_off + bufp->gap_len);
+
+		bufvcnt = 2;
+	    }
+	    else
+	    {
+		/* One range. */
+		if (start->ppos < bufp->gap_off)
+		{
+		    /* Before gap. */
+		    retval[0].len = CW_BUFP_SIZE - bufp->gap_len - start->ppos;
+		}
+		else
+		{
+		    /* After gap. */
+		    retval[0].len = CW_BUFP_SIZE - start->ppos;
+		}
+
+		bufvcnt = 1;
+	    }
+
+	    /* Intermediate bufp's. */
+	    for (bufp = ql_next(&buf->plist, bufp, plink);
+		 bufp != end->bufp;
+		 bufp = ql_next(&buf->plist, bufp, plink))
+	    {
+		cw_check_ptr(bufp);
+
+		if (bufp->gap_off == 0)
+		{
+		    /* Gap at beginning. */
+		    retval[bufvcnt].data = &bufp->b[bufp->gap_off];
+		    retval[bufvcnt].len = CW_BUFP_SIZE - bufp->gap_len;
+
+		    bufvcnt++;
+		}
+		else if (bufp->gap_off == CW_BUFP_SIZE - bufp->gap_len)
+		{
+		    /* Gap at end. */
+		    retval[bufvcnt].data = &bufp->b[0];
+		    retval[bufvcnt].len = CW_BUFP_SIZE - bufp->gap_len;
+
+		    bufvcnt++;
+		}
+		else
+		{
+		    /* Gap splits bufp into two regions. */
+		    retval[bufvcnt].data = &bufp->b[0];
+		    retval[bufvcnt].len = bufp->gap_off;
+
+		    retval[bufvcnt + 1].data = &bufp->b[bufp->gap_off
+						       + bufp->gap_len];
+		    retval[bufvcnt + 1].len = CW_BUFP_SIZE - (bufp->gap_off
+							      + bufp->gap_len);
+
+		    bufvcnt += 2;
+		}
+	    }
+
+	    /* Last bufp. */
+	    retval[bufvcnt].data = &bufp->b[end->ppos];
+	    if (end->ppos < end->bufp->gap_off
+		&& bufp->gap_off < CW_BUFP_SIZE - bufp->gap_len)
+	    {
+		/* Two ranges. */
+		retval[bufvcnt].len = bufp->gap_off - end->ppos;
+
+		retval[bufvcnt + 1].data = &bufp->b[bufp->gap_off
+						   + bufp->gap_len];
+		retval[bufvcnt + 1].len = CW_BUFP_SIZE - (bufp->gap_off
+							  + bufp->gap_len);
+
+		bufvcnt += 2;
+	    }
+	    else
+	    {
+		/* One range. */
+		if (end->ppos < bufp->gap_off)
+		{
+		    /* Before gap. */
+		    retval[bufvcnt].len = CW_BUFP_SIZE - bufp->gap_len
+			- end->ppos;
+		}
+		else
+		{
+		    /* After gap. */
+		    retval[bufvcnt].len = CW_BUFP_SIZE - end->ppos;
+		}
+
+		bufvcnt++;
+	    }
+
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    return retval;
 }
 
 void
