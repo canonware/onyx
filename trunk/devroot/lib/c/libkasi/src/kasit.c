@@ -23,23 +23,8 @@
     a_kasit->index = 0;                                                     \
   } while (0)
 
-#if (0)
 #define _CW_KASIT_GETC(a_i)                                                 \
-  do                                                                        \
-  {                                                                         \
-    if (_CW_KASI_BUFC_SIZE > (a_i))                                         \
-    {                                                                       \
-      a_kasit->tok_buffer.str[(a_i)];                                       \
-    }                                                                       \
-    else                                                                    \
-    {                                                                       \
-      buf_get_uint8(&a_kasit->tok_buffer.buf, (a_i));                       \
-    }                                                                       \
-  } while (0)
-#endif
-
-#define _CW_KASIT_GETC(a_i)                                                 \
-  ((_CW_KASI_BUFC_SIZE > (a_i))                                             \
+  ((_CW_KASI_BUFC_SIZE > a_kasit->index)                                    \
    ? a_kasit->tok_buffer.str[(a_i)]                                         \
    : buf_get_uint8(&a_kasit->tok_buffer.buf, (a_i)))
 
