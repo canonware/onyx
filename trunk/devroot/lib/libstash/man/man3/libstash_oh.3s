@@ -748,7 +748,8 @@ Otherwise: Undefined.
 .RE
 Description:
 .RS
-Set *r_key and *r_data to point to the oldest item in a_oh.
+Set *r_key and *r_data to point to the oldest item in a_oh.  Promote the item so
+that it is the newest item in a_oh.
 .RE
 .RE
 
