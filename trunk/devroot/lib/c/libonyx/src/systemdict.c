@@ -971,6 +971,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 	NXO_STACK_GET(nxo, ostack, a_thread);
 
 	switch (nxo_type_get(nxo)) {
+#if (0)	/* XXX To become ndup. */
 	case NXOT_INTEGER: {
 		cw_nxo_t	*dup;
 		cw_uint32_t	i;
@@ -1000,6 +1001,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 		}
 		break;
 	}
+#endif
 	case NXOT_ARRAY: {
 		cw_nxo_t	*orig;
 
@@ -5015,9 +5017,10 @@ systemdict_timedwait(cw_nxo_t *a_thread)
 	timeout.tv_nsec = nxo_integer_get(nsecs) % 1000000000;
 	timeout.tv_sec = nxo_integer_get(nsecs) / 1000000000;
 
-	nxo_condition_timedwait(condition, mutex, &timeout);
+	nxo_boolean_new(condition, nxo_condition_timedwait(condition, mutex,
+	    &timeout));
 
-	nxo_stack_npop(ostack, 3);
+	nxo_stack_npop(ostack, 2);
 }
 
 void
