@@ -1706,7 +1706,8 @@ object. \\
 object \dots index & {\bf \htmlref{index}{systemdict:index}} & object \dots
 object & Duplicate object on ostack at a given index. \\
 \hline
-& {\bf \htmlref{exch}{systemdict:exch}} & & \\
+a b & {\bf \htmlref{exch}{systemdict:exch}} & b a & Exchange the top two objects
+on ostack. \\
 \hline
 \oparg{region} \oparg{count} \oparg{amount} & {\bf
 \htmlref{roll}{systemdict:roll}} & \oparg{rolled} & Roll the top
@@ -3306,23 +3307,37 @@ onyx:2>
 	\end{description}
 \label{systemdict:exch}
 \index{exch@\onyxop{}{exch}{}}
-\item[{\onyxop{--}{exch}{--}}: ]
+\item[{\onyxop{a b}{exch}{b a}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[b: ]
+			The same object that was passed in.
+		\item[a: ]
+			The same object that was passed in.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Exchange the top two objects on ostack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 1 2 pstack
+2
+1
+onyx:2> exch pstack
+1
+2
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exec}
