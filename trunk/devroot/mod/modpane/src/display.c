@@ -196,11 +196,8 @@ modpane_display_display(void *a_data, cw_nxo_t *a_thread)
     display = (struct cw_display *) nxa_malloc(sizeof(struct cw_display));
 
     /* Initialize the ds. */
-    /* XXX Use cw_g_nxaa. */
-    ds_new(&display->ds, (cw_opaque_alloc_t *) nxa_malloc_e,
-	   (cw_opaque_realloc_t *) nxa_realloc_e,
-	   (cw_opaque_dealloc_t *) nxa_free_e, NULL,
-	   nxo_file_fd_get(infile), nxo_file_fd_get(outfile));
+    ds_new(&display->ds, cw_g_nxaa, nxo_file_fd_get(infile),
+	   nxo_file_fd_get(outfile));
 
     /* Initialize the protection mutex; ds's aren't thread-safe. */
     mtx_new(&display->mtx);

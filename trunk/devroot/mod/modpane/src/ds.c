@@ -13,9 +13,7 @@
 #include "../include/modpane.h"
 
 void
-ds_new(cw_ds_t *a_ds, cw_opaque_alloc_t *a_alloc,
-       cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc,
-       void *a_arg, int a_in, int a_out)
+ds_new(cw_ds_t *a_ds, cw_mema_t *a_mema, int a_in, int a_out)
 {
     a_ds->in = a_in;
     a_ds->out = a_out;
