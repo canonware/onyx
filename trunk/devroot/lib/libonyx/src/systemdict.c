@@ -5547,7 +5547,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 	tkey = nxo_stack_push(tstack);
 	nxo_string_new(tkey, nx, nxo_thread_currentlocking(a_thread), len + 1);
 	nxo_string_set(tkey, 0, nxo_name_str_get(key), len);
-	nxo_string_el_set(tkey, '\0', len - 1);
+	nxo_string_el_set(tkey, '\0', len);
 
 	/* Do the unsetenv(). */
 	unsetenv(nxo_string_get(tkey));
