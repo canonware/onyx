@@ -1,3 +1,8 @@
+1999-12-28  Jason Evans  <jasone@canonware.com>
+
+	* src/sockb.c (sockb_l_get_host_ip): Print IP address correctly on
+	big- and little-endian machines.
+
 1999-11-10  Jason Evans  <jasone@canonware.com>
 
 	* src/sockb.c (sockb_p_entry_func): Correctly calculate whether
