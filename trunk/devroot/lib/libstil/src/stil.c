@@ -188,11 +188,9 @@ stil_delete(cw_stil_t *a_stil)
 	stilt_setglobal(&stilt, TRUE);
 	stilt_delete(&stilt);
 
-	/* XXX Run the GC one last time. */
-
+	stila_delete(&a_stil->stila);
 	dch_delete(&a_stil->name_hash);
 	mtx_delete(&a_stil->name_lock);
-	stila_delete(&a_stil->stila);
 	mtx_delete(&a_stil->lock);
 
 	if (a_stil->is_malloced)
