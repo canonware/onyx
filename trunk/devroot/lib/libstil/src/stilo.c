@@ -201,18 +201,18 @@ static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
 
 /* no. */
 static cw_stilte_t stilo_p_no_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /* array. */
 static void	stiloe_p_array_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 static cw_stiloe_t *stiloe_p_array_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /* boolean. */
 static cw_stilte_t stilo_p_boolean_print(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
+    *a_file, cw_bool_t a_syntactic);
 
 /* condition. */
 static void	stiloe_p_condition_delete(cw_stiloe_t *a_stiloe, cw_stil_t
@@ -220,14 +220,14 @@ static void	stiloe_p_condition_delete(cw_stiloe_t *a_stiloe, cw_stil_t
 static cw_stiloe_t *stiloe_p_condition_ref_iter(cw_stiloe_t *a_stiloe,
     cw_bool_t a_reset);
 static cw_stilte_t stilo_p_condition_print(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
+    *a_file, cw_bool_t a_syntactic);
 
 /* dict. */
 static void	stiloe_p_dict_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 static cw_stiloe_t *stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 #define		stiloe_p_dict_lock(a_dict) do {				\
 	if ((a_dict)->stiloe.global &&					\
@@ -248,7 +248,7 @@ static void	stiloe_p_file_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 static cw_stiloe_t *stiloe_p_file_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_file_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 static cw_stilte_t stilo_p_file_buffer_flush(cw_stilo_t *a_stilo);
 
 #define		stiloe_p_file_lock(a_file) do {				\
@@ -265,29 +265,29 @@ static void	stiloe_p_hook_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 static cw_stiloe_t *stiloe_p_hook_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_hook_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /* integer. */
 static cw_stilte_t stilo_p_integer_print(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
+    *a_file, cw_bool_t a_syntactic);
 
 /* mark. */
 static cw_stilte_t stilo_p_mark_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /* mutex. */
 static void	stiloe_p_mutex_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 static cw_stiloe_t *stiloe_p_mutex_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_mutex_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /* name. */
 static void	stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 static cw_stiloe_t *stiloe_p_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 #define		stiloe_p_name_lock(a_name) do {				\
 	if ((a_name)->stiloe.global)					\
@@ -300,11 +300,11 @@ static cw_stilte_t stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
 
 /* null. */
 static cw_stilte_t stilo_p_null_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /* operator. */
 static cw_stilte_t stilo_p_operator_print(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
+    *a_file, cw_bool_t a_syntactic);
 
 /* string. */
 static void	stiloe_p_string_delete(cw_stiloe_t *a_stiloe, cw_stil_t
@@ -312,7 +312,7 @@ static void	stiloe_p_string_delete(cw_stiloe_t *a_stiloe, cw_stil_t
 static cw_stiloe_t *stiloe_p_string_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
+    cw_bool_t a_syntactic);
 
 /*
  * vtable setup for the various operations on stilo's that are polymorphic.
@@ -324,7 +324,7 @@ typedef cw_stiloe_t	*cw_stilot_ref_iter_t(cw_stiloe_t *a_stiloe,
 typedef cw_stilte_t	cw_stilot_copy_t(cw_stilo_t *a_to, cw_stilo_t *a_from,
     cw_stilt_t *a_stilt);
 typedef cw_stilte_t	cw_stilot_print_t(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
+    *a_file, cw_bool_t a_syntactic);
 
 typedef struct cw_stilot_vtable_s cw_stilot_vtable_t;
 struct  cw_stilot_vtable_s {
@@ -651,8 +651,18 @@ cw_stilte_t
 stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t a_syntactic,
     cw_bool_t a_newline)
 {
-	return stilot_vtable[a_stilo->type].print_f(a_stilo, a_file,
-	    a_syntactic, a_newline);
+	cw_stilte_t	retval;
+
+	retval = stilot_vtable[a_stilo->type].print_f(a_stilo, a_file,
+	    a_syntactic);
+	if (retval)
+		goto RETURN;
+
+	if (a_newline)
+		retval = stilo_file_output(a_file, "\n");
+
+	RETURN:
+	return retval;
 }
 
 /* Hash any stilo, but optimize for name hashing. */
@@ -763,18 +773,14 @@ stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
  * no.
  */
 static cw_stilte_t
-stilo_p_no_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_bool_t a_syntactic, cw_bool_t a_newline)
+stilo_p_no_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-notype-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-notype-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -966,10 +972,9 @@ stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 
 static cw_stilte_t
 stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	cw_stilo_t	*arr;
 	cw_uint32_t	nelms, i;
 
@@ -999,19 +1004,16 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 			}
 		}
 		if (a_stilo->attrs == STILOA_EXECUTABLE) {
-			retval = stilo_file_output(a_file, "}[c]",
-			    newline);
+			retval = stilo_file_output(a_file, "}");
 			if (retval)
 				goto RETURN;
 		} else {
-			retval = stilo_file_output(a_file, "][c]",
-			    newline);
+			retval = stilo_file_output(a_file, "]");
 			if (retval)
 				goto RETURN;
 		}
 	} else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
+		retval = stilo_file_output(a_file, "--nostringval--");
 		if (retval)
 			goto RETURN;
 	}
@@ -1187,15 +1189,14 @@ stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val)
 
 static cw_stilte_t
 stilo_p_boolean_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 
 	if (a_stilo->o.boolean.val)
-		retval = stilo_file_output(a_file, "true[c]", newline);
+		retval = stilo_file_output(a_file, "true");
 	else
-		retval = stilo_file_output(a_file, "false[c]", newline);
+		retval = stilo_file_output(a_file, "false");
 
 	return retval;
 }
@@ -1264,17 +1265,14 @@ stiloe_p_condition_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 
 static cw_stilte_t
 stilo_p_condition_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-condition-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-condition-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -1517,17 +1515,14 @@ stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stil_t *a_stil)
 
 static cw_stilte_t
 stilo_p_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-dict-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-dict-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -1783,17 +1778,14 @@ stiloe_p_file_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 
 static cw_stilte_t
 stilo_p_file_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t		retval;
-	cw_uint8_t		newline = (a_newline) ? '\n' : '\0';
 
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-file-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-file-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -3087,17 +3079,14 @@ stiloe_p_hook_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 
 static cw_stilte_t
 stilo_p_hook_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-hook-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-hook-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -3154,13 +3143,11 @@ stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
  */
 static cw_stilte_t
 stilo_p_integer_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
-	retval = stilo_file_output(a_file, "[q|s:s][c]", a_stilo->o.integer.i,
-	    newline);
+	retval = stilo_file_output(a_file, "[q|s:s]", a_stilo->o.integer.i);
 
 	return retval;
 }
@@ -3176,17 +3163,14 @@ stilo_mark_new(cw_stilo_t *a_stilo)
 
 static cw_stilte_t
 stilo_p_mark_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-mark-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-mark-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -3234,17 +3218,14 @@ stiloe_p_mutex_ref_iter(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
 
 static cw_stilte_t
 stilo_p_mutex_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-mutex-[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "-mutex-");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -3418,7 +3399,7 @@ stiloe_p_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 
 static cw_stilte_t
 stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_name_t	*name;
@@ -3443,11 +3424,6 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 	    name->str);
 	if (retval)
 		goto RETURN;
-	if (a_newline) {
-		retval = stilo_file_output(a_file, "\n");
-		if (retval)
-			goto RETURN;
-	}
 
 	retval = STILTE_NONE;
 	RETURN:
@@ -3553,17 +3529,14 @@ stilo_name_len_get(cw_stilo_t *a_stilo)
  */
 static cw_stilte_t
 stilo_p_null_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
 	if (a_syntactic)
-		retval = stilo_file_output(a_file, "null[c]", newline);
-	else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		retval = stilo_file_output(a_file, "null");
+	else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -3581,29 +3554,23 @@ stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op, cw_stiln_t a_stiln)
 
 static cw_stilte_t
 stilo_p_operator_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	
 	if (a_syntactic) {
 		if (a_stilo->op_code <= STILN_LAST) {
 			if (a_stilo->fast_op) {
 				retval = stilo_file_output(a_file,
-				    "---[s]---[c]", stiln_str(a_stilo->op_code),
-				    newline);
+				    "---[s]---", stiln_str(a_stilo->op_code));
 			} else {
-				retval = stilo_file_output(a_file, "--[s]--[c]",
-				    stiln_str(a_stilo->op_code), newline);
+				retval = stilo_file_output(a_file, "--[s]--",
+				    stiln_str(a_stilo->op_code));
 			}
-		} else {
-			retval = stilo_file_output(a_file, "-operator-[c]",
-			    newline);
-		}
-	} else {
-		retval = stilo_file_output(a_file, "--nostringval--[c]",
-		    newline);
-	}
+		} else
+			retval = stilo_file_output(a_file, "-operator-");
+	} else
+		retval = stilo_file_output(a_file, "--nostringval--");
 
 	return retval;
 }
@@ -3768,10 +3735,9 @@ stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 
 static cw_stilte_t
 stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
+    a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	cw_uint8_t	*str;
 	cw_sint32_t	len;
 	cw_uint32_t	i;
@@ -3820,7 +3786,7 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 			if (retval)
 				goto RETURN;
 		}
-		retval = stilo_file_output(a_file, ")[c]", newline);
+		retval = stilo_file_output(a_file, ")");
 		if (retval)
 			goto RETURN;
 	} else {
@@ -3829,7 +3795,6 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 			if (retval)
 				goto RETURN;
 		}
-		retval = stilo_file_output(a_file, "[c]", newline);
 		if (retval)
 			goto RETURN;
 	}
