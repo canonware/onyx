@@ -123,10 +123,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 		make
 		make install
 
-	As of pth 1.4.1, there are some problems with poll().  A patch has been
-	submitted to the pth maintainer, which will hopefully be incorporated in
-	later releases.
-
 --disable-real
 	Do not include the "real" Onyx type, which supports double precision
 	floating point operations.  The documentation does not mention the
