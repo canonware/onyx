@@ -2497,7 +2497,88 @@ systemdict_length(cw_stilo_t *a_thread)
 void
 systemdict_link(cw_stilo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_stilo_t	*ostack, *tstack;
+	cw_stilo_t	*filename, *linkname, *tfilename, *tlinkname;
+	int		error;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
+	STILO_STACK_GET(linkname, ostack, a_thread);
+	STILO_STACK_DOWN_GET(filename, ostack, a_thread, linkname);
+	if (stilo_type_get(filename) != STILOT_STRING ||
+	    stilo_type_get(linkname) != STILOT_STRING) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/*
+	 * Create a copy of filename with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	tfilename = stilo_stack_push(tstack);
+	stilo_string_new(tfilename, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread),
+	    stilo_string_len_get(filename) + 1);
+	stilo_string_lock(filename);
+	stilo_string_lock(tfilename);
+	stilo_string_set(tfilename, 0, stilo_string_get(filename),
+	    stilo_string_len_get(filename));
+	stilo_string_el_set(tfilename, '\0', stilo_string_len_get(tfilename) -
+	    1);
+	stilo_string_unlock(filename);
+
+	/*
+	 * Create a copy of linkname with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	tlinkname = stilo_stack_push(tstack);
+	stilo_string_new(tlinkname, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread),
+	    stilo_string_len_get(linkname) + 1);
+	stilo_string_lock(linkname);
+	stilo_string_lock(tlinkname);
+	stilo_string_set(tlinkname, 0, stilo_string_get(linkname),
+	    stilo_string_len_get(linkname));
+	stilo_string_el_set(tlinkname, '\0', stilo_string_len_get(tlinkname) -
+	    1);
+	stilo_string_unlock(linkname);
+
+	error = link(stilo_string_get(tfilename), stilo_string_get(tlinkname));
+	stilo_stack_npop(tstack, 2);
+	if (error == -1) {
+		switch (errno) {
+		case EIO:
+		case EDQUOT:
+		case EMLINK:
+		case ENOSPC:
+		case EROFS:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_IOERROR);
+			break;
+		case EEXIST:
+		case ENOENT:
+		case ENOTDIR:
+		case EOPNOTSUPP:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNDEFINEDFILENAME);
+			break;
+		case EACCES:
+		case ENAMETOOLONG:
+		case ELOOP:
+		case EPERM:
+		case EXDEV:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_INVALIDFILEACCESS);
+			break;
+		case EFAULT:
+		default:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNREGISTERED);
+		}
+		return;
+	}
+
+	stilo_stack_npop(ostack, 2);
 }
 
 void
@@ -4150,7 +4231,85 @@ systemdict_sym_rb(cw_stilo_t *a_thread)
 void
 systemdict_symlink(cw_stilo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_stilo_t	*ostack, *tstack;
+	cw_stilo_t	*filename, *linkname, *tfilename, *tlinkname;
+	int		error;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
+	STILO_STACK_GET(linkname, ostack, a_thread);
+	STILO_STACK_DOWN_GET(filename, ostack, a_thread, linkname);
+	if (stilo_type_get(filename) != STILOT_STRING ||
+	    stilo_type_get(linkname) != STILOT_STRING) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/*
+	 * Create a copy of filename with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	tfilename = stilo_stack_push(tstack);
+	stilo_string_new(tfilename, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread),
+	    stilo_string_len_get(filename) + 1);
+	stilo_string_lock(filename);
+	stilo_string_lock(tfilename);
+	stilo_string_set(tfilename, 0, stilo_string_get(filename),
+	    stilo_string_len_get(filename));
+	stilo_string_el_set(tfilename, '\0', stilo_string_len_get(tfilename) -
+	    1);
+	stilo_string_unlock(filename);
+
+	/*
+	 * Create a copy of linkname with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	tlinkname = stilo_stack_push(tstack);
+	stilo_string_new(tlinkname, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread),
+	    stilo_string_len_get(linkname) + 1);
+	stilo_string_lock(linkname);
+	stilo_string_lock(tlinkname);
+	stilo_string_set(tlinkname, 0, stilo_string_get(linkname),
+	    stilo_string_len_get(linkname));
+	stilo_string_el_set(tlinkname, '\0', stilo_string_len_get(tlinkname) -
+	    1);
+	stilo_string_unlock(linkname);
+
+	error = symlink(stilo_string_get(tfilename),
+	    stilo_string_get(tlinkname));
+	stilo_stack_npop(tstack, 2);
+	if (error == -1) {
+		switch (errno) {
+		case EDQUOT:
+		case EIO:
+		case EMLINK:
+		case ENOSPC:
+		case EROFS:
+			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
+			break;
+		case EEXIST:
+		case ENOENT:
+		case ENOTDIR:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNDEFINEDFILENAME);
+			break;
+		case EACCES:
+		case ELOOP:
+		case ENAMETOOLONG:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_INVALIDFILEACCESS);
+			break;
+		case EFAULT:
+		default:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNREGISTERED);
+		}
+		return;
+	}
+
+	stilo_stack_npop(ostack, 2);
 }
 
 void
@@ -4500,45 +4659,62 @@ systemdict_undef(cw_stilo_t *a_thread)
 void
 systemdict_unlink(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack;
-	cw_stilo_t	*string;
-	cw_uint8_t	str[PATH_MAX];
-	cw_uint32_t	nbytes;
+	cw_stilo_t	*ostack, *tstack;
+	cw_stilo_t	*filename, *tfilename;
 
 	ostack = stilo_thread_ostack_get(a_thread);
-	STILO_STACK_GET(string, ostack, a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
+	STILO_STACK_GET(filename, ostack, a_thread);
 
-	if (stilo_type_get(string) != STILOT_STRING) {
+	if (stilo_type_get(filename) != STILOT_STRING) {
 		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 		return;
 	}
 
-	if (stilo_string_len_get(string) < sizeof(str))
-		nbytes = stilo_string_len_get(string);
-	else
-		nbytes = sizeof(str) - 1;
-	stilo_string_lock(string);
-	memcpy(str, stilo_string_get(string), nbytes);
-	stilo_string_unlock(string);
-	str[nbytes] = '\0';
+	/*
+	 * Create a copy of filename with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	tfilename = stilo_stack_push(tstack);
+	stilo_string_new(tfilename, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread),
+	    stilo_string_len_get(filename) + 1);
+	stilo_string_lock(filename);
+	stilo_string_lock(tfilename);
+	stilo_string_set(tfilename, 0, stilo_string_get(filename),
+	    stilo_string_len_get(filename));
+	stilo_string_el_set(tfilename, '\0', stilo_string_len_get(tfilename) -
+	    1);
+	stilo_string_unlock(filename);
 
-	stilo_stack_pop(ostack);
-
-	if (unlink(str) == -1) {
+	if (unlink(stilo_string_get(tfilename)) == -1) {
 		switch (errno) {
+		case EIO:
+		case EBUSY:
+		case ELOOP:
+		case EROFS:
+			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
+			break;
+		case ENOENT:
+		case ENOTDIR:
+		case ENAMETOOLONG:
+			stilo_thread_error(a_thread,
+			    STILO_THREADE_UNDEFINEDFILENAME);
+			break;
 		case EACCES:
 		case EPERM:
 			stilo_thread_error(a_thread,
 			    STILO_THREADE_INVALIDFILEACCESS);
-		case EIO:
-		case EBUSY:
-			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
+			break;
+		case EFAULT:
 		default:
 			stilo_thread_error(a_thread,
-			    STILO_THREADE_UNDEFINEDFILENAME);
+			    STILO_THREADE_UNREGISTERED);
 		}
 		return;
 	}
+
+	stilo_stack_pop(ostack);
 }
 
 void
