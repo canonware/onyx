@@ -51,8 +51,6 @@ dbg_delete(cw_dbg_t * a_dbg)
 void
 dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
 {
-/*    _cw_check_ptr(a_dbg); */
-
   if (NULL != a_dbg)
   {
     /* Ignore the return value, since we don't care if the flag is already
@@ -65,27 +63,26 @@ dbg_register(cw_dbg_t * a_dbg, const char * a_flag)
 void
 dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag)
 {
-  char ** junk1 = NULL, ** junk2 = NULL;
-
-/*    _cw_check_ptr(a_dbg); */
+  char * junk1, * junk2;
 
   if (NULL != a_dbg)
   {
     /* Ignore the return value, since we don't care if the flag isn't
      * registered.  Also, pass dummy variables junk1 and junk2, since we don't
      * care about their contents. */
-    oh_item_delete(&a_dbg->flag_hash, a_flag, (void **) junk1, (void **) junk2);
+    oh_item_delete(&a_dbg->flag_hash,
+		   a_flag,
+		   (void **) &junk1,
+		   (void **) &junk2);
   }
 }
 
-#ifdef _LIBSTASH_DBG
 cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag)
 {
   cw_bool_t retval;
   char * junk = NULL;
 
-/*    _cw_check_ptr(a_dbg); */
   _cw_check_ptr(a_flag);
 
   if (NULL != a_dbg)
@@ -100,4 +97,3 @@ dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag)
   
   return retval;
 }
-#endif

@@ -19,7 +19,7 @@ extern "C" {
 #ifndef _LIBSOCK_H_
 #  define _LIBSOCK_H_
 
-#  define _LIBSOCK_VERSION_ <Version>
+#  define _LIBSOCK_VERSION "<Version>"
 
 /* This guarantees that the socket code can handle something over 1000
  * simultaneous clients, rather than the default of under 256 as on some

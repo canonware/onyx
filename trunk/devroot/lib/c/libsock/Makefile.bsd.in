@@ -27,7 +27,7 @@ P_INCS := sock_p.h sockb_p.h socks_p.h
 SRCS := sock.c sockb.c socks.c
 
 # Executables.
-BINS :=
+BINS := proxy.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS :=
@@ -140,7 +140,7 @@ $(bin:S/$/&.o/) : $(bin:S/$/&.c/)
 
 .for bin in $(BINS)
 $(bin) : $(LIB_ST_D) $(bin:S/$/&.o/)
-	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(BIN_LIBBR) $(BIN_LIBS) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $(@:S/$/&.o/) $(LIBPATH) $(BIN_LIBSOCK) $(BIN_LIBS) -dynamic $(EXTRALIBS)
 
 $(bin:S/$/&.o/) : $(bin:S/$/&.c/)
 	$(CC) $(CFLAGS) $(BIN_CFLAGS) $(INCPATH) $(DEFINES) $(BIN_DEFINES) -c $(bin:S/$/&.c/) -o $@

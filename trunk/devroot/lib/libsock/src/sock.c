@@ -396,6 +396,16 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare)
     {
       retval = size;
       buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+
+      if (size == a_sock->in_max_buf_size)
+      {
+	/* The socket was possibly unregistered by sockb, since there was no
+	 * more room to stuff data.  Register the sock again. */
+	mtx_lock(&a_sock->lock);
+	sockb_l_register_sock(a_sock);
+	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+	mtx_unlock(&a_sock->lock);
+      }
     }
     else
     {
@@ -443,6 +453,16 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare)
     {
       retval = size;
       buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+
+      if (size == a_sock->in_max_buf_size)
+      {
+	/* The socket was possibly unregistered by sockb, since there was no
+	 * more room to stuff data.  Register the sock again. */
+	mtx_lock(&a_sock->lock);
+	sockb_l_register_sock(a_sock);
+	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+	mtx_unlock(&a_sock->lock);
+      }
     }
     else
     {
