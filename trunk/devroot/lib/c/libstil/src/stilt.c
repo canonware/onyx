@@ -106,6 +106,8 @@ static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
 #define			stilt_p_token_print(a, b, c, d)
 #define			stilt_p_syntax_error_print(a, b)
 #endif
+static void		stilt_p_syntax_error(cw_stilt_t *a_stilt,
+    cw_uint8_t *a_prefix, cw_uint8_t *a_suffix, cw_uint8_t a_c);
 static void		stilt_p_reset(cw_stilt_t *a_stilt);
 static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
@@ -1066,9 +1068,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->m.s.p_depth = 1;
 				break;
 			case ')':
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "", "", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1114,10 +1114,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					stilt_p_procedure_accept(a_stilt);
 				} else {
 					/* Missing '{'. */
-					stilt_p_syntax_error_print(a_stilt, c);
-					stilt_p_reset(a_stilt);
-					stilt_error(a_stilt,
-					    STILTE_SYNTAXERROR);
+					stilt_p_syntax_error(a_stilt, "", "",
+					    c);
 					if (a_token)
 						goto RETURN;
 				}
@@ -1196,9 +1194,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->state = STILTTS_HEX_STRING;
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "", "<", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1216,9 +1212,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "", ">", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1234,9 +1228,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '\n':
 				_CW_STILT_NEWLINE();
 
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "", "/", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1244,9 +1236,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '(': case ')': case '`': case '\'': case '<':
 			case '>': case '[': case ']': case '{': case '}':
 			case '%':
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "", "/", c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1623,9 +1613,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->m.s.hex_val = c;
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "<", "", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1672,9 +1660,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				break;
 			}
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "<", "", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1813,9 +1799,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "<", "", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1859,10 +1843,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					 * We shouldn't have even seen this
 					 * padding character.
 					 */
-					stilt_p_syntax_error_print(a_stilt, c);
-					stilt_p_reset(a_stilt);
-					stilt_error(a_stilt,
-					    STILTE_SYNTAXERROR);
+					stilt_p_syntax_error(a_stilt, "<~", "",
+					    c);
 					if (a_token)
 						goto RETURN;
 					break;
@@ -1881,9 +1863,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				}
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "<~", "", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1901,9 +1881,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				/* Ignore. */
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				stilt_p_syntax_error(a_stilt, "<~", "=", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1921,9 +1899,22 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				/* Ignore. */
 				break;
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				switch (a_stilt->index % 4) {
+				case 0:
+					stilt_p_syntax_error(a_stilt, "<~", "~",
+					    c);
+					break;
+				case 2:
+					stilt_p_syntax_error(a_stilt, "<~",
+					    "==~", c);
+					break;
+				case 3:
+					stilt_p_syntax_error(a_stilt, "<~",
+					    "=~", c);
+					break;
+				default:
+					_cw_not_reached();
+				}
 				if (a_token)
 					goto RETURN;
 			}
@@ -2002,9 +1993,22 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				break;
 			}
 			default:
-				stilt_p_syntax_error_print(a_stilt, c);
-				stilt_p_reset(a_stilt);
-				stilt_error(a_stilt, STILTE_SYNTAXERROR);
+				switch (a_stilt->index % 4) {
+				case 0:
+					stilt_p_syntax_error(a_stilt, "<~", "~",
+					    c);
+					break;
+				case 2:
+					stilt_p_syntax_error(a_stilt, "<~",
+					    "==~", c);
+					break;
+				case 3:
+					stilt_p_syntax_error(a_stilt, "<~",
+					    "=~", c);
+					break;
+				default:
+					_cw_not_reached();
+				}
 				if (a_token)
 					goto RETURN;
 			}
@@ -2035,10 +2039,22 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					token = TRUE;
 					stilt_p_name_accept(a_stilt, a_stilts);
 				} else {
-					stilt_p_syntax_error_print(a_stilt, c);
-					stilt_p_reset(a_stilt);
-					stilt_error(a_stilt,
-					    STILTE_SYNTAXERROR);
+					switch (a_stilt->m.m.action) {
+					case ACTION_EXECUTE:
+						stilt_p_syntax_error(a_stilt,
+						    "", "", c);
+						break;
+					case ACTION_LITERAL:
+						stilt_p_syntax_error(a_stilt,
+						    "/", "", c);
+						break;
+					case ACTION_EVALUATE:
+						stilt_p_syntax_error(a_stilt,
+						    "//", "", c);
+						break;
+					default:
+						_cw_not_reached();
+					}
 					if (a_token)
 						goto RETURN;
 				}
@@ -2112,6 +2128,37 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		_cw_free(a_stilt->tok_str);
 		a_stilt->tok_str = t_str;
 	}
+}
+
+static void
+stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t *a_prefix, cw_uint8_t
+    *a_suffix, cw_uint8_t a_c)
+{
+	cw_stilo_t	*stilo;
+
+	stilo = stils_push(&a_stilt->estack);
+
+	stilo_string_new(stilo, a_stilt->stil, a_stilt->locking,
+	    strlen(a_prefix) + a_stilt->index + strlen(a_suffix) + 1);
+
+	/* Prefix. */
+	stilo_string_set(stilo, 0, a_prefix, strlen(a_prefix));
+
+	/* Main text. */
+	stilo_string_set(stilo, strlen(a_prefix), a_stilt->tok_str,
+	    a_stilt->index);
+
+	/* Suffix. */
+	stilo_string_set(stilo, strlen(a_prefix) + a_stilt->index, a_suffix,
+	    strlen(a_suffix));
+
+	/* Current character. */
+	stilo_string_set(stilo, strlen(a_prefix) + a_stilt->index +
+	    strlen(a_suffix), &a_c, 1);
+
+	stilt_p_syntax_error_print(a_stilt, a_c);
+	stilt_p_reset(a_stilt);
+	stilt_error(a_stilt, STILTE_SYNTAXERROR);
 }
 
 static void
