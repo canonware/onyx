@@ -29,4 +29,6 @@
  */
 
 #include "kasi.h"
+#include "kasio.h"
+#include "kasis.h"
 #include "kasit.h"

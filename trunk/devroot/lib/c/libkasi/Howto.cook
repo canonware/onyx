@@ -22,7 +22,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libkasi.h libkasi_incs.h;
+  local incs = libkasi.h libkasi_incs.h kasi.h kasio.h kasis.h kasit.h;
   incs = [fromto % [srcdir]/lib/c/libkasi/include/libkasi/% [incs]];
   incs = [incs] [objdir]/lib/c/libkasi/include/libkasi/libkasi_defs.h;
 

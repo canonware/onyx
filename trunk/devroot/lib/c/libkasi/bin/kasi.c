@@ -38,10 +38,20 @@ main(int argc, char ** argv)
   kasi_new(&kasi);
   kasit_new(&kasit, NULL, NULL, &kasi);
 
+  out_put(cw_g_out, "sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
+  out_put(cw_g_out, "sizeof(cw_kasis_t): [i]\n", sizeof(cw_kasis_t));
+  out_put(cw_g_out, "sizeof(cw_kasis_chunk_spare_t): [i]\n",
+	  sizeof(cw_kasis_chunk_spare_t));
+  out_put(cw_g_out, "sizeof(cw_kasis_op_t): [i]\n", sizeof(cw_kasis_op_t));
+  out_put(cw_g_out, "sizeof(cw_kasis_chunk_t): [i]\n",
+	  sizeof(cw_kasis_chunk_t));
+  
+
   while (1)
   {
     out_put(&out, "kasi> ");
-    /* XXX Read input. */
+    
+    /* Read input. */
     bytes_read = read(0, input, _BUF_SIZE - 1);
     if (-1 == bytes_read)
     {
