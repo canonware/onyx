@@ -9,7 +9,7 @@
 #
 # Version: <Version>
 #
-# Description: Master Makefile for libstash.
+# Description: Master BSD-compatible Makefile for libstash.
 #              
 ##############################################################################
 
@@ -123,8 +123,6 @@ R_CFLAGS :=
 
 # Clear out all vpaths, then set just one (default vpath) for the main build
 # directory.
-#vpath
-#vpath % .
 .PATH :
 .PATH : .
 
@@ -135,7 +133,6 @@ all : all_s @without_threads@all_r
 #
 # Common rules
 #
-
 .SUFFIXES :
 .SUFFIXES : .a .c .h .o .d .pl.in .pl \
 	.o_st_d .o_st_o .o_sh_o .o_st_p \
@@ -148,12 +145,12 @@ all : all_s @without_threads@all_r
 #
 
 # This rule is used to build the tests.
-# .for bin in $(CTESTS) $(BTESTS)
-# $(bin) : $(bin:S/$/&.c/) $(LIB_ST_R_D)
-# 	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $(bin:S/$/&.c/) -o $(@:S/$/&.o/)
-# 	$(CC) -o $@ $(@:S/$/&.o/) $(LIB_ST_R_D) $(LIBPATH) -dynamic $(EXTRALIBS)
-# 	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $< | sed \"s/\($(bin:T:R\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/test\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
-# .endfor
+.for bin in $(CTESTS) $(BTESTS)
+$(bin) : $(LIB_ST_R_D) $(bin:S/$/&.c/)
+	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $(bin:S/$/&.c/) -o $(@:S/$/&.o/)
+	$(CC) -o $@ $(@:S/$/&.o/) $(LIB_ST_R_D) $(LIBPATH) -dynamic $(EXTRALIBS)
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(ST_DEFINES) $(D_DEFINES) $(INCPATH) $(bin:S/$/&.c/) | sed \"s/\($(bin:R:T)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/test\/\1.o \2/g\" > $(@:R:S/$/&.d/)"
+.endfor
 
 .for srcfile in $(SRCS)
 $(srcfile:T:R:S/^/$(.OBJDIR)\/st_d\/&/:S/$/&.o_st_d/) : $(srcfile)
@@ -189,7 +186,6 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/sh_r_o\/&/:S/$/&.o_sh_r_o/) : $(srcfile)
 $(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(P_CFLAGS) $(R_CFLAGS) $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) -c $(srcfile) -o $@
 	$(SHELL) -ec "$(CC) -MM $(DEFINES) $(ST_DEFINES) $(P_DEFINES) $(R_DEFINES) $(INCPATH) $(srcfile) | sed \"s/\($(srcfile:T:R)\)\.o\([ :]*\)/$(.CURDIR:S/\//\\\//g)\/obj\/st_r_p\/\1.o_st_r_p \2/g\" > $(@:R:S/$/&.d_st_r_p/)"
-
 .endfor
 
 .pl.in.pl :
@@ -224,12 +220,11 @@ $(srcfile:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) : $(srcfile)
 @without_threads@.endfor
 #.endif
 
-# ifneq ($(strip $(CTESTS)),)
-# -include $(CTESTS:=.d)
-# endif
-# ifneq ($(strip $(BTESTS)),)
-# -include $(BTESTS:=.d)
-# endif
+.for depfile in $(CTESTS:R:S/$/&.d/) $(BTESTS:R:S/$/&.d/)
+.if exists($(depfile))
+.include "$(depfile)"
+.endif
+.endfor
 
 $(LIB_ST_D) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_d\/&/:S/$/&.o_st_d/)
 	$(AR) cru $@ $?
@@ -265,34 +260,38 @@ $(LIB_ST_R_P) : $(SRCS:T:R:S/^/$(.OBJDIR)\/st_r_p\/&/:S/$/&.o_st_r_p/) \
 	$(AR) cru $@ $?
 	$(RANLIB) $@
 
-stat_dbg : $(LIB_ST_D)
-stat_opt : $(LIB_ST_O)
-shar_opt : $(LIB_SH_O)
-stat_prof : $(LIB_ST_P)
-stat_dbg_r : $(LIB_ST_R_D)
-stat_opt_r : $(LIB_ST_R_O)
-shar_opt_r : $(LIB_SH_R_O)
-stat_prof_r : $(LIB_ST_R_P)
+stat_dbg : $(LIB_ST_D) makefile
+stat_opt : $(LIB_ST_O) makefile
+shar_opt : $(LIB_SH_O) makefile
+stat_prof : $(LIB_ST_P) makefile
+stat_dbg_r : $(LIB_ST_R_D) makefile
+stat_opt_r : $(LIB_ST_R_O) makefile
+shar_opt_r : $(LIB_SH_R_O) makefile
+stat_prof_r : $(LIB_ST_R_P) makefile
 
 #
 # autoconf-related rules.
 #
-configure : configure.in
-	autoconf
+$(.CURDIR)/configure : $(.CURDIR)/configure.in
+	$(SHELL) -c 'cd $(.CURDIR); autoconf; cd -'
 
-config.status : configure
-	./config.status --recheck
+$(.CURDIR)/config.status : $(.CURDIR)/configure
+	$(SHELL) -c 'cd $(.CURDIR); ./config.status --recheck; cd -'
 
-Makefile : Makefile.in config.status
-	./config.status
+makefile :: $(.CURDIR)/Makefile
 
-stamp.in : configure.in
-	echo timestamp > stamp.in
+$(.CURDIR)/Makefile : $(.CURDIR)/Makefile.bsd
+$(.CURDIR)/Makefile.bsd : $(.CURDIR)/Makefile.bsd.in $(.CURDIR)/config.status
+	$(SHELL) -c 'cd $(.CURDIR); ./config.status; cd -'
 
-stamp : include/libstash/libstash.h.in config.status
-	./config.status
+$(.CURDIR)/stamp.in : $(.CURDIR)/configure.in
+	$(SHELL) -c 'cd $(.CURDIR); echo timestamp > stamp.in; cd -'
 
-include/libstash/libstash.h : stamp
+$(.CURDIR)/stamp : $(.CURDIR)/include/libstash/libstash.h.in \
+	$(.CURDIR)/config.status
+	$(SHELL) -c 'cd $(.CURDIR); ./config.status; cd -'
+
+$(.CURDIR)/include/libstash/libstash.h : $(.CURDIR)/stamp
 
 FORCE :
 
@@ -304,19 +303,20 @@ all_s : stat_dbg stat_opt shar_opt stat_prof
 
 all_r : stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
 
-tests : $(CTESTS) $(PTESTS) $(BTESTS)
+tests : $(CTESTS) $(PTESTS) $(BTESTS) makefile
 
 check : tests
 	@$(SHELL) -c \
-	'echo Running regression tests: ; \
+	'cd $(.CURDIR) \
+	echo Running regression tests: ; \
 	echo "---------------------------------------------" ;\
 	for i in $(PTESTS); do \
 	echo -n "$$i..."; \
-	./$$i; \
+	$$i; \
 	done; \
 	for i in $(CTESTS); do \
 	echo -n "$$i..."; \
-	./$$i > ./$$i.out 2>&1; \
+	$$i > $$i.out 2>&1; \
 	$(DIFF) $$i.out $$i.exp > $$i.diff ; \
 	if [ -s $$i.diff ] ; then \
 	echo "failed. ****************" ; \
@@ -333,16 +333,18 @@ check : tests
 	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"`; \
 	done; \
 	echo "---------------------------------------------" \
+	cd - \
 	'
 
 install : install_s @without_threads@install_r
 
-install_s : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
+install_s : install_stat_dbg install_stat_opt install_shar_opt \
+	install_stat_prof
 
 install_r : install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
 	install_stat_prof_r
 
-install_common : 
+install_common : makefile
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/include/libstash; \
 	@INSTALL@ -d @prefix@/include/libstash; \
@@ -383,13 +385,13 @@ install_shar_opt_r : shar_opt_r install_common install_common_r
 install_stat_prof_r : stat_prof_r install_common install_common_r
 	@INSTALL@ -m 0444 $(LIB_ST_R_P) @prefix@/lib
 
-uninstall :
-	rm -f @prefix@/lib/lib$(strip $(LIB))*
+uninstall : makefile
+	rm -f @prefix@/lib/lib$(LIB)*
 	rm -rf @prefix@/include/libstash
 
 doc :
 
-clean : FORCE
+clean : makefile FORCE
 	rm -f $(.CURDIR)/*~ $(.CURDIR)/*/*~
 	rm -f $(.CURDIR)/*.bak $(.CURDIR)/*.BAK
 	rm -f $(.CURDIR)/core $(.CURDIR)/test/core
@@ -413,5 +415,6 @@ distclean : clean
 	rm -f $(.CURDIR)/$(PMERGE)
 	rm -f $(.CURDIR)/$(PSTUB)
 
-etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)
+etags : $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R) \
+	makefile
 	@ETAGS@ $(INCS) $(INCS_R) $(PRIV_INCS) $(PRIV_INCS_R) $(SRCS) $(SRCS_R)

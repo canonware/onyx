@@ -29,8 +29,12 @@ typedef struct cw_bufel_s cw_bufel_t;
 
 struct cw_bufpool_s
 {
+  cw_bool_t is_malloced;
 #ifdef _STASH_DBG
   cw_uint32_t magic;
+#endif
+#ifdef _CW_REENTRANT
+  cw_mtx_t lock;
 #endif
   cw_uint32_t buffer_size;
   cw_uint32_t max_spare_buffers;
@@ -119,7 +123,7 @@ bufpool_get_buffer(cw_bufpool_t * a_bufpool);
 
 #define bufpool_put_buffer _CW_NS_STASH(bufpool_put_buffer)
 void
-bufpool_put_buffer(cw_bufpool_t * a_bufpool, void * a_buffer);
+bufpool_put_buffer(void * a_bufpool, void * a_buffer);
 
 /****************************************************************************
  *

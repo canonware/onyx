@@ -9,7 +9,7 @@
 #
 # Version: <Version>
 #
-# Description: Master Makefile for libstash.
+# Description: Master GNU-compatible Makefile for libstash.
 #              
 ##############################################################################
 
@@ -272,6 +272,7 @@ stamp : include/libstash/libstash.h.in config.status
 
 include/libstash/libstash.h : stamp
 
+
 FORCE :
 
 #
@@ -380,7 +381,7 @@ clean : FORCE
 
 distclean : clean
 	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
-	rm -f Makefile stamp
+	rm -f Makefile Makefile.gnu Makefile.bsd stamp
 	rm -f config.cache config.log config.status include/libstash/libstash.h
 	rm -f TAGS
 	rm -f $(PMERGE)

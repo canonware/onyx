@@ -10,38 +10,49 @@ AC_CONFIG_HEADER(include/libstash/libstash.h)
 
 dnl Comment out threaded dependency includes in Makefile.in if 
 dnl --without-pthreads is defined.
-AC_ARG_WITH(pthreads, [Build threaded libraries with pthreads], 
-if test $withval = "yes" ;
- then  
-  without_threads=""
- else
+AC_ARG_WITH(pthreads, [  --with-pthreads         Build threaded libstash libraries],
+if test "x$with_pthreads" = "xno" ; then
   without_threads="[#]"
- fi
-, without_threads="")
+else
+  without_threads=""
+fi
+, 
+without_threads=""
+)
 
 AC_SUBST(without_threads)
 
+AC_ARG_WITH(gnu-make, [  --with-gnu-make         Generate a Makefile compatiple with gnu make],
+if test "x$with_gnu_make" != "xno" ; then
+  use_gmake="yes"
+else
+  use_gmake="maybe"
+fi
+,
+use_gmake="maybe"
+)
+
+AC_ARG_WITH
+
 AC_CANONICAL_HOST
-
-dnl Remove Makefile if it exists
-echo rm -f Makefile
-rm -f Makefile
-
 case "${host}" in
   i386-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
-	echo "ln -s Makefile.bsd Makefile"
-	ln -s Makefile.bsd Makefile
+	if test "x$use_gmake" = "xmaybe" ; then
+	  use_gmake="no"
+	fi
         ;;
   *-*-linux*)
 	AC_DEFINE(_CW_OS_LINUX, )
-	echo "ln -s Makefile.gnu Makefile"
-	ln -s Makefile.gnu Makefile
+	if test "x$use_gmake" = "xmaybe" ; then
+	  use_gmake="yes"
+	fi
         ;;
   *-*-solaris2*)
 	AC_DEFINE(_CW_OS_SOLARIS, )
-	echo "ln -s Makefile.gnu Makefile"
-	ln -s Makefile.gnu Makefile
+	if test "x$use_gmake" = "xmaybe" ; then
+	  use_gmake="yes"
+	fi
         ;;
 esac
 
@@ -116,8 +127,21 @@ AC_MSG_RESULT(Compiler flags: ${CFLAGS})
 AC_MSG_RESULT(C preprocessor flags: ${CPPFLAGS})
 AC_MSG_RESULT(================================================================)
 
+echo rm -f Makefile
+rm -f Makefile
+if test "x$use_gmake" = "xyes" ; then
+  echo "ln -s Makefile.gnu Makefile"
+  ln -s Makefile.gnu Makefile
+else
+  echo "ln -s Makefile.bsd Makefile"
+  ln -s Makefile.bsd Makefile
+fi
+
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \
 Makefile.gnu \
 bin/pmerge \
-bin/pstub, echo timestamp > stamp)
+bin/pstub
+,
+echo timestamp > stamp
+)

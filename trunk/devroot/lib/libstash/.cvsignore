@@ -1,3 +1,5 @@
+*.core
+core
 Makefile
 Makefile.bsd
 Makefile.gnu

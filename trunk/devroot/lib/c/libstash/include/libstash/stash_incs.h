@@ -147,6 +147,8 @@
  
 #ifdef _STASH_USE_BUF
 #  ifndef _BUF_H_
+#    include <sys/types.h>
+#    include <sys/uio.h>
 #    include "buf.h"
 #    define _BUF_H_
 #  endif
