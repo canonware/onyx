@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
+#include <dirent.h>	/* For dirforeach operator. */
 
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilo_array_l.h"
@@ -1331,7 +1332,112 @@ systemdict_dict(cw_stilo_t *a_thread)
 void
 systemdict_dirforeach(cw_stilo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_stilo_t	*ostack, *estack, *tstack;
+	cw_stilo_t	*stilo, *tstilo, *path, *proc, *scratch, *entry;
+	DIR		*dir;
+	struct dirent	ent, *entp;
+	int		error;
+	cw_uint32_t	edepth, tdepth;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+	estack = stilo_thread_estack_get(a_thread);
+	tstack = stilo_thread_tstack_get(a_thread);
+	edepth = stilo_stack_count(estack);
+	tdepth = stilo_stack_count(tstack);
+
+	STILO_STACK_GET(tstilo, ostack, a_thread);
+	STILO_STACK_DOWN_GET(stilo, ostack, a_thread, tstilo);
+	if (stilo_type_get(stilo) != STILOT_STRING) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/*
+	 * Make a copy of the procedure to execute.
+	 */
+	proc = stilo_stack_push(tstack);
+	stilo_dup(proc, tstilo);
+
+	/*
+	 * Create a copy of the path with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	path = stilo_stack_push(tstack);
+	stilo_string_new(path, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), stilo_string_len_get(stilo) +
+	    1);
+	stilo_string_lock(path);
+	stilo_string_lock(stilo);
+	stilo_string_set(path, 0, stilo_string_get(stilo),
+	    stilo_string_len_get(stilo));
+	stilo_string_el_set(path, '\0', stilo_string_len_get(path) - 1);
+	stilo_string_unlock(stilo);
+	stilo_string_unlock(path);
+
+	/*
+	 * Open the directory.
+	 */
+	dir = opendir(stilo_string_get(path));
+	if (dir == NULL) {
+		stilo_stack_npop(tstack, 2);
+		stilo_thread_error(a_thread, STILO_THREADE_INVALIDACCESS);
+		return;
+	}
+
+	/* Pop the path and proc off ostack before going into the loop. */
+	stilo_stack_npop(ostack, 2);
+
+	/*
+	 * Create a scratch string for storing directory entries.  The string
+	 * pushed onto ostack in the loop below is a substring of this.
+	 */
+	scratch = stilo_stack_push(tstack);
+	stilo_string_new(scratch, stilo_thread_stil_get(a_thread),
+	    stilo_thread_currentlocking(a_thread), PATH_MAX);
+
+	xep_begin();
+	xep_try {
+		/*
+		 * Iterate through the directory.
+		 */
+		while ((error = readdir_r(dir, &ent, &entp) == 0) && entp ==
+		    &ent) {
+			_cw_assert(ent.d_namlen < PATH_MAX);
+
+			/*
+			 * Push a string onto ostack that represents the
+			 * directory entry.
+			 */
+			entry = stilo_stack_push(ostack);
+			stilo_string_set(scratch, 0, ent.d_name, ent.d_namlen);
+			stilo_string_substring_new(entry, scratch,
+			    stilo_thread_stil_get(a_thread), 0, ent.d_namlen);
+
+			/*
+			 * Evaluate proc.
+			 */
+			stilo = stilo_stack_push(estack);
+			stilo_dup(stilo, proc);
+			stilo_thread_loop(a_thread);
+		}
+		if (error && entp != NULL) {
+			/* The loop terminated due to an error. */
+			stilo_thread_error(a_thread, STILO_THREADE_IOERROR);
+		}
+	}
+	xep_catch(_CW_STILX_EXIT) {
+		xep_handled();
+
+		/* Clean up estack. */
+		stilo_stack_npop(estack, stilo_stack_count(estack) - edepth);
+	}
+	xep_end();
+
+	/* Close the directory. */
+	closedir(dir);
+
+	/* Clean up tstack. */
+	stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 }
 
 void
@@ -1920,6 +2026,12 @@ systemdict_foreach(cw_stilo_t *a_thread)
 		}
 		default:
 			stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+			/*
+			 * XXX Is it legal to return inside of an exception
+			 * block?
+			 *
+			 * XXX What about cleaning up estack?
+			 */
 			return;
 		}
 	}
@@ -1932,6 +2044,7 @@ systemdict_foreach(cw_stilo_t *a_thread)
 	}
 	xep_end();
 
+	/* XXX Doesn't this re-do the xep_catch cleanup? */
 	stilo_stack_npop(tstack, stilo_stack_count(tstack) - tdepth);
 }
 

@@ -798,7 +798,7 @@ path & {\bf \htmlref{cd}{systemdict:cd}} & -- & \\
 \hline
 -- & {\bf \htmlref{pwd}{systemdict:pwd}} & path & \\
 \hline
-& {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & & \\
+path proc & {\bf \htmlref{dirforeach}{systemdict:dirforeach}} & -- & \\
 \hline
 & {\bf \htmlref{currentfile}{systemdict:currentfile}} & & \\
 \hline
@@ -1056,6 +1056,58 @@ s:0> pwd 1 sprint
 s:0> `bin' cd
 s:0> pwd 1 sprint
 `/usr/local/bin'
+s:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:dirforeach}
+\index{\stilop{}{dirforeach}{}}
+\item[{\stilop{path proc}{dirforeach}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that represents a filesystem path.
+		\item[proc: ]
+			An object to be executed.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+		For each entry in the directory represented by \oparg{path},
+		push a string that represents the entry onto ostack and
+		execute \oparg{proc}.
+
+		\stilop{}{dirforeach}{} catches \stilop{}{exit}{}, so that the
+		loop can be cleanly terminated prematurely.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> pwd {1 sprint} dirforeach
+`.'
+`..'
+`CVS'
+`.cvsignore'
+`Cookfile'
+`Cookfile.inc'
+`latex'
+`ps'
+`pdf'
+`html'
+s:0> pwd {`Cookfile.inc' search
+     {pop `Yes: ' print 1 sprint pop exit}
+     {`Not: ' print 1 sprint} ifelse
+} dirforeach
+Not: `.'
+Not: `..'
+Not: `CVS'
+Not: `.cvsignore'
+Not: `Cookfile'
+Yes: `Cookfile.inc'
 s:0>
 		\end{verbatim}
 	\end{description}
