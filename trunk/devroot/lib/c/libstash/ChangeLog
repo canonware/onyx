@@ -1,3 +1,7 @@
+1998-11-23  Jason Evans  <jasone@canonware.com>
+
+	* configure.in (CFLAGS): Added -lsocket -lnsl to LIBS for Solaris.
+
 1998-11-22  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (bufel_set_data_ptr): Added so that a bufel can be

@@ -59,6 +59,17 @@ AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
     LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
 fi
 
+dnl Extra libraries for particular platforms.
+case "${host}" in
+  i386-*-freebsd*)
+        ;;
+  *-*-linux*)
+        ;;
+  *-*-solaris2*)
+	LIBS="$LIBS -lsocket -lnsl"
+        ;;
+esac
+
 dnl Define preprocessor macros.
 
 dnl Check for header files.
