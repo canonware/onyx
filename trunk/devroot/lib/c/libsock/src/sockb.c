@@ -683,6 +683,14 @@ sockb_p_entry_func(void * a_arg)
 	    /* Uncomment this if adding out of band data support. */
 	    /* FD_CLR(sockfd, &fd_m_exception_set); */
 
+	    /* If this sock has a notification mq associated with it, send a
+	     * final message, then deactivate notifications. */
+	    if (NULL != notify_vec[sockfd])
+	    {
+	      sockb_p_notify(notify_vec[sockfd], sockfd);
+	      notify_vec[sockfd] = NULL;
+	    }
+	    
 	    /* Lower max_fd to the next highest fd, if necessary. */
 	    if (sockfd == max_fd)
 	    {
