@@ -76,15 +76,15 @@ systemdict begin
 			pop pop
 			`-array-'
 		} ifelse
-	} bind
+	}
 	/booleantype {
 		pop
 		cvs
-	} bind
+	}
 	/conditiontype {
 		pop pop
 		`-condition-'
-	} bind
+	}
 	/dicttype {
 		% %dict %depth
 		dup 0 gt {
@@ -132,15 +132,15 @@ systemdict begin
 			pop pop
 			`-dict-'
 		} ifelse
-	} bind
+	}
 	/filetype {
 		pop pop
 		`-file-'
-	} bind
+	}
 	/finotype {
 		pop pop
 		`-fino-'
-	} bind
+	}
 	/hooktype {
 		% %hook %depth
 		exch hooktag
@@ -156,30 +156,30 @@ systemdict begin
 			pop pop
 			`-hook-'
 		} ifelse
-	} bind
+	}
 	/integertype {
 		pop
 		cvs
-	} bind
+	}
 	/marktype {
 		pop pop
 		`-mark-'
-	} bind
+	}
 	/mutextype {
 		pop pop
 		`-mutex-'
-	} bind
+	}
 	/nametype {
 		pop
 		dup cvs
 		exch xcheck not {
 			`/' exch catenate
 		} if
-	} bind
+	}
 	/nulltype {
 		pop pop
 		`null'
-	} bind
+	}
 	/operatortype {
 		pop
 		cvs
@@ -187,11 +187,11 @@ systemdict begin
 			`--' dup 3 1 roll
 			catenate catenate
 		} if
-	} bind
+	}
 	/pmarktype {
 		pop pop
 		`-pmark-'
-	} bind
+	}
 	/stacktype {
 		% %stack %depth
 		dup 0 gt {
@@ -231,26 +231,26 @@ systemdict begin
 			pop pop
 			`-stack-'
 		} ifelse
-	} bind
+	}
 	/stringtype {
 		pop
 		cvs
-	} bind
+	}
 	/threadtype {
 		pop pop
 		`-thread-'
-	} bind
+	}
 > def
 
 % <object> <depth> sprints <string>
 /sprints {
 	1 index type sprintsdict exch get eval
-} bind def
+} def
 
 /sprint {
 	sprints print
 	`\n' print flush
-} bind def
+} def
 
 %
 % outputsdict implements formatted output to strings for every type.
@@ -285,7 +285,7 @@ systemdict begin
 		% %str %flags
 		outputsdict /stringtype get eval
 		% %str
-	} bind
+	}
 	% Temporarily define.
 	/_s {
 		% Check for /w flag.  /w takes precedence over /n.
@@ -392,7 +392,7 @@ systemdict begin
 
 		pop
 		% %str
-	} bind def
+	} def
 	/stringtype /_s load
 
 	% Most types can be handled identically.  The following code uses the
@@ -450,20 +450,24 @@ systemdict begin
 %
 % Formatted output to a string.  Supported flags:
 %
-% /w : minimum width
-%    : %integer
+% All types:
 % /n : maximum width
 %    : %integer
+% /w : minimum width
+%    : %integer
 % /j : justification
-%    : /l, /c, /r (left, center, right)
+%    : /l, /c, /r
 % /p : padding character
 %    : `?'
+% /r : recursion depth
+%    : 0..n
+%
+% Integers only:
+%
 % /b : base
 %    : 2..36
 % /s : sign
 %    : /+ /-
-% /r : recursion depth
-%    : 0..n
 %
 % %obj %flags outputs %string
 /outputs {
@@ -473,12 +477,12 @@ systemdict begin
 	1 index type
 	% %obj %flags %type
 	outputsdict exch get eval
-} bind def
+} def
 
 %obj %flags output -
 /output {
 	outputs print
-} bind def
+} def
 
 % - product <string>
 /product `Canonware Onyx' def
@@ -488,7 +492,7 @@ systemdict begin
 		1 sprint
 	} foreach
 	flush
-} bind def
+} def
 
 %
 % <string> <pattern> search <post> <pattern> <pre> true
@@ -574,7 +578,7 @@ systemdict begin
 		% Substring is too long.
 		pop false
 	} ifelse
-} bind def
+} def
 
 % [`<path>' `<args>'...] system <exit_code>
 /system {
@@ -587,7 +591,7 @@ systemdict begin
 	}{
 		exch pop waitpid
 	} ifelse
-} bind def
+} def
 
 % /errorname throw -
 /throw {
@@ -658,7 +662,7 @@ systemdict begin
 
 	% Stop.
 	/errordict load /stop get eval
-} bind def
+} def
 
 % - version <string>
 /version `<Version>' def

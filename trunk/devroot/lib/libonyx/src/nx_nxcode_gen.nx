@@ -47,7 +47,7 @@ stdin cvx eval
 1000 1 index type /sprintsdict load exch get eval print
 
 % Output the footer.
-` eval");
+`bind eval");
 	nxo_thread_exit(&thread);
 }
 ' print
