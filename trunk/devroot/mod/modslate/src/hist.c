@@ -972,7 +972,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	    tag_equiv = HISTH_TAG_NONE;
 	}
     }
-    
+
     /* Update the data count if extending an existing record.  Otherwise, create
      * a new empty record. */
     if (mkr_pos(&a_hist->hend) > 1 && tag_equiv == a_tag)
@@ -1838,7 +1838,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     histh_p_dump(&a_hist->hhead, pbeg, pmid, NULL);
     free(pbeg);
     free(pmid);
-    
+
     /* hfoot. */
     fprintf(stderr, "%s|\n", mid);
     asprintf(&pbeg, "%s|-> hfoot: ", mid);

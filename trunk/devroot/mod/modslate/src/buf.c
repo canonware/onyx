@@ -1061,7 +1061,6 @@ bufp_p_ppos2pline(cw_bufp_t *a_bufp, cw_uint32_t a_ppos)
 		    pline--;
 		}
 	    }
-	    
 	}
     }
 
@@ -1106,7 +1105,7 @@ bufp_p_dump(cw_bufp_t *a_bufp, const char *a_beg, const char *a_mid,
 	fprintf(stderr, "%s|-> line: %llu (%llu)\n", mid, a_bufp->line,
 		bufp_p_line(a_bufp));
     }
-    
+
     fprintf(stderr, "%s|\n", mid);
     fprintf(stderr, "%s|-> len: %u\n", mid, a_bufp->len);
     fprintf(stderr, "%s|-> nlines: %u\n", mid, a_bufp->nlines);
@@ -1244,7 +1243,7 @@ bufp_p_validate(cw_bufp_t *a_bufp)
 	    tmkr = NULL;
 	}
 	cw_assert(ql_next(&a_bufp->mlist, mkr, mlink) == tmkr);
-	
+
 	/* Validate increasing order. */
 	if (tmkr != NULL)
 	{
@@ -1333,7 +1332,7 @@ buf_p_bpos_lf_comp(cw_bufp_t *a_key, cw_bufp_t *a_bufp)
 /* Return the bpos just before a line feed ('\n'), as well as the bufp that
  * contains it.  Line feeds are numbered as such:
  *
- * line:  1111 2222 3333 4 555 
+ * line:  1111 2222 3333 4 555
  * data:  abc\ndef\nghi\n\njkl
  * lf #:     1    2    3 4    5
  *
@@ -2276,7 +2275,7 @@ buf_validate(cw_buf_t *a_buf)
 		cw_assert(bufp->bpos + bufp->len == tbufp->bpos);
 		cw_assert(bufp->line + bufp->nlines == tbufp->line);
 	    }
-	    else if (bufp->bob_relative == FALSE 
+	    else if (bufp->bob_relative == FALSE
 		     && tbufp->bob_relative == FALSE)
 	    {
 		cw_assert(bufp->bpos - bufp->len == tbufp->bpos);
@@ -2562,7 +2561,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 	{
 	    mkr->ppos -= (bufp_size - bufp->len) + a_count;
 	    mkr->pline -= nlines;
-	}	
+	}
     }
 
     return nlines;
@@ -2690,7 +2689,7 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
     buf = bufp->buf;
     bufp_size = buf->bufp_size;
     cw_assert(buf->bufp_cur == bufp);
-    
+
     /* The data won't fit in this bufp, but enough data can be slid to the next
      * bufp to make room. */
 
@@ -2806,7 +2805,7 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     /* Create nextp and insert it just after bufp. */
     nextp = bufp_p_new(buf);
     nextp->bob_relative = TRUE;
-    
+
     nextp->bpos = bufp->bpos; /* Not actual bpos, but needed for insertion. */
     nextp->line = bufp->line; /* Not actual line. */
     buf_p_bufp_insert(buf, nextp);
@@ -3237,7 +3236,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	cw_uint32_t bufvcnt;
 
 	mkr_range_get(start, end, &bufvcnt);
-	
+
 	if (start == a_start)
 	{
 	    hist_del(buf->hist, buf, start_bpos, buf->bufv, bufvcnt);
@@ -4276,7 +4275,7 @@ mkr_dump(cw_mkr_t *a_mkr, const char *a_beg, const char *a_mid,
 
     fprintf(stderr, "%s|\n", mid);
     fprintf(stderr, "%s|-> bufp: %p\n", mid, a_mkr->bufp);
-    
+
     fprintf(stderr, "%s|\n", mid);
     fprintf(stderr, "%s|-> order: %s\n", mid,
 	    (a_mkr->order == MKRO_BEFORE) ? "MKRO_BEFORE" :
