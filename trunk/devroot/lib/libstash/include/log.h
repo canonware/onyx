@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 108 $
- * Last modified: $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
+ * Current revision: $Revision: 111 $
+ * Last modified: $Date: 1998-06-30 15:55:50 -0700 (Tue, 30 Jun 1998) $
  *
  * Description: 
  *              
@@ -30,6 +30,7 @@ typedef struct cw_log_s cw_log_t;
 #define log_eprintf _CW_NS_CMN(log_eprintf)
 #define log_lprintf _CW_NS_CMN(log_eprintf)
 #define log_leprintf _CW_NS_CMN(log_leprintf)
+#define log_print_uint64 _CW_NS_CMN(log_print_uint64)
 
 cw_log_t * log_new();
 void log_delete(cw_log_t * a_log_o);
@@ -53,6 +54,7 @@ int log_leprintf(cw_log_t * a_log_o,
 		 char * a_func_name, /* Optional, pass NULL if not used. */
 		 char * a_format, 
 		 ...);
+char * log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
 
 /* 
  * My version of assert().  It's a bit prettier and cleaner, but the same idea.

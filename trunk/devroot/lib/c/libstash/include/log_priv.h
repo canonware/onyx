@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 111 $
+ * $Date: 1998-06-30 15:55:50 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -26,5 +26,9 @@ struct cw_log_s
   char * logfile_name;
   FILE * log_fp;
 };
+
+#define log_p_uint64_base10_add _CW_NS_CMN(log_p_uint64_base10_add)
+
+void log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b);
 
 #endif /* _LOG_PRIV_H_ */

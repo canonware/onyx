@@ -7,12 +7,12 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 104 $
- * $Date: 1998-06-29 21:48:56 -0700 (Mon, 29 Jun 1998) $
+ * $Revision: 111 $
+ * $Date: 1998-06-30 15:55:50 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
- *
+ * Logging facility.
  *
  ****************************************************************************/
 
@@ -324,4 +324,137 @@ log_leprintf(cw_log_t * a_log_o,
 
   mtx_unlock(&a_log_o->lock);
   return retval;
+}
+
+/****************************************************************************
+ * <<< Arguments >>>
+ *
+ * a_val : Value to convert to a string.
+ * a_base : Number base to convert to.
+ * a_buf : A string buffer of at least 65 bytes (for base 2 conversion).
+ *
+ * <<< Description >>>
+ *
+ * Converts a_val to a number string in base a_base and puts the result
+ * into *a_buf.
+ *
+ ****************************************************************************/
+char *
+log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf)
+{
+  char * retval;
+  
+  _cw_check_ptr(a_buf);
+
+  retval = a_buf;
+  
+  if (a_base == 16)
+  {
+    cw_uint32_t i;
+    cw_uint32_t digit;
+    
+    for (i = 0; i < 16; i++)
+    {
+      digit = ((a_val >> (60 - (4 * i))) & (cw_uint64_t) 0x0000000f);
+
+      if ((digit >= 0) && (digit <= 9))
+      {
+	a_buf[i] = '0' + digit;
+      }
+      else
+      {
+	a_buf[i] = 'a' + (digit - 10);
+      }
+    }
+    a_buf[16] = '\0';
+  }
+  else if (a_base == 10)
+  {
+    char zero[21] = "00000000000000000000",
+      curr_add[21]= "00000000000000000001",
+      result[21] = "00000000000000000000",
+      temp[21] = "00000000000000000000";
+    
+    cw_uint32_t i;
+
+    for (i = 0; i < 64; i++)
+    {
+      if ((a_val >> i) & 0x00000001)
+      {
+	/* Copy the result for use in the next call. */
+	log_p_uint64_base10_add(temp, result, zero);
+
+	/* Add this digit into the result. */
+	log_p_uint64_base10_add(result, temp, curr_add);
+      }
+      /* Copy curr_add for use in the next call. */
+      log_p_uint64_base10_add(temp, curr_add, zero);
+
+      /* Double curr_add. */
+      log_p_uint64_base10_add(curr_add, temp, temp);
+    }
+    
+    /* Find the first non-zero digit. */
+    for (i = 0; i < 20; i++)
+    {
+      if (result[i] != '0')
+      {
+	break;
+      }
+    }
+    strcpy(a_buf, result + i);
+  }
+  else if (a_base == 2)
+  {
+    cw_uint32_t i;
+    cw_uint8_t digit;
+    
+    for (i = 0; i < 64; i++)
+    {
+      digit = ((a_val >> (63 - i)) & 0x00000001);
+
+      if (digit == 0)
+      {
+	a_buf[i] = '0';
+      }
+      else
+      {
+	a_buf[i] = '1';
+      }
+    }
+    a_buf[64] = '\0';
+  }
+/*   else if (a_base == 8) */
+/*   { */
+/*   } */
+  else
+  {
+    /* Unsupported base. */
+    _cw_error("Unsupported base in log_print_uint64()");
+    retval = NULL;
+  }
+  
+  return retval;
+}
+
+void
+log_p_uint64_base10_add(char * a_result, char * a_a, char * a_b)
+{
+  cw_sint32_t i;
+  cw_uint8_t digit, carry;
+
+  for (i = 19, carry = 0; i >= 0; i--)
+  {
+    digit = (a_a[i] - '0') + (a_b[i] - '0') + carry;
+    if (digit > 9)
+    {
+      digit -= 10;
+      carry = 1;
+    }
+    else
+    {
+      carry = 0;
+    }
+    a_result[i] = digit + '0';
+  }
 }
