@@ -2843,22 +2843,34 @@ done
 
 fi
 
+if test "x$build_libonyx" = "xyes" ; then
+  if test "x$prefix" = "xNONE" ; then
+    _CW_LIBONYX_LOAD_PATH="/usr/local/share/canonware/onyx/modules"
+  else
+    _CW_LIBONYX_LOAD_PATH="$prefix/share/canonware/onyx/modules"
+  fi
+  cat >> confdefs.h <<EOF
+#define _CW_LIBONYX_LOAD_PATH "$_CW_LIBONYX_LOAD_PATH"
+EOF
+
+fi
+
 if test "x$build_proxy" = "xyes" ; then
   for ac_hdr in netinet/ip_nat.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:2852: checking for $ac_hdr" >&5
+echo "configure:2864: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 2857 "configure"
+#line 2869 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:2862: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:2874: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*

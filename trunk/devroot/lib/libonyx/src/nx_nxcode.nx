@@ -34,6 +34,20 @@ systemdict begin
 	`\n' print flush
 } def
 
+% Storage for autoloaded dictionaries.
+/autodict <> def
+
+% /name autounload -
+/autounload {
+	% Make sure the argument is a name.
+	dup type /nametype ne {
+		/typecheck throw
+	} if
+
+	% Undefine /name in autodict
+	/autodict load exch undef
+} def
+
 % - product <string>
 /product `Canonware onyx' def
 
@@ -52,11 +66,11 @@ systemdict begin
 	% Make sure the arguments are strings.
 	% Pattern.
 	dup type /stringtype ne {
-		errordict begin typecheck end
+		/typecheck throw
 	} if
 	% String.
 	1 index type /stringtype ne {
-		errordict begin typecheck end
+		/typecheck throw
 	} if
 
 	% Make sure substring isn't longer than string.

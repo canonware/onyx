@@ -8,3 +8,8 @@
  * Version: <Version>
  *
  ******************************************************************************/
+
+/*
+ * Default module path for the autoload operator.
+ */
+#undef _CW_LIBONYX_LOAD_PATH

@@ -15,6 +15,7 @@ void	systemdict_aload(cw_nxo_t *a_thread);
 void	systemdict_and(cw_nxo_t *a_thread);
 void	systemdict_array(cw_nxo_t *a_thread);
 void	systemdict_astore(cw_nxo_t *a_thread);
+void	systemdict_autoload(cw_nxo_t *a_thread);
 void	systemdict_begin(cw_nxo_t *a_thread);
 void	systemdict_bind(cw_nxo_t *a_thread);
 void	systemdict_broadcast(cw_nxo_t *a_thread);

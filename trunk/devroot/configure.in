@@ -185,6 +185,15 @@ if test "x$build_libsock" = "xyes" ; then
   AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
 fi
 
+if test "x$build_libonyx" = "xyes" ; then
+  if test "x$prefix" = "xNONE" ; then
+    _CW_LIBONYX_LOAD_PATH="/usr/local/share/canonware/onyx/modules"
+  else
+    _CW_LIBONYX_LOAD_PATH="$prefix/share/canonware/onyx/modules"
+  fi
+  AC_DEFINE_UNQUOTED(_CW_LIBONYX_LOAD_PATH, "$_CW_LIBONYX_LOAD_PATH")
+fi
+
 if test "x$build_proxy" = "xyes" ; then
   AC_CHECK_HEADERS(netinet/ip_nat.h, AC_DEFINE(_CW_IPFILTER))
 fi
