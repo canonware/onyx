@@ -219,17 +219,13 @@ stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	 *                             |          |
 	 *                             \----------/
 	 *
-	 * 1) Break the stack at bottom.
+	 * 1) Link qs_top(&a_stils->spares) under bottom.
 	 *
-	 * 2) Push qs_top(&a_stils->spares) under bottom.
+	 * 2) Move qs_top(&a_stils->stack) to qs_top(&a_stils->spares).
 	 *
-	 * 3) Move qs_top(&a_stils->stack) to qs_top(&a_stils->spares).
-	 *
-	 * 4) Set qs_top(&a_stils->stack) to top.
+	 * 3) Set qs_top(&a_stils->stack) to top.
 	 */
-	qs_down(bottom, link) = NULL;
-	if (qs_top(&a_stils->spares) != NULL)
-		qs_under_push(bottom, qs_top(&a_stils->spares), link);
+	qs_down(bottom, link) = qs_top(&a_stils->spares);
 	qs_top(&a_stils->spares) = qs_top(&a_stils->stack);
 	qs_top(&a_stils->stack) = top;
 	
@@ -291,20 +287,20 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	/*
 	 * We now have:
 	 *
-	 * qs_top(&a_stils->stack) --> /----------\
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                  bottom --> \----------/
-	 *                     top --> /----------\
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                  stilso --> \----------/
+	 * qs_top(&a_stils->stack) --> /----------\ \  \
+	 *                             |          | |  |
+	 *                             |          | |   \
+	 *                             |          | |   / a_amount
+	 *                             |          | |  |
+	 *                             |          | |  /
+	 *                  bottom --> \----------/  \
+	 *                     top --> /----------\  / a_count
+	 *                             |          | |
+	 *                             |          | |
+	 *                             |          | |
+	 *                             |          | |
+	 *                             |          | |
+	 *                  stilso --> \----------/ /
 	 *                  noroll --> /----------\
 	 *                             |          |
 	 *                             |          |
@@ -313,19 +309,14 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 *                             |          |
 	 *                             \----------/
 	 *
-	 * 1) Break the stack at bottom and stilso.
+	 * 1) Link qs_top(&a_stils->stack) under stilso.
 	 *
-	 * 2) Push qs_top(&a_stils->stack) under stilso.
+	 * 2) Link noroll under bottom.
 	 *
-	 * 3) Push noroll under bottom.
-	 *
-	 * 4) Set a_stils->stack to top.
+	 * 3) Set a_stils->stack to top.
 	 */
-	qs_down(bottom, link) = NULL;
-	qs_down(stilso, link) = NULL;
-	qs_under_push(stilso, qs_top(&a_stils->stack), link);
-	if (noroll != NULL)
-		qs_under_push(bottom, noroll, link);
+	qs_down(stilso, link) = qs_top(&a_stils->stack);
+	qs_down(bottom, link) = noroll;
 	qs_top(&a_stils->stack) = top;
 
 	RETURN:
