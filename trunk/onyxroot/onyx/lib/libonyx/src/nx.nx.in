@@ -1000,7 +1000,7 @@ dup <
 
 	dup data <
 	    $modules dict
-	> copy pop
+	> exch copy pop
     }
 
     #class :singleton #instance
@@ -1026,7 +1026,7 @@ dup <
     $load {
 	dup data $modules get
 	#modname #instance #modules
-	2 idup known {
+	dup 3 idup known {
 	    # Already loaded.
 	    nip exch get
 	}{
@@ -1043,7 +1043,7 @@ dup <
     #
     #modname #instance :unload_notify -
     $unload_notify {
-	data exch get pop
+	data $modules get exch get pop
     }
 
     #instance :modules #<modules>
@@ -1072,8 +1072,10 @@ dup <
 	    $mclass_singleton 6 idup
 	    $defs dict
 	    $deps dict
+	    $pre_unload_hook null cvx
+	    $post_unload_hook null cvx
 	    $version 0
-	> copy pop
+	> exch copy pop
 
 	# Define $mclass_singleton as instance data before loading the module,
 	# so that it is available to the module initialization code.
@@ -1085,15 +1087,12 @@ dup <
 	#modname #mclass_singleton #instance
 
 	# Load the module.
-	`modX/modX.nx' `X' 4 idup <$g true> subst pop
+	`modX/modX.nx' `X' 4 idup cvx cvs <$g true> subst pop
 	#modname #mclass_singleton #instance `mod#modname/#modname.nx'
 	require
 	#modname #mclass_singleton #instance
 
-	# Notify #mclass_singleton of this registration.
-	dup 4 nup
-	#instance #modname #mclass_singleton #instance
-	exch :load_notify
+	nip nip
 	#instance
     }
 
@@ -1155,10 +1154,27 @@ dup <
 	pop
     }
 
+    # Store a reference to #hook, and evaluate it at the beginning of :unload.
+    #
+    #hook #instance :pre_unload_hook_set -
+    $pre_unload_hook_set {
+	data $pre_unload_hook dn put
+    }
+
+    # Store a reference to #hook, and evaluate it at the end of :unload.
+    #
+    #hook #instance :post_unload_hook_set -
+    $post_unload_hook_set {
+	data $post_unload_hook dn put
+    }
+
     # Unload the module.
     #
     #instance :unload -
     $unload {
+	# Evaluate the pre-unload hook.
+	dup data $pre_unload_hook get eval
+
 	# Iteratively undefine the modules definitions, as recorded in the defs
 	# dict.
 	dup data $defs get {
@@ -1167,6 +1183,9 @@ dup <
 	    undef
 	} foreach
 	#instance
+
+	# Evaluate the post-unload hook.
+	dup data $post_unload_hook get eval
 
 	# Notify mclass_singleton of the unload.
 	data
