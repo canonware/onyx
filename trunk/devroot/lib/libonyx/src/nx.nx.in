@@ -1190,7 +1190,9 @@ dup <
 	,mclass_singleton
 	#depname #mclass_singleton
 	under :load
-	#depname #depmod#XXX
+	#depname
+	dup cvx eval
+	#depname #depmod
 	this data up put
     }
 
