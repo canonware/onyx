@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 27 $
- * $Date: 1998-04-12 23:19:36 -0700 (Sun, 12 Apr 1998) $
+ * $Revision: 28 $
+ * $Date: 1998-04-13 01:22:55 -0700 (Mon, 13 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -86,24 +86,26 @@ thd_new(cw_thd_t * arg_thd_obj,
 void
 thd_delete(cw_thd_t * arg_thd_obj)
 {
-  int exit_val = 0;
-
   _cw_check_ptr(arg_thd_obj);
 
-  /* Check to make sure we're exiting ourself, not another thread. */
-  if (!pthread_equal(pthread_self(), arg_thd_obj->thread))
-  {
-    log_printf(g_log_obj, __FILE__, __LINE__, "thd_delete",
-	       "Tried to exit another thread\n");
-    abort();
-  }
+  pthread_detach(arg_thd_obj->thread);
 
   if (arg_thd_obj->is_malloced == TRUE)
   {
     _cw_free(arg_thd_obj);
   }
+}
+
+void *
+thd_join(cw_thd_t * arg_thd_obj)
+{
+  void * retval;
   
-  pthread_exit(&exit_val);
+  _cw_check_ptr(arg_thd_obj);
+
+  pthread_join(arg_thd_obj->thread, &retval);
+
+  return retval;
 }
 
 cw_mtx_t *

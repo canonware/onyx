@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 26 $
- * Last modified: $Date: 1998-04-12 04:09:42 -0700 (Sun, 12 Apr 1998) $
+ * Current revision: $Revision: 28 $
+ * Last modified: $Date: 1998-04-13 01:22:55 -0700 (Mon, 13 Apr 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -53,6 +53,13 @@
 /*
  * Always include these once per run.
  */
+
+#if (defined(_INC_THREAD_H_) || defined(_INC_ALL_))
+#  ifndef _THREAD_H_
+#    include <thread.h>
+#    define _THREAD_H_
+#  endif
+#endif
 
 #ifndef _DBG_H_
 #  include <dbg.h>
@@ -77,6 +84,13 @@
 /* 
  * Other project headers we don't always want to include.
  */
+
+#if (defined(_INC_THREAD_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _THREAD_PRIV_H_
+#    include <thread_priv.h>
+#    define _THREAD_PRIV_H_
+#  endif
+#endif
 
 #if (defined(_INC_GLOB_H_) || defined(_INC_ALL_))
 #  ifndef _GLOB_H_
@@ -131,20 +145,6 @@
 #  ifndef _MEM_PRIV_H_
 #    include <mem_priv.h>
 #    define _MEM_PRIV_H_
-#  endif
-#endif
-
-#if (defined(_INC_THREAD_H_) || defined(_INC_ALL_))
-#  ifndef _THREAD_H_
-#    include <thread.h>
-#    define _THREAD_H_
-#  endif
-#endif
-
-#if (defined(_INC_THREAD_PRIV_H_) || defined(_INC_ALL_))
-#  ifndef _THREAD_PRIV_H_
-#    include <thread_priv.h>
-#    define _THREAD_PRIV_H_
 #  endif
 #endif
 

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 27 $
- * $Date: 1998-04-12 23:19:36 -0700 (Sun, 12 Apr 1998) $
+ * $Revision: 28 $
+ * $Date: 1998-04-13 01:22:55 -0700 (Mon, 13 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -40,6 +40,11 @@
 
 #ifndef _THREAD_H_
 #define _THREAD_H_
+
+#ifndef _PTHREAD_H_
+#  include <pthread.h>
+#  define _PTHREAD_H_
+#endif
 
 /*
  * Opaque types.
@@ -104,6 +109,7 @@ struct cw_tsd_s
  */
 #define thd_new _CW_NS_CMN(thd_new)
 #define thd_delete _CW_NS_CMN(thd_delete)
+#define thd_join _CW_NS_CMN(thd_join)
 
 #define mtx_new _CW_NS_CMN(mtx_new)
 #define mtx_delete _CW_NS_CMN(mtx_delete)
@@ -143,6 +149,7 @@ struct cw_tsd_s
 cw_thd_t * thd_new(cw_thd_t * arg_thd_obj, void * (*arg_start_func)(void *),
 		   void * arg_arg);
 void thd_delete(cw_thd_t * arg_thd_obj);
+void * thd_join(cw_thd_t * arg_thd_obj);
 
 cw_mtx_t * mtx_new(cw_mtx_t * arg_mtx_obj);
 void mtx_delete(cw_mtx_t * arg_mtx_obj);
