@@ -28,7 +28,7 @@ extern  "C" {
 /*
  * Maximum depth of estack.
  */
-#define	_CW_LIBONYX_ESTACK_MAX		  128
+#define	_CW_LIBONYX_ESTACK_MAX		  256
 
 /*
  * Default file buffer size.
