@@ -500,6 +500,7 @@ nxo_p_dict_hash(const void *a_key)
 		break;
 	case NXOT_MARK:
 	case NXOT_NULL:
+	case NXOT_PMARK:
 		retval = UINT_MAX;
 		break;
 	default:

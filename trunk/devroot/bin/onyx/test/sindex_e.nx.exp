@@ -1,4 +1,7 @@
-Error /typecheck in --sindex--
-ostack: (-mark- 1 --sindex--)
-estack: (--start-- -file- --sindex--)
-dstack: (-dict- -dict- -dict-)
+Error /typecheck
+ostack: (-mark- 1)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--sindex--
+1:	-file-
+2:	--start--

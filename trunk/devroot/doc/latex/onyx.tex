@@ -77,7 +77,7 @@ mark	& file		\\
 name	& hook		\\
 null	& mutex		\\
 operator & stack	\\
-        & string	\\
+pmark	& string	\\
 	& thread	\\
 \hline
 \end{tabular}
@@ -155,6 +155,11 @@ for equality.  Names are typically used as keys in dictionaries.
 
 \item[operator: ] An operator is an operation that is built in to the
 interpreter.
+
+\item[pmark: ] A pmark is used as a stack marker when creating procedures in
+deferred execution mode (i.e. procedures that use the \{\} syntax).  The
+application will only encounter pmarks in error conditions, and there is never a
+reason for an application to explicitly create a pmark.
 
 \item[stack: ] Stacks are the basis for onyx.  An application can create, then
 manipulate stacks in much the same way that the operand stack can be
@@ -315,7 +320,7 @@ Stacks in onyx are the core data structure that programs act on.  Stacks store
 objects in a last in, first out (LIFO) fashion.  Onyx includes a number of
 operators that manipulate stacks.
 
-Each onyx thread has three program-visible stacks associated with it:
+Each onyx thread has four program-visible stacks associated with it:
 \begin{description}
 \item[Operand stack: ] Most direct object manipulations are done using the
 	operand stack.  Operators use the operand stack for inputs and outputs,
@@ -328,12 +333,20 @@ Each onyx thread has three program-visible stacks associated with it:
 	\item{userdict}
 	\item{globaldict}
 	\item{systemdict}
+	\item{threaddict}
 	\end{itemize}
 	These dictionaries are discussed in detail later.
 \item[Execution stack: ] The interpreter uses the execution stack to store
 	objects that are being executed.  The application generally does not
 	need to explicitly manipulate the execution stack, but its contents are
 	accessible, mainly for debugging purposes.
+\item[Index stack: ] The interpreter uses the index stack to store execution
+	offsets for arrays that are being executed.  There is a one to one
+	correspondence of the elements of the execution stack to the elements
+	of the index stack, even though the elements of the index stack that
+	don't correspond to arrays have no meaning.  The index stack does not
+	affect execution, and exists purely to allow useful execution stack
+	traces when errors occur.
 \end{description}
 
 The application can also create additional stacks and manipulate them in much
@@ -361,11 +374,9 @@ The error handling mechanisms in onyx are simple but flexible.  When an error
 occurs, the following operations are performed:
 \begin{enumerate}
 \item{Find an error handler in errordict corresponding to the current error.}
-\item{Unless the error is an interrupt or a timeout, push the object whose
-execution caused the error onto the operand stack.}
+\item{Push the object whose execution caused the error onto the operand stack.}
 \item{Execute the error handler.}
-\item{Unless the error is an interrupt or a timeout, execute errordict's stop
-operator.}
+\item{Execute errordict's stop operator.}
 \end{enumerate}
 
 \section{Threads}
@@ -508,37 +519,16 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline
 & {\bf \htmlref{errorname}{currenterror:errorname}} & & \\
 \hline
-& {\bf \htmlref{command}{currenterror:command}} & & \\
-\hline
 & {\bf \htmlref{ostack}{currenterror:ostack}} & & \\
+\hline
+& {\bf \htmlref{dstack}{currenterror:dstack}} & & \\
 \hline
 & {\bf \htmlref{estack}{currenterror:estack}} & & \\
 \hline
-& {\bf \htmlref{dstack}{currenterror:dstack}} & & \\
+& {\bf \htmlref{istack}{currenterror:istack}} & & \\
 \end{longtable}
 
 \begin{description}
-\label{currenterror:command}
-\index{command@\onyxop{}{command}{}}
-\item[{\onyxop{--}{command}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{currenterror:dstack}
 \index{dstack@\onyxop{}{dstack}{}}
 \item[{\onyxop{--}{dstack}{--}}: ]
@@ -584,6 +574,27 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \label{currenterror:estack}
 \index{estack@\onyxop{}{estack}{}}
 \item[{\onyxop{--}{estack}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{currenterror:istack}
+\index{istack@\onyxop{}{istack}{}}
+\item[{\onyxop{--}{istack}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -717,8 +728,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline
 & {\bf \htmlref{handleerror}{errordict:handleerror}} & & \\
 \hline
-& {\bf \htmlref{interrupt}{errordict:interrupt}} & & \\
-\hline
 & {\bf \htmlref{invalidaccess}{errordict:invalidaccess}} & & \\
 \hline
 & {\bf \htmlref{invalidcontext}{errordict:invalidcontext}} & & \\
@@ -736,8 +745,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 & {\bf \htmlref{stackunderflow}{errordict:stackunderflow}} & & \\
 \hline
 & {\bf \htmlref{syntaxerror}{errordict:syntaxerror}} & & \\
-\hline
-& {\bf \htmlref{timeout}{errordict:timeout}} & & \\
 \hline
 & {\bf \htmlref{typecheck}{errordict:typecheck}} & & \\
 \hline
@@ -803,28 +810,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \label{errordict:handleerror}
 \index{handleerror@\onyxop{}{handleerror}{}}
 \item[{\onyxop{--}{handleerror}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{interrupt}
-\label{errordict:interrupt}
-\index{interrupt@\onyxop{}{interrupt}{}}
-\item[{\onyxop{--}{interrupt}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -1062,28 +1047,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 
 		\end{verbatim}
 	\end{description}
-\label{timeout}
-\label{errordict:timeout}
-\index{timeout@\onyxop{}{timeout}{}}
-\item[{\onyxop{--}{timeout}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{typecheck}
 \label{errordict:typecheck}
 \index{typecheck@\onyxop{}{typecheck}{}}
@@ -1291,6 +1254,282 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline
 & {\bf \htmlref{sum}{gcdict:sum}} & & \\
 \end{longtable}
+
+\begin{description}
+\label{gcdict:active}
+\index{active@\onyxop{}{active}{}}
+\item[{\onyxop{--}{active}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:collect}
+\index{collect@\onyxop{}{collect}{}}
+\item[{\onyxop{--}{collect}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:collections}
+\index{collections@\onyxop{}{collections}{}}
+\item[{\onyxop{--}{collections}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:current}
+\index{current@\onyxop{}{current}{}}
+\item[{\onyxop{--}{current}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:dump}
+\index{dump@\onyxop{}{dump}{}}
+\item[{\onyxop{--}{dump}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:maximum}
+\index{maximum@\onyxop{}{maximum}{}}
+\item[{\onyxop{--}{maximum}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:new}
+\index{new@\onyxop{}{new}{}}
+\item[{\onyxop{--}{new}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:period}
+\index{period@\onyxop{}{period}{}}
+\item[{\onyxop{--}{period}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:setactive}
+\index{setactive@\onyxop{}{setactive}{}}
+\item[{\onyxop{--}{setactive}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:setperiod}
+\index{setperiod@\onyxop{}{setperiod}{}}
+\item[{\onyxop{--}{setperiod}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:setthreshold}
+\index{setthreshold@\onyxop{}{setthreshold}{}}
+\item[{\onyxop{--}{setthreshold}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:sum}
+\index{sum@\onyxop{}{sum}{}}
+\item[{\onyxop{--}{sum}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{gcdict:threshold}
+\index{threshold@\onyxop{}{threshold}{}}
+\item[{\onyxop{--}{threshold}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\end{description}
 
 \subsection{globaldict}
 \label{sec:globaldict}
@@ -1762,6 +2001,8 @@ nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 \hline
 & {\bf \htmlref{estack}{systemdict:estack}} & & \\
 \hline
+& {\bf \htmlref{istack}{systemdict:istack}} & & \\
+\hline
 & {\bf \htmlref{eval}{systemdict:eval}} & & \\
 \hline
 & {\bf \htmlref{countestack}{systemdict:countestack}} & & \\
@@ -1872,10 +2113,6 @@ objecs from stack down through topmost mark. \\
 & {\bf \htmlref{gcdict}{systemdict:gcdict}} & & \\
 \hline
 & {\bf \htmlref{globaldict}{systemdict:globaldict}} & & \\
-\hline
-& {\bf \htmlref{userdict}{systemdict:userdict}} & & \\
-\hline
-& {\bf \htmlref{errordict}{systemdict:errordict}} & & \\
 \hline
 & {\bf \htmlref{where}{systemdict:where}} & & \\
 \hline
@@ -2824,27 +3061,6 @@ onyx:5>
 
 		\end{verbatim}
 	\end{description}
-\label{systemdict:currenterror}
-\index{currenterror@\onyxop{}{currenterror}{}}
-\item[{\onyxop{--}{currenterror}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:currentfile}
 \index{currentfile@\onyxop{}{currentfile}{}}
 \item[{\onyxop{--}{currentfile}{--}}: ]
@@ -3224,27 +3440,6 @@ onyx:2>
 \label{systemdict:eq}
 \index{eq@\onyxop{}{eq}{}}
 \item[{\onyxop{--}{eq}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{systemdict:errordict}
-\index{errordict@\onyxop{}{errordict}{}}
-\item[{\onyxop{--}{errordict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -3714,6 +3909,27 @@ onyx:0> 3 2 1 0 2 index pstack
 2
 3
 onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:istack}
+\index{istack@\onyxop{}{istack}{}}
+\item[{\onyxop{--}{istack}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:join}
@@ -5565,27 +5781,6 @@ onyx:1> pstack
 
 		\end{verbatim}
 	\end{description}
-\label{systemdict:userdict}
-\index{userdict@\onyxop{}{userdict}{}}
-\item[{\onyxop{--}{userdict}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:wait}
 \index{wait@\onyxop{}{wait}{}}
 \item[{\onyxop{--}{wait}{--}}: ]
@@ -5715,6 +5910,125 @@ onyx:1> pstack
 \label{systemdict:yield}
 \index{yield@\onyxop{}{yield}{}}
 \item[{\onyxop{--}{yield}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\end{description}
+
+\subsection{threaddict}
+\label{sec:threaddict}
+
+Each thread has its own threaddict, which is not shared with any other threads.
+threaddict is meant to be used for thread-specific definitions that would
+otherwise go in systemdict.
+
+\begin{longtable}{|r|l|l|p{3in}|}
+\caption[threaddict summary]{threaddict summary}
+\\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+& {\bf \htmlref{threaddict}{threaddict:threaddict}} & & \\
+\hline
+& {\bf \htmlref{userdict}{threaddict:userdict}} & & \\
+\hline
+& {\bf \htmlref{currenterror}{threaddict:currenterror}} & & \\
+\hline
+& {\bf \htmlref{errordict}{threaddict:errordict}} & & \\
+\end{longtable}
+
+\begin{description}
+\label{threaddict:currenterror}
+\index{currenterror@\onyxop{}{currenterror}{}}
+\item[{\onyxop{--}{currenterror}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{threaddict:errordict}
+\index{errordict@\onyxop{}{errordict}{}}
+\item[{\onyxop{--}{errordict}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{threaddict:threaddict}
+\index{threaddict@\onyxop{}{threaddict}{}}
+\item[{\onyxop{--}{threaddict}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{threaddict:userdict}
+\index{userdict@\onyxop{}{userdict}{}}
+\item[{\onyxop{--}{userdict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]

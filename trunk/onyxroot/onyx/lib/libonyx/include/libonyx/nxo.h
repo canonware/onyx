@@ -22,7 +22,6 @@ typedef enum {
 	NXO_THREADE_NONE,		/* No error. */
 	NXO_THREADE_DSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
 	NXO_THREADE_ESTACKOVERFLOW,	/* estack too deep. */
-	NXO_THREADE_INTERRUPT,		/* Interrupt. */
 	NXO_THREADE_INVALIDACCESS,	/* Permission error. */
 	NXO_THREADE_INVALIDCONTEXT,	/* Bad thread context. */
 	NXO_THREADE_INVALIDEXIT,	/* exit operator called outside loop. */
@@ -32,7 +31,6 @@ typedef enum {
 	NXO_THREADE_RANGECHECK,		/* Out of bounds string or array use. */
 	NXO_THREADE_STACKUNDERFLOW,	/* Not enough objects on ostack. */
 	NXO_THREADE_SYNTAXERROR,	/* Scanner syntax error. */
-	NXO_THREADE_TIMEOUT,		/* Timeout. */
 	NXO_THREADE_TYPECHECK,		/* Incorrect argument type. */
 	NXO_THREADE_UNDEFINED,		/* Object not found in dstack. */
 	NXO_THREADE_UNDEFINEDFILENAME,	/* Bad filename. */
@@ -58,6 +56,7 @@ typedef enum {
 	NXOT_NAME,
 	NXOT_NULL,
 	NXOT_OPERATOR,
+	NXOT_PMARK,
 	NXOT_STACK,
 	NXOT_STRING,
 	NXOT_THREAD

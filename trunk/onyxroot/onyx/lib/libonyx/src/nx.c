@@ -19,7 +19,8 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_name_l.h"
 
-static void nx_p_soft_init(cw_nx_t *a_nx);
+/* Include generated code. */
+#include "nx_nxcode.c"
 
 cw_nx_t *
 nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
@@ -116,14 +117,19 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 		    _CW_LIBONYX_THREADSDICT_HASH);
 		try_stage = 11;
 
-		/* Set the thread initialization hook pointer. */
-		retval->thread_init = a_thread_init;
-
 		/* Now that we have an initial thread, activate the GC. */
 		nxa_active_set(&retval->nxa, TRUE);
 
 		/* Do soft operator initialization. */
-		nx_p_soft_init(retval);
+		nx_p_nxcode(retval);
+
+		/*
+		 * Set the thread initialization hook pointer.  It's important
+		 * to set this after doing soft operator initialization, so that
+		 * the hook doesn't get called above while ininitializing
+		 * globally visible soft operators.
+		 */
+		retval->thread_init = a_thread_init;
 	}
 	xep_catch (_CW_STASHX_OOM) {
 		retval = (cw_nx_t *)v_retval;
@@ -181,6 +187,3 @@ nx_delete(cw_nx_t *a_nx)
 		memset(a_nx, 0x5a, sizeof(cw_nx_t));
 #endif
 }
-
-/* Include generated code. */
-#include "softop.c"

@@ -81,9 +81,9 @@ extern  "C" {
 #define	_CW_LIBONYX_STACKC_COUNT	   32
 
 /*
- * Initial size of userdict.
+ * Initial size of threaddict.
  */
-#define	_CW_LIBONYX_USERDICT_HASH	   64
+#define	_CW_LIBONYX_THREADDICT_HASH	    4
 
 /*
  * Exception numbers.  libonyx reserves 128 through 255.

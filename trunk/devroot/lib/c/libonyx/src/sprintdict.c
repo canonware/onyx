@@ -23,6 +23,7 @@
 #include "../include/libonyx/nxo_name_l.h"
 #include "../include/libonyx/nxo_null_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
+#include "../include/libonyx/nxo_pmark_l.h"
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_string_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
@@ -51,6 +52,7 @@ static const struct cw_sprintdict_entry sprintdict_ops[] = {
 	ENTRY(name),
 	ENTRY(null),
 	ENTRY(operator),
+	ENTRY(pmark),
 	ENTRY(stack),
 	ENTRY(string),
 	ENTRY(thread)

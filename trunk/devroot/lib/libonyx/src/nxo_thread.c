@@ -17,14 +17,15 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "../include/libonyx/currenterror_l.h"
-#include "../include/libonyx/errordict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
+
+/* Include generated code. */
+#include "nxo_thread_nxcode.c"
 
 /*
  * These should be defined by the system headers, but Linux fails to do so.
@@ -43,7 +44,6 @@ nxo_threade_nxn(cw_nxo_threade_t a_threade)
 		0,
 		NXN_dstackunderflow,
 		NXN_estackoverflow,
-		NXN_interrupt,
 		NXN_invalidaccess,
 		NXN_invalidcontext,
 		NXN_invalidexit,
@@ -53,7 +53,6 @@ nxo_threade_nxn(cw_nxo_threade_t a_threade)
 		NXN_rangecheck,
 		NXN_stackunderflow,
 		NXN_syntaxerror,
-		NXN_timeout,
 		NXN_typecheck,
 		NXN_undefined,
 		NXN_undefinedfilename,
@@ -237,9 +236,6 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxo_no_new(&thread->ostack);
 	nxo_no_new(&thread->dstack);
 	nxo_no_new(&thread->tstack);
-	nxo_no_new(&thread->currenterror);
-	nxo_no_new(&thread->errordict);
-	nxo_no_new(&thread->userdict);
 	nxo_no_new(&thread->stdin_nxo);
 	nxo_no_new(&thread->stdout_nxo);
 	nxo_no_new(&thread->stderr_nxo);
@@ -272,25 +268,25 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxo_stack_new(&thread->dstack, a_nx, FALSE);
 	nxo_stack_new(&thread->tstack, a_nx, FALSE);
 
-	currenterror_l_populate(&thread->currenterror, a_nxo);
-	errordict_l_populate(&thread->errordict, a_nxo);
-	nxo_dict_new(&thread->userdict, a_nx, FALSE, _CW_LIBONYX_USERDICT_HASH);
-
 	nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
 	nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
 	nxo_dup(&thread->stderr_nxo, nx_stderr_get(a_nx));
 
 	/*
-	 * Push systemdict, globaldict, and userdict onto the dictionary stack.
+	 * Push threaddict, systemdict, and globaldict, onto the dictionary
+	 * stack.  The embedded onyx initialization code creates userdict.
 	 */
+	nxo = nxo_stack_push(&thread->dstack);
+	nxo_dict_new(nxo, a_nx, FALSE, _CW_LIBONYX_THREADDICT_HASH);
+
 	nxo = nxo_stack_push(&thread->dstack);
 	nxo_dup(nxo, nx_systemdict_get(a_nx));
 
 	nxo = nxo_stack_push(&thread->dstack);
 	nxo_dup(nxo, nx_globaldict_get(a_nx));
 
-	nxo = nxo_stack_push(&thread->dstack);
-	nxo_dup(nxo, &thread->userdict);
+	/* Run per-thread embedded initialization code. */
+	nxo_p_thread_nxcode(&thread->self);
 
 	/* Execute the thread initialization hook if set. */
 	if (nx_l_thread_init(a_nx) != NULL)
@@ -357,21 +353,12 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 			retval = nxo_nxoe_get(&thread->tstack);
 			break;
 		case 5:
-			retval = nxo_nxoe_get(&thread->currenterror);
-			break;
-		case 6:
-			retval = nxo_nxoe_get(&thread->errordict);
-			break;
-		case 7:
-			retval = nxo_nxoe_get(&thread->userdict);
-			break;
-		case 8:
 			retval = nxo_nxoe_get(&thread->stdin_nxo);
 			break;
-		case 9:
+		case 6:
 			retval = nxo_nxoe_get(&thread->stdout_nxo);
 			break;
-		case 10:
+		case 7:
 			retval = nxo_nxoe_get(&thread->stderr_nxo);
 			break;
 		default:
@@ -683,6 +670,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		case NXOT_INTEGER:
 		case NXOT_MARK:
 		case NXOT_MUTEX:
+		case NXOT_PMARK:
 		case NXOT_STACK:
 		case NXOT_THREAD:
 			/*
@@ -972,7 +960,7 @@ void
 nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_error)
 {
 	cw_nxoe_thread_t	*thread;
-	cw_nxo_t		*nxo, *errordict, *key, *handler;
+	cw_nxo_t		*errorname;
 	cw_nxn_t		nxn;
 	cw_uint32_t		defer_count;
 
@@ -983,86 +971,26 @@ nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_error)
 	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-	/* Shut off deferral temporarily. */
+	/*
+	 * Convert a_error to a name object on ostack.
+	 */
+	errorname = nxo_stack_push(&thread->ostack);
+	nxn = nxo_threade_nxn(a_error);
+	nxo_name_new(errorname, thread->nx, nxn_str(nxn), nxn_len(nxn), TRUE);
+
+	/*
+	 * Shut off deferral temporarily.  It is possible for this C stack frame
+	 * to never be returned to, due to an exception (stop, quit, exit), in
+	 * which case, deferral will never be turned back on.  That's fine,
+	 * since the user is going to have to patch things up by hand in that
+	 * case anyway.
+	 */
 	defer_count = thread->defer_count;
 	thread->defer_count = 0;
 
-	/*
-	 * Get errordict.  We can't throw an undefined error here because it
-	 * would go infinitely recursive.
-	 */
-	errordict = nxo_stack_push(&thread->tstack);
-	key = nxo_stack_push(&thread->tstack);
-	nxo_name_new(key, thread->nx, nxn_str(NXN_errordict),
-	    nxn_len(NXN_errordict), TRUE);
-	if (nxo_thread_dstack_search(a_nxo, key, errordict)) {
-		/*
-		 * We failed to find errordict.  Fall back to the one originally
-		 * defined in the thread.
-		 */
-		nxo_dup(errordict, &thread->errordict);
-	} else if (nxo_type_get(errordict) != NXOT_DICT) {
-		/* Evaluate errordict to get its value. */
-		nxo = nxo_stack_push(&thread->estack);
-		nxo_dup(nxo, errordict);
-		nxo_thread_loop(a_nxo);
-		nxo = nxo_stack_get(&thread->ostack);
-		if (nxo != NULL) {
-			nxo_dup(errordict, nxo);
-			nxo_stack_pop(&thread->ostack);
-		}
+	/* Throw an error. */
+	_cw_onyx_code(a_nxo, "throw");
 
-		if (nxo_type_get(errordict) != NXOT_DICT) {
-			/*
-			 * We don't have a usable dictionary.  Fall back to the
-			 * one originally defined in the thread.
-			 */
-			nxo_dup(errordict, &thread->errordict);
-		}
-	}
-
-	/*
-	 * Find handler corresponding to error.
-	 */
-	nxn = nxo_threade_nxn(a_error);
-	nxo_name_new(key, thread->nx, nxn_str(nxn), nxn_len(nxn), TRUE);
-
-	/*
-	 * Push the object being executed onto ostack unless this is an
-	 * interrupt or timeout.
-	 */
-	switch (a_error) {
-	case NXO_THREADE_INTERRUPT:
-	case NXO_THREADE_TIMEOUT:
-		break;
-	default:
-		nxo = nxo_stack_push(&thread->ostack);
-		nxo_dup(nxo, nxo_stack_get(&thread->estack));
-	}
-
-	/*
-	 * Get the handler for this particular error and push it onto estack.
-	 * We could potentially throw another error here without going
-	 * infinitely recursive, but it's not worth the risk.  After all, the
-	 * user has done some really hokey management of errordict if this
-	 * happens.
-	 */
-	handler = nxo_stack_push(&thread->estack);
-	if (nxo_dict_lookup(errordict, key, handler)) {
-		/*
-		 * Ignore the error, since the only alternative is to blow
-		 * up (or potentially go infinitely recursive).
-		 */
-		nxo_stack_npop(&thread->tstack, 2);
-		nxo_stack_pop(&thread->estack);
-		goto IGNORE;
-	}
-	nxo_stack_npop(&thread->tstack, 2);
-
-	/* Execute the handler. */
-	nxo_thread_loop(a_nxo);
-
-	IGNORE:
 	/* Turn deferral back on. */
 	thread->defer_count = defer_count;
 }
@@ -1129,51 +1057,6 @@ nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking)
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	thread->locking = a_locking;
-}
-
-cw_nxo_t *
-nxo_thread_userdict_get(cw_nxo_t *a_nxo)
-{
-	cw_nxoe_thread_t	*thread;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-	return &thread->userdict;
-}
-
-cw_nxo_t *
-nxo_thread_errordict_get(cw_nxo_t *a_nxo)
-{
-	cw_nxoe_thread_t	*thread;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-	return &thread->errordict;
-}
-
-cw_nxo_t *
-nxo_thread_currenterror_get(cw_nxo_t *a_nxo)
-{
-	cw_nxoe_thread_t	*thread;
-
-	_cw_check_ptr(a_nxo);
-	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
-
-	thread = (cw_nxoe_thread_t *)a_nxo->o.nxoe;
-	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-	return &thread->currenterror;
 }
 
 cw_uint32_t
@@ -1281,10 +1164,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			case '{':
 				a_thread->defer_count++;
 				nxo = nxo_stack_push(&a_thread->ostack);
-				/*
-				 * Leave the nxo as notype in order to
-				 * differentiate from normal marks.
-				 */
+				nxo_pmark_new(nxo);
 				break;
 			case '}':
 				if (a_thread->defer_count > defer_base) {
@@ -1916,11 +1796,11 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 	nxo_name_new(key, a_thread->nx, nxn_str(NXN_currenterror),
 	    nxn_len(NXN_currenterror), TRUE);
 	if (nxo_thread_dstack_search(&a_thread->self, key, currenterror)) {
+		/* XXX Let throw do this. */
 		/*
-		 * Couldn't find currenterror.  Fall back to the currenterror
-		 * defined during thread creation.
+		 * Our choices here are to abort or ignore the error.
 		 */
-		nxo_dup(currenterror, &a_thread->currenterror);
+		_cw_error("currenterror not found");
 	} else if (nxo_type_get(currenterror) != NXOT_DICT) {
 		cw_nxo_t	*tnxo;
 
@@ -1935,11 +1815,11 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 		}
 
 		if (nxo_type_get(currenterror) != NXOT_DICT) {
+			/* XXX Let throw do this. */
 			/*
-			 * We don't have a usable dictionary.  Fall back to the
-			 * one originally defined in the thread.
+			 * Our choices here are to abort or ignore the error.
 			 */
-			nxo_dup(currenterror, &a_thread->currenterror);
+			_cw_error("currenterror not found");
 		}
 	}
 
@@ -1963,24 +1843,6 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 
 	nxo_stack_npop(&a_thread->tstack, 3);
 
-	/*
-	 * Objects of type "no" should never be visible to the user.  If we are
-	 * currently in deferred execution mode, then there are "no" objects on
-	 * ostack acting as markers.  We can't leave them there, so convert them
-	 * to null objects and turn deferred execution mode off.
-	 */
-	if (a_thread->defer_count > a_defer_base) {
-		for (nxo = nxo_stack_down_get(&a_thread->ostack, NULL);
-		     a_thread->defer_count > a_defer_base;
-		     nxo = nxo_stack_down_get(&a_thread->ostack, nxo)) {
-			_cw_assert(nxo != NULL);
-			if (nxo_type_get(nxo) == NXOT_NO) {
-				a_thread->defer_count--;
-				nxo_null_new(nxo);
-			}
-		}
-	}
-
 	/* Finally, throw a syntaxerror. */
 	nxo_thread_error(&a_thread->self, NXO_THREADE_SYNTAXERROR);
 }
@@ -2002,11 +1864,11 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 	cw_nxo_t	*tnxo, *nxo;
 	cw_uint32_t	nelements, i, depth;
 
-	/* Find the no "mark". */
+	/* Find the pmark. */
 	for (i = 0, depth = nxo_stack_count(&a_thread->ostack), nxo = NULL;
 	     i < depth; i++) {
 		nxo = nxo_stack_down_get(&a_thread->ostack, nxo);
-		if (nxo_type_get(nxo) == NXOT_NO)
+		if (nxo_type_get(nxo) == NXOT_PMARK)
 			break;
 	}
 	_cw_assert(i < depth);
@@ -2082,18 +1944,24 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 		 * Find the value associated with the name in the dictionary
 		 * stack and push the value onto the data stack.
 		 */
-		key = nxo_stack_push(&a_thread->estack);
+		key = nxo_stack_push(&a_thread->tstack);
 		nxo_name_new(key, a_thread->nx, a_thread->tok_str,
 		    a_thread->index, FALSE);
 		nxoe_p_thread_reset(a_thread);
 
 		nxo = nxo_stack_push(&a_thread->ostack);
 		if (nxo_thread_dstack_search(&a_thread->self, key, nxo)) {
-			nxo_stack_pop(&a_thread->ostack);
+			/*
+			 * Push the name onto ostack before throwing the error.
+			 * This results in both the name and the source being
+			 * pushed onto ostack, which is useful, depending on the
+			 * source.
+			 */
+			nxo_dup(nxo, key);
 			nxo_thread_error(&a_thread->self,
 			    NXO_THREADE_UNDEFINED);
 		}
-		nxo_stack_pop(&a_thread->estack);
+		nxo_stack_pop(&a_thread->tstack);
 
 		break;
 	}

@@ -102,6 +102,10 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
 	{NULL,
 	 NULL},
 
+	/* NXOT_PMARK */
+	{NULL,
+	 NULL},
+
 	/* NXOT_STACK */
 	{nxoe_l_stack_delete,
 	 nxoe_l_stack_ref_iter},
@@ -222,6 +226,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	case NXOT_FINO:
 	case NXOT_MARK:
 	case NXOT_NULL:
+	case NXOT_PMARK:
 		if (nxo_type_get(a_a) == nxo_type_get(a_b))
 			retval = 0;
 		else

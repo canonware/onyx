@@ -7,23 +7,21 @@
 %
 % Version: <Version>
 %
-% This file is processed by softop_gen.st to produce a more compact embedded
-% version in softop.c.  Due to bootstrapping issues, this cannot be done
-% automatically as part of the build process.  In order to make changes to this
-% file take effect, either type:
+% This file is processed by nx_nxcode_gen.nx to produce a more compact embedded
+% version in nx_nxcode.c.  Due to bootstrapping issues, this cannot safely be
+% done automatically as part of the build process.  In order to make changes to
+% this file take effect, either type:
 %
 %   cook onyx_bootstrap
 %
 % or
 %
-%   cat softop.st | onyx softop_gen.st > softop.c
-%
-% The format of the code in this file is fragile.  Only add definitions of the
-% format:
-%
-%   /procname {...} bind def
+%   cat nx_nxcode.nx | onyx nx_nxcode_gen.nx > nx_nxcode.c
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Enclose this entire file in an outer array to defer execution.
+{
 
 systemdict begin
 
@@ -61,18 +59,6 @@ systemdict begin
 		exch pop
 		eval
 	} ifelse
-} bind def
-
-% <lock> <proc> monitor -
-/monitor {
-	% Validate arguments.
-	1 index type /mutextype ne {
-		errordict begin typecheck end
-	} if
-
-	1 index lock
-	eval
-	unlock
 } bind def
 
 % - product <string>
@@ -186,9 +172,89 @@ systemdict begin
 	} ifelse
 } bind def
 
+% /errorname throw -
+/throw {
+	% Do some sanity checking, to try to avoid going infinitely recursive
+	% in the error handling machinery.
+	{
+		{/errordict where {pop true}{false} ifelse}
+		{/errordict load /handleerror known}
+		{/currenterror where {pop true}{false} ifelse}
+		{/currenterror load /recordstacks known}
+		{/currenterror load /stop known}
+	}{
+		eval not {
+			`Onyx: Missing errordict or currenterror defs\n' print
+
+			% Print stack dumps.
+			`ostack: ' print
+			ostack 2 sprint
+
+			`dstack: ' print
+			dstack 2 sprint
+
+			`estack: ' print
+			estack 2 sprint
+
+			`istack: ' print
+			istack 2 sprint
+
+			`Onyx: dieing\n' print flush
+			1 die
+		} if
+	} foreach
+
+	% Make sure the argument is a name.
+	dup type /nametype ne {
+		/errordict load /typecheck get eval
+	} if
+
+	/currenterror load begin
+
+	% Set newerror to true to indicate there is an error.  It is up to the
+	% application to clear this afterwards if it wants to make newerror
+	% meaningful in the face of multiple errors.
+	/newerror true def
+
+	% Set errorname to the argument passed in.
+	/errorname exch cvx def
+
+	% If recordstacks is true, snapshot the stacks.
+	/recordstacks load {
+		% ostack.  The order of operations keeps ostack pristine for the
+		% snapshot.
+		ostack /ostack cvx exch def
+
+		% dstack.  Don't include the top element, which is the copy of
+		% currenterror that we pushed.
+		/dstack cvx dstack spop pop def
+
+		% estack.  Don't include the top two elements, which are this
+		% procedure and this conditionally executed array.
+		/estack cvx estack spop pop spop pop def
+
+		% istack.  Don't include the top two elements, which are this
+		% procedure and this conditionally executed array.
+		/istack cvx istack spop pop spop pop def
+	} if
+
+	end % currenterror.
+
+	% Push the offending object onto ostack.
+	estack 1 sindex spop exch pop
+
+	% Call the error handler.
+	/errordict load /handleerror get eval
+
+	% Stop.
+	/currenterror load /stop get eval
+} bind def
+
 % - version <string>
 /version {
 	`<Version>'
 } bind def
 
 end % systemdict
+
+} % End deferral.

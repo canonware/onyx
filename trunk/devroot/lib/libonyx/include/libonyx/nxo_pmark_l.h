@@ -9,4 +9,4 @@
  *
  ******************************************************************************/
 
-void	currenterror_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_thread);
+void	nxo_l_pmark_print(cw_nxo_t *a_thread);

@@ -101,13 +101,6 @@ struct cw_nxoe_thread_s {
 	cw_nxo_t	tstack;	/* Temp stack. */
 
 	/*
-	 * Local dictionaries.
-	 */
-	cw_nxo_t	currenterror;
-	cw_nxo_t	errordict;
-	cw_nxo_t	userdict;
-
-	/*
 	 * Files.
 	 */
 	cw_nxo_t	stdin_nxo;
@@ -210,10 +203,6 @@ cw_bool_t nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t
 
 cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
 void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
-
-cw_nxo_t *nxo_thread_userdict_get(cw_nxo_t *a_nxo);
-cw_nxo_t *nxo_thread_errordict_get(cw_nxo_t *a_nxo);
-cw_nxo_t *nxo_thread_currenterror_get(cw_nxo_t *a_nxo);
 
 #ifndef _CW_USE_INLINES
 cw_nx_t *nxo_thread_nx_get(cw_nxo_t *a_nxo);

@@ -65,7 +65,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(countestack),
 	ENTRY(counttomark),
 	ENTRY(currentdict),
-	ENTRY(currenterror),
 	ENTRY(currentfile),
 	ENTRY(currentlocking),
 	ENTRY(cvlit),
@@ -83,7 +82,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(dup),
 	ENTRY(end),
 	ENTRY(eq),
-	ENTRY(errordict),
 	ENTRY(estack),
 	ENTRY(eval),
 	ENTRY(exch),
@@ -100,10 +98,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(get),
 	ENTRY(getinterval),
 	ENTRY(gt),
-	ENTRY(handleerror),
 	ENTRY(if),
 	ENTRY(ifelse),
 	ENTRY(index),
+	ENTRY(istack),
 	ENTRY(join),
 	ENTRY(known),
 	ENTRY(le),
@@ -116,6 +114,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(mark),
 	ENTRY(mkdir),
 	ENTRY(mod),
+	ENTRY(monitor),
 	ENTRY(mul),
 	ENTRY(mutex),
 	ENTRY(ne),
@@ -190,7 +189,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(undef),
 	ENTRY(unlink),
 	ENTRY(unlock),
-	ENTRY(userdict),
 	ENTRY(wait),
 	ENTRY(waitpid),
 	ENTRY(where),
@@ -1195,16 +1193,6 @@ systemdict_currentdict(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_currenterror(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *nxo;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	nxo = nxo_stack_push(ostack);
-	nxo_dup(nxo, nxo_thread_currenterror_get(a_thread));
-}
-
-void
 systemdict_currentfile(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *estack;
@@ -1687,7 +1675,7 @@ systemdict_end(cw_nxo_t *a_thread)
 	dstack = nxo_thread_dstack_get(a_thread);
 
 	/* systemdict, globaldict, and userdict cannot be popped. */
-	if (nxo_stack_count(dstack) <= 3) {
+	if (nxo_stack_count(dstack) <= 4) {
 		nxo_thread_error(a_thread, NXO_THREADE_DSTACKUNDERFLOW);
 		return;
 	}
@@ -1717,16 +1705,6 @@ systemdict_eq(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo_a, eq);
 
 	nxo_stack_pop(ostack);
-}
-
-void
-systemdict_errordict(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *nxo;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	nxo = nxo_stack_push(ostack);
-	nxo_dup(nxo, nxo_thread_errordict_get(a_thread));
 }
 
 void
@@ -2480,70 +2458,6 @@ systemdict_gt(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_handleerror(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*estack, *tstack;
-	cw_nxo_t	*key, *errordict, *handleerror;
-
-	estack = nxo_thread_estack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-
-	/* Get errordict. */
-	errordict = nxo_stack_push(tstack);
-	key = nxo_stack_push(tstack);
-	nxo_name_new(key, nxo_thread_nx_get(a_thread),
-	    nxn_str(NXN_errordict), nxn_len(NXN_errordict), TRUE);
-	if (nxo_thread_dstack_search(a_thread, key, errordict)) {
-		/*
-		 * Fall back to the errordict defined during thread creation,
-		 * since the alternative is to blow up (or potentially go
-		 * infinitely recursive).
-		 */
-		nxo_dup(errordict, nxo_thread_errordict_get(a_thread));
-	} else if (nxo_type_get(errordict) != NXOT_DICT) {
-		cw_nxo_t	*ostack, *nxo;
-
-		ostack = nxo_thread_ostack_get(a_thread);
-
-		/* Evaluate errordict to get its value. */
-		nxo = nxo_stack_push(estack);
-		nxo_dup(nxo, errordict);
-		nxo_thread_loop(a_thread);
-		nxo = nxo_stack_get(ostack);
-		if (nxo != NULL) {
-			nxo_dup(errordict, nxo);
-			nxo_stack_pop(ostack);
-		}
-
-		if (nxo_type_get(errordict) != NXOT_DICT) {
-			/*
-			 * We don't have a usable dictionary.  Fall back to the
-			 * one originally defined in the thread.
-			 */
-			nxo_dup(errordict, nxo_thread_errordict_get(a_thread));
-		}
-	}
-
-	/* Get handleerror from errordict and push it onto estack. */
-	handleerror = nxo_stack_push(estack);
-	nxo_name_new(key, nxo_thread_nx_get(a_thread),
-	    nxn_str(NXN_handleerror), nxn_len(NXN_handleerror), TRUE);
-	if (nxo_dict_lookup(errordict, key, handleerror)) {
-		/*
-		 * Do not execute an error handler, since the alternative is to
-		 * blow up (or potentially go infinitely recursive).
-		 */
-		nxo_stack_pop(estack);
-		nxo_stack_npop(tstack, 2);
-		return;
-	}
-	nxo_stack_npop(tstack, 2);
-
-	/* Execute handleerror. */
-	nxo_thread_loop(a_thread);
-}
-
-void
 systemdict_if(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -2605,6 +2519,20 @@ systemdict_index(cw_nxo_t *a_thread)
 	systemdict_inline_index(a_thread);
 }
 #endif
+
+void
+systemdict_istack(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *istack, *stack;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	istack = nxo_thread_istack_get(a_thread);
+
+	stack = nxo_stack_push(ostack);
+	nxo_stack_new(stack, nxo_thread_nx_get(a_thread),
+	    nxo_thread_currentlocking(a_thread));
+	nxo_stack_copy(stack, istack);
+}
 
 void
 systemdict_join(cw_nxo_t *a_thread)
@@ -3045,6 +2973,57 @@ systemdict_mod(cw_nxo_t *a_thread)
 
 	nxo_integer_set(a, nxo_integer_get(a) % nxo_integer_get(b));
 	nxo_stack_pop(ostack);
+}
+
+void
+systemdict_monitor(cw_nxo_t *a_thread)
+{
+	cw_nxo_t	*ostack, *estack, *tstack, *proc, *mutex, *nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	estack = nxo_thread_estack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	NXO_STACK_GET(proc, ostack, a_thread);
+	NXO_STACK_DOWN_GET(mutex, ostack, a_thread, proc);
+	if (nxo_type_get(mutex) != NXOT_MUTEX) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/* Dup proc to estack. */
+	nxo = nxo_stack_push(estack);
+	nxo_dup(nxo, proc);
+
+	/* Dup mutex to tstack. */
+	nxo = nxo_stack_push(tstack);
+	nxo_dup(nxo, mutex);
+
+	/* Remove args from ostack. */
+	nxo_stack_npop(ostack, 2);
+
+	/* Lock mutex. */
+	nxo_mutex_lock(nxo);
+
+	/*
+	 * Make sure that the mutex gets unlocked, even in the face of
+	 * exceptions.
+	 */
+	xep_begin();
+	xep_try {
+		/* Execute proc. */
+		nxo_thread_loop(a_thread);
+	}
+	xep_acatch {
+		/* Don't handle the exception, but unlock mutex. */
+		nxo_mutex_unlock(nxo);
+	}
+	xep_end();
+
+	/* Unlock mutex. */
+	nxo_mutex_unlock(nxo);
+
+	/* Pop mutex off of tstack. */
+	nxo_stack_pop(tstack);
 }
 
 void
@@ -5387,6 +5366,7 @@ systemdict_type(cw_nxo_t *a_thread)
 		NXN_nametype,
 		NXN_nulltype,
 		NXN_operatortype,
+		NXN_pmarktype,
 		NXN_stacktype,
 		NXN_stringtype,
 		NXN_threadtype
@@ -5505,16 +5485,6 @@ systemdict_unlock(cw_nxo_t *a_thread)
 	nxo_mutex_unlock(mutex);
 
 	nxo_stack_pop(ostack);
-}
-
-void
-systemdict_userdict(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *nxo;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	nxo = nxo_stack_push(ostack);
-	nxo_dup(nxo, nxo_thread_userdict_get(a_thread));
 }
 
 void

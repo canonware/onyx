@@ -1,4 +1,7 @@
-Error /stackunderflow in --catenate--
-ostack: (`a' --catenate--)
-estack: (--start-- -file- --catenate--)
-dstack: (-dict- -dict- -dict-)
+Error /stackunderflow
+ostack: (`a')
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--catenate--
+1:	-file-
+2:	--start--

@@ -1,4 +1,7 @@
-Error /unmatchedmark in --scleartomark--
-ostack: (-stack- --scleartomark--)
-estack: (--start-- -file- --scleartomark--)
-dstack: (-dict- -dict- -dict-)
+Error /unmatchedmark
+ostack: (-stack-)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--scleartomark--
+1:	-file-
+2:	--start--

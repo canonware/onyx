@@ -1,4 +1,7 @@
-Error /typecheck in --spush--
-ostack: (1 2 --spush--)
-estack: (--start-- -file- --spush--)
-dstack: (-dict- -dict- -dict-)
+Error /typecheck
+ostack: (1 2)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--spush--
+1:	-file-
+2:	--start--

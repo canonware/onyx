@@ -230,6 +230,7 @@ behavior and likely crashes.
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_no}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_null}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_operator}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_pmark}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_stack}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_string}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_thread}

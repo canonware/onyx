@@ -1,5 +1,8 @@
 Test begin
-Error /typecheck in --index--
-ostack: (`a' --index--)
-estack: (--start-- -file- --index--)
-dstack: (-dict- -dict- -dict-)
+Error /typecheck
+ostack: (`a')
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--index--
+1:	-file-
+2:	--start--

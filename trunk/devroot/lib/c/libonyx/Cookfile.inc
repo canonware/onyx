@@ -22,10 +22,10 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libonyx.h libonyx_incs.h errordict.h gcdict.h nx.h nxa.h nxn.h
-               nxo.h nxo_array.h nxo_boolean.h nxo_condition.h nxo_dict.h
-               nxo_file.h nxo_fino.h nxo_hook.h nxo_integer.h nxo_mark.h
-               nxo_mutex.h nxo_name.h nxo_no.h nxo_null.h nxo_operator.h
+  local incs = libonyx.h libonyx_incs.h gcdict.h nx.h nxa.h nxn.h nxo.h
+               nxo_array.h nxo_boolean.h nxo_condition.h nxo_dict.h nxo_file.h
+               nxo_fino.h nxo_hook.h nxo_integer.h nxo_mark.h nxo_mutex.h
+               nxo_name.h nxo_no.h nxo_null.h nxo_operator.h nxo_pmark.h
                nxo_stack.h nxo_string.h nxo_thread.h systemdict.h;
   incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [incs]];
   incs = [incs] [objdir]/lib/c/libonyx/include/libonyx/libonyx_defs.h;
@@ -36,23 +36,26 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = currenterror_l.h envdict_l.h errordict_l.h gcdict_l.h
-                    nx_l.h nxaa_l.h nxo_l.h nxo_array_l.h nxo_boolean_l.h
-                    nxo_condition_l.h nxo_dict_l.h nxo_file_l.h nxo_fino_l.h
-                    nxo_hook_l.h nxo_integer_l.h nxo_mark_l.h nxo_mutex_l.h
-                    nxo_name_l.h nxo_null_l.h nxo_operator_l.h nxo_stack_l.h
-                    nxo_string_l.h nxo_thread_l.h sprintdict_l.h systemdict_l.h;
+  local priv_incs = envdict_l.h gcdict_l.h nx_l.h nxaa_l.h nxo_l.h nxo_array_l.h
+                    nxo_boolean_l.h nxo_condition_l.h nxo_dict_l.h nxo_file_l.h
+                    nxo_fino_l.h nxo_hook_l.h nxo_integer_l.h nxo_mark_l.h
+                    nxo_mutex_l.h nxo_name_l.h nxo_null_l.h nxo_operator_l.h
+                    nxo_pmark_l.h nxo_stack_l.h nxo_string_l.h nxo_thread_l.h
+                    sprintdict_l.h systemdict_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [priv_incs]];
 
-  PRIV_INCS = [PRIV_INCS] [priv_incs];
+  local priv_cincs = nx_nxcode.c nxo_thread_nxcode.c;
+  prix_cincs = [fromto % [srcdir]/lib/c/libonyx/src/% [priv_incs]];
+
+  PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
 }
 
 /* Source files. */
-LIBONYX_SRCS = currenterror.c envdict.c errordict.c gcdict.c nx.c nxa.c nxn.c
-               nxo.c nxo_array.c nxo_boolean.c nxo_condition.c nxo_dict.c
-               nxo_file.c nxo_fino.c nxo_hook.c nxo_integer.c nxo_mark.c
-               nxo_mutex.c nxo_name.c nxo_null.c nxo_operator.c nxo_stack.c
-               nxo_string.c nxo_thread.c sprintdict.c systemdict.c;
+LIBONYX_SRCS = envdict.c gcdict.c nx.c nxa.c nxn.c nxo.c nxo_array.c
+               nxo_boolean.c nxo_condition.c nxo_dict.c nxo_file.c nxo_fino.c
+               nxo_hook.c nxo_integer.c nxo_mark.c nxo_mutex.c nxo_name.c
+               nxo_null.c nxo_operator.c nxo_pmark.c nxo_stack.c nxo_string.c
+               nxo_thread.c sprintdict.c systemdict.c;
 LIBONYX_SRCS = [fromto % [srcdir]/lib/c/libonyx/src/% [LIBONYX_SRCS]];
 SRCS = [SRCS] [LIBONYX_SRCS];
 
@@ -105,7 +108,8 @@ SRCS = [SRCS] [LIBONYX_SRCS];
                    nxo_boolean.tex nxo_dict.tex nxo_file.tex nxo_fino.tex
                    nxo_hook.tex nxo_integer.tex nxo_mark.tex nxo_mutex.tex
                    nxo_name.tex nxo_no.tex nxo_null.tex nxo_operator.tex
-                   nxo_stack.tex nxo_string.tex nxo_thread.tex systemdict.tex;
+                   nxo_pmark.tex nxo_stack.tex nxo_string.tex nxo_thread.tex
+                   systemdict.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libonyx/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libonyx/doc/latex/manual.tex;
 
@@ -142,9 +146,12 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
 
 onyx_bootstrap : [ONYX_D]
 {
-  cat [srcdir]/lib/c/libonyx/src/softop.nx
-    | [ONYX_D] [srcdir]/lib/c/libonyx/src/softop_gen.nx
-    > [srcdir]/lib/c/libonyx/src/softop.c;
+  cat [srcdir]/lib/c/libonyx/src/nx_nxcode.nx
+    | [ONYX_D] [srcdir]/lib/c/libonyx/src/nx_nxcode_gen.nx
+    > [srcdir]/lib/c/libonyx/src/nx_nxcode.c;
+  cat [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode.nx
+    | [ONYX_D] [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode_gen.nx
+    > [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode.c;
 }
 
 libonyx : [LIBONYX_D] [LIBONYX_A] [LIBONYX_P]

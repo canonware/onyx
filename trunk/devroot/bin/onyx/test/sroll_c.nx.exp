@@ -1,4 +1,7 @@
-Error /stackunderflow in --sroll--
-ostack: (1 --sroll--)
-estack: (--start-- -file- --sroll--)
-dstack: (-dict- -dict- -dict-)
+Error /stackunderflow
+ostack: (1)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--sroll--
+1:	-file-
+2:	--start--
