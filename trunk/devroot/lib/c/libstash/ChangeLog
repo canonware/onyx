@@ -1,3 +1,7 @@
+1999-01-13  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/log.h: Use __FUNCTION__ in macros.
+
 1999-01-12  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (bufel_set_size): Allow truncating a bufel with no
