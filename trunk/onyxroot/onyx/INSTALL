@@ -1,0 +1,68 @@
+################################################################################
+#
+# Version: <Version>
+#
+# Building and installation instructions for Canonware software distributions.
+#
+################################################################################
+
+This software depends on the excellent 'cook' program for building.  'cook' is
+freely available (GPLed).  For more information, see:
+
+	http://www.canb.auug.org.au/~millerp/cook/cook.html
+
+Building this distribution in many cases is as simple as typing the following
+while in the root directory of the source tree:
+
+	./configure
+	cook everything
+
+To install, do the above, then type:
+
+	cook install
+
+Optionally, you may only want to install parts of the software with any of:
+
+	cook install_bins
+	cook install_libs
+
+To run regression tests, if any, type:
+
+	cook check
+
+There are additional targets that allow finer-grain control, so if these targets
+don't meet your needs, take a look at Howto.cook.in.
+
+Optionally, pass any of the following (not a definitive list) arguments to
+'configure':
+
+--prefix=<install-root-dir>
+	Set the base directory in which to install.  For example:
+	
+	./configure --prefix=/usr/local
+
+	will cause files to be installed into /usr/local/bin, /usr/local/man,
+	/usr/local/include, and /usr/local/lib.
+
+--enable-shared
+	Build and install shared libraries.
+
+Optionally, define environment variables, including (not exclusively):
+
+CFLAGS="?"
+	Pass these flags to the compiler.  You probably shouldn't define this
+	unless you know what you are doing.
+
+CPPFLAGS="?"
+	Pass these flags to the C preprocessor.  Note that CFLAGS is not passed
+	to 'cpp' when 'configure' is looking for include files, so you must use 
+	CPPFLAGS instead if you need to help 'configure' find header files.
+
+LD_LIBRARY_PATH="?"
+	'ld' uses this colon-separated list to find libraries.
+
+LDFLAGS="?"
+	Flags passed to 'gcc', which should normally be passed on to 'ld'.
+
+PATH="?"
+	'configure' uses this to find programs.
