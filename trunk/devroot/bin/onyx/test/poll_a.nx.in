@@ -12,16 +12,28 @@
 
 `Test begin\n' print flush
 
+$tmpfilename_a argv 2 get `/poll_a.tmp_a' cat def
+$tmpfile_a tmpfilename_a `w' open def
+tmpfile_a 0 setiobuf
+
+$tmpfilename_b argv 2 get `/poll_a.tmp_b' cat def
+$tmpfile_b tmpfilename_b `w' open def
+tmpfile_b 0 setiobuf
+
+tmpfile_a `Hello\n' write pop
+tmpfile_a flushfile
+tmpfile_a 3 seek
+
 [
-    <stdout <$POLLOUT false $POLLWRNORM false>>
+    <tmpfile_a <$POLLOUT false $POLLWRNORM false>>
     <
-	stdout <$POLLOUT false $POLLWRNORM false>
-	stderr <$POLLOUT false $POLLWRNORM false>
+	tmpfile_a <$POLLOUT false $POLLWRNORM false>
+	tmpfile_b <$POLLOUT false $POLLWRNORM false>
     >
-    <stdout <$POLLOUT false $POLLWRNORM false>>
-    <stdout <$POLLOUT true $POLLWRNORM true $garbage `ignore me'>>
+    <tmpfile_a <$POLLOUT false $POLLWRNORM false>>
+    <tmpfile_a <$POLLOUT true $POLLWRNORM true $garbage `ignore me'>>
     <
-	stdout <
+	tmpfile_a <
 	    $POLLIN false
 	    $POLLRDNORM false
 	    $POLLOUT false
@@ -29,7 +41,7 @@
 	>
     >
     <
-	stdout <
+	tmpfile_a <
 	    $POLLIN true
 	    $POLLRDNORM true
 	    $POLLOUT true
@@ -37,13 +49,13 @@
 	>
     >
     <
-	stdout <
+	tmpfile_a <
 	    $POLLIN false
 	    $POLLRDNORM false
 	    $POLLOUT false
 	    $POLLWRNORM false
 	>
-	stderr <
+	tmpfile_b <
 	    $POLLIN false
 	    $POLLRDNORM false
 	    $POLLOUT false
@@ -57,6 +69,12 @@
     `out:\n' print
     1 sprint 2 sprint
 } foreach
+
+tmpfile_a close
+tmpfilename_a unlink
+
+tmpfile_b close
+tmpfilename_b unlink
 
 `Test end\n' print
 pstack
