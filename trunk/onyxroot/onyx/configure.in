@@ -104,7 +104,7 @@ AC_SUBST(VERIFY)
 dnl Find libraries.
 
 if test "x$build_libedit" = "xyes" ; then
-  AC_CHECK_LIB(curses, tigetstr, , \
+  AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
     AC_MSG_ERROR(Cannot find the curses library))
 fi
 
