@@ -1,3 +1,10 @@
+1999-09-17  Jason Evans  <jasone@canonware.com>
+
+	* src/sockb.c (sockb_p_entry_func): Fix a race condition bug that
+	could result in no mq message being sent when using
+	sockb_in_notify() if a socket is remotely disconnected after the
+	last time that the program calls a sock_*() function.
+
 1999-09-14  Jason Evans  <jasone@canonware.com>
 
 	* bin/echos.c: Move critical code out of assertions so that the

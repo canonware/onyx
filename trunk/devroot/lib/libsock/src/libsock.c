@@ -307,7 +307,7 @@ sockb_in_notify(cw_mq_t * a_mq, int a_sockfd)
   if (0 != mq_put(&g_sockb->messages, (const void *) message))
   {
     _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
-    retval =TRUE;
+    retval = TRUE;
     goto RETURN;
   }
   
@@ -794,6 +794,15 @@ sockb_p_entry_func(void * a_arg)
 	    cnd_signal(message->data.in_notify.cnd);
 	    mtx_unlock(message->data.in_notify.mtx);
 
+	    /* Send a message here to avoid a race condition where a sock is
+	     * unregistered due to a failed readv()/writev(), but the user
+	     * hasn't realized this yet, since no sock_*() calls have been made
+	     * since the unregistration. */
+	    if (NULL != message->data.in_notify.mq)
+	    {
+	      sockb_p_notify(message->data.in_notify.mq, sockfd);
+	    }
+	    
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Refuse to set regs[[[i]].notify_mq = 0x[p]\n",
@@ -969,8 +978,8 @@ sockb_p_entry_func(void * a_arg)
 
 	if (fds[i].revents & POLLIN)
 	{
-	  const struct iovec * iovec;
-	  int iovec_count;
+	  const struct iovec * iov;
+	  int iov_cnt;
 	  ssize_t bytes_read;
 	  cw_sint32_t max_read;
 	  cw_bufc_t * bufc;
@@ -1049,9 +1058,9 @@ sockb_p_entry_func(void * a_arg)
 	   * inserted.  However, this is quite safe, since as a result of how we
 	   * use buf_in, we know for sure that there are no other references to
 	   * the byte ranges of the buffers we are writing to. */
-	  iovec = buf_get_iovec(&buf_in, max_read, TRUE, &iovec_count);
+	  iov = buf_get_iovec(&buf_in, max_read, TRUE, &iov_cnt);
 
-	  bytes_read = readv(sockfd, iovec, iovec_count);
+	  bytes_read = readv(sockfd, iov, iov_cnt);
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  out_put(cw_g_out, "([i|s:s])", bytes_read);
 #endif
@@ -1099,22 +1108,32 @@ sockb_p_entry_func(void * a_arg)
 	      continue;
 	    }
 
-	    /* Append to the sock's in_buf. */
-	    if (0 == sock_l_put_in_data(regs[sockfd].sock, &tmp_buf))
 	    {
-	      /* Turn off the read bit for this sock.  The sock will send a
-	       * message when there is once again space. */
-#ifdef _LIBSTASH_SOCKB_CONFESS
-	      out_put(cw_g_out, "u");
-#endif
-	      fds[i].events ^= (fds[i].events & POLLIN);
-	    }
-	    
-	    if (NULL != regs[sockfd].notify_mq)
-	    {
-	      if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+	      cw_uint32_t in_buf_free;
+	      
+	      /* Append to the sock's in_buf. */
+	      in_buf_free = sock_l_put_in_data(regs[sockfd].sock, &tmp_buf);
+	      if (0 == in_buf_free)
 	      {
-		regs[sockfd].notify_mq = NULL;
+		/* Turn off the read bit for this sock.  The sock will send a
+		 * message when there is once again space. */
+#ifdef _LIBSTASH_SOCKB_CONFESS
+		out_put(cw_g_out, "u");
+#endif
+		fds[i].events ^= (fds[i].events & POLLIN);
+	      }
+
+	      /* Only send a message if the sock buffer was empty before we put
+	       * data in it. */
+	      if (0 == (max_read - (in_buf_free + bytes_read)))
+	      {
+		if (NULL != regs[sockfd].notify_mq)
+		{
+		  if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+		  {
+		    regs[sockfd].notify_mq = NULL;
+		  }
+		}
 	      }
 	    }
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
@@ -1213,8 +1232,8 @@ sockb_p_entry_func(void * a_arg)
 	}
 	if (fds[i].revents & POLLOUT)
 	{
-	  const struct iovec * iovec;
-	  int iovec_count;
+	  const struct iovec * iov;
+	  int iov_cnt;
 	  ssize_t bytes_written;
 	  
 	  j++;
@@ -1229,16 +1248,16 @@ sockb_p_entry_func(void * a_arg)
 	  sock_l_get_out_data(regs[sockfd].sock, &tmp_buf);
 
 	  /* Build an iovec for writing. */
-	  iovec = buf_get_iovec(&tmp_buf,
-				buf_get_size(&tmp_buf),
-				TRUE,
-				&iovec_count);
+	  iov = buf_get_iovec(&tmp_buf,
+			      buf_get_size(&tmp_buf),
+			      TRUE,
+			      &iov_cnt);
 
-	  /* XXX If the buf exceeds the maximum iovec, it's possible that we'll
-	   * only write part of the data, when we could have written it all.
-	   * This is in practice very unlikely though, and doesn't cause
-	   * erroneous behavior. */
-	  bytes_written = writev(sockfd, iovec, iovec_count);
+	  /* If the buf exceeds the maximum iovec, it's possible that we'll only
+	   * write part of the data, when we could have written it all.  This is
+	   * in practice very unlikely though, and doesn't cause erroneous
+	   * behavior. */
+	  bytes_written = writev(sockfd, iov, iov_cnt);
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  out_put(cw_g_out, "([i|s:s]/[i])", bytes_written,
 		  buf_get_size(&tmp_buf));
