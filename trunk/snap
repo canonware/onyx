@@ -31,8 +31,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 130 $
-# $Date: 1998-07-05 13:35:26 -0700 (Sun, 05 Jul 1998) $
+# $Revision: 143 $
+# $Date: 1998-07-15 15:32:11 -0700 (Wed, 15 Jul 1998) $
 #
 # <<< Description >>>
 #
@@ -46,9 +46,8 @@ use File::Find; # For find().
 use FileHandle; # For file manipulation.
 use Getopt::Long;
 
-# XXX The following variables should be set according to the needs of the
+# XXX The following variable(s) should be set according to the needs of the
 # project.
-$src_dir = "sqrl";
 $dot = "sqlmaster";
 
 $COPYRIGHT{"jasone"} 
@@ -62,11 +61,11 @@ $COPYRIGHT{"jasone"}
  'are met:',
  '1. Redistributions of source code must retain the above copyright',
  '   notice(s), this list of conditions and the following disclaimer as',
- '   the first lines of this file, unmodified other than the possible',
+ '   the first lines of this file unmodified other than the possible',
  '   addition of one or more copyright notices.',
  '2. Redistributions in binary form must reproduce the above copyright',
  '   notice(s), this list of conditions and the following disclaimer in',
- '   the  documentation and/or other materials provided with the',
+ '   the documentation and/or other materials provided with the',
  '   distribution.',
  '',
  "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY",
@@ -91,12 +90,14 @@ $opt_retval =
   &GetOptions("h|help" => \$opt_help,
 	      "n|noact" => \$opt_noact,
 	      "v|verbose" => \$opt_verbose,
-	      "t|tag=s" => \$opt_tag#,
+	      "t|tag=s" => \$opt_tag,
+	      "d|dir=s" => \$opt_subdir#,
 	     );
 
 if (($#ARGV >= 0) 
     || ($opt_retval == 0)
     || (!defined($opt_tag))
+    || (!defined($opt_subdir))
     || ($opt_help)
    )
   {
@@ -106,30 +107,21 @@ if (($#ARGV >= 0)
 
 if ($opt_verbose)
   {
-    print STDERR "echo SNAP_$opt_tag > last_tag\n";
+    print STDERR "cvs tag SNAP_$opt_tag $opt_subdir\n";
   }
 unless ($opt_noact)
   {
-    `echo SNAP_$opt_tag > last_tag`;
-  }
-
-if ($opt_verbose)
-  {
-    print STDERR "cvs tag SNAP_$opt_tag $src_dir\n";
-  }
-unless ($opt_noact)
-  {
-    `cvs tag SNAP_$opt_tag $src_dir`;
+    `cvs tag SNAP_$opt_tag $opt_subdir`;
   }
 
 if ($opt_verbose)
   {
     print STDERR 
-      "cvs export -r SNAP_$opt_tag -d $src_dir\_$opt_tag $dot/$src_dir\n";
+      "cvs export -r SNAP_$opt_tag -d $opt_subdir\_$opt_tag $dot/$opt_subdir\n";
   }
 unless ($opt_noact)
   {
-    `cvs export -r SNAP_$opt_tag -d $src_dir\_$opt_tag $dot/$src_dir`;
+    `cvs export -r SNAP_$opt_tag -d $opt_subdir\_$opt_tag $dot/$opt_subdir`;
   }
 
 # Find all the files that need the copyright tag expanded.
@@ -139,23 +131,25 @@ if ($opt_verbose)
   }
 unless ($opt_noact)
   {
-    finddepth(\&expand_copyright, "$src_dir\_$opt_tag");
+    finddepth(\&expand_copyright, "$opt_subdir\_$opt_tag");
   }
 
 if ($opt_verbose)
   {
-    print STDERR "tar cvzf $src_dir\_$opt_tag.tar.gz $src_dir\_$opt_tag\n";
+    print STDERR "tar cvzf $opt_subdir\_$opt_tag.tar.gz $opt_subdir\_$opt_tag\n";
   }
 unless ($opt_noact)
   {
-    `tar cvzf $src_dir\_$opt_tag.tar.gz $src_dir\_$opt_tag`;
+    `tar cvzf $opt_subdir\_$opt_tag.tar.gz $opt_subdir\_$opt_tag`;
   }
+
+# End of main execution.
 
 sub print_usage
   {
     print <<EOF;
 $0 usage:
-  $0 [-hnv --help --noact --verbose] --tag=<tag> | -t <tag>
+  $0 [-hnv --help --noact --verbose] {--tag=<tag> | -t <tag>} {--dir=<subdir> | -d <subdir>}
 EOF
   }
 
