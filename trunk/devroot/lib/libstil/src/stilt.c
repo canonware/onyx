@@ -113,8 +113,6 @@ static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
 #define			stilt_p_token_print(a, b, c, d)
 #define			stilt_p_syntax_error_print(a, b)
 #endif
-static void		stilt_p_special_accept(cw_stilt_t *a_stilt, const
-    cw_uint8_t *a_token, cw_uint32_t a_len);
 static void		stilt_p_reset(cw_stilt_t *a_stilt);
 static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
@@ -521,7 +519,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 */
 			el = stils_push(&a_stilt->tstack);
 			for (i = 0; i < len - 1; i++) {
-				stilo_array_el_get(stilo, i, el);
+				stilo_l_array_el_get(stilo, i, el);
 				if (stilo_attrs_get(el) == STILOA_LITERAL) {
 					/*
 					 * Always push literal objects onto the
@@ -725,7 +723,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * recursion safe by replacing the array with its last
 			 * element before executing the last element.
 			 */
-			stilo_array_el_get(stilo, i, el);
+			stilo_l_array_el_get(stilo, i, el);
 			if ((stilo_attrs_get(el) == STILOA_LITERAL) ||
 			    (stilo_type_get(el) == STILOT_ARRAY)) {
 				/*
@@ -1099,20 +1097,23 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '[':
 				/* An operator, not the same as '{'. */
 				stilt_p_token_print(a_stilt, a_stilts, 0, "[");
+				_CW_STILT_PUTC(c);
 				token = TRUE;
-				stilt_p_special_accept(a_stilt, "[", 1);
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			case ']':
 				/* An operator, not the same as '}'. */
 				stilt_p_token_print(a_stilt, a_stilts, 0, "]");
+				_CW_STILT_PUTC(c);
 				token = TRUE;
-				stilt_p_special_accept(a_stilt, "]", 1);
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			case '{':
 				stilt_p_token_print(a_stilt, a_stilts, 0, "{");
 				a_stilt->defer_count++;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_no_new(stilo);
 				/*
 				 * Leave the stilo as notype in order to
 				 * differentiate from normal marks.
@@ -1174,10 +1175,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 
 			switch (c) {
 			case '<':
-				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, "<<");
+				_CW_STILT_PUTC(c);
+				_CW_STILT_PUTC(c);
 				token = TRUE;
-				stilt_p_special_accept(a_stilt, "<<", 2);
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			case '>':
 				a_stilt->state = STILTTS_START;
@@ -1218,10 +1221,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 
 			switch (c) {
 			case '>':
-				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, ">>");
+				_CW_STILT_PUTC(c);
+				_CW_STILT_PUTC(c);
 				token = TRUE;
-				stilt_p_special_accept(a_stilt, ">>", 2);
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
@@ -2114,24 +2119,6 @@ stilt_p_reset(cw_stilt_t *a_stilt)
 		a_stilt->tok_str = a_stilt->buffer;
 	}
 	a_stilt->index = 0;
-}
-
-static void
-stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
-    cw_uint32_t a_len)
-{
-	cw_stilo_t	*stilo, *key;
-
-	key = stils_push(&a_stilt->tstack);
-	stilo_name_new(key, a_stilt->stil, a_token, a_len, TRUE);
-
-	stilo = stils_push(&a_stilt->estack);
-	if (stilt_dict_stack_search(a_stilt, key, stilo)) {
-		stilt_error(a_stilt, STILTE_UNDEFINED);
-		stils_pop(&a_stilt->estack);
-	} else
-		stilt_loop(a_stilt);
-	stils_pop(&a_stilt->tstack);
 }
 
 static void

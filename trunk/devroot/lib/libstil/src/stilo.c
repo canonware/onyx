@@ -9,6 +9,9 @@
  *
  ******************************************************************************/
 
+/* Compile non-inlined functions if not using inlines. */
+#define	_STILO_C_
+
 #include "../include/libstil/libstil.h"
 
 #include <stdarg.h>
@@ -23,10 +26,6 @@
 #include "../include/libstil/stila_l.h"
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilt_l.h"
-
-#ifdef _LIBSTIL_DBG
-#define _CW_STILOE_MAGIC	0x0fa6e798
-#endif
 
 /*
  * Don't actually free stiloe's if we're running GC diagnostics.  Instead, just
@@ -52,37 +51,12 @@
 #define	_CW_STILO_FILE_READLINE_BUFSIZE	100
 #endif
 
-typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_file_s cw_stiloe_file_t;
 typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_mutex_s cw_stiloe_mutex_t;
 typedef struct cw_stiloe_name_s cw_stiloe_name_t;
 typedef struct cw_stiloe_string_s cw_stiloe_string_t;
-
-struct cw_stiloe_array_s {
-	cw_stiloe_t	stiloe;
-	/*
-	 * Access is locked if this object has the locking bit set.  Indirect
-	 * arrays aren't locked, but their parents are.
-	 */
-	cw_mtx_t	lock;
-	/*
-	 * Used for remembering the current state of reference iteration.
-	 */
-	cw_uint32_t	ref_iter;
-	union {
-		struct {
-			cw_stilo_t	stilo;
-			cw_uint32_t	beg_offset;
-			cw_uint32_t	len;
-		}	i;
-		struct {
-			cw_stilo_t	*arr;
-			cw_uint32_t	len;
-		}	a;
-	}	e;
-};
 
 struct cw_stiloe_condition_s {
 	cw_stiloe_t	stiloe;
@@ -226,15 +200,6 @@ static cw_stiloe_t *stiloe_p_array_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
     cw_uint32_t a_depth);
-
-#define		stiloe_p_array_lock(a_stiloe) do {			\
-	if ((a_stiloe)->stiloe.locking && !(a_stiloe)->stiloe.indirect)	\
-		mtx_lock(&(a_stiloe)->lock);				\
-} while (0)
-#define		stiloe_p_array_unlock(a_stiloe) do {			\
-	if ((a_stiloe)->stiloe.locking && !(a_stiloe)->stiloe.indirect)	\
-		mtx_unlock(&(a_stiloe)->lock);				\
-} while (0)
 
 /* boolean. */
 static cw_stilte_t stilo_p_boolean_print(cw_stilo_t *a_stilo, cw_stilo_t
@@ -998,8 +963,10 @@ stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	 */
 	stiloe_p_array_lock(array_fr_l);
 	stiloe_p_array_lock(array_to_l);
-	for (i = 0; i < len_fr; i++)
+	for (i = 0; i < len_fr; i++) {
+		stilo_no_new(&arr_to[i]);
 		stilo_dup(&arr_to[i], &arr_fr[i]);
+	}
 	stiloe_p_array_unlock(array_fr_l);
 
 	/*
@@ -1039,28 +1006,7 @@ stilo_array_len_get(cw_stilo_t *a_stilo)
 void
 stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset, cw_stilo_t *r_el)
 {
-	cw_stiloe_array_t	*array;
-
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_ARRAY);
-	_cw_check_ptr(r_el);
-
-	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
-
-	_cw_check_ptr(array);
-	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(array->stiloe.type == STILOT_ARRAY);
-
-	stiloe_p_array_lock(array);
-	if (array->stiloe.indirect == FALSE) {
-		_cw_assert(a_offset < array->e.a.len && a_offset >= 0);
-		stilo_dup(r_el, &array->e.a.arr[a_offset]);
-	} else {
-		stilo_array_el_get(&array->e.i.stilo, a_offset +
-		    array->e.i.beg_offset, r_el);
-	}
-	stiloe_p_array_unlock(array);
+	stilo_l_array_el_get(a_stilo, a_offset, r_el);
 }
 
 void
@@ -1081,6 +1027,7 @@ stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el, cw_sint64_t a_offset)
 	stiloe_p_array_lock(array);
 	if (array->stiloe.indirect == FALSE) {
 		_cw_assert(a_offset < array->e.a.len && a_offset >= 0);
+		stilo_no_new(&array->e.a.arr[a_offset]);
 		stilo_dup(&array->e.a.arr[a_offset], a_el);
 	} else {
 		stilo_array_el_set(&array->e.i.stilo, a_el, a_offset +
@@ -1529,6 +1476,7 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t *a_key,
 	stiloe_p_dict_lock(dict);
 	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto) == FALSE) {
 		/* a_key is already defined. */
+		stilo_no_new(&dicto->val);
 		stilo_dup(&dicto->val, a_val);
 
 		/*
