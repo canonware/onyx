@@ -92,8 +92,9 @@ SRCS = [SRCS] [LIBSTIL_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = manual.tex;
+  local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/lib/c/libstil/doc/latex/% [tex_srcs]];
+  tex_srcs = [tex_srcs] [objdir]/lib/c/libstil/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }

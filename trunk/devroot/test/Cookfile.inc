@@ -29,10 +29,10 @@ test_clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.out [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.diff [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.perf [STESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0% [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.out [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.diff [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.perf [STESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [STESTS]];
 
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.out [PTESTS]];
   rm -f [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl.out [PTESTS]];
@@ -45,9 +45,9 @@ test_clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CBTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CBTESTS]];
 
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.out [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.diff [SBTESTS]];
-  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0% [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.out [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st.diff [SBTESTS]];
+  rm -f [fromto [srcdir]/%0%.st.in [objdir]/%0%.st [SBTESTS]];
 }
 
 test_distclean :

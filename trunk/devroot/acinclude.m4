@@ -36,6 +36,7 @@ if test -d "$srcdir/lib/c/$1" ; then
   cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
   libs="$libs $1"
   mkdir -p $objdir/lib/c/$1/include/$1
+  mkdir -p $objdir/lib/c/$1/doc/latex
 else
   build_$1="no"
   $2=0
@@ -56,6 +57,7 @@ if test -d "$srcdir/bin/$1" ; then
   cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
   bins="$bins $1"
   mkdir -p $objdir/bin/$1/include
+  mkdir -p $objdir/bin/$1/doc/latex
 else
   build_$1="no"
   $2=0

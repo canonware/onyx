@@ -85,8 +85,9 @@ SRCS = [SRCS] [NCAT_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = manual.tex;
+  local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/bin/ncat/doc/latex/% [tex_srcs]];
+  tex_srcs = [tex_srcs] [objdir]/bin/ncat/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }

@@ -85,8 +85,9 @@ SRCS = [SRCS] [PROXY_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = manual.tex;
+  local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/bin/proxy/doc/latex/% [tex_srcs]];
+  tex_srcs = [tex_srcs] [objdir]/bin/proxy/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }

@@ -97,11 +97,12 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = manual.tex bhp.tex buf.tex ch.tex cnd.tex dch.tex dbg.tex
-                   mem.tex mq.tex mtx.tex out.tex pezz.tex pool.tex ql.tex
-                   qr.tex qs.tex res.tex rwl.tex sema.tex thd.tex tsd.tex
-                   treen.tex xep.tex;
+  local tex_srcs = bhp.tex buf.tex ch.tex cnd.tex dch.tex dbg.tex mem.tex
+                   mq.tex mtx.tex out.tex pezz.tex pool.tex ql.tex qr.tex
+                   qs.tex res.tex rwl.tex sema.tex thd.tex tsd.tex treen.tex
+                   xep.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libstash/doc/latex/% [tex_srcs]];
+  tex_srcs = [tex_srcs] [objdir]/lib/c/libstash/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }

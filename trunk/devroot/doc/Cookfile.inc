@@ -18,7 +18,7 @@
 TEX_SRCS = ;
 FIG_SRCS = ;
 
-T_MANUAL = [srcdir]/doc/latex/manual.tex;
+T_MANUAL = [objdir]/doc/latex/manual.tex;
 D_MANUAL = [objdir]/doc/latex/manual.dvi;
 P_MANUAL = [objdir]/doc/ps/manual.ps;
 H_MANUAL = [objdir]/doc/html/manual.html;
@@ -136,5 +136,5 @@ doc_relclean :
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
     -dir [abs_objdir]/%0html -split 5 -toc_depth 4
     -footnode -noinfo -auto_link -transparent -image_type png
-    -show_section_numbers [abs_srcdir]/%0latex/%.tex;
+    -show_section_numbers [abs_objdir]/%0latex/%.tex;
 }

@@ -18,17 +18,17 @@
 % Programs.
 \clearemptydoublepage
 \part{Programs}
-\input{@abs_srcdir@/bin/ncat/doc/latex/manual}
-\input{@abs_srcdir@/bin/proxy/doc/latex/manual}
-\input{@abs_srcdir@/bin/stil/doc/latex/manual}
-\input{@abs_srcdir@/bin/stile/doc/latex/manual}
+\input{@abs_objdir@/bin/ncat/doc/latex/manual}
+\input{@abs_objdir@/bin/proxy/doc/latex/manual}
+\input{@abs_objdir@/bin/stil/doc/latex/manual}
+\input{@abs_objdir@/bin/stile/doc/latex/manual}
 
 % Libraries.
 \clearemptydoublepage
 \part{Libraries}
-\input{@abs_srcdir@/lib/c/libstash/doc/latex/manual}
-\input{@abs_srcdir@/lib/c/libsock/doc/latex/manual}
-\input{@abs_srcdir@/lib/c/libstil/doc/latex/manual}
+\input{@abs_objdir@/lib/c/libstash/doc/latex/manual}
+\input{@abs_objdir@/lib/c/libsock/doc/latex/manual}
+\input{@abs_objdir@/lib/c/libstil/doc/latex/manual}
 
 % Back matter.
 \clearemptydoublepage

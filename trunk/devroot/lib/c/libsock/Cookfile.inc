@@ -88,8 +88,9 @@ SRCS = [SRCS] [LIBSOCK_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = manual.tex /*sock.tex socks.tex*/;
+  local tex_srcs = /*sock.tex socks.tex*/;
   tex_srcs = [fromto % [srcdir]/lib/c/libsock/doc/latex/% [tex_srcs]];
+  tex_srcs = [tex_srcs] [objdir]/lib/c/libsock/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }
