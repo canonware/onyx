@@ -1,3 +1,8 @@
+1999-07-08  Jason Evans  <jasone@canonware.com>
+
+	* src/bhp.c (bhp_del_min): Call bhpi_delete(), not _cw_free(),
+	when cleaning up a bhpi instance.
+
 1999-07-06  J. Owen Evans  <jasone@canonware.com>
 
 	* src/bhp.c (bhp_delete): Delete the tree.

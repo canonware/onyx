@@ -395,7 +395,7 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
     {
       *r_data = (void *) curr_min->data;
     }
-    _cw_free(curr_min);
+    bhpi_delete(curr_min);
   }
   
 #ifdef _CW_REENTRANT
