@@ -32,14 +32,14 @@ bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void *a_priority, const void
 
 	if (a_bhpi != NULL) {
 		retval = a_bhpi;
-		bzero(retval, sizeof(cw_bhpi_t));
+		memset(retval, 0, sizeof(cw_bhpi_t));
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
 		retval = (cw_bhpi_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhpi_t));
 		if (retval == NULL)
 			goto RETURN;
-		bzero(retval, sizeof(cw_bhpi_t));
+		memset(retval, 0, sizeof(cw_bhpi_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
 		retval->dealloc_arg = a_mem;
 	}

@@ -77,8 +77,8 @@ buf_delete(cw_buf_t *a_buf)
 /*  		    & (a_buf->array_size - 1)], */
 /*  		    0x5a, */
 /*  		    sizeof(cw_bufel_t)); */
-		bzero(&a_buf->bufel_array[(i + a_buf->array_start)
-		    & (a_buf->array_size - 1)], sizeof(cw_bufel_t));
+		memset(&a_buf->bufel_array[(i + a_buf->array_start)
+		    & (a_buf->array_size - 1)], 0, sizeof(cw_bufel_t));
 #endif
 	}
 
@@ -490,10 +490,10 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 				bufc_delete(a_b->bufel_array[a_b->array_start].bufc);
 
 #ifdef _LIBSTASH_DBG
-				bzero(&a_b->bufel_array[a_b->array_start],
+				memset(&a_b->bufel_array[a_b->array_start], 0,
 				    sizeof(cw_bufel_t));
-				bzero(&a_b->cumulative_index[a_b->array_start],
-				    sizeof(cw_uint32_t));
+				memset(&a_b->cumulative_index[a_b->array_start],
+				    0, sizeof(cw_uint32_t));
 #endif
 				a_b->array_start = (a_b->array_start + 1) &
 				    (a_b->array_size - 1);
@@ -538,10 +538,10 @@ buf_split(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_offset)
 					 */
 					bufc_delete(a_b->bufel_array[a_b->array_start].bufc);
 #ifdef _LIBSTASH_DBG
-					bzero(&a_b->bufel_array[a_b->array_start],
-					    sizeof(cw_bufel_t));
-					bzero(&a_b->cumulative_index[a_b->array_start],
-					    sizeof(cw_uint32_t));
+					memset(&a_b->bufel_array[a_b->array_start],
+					    0, sizeof(cw_bufel_t));
+					memset(&a_b->cumulative_index[a_b->array_start],
+					    0, sizeof(cw_uint32_t));
 #endif
 					a_b->array_start = (a_b->array_start +
 					    1) & (a_b->array_size - 1);
@@ -872,7 +872,7 @@ buf_release_head_data(cw_buf_t *a_buf, cw_uint32_t a_amount)
 				    NULL)
 					bufc_delete(a_buf->bufel_array[array_index].bufc);
 #ifdef _LIBSTASH_DBG
-				bzero(&a_buf->bufel_array[array_index],
+				memset(&a_buf->bufel_array[array_index], 0,
 				    sizeof(cw_bufel_t));
 #endif
 
@@ -943,7 +943,7 @@ buf_release_tail_data(cw_buf_t *a_buf, cw_uint32_t a_amount)
 				    NULL)
 					bufc_delete(a_buf->bufel_array[array_index].bufc);
 #ifdef _LIBSTASH_DBG
-				bzero(&a_buf->bufel_array[array_index],
+				memset(&a_buf->bufel_array[array_index], 0,
 				    sizeof(cw_bufel_t));
 #endif
 
@@ -1462,7 +1462,7 @@ buf_set_range(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 			goto RETURN;
 		}
 		/* Initialize bufel. */
-/*  		bzero(&a_buf->bufel_array[a_buf->array_end], */
+/*  		memset(&a_buf->bufel_array[a_buf->array_end], 0, */
 /*  		    sizeof(cw_bufel_t)); */
 #ifdef _LIBSTASH_DBG
 		a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
@@ -1563,11 +1563,11 @@ buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 	retval->iov = retval->static_iov;
 
 #ifdef _LIBSTASH_DBG
-	bzero(retval->bufel_array,
+	memset(retval->bufel_array, 0,
 	    _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_bufel_t));
-	bzero(retval->cumulative_index,
+	memset(retval->cumulative_index, 0,
 	    _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(cw_uint32_t));
-	bzero(retval->iov,
+	memset(retval->iov, 0,
 	    _LIBSTASH_BUF_ARRAY_MIN_SIZE * sizeof(struct iovec));
 #endif
 
@@ -1757,11 +1757,11 @@ buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		a_buf->iov = (struct iovec *)t_ptr;
 
 #ifdef _LIBSTASH_DBG
-		bzero(&a_buf->bufel_array[a_buf->array_size],
+		memset(&a_buf->bufel_array[a_buf->array_size], 0,
 		    ((i - a_buf->array_size) * sizeof(cw_bufel_t)));
-		bzero(&a_buf->cumulative_index[a_buf->array_size],
+		memset(&a_buf->cumulative_index[a_buf->array_size], 0,
 		    ((i - a_buf->array_size) * sizeof(cw_uint32_t)));
-		bzero(&a_buf->iov[a_buf->array_size],
+		memset(&a_buf->iov[a_buf->array_size], 0,
 		    ((i - a_buf->array_size) * sizeof(struct iovec)));
 #endif
 
@@ -1789,9 +1789,9 @@ buf_p_fit_array(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 			/*
 			 * Zero the old copy to get rid of the bufel's' magic.
 			 */
-			bzero(a_buf->bufel_array,
+			memset(a_buf->bufel_array, 0,
 			    (a_buf->array_end * sizeof(cw_bufel_t)));
-			bzero(a_buf->cumulative_index,
+			memset(a_buf->cumulative_index, 0,
 			    (a_buf->array_end * sizeof(cw_uint32_t)));
 #endif
 			a_buf->array_end = a_buf->array_start +
@@ -1857,7 +1857,7 @@ buf_p_catenate_buf(cw_buf_t *a_a, cw_buf_t *a_b, cw_bool_t a_preserve)
 				    NULL)
 					bufc_delete(a_b->bufel_array[a_b->array_start].bufc);
 #ifdef _LIBSTASH_DBG
-				bzero(&a_b->bufel_array[a_b->array_start],
+				memset(&a_b->bufel_array[a_b->array_start], 0,
 				    sizeof(cw_bufel_t));
 #endif
 			}
@@ -1980,7 +1980,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 		}
 #ifdef _LIBSTASH_DBG
 		if (a_is_destructive) {
-			bzero(&a_b->bufel_array[a_b_start],
+			memset(&a_b->bufel_array[a_b_start], 0,
 			    a_num_elements * sizeof(cw_bufel_t));
 		}
 #endif
@@ -2023,7 +2023,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 		    first_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 		if (a_is_destructive) {
-			bzero(&a_b->bufel_array[a_b_start],
+			memset(&a_b->bufel_array[a_b_start], 0,
 			    first_chunk_size * sizeof(cw_bufel_t));
 		}
 #endif
@@ -2033,8 +2033,8 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 		    second_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 		if (a_is_destructive) {
-			bzero(&a_b->bufel_array[a_b_start + first_chunk_size],
-			    second_chunk_size * sizeof(cw_bufel_t));
+			memset(&a_b->bufel_array[a_b_start + first_chunk_size],
+			    0, second_chunk_size * sizeof(cw_bufel_t));
 		}
 #endif
 	} else {
@@ -2080,7 +2080,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    first_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[a_b_start],
+				memset(&a_b->bufel_array[a_b_start], 0,
 				    first_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2090,8 +2090,8 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    second_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[a_b_start +
-				    first_chunk_size], second_chunk_size *
+				memset(&a_b->bufel_array[a_b_start +
+				    first_chunk_size], 0, second_chunk_size *
 				    sizeof(cw_bufel_t));
 			}
 #endif
@@ -2101,7 +2101,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[0],
+				memset(&a_b->bufel_array[0], 0,
 				    third_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2147,7 +2147,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    first_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_a->bufel_array[a_b_start],
+				memset(&a_a->bufel_array[a_b_start], 0,
 				    first_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2157,7 +2157,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    second_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[0],
+				memset(&a_b->bufel_array[0], 0,
 				    second_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2167,7 +2167,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    third_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[second_chunk_size],
+				memset(&a_b->bufel_array[second_chunk_size], 0,
 				    third_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2241,7 +2241,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    first_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[a_b_start],
+				memset(&a_b->bufel_array[a_b_start], 0,
 				    first_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2252,7 +2252,7 @@ buf_p_copy_array(cw_buf_t *a_a, cw_buf_t *a_b, cw_uint32_t a_num_elements,
 			    second_chunk_size * sizeof(cw_bufel_t));
 #ifdef _LIBSTASH_DBG
 			if (a_is_destructive) {
-				bzero(&a_b->bufel_array[0],
+				memset(&a_b->bufel_array[0], 0,
 				    second_chunk_size * sizeof(cw_bufel_t));
 			}
 #endif
@@ -2301,7 +2301,7 @@ buf_p_make_range_writeable(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 			goto RETURN;
 		}
 		/* Initialize bufel. */
-/*  		bzero(&a_buf->bufel_array[a_buf->array_end], */
+/*  		memset(&a_buf->bufel_array[a_buf->array_end], 0, */
 /*  		    sizeof(cw_bufel_t)); */
 #ifdef _LIBSTASH_DBG
 		a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
@@ -2387,12 +2387,12 @@ bufc_new(cw_bufc_t *a_bufc, cw_mem_t *a_mem, cw_opaque_dealloc_t
 		    sizeof(cw_bufc_t));
 		if (retval == NULL)
 			goto RETURN;
-		bzero(retval, sizeof(cw_bufc_t));
+		memset(retval, 0, sizeof(cw_bufc_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
 		retval->dealloc_arg = (void *)a_mem;
 	} else {
 		retval = a_bufc;
-		bzero(retval, sizeof(cw_bufc_t));
+		memset(retval, 0, sizeof(cw_bufc_t));
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	}

@@ -244,7 +244,7 @@ main(int argc, char **argv)
 	for (conn_num = 0; should_quit == FALSE;) {
 		conn = _cw_malloc(sizeof(connection_t));
 
-		bzero(conn, sizeof(connection_t));
+		memset(conn, 0, sizeof(connection_t));
 		sock_new(&conn->client_sock, 16384);
 
 		timeout.tv_sec = 5;

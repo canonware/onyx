@@ -46,7 +46,7 @@ main(int argc, char **argv)
 	cw_bool_t	cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
 	int		opt_port = 0;
 
-	bzero(sock_vec, _LIBSOCK_SUCK_MAX_CONNS * sizeof(cw_sock_t *));
+	memset(sock_vec, 0, _LIBSOCK_SUCK_MAX_CONNS * sizeof(cw_sock_t *));
 
 	libstash_init();
 	dbg_register(cw_g_dbg, "mem_error");

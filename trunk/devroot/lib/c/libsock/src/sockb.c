@@ -129,20 +129,20 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 
 	if (arg->regs == NULL)
 		goto OOM_2;
-	bzero(arg->regs, a_max_fds * sizeof(struct cw_sockb_reg_s));
+	memset(arg->regs, 0, a_max_fds * sizeof(struct cw_sockb_reg_s));
 
 	arg->fds = (struct pollfd *)_cw_calloc(a_max_fds, sizeof(struct
 	    pollfd));
 
 	if (arg->fds == NULL)
 		goto OOM_3;
-	bzero(arg->fds, a_max_fds * sizeof(struct pollfd));
+	memset(arg->fds, 0, a_max_fds * sizeof(struct pollfd));
 
 	if (g_sockb == NULL) {
 		g_sockb = (cw_sockb_t *)_cw_malloc(sizeof(cw_sockb_t));
 		if (g_sockb == NULL)
 			goto OOM_4;
-		bzero(g_sockb, sizeof(cw_sockb_t));
+		memset(g_sockb, 0, sizeof(cw_sockb_t));
 
 		/*
 		 * Ignore SIGPIPE, so that writing to a closed socket won't

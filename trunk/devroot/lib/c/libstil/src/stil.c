@@ -51,13 +51,13 @@ stil_new(cw_stil_t *a_stil)
 
 	if (a_stil != NULL) {
 		retval = a_stil;
-		bzero(retval, sizeof(cw_stil_t));
+		memset(retval, 0, sizeof(cw_stil_t));
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_stil_t *)_cw_malloc(sizeof(cw_stil_t));
 		if (retval == NULL)
 			goto OOM_1;
-		bzero(retval, sizeof(cw_stil_t));
+		memset(retval, 0, sizeof(cw_stil_t));
 		retval->is_malloced = TRUE;
 	}
 
@@ -149,7 +149,7 @@ stil_stil_bufc_get(cw_stil_t *a_stil)
 		goto RETURN;
 	bufc_new(&retval->bufc, stila_mem_get(&a_stil->stila),
 	    (cw_opaque_dealloc_t *)pool_put, &a_stil->stil_bufc_pool);
-	bzero(retval->buffer, sizeof(retval->buffer));
+	memset(retval->buffer, 0, sizeof(retval->buffer));
 	bufc_set_buffer(&retval->bufc, retval->buffer, _CW_STIL_BUFC_SIZE, TRUE,
 	    NULL, NULL);
 

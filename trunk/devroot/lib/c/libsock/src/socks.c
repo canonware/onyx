@@ -43,7 +43,7 @@ socks_new(void)
 	retval = (cw_socks_t *)_cw_malloc(sizeof(cw_socks_t));
 	if (retval == NULL)
 		goto RETURN;
-	bzero(retval, sizeof(cw_socks_t));
+	memset(retval, 0, sizeof(cw_socks_t));
 
 #ifdef _LIBSOCK_DBG
 	retval->magic = _LIBSOCK_SOCKS_MAGIC;
@@ -177,7 +177,7 @@ socks_accept(cw_socks_t *a_socks, struct timespec * a_timeout, cw_sock_t
 		retval = NULL;
 		goto RETURN;
 	}
-	bzero(&pfd, sizeof(struct pollfd));
+	memset(&pfd, 0, sizeof(struct pollfd));
 
 	pfd.fd = a_socks->sockfd;
 	pfd.events = POLLIN;

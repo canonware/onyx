@@ -131,7 +131,7 @@ mem_delete(cw_mem_t *a_mem)
 		    num_addrs))) {
 			char	buf[1025];
 
-			bzero(buf, sizeof(buf));
+			memset(buf, 0, sizeof(buf));
 			out_put_sn(NULL, buf, 1024,
 			    "[s](): [i] unfreed allocation[s]\n", __FUNCTION__,
 			    num_addrs, num_addrs != 1 ? "s" : "");
@@ -143,7 +143,7 @@ mem_delete(cw_mem_t *a_mem)
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): 0x[p], size [i] never freed "
 				    "(allocated at [s], line [i])\n",
@@ -216,7 +216,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 		if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 			char	buf[1025];
 
-			bzero(buf, sizeof(buf));
+			memset(buf, 0, sizeof(buf));
 			out_put_sn(NULL, buf, 1024,
 			    "[s](): malloc([i]) returned NULL at [s], "
 			    "line [i]\n",
@@ -233,7 +233,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 				_cw_check_ptr(old_allocation);
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): 0x[p] multiply-allocated "
 				    "(was at [s], line [i], size [i];"
@@ -253,7 +253,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 			if (allocation == NULL) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): malloc([i]) returned NULL\n",
 				    __FUNCTION__, sizeof(struct cw_mem_item_s));
@@ -269,7 +269,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 				    "mem_verbose")) {
 					char	buf[1025];
 
-					bzero(buf, sizeof(buf));
+					memset(buf, 0, sizeof(buf));
 					out_put_sn(NULL, buf, 1024,
 					    "[s](): 0x[p] <-- malloc([i]) "
 					    "at [s], line [i]\n", __FUNCTION__,
@@ -283,7 +283,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 					    "mem_error")) {
 						char	buf[1025];
 
-						bzero(buf, sizeof(buf));
+						memset(buf, 0, sizeof(buf));
 
 						out_put_sn(NULL, buf, 1024,
 						    "[s](): Memory allocation"
@@ -344,7 +344,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 		if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 			char	buf[1025];
 
-			bzero(buf, sizeof(buf));
+			memset(buf, 0, sizeof(buf));
 			out_put_sn(NULL, buf, 1024,
 			    "[s](): calloc([i], [i]) returned NULL "
 			    "at [s], line [i]\n", __FUNCTION__, a_number,
@@ -361,7 +361,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 
 				_cw_check_ptr(old_allocation);
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): 0x[p] multiply-allocated "
 				    "(was at [s], line [i], size [i];"
@@ -381,7 +381,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 			if (allocation == NULL) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): malloc([i]) returned NULL\n",
 				    __FUNCTION__, sizeof(struct cw_mem_item_s));
@@ -400,7 +400,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 				    "mem_verbose")) {
 					char	buf[1025];
 
-					bzero(buf, sizeof(buf));
+					memset(buf, 0, sizeof(buf));
 					out_put_sn(NULL, buf, 1024,
 					    "[s](): 0x[p] <-- calloc([i], [i]) "
 					    "at [s], line [i]\n",
@@ -414,7 +414,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 					    "mem_error")) {
 						char	buf[1025];
 
-						bzero(buf, sizeof(buf));
+						memset(buf, 0, sizeof(buf));
 
 						out_put_sn(NULL, buf, 1024,
 						    "[s](): Memory allocation "
@@ -476,7 +476,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 		if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 			char	buf[1025];
 
-			bzero(buf, sizeof(buf));
+			memset(buf, 0, sizeof(buf));
 			out_put_sn(NULL, buf, 1024,
 			    "[s](): realloc(0x[p], [i]) "
 			    "returned NULL at [s], line [i]\n", __FUNCTION__,
@@ -491,7 +491,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): 0x[p] not allocated\n",
 				    __FUNCTION__, a_ptr);
@@ -513,7 +513,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 				if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 					char	buf[1025];
 
-					bzero(buf, sizeof(buf));
+					memset(buf, 0, sizeof(buf));
 
 					out_put_sn(NULL, buf, 1024,
 					    "[s](): Memory allocation error; "
@@ -530,7 +530,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 			if (dbg_is_registered(cw_g_dbg, "mem_verbose")) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): reallocing 0x[p]"
 				    " (was size [i], allocated at [s], line"
@@ -565,7 +565,7 @@ mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 			if (dbg_is_registered(cw_g_dbg, "mem_error")) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): 0x[p] not allocated, "
 				    "attempted to free at [s], line [i]\n",
@@ -577,7 +577,7 @@ mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 			if (dbg_is_registered(cw_g_dbg, "mem_verbose")) {
 				char	buf[1025];
 
-				bzero(buf, sizeof(buf));
+				memset(buf, 0, sizeof(buf));
 				out_put_sn(NULL, buf, 1024,
 				    "[s](): Freeing 0x[p], size [i], at [s], "
 				    "line [i] (allocated at [s], line [i])\n",

@@ -23,7 +23,7 @@ treen_new(cw_treen_t *a_treen, cw_mem_t *a_mem, cw_opaque_dealloc_t
 
 	if (a_treen != NULL) {
 		retval = a_treen;
-		bzero(retval, sizeof(cw_treen_t));
+		memset(retval, 0, sizeof(cw_treen_t));
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
@@ -31,7 +31,7 @@ treen_new(cw_treen_t *a_treen, cw_mem_t *a_mem, cw_opaque_dealloc_t
 		    sizeof(cw_treen_t));
 		if (retval == NULL)
 			goto RETURN;
-		bzero(retval, sizeof(cw_treen_t));
+		memset(retval, 0, sizeof(cw_treen_t));
 		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
 		retval->dealloc_arg = a_mem;
 	}

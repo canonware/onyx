@@ -32,13 +32,13 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 
 	if (a_dch != NULL) {
 		retval = a_dch;
-		bzero(retval, sizeof(cw_dch_t));
+		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_dch_t *)_cw_mem_malloc(a_mem, sizeof(cw_dch_t));
 		if (retval == NULL)
 			goto RETURN;
-		bzero(retval, sizeof(cw_dch_t));
+		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = TRUE;
 	}
 

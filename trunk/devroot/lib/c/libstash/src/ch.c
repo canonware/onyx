@@ -25,14 +25,14 @@ ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
 
 	if (NULL != a_ch) {
 		retval = a_ch;
-		bzero(retval, _CW_CH_TABLE2SIZEOF(a_table_size));
+		memset(retval, 0, _CW_CH_TABLE2SIZEOF(a_table_size));
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_ch_t
 		    *)_cw_malloc(_CW_CH_TABLE2SIZEOF(a_table_size));
 		if (NULL == retval)
 			goto RETURN;
-		bzero(retval, _CW_CH_TABLE2SIZEOF(a_table_size));
+		memset(retval, 0, _CW_CH_TABLE2SIZEOF(a_table_size));
 		retval->is_malloced = TRUE;
 	}
 

@@ -237,7 +237,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 			retval = -1;
 			goto RETURN;
 		}
-		bzero(&server_addr, sizeof(struct sockaddr_in));
+		memset(&server_addr, 0, sizeof(struct sockaddr_in));
 		server_addr.sin_family = AF_INET;
 
 		(server_addr.sin_addr).s_addr = server_ip;
@@ -252,7 +252,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 			struct pollfd	pfd;
 			int		timeout;
 
-			bzero(&pfd, sizeof(struct pollfd));
+			memset(&pfd, 0, sizeof(struct pollfd));
 			pfd.fd = a_sock->sockfd;
 			pfd.events = POLLIN | POLLOUT;
 
