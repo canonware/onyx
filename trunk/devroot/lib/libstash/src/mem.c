@@ -89,16 +89,6 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 /*    _cw_check_ptr(a_mem); */
 
   retval = _cw_malloc(a_size);
-  if (retval == NULL)
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_malloc",
-		"malloc(%d) returned NULL\n", a_size);
-    abort();
-  }
-
-#ifdef _LIBSTASH_DBG
-  bzero(retval, a_size);
-#endif
 
   if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
   {
@@ -120,6 +110,17 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   }
 #endif
   
+  if (retval == NULL)
+  {
+    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_malloc",
+		"malloc(%d) returned NULL\n", a_size);
+    abort();
+  }
+
+#ifdef _LIBSTASH_DBG
+  bzero(retval, a_size);
+#endif
+  
   return retval;
 }
 
@@ -132,17 +133,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number,
 /*    _cw_check_ptr(a_mem); */
 
   retval = _cw_calloc(a_number, a_size);
-  if (retval == NULL)
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_calloc",
-		"calloc(%d, %d) returned NULL\n", a_number, a_size);
-    abort();
-  }
 
-#ifdef _LIBSTASH_DBG
-  bzero(retval, a_number * a_size);
-#endif
-  
   if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
   {
     log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
@@ -163,6 +154,17 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number,
   }
 #endif
   
+  if (retval == NULL)
+  {
+    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_calloc",
+		"calloc(%d, %d) returned NULL\n", a_number, a_size);
+    abort();
+  }
+
+#ifdef _LIBSTASH_DBG
+  bzero(retval, a_number * a_size);
+#endif
+  
   return retval;
 }
 
@@ -175,12 +177,6 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   _cw_check_ptr(a_ptr);
 
   retval = _cw_realloc(a_ptr, a_size);
-  if (retval == NULL)
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_realloc",
-		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
-    abort();
-  }
   
   if (dbg_is_registered(cw_g_dbg, "mem_verbose"))
   {
@@ -212,6 +208,13 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   }
 #endif
 
+  if (retval == NULL)
+  {
+    log_eprintf(cw_g_log, __FILE__, __LINE__, "mem_realloc",
+		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
+    abort();
+  }
+  
   return retval;
 }
 

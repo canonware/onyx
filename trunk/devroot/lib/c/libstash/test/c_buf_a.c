@@ -816,48 +816,53 @@ main()
     _cw_assert(40 == buf_get_size(&buf_a));
     _cw_assert(8 == buf_get_size(&buf_b));
 
+    /* Here. */
     buf_catenate_buf(&buf_b, &buf_c, TRUE);
-    _cw_assert(24 == buf_get_size(&buf_b));
+    _cw_assert(32 == buf_get_size(&buf_b));
     _cw_assert(24 == buf_get_size(&buf_c));
 
     buf_catenate_buf(&buf_c, &buf_b, FALSE);
-    _cw_assert(48 == buf_get_size(&buf_a));
+    _cw_assert(40 == buf_get_size(&buf_a));
     _cw_assert(0 == buf_get_size(&buf_b));
-    _cw_assert(48 == buf_get_size(&buf_c));
+    _cw_assert(56 == buf_get_size(&buf_c));
 
 /*      buf_dump(&buf_a, "buf_a "); */
 /*      buf_dump(&buf_b, "buf_b "); */
 /*      buf_dump(&buf_c, "buf_c "); */
     
     _cw_assert(FALSE == buf_release_head_data(&buf_a, 10));
-    _cw_assert(38 == buf_get_size(&buf_a));
+    _cw_assert(30 == buf_get_size(&buf_a));
     
     _cw_assert(FALSE == buf_release_tail_data(&buf_a, 10));
-    _cw_assert(28 == buf_get_size(&buf_a));
+    _cw_assert(20 == buf_get_size(&buf_a));
 
     buf_catenate_buf(&buf_b, &buf_a, TRUE);
-    _cw_assert(28 == buf_get_size(&buf_b));
+    _cw_assert(20 == buf_get_size(&buf_b));
     
     buf_catenate_buf(&buf_b, &buf_a, FALSE);
     _cw_assert(0 == buf_get_size(&buf_a));
-    _cw_assert(56 == buf_get_size(&buf_b));
+    _cw_assert(40 == buf_get_size(&buf_b));
+
+    _cw_assert(56 == buf_get_size(&buf_c));
 
 
     _cw_assert(FALSE == buf_release_tail_data(&buf_c, 10));
-    _cw_assert(38 == buf_get_size(&buf_c));
+    _cw_assert(46 == buf_get_size(&buf_c));
     
     _cw_assert(FALSE == buf_release_head_data(&buf_c, 10));
-    _cw_assert(28 == buf_get_size(&buf_c));
+    _cw_assert(36 == buf_get_size(&buf_c));
 
     buf_catenate_buf(&buf_a, &buf_c, TRUE);
-    _cw_assert(28 == buf_get_size(&buf_a));
+    _cw_assert(36 == buf_get_size(&buf_a));
     
     buf_catenate_buf(&buf_a, &buf_c, FALSE);
     _cw_assert(0 == buf_get_size(&buf_c));
-    _cw_assert(56 == buf_get_size(&buf_a));
+    _cw_assert(72 == buf_get_size(&buf_a));
 
-
-    buf_catenate_buf(&buf_c, &buf_b, TRUE);
+    buf_release_tail_data(&buf_a, 16);
+    buf_catenate_buf(&buf_c, &buf_a, TRUE);
+    buf_release_head_data(&buf_b, 40);
+    buf_catenate_buf(&buf_b, &buf_a, TRUE);
     _cw_assert(56 == buf_get_size(&buf_a));
     _cw_assert(56 == buf_get_size(&buf_b));
     _cw_assert(56 == buf_get_size(&buf_c));

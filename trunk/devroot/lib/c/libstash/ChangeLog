@@ -1,3 +1,7 @@
+1999-02-26  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c : Complete testing.
+
 1999-02-25  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c : Add intelligence and logging to mem class that
@@ -5,7 +9,7 @@
 
 1999-02-24  Jason Evans  <jasone@canonware.com>
 
-	* : Fully implement and test buf, bufel, and bufpool.
+	* : Fully implement and partially test buf, bufel, and bufpool.
 
 1999-02-22  Jason Evans  <jasone@canonware.com>
 

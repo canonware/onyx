@@ -6,3 +6,5 @@ c_*_b
 c_*_c
 p*.pl
 b19980828a
+*.core
+core
