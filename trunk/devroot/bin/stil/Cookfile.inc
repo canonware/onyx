@@ -53,7 +53,9 @@ SRCS = [SRCS] [STIL_SRCS];
  * output.
  */
 {
-  local stests = copy_a.st.in eval.st.in gc_roll.st.in hello.st.in
+  local stests = catenate_a.st.in catenate_b.st.in catenate_c.st.in
+                 catenate_d.st.in copy_a.st.in eval.st.in gc_roll.st.in
+                 hello.st.in
                  integer.st.in monitor_a.st.in monitor_b.st.in monitor_c.st.in
                  nsleep_a.st.in nsleep_b.st.in nsleep_c.st.in
                  nsleep_d.st.in sclear_a.st.in sclear_b.st.in sclear_c.st.in

@@ -1,0 +1,4 @@
+Error /typecheck in --catenate--
+ostack: (-stack- -array- --catenate--)
+estack: (--start-- -file- --catenate--)
+dstack: (-dict- -dict- -dict- -dict-)

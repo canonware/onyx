@@ -988,6 +988,45 @@ s:1> 1 sprint
 s:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:catenate}
+\index{\stilop{}{catenate}{}}
+\item[{\stilop{[a] [b]}{catenate}{[a b]}}: ]
+\item[{\stilop{(a) (b)}{catenate}{(a b)}}: ]
+\item[{\stilop{`a' `b'}{catenate}{`ab'}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a: ]
+			An array, stack, or string.
+		\item[b: ]
+			An array, stack, or string.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[ab: ]
+			The catenation of \oparg{a} and \oparg{b}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Catenate two arrays, strings, or stacks.
+	\item[Example(s): ]\begin{verbatim}
+
+s:0> [`a'] [`b'] catenate
+s:1> 1 sprint
+[`a' `b']
+s:0> (`a') (`b') catenate
+s:1> 1 sprint
+(`a' `b')
+s:0> `a' `b' catenate
+s:1> 1 sprint
+`ab'
+s:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:monitor}
 \index{\stilop{}{monitor}{}}
 \item[{\stilop{mutex proc}{monitor}{--}}: ]
