@@ -17,7 +17,7 @@
 #include <libstash/libstash_r.h>
 
 #define NUM_STRINGS 20
-#define NUM_THREADS 100
+#define NUM_THREADS 50
 
 struct foo_s
 {
