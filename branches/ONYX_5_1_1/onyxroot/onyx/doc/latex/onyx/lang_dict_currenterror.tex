@@ -1,0 +1,429 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% currenterror reference portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{currenterror}
+\label{sec:currenterror}
+\index{currenterror@\onyxop{}{currenterror}{}}
+
+Each thread has its own currenterror dictionary, which is used by the error
+handling machinery to store error state.
+
+\begin{longtable}{\optableformat{4.10}}
+\caption{currenterror summary}
+\\
+\hline
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline \endhead
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+\optableent
+	{--}
+	{{\bf \htmlref{newerror}{currenterror:newerror}}}
+	{boolean}
+	{Set to true during error handling.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{errorname}{currenterror:errorname}}}
+	{name}
+	{Name of most recent error.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{origin}{currenterror:origin}}}
+	{string/null}
+	{Get origin of syntax error.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{line}{currenterror:line}}}
+	{number}
+	{Get line number of syntax error.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{column}{currenterror:column}}}
+	{number}
+	{Get column number of syntax error.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{ostack}{currenterror:ostack}}}
+	{stack}
+	{ostack snapshot.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{dstack}{currenterror:dstack}}}
+	{stack}
+	{dstack snaphot.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{cstack}{currenterror:cstack}}}
+	{stack}
+	{cstack snaphot.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{estack}{currenterror:estack}}}
+	{stack}
+	{estack snapshot.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{istack}{currenterror:istack}}}
+	{stack}
+	{istack snapshot.}
+\end{longtable}
+
+\begin{description}
+\label{currenterror:column}
+\index{column@\onyxop{}{column}{}}
+\item[{\onyxop{--}{column}{integer}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			Column number, valid only if the error was a
+			syntaxerror.  Column numbering starts at 0.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the column number that a syntaxerror occurred on.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `1 2 3}' cvx eval
+At line 1, column 5: Error $syntaxerror
+ostack: (1 2 3 `}')
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..3):
+0:      `1 2 3}'
+1:      --eval--
+2:      -file-
+3:      --start--
+onyx:5> currenterror $column get 1 sprint
+5
+onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:cstack}
+\index{cstack@\onyxop{}{cstack}{}}
+\item[{\onyxop{--}{cstack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A cstack snapshot.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a stack that is a cstack snapshot as of the most recent
+		error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin cstack end 1 sprint
+()
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:dstack}
+\index{dstack@\onyxop{}{dstack}{}}
+\item[{\onyxop{--}{dstack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A dstack snapshot.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a stack that is a dstack snapshot as of the most recent
+		error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin dstack end 1 sprint
+(-dict- -dict- -dict- -dict-)
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:errorname}
+\index{errorname@\onyxop{}{errorname}{}}
+\item[{\onyxop{--}{errorname}{name}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[name: ]
+			Name of the most recent error.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the name of the most recent error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin errorname end 1 sprint
+$undefined
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:estack}
+\index{estack@\onyxop{}{estack}{}}
+\item[{\onyxop{--}{estack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			An estack snapshot.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a stack that is an estack snapshot as of the most recent
+		error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin estack end 1 sprint
+(--start-- -file- x)
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:istack}
+\index{istack@\onyxop{}{istack}{}}
+\item[{\onyxop{--}{istack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			An istack snapshot.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a stack that is an istack snapshot as of the most recent
+		error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin istack end 1 sprint
+(0 0 0)
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:newerror}
+\index{newerror@\onyxop{}{newerror}{}}
+\item[{\onyxop{--}{newerror}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			False if there has been no error since the last time
+			newerror was reset; true otherwise.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a boolean that represents whether there has been an error
+		since the last time newerror was set to false (as during
+		interpreter initialization).  It is the application's
+		responsibility to reset newerror after each error if it expects
+		the value to be useful across multiple errors.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> currenterror begin
+onyx:0> newerror 1 sprint
+false
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> newerror 1 sprint
+true
+onyx:1> $newerror false def
+onyx:1> newerror 1 sprint
+false
+onyx:1> resume
+onyx:1> y
+Error $undefined
+ostack: (x)
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      y
+1:      -file-
+2:      --start--
+onyx:2> newerror 1 sprint
+true
+onyx:2>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:line}
+\index{line@\onyxop{}{line}{}}
+\item[{\onyxop{--}{line}{integer}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			Line number, valid only if the error was a syntaxerror.
+			Line numbering starts at 1.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the line number that a syntaxerror occurred on.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `1 2 3}' cvx eval
+At line 1, column 5: Error $syntaxerror
+ostack: (1 2 3 `}')
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..3):
+0:      `1 2 3}'
+1:      --eval--
+2:      -file-
+3:      --start--
+onyx:5> currenterror $line get 1 sprint
+1
+onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:origin}
+\index{origin@\onyxop{}{origin}{}}
+\item[{\onyxop{--}{origin}{string/null}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string/null: ]
+			Origin string if the error was a syntaxerror, null
+			otherwise.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the origin of a syntaxerror.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 2 3}
+At *stdin*:1:5: Error $syntaxerror
+ostack: (1 2 3 `}')
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..1):
+0:      -file-
+1:      --start--
+onyx:5> currenterror $origin get 1 sprint
+`*stdin*'
+onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:ostack}
+\index{ostack@\onyxop{}{ostack}{}}
+\item[{\onyxop{--}{ostack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			An ostack snapshot.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get a stack that is an ostack snapshot as of the most recent
+		error.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> x
+Error $undefined
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      x
+1:      -file-
+2:      --start--
+onyx:1> currenterror begin ostack end 1 sprint
+()
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\end{description}
