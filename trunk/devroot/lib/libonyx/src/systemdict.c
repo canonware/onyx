@@ -4845,6 +4845,11 @@ systemdict_ndn(cw_nxo_t *a_thread)
 	return;
     }
     count = nxo_integer_get(nxo);
+    if (count < 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
     if (count > nxo_stack_count(ostack) - 1)
     {
 	nxo_thread_nerror(a_thread, NXN_stackunderflow);
@@ -5066,6 +5071,11 @@ systemdict_nup(cw_nxo_t *a_thread)
 	return;
     }
     count = nxo_integer_get(nxo);
+    if (count < 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
     if (count > nxo_stack_count(ostack) - 1)
     {
 	nxo_thread_nerror(a_thread, NXN_stackunderflow);
@@ -6960,6 +6970,11 @@ systemdict_sndn(cw_nxo_t *a_thread)
 	return;
     }
     count = nxo_integer_get(nxo);
+    if (count < 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
     if (count > nxo_stack_count(stack))
     {
 	nxo_thread_nerror(a_thread, NXN_stackunderflow);
@@ -7085,6 +7100,11 @@ systemdict_snup(cw_nxo_t *a_thread)
 	return;
     }
     count = nxo_integer_get(nxo);
+    if (count < 1)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
     if (count > nxo_stack_count(stack))
     {
 	nxo_thread_nerror(a_thread, NXN_stackunderflow);
