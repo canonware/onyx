@@ -8,15 +8,17 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 193 $
+ * $Date: 1998-09-01 18:16:45 -0700 (Tue, 01 Sep 1998) $
  *
  * <<< Description >>>
  *
  * Block repository backing store class.  This class encapsulates a file or 
  * raw device and provides read and write functions that behave the same
- * regardless of the underlying backing store.  In the case of a
- * dynamically resizeable file, 
+ * regardless of the underlying backing store.
+ *
+ * XXX A function that writes multiple blocks could speed up the br's
+ * buffer writes considerably.
  *
  ****************************************************************************/
 
