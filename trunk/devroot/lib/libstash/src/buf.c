@@ -68,10 +68,6 @@ bufpool_delete(cw_bufpool_t * a_bufpool)
   _cw_check_ptr(a_bufpool);
   _cw_assert(a_bufpool->magic == _CW_BUFPOOL_MAGIC);
   
-#ifdef _LIBSTASH_DBG
-  a_bufpool->magic = 0;
-#endif
-
 #ifdef _CW_REENTRANT
   mtx_delete(&a_bufpool->lock);
 #endif
@@ -84,6 +80,9 @@ bufpool_delete(cw_bufpool_t * a_bufpool)
     _cw_free(buffer);
   }
 
+#ifdef _LIBSTASH_DBG
+  bzero(a_bufpool, sizeof(cw_bufpool_t));
+#endif
   if (a_bufpool->is_malloced)
   {
     _cw_free(a_bufpool);
@@ -171,6 +170,10 @@ bufpool_get_buffer(cw_bufpool_t * a_bufpool)
   {
     retval = _cw_malloc(a_bufpool->buffer_size);
   }
+
+#ifdef _LIBSTASH_DBG
+  bzero(retval, a_bufpool->buffer_size);
+#endif
   
 #ifdef _CW_REENTRANT
   mtx_unlock(&a_bufpool->lock);
@@ -246,6 +249,11 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
   retval->array = (cw_bufel_array_el_t *)
     _cw_malloc(2 * sizeof(cw_bufel_array_el_t));
   retval->iov = (struct iovec *) _cw_malloc(2 * sizeof(struct iovec));
+
+#ifdef _LIBSTASH_DBG
+  bzero(retval->array, 2 * sizeof(cw_bufel_array_el_t));
+  bzero(retval->iov, 2 * sizeof(struct iovec));
+#endif
   
   return retval;
 }
@@ -273,9 +281,8 @@ buf_delete(cw_buf_t * a_buf)
   }
 
 #ifdef _LIBSTASH_DBG
-  a_buf->magic = 0;
+  bzero(a_buf, sizeof(cw_buf_t));
 #endif
-
   if (a_buf->is_malloced)
   {
     _cw_free(a_buf);
@@ -422,9 +429,6 @@ buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count)
 void
 buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
 {
-  cw_uint32_t i, j, k;
-  cw_bool_t did_bufel_merge = FALSE;
-  
   _cw_check_ptr(a_a);
   _cw_assert(a_a->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_b);
@@ -440,89 +444,7 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
   }
 #endif
 
-  buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid);
-    
-  /* This looks ugly because we have to be careful to not decrement past the
-   * beginning of the array. */
-  if (a_a->array_num_valid > 0)
-  {
-    cw_uint32_t last_element_index;
-    
-    last_element_index = ((a_a->array_end + a_a->array_size - 1)
-			  % a_a->array_size);
-    if ((bufel_get_data_ptr(&a_a->array[last_element_index].bufel)
-	 == bufel_get_data_ptr(&a_b->array[a_b->array_start].bufel))
-	&& (bufel_get_end_offset(&a_a->array[last_element_index].bufel)
-	    == bufel_get_beg_offset(&a_b->array[a_b->array_start].bufel)))
-    {
-      /* These two bufel's reference the same bufc, and the buffer regions they
-       * refer to are consecutive and adjacent.  Merge the two bufel's
-       * together. */
-      did_bufel_merge = TRUE;
-
-      bufel_set_end_offset(&a_a->array[last_element_index].bufel,
-			   (bufel_get_end_offset(
-			     &a_a->array[last_element_index].bufel)
-			    + bufel_get_valid_data_size(
-			      &a_b->array[a_b->array_start].bufel)));
-      
-      a_a->size
-	+= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel);
-      
-      a_a->array[last_element_index].cumulative_size = a_a->size;
-      
-      if (FALSE == a_preserve)
-      {
-	bufel_delete(&a_b->array[a_b->array_start].bufel);
-      }
-    }
-  }
-  
-  /* Iterate through a_b's array, creating bufel's in a_a and adding references
-   * to a_b's bufel data. */
-  for (i = 0,
-	 j = a_a->array_start,
-	 k = (a_b->array_start + (did_bufel_merge ? 1 : 0)) % a_b->array_size;
-       i < a_b->array_num_valid;
-       i++,
-	 j = (j + 1) % a_a->array_size,
-	 k = (k + 1) % a_b->array_size)
-  {
-    memcpy(&a_a->array[i].bufel,
-	   &a_b->array[j].bufel,
-	   sizeof(cw_bufel_t));
-
-    a_a->size
-      += bufel_get_valid_data_size(&a_a->array[i].bufel);
-
-    a_a->array[i].cumulative_size = a_a->size;
-
-    a_a->array_num_valid++;
-
-    if (TRUE == a_preserve)
-    {
-      bufc_ref_increment(a_a->array[i].bufel.bufc);
-    }
-#ifdef _LIBSTASH_DBG
-    else
-    {
-      a_b->array[j].bufel.magic = 0;
-    }
-#endif
-  }
-
-  /* Finish making a_a's state consistent. */
-  a_a->array_end = i;
-
-  /* Make a_b's state consistent if not preserving its state. */
-  if (FALSE == a_preserve)
-  {
-    a_b->size = 0;
-    a_b->array_num_valid = 0;
-    a_b->array_start = 0;
-    a_b->array_end = 0;
-    a_b->is_cumulative_valid = FALSE;
-  }
+  buf_p_catenate_buf(a_a, a_b, a_preserve);
   
 #ifdef _CW_REENTRANT
   if (a_b->is_threadsafe == TRUE)
@@ -541,108 +463,153 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
 {
   cw_uint32_t array_element, bufel_offset, num_bufels_to_move;
   cw_uint32_t i, a_a_index, a_b_index;
+  cw_bool_t did_bufel_merge = FALSE;
 
   _cw_check_ptr(a_a);
   _cw_assert(a_a->magic == _CW_BUF_MAGIC);
   _cw_check_ptr(a_b);
   _cw_assert(a_b->magic == _CW_BUF_MAGIC);
-  _cw_assert(a_offset < buf_get_size(a_b));
+  _cw_assert(a_offset <= buf_get_size(a_b));
 
 #ifdef _CW_REENTRANT
-  if (a_a->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_a->lock);
-  }
-  if (a_b->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_b->lock);
-  }
+    if (a_a->is_threadsafe == TRUE)
+    {
+      mtx_lock(&a_a->lock);
+    }
+    if (a_b->is_threadsafe == TRUE)
+    {
+      mtx_lock(&a_b->lock);
+    }
 #endif
-
-  buf_p_get_data_position(a_b, a_offset, &array_element, &bufel_offset);
-
-  num_bufels_to_move = (((array_element >= a_b->array_start)
-			 ? array_element - a_b->array_start
-			 : array_element + a_b->array_size - a_b->array_start));
-  if (bufel_offset != 0)
-  {
-    num_bufels_to_move++;
-  }
-
-  /* Make sure that a_a's array is big enough. */
-  buf_p_fit_array(a_a, a_a->array_num_valid + num_bufels_to_move);
-
-  /* Iterate through the bufel's in a_b and move them to a_a, up to and
-   * including the bufel where the split occurs. */
-  for (i = 0,
-	 a_a_index = a_a->array_end,
-	 a_b_index = a_b->array_start;
-       i < num_bufels_to_move;
-       i++)
-  {
-    a_a_index = (i + a_a->array_end) % a_a->array_size;
-    a_b_index = (i + a_b->array_start) % a_b->array_size;
     
-    memcpy(&a_a->array[a_a_index].bufel,
-	   &a_b->array[a_b_index].bufel,
-	   sizeof(cw_bufel_t));
+  if ((a_offset > 0) && (a_offset < a_b->size))
+  {
+    buf_p_get_data_position(a_b, a_offset, &array_element, &bufel_offset);
 
-    a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
-    a_a->array[a_a_index].cumulative_size = a_a->size;
+    num_bufels_to_move = (((array_element >= a_b->array_start)
+			   ? array_element - a_b->array_start
+			   : (array_element + a_b->array_size
+			      - a_b->array_start)));
+    if (bufel_offset != 0)
+    {
+      num_bufels_to_move++;
+    }
+
+    /* Make sure that a_a's array is big enough. */
+    buf_p_fit_array(a_a, a_a->array_num_valid + num_bufels_to_move);
+
+    /* Try to merge first bufel of a_b and last bufel of a_a. */
+    if ((num_bufels_to_move > 0) && (a_a->array_num_valid > 0))
+    {
+      cw_uint32_t last_element_index;
+    
+      last_element_index = ((a_a->array_end + a_a->array_size - 1)
+			    % a_a->array_size);
+
+      did_bufel_merge
+	= ! bufel_p_merge_bufel(&a_a->array[last_element_index].bufel,
+				&a_b->array[a_b->array_start].bufel);
+      if (did_bufel_merge)
+      {
+	a_a->size
+	  += bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel);
+	a_a->array[last_element_index].cumulative_size = a_a->size;
+      
+	num_bufels_to_move--;
+#ifdef _LIBSTASH_DBG
+	bzero(&a_b->array[a_b->array_start], sizeof(cw_bufel_array_el_t));
+#endif
+	a_b->array_start = (a_b->array_start + 1) % a_b->array_size;
+	a_b->array_num_valid--;
+      }
+    }
+    
+    /* Iterate through the bufel's in a_b and move them to a_a, up to and
+     * including the bufel where the split occurs. */
+    for (i = 0,
+	   a_a_index = a_a->array_end,
+	   a_b_index = a_b->array_start;
+	 i < num_bufels_to_move;
+	 i++)
+    {
+      a_a_index = (i + a_a->array_end) % a_a->array_size;
+      a_b_index = (i + a_b->array_start) % a_b->array_size;
+    
+      memcpy(&a_a->array[a_a_index].bufel,
+	     &a_b->array[a_b_index].bufel,
+	     sizeof(cw_bufel_t));
+
+      a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+      a_a->array[a_a_index].cumulative_size = a_a->size;
     
 #ifdef _LIBSTASH_DBG
-    a_b->array[a_b_index].bufel.magic = 0;
+      bzero(&a_b->array[a_b_index], sizeof(cw_bufel_array_el_t));
 #endif
-  }
+    }
 
-  /* Deal with the bufel that the split is in. */
-  if (bufel_offset == 0)
-  {
-    /* The split is actually between bufel's.  We're done. */
-  }
-  else
-  {
+    /* Deal with the bufel that the split is in. */
+    if (bufel_offset == 0)
+    {
+      /* The split is actually between bufel's. */
+    }
+    else
+    {
 #ifdef _LIBSTASH_DBG
-    /* Reset the magic for the last bufel copied, since the data is split and
-     * the original bufel must still remain valid. */
-    a_b->array[a_b_index].bufel.magic = _CW_BUFEL_MAGIC;
+      /* Copy the bufel back to a_b, since the data is split and the original
+       * bufel must still remain valid. */
+      memcpy(&a_b->array[a_b_index].bufel,
+	     &a_a->array[a_a_index].bufel,
+	     sizeof(cw_bufel_t));
 #endif
-    /* Decrement a_a->size, since we don't want the whole bufc. */
-    a_a->size -= bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+      /* Decrement a_a->size, since we don't want the whole bufc. */
+      a_a->size -= bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
 
-    /* Increment the reference count for the buffer, and set the offsets
-     * appropriately for both bufel's. */
-    bufc_ref_increment(a_a->array[a_a_index].bufel.bufc);
+      /* Increment the reference count for the buffer, and set the offsets
+       * appropriately for both bufel's. */
+      bufc_ref_increment(a_a->array[a_a_index].bufel.bufc);
 		  
-    bufel_set_end_offset(&a_a->array[a_a_index].bufel, bufel_offset);
-    bufel_set_beg_offset(&a_b->array[a_b_index].bufel, bufel_offset);
+      bufel_set_end_offset(&a_a->array[a_a_index].bufel, bufel_offset);
+      bufel_set_beg_offset(&a_b->array[a_b_index].bufel, bufel_offset);
 
-    a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
-    a_a->array[a_a_index].cumulative_size = a_a->size;
-  }
+      a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+      a_a->array[a_a_index].cumulative_size = a_a->size;
+    }
 
-  /* Make a_a's and a_b's states consistent. */
-  a_a->array_num_valid += num_bufels_to_move;
-  a_a->array_end = a_a_index;
+    /* Make a_a's and a_b's states consistent. */
+    a_a->array_num_valid += num_bufels_to_move;
+    a_a->array_end = (a_a_index + 1) % a_a->array_size;
   
-  a_b->array_num_valid -= num_bufels_to_move;
-  if (bufel_offset != 0)
-  {
-    a_b->array_num_valid++;
+    a_b->array_num_valid -= num_bufels_to_move;
+    if (bufel_offset != 0)
+    {
+      a_b->array_num_valid++;
+      a_b->array_start = a_b_index;
+    }
+    else
+    {
+      a_b->array_start = (a_b_index + 1) % a_b->array_size;
+    }
+    a_b->is_cumulative_valid = FALSE;
+    a_b->size -= a_offset;
+
+    /* XXX Maybe shrink a_b. */
+  
   }
-  a_b->array_start = a_b_index;
-  a_b->is_cumulative_valid = FALSE;
-  a_b->size -= a_offset;
+  else if ((a_offset > 0) && (a_offset == a_b->size))
+  {
+    /* Same as catenation. */
+    buf_p_catenate_buf(a_a, a_b, FALSE);
+  }
   
 #ifdef _CW_REENTRANT
-  if (a_b->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_b->lock);
-  }
-  if (a_a->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_a->lock);
-  }
+    if (a_b->is_threadsafe == TRUE)
+    {
+      mtx_unlock(&a_b->lock);
+    }
+    if (a_a->is_threadsafe == TRUE)
+    {
+      mtx_unlock(&a_a->lock);
+    }
 #endif
 }
 
@@ -815,7 +782,9 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
   else
   {
-    for (i = 0; (a_amount > 0) && (i < a_buf->array_num_valid); i++)
+    for (i = 0;
+	 (a_amount > 0) && (i < a_buf->array_num_valid);
+	 i++)
     {
       array_index = (i + a_buf->array_start) % a_buf->array_size;
       
@@ -849,6 +818,11 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
       a_buf->iov = (struct iovec *)
 	_cw_realloc(a_buf->iov, 2 * sizeof(struct iovec));
       
+#ifdef _LIBSTASH_DBG
+      bzero(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      bzero(a_buf->iov, 2 * sizeof(struct iovec));
+#endif
+  
       a_buf->array_size = 2;
     }
 
@@ -926,6 +900,12 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
 	_cw_realloc(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
       a_buf->iov = (struct iovec *)
 	_cw_realloc(a_buf->iov, 2 * sizeof(struct iovec));
+
+#ifdef _LIBSTASH_DBG
+      bzero(a_buf->array, 2 * sizeof(cw_bufel_array_el_t));
+      bzero(a_buf->iov, 2 * sizeof(struct iovec));
+#endif
+      
       a_buf->array_size = 2;
     }
 
@@ -1299,6 +1279,14 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
     a_buf->iov = (struct iovec *) _cw_realloc(a_buf->iov,
 					      i * sizeof(struct iovec));
     
+#ifdef _LIBSTASH_DBG
+      bzero(&a_buf->array[a_buf->array_size],
+			    ((i - a_buf->array_size)
+			     * sizeof(cw_bufel_array_el_t)));
+      bzero(&a_buf->iov[a_buf->array_size], ((i - a_buf->array_size)
+					     * sizeof(struct iovec)));
+#endif
+      
     if ((a_buf->array_start >= a_buf->array_end)
 	&& (a_buf->array_num_valid > 0)) /* array_num_valid check probably isn't
 					  * necessary. */
@@ -1320,6 +1308,86 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
     /* This must happen last, since the old value is used for some calculations
      * above. */
     a_buf->array_size = i;
+  }
+}
+
+static void
+buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
+{
+  cw_uint32_t i, a_a_index, a_b_index;
+  cw_bool_t did_bufel_merge = FALSE;
+  
+  buf_p_fit_array(a_a, a_a->array_num_valid + a_b->array_num_valid);
+    
+  /* Try to merge the last bufel in a_a and the first bufel in a_b into one
+   * bufel in a_a. */
+  if (a_a->array_num_valid > 0)
+  {
+    cw_uint32_t last_element_index;
+    
+    last_element_index = ((a_a->array_end + a_a->array_size - 1)
+			  % a_a->array_size);
+
+    did_bufel_merge
+      = ! bufel_p_merge_bufel(&a_a->array[last_element_index].bufel,
+			      &a_b->array[a_b->array_start].bufel);
+    if (did_bufel_merge)
+    {
+      a_a->size
+	+= bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel);
+      a_a->array[last_element_index].cumulative_size = a_a->size;
+      
+      if (FALSE == a_preserve)
+      {
+	bufel_delete(&a_b->array[a_b->array_start].bufel);
+      }
+    }
+  }
+  
+  /* Iterate through a_b's array, creating bufel's in a_a and adding references
+   * to a_b's bufel data. */
+  for (i = 0,
+	 a_a_index = a_a->array_end,
+	 a_b_index
+	 = (a_b->array_start + (did_bufel_merge ? 1 : 0)) % a_b->array_size;
+       i < a_b->array_num_valid - (did_bufel_merge ? 1 : 0);
+       i++,
+	 a_a_index = (a_a_index + 1) % a_a->array_size,
+	 a_b_index = (a_b_index + 1) % a_b->array_size)
+  {
+    memcpy(&a_a->array[a_a_index].bufel,
+	   &a_b->array[a_b_index].bufel,
+	   sizeof(cw_bufel_t));
+
+    a_a->size
+      += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+
+    a_a->array[a_a_index].cumulative_size = a_a->size;
+
+    if (TRUE == a_preserve)
+    {
+      bufc_ref_increment(a_a->array[a_a_index].bufel.bufc);
+    }
+#ifdef _LIBSTASH_DBG
+    else
+    {
+      bzero(&a_b->array[a_b_index], sizeof(cw_bufel_array_el_t));
+    }
+#endif
+  }
+
+  /* Finish making a_a's state consistent. */
+  a_a->array_end = a_a_index;
+  a_a->array_num_valid += i;
+
+  /* Make a_b's state consistent if not preserving its state. */
+  if (FALSE == a_preserve)
+  {
+    a_b->size = 0;
+    a_b->array_num_valid = 0;
+    a_b->array_start = 0;
+    a_b->array_end = 0;
+    a_b->is_cumulative_valid = FALSE;
   }
 }
 
@@ -1359,9 +1427,8 @@ bufel_delete(cw_bufel_t * a_bufel)
   }
 
 #ifdef _LIBSTASH_DBG
-  a_bufel->magic = 0;
+  bzero(a_bufel, sizeof(cw_bufel_t));
 #endif
-
   if (a_bufel->is_malloced == TRUE)
   {
     _cw_free(a_bufel);
@@ -1553,6 +1620,34 @@ bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size,
   a_bufel->end_offset = a_size;
 }
 
+static cw_bool_t
+bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b)
+{
+  cw_bool_t retval;
+  
+  _cw_check_ptr(a_a);
+  _cw_assert(a_a->magic == _CW_BUFEL_MAGIC);
+  _cw_check_ptr(a_b);
+  _cw_assert(a_b->magic == _CW_BUFEL_MAGIC);
+  
+  if ((NULL != bufel_get_data_ptr(a_a))
+      && (bufel_get_data_ptr(a_a) == bufel_get_data_ptr(a_b))
+      && (bufel_get_end_offset(a_a) == bufel_get_beg_offset(a_b)))
+  {
+    /* These two bufel's reference the same bufc, and the buffer regions they
+     * refer to are consecutive and adjacent.  Merge a_b into a_a. */
+    bufel_set_end_offset(a_a, (bufel_get_end_offset(a_a)
+			       + bufel_get_valid_data_size(a_b)));
+    retval = FALSE;
+  }
+  else
+  {
+    retval = TRUE;
+  }
+  
+  return retval;
+}
+
 static cw_bufc_t *
 bufc_new(void * a_buffer, cw_uint32_t a_size,
 	 void (*a_free_func)(void * free_arg, void * buffer_p),
@@ -1589,10 +1684,6 @@ bufc_delete(cw_bufc_t * a_bufc)
   _cw_check_ptr(a_bufc);
   _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
   
-#ifdef _LIBSTASH_DBG
-  a_bufc->magic = 0;
-#endif
-
 #ifdef _CW_REENTRANT
   mtx_delete(&a_bufc->lock);
 #endif
@@ -1602,6 +1693,9 @@ bufc_delete(cw_bufc_t * a_bufc)
     a_bufc->free_func(a_bufc->free_arg, (void *) a_bufc->buf);
   }
   
+#ifdef _LIBSTASH_DBG
+  bzero(a_bufc, sizeof(cw_bufc_t));
+#endif
   _cw_free(a_bufc);
 }
 

@@ -26,6 +26,12 @@ buf_p_get_data_position(cw_buf_t * a_buf,
 static void
 buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size);
 
+static void
+buf_p_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
+
+static cw_bool_t
+bufel_p_merge_bufel(cw_bufel_t * a_a, cw_bufel_t * a_b);
+
 static cw_bufc_t *
 bufc_new(void * a_buffer, cw_uint32_t a_size,
 	 void (*a_free_func)(void * free_arg, void * buffer_p),
