@@ -136,6 +136,9 @@ install_bins :
 #if @bin_suck@
           suck_install_a
 #endif
+#if @bin_xvx@
+          xvx_install_a
+#endif
 ;
 
 install_libs :
@@ -179,6 +182,9 @@ uninstall_bins :
 #endif
 #if @bin_suck@
           suck_uninstall
+#endif
+#if @bin_xvx@
+          xvx_uninstall
 #endif
 ;
 
@@ -404,4 +410,7 @@ dataend
 #endif
 #if @bin_suck@
 #  include [srcdir]/bin/suck/Howto.cook.inc
+#endif
+#if @bin_xvx@
+#  include [srcdir]/bin/xvx/Howto.cook.inc
 #endif

@@ -28,6 +28,7 @@ CW_BUILD_BIN(proxy, bin_proxy)
 CW_BUILD_BIN(stil, bin_stil)
 CW_BUILD_BIN(stile, bin_stile)
 CW_BUILD_BIN(suck, bin_suck)
+CW_BUILD_BIN(xvx, bin_xvx)
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)

@@ -1,5 +1,5 @@
-*.[od]_*
+*.[do]_[dap]
+xvx.dbg
 xvx
-core
-*.core
-.cook.fp
+xvx.prof
+Howto.list
