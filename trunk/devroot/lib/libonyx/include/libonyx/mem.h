@@ -133,8 +133,9 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const
 	     char *a_filename, cw_uint32_t a_line_num);
 
 void *
-mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t
-	      a_old_size, const char *a_filename, cw_uint32_t a_line_num);
+mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
+	      size_t a_old_size, const char *a_filename,
+	      cw_uint32_t a_line_num);
 
 void
 mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size,
