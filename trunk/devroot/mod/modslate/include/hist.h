@@ -90,5 +90,5 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 
 #ifdef CW_BUF_VALIDATE
 void
-hist_validate(cw_hist_t *a_hist);
+hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf);
 #endif

@@ -1589,7 +1589,7 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 
 #ifdef CW_BUF_VALIDATE
 void
-hist_validate(cw_hist_t *a_hist)
+hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 {
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
@@ -1602,7 +1602,9 @@ hist_validate(cw_hist_t *a_hist)
     cw_assert(a_hist->htmp.bufp->buf == &a_hist->h);
 
     /* Validate that hpbos is a legal bpos in the data buf. */
-    cw_assert(a_hist->hbpos <= buf_len(&a_hist->h) + 1);
+    cw_assert(a_hist->hbpos >= 1
+	      || buf_len(&a_hist->h) == 0);
+    cw_assert(a_hist->hbpos <= buf_len(a_buf) + 1);
 
     /* Iterate through the undo history and validate record consistency. */
 

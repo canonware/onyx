@@ -2109,7 +2109,7 @@ buf_validate(cw_buf_t *a_buf)
     /* Validate hist, via hist_validate(). */
     if (a_buf->hist != NULL)
     {
-	hist_validate(a_buf->hist);
+	hist_validate(a_buf->hist, a_buf);
     }
 }
 #endif
