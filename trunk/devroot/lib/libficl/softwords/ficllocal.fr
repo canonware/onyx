@@ -44,5 +44,3 @@ set-current
 ; immediate compile-only
  
 previous
-
-\ ** E N D   F I C L L O C A L . F R

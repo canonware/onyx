@@ -13,13 +13,13 @@
 ** basis only.
 ** 
 ** Any third party may reproduce, distribute, or modify the ficl
-** software code or any derivative works thereof without any
+** software code or any derivative  works thereof without any 
 ** compensation or license, provided that the author information
 ** and this disclaimer text are retained in the source code files.
 ** The ficl software code is provided on an "as is"  basis without
 ** warranty of any kind, including, without limitation, the implied
 ** warranties of merchantability and fitness for a particular purpose
-** and their equivalents under the laws of any jurisdiction.
+** and their equivalents under the laws of any jurisdiction.  
 ** 
 ** I am interested in hearing from anyone who uses ficl. If you have
 ** a problem, a success story, a defect, an enhancement request, or
@@ -217,7 +217,7 @@ struct ficl_dict;
 /* 
 ** the Good Stuff starts here...
 */
-#define FICL_VER    "2.03"
+#define FICL_VER    "2.04"
 #if !defined (FICL_PROMPT)
 #define FICL_PROMPT "ok> "
 #endif
@@ -227,7 +227,7 @@ struct ficl_dict;
 ** complement of false... that unifies logical and bitwise operations
 ** nicely.
 */
-#define FICL_TRUE  (0xffffffffL)
+#define FICL_TRUE  ((unsigned long)~(0L))
 #define FICL_FALSE (0)
 #define FICL_BOOL(x) ((x) ? FICL_TRUE : FICL_FALSE)
 
@@ -334,7 +334,7 @@ typedef struct _ficlStack
     FICL_UNS nCells;    /* size of the stack */
     CELL *pFrame;       /* link reg for stack frame */
     CELL *sp;           /* stack pointer */
-    CELL base[1];       /* Bottom of the stack */
+    CELL base[1];       /* Top of stack */
 } FICL_STACK;
 
 /*
@@ -515,11 +515,17 @@ STRINGINFO  vmGetWord(FICL_VM *pVM);
 STRINGINFO  vmGetWord0(FICL_VM *pVM);
 int         vmGetWordToPad(FICL_VM *pVM);
 STRINGINFO  vmParseString(FICL_VM *pVM, char delimiter);
+STRINGINFO  vmParseStringEx(FICL_VM *pVM, char delimiter, char fSkipLeading);
+CELL        vmPop(FICL_VM *pVM);
+void        vmPush(FICL_VM *pVM, CELL c);
 void        vmPopIP  (FICL_VM *pVM);
 void        vmPushIP (FICL_VM *pVM, IPTYPE newIP);
 void        vmQuit   (FICL_VM *pVM);
 void        vmReset  (FICL_VM *pVM);
 void        vmSetTextOut(FICL_VM *pVM, OUTFUNC textOut);
+#if FICL_WANT_DEBUGGER
+void        vmStep(FICL_VM *pVM);
+#endif
 void        vmTextOut(FICL_VM *pVM, char *text, int fNewline);
 void        vmThrow  (FICL_VM *pVM, int except);
 void        vmThrowErr(FICL_VM *pVM, char *fmt, ...);
@@ -531,13 +537,13 @@ void        vmThrowErr(FICL_VM *pVM, char *fmt, ...);
 ** The inner interpreter - coded as a macro (see note for 
 ** INLINE_INNER_LOOP in sysdep.h for complaints about VC++ 5
 */
-#define M_INNER_LOOP(pVM) \
-    for (;;) \
-    {  \
+#define M_VM_STEP(pVM) \
         FICL_WORD *tempFW = *(pVM)->ip++; \
         (pVM)->runningWord = tempFW; \
         tempFW->code(pVM); \
-    }
+
+#define M_INNER_LOOP(pVM) \
+    for (;;)  { M_VM_STEP(pVM) }
 
 
 #if INLINE_INNER_LOOP != 0
@@ -761,6 +767,16 @@ int        ficlExecXT(FICL_VM *pVM, FICL_WORD *pWord);
 ** Precondition: successful execution of ficlInitSystem
 */
 FICL_VM   *ficlNewVM(void);
+
+/*
+** Force deletion of a VM. You do not need to do this 
+** unless you're creating and discarding a lot of VMs.
+** For systems that use a constant pool of VMs for the life
+** of the system, ficltermSystem takes care of VM cleanup
+** automatically.
+*/
+void ficlFreeVM(FICL_VM *pVM);
+
 
 /*
 ** Set the stack sizes (return and parameter) to be used for all

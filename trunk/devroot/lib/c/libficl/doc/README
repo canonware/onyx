@@ -1,9 +1,47 @@
-Edit paste works more sensibly if there's already text on the 
-line being appended to...
+Coming up:
+Rewrite exception words using inner loop function
+Web server scripting extension (GoAhead port)
 
-rel 2.03 (April 1999)
+ficlwin Debugger pane - step, stack trace, breakpoint
+Design:
+0. Debug pane or window - step-into step-over go
+1. DEBUG <word> --- lookup word, decompile it into debug pane
+2. At each STEP, stack pane displays stack state
+3. GO runs until breakpoint or leaves debug mode if no breaks
+4. BREAK stops debug vm at next step
+Requires a debug VM that checks for breaks, step mode, etc.
+
+rel 2.04 -- May 2000
+ficlwin:
+- Catches exceptions thrown by VM in ficlThread (0 @ for example) rather than
+  passing them off to the OS.
+
+ficl bugs vanquished
+- Fixed leading delimiter bugs in s" ." .( and ( (reported by Reuben Thomas)
+- Makefile tabs restored (thanks to Michael Somos)
+- ABORT" now throws -2 per the DPANS (thanks to Daniel Sobral for sharp eyes again)
+- ficlExec does not print the prompt string unless (source-id == 0)
+- Various fixes from the FreeBSD team 
+
+ficl enhancements
+- Words.c: modified ficlCatch to use vmExecute and vmInnerLoop (request of Daniel Sobral)
+- Added vmPop and vmPush functions (by request of Lars Krueger ) in vm.c 
+  These are shortcuts to the param stack. (Use LVALUEtoCELL to get things into CELL form)
+- Added function vmGetStringEx with a flag to specify whether or not to
+  skip lead delimiters
+- Added non-std word: number?
+- Added CORE EXT word AGAIN (by request of Reuben Thomas)
+- Added double cell local (2local) support
+- Augmented Johns Hopkins local syntax so that locals whose names begin
+  with char 2 are treated as 2locals (OK - it's goofy, but handy for OOP)
+- C-string class revised and enhanced - now dynamically sized
+- C-hashstring class derived from c-string computes hashcode too.
+
+rel 2.03 -- April 1999
 
 ficlwin:
+- Edit paste works more sensibly if there's already text on the 
+  line being appended to...
 - File Menu: recent file list and Open now load files.
 - Text ouput function is now faster through use of string 
   caching. Cache flushes at the end of each line and each
@@ -161,89 +199,4 @@ Added {{ -- }} local syntax with variable reordering
 
 
 
-
-========================================================================
-       MICROSOFT FOUNDATION CLASS LIBRARY : ficlwin
-========================================================================
-
-
-AppWizard has created this ficlwin application for you.  This application
-not only demonstrates the basics of using the Microsoft Foundation classes
-but is also a starting point for writing your application.
-
-This file contains a summary of what you will find in each of the files that
-make up your ficlwin application.
-
-ficlwin.h
-    This is the main header file for the application.  It includes other
-    project specific headers (including Resource.h) and declares the
-    CFiclwinApp application class.
-
-ficlwin.cpp
-    This is the main application source file that contains the application
-    class CFiclwinApp.
-
-ficlwin.rc
-    This is a listing of all of the Microsoft Windows resources that the
-    program uses.  It includes the icons, bitmaps, and cursors that are stored
-    in the RES subdirectory.  This file can be directly edited in Microsoft
-	Developer Studio.
-
-res\ficlwin.ico
-    This is an icon file, which is used as the application's icon.  This
-    icon is included by the main resource file ficlwin.rc.
-
-res\ficlwin.rc2
-    This file contains resources that are not edited by Microsoft 
-	Developer Studio.  You should place all resources not
-	editable by the resource editor in this file.
-
-ficlwin.clw
-    This file contains information used by ClassWizard to edit existing
-    classes or add new classes.  ClassWizard also uses this file to store
-    information needed to create and edit message maps and dialog data
-    maps and to create prototype member functions.
-
-/////////////////////////////////////////////////////////////////////////////
-
-For the main frame window:
-
-MainFrm.h, MainFrm.cpp
-    These files contain the frame class CMainFrame, which is derived from
-    CFrameWnd and controls all SDI frame features.
-
-res\Toolbar.bmp
-    This bitmap file is used to create tiled images for the toolbar.
-    The initial toolbar and status bar are constructed in the
-    CMainFrame class.  Edit this toolbar bitmap along with the
-    array in MainFrm.cpp to add more toolbar buttons.
-
-/////////////////////////////////////////////////////////////////////////////
-
-AppWizard creates one document type and one view:
-
-ficlwinDoc.h, ficlwinDoc.cpp - the document
-    These files contain your CFiclwinDoc class.  Edit these files to
-    add your special document data and to implement file saving and loading
-    (via CFiclwinDoc::Serialize).
-
-ficlwinView.h, ficlwinView.cpp - the view of the document
-    These files contain your CFiclwinView class.
-    CFiclwinView objects are used to view CFiclwinDoc objects.
-
-
-
-/////////////////////////////////////////////////////////////////////////////
-Other standard files:
-
-StdAfx.h, StdAfx.cpp
-    These files are used to build a precompiled header (PCH) file
-    named ficlwin.pch and a precompiled types file named StdAfx.obj.
-
-Resource.h
-    This is the standard header file, which defines new resource IDs.
-    Microsoft Developer Studio reads and updates this file.
-
-
-/////////////////////////////////////////////////////////////////////////////
 

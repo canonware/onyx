@@ -33,7 +33,8 @@ decimal 32 constant bl
     postpone if 
     postpone ." 
     postpone cr 
-    postpone abort 
+    [ -2 ] literal ,
+    postpone throw
     postpone endif 
 ; immediate 
 
@@ -41,8 +42,8 @@ decimal 32 constant bl
 \ ** CORE EXT
 0  constant false 
 -1 constant true 
-: <>   = invert ; 
-: 0<>  0= invert ; 
+: <>   = 0= ; 
+: 0<>  0= 0= ; 
 : compile,  , ; 
 : erase   ( addr u -- )    0 fill ; 
 : nip     ( y x -- x )     swap drop ; 
@@ -64,6 +65,8 @@ decimal 32 constant bl
 ; immediate
 
 : local  ( name -- )  bl word count (local) ;  immediate
+
+: 2local  ( name -- ) bl word count (2local) ; immediate
 
 : end-locals  ( -- )  0 0 (local) ;  immediate
 
@@ -124,3 +127,4 @@ wordlist constant hidden
 : hide   hidden dup >search ficl-set-current ;
 
 \ ** E N D   S O F T C O R E . F R
+

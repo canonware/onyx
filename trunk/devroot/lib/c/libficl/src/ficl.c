@@ -66,8 +66,6 @@ static int defaultDict  = FICL_DEFAULT_DICT;
 **************************************************************************/
 void ficlInitSystem(int nDictCells)
 {
-  ficlSysdepInit();
-  
     if (dp)
         dictDelete(dp);
 
@@ -124,6 +122,38 @@ FICL_VM *ficlNewVM(void)
 
 
 /**************************************************************************
+                        f i c l F r e e V M
+** Removes the VM in question from the system VM list and deletes the
+** memory allocated to it. This is an optional call, since ficlTermSystem
+** will do this cleanup for you. This function is handy if you're going to
+** do a lot of dynamic creation of VMs.
+**************************************************************************/
+void ficlFreeVM(FICL_VM *pVM)
+{
+	FICL_VM *pList = vmList;
+
+	assert(pVM != 0);
+
+	if (vmList == pVM)
+	{
+		vmList = vmList->link;
+	}
+	else for (pList; pList != 0; pList = pList->link)
+	{
+		if (pList->link == pVM)
+		{
+			pList->link = pVM->link;
+			break;
+		}
+	}
+
+	if (pList)
+		vmDelete(pVM);
+	return;
+}
+
+
+/**************************************************************************
                         f i c l B u i l d
 ** Builds a word into the dictionary.
 ** Preconditions: system must be initialized, and there must
@@ -143,9 +173,10 @@ int ficlBuild(char *name, FICL_CODE code, char flags)
 	int err = ficlLockDictionary(TRUE);
 	if (err) return err;
 
+	assert(dictCellsAvail(dp) > sizeof (FICL_WORD) / sizeof (CELL));
     dictAppendWord(dp, name, code, flags);
 
-	if (ficlLockDictionary(FALSE));
+	ficlLockDictionary(FALSE);
 	return 0;
 }
 
@@ -330,7 +361,7 @@ int ficlExecXT(FICL_VM *pVM, FICL_WORD *pWord)
             vmThrow(pVM, except);
         }
         break;
-   }
+    }
 
     pVM->pState    = oldState;
     return (except);
@@ -478,7 +509,7 @@ void ficlTermSystem(void)
         vmDelete(pVM);
     }
 
-    ficlSysdepTerm();
-
     return;
 }
+
+

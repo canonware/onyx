@@ -17,12 +17,14 @@ dnl Look for libraries.
 CW_BUILD_LIB(libstash, lib_stash)
 CW_BUILD_LIB(libsock, lib_sock)
 CW_BUILD_LIB(libedit, lib_edit)
+CW_BUILD_LIB(libficl, lib_ficl)
 CW_BUILD_LIB(libstil, lib_stil)
 
 dnl Look for binaries.
 CW_BUILD_BIN(blow, bin_blow)
 CW_BUILD_BIN(edittest, bin_edittest)
 CW_BUILD_BIN(echos, bin_echos)
+CW_BUILD_BIN(ficl, bin_ficl)
 CW_BUILD_BIN(ncat, bin_ncat)
 CW_BUILD_BIN(proxy, bin_proxy)
 CW_BUILD_BIN(stil, bin_stil)
@@ -171,9 +173,15 @@ dnl Process the following files.
 
 AC_OUTPUT(Howto.cook \
 test/verify \
+lib/c/libficl/softwords/softcore.pl \
 )
 
 dnl autoconf doesn't keep the execute bit if it's set for the input file, so do
 dnl it manually.
 echo chmod u+x $objdir/test/verify
 chmod u+x $objdir/test/verify
+
+if test "x$build_libficl" = "xyes" ; then
+  echo chmod u+x $objdir/lib/c/libficl/softwords/softcore.pl
+  chmod u+x $objdir/lib/c/libficl/softwords/softcore.pl
+fi

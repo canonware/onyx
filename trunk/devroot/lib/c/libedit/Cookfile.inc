@@ -131,6 +131,14 @@ done
 dataend
 }
 
+libedit_clean :
+{
+}
+
+libedit_distclean :
+{
+}
+
 /*
  * Various flags.
  */

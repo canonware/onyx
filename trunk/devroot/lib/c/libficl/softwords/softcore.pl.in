@@ -83,10 +83,6 @@ while (<>) {
     print "$out\n";
 }
 
-if ($commenting == 1) {
-    print "*/\n";
-}
-
 print <<EOF
     "quit ";
 
@@ -99,5 +95,8 @@ void ficlCompileSoftCore(FICL_VM *pVM)
         assert(FALSE);
     return;
 }
+
+
 EOF
 ;
+

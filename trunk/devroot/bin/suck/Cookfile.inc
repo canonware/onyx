@@ -113,6 +113,14 @@ done
 dataend
 }
 
+suck_clean :
+{
+}
+
+suck_distclean :
+{
+}
+
 /*
  * Various flags.
  */

@@ -216,6 +216,10 @@ set-current previous
 \ instance of the class. This word gets compiled into
 \ the wordlist of every class by the SUB method.
 \ PRECONDITION: current-class contains the class address
+\ why use a state variable instead of the stack?
+\ >> Stack state is not well-defined during compilation	(there are
+\ >> control structure match codes on the stack, of undefined size
+\ >> easiest way around this is use of this thread-local variable
 \
 : do-do-instance  ( -- )
     s" : .do-instance does> [ current-class @ ] literal ;" 
@@ -232,7 +236,8 @@ set-current previous
 \
 :noname
 	wordlist
-	create  immediate
+	create  
+    immediate
 	0       ,	\ NULL parent class
 	dup     ,	\ wid
 	3 cells ,	\ instance size 
@@ -300,7 +305,7 @@ previous
     locals| meta class |
     class meta metaclass => get-size allocate   ( -- addr fail-flag )
     abort" allocate failed "                    ( -- addr )
-    class
+    class 2dup --> init
 ;
 
 \ Create an anonymous array of initialized instances from the heap
@@ -488,5 +493,3 @@ set-current
 
 
 previous definitions
-
-\ ** E N D   O O . F R

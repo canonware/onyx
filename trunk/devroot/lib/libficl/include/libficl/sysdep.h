@@ -40,8 +40,7 @@
 #include <assert.h>
 
 #if !defined IGNORE		/* Macro to silence unused param warnings */
-/*  #define IGNORE(x) &x */
-#define IGNORE(x)
+#define IGNORE(x) &x
 #endif
 
 /*
@@ -128,13 +127,22 @@ typedef struct
     FICL_INT rem;
 } INTQR;
 
+
 /*
 ** Build controls
 ** FICL_MULTITHREAD enables dictionary mutual exclusion
-** via the ficlLockDictionary system dependent function.
+** wia the ficlLockDictionary system dependent function.
 */
 #if !defined FICL_MULTITHREAD
-#define FICL_MULTITHREAD 1
+#define FICL_MULTITHREAD 0
+#endif
+
+/*
+** FICL_WANT_DEBUGGER
+** Includes ficl code necesary to single step the VM. Turned on in ficlWin.
+*/
+#if !defined (FICL_WANT_DEBUGGER)
+#define FICL_WANT_DEBUGGER 0
 #endif
 
 /*
@@ -264,10 +272,6 @@ void  ficlTextOut(struct vm *pVM, char *msg, int fNewline);
 void *ficlMalloc (size_t size);
 void  ficlFree   (void *p);
 void *ficlRealloc(void *p, size_t size);
-
-void ficlSysdepInit(void);
-void ficlSysdepTerm(void);
-
 /*
 ** Stub function for dictionary access control - does nothing
 ** by default, user can redefine to guarantee exclusive dict
@@ -286,7 +290,7 @@ void ficlSysdepTerm(void);
 #if FICL_MULTITHREAD
 int ficlLockDictionary(short fLock);
 #else
-#define ficlLockDictionary(x) 0
+#define ficlLockDictionary(x) 0 /* ignore */
 #endif
 
 /*

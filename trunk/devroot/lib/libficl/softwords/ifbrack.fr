@@ -52,5 +52,3 @@ set-current
 : [then]  ( -- )  ;  immediate
 
 previous
-
-\ ** E N D   I F B R A C K . F R

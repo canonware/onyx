@@ -113,6 +113,14 @@ done
 dataend
 }
 
+ncat_clean :
+{
+}
+
+ncat_distclean :
+{
+}
+
 /*
  * Various flags.
  */

@@ -9,10 +9,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <libstash/libstash_r.h>
+#include "libstash/libstash.h"
 #include "libficl/libficl.h"
 
-cw_mtx_t * g_dict_lock = NULL;
+cw_bool_t g_lock_valid = FALSE;
+cw_mtx_t g_dict_lock;
 
 #if PORTABLE_LONGMULDIV == 0
 DPUNS ficlLongMul(FICL_UNS x, FICL_UNS y)
@@ -70,19 +71,19 @@ void *ficlRealloc(void *p, size_t size)
 void
 ficlSysdepInit(void)
 {
-  if (NULL == g_dict_lock)
+  if (g_lock_valid == FALSE)
   {
-    g_dict_lock = mtx_new(NULL);
+    mtx_new(&g_dict_lock);
   }
 }
 
 void
 ficlSysdepTerm(void)
 {
-  if (NULL != g_dict_lock)
+  if (g_lock_valid)
   {
-    mtx_delete(g_dict_lock);
-    g_dict_lock = NULL;
+    mtx_delete(&g_dict_lock);
+    g_lock_valid = FALSE;
   }
 }
 
@@ -101,19 +102,15 @@ ficlSysdepTerm(void)
 #if FICL_MULTITHREAD
 int ficlLockDictionary(short fLock)
 {
-  extern cw_mtx_t * g_dict_lock;
-
-  _cw_check_ptr(g_dict_lock);
-  
   if (fLock)
   {
     /* Lock. */
-    mtx_lock(g_dict_lock);
+    mtx_lock(&g_dict_lock);
   }
   else
   {
     /* Unlock. */
-    mtx_unlock(g_dict_lock);
+    mtx_unlock(&g_dict_lock);
   }
   
   return 0;

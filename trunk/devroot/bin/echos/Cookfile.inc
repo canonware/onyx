@@ -113,6 +113,14 @@ done
 dataend
 }
 
+echos_clean :
+{
+}
+
+echos_distclean :
+{
+}
+
 /*
  * Various flags.
  */

@@ -113,6 +113,14 @@ done
 dataend
 }
 
+xvx_clean :
+{
+}
+
+xvx_distclean :
+{
+}
+
 /*
  * Various flags.
  */

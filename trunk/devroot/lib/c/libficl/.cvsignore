@@ -1,5 +1,3 @@
-config.log
-config.cache
-config.status
-Makefile
 .cook.fp
+lib
+Howto.list

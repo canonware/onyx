@@ -23,5 +23,3 @@
     loop
     drop
 ;
-
-\ ** E N D   M A R K E R . F R

@@ -38,13 +38,13 @@ static char *dictCopyName(FICL_DICT *pDict, STRINGINFO si);
 void dictAbortDefinition(FICL_DICT *pDict)
 {
     FICL_WORD *pFW;
-    if (ficlLockDictionary(TRUE));
+    ficlLockDictionary(TRUE);
     pFW = pDict->smudge;
 
     if (pFW->flags & FW_SMUDGE)
         pDict->here = (CELL *)pFW->name;
 
-    if (ficlLockDictionary(FALSE));
+    ficlLockDictionary(FALSE);
     return;
 }
 
@@ -196,7 +196,7 @@ FICL_WORD *dictAppendWord2(FICL_DICT *pDict,
     char *pName;
     FICL_WORD *pFW;
 
-    if (ficlLockDictionary(TRUE));
+    ficlLockDictionary(TRUE);
 
     /*
     ** NOTE: dictCopyName advances "here" as a side-effect.
@@ -218,7 +218,7 @@ FICL_WORD *dictAppendWord2(FICL_DICT *pDict,
     if (!(flags & FW_SMUDGE))
         dictUnsmudge(pDict);
 
-    if (ficlLockDictionary(FALSE));
+    ficlLockDictionary(FALSE);
     return pFW;
 }
 
@@ -346,6 +346,7 @@ FICL_DICT  *dictCreateHashed(unsigned nCells, unsigned nHash)
 
     pDict = ficlMalloc(nAlloc);
     assert(pDict);
+	memset(pDict, 0, sizeof (FICL_DICT));
     pDict->size = nCells;
     dictEmpty(pDict, nHash);
     return pDict;
@@ -367,8 +368,7 @@ void dictDelete(FICL_DICT *pDict)
 /**************************************************************************
                         d i c t E m p t y
 ** Empty the dictionary, reset its hash table, and reset its search order.
-** Clears and (re-)creates the main hash table (pForthWords) with the
-** size specified by nHash.
+** Clears and (re-)creates the hash table with the size specified by nHash.
 **************************************************************************/
 void dictEmpty(FICL_DICT *pDict, unsigned nHash)
 {
@@ -496,7 +496,7 @@ FICL_WORD *dictLookup(FICL_DICT *pDict, STRINGINFO si)
 
     assert(pDict);
 
-    if (ficlLockDictionary(TRUE));
+    ficlLockDictionary(1);
 
     for (i = (int)pDict->nLists - 1; (i >= 0) && (!pFW); --i)
     {
@@ -504,7 +504,7 @@ FICL_WORD *dictLookup(FICL_DICT *pDict, STRINGINFO si)
         pFW = hashLookup(pHash, si, hashCode);
     }
 
-    if (ficlLockDictionary(FALSE));
+    ficlLockDictionary(0);
     return pFW;
 }
 
@@ -525,7 +525,7 @@ FICL_WORD *dictLookupLoc(FICL_DICT *pDict, STRINGINFO si)
     assert(pHash);
     assert(pDict);
 
-    if (ficlLockDictionary(TRUE));
+    ficlLockDictionary(1);
     /* 
     ** check the locals dict first... 
     */
@@ -541,7 +541,7 @@ FICL_WORD *dictLookupLoc(FICL_DICT *pDict, STRINGINFO si)
         pFW = hashLookup(pHash, si, hashCode);
     }
 
-    if (ficlLockDictionary(FALSE));
+    ficlLockDictionary(0);
     return pFW;
 }
 #endif
@@ -770,3 +770,5 @@ void hashReset(FICL_HASH *pHash)
     pHash->link = NULL;
     return;
 }
+
+

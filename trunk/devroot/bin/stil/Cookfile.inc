@@ -113,6 +113,14 @@ done
 dataend
 }
 
+stil_clean :
+{
+}
+
+stil_distclean :
+{
+}
+
 /*
  * Various flags.
  */

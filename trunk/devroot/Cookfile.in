@@ -121,6 +121,9 @@ install_bins :
 #if @bin_echos@
           echos_install_a
 #endif
+#if @bin_ficl@
+          ficl_install_a
+#endif
 #if @bin_ncat@
           ncat_install_a
 #endif
@@ -145,6 +148,9 @@ install_libs :
 #if @lib_stil@
           libstil_install
 #endif
+#if @lib_ficl@
+          libficl_install
+#endif
 #if @lib_edit@
           libedit_install
 #endif
@@ -167,6 +173,9 @@ uninstall_bins :
 #endif
 #if @bin_echos@
           echos_uninstall
+#endif
+#if @bin_ficl@
+          ficl_uninstall
 #endif
 #if @bin_ncat@
           ncat_uninstall
@@ -192,6 +201,9 @@ uninstall_libs :
 #if @lib_stil@
           libstil_uninstall
 #endif
+#if @lib_ficl@
+          libficl_uninstall
+#endif
 #if @lib_edit@
           libedit_uninstall
 #endif
@@ -204,6 +216,51 @@ uninstall_libs :
 ;
 
 clean :
+#if @bin_blow@
+          blow_clean
+#endif
+#if @bin_edittest@
+          edittest_clean
+#endif
+#if @bin_echos@
+          echos_clean
+#endif
+#if @bin_ficl@
+          ficl_clean
+#endif
+#if @bin_ncat@
+          ncat_clean
+#endif
+#if @bin_proxy@
+          proxy_clean
+#endif
+#if @bin_stil@
+          stil_clean
+#endif
+#if @bin_stile@
+          stile_clean
+#endif
+#if @bin_suck@
+          suck_clean
+#endif
+#if @bin_xvx@
+          xvx_clean
+#endif
+#if @lib_stil@
+          libstil_clean
+#endif
+#if @lib_ficl@
+          libficl_clean
+#endif
+#if @lib_edit@
+          libedit_clean
+#endif
+#if @lib_sock@
+          libsock_clean
+#endif
+#if @lib_stash@
+          libstash_clean
+#endif
 {
   rm -f core *.core;
   rm -f TAGS;
@@ -281,6 +338,51 @@ dataend
 }
 
 distclean : clean
+#if @bin_blow@
+          blow_distclean
+#endif
+#if @bin_edittest@
+          edittest_distclean
+#endif
+#if @bin_echos@
+          echos_distclean
+#endif
+#if @bin_ficl@
+          ficl_distclean
+#endif
+#if @bin_ncat@
+          ncat_distclean
+#endif
+#if @bin_proxy@
+          proxy_distclean
+#endif
+#if @bin_stil@
+          stil_distclean
+#endif
+#if @bin_stile@
+          stile_distclean
+#endif
+#if @bin_suck@
+          suck_distclean
+#endif
+#if @bin_xvx@
+          xvx_distclean
+#endif
+#if @lib_stil@
+          libstil_distclean
+#endif
+#if @lib_ficl@
+          libficl_distclean
+#endif
+#if @lib_edit@
+          libedit_distclean
+#endif
+#if @lib_sock@
+          libsock_distclean
+#endif
+#if @lib_stash@
+          libstash_distclean
+#endif
 {
   rm -f [objdir]/Howto.cook;
   rm -f [objdir]/config.cache;
@@ -374,6 +476,9 @@ dataend
 #if @lib_stil@
 #  include [srcdir]/lib/c/libstil/Howto.cook.inc
 #endif
+#if @lib_ficl@
+#  include [srcdir]/lib/c/libficl/Howto.cook.inc
+#endif
 #if @lib_edit@
 #  include [srcdir]/lib/c/libedit/Howto.cook.inc
 #endif
@@ -395,6 +500,9 @@ dataend
 #endif
 #if @bin_echos@
 #  include [srcdir]/bin/echos/Howto.cook.inc
+#endif
+#if @bin_ficl@
+#  include [srcdir]/bin/ficl/Howto.cook.inc
 #endif
 #if @bin_ncat@
 #  include [srcdir]/bin/ncat/Howto.cook.inc

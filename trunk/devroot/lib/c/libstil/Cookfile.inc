@@ -128,6 +128,14 @@ done
 dataend
 }
 
+libstil_clean :
+{
+}
+
+libstil_distclean :
+{
+}
+
 /*
  * Various flags.
  */

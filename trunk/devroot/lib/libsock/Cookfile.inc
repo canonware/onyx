@@ -127,6 +127,14 @@ done
 dataend
 }
 
+libsock_clean :
+{
+}
+
+libsock_distclean :
+{
+}
+
 /*
  * Various flags.
  */

@@ -113,6 +113,14 @@ done
 dataend
 }
 
+proxy_clean :
+{
+}
+
+proxy_distclean :
+{
+}
+
 /*
  * Various flags.
  */

@@ -27,3 +27,14 @@ testing within
 { 1 -5 5    within -> true }
 { 33000 32000 34000 within -> true }
 { 0x80000000 0x7f000000 0x81000000 within -> true }
+
+testing exception words
+: exc1 1 throw ;
+: exctest1 [ ' exc1 ] literal catch ;
+: exc2 exctest1 1 = if 2 throw endif ;
+: exctest2 [ ' exc2 ] literal catch ;
+: exctest? ' catch ;
+
+{ exctest1 -> 1 }
+{ exctest2 -> 2 }
+{ exctest? abort -> -1 }

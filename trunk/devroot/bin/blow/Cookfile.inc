@@ -113,6 +113,14 @@ done
 dataend
 }
 
+blow_clean :
+{
+}
+
+blow_distclean :
+{
+}
+
 /*
  * Various flags.
  */

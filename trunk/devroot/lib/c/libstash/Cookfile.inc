@@ -140,6 +140,14 @@ done
 dataend
 }
 
+libstash_clean :
+{
+}
+
+libstash_distclean :
+{
+}
+
 /*
  * Various flags.
  */

@@ -1,8 +1,11 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ******************************************************************************
- * ANS Forth CORE word-set written in C
- * Author: John Sadler (john_sadler@alum.mit.edu)
- ******************************************************************************/
+/*******************************************************************
+** w o r d s . c
+** Forth Inspired Command Language
+** ANS Forth CORE word-set written in C
+** Author: John Sadler (john_sadler@alum.mit.edu)
+** Created: 19 July 1997
+** 
+*******************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,6 +45,7 @@ static FICL_WORD *pExitParen    = NULL;
 static FICL_WORD *pIfParen      = NULL;
 static FICL_WORD *pInterpret    = NULL;
 static FICL_WORD *pLitParen     = NULL;
+static FICL_WORD *pTwoLitParen  = NULL;
 static FICL_WORD *pLoopParen    = NULL;
 static FICL_WORD *pPLoopParen   = NULL;
 static FICL_WORD *pQDoParen     = NULL;
@@ -52,14 +56,21 @@ static FICL_WORD *pType         = NULL;
 
 #if FICL_WANT_LOCALS
 static FICL_WORD *pGetLocalParen= NULL;
+static FICL_WORD *pGet2LocalParen= NULL;
 static FICL_WORD *pGetLocal0    = NULL;
 static FICL_WORD *pGetLocal1    = NULL;
 static FICL_WORD *pToLocalParen = NULL;
+static FICL_WORD *pTo2LocalParen = NULL;
 static FICL_WORD *pToLocal0     = NULL;
 static FICL_WORD *pToLocal1     = NULL;
 static FICL_WORD *pLinkParen    = NULL;
 static FICL_WORD *pUnLinkParen  = NULL;
 static int nLocals = 0;
+static CELL *pMarkLocals = NULL;
+
+static void doLocalIm(FICL_VM *pVM);
+static void do2LocalIm(FICL_VM *pVM);
+
 #endif
 
 
@@ -71,26 +82,26 @@ static int nLocals = 0;
 */
 static void markBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 {
-  stackPushPtr(pVM->pStack, dp->here);
-  stackPushPtr(pVM->pStack, tag);
-  return;
+    stackPushPtr(pVM->pStack, dp->here);
+    stackPushPtr(pVM->pStack, tag);
+    return;
 }
 
 static void markControlTag(FICL_VM *pVM, char *tag)
 {
-  stackPushPtr(pVM->pStack, tag);
-  return;
+    stackPushPtr(pVM->pStack, tag);
+    return;
 }
 
 static void matchControlTag(FICL_VM *pVM, char *tag)
 {
-  char *cp = (char *)stackPopPtr(pVM->pStack);
-  if ( strcmp(cp, tag) )
-  {
-    vmThrowErr(pVM, "Error -- unmatched control structure \"%s\"", tag);
-  }
+    char *cp = (char *)stackPopPtr(pVM->pStack);
+    if ( strcmp(cp, tag) )
+    {
+        vmThrowErr(pVM, "Error -- unmatched control structure \"%s\"", tag);
+    }
 
-  return;
+    return;
 }
 
 /*
@@ -100,16 +111,16 @@ static void matchControlTag(FICL_VM *pVM, char *tag)
 */
 static void resolveBackBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 {
-  long offset;
-  CELL *patchAddr;
+    long offset;
+    CELL *patchAddr;
 
-  matchControlTag(pVM, tag);
+    matchControlTag(pVM, tag);
 
-  patchAddr = (CELL *)stackPopPtr(pVM->pStack);
-  offset = patchAddr - dp->here;
-  dictAppendCell(dp, LVALUEtoCELL(offset));
+    patchAddr = (CELL *)stackPopPtr(pVM->pStack);
+    offset = patchAddr - dp->here;
+    dictAppendCell(dp, LVALUEtoCELL(offset));
 
-  return;
+    return;
 }
 
 
@@ -120,16 +131,16 @@ static void resolveBackBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 */
 static void resolveForwardBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 {
-  long offset;
-  CELL *patchAddr;
+    long offset;
+    CELL *patchAddr;
 
-  matchControlTag(pVM, tag);
+    matchControlTag(pVM, tag);
 
-  patchAddr = (CELL *)stackPopPtr(pVM->pStack);
-  offset = dp->here - patchAddr;
-  *patchAddr = LVALUEtoCELL(offset);
+    patchAddr = (CELL *)stackPopPtr(pVM->pStack);
+    offset = dp->here - patchAddr;
+    *patchAddr = LVALUEtoCELL(offset);
 
-  return;
+    return;
 }
 
 /*
@@ -139,20 +150,20 @@ static void resolveForwardBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 */
 static void resolveAbsBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 {
-  CELL *patchAddr;
-  char *cp;
+    CELL *patchAddr;
+    char *cp;
 
-  cp = stackPopPtr(pVM->pStack);
-  if (strcmp(cp, tag))
-  {
-    vmTextOut(pVM, "Warning -- Unmatched control word: ", 0);
-    vmTextOut(pVM, tag, 1);
-  }
+    cp = stackPopPtr(pVM->pStack);
+    if (strcmp(cp, tag))
+    {
+        vmTextOut(pVM, "Warning -- Unmatched control word: ", 0);
+        vmTextOut(pVM, tag, 1);
+    }
 
-  patchAddr = (CELL *)stackPopPtr(pVM->pStack);
-  *patchAddr = LVALUEtoCELL(dp->here);
+    patchAddr = (CELL *)stackPopPtr(pVM->pStack);
+    *patchAddr = LVALUEtoCELL(dp->here);
 
-  return;
+    return;
 }
 
 
@@ -165,54 +176,66 @@ static void resolveAbsBranch(FICL_DICT *dp, FICL_VM *pVM, char *tag)
 
 static int isNumber(FICL_VM *pVM, STRINGINFO si)
 {
-  FICL_INT accum     = 0;
-  char isNeg      = FALSE;
-  unsigned base   = pVM->base;
-  char *cp        = SI_PTR(si);
-  FICL_COUNT count= (FICL_COUNT)SI_COUNT(si);
-  unsigned ch;
-  unsigned digit;
+    FICL_INT accum     = 0;
+    char isNeg      = FALSE;
+    unsigned base   = pVM->base;
+    char *cp        = SI_PTR(si);
+    FICL_COUNT count= (FICL_COUNT)SI_COUNT(si);
+    unsigned ch;
+    unsigned digit;
 
-  if (*cp == '-')
-  {
-    cp++;
-    count--;
-    isNeg = TRUE;
-  }
-  else if ((cp[0] == '0') && (cp[1] == 'x'))
-  {               /* detect 0xNNNN format for hex numbers */
-    cp += 2;
-    count -= 2;
-    base = 16;
-  }
+    if (*cp == '-')
+    {
+        cp++;
+        count--;
+        isNeg = TRUE;
+    }
+    else if ((cp[0] == '0') && (cp[1] == 'x'))
+    {               /* detect 0xNNNN format for hex numbers */
+        cp += 2;
+        count -= 2;
+        base = 16;
+    }
 
-  if (count == 0)
-  return FALSE;
+    if (count == 0)
+        return FALSE;
 
-  while (count-- && ((ch = *cp++) != '\0'))
-  {
-    if (!isalnum(ch))
-    return FALSE;
+    while (count-- && ((ch = *cp++) != '\0'))
+    {
+        if (!isalnum(ch))
+            return FALSE;
 
-    digit = ch - '0';
+        digit = ch - '0';
 
-    if (digit > 9)
-    digit = tolower(ch) - 'a' + 10;
+        if (digit > 9)
+            digit = tolower(ch) - 'a' + 10;
 
-    if (digit >= base)
-    return FALSE;
+        if (digit >= base)
+            return FALSE;
 
-    accum = accum * base + digit;
-  }
+        accum = accum * base + digit;
+    }
 
-  if (isNeg)
-  accum = -accum;
+    if (isNeg)
+        accum = -accum;
 
-  stackPushINT(pVM->pStack, accum);
+    stackPushINT(pVM->pStack, accum);
 
-  return TRUE;
+    return TRUE;
 }
 
+
+static void ficlIsNum(FICL_VM *pVM)
+{
+	STRINGINFO si;
+	FICL_INT ret;
+
+	SI_SETLEN(si, stackPopINT(pVM->pStack));
+	SI_SETPTR(si, stackPopPtr(pVM->pStack));
+	ret = isNumber(pVM, si) ? FICL_TRUE : FICL_FALSE;
+	stackPushINT(pVM->pStack, ret);
+	return;
+}
 
 /**************************************************************************
                         a d d   &   f r i e n d s
@@ -221,61 +244,61 @@ static int isNumber(FICL_VM *pVM, STRINGINFO si)
 
 static void add(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  i = stackPopINT(pVM->pStack);
-  i += stackGetTop(pVM->pStack).i;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackPopINT(pVM->pStack);
+    i += stackGetTop(pVM->pStack).i;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void sub(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  i = stackPopINT(pVM->pStack);
-  i = stackGetTop(pVM->pStack).i - i;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackPopINT(pVM->pStack);
+    i = stackGetTop(pVM->pStack).i - i;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void mul(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  i = stackPopINT(pVM->pStack);
-  i *= stackGetTop(pVM->pStack).i;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackPopINT(pVM->pStack);
+    i *= stackGetTop(pVM->pStack).i;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void negate(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  i = -stackPopINT(pVM->pStack);
-  stackPushINT(pVM->pStack, i);
-  return;
+    i = -stackPopINT(pVM->pStack);
+    stackPushINT(pVM->pStack, i);
+    return;
 }
 
 static void ficlDiv(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  i = stackPopINT(pVM->pStack);
-  i = stackGetTop(pVM->pStack).i / i;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackPopINT(pVM->pStack);
+    i = stackGetTop(pVM->pStack).i / i;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 /*
@@ -289,108 +312,108 @@ static void ficlDiv(FICL_VM *pVM)
 */
 static void slashMod(FICL_VM *pVM)
 {
-  DPINT n1;
-  FICL_INT n2;
-  INTQR qr;
+    DPINT n1;
+    FICL_INT n2;
+    INTQR qr;
 
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 2);
+    vmCheckStack(pVM, 2, 2);
 #endif
-  n2    = stackPopINT(pVM->pStack);
-  n1.lo = stackPopINT(pVM->pStack);
-  i64Extend(n1);
+    n2    = stackPopINT(pVM->pStack);
+    n1.lo = stackPopINT(pVM->pStack);
+    i64Extend(n1);
 
-  qr = m64SymmetricDivI(n1, n2);
-  stackPushINT(pVM->pStack, qr.rem);
-  stackPushINT(pVM->pStack, qr.quot);
-  return;
+    qr = m64SymmetricDivI(n1, n2);
+    stackPushINT(pVM->pStack, qr.rem);
+    stackPushINT(pVM->pStack, qr.quot);
+    return;
 }
 
 static void onePlus(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  i = stackGetTop(pVM->pStack).i;
-  i += 1;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackGetTop(pVM->pStack).i;
+    i += 1;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void oneMinus(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  i = stackGetTop(pVM->pStack).i;
-  i -= 1;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackGetTop(pVM->pStack).i;
+    i -= 1;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void twoMul(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  i = stackGetTop(pVM->pStack).i;
-  i *= 2;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackGetTop(pVM->pStack).i;
+    i *= 2;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void twoDiv(FICL_VM *pVM)
 {
-  FICL_INT i;
+    FICL_INT i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  i = stackGetTop(pVM->pStack).i;
-  i >>= 1;
-  stackSetTop(pVM->pStack, LVALUEtoCELL(i));
-  return;
+    i = stackGetTop(pVM->pStack).i;
+    i >>= 1;
+    stackSetTop(pVM->pStack, LVALUEtoCELL(i));
+    return;
 }
 
 static void mulDiv(FICL_VM *pVM)
 {
-  FICL_INT x, y, z;
-  DPINT prod;
+    FICL_INT x, y, z;
+    DPINT prod;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 3, 1);
+    vmCheckStack(pVM, 3, 1);
 #endif
-  z = stackPopINT(pVM->pStack);
-  y = stackPopINT(pVM->pStack);
-  x = stackPopINT(pVM->pStack);
+    z = stackPopINT(pVM->pStack);
+    y = stackPopINT(pVM->pStack);
+    x = stackPopINT(pVM->pStack);
 
-  prod = m64MulI(x,y);
-  x    = m64SymmetricDivI(prod, z).quot;
+    prod = m64MulI(x,y);
+    x    = m64SymmetricDivI(prod, z).quot;
 
-  stackPushINT(pVM->pStack, x);
-  return;
+    stackPushINT(pVM->pStack, x);
+    return;
 }
 
 
 static void mulDivRem(FICL_VM *pVM)
 {
-  FICL_INT x, y, z;
-  DPINT prod;
-  INTQR qr;
+    FICL_INT x, y, z;
+    DPINT prod;
+    INTQR qr;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 3, 2);
+    vmCheckStack(pVM, 3, 2);
 #endif
-  z = stackPopINT(pVM->pStack);
-  y = stackPopINT(pVM->pStack);
-  x = stackPopINT(pVM->pStack);
+    z = stackPopINT(pVM->pStack);
+    y = stackPopINT(pVM->pStack);
+    x = stackPopINT(pVM->pStack);
 
-  prod = m64MulI(x,y);
-  qr   = m64SymmetricDivI(prod, z);
+    prod = m64MulI(x,y);
+    qr   = m64SymmetricDivI(prod, z);
 
-  stackPushINT(pVM->pStack, qr.rem);
-  stackPushINT(pVM->pStack, qr.quot);
-  return;
+    stackPushINT(pVM->pStack, qr.rem);
+    stackPushINT(pVM->pStack, qr.quot);
+    return;
 }
 
 
@@ -403,8 +426,8 @@ static void mulDivRem(FICL_VM *pVM)
 
 static void bye(FICL_VM *pVM)
 {
-  vmThrow(pVM, VM_USEREXIT);
-  return;
+    vmThrow(pVM, VM_USEREXIT);
+    return;
 }
 
 
@@ -418,16 +441,16 @@ static void bye(FICL_VM *pVM)
 
 static void colon(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  STRINGINFO si = vmGetWord(pVM);
+    FICL_DICT *dp = ficlGetDict();
+    STRINGINFO si = vmGetWord(pVM);
 
-  pVM->state = COMPILE;
-  markControlTag(pVM, colonTag);
-  dictAppendWord2(dp, si, colonParen, FW_DEFAULT | FW_SMUDGE);
+    pVM->state = COMPILE;
+    markControlTag(pVM, colonTag);
+    dictAppendWord2(dp, si, colonParen, FW_DEFAULT | FW_SMUDGE);
 #if FICL_WANT_LOCALS
-  nLocals = 0;
+    nLocals = 0;
 #endif
-  return;
+    return;
 }
 
 
@@ -445,10 +468,10 @@ static void colon(FICL_VM *pVM)
        
 static void colonParen(FICL_VM *pVM)
 {
-  IPTYPE tempIP = (IPTYPE) (pVM->runningWord->param);
-  vmPushIP(pVM, tempIP);
+    IPTYPE tempIP = (IPTYPE) (pVM->runningWord->param);
+    vmPushIP(pVM, tempIP);
 
-  return;
+    return;
 }
 
 
@@ -462,33 +485,33 @@ static void colonParen(FICL_VM *pVM)
 **************************************************************************/
 static void semiParen(FICL_VM *pVM)
 {
-  vmPopIP(pVM);
-  return;
+    vmPopIP(pVM);
+    return;
 }
 
 
 static void semicolonCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pSemiParen);
-  matchControlTag(pVM, colonTag);
+    assert(pSemiParen);
+    matchControlTag(pVM, colonTag);
 
 #if FICL_WANT_LOCALS
-  assert(pUnLinkParen);
-  if (nLocals > 0)
-  {
-    FICL_DICT *pLoc = ficlGetLoc();
-    dictEmpty(pLoc, pLoc->pForthWords->size);
-    dictAppendCell(dp, LVALUEtoCELL(pUnLinkParen));
-  }
-  nLocals = 0;
+    assert(pUnLinkParen);
+    if (nLocals > 0)
+    {
+        FICL_DICT *pLoc = ficlGetLoc();
+        dictEmpty(pLoc, pLoc->pForthWords->size);
+        dictAppendCell(dp, LVALUEtoCELL(pUnLinkParen));
+    }
+    nLocals = 0;
 #endif
 
-  dictAppendCell(dp, LVALUEtoCELL(pSemiParen));
-  pVM->state = INTERPRET;
-  dictUnsmudge(dp);
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pSemiParen));
+    pVM->state = INTERPRET;
+    dictUnsmudge(dp);
+    return;
 }
 
 
@@ -503,24 +526,24 @@ static void semicolonCoIm(FICL_VM *pVM)
 **************************************************************************/
 static void exitParen(FICL_VM *pVM)
 {
-  vmPopIP(pVM);
-  return;
+    vmPopIP(pVM);
+    return;
 }
 
 static void exitCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  assert(pExitParen);
-  IGNORE(pVM);
+    FICL_DICT *dp = ficlGetDict();
+    assert(pExitParen);
+    IGNORE(pVM);
 
 #if FICL_WANT_LOCALS
-  if (nLocals > 0)
-  {
-    dictAppendCell(dp, LVALUEtoCELL(pUnLinkParen));
-  }
+    if (nLocals > 0)
+    {
+        dictAppendCell(dp, LVALUEtoCELL(pUnLinkParen));
+    }
 #endif
-  dictAppendCell(dp, LVALUEtoCELL(pExitParen));
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pExitParen));
+    return;
 }
 
 
@@ -533,23 +556,23 @@ static void exitCoIm(FICL_VM *pVM)
 
 void constantParen(FICL_VM *pVM)
 {
-  FICL_WORD *pFW = pVM->runningWord;
+    FICL_WORD *pFW = pVM->runningWord;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 0, 1);
+    vmCheckStack(pVM, 0, 1);
 #endif
-  stackPush(pVM->pStack, pFW->param[0]);
-  return;
+    stackPush(pVM->pStack, pFW->param[0]);
+    return;
 }
 
 void twoConstParen(FICL_VM *pVM)
 {
-  FICL_WORD *pFW = pVM->runningWord;
+    FICL_WORD *pFW = pVM->runningWord;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 0, 2);
+    vmCheckStack(pVM, 0, 2);
 #endif
-  stackPush(pVM->pStack, pFW->param[0]); /* lo */
-  stackPush(pVM->pStack, pFW->param[1]); /* hi */
-  return;
+    stackPush(pVM->pStack, pFW->param[0]); /* lo */
+    stackPush(pVM->pStack, pFW->param[1]); /* hi */
+    return;
 }
 
 
@@ -562,32 +585,32 @@ void twoConstParen(FICL_VM *pVM)
 
 static void constant(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  STRINGINFO si = vmGetWord(pVM);
+    FICL_DICT *dp = ficlGetDict();
+    STRINGINFO si = vmGetWord(pVM);
 
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  dictAppendWord2(dp, si, constantParen, FW_DEFAULT);
-  dictAppendCell(dp, stackPop(pVM->pStack));
-  return;
+    dictAppendWord2(dp, si, constantParen, FW_DEFAULT);
+    dictAppendCell(dp, stackPop(pVM->pStack));
+    return;
 }
 
 
 static void twoConstant(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  STRINGINFO si = vmGetWord(pVM);
-  CELL c;
+    FICL_DICT *dp = ficlGetDict();
+    STRINGINFO si = vmGetWord(pVM);
+    CELL c;
     
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  c = stackPop(pVM->pStack);
-  dictAppendWord2(dp, si, twoConstParen, FW_DEFAULT);
-  dictAppendCell(dp, stackPop(pVM->pStack));
-  dictAppendCell(dp, c);
-  return;
+    c = stackPop(pVM->pStack);
+    dictAppendWord2(dp, si, twoConstParen, FW_DEFAULT);
+    dictAppendCell(dp, stackPop(pVM->pStack));
+    dictAppendCell(dp, c);
+    return;
 }
 
 
@@ -599,42 +622,42 @@ static void twoConstant(FICL_VM *pVM)
 
 static void displayCell(FICL_VM *pVM)
 {
-  CELL c;
+    CELL c;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  c = stackPop(pVM->pStack);
-  ltoa((c).i, pVM->pad, pVM->base);
-  strcat(pVM->pad, " ");
-  vmTextOut(pVM, pVM->pad, 0);
-  return;
+    c = stackPop(pVM->pStack);
+    ltoa((c).i, pVM->pad, pVM->base);
+    strcat(pVM->pad, " ");
+    vmTextOut(pVM, pVM->pad, 0);
+    return;
 }
 
 static void uDot(FICL_VM *pVM)
 {
-  FICL_UNS u;
+    FICL_UNS u;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  u = stackPopUNS(pVM->pStack);
-  ultoa(u, pVM->pad, pVM->base);
-  strcat(pVM->pad, " ");
-  vmTextOut(pVM, pVM->pad, 0);
-  return;
+    u = stackPopUNS(pVM->pStack);
+    ultoa(u, pVM->pad, pVM->base);
+    strcat(pVM->pad, " ");
+    vmTextOut(pVM, pVM->pad, 0);
+    return;
 }
 
 
 static void hexDot(FICL_VM *pVM)
 {
-  FICL_UNS u;
+    FICL_UNS u;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  u = stackPopUNS(pVM->pStack);
-  ultoa(u, pVM->pad, 16);
-  strcat(pVM->pad, " ");
-  vmTextOut(pVM, pVM->pad, 0);
-  return;
+    u = stackPopUNS(pVM->pStack);
+    ultoa(u, pVM->pad, 16);
+    strcat(pVM->pad, " ");
+    vmTextOut(pVM, pVM->pad, 0);
+    return;
 }
 
 
@@ -645,22 +668,22 @@ static void hexDot(FICL_VM *pVM)
 
 static void displayStack(FICL_VM *pVM)
 {
-  int d = stackDepth(pVM->pStack);
-  int i;
-  CELL *pCell;
+    int d = stackDepth(pVM->pStack);
+    int i;
+    CELL *pCell;
 
-  vmCheckStack(pVM, 0, 0);
+    vmCheckStack(pVM, 0, 0);
 
-  if (d == 0)
-  vmTextOut(pVM, "(Stack Empty)", 1);
-  else
-  {
-    pCell = pVM->pStack->sp;
-    for (i = 0; i < d; i++)
+    if (d == 0)
+        vmTextOut(pVM, "(Stack Empty)", 1);
+    else
     {
-      vmTextOut(pVM, ltoa((*--pCell).i, pVM->pad, pVM->base), 1);
+        pCell = pVM->pStack->sp;
+        for (i = 0; i < d; i++)
+        {
+            vmTextOut(pVM, ltoa((*--pCell).i, pVM->pad, pVM->base), 1);
+        }
     }
-  }
 }
 
 
@@ -671,155 +694,155 @@ static void displayStack(FICL_VM *pVM)
 
 static void depth(FICL_VM *pVM)
 {
-  int i;
+    int i;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 0, 1);
+    vmCheckStack(pVM, 0, 1);
 #endif
-  i = stackDepth(pVM->pStack);
-  stackPushINT(pVM->pStack, i);
-  return;
+    i = stackDepth(pVM->pStack);
+    stackPushINT(pVM->pStack, i);
+    return;
 }
 
 
 static void drop(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  stackDrop(pVM->pStack, 1);
-  return;
+    stackDrop(pVM->pStack, 1);
+    return;
 }
 
 
 static void twoDrop(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  stackDrop(pVM->pStack, 2);
-  return;
+    stackDrop(pVM->pStack, 2);
+    return;
 }
 
 
 static void dup(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 2);
+    vmCheckStack(pVM, 1, 2);
 #endif
-  stackPick(pVM->pStack, 0);
-  return;
+    stackPick(pVM->pStack, 0);
+    return;
 }
 
 
 static void twoDup(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 4);
+    vmCheckStack(pVM, 2, 4);
 #endif
-  stackPick(pVM->pStack, 1);
-  stackPick(pVM->pStack, 1);
-  return;
+    stackPick(pVM->pStack, 1);
+    stackPick(pVM->pStack, 1);
+    return;
 }
 
 
 static void over(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 3);
+    vmCheckStack(pVM, 2, 3);
 #endif
-  stackPick(pVM->pStack, 1);
-  return;
+    stackPick(pVM->pStack, 1);
+    return;
 }
 
 static void twoOver(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 4, 6);
+    vmCheckStack(pVM, 4, 6);
 #endif
-  stackPick(pVM->pStack, 3);
-  stackPick(pVM->pStack, 3);
-  return;
+    stackPick(pVM->pStack, 3);
+    stackPick(pVM->pStack, 3);
+    return;
 }
 
 
 static void pick(FICL_VM *pVM)
 {
-  CELL c = stackPop(pVM->pStack);
+    CELL c = stackPop(pVM->pStack);
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, c.i+1, c.i+2);
+    vmCheckStack(pVM, c.i+1, c.i+2);
 #endif
-  stackPick(pVM->pStack, c.i);
-  return;
+    stackPick(pVM->pStack, c.i);
+    return;
 }
 
 
 static void questionDup(FICL_VM *pVM)
 {
-  CELL c;
+    CELL c;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 2);
+    vmCheckStack(pVM, 1, 2);
 #endif
-  c = stackGetTop(pVM->pStack);
+    c = stackGetTop(pVM->pStack);
 
-  if (c.i != 0)
-  stackPick(pVM->pStack, 0);
+    if (c.i != 0)
+        stackPick(pVM->pStack, 0);
 
-  return;
+    return;
 }
 
 
 static void roll(FICL_VM *pVM)
 {
-  int i = stackPop(pVM->pStack).i;
-  i = (i > 0) ? i : 0;
+    int i = stackPop(pVM->pStack).i;
+    i = (i > 0) ? i : 0;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, i+1, i+1);
+    vmCheckStack(pVM, i+1, i+1);
 #endif
-  stackRoll(pVM->pStack, i);
-  return;
+    stackRoll(pVM->pStack, i);
+    return;
 }
 
 
 static void minusRoll(FICL_VM *pVM)
 {
-  int i = stackPop(pVM->pStack).i;
-  i = (i > 0) ? i : 0;
+    int i = stackPop(pVM->pStack).i;
+    i = (i > 0) ? i : 0;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, i+1, i+1);
+    vmCheckStack(pVM, i+1, i+1);
 #endif
-  stackRoll(pVM->pStack, -i);
-  return;
+    stackRoll(pVM->pStack, -i);
+    return;
 }
 
 
 static void rot(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 3, 3);
+    vmCheckStack(pVM, 3, 3);
 #endif
-  stackRoll(pVM->pStack, 2);
-  return;
+    stackRoll(pVM->pStack, 2);
+    return;
 }
 
 
 static void swap(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 2);
+    vmCheckStack(pVM, 2, 2);
 #endif
-  stackRoll(pVM->pStack, 1);
-  return;
+    stackRoll(pVM->pStack, 1);
+    return;
 }
 
 
 static void twoSwap(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 4, 4);
+    vmCheckStack(pVM, 4, 4);
 #endif
-  stackRoll(pVM->pStack, 3);
-  stackRoll(pVM->pStack, 3);
-  return;
+    stackRoll(pVM->pStack, 3);
+    stackRoll(pVM->pStack, 3);
+    return;
 }
 
 
@@ -830,54 +853,54 @@ static void twoSwap(FICL_VM *pVM)
 
 static void emit(FICL_VM *pVM)
 {
-  char *cp = pVM->pad;
-  int i;
+    char *cp = pVM->pad;
+    int i;
 
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  i = stackPopINT(pVM->pStack);
-  cp[0] = (char)i;
-  cp[1] = '\0';
-  vmTextOut(pVM, cp, 0);
-  return;
+    i = stackPopINT(pVM->pStack);
+    cp[0] = (char)i;
+    cp[1] = '\0';
+    vmTextOut(pVM, cp, 0);
+    return;
 }
 
 
 static void cr(FICL_VM *pVM)
 {
-  vmTextOut(pVM, "", 1);
-  return;
+    vmTextOut(pVM, "", 1);
+    return;
 }
 
 
 static void commentLine(FICL_VM *pVM)
 {
-  char *cp        = vmGetInBuf(pVM);
-  char *pEnd      = vmGetInBufEnd(pVM);
-  char ch = *cp;
+    char *cp        = vmGetInBuf(pVM);
+    char *pEnd      = vmGetInBufEnd(pVM);
+    char ch = *cp;
 
-  while ((cp != pEnd) && (ch != '\r') && (ch != '\n'))
-  {
-    ch = *++cp;
-  }
+    while ((cp != pEnd) && (ch != '\r') && (ch != '\n'))
+    {
+        ch = *++cp;
+    }
 
-  /*
-  ** Cope with DOS or UNIX-style EOLs -
-  ** Check for /r, /n, /r/n, or /n/r end-of-line sequences,
-  ** and point cp to next char. If EOL is \0, we're done.
-  */
-  if (cp != pEnd)
-  {
-    cp++;
+    /*
+    ** Cope with DOS or UNIX-style EOLs -
+    ** Check for /r, /n, /r/n, or /n/r end-of-line sequences,
+    ** and point cp to next char. If EOL is \0, we're done.
+    */
+    if (cp != pEnd)
+    {
+        cp++;
 
-    if ( (cp != pEnd) && (ch != *cp) 
-	 && ((*cp == '\r') || (*cp == '\n')) )
-    cp++;
-  }
+        if ( (cp != pEnd) && (ch != *cp) 
+             && ((*cp == '\r') || (*cp == '\n')) )
+            cp++;
+    }
 
-  vmUpdateTib(pVM, cp);
-  return;
+    vmUpdateTib(pVM, cp);
+    return;
 }
 
 
@@ -892,8 +915,8 @@ static void commentLine(FICL_VM *pVM)
 */
 static void commentHang(FICL_VM *pVM)
 {
-  vmParseString(pVM, ')');
-  return;
+    vmParseStringEx(pVM, ')', 0);
+    return;
 }
 
 
@@ -904,13 +927,13 @@ static void commentHang(FICL_VM *pVM)
 
 static void fetch(FICL_VM *pVM)
 {
-  CELL *pCell;
+    CELL *pCell;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  pCell = (CELL *)stackPopPtr(pVM->pStack);
-  stackPush(pVM->pStack, *pCell);
-  return;
+    pCell = (CELL *)stackPopPtr(pVM->pStack);
+    stackPush(pVM->pStack, *pCell);
+    return;
 }
 
 /*
@@ -921,15 +944,15 @@ static void fetch(FICL_VM *pVM)
 */
 static void twoFetch(FICL_VM *pVM)
 {
-  CELL *pCell;
+    CELL *pCell;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 2);
+    vmCheckStack(pVM, 1, 2);
 #endif
-  pCell = (CELL *)stackPopPtr(pVM->pStack);
-  stackPush(pVM->pStack, *pCell++);
-  stackPush(pVM->pStack, *pCell);
-  swap(pVM);
-  return;
+    pCell = (CELL *)stackPopPtr(pVM->pStack);
+    stackPush(pVM->pStack, *pCell++);
+    stackPush(pVM->pStack, *pCell);
+    swap(pVM);
+    return;
 }
 
 /*
@@ -938,12 +961,12 @@ static void twoFetch(FICL_VM *pVM)
 */
 static void store(FICL_VM *pVM)
 {
-  CELL *pCell;
+    CELL *pCell;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  pCell = (CELL *)stackPopPtr(pVM->pStack);
-  *pCell = stackPop(pVM->pStack);
+    pCell = (CELL *)stackPopPtr(pVM->pStack);
+    *pCell = stackPop(pVM->pStack);
 }
 
 /*
@@ -954,66 +977,66 @@ static void store(FICL_VM *pVM)
 */
 static void twoStore(FICL_VM *pVM)
 {
-  CELL *pCell;
+    CELL *pCell;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 3, 0);
+    vmCheckStack(pVM, 3, 0);
 #endif
-  pCell = (CELL *)stackPopPtr(pVM->pStack);
-  *pCell++    = stackPop(pVM->pStack);
-  *pCell      = stackPop(pVM->pStack);
+    pCell = (CELL *)stackPopPtr(pVM->pStack);
+    *pCell++    = stackPop(pVM->pStack);
+    *pCell      = stackPop(pVM->pStack);
 }
 
 static void plusStore(FICL_VM *pVM)
 {
-  CELL *pCell;
+    CELL *pCell;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  pCell = (CELL *)stackPopPtr(pVM->pStack);
-  pCell->i += stackPop(pVM->pStack).i;
+    pCell = (CELL *)stackPopPtr(pVM->pStack);
+    pCell->i += stackPop(pVM->pStack).i;
 }
 
 
 static void wFetch(FICL_VM *pVM)
 {
-  UNS16 *pw;
+    UNS16 *pw;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  pw = (UNS16 *)stackPopPtr(pVM->pStack);
-  stackPushUNS(pVM->pStack, (FICL_UNS)*pw);
-  return;
+    pw = (UNS16 *)stackPopPtr(pVM->pStack);
+    stackPushUNS(pVM->pStack, (FICL_UNS)*pw);
+    return;
 }
 
 static void wStore(FICL_VM *pVM)
 {
-  UNS16 *pw;
+    UNS16 *pw;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  pw = (UNS16 *)stackPopPtr(pVM->pStack);
-  *pw = (UNS16)(stackPop(pVM->pStack).u);
+    pw = (UNS16 *)stackPopPtr(pVM->pStack);
+    *pw = (UNS16)(stackPop(pVM->pStack).u);
 }
 
 static void cFetch(FICL_VM *pVM)
 {
-  UNS8 *pc;
+    UNS8 *pc;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  pc = (UNS8 *)stackPopPtr(pVM->pStack);
-  stackPushUNS(pVM->pStack, (FICL_UNS)*pc);
-  return;
+    pc = (UNS8 *)stackPopPtr(pVM->pStack);
+    stackPushUNS(pVM->pStack, (FICL_UNS)*pc);
+    return;
 }
 
 static void cStore(FICL_VM *pVM)
 {
-  UNS8 *pc;
+    UNS8 *pc;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  pc = (UNS8 *)stackPopPtr(pVM->pStack);
-  *pc = (UNS8)(stackPop(pVM->pStack).u);
+    pc = (UNS8 *)stackPopPtr(pVM->pStack);
+    *pc = (UNS8)(stackPop(pVM->pStack).u);
 }
 
 
@@ -1027,14 +1050,14 @@ static void cStore(FICL_VM *pVM)
 
 static void ifCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pIfParen);
+    assert(pIfParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pIfParen));
-  markBranch(dp, pVM, origTag);
-  dictAppendUNS(dp, 1);
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pIfParen));
+    markBranch(dp, pVM, origTag);
+    dictAppendUNS(dp, 1);
+    return;
 }
 
 
@@ -1047,23 +1070,23 @@ static void ifCoIm(FICL_VM *pVM)
 
 static void ifParen(FICL_VM *pVM)
 {
-  FICL_UNS flag;
+    FICL_UNS flag;
     
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
-  flag = stackPopUNS(pVM->pStack);
+    flag = stackPopUNS(pVM->pStack);
 
-  if (flag) 
-  {                           /* fall through */
-    vmBranchRelative(pVM, 1);
-  }
-  else 
-  {                           /* take branch (to else/endif/begin) */
-    vmBranchRelative(pVM, (int)(*pVM->ip));
-  }
+    if (flag) 
+    {                           /* fall through */
+        vmBranchRelative(pVM, 1);
+    }
+    else 
+    {                           /* take branch (to else/endif/begin) */
+        vmBranchRelative(pVM, (int)(*pVM->ip));
+    }
 
-  return;
+    return;
 }
 
 
@@ -1081,22 +1104,22 @@ static void ifParen(FICL_VM *pVM)
 
 static void elseCoIm(FICL_VM *pVM)
 {
-  CELL *patchAddr;
-  int offset;
-  FICL_DICT *dp = ficlGetDict();
+    CELL *patchAddr;
+    int offset;
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pBranchParen);
-  /* (1) compile branch runtime */
-  dictAppendCell(dp, LVALUEtoCELL(pBranchParen));
-  matchControlTag(pVM, origTag);
-  patchAddr = 
-    (CELL *)stackPopPtr(pVM->pStack);   /* (2) pop "if" patch addr */
-  markBranch(dp, pVM, origTag);           /* (4) push "else" patch addr */
-  dictAppendUNS(dp, 1);                 /* (1) compile patch placeholder */
-  offset = dp->here - patchAddr;
-  *patchAddr = LVALUEtoCELL(offset);      /* (3) Patch "if" */
+    assert(pBranchParen);
+                                            /* (1) compile branch runtime */
+    dictAppendCell(dp, LVALUEtoCELL(pBranchParen));
+    matchControlTag(pVM, origTag);
+    patchAddr = 
+        (CELL *)stackPopPtr(pVM->pStack);   /* (2) pop "if" patch addr */
+    markBranch(dp, pVM, origTag);           /* (4) push "else" patch addr */
+    dictAppendUNS(dp, 1);                 /* (1) compile patch placeholder */
+    offset = dp->here - patchAddr;
+    *patchAddr = LVALUEtoCELL(offset);      /* (3) Patch "if" */
 
-  return;
+    return;
 }
 
 
@@ -1109,8 +1132,8 @@ static void elseCoIm(FICL_VM *pVM)
 
 static void branchParen(FICL_VM *pVM)
 {
-  vmBranchRelative(pVM, *(int *)(pVM->ip));
-  return;
+    vmBranchRelative(pVM, *(int *)(pVM->ip));
+    return;
 }
 
 
@@ -1121,9 +1144,25 @@ static void branchParen(FICL_VM *pVM)
 
 static void endifCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  resolveForwardBranch(dp, pVM, origTag);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    resolveForwardBranch(dp, pVM, origTag);
+    return;
+}
+
+
+/**************************************************************************
+                        h a s h
+** hash ( c-addr u -- code)
+** calculates hashcode of specified string and leaves it on the stack
+**************************************************************************/
+
+static void hash(FICL_VM *pVM)
+{
+	STRINGINFO si;
+	SI_SETLEN(si, stackPopUNS(pVM->pStack));
+	SI_SETPTR(si, stackPopPtr(pVM->pStack));
+	stackPushUNS(pVM->pStack, hashHashCode(si));
+    return;
 }
 
 
@@ -1148,23 +1187,23 @@ static void endifCoIm(FICL_VM *pVM)
 
 static void interpret(FICL_VM *pVM)
 {
-  STRINGINFO si = vmGetWord0(pVM);
-  assert(pVM);
+    STRINGINFO si = vmGetWord0(pVM);
+    assert(pVM);
 
-  vmBranchRelative(pVM, -1);
+    vmBranchRelative(pVM, -1);
 
-  /*
-  ** Get next word...if out of text, we're done.
-  */
-  if (si.count == 0)
-  {
-    vmThrow(pVM, VM_OUTOFTEXT);
-  }
+    /*
+    ** Get next word...if out of text, we're done.
+    */
+    if (si.count == 0)
+    {
+        vmThrow(pVM, VM_OUTOFTEXT);
+    }
 
-  interpWord(pVM, si);
+    interpWord(pVM, si);
 
 
-  return;                 /* back to inner interpreter */
+    return;                 /* back to inner interpreter */
 }
 
 /**************************************************************************
@@ -1186,67 +1225,67 @@ static void interpret(FICL_VM *pVM)
 **************************************************************************/
 static void interpWord(FICL_VM *pVM, STRINGINFO si)
 {
-  FICL_DICT *dp = ficlGetDict();
-  FICL_WORD *tempFW;
+    FICL_DICT *dp = ficlGetDict();
+    FICL_WORD *tempFW;
 
 #if FICL_ROBUST
-  dictCheck(dp, pVM, 0);
-  vmCheckStack(pVM, 0, 0);
+    dictCheck(dp, pVM, 0);
+    vmCheckStack(pVM, 0, 0);
 #endif
 
 #if FICL_WANT_LOCALS
-  if (nLocals > 0)
-  {
-    tempFW = dictLookupLoc(dp, si);
-  }
-  else
-#endif
-  tempFW = dictLookup(dp, si);
-
-  if (pVM->state == INTERPRET)
-  {
-    if (tempFW != NULL)
+    if (nLocals > 0)
     {
-      if (wordIsCompileOnly(tempFW))
-      {
-	vmThrowErr(pVM, "Error: Compile only!");
-      }
-
-      vmExecute(pVM, tempFW);
-    }
-
-    else if (!isNumber(pVM, si))
-    {
-      int i = SI_COUNT(si);
-      vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
-    }
-  }
-
-  else /* (pVM->state == COMPILE) */
-  {
-    if (tempFW != NULL)
-    {
-      if (wordIsImmediate(tempFW))
-      {
-	vmExecute(pVM, tempFW);
-      }
-      else
-      {
-	dictAppendCell(dp, LVALUEtoCELL(tempFW));
-      }
-    }
-    else if (isNumber(pVM, si))
-    {
-      literalIm(pVM);
+        tempFW = dictLookupLoc(dp, si);
     }
     else
-    {
-      int i = SI_COUNT(si);
-      vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
-    }
-  }
+#endif
+    tempFW = dictLookup(dp, si);
 
-  return;
+    if (pVM->state == INTERPRET)
+    {
+        if (tempFW != NULL)
+        {
+            if (wordIsCompileOnly(tempFW))
+            {
+                vmThrowErr(pVM, "Error: Compile only!");
+            }
+
+            vmExecute(pVM, tempFW);
+        }
+
+        else if (!isNumber(pVM, si))
+        {
+            int i = SI_COUNT(si);
+            vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
+        }
+    }
+
+    else /* (pVM->state == COMPILE) */
+    {
+        if (tempFW != NULL)
+        {
+            if (wordIsImmediate(tempFW))
+            {
+                vmExecute(pVM, tempFW);
+            }
+            else
+            {
+                dictAppendCell(dp, LVALUEtoCELL(tempFW));
+            }
+        }
+        else if (isNumber(pVM, si))
+        {
+            literalIm(pVM);
+        }
+        else
+        {
+            int i = SI_COUNT(si);
+            vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
+        }
+    }
+
+    return;
 }
 
 
@@ -1262,11 +1301,22 @@ static void interpWord(FICL_VM *pVM, STRINGINFO si)
 static void literalParen(FICL_VM *pVM)
 {
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 0, 1);
+    vmCheckStack(pVM, 0, 1);
 #endif
-  stackPushINT(pVM->pStack, *(FICL_INT *)(pVM->ip));
-  vmBranchRelative(pVM, 1);
-  return;
+    stackPushINT(pVM->pStack, *(FICL_INT *)(pVM->ip));
+    vmBranchRelative(pVM, 1);
+    return;
+}
+
+static void twoLitParen(FICL_VM *pVM)
+{
+#if FICL_ROBUST > 1
+    vmCheckStack(pVM, 0, 2);
+#endif
+    stackPushINT(pVM->pStack, *((FICL_INT *)(pVM->ip)+1));
+    stackPushINT(pVM->pStack, *(FICL_INT *)(pVM->ip));
+    vmBranchRelative(pVM, 2);
+    return;
 }
 
 
@@ -1280,15 +1330,27 @@ static void literalParen(FICL_VM *pVM)
 
 static void literalIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  assert(pLitParen);
+    FICL_DICT *dp = ficlGetDict();
+    assert(pLitParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pLitParen));
-  dictAppendCell(dp, stackPop(pVM->pStack));
+    dictAppendCell(dp, LVALUEtoCELL(pLitParen));
+    dictAppendCell(dp, stackPop(pVM->pStack));
 
-  return;
+    return;
 }
 
+
+static void twoLiteralIm(FICL_VM *pVM)
+{
+    FICL_DICT *dp = ficlGetDict();
+    assert(pTwoLitParen);
+
+    dictAppendCell(dp, LVALUEtoCELL(pTwoLitParen));
+    dictAppendCell(dp, stackPop(pVM->pStack));
+    dictAppendCell(dp, stackPop(pVM->pStack));
+
+    return;
+}
 
 /**************************************************************************
                         l i s t W o r d s
@@ -1297,82 +1359,82 @@ static void literalIm(FICL_VM *pVM)
 #define nCOLWIDTH 8
 static void listWords(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  FICL_HASH *pHash = dp->pSearch[dp->nLists - 1];
-  FICL_WORD *wp;
-  int nChars = 0;
-  int len;
-  unsigned i;
-  int nWords = 0;
-  char *cp;
-  char *pPad = pVM->pad;
+    FICL_DICT *dp = ficlGetDict();
+    FICL_HASH *pHash = dp->pSearch[dp->nLists - 1];
+    FICL_WORD *wp;
+    int nChars = 0;
+    int len;
+    unsigned i;
+    int nWords = 0;
+    char *cp;
+    char *pPad = pVM->pad;
 
-  for (i = 0; i < pHash->size; i++)
-  {
-    for (wp = pHash->table[i]; wp != NULL; wp = wp->link, nWords++)
+    for (i = 0; i < pHash->size; i++)
     {
-      if (wp->nName == 0) /* ignore :noname defs */
-      continue;
+        for (wp = pHash->table[i]; wp != NULL; wp = wp->link, nWords++)
+        {
+            if (wp->nName == 0) /* ignore :noname defs */
+                continue;
 
-      cp = wp->name;
-      nChars += sprintf(pPad + nChars, "%s", cp);
+            cp = wp->name;
+            nChars += sprintf(pPad + nChars, "%s", cp);
 
-      if (nChars > 70)
-      {
-	pPad[nChars] = '\0';
-	nChars = 0;
-	vmTextOut(pVM, pPad, 1);
-      }
-      else
-      {
-	len = nCOLWIDTH - nChars % nCOLWIDTH;
-	while (len-- > 0)
-	pPad[nChars++] = ' ';
-      }
+            if (nChars > 70)
+            {
+                pPad[nChars] = '\0';
+                nChars = 0;
+                vmTextOut(pVM, pPad, 1);
+            }
+            else
+            {
+                len = nCOLWIDTH - nChars % nCOLWIDTH;
+                while (len-- > 0)
+                    pPad[nChars++] = ' ';
+            }
 
-      if (nChars > 70)
-      {
-	pPad[nChars] = '\0';
-	nChars = 0;
-	vmTextOut(pVM, pPad, 1);
-      }
+            if (nChars > 70)
+            {
+                pPad[nChars] = '\0';
+                nChars = 0;
+                vmTextOut(pVM, pPad, 1);
+            }
+        }
     }
-  }
 
-  if (nChars > 0)
-  {
-    pPad[nChars] = '\0';
-    nChars = 0;
-    vmTextOut(pVM, pPad, 1);
-  }
+    if (nChars > 0)
+    {
+        pPad[nChars] = '\0';
+        nChars = 0;
+        vmTextOut(pVM, pPad, 1);
+    }
 
-  sprintf(pVM->pad, "Dictionary: %d words, %d cells used of %u total", 
-	  nWords, dp->here - dp->dict, dp->size);
-  vmTextOut(pVM, pVM->pad, 1);
-  return;
+    sprintf(pVM->pad, "Dictionary: %d words, %ld cells used of %lu total", 
+        nWords, dp->here - dp->dict, dp->size);
+    vmTextOut(pVM, pVM->pad, 1);
+    return;
 }
 
 
 static void listEnv(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetEnv();
-  FICL_HASH *pHash = dp->pForthWords;
-  FICL_WORD *wp;
-  unsigned i;
-  int nWords = 0;
+    FICL_DICT *dp = ficlGetEnv();
+    FICL_HASH *pHash = dp->pForthWords;
+    FICL_WORD *wp;
+    unsigned i;
+    int nWords = 0;
 
-  for (i = 0; i < pHash->size; i++)
-  {
-    for (wp = pHash->table[i]; wp != NULL; wp = wp->link, nWords++)
+    for (i = 0; i < pHash->size; i++)
     {
-      vmTextOut(pVM, wp->name, 1);
+        for (wp = pHash->table[i]; wp != NULL; wp = wp->link, nWords++)
+        {
+            vmTextOut(pVM, wp->name, 1);
+        }
     }
-  }
 
-  sprintf(pVM->pad, "Environment: %d words, %d cells used of %u total", 
-	  nWords, dp->here - dp->dict, dp->size);
-  vmTextOut(pVM, pVM->pad, 1);
-  return;
+    sprintf(pVM->pad, "Environment: %d words, %ld cells used of %lu total", 
+        nWords, dp->here - dp->dict, dp->size);
+    vmTextOut(pVM, pVM->pad, 1);
+    return;
 }
 
 
@@ -1383,131 +1445,131 @@ static void listEnv(FICL_VM *pVM)
 
 static void zeroEquals(FICL_VM *pVM)
 {
-  CELL c;
+    CELL c;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  c.i = FICL_BOOL(stackPopINT(pVM->pStack) == 0);
-  stackPush(pVM->pStack, c);
-  return;
+    c.i = FICL_BOOL(stackPopINT(pVM->pStack) == 0);
+    stackPush(pVM->pStack, c);
+    return;
 }
 
 static void zeroLess(FICL_VM *pVM)
 {
-  CELL c;
+    CELL c;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  c.i = FICL_BOOL(stackPopINT(pVM->pStack) < 0);
-  stackPush(pVM->pStack, c);
-  return;
+    c.i = FICL_BOOL(stackPopINT(pVM->pStack) < 0);
+    stackPush(pVM->pStack, c);
+    return;
 }
 
 static void zeroGreater(FICL_VM *pVM)
 {
-  CELL c;
+    CELL c;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  c.i = FICL_BOOL(stackPopINT(pVM->pStack) > 0);
-  stackPush(pVM->pStack, c);
-  return;
+    c.i = FICL_BOOL(stackPopINT(pVM->pStack) > 0);
+    stackPush(pVM->pStack, c);
+    return;
 }
 
 static void isEqual(FICL_VM *pVM)
 {
-  CELL x, y;
+    CELL x, y;
 
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  x = stackPop(pVM->pStack);
-  y = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, FICL_BOOL(x.i == y.i));
-  return;
+    x = stackPop(pVM->pStack);
+    y = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, FICL_BOOL(x.i == y.i));
+    return;
 }
 
 static void isLess(FICL_VM *pVM)
 {
-  CELL x, y;
+    CELL x, y;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  y = stackPop(pVM->pStack);
-  x = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, FICL_BOOL(x.i < y.i));
-  return;
+    y = stackPop(pVM->pStack);
+    x = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, FICL_BOOL(x.i < y.i));
+    return;
 }
 
 static void uIsLess(FICL_VM *pVM)
 {
-  FICL_UNS u1, u2;
+    FICL_UNS u1, u2;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  u2 = stackPopUNS(pVM->pStack);
-  u1 = stackPopUNS(pVM->pStack);
-  stackPushINT(pVM->pStack, FICL_BOOL(u1 < u2));
-  return;
+    u2 = stackPopUNS(pVM->pStack);
+    u1 = stackPopUNS(pVM->pStack);
+    stackPushINT(pVM->pStack, FICL_BOOL(u1 < u2));
+    return;
 }
 
 static void isGreater(FICL_VM *pVM)
 {
-  CELL x, y;
+    CELL x, y;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  y = stackPop(pVM->pStack);
-  x = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, FICL_BOOL(x.i > y.i));
-  return;
+    y = stackPop(pVM->pStack);
+    x = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, FICL_BOOL(x.i > y.i));
+    return;
 }
 
 static void bitwiseAnd(FICL_VM *pVM)
 {
-  CELL x, y;
+    CELL x, y;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  x = stackPop(pVM->pStack);
-  y = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, x.i & y.i);
-  return;
+    x = stackPop(pVM->pStack);
+    y = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, x.i & y.i);
+    return;
 }
 
 static void bitwiseOr(FICL_VM *pVM)
 {
-  CELL x, y;
+    CELL x, y;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  x = stackPop(pVM->pStack);
-  y = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, x.i | y.i);
-  return;
+    x = stackPop(pVM->pStack);
+    y = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, x.i | y.i);
+    return;
 }
 
 static void bitwiseXor(FICL_VM *pVM)
 {
-  CELL x, y;
+    CELL x, y;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 1);
+    vmCheckStack(pVM, 2, 1);
 #endif
-  x = stackPop(pVM->pStack);
-  y = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, x.i ^ y.i);
-  return;
+    x = stackPop(pVM->pStack);
+    y = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, x.i ^ y.i);
+    return;
 }
 
 static void bitwiseNot(FICL_VM *pVM)
 {
-  CELL x;
+    CELL x;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  x = stackPop(pVM->pStack);
-  stackPushINT(pVM->pStack, ~x.i);
-  return;
+    x = stackPop(pVM->pStack);
+    stackPushINT(pVM->pStack, ~x.i);
+    return;
 }
 
 
@@ -1538,89 +1600,89 @@ static void bitwiseNot(FICL_VM *pVM)
 
 static void doCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pDoParen);
+    assert(pDoParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pDoParen));
-  /*
-  ** Allot space for a pointer to the end
-  ** of the loop - "leave" uses this...
-  */
-  markBranch(dp, pVM, leaveTag);
-  dictAppendUNS(dp, 0);
-  /*
-  ** Mark location of head of loop...
-  */
-  markBranch(dp, pVM, doTag);
+    dictAppendCell(dp, LVALUEtoCELL(pDoParen));
+    /*
+    ** Allot space for a pointer to the end
+    ** of the loop - "leave" uses this...
+    */
+    markBranch(dp, pVM, leaveTag);
+    dictAppendUNS(dp, 0);
+    /*
+    ** Mark location of head of loop...
+    */
+    markBranch(dp, pVM, doTag);
 
-  return;
+    return;
 }
 
 
 static void doParen(FICL_VM *pVM)
 {
-  CELL index, limit;
+    CELL index, limit;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  index = stackPop(pVM->pStack);
-  limit = stackPop(pVM->pStack);
+    index = stackPop(pVM->pStack);
+    limit = stackPop(pVM->pStack);
 
-  /* copy "leave" target addr to stack */
-  stackPushPtr(pVM->rStack, *(pVM->ip++));
-  stackPush(pVM->rStack, limit);
-  stackPush(pVM->rStack, index);
+    /* copy "leave" target addr to stack */
+    stackPushPtr(pVM->rStack, *(pVM->ip++));
+    stackPush(pVM->rStack, limit);
+    stackPush(pVM->rStack, index);
 
-  return;
+    return;
 }
 
 
 static void qDoCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pQDoParen);
+    assert(pQDoParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pQDoParen));
-  /*
-  ** Allot space for a pointer to the end
-  ** of the loop - "leave" uses this...
-  */
-  markBranch(dp, pVM, leaveTag);
-  dictAppendUNS(dp, 0);
-  /*
-  ** Mark location of head of loop...
-  */
-  markBranch(dp, pVM, doTag);
+    dictAppendCell(dp, LVALUEtoCELL(pQDoParen));
+    /*
+    ** Allot space for a pointer to the end
+    ** of the loop - "leave" uses this...
+    */
+    markBranch(dp, pVM, leaveTag);
+    dictAppendUNS(dp, 0);
+    /*
+    ** Mark location of head of loop...
+    */
+    markBranch(dp, pVM, doTag);
 
-  return;
+    return;
 }
 
 
 static void qDoParen(FICL_VM *pVM)
 {
-  CELL index, limit;
+    CELL index, limit;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  index = stackPop(pVM->pStack);
-  limit = stackPop(pVM->pStack);
+    index = stackPop(pVM->pStack);
+    limit = stackPop(pVM->pStack);
 
-  /* copy "leave" target addr to stack */
-  stackPushPtr(pVM->rStack, *(pVM->ip++));
+    /* copy "leave" target addr to stack */
+    stackPushPtr(pVM->rStack, *(pVM->ip++));
 
-  if (limit.u == index.u)
-  {
-    vmPopIP(pVM);
-  }
-  else
-  {
-    stackPush(pVM->rStack, limit);
-    stackPush(pVM->rStack, index);
-  }
+    if (limit.u == index.u)
+    {
+        vmPopIP(pVM);
+    }
+    else
+    {
+        stackPush(pVM->rStack, limit);
+        stackPush(pVM->rStack, index);
+    }
 
-  return;
+    return;
 }
 
 
@@ -1631,122 +1693,122 @@ static void qDoParen(FICL_VM *pVM)
 */
 static void leaveCo(FICL_VM *pVM)
 {
-  /* almost unloop */
-  stackDrop(pVM->rStack, 2);
-  /* exit */
-  vmPopIP(pVM);
-  return;
+    /* almost unloop */
+    stackDrop(pVM->rStack, 2);
+    /* exit */
+    vmPopIP(pVM);
+    return;
 }
 
 
 static void unloopCo(FICL_VM *pVM)
 {
-  stackDrop(pVM->rStack, 3);
-  return;
+    stackDrop(pVM->rStack, 3);
+    return;
 }
 
 
 static void loopCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pLoopParen);
+    assert(pLoopParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pLoopParen));
-  resolveBackBranch(dp, pVM, doTag);
-  resolveAbsBranch(dp, pVM, leaveTag);
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pLoopParen));
+    resolveBackBranch(dp, pVM, doTag);
+    resolveAbsBranch(dp, pVM, leaveTag);
+    return;
 }
 
 
 static void plusLoopCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pPLoopParen);
+    assert(pPLoopParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pPLoopParen));
-  resolveBackBranch(dp, pVM, doTag);
-  resolveAbsBranch(dp, pVM, leaveTag);
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pPLoopParen));
+    resolveBackBranch(dp, pVM, doTag);
+    resolveAbsBranch(dp, pVM, leaveTag);
+    return;
 }
 
 
 static void loopParen(FICL_VM *pVM)
 {
-  FICL_INT index = stackGetTop(pVM->rStack).i;
-  FICL_INT limit = stackFetch(pVM->rStack, 1).i;
+    FICL_INT index = stackGetTop(pVM->rStack).i;
+    FICL_INT limit = stackFetch(pVM->rStack, 1).i;
 
-  index++;
+    index++;
 
-  if (index >= limit) 
-  {
-    stackDrop(pVM->rStack, 3); /* nuke the loop indices & "leave" addr */
-    vmBranchRelative(pVM, 1);  /* fall through the loop */
-  }
-  else 
-  {                       /* update index, branch to loop head */
-    stackSetTop(pVM->rStack, LVALUEtoCELL(index));
-    vmBranchRelative(pVM, *(int *)(pVM->ip));
-  }
+    if (index >= limit) 
+    {
+        stackDrop(pVM->rStack, 3); /* nuke the loop indices & "leave" addr */
+        vmBranchRelative(pVM, 1);  /* fall through the loop */
+    }
+    else 
+    {                       /* update index, branch to loop head */
+        stackSetTop(pVM->rStack, LVALUEtoCELL(index));
+        vmBranchRelative(pVM, *(int *)(pVM->ip));
+    }
 
-  return;
+    return;
 }
 
 
 static void plusLoopParen(FICL_VM *pVM)
 {
-  FICL_INT index = stackGetTop(pVM->rStack).i;
-  FICL_INT limit = stackFetch(pVM->rStack, 1).i;
-  FICL_INT increment = stackPop(pVM->pStack).i;
-  int flag;
+    FICL_INT index = stackGetTop(pVM->rStack).i;
+    FICL_INT limit = stackFetch(pVM->rStack, 1).i;
+    FICL_INT increment = stackPop(pVM->pStack).i;
+    int flag;
 
-  index += increment;
+    index += increment;
 
-  if (increment < 0)
-  flag = (index < limit);
-  else
-  flag = (index >= limit);
+    if (increment < 0)
+        flag = (index < limit);
+    else
+        flag = (index >= limit);
 
-  if (flag) 
-  {
-    stackDrop(pVM->rStack, 3); /* nuke the loop indices & "leave" addr */
-    vmBranchRelative(pVM, 1);  /* fall through the loop */
-  }
-  else 
-  {                       /* update index, branch to loop head */
-    stackSetTop(pVM->rStack, LVALUEtoCELL(index));
-    vmBranchRelative(pVM, *(int *)(pVM->ip));
-  }
+    if (flag) 
+    {
+        stackDrop(pVM->rStack, 3); /* nuke the loop indices & "leave" addr */
+        vmBranchRelative(pVM, 1);  /* fall through the loop */
+    }
+    else 
+    {                       /* update index, branch to loop head */
+        stackSetTop(pVM->rStack, LVALUEtoCELL(index));
+        vmBranchRelative(pVM, *(int *)(pVM->ip));
+    }
 
-  return;
+    return;
 }
 
 
 static void loopICo(FICL_VM *pVM)
 {
-  CELL index = stackGetTop(pVM->rStack);
-  stackPush(pVM->pStack, index);
+    CELL index = stackGetTop(pVM->rStack);
+    stackPush(pVM->pStack, index);
 
-  return;
+    return;
 }
 
 
 static void loopJCo(FICL_VM *pVM)
 {
-  CELL index = stackFetch(pVM->rStack, 3);
-  stackPush(pVM->pStack, index);
+    CELL index = stackFetch(pVM->rStack, 3);
+    stackPush(pVM->pStack, index);
 
-  return;
+    return;
 }
 
 
 static void loopKCo(FICL_VM *pVM)
 {
-  CELL index = stackFetch(pVM->rStack, 6);
-  stackPush(pVM->pStack, index);
+    CELL index = stackFetch(pVM->rStack, 6);
+    stackPush(pVM->pStack, index);
 
-  return;
+    return;
 }
 
 
@@ -1757,20 +1819,20 @@ static void loopKCo(FICL_VM *pVM)
 
 static void toRStack(FICL_VM *pVM)
 {
-  stackPush(pVM->rStack, stackPop(pVM->pStack));
-  return;
+    stackPush(pVM->rStack, stackPop(pVM->pStack));
+    return;
 }
 
 static void fromRStack(FICL_VM *pVM)
 {
-  stackPush(pVM->pStack, stackPop(pVM->rStack));
-  return;
+    stackPush(pVM->pStack, stackPop(pVM->rStack));
+    return;
 }
 
 static void fetchRStack(FICL_VM *pVM)
 {
-  stackPush(pVM->pStack, stackGetTop(pVM->rStack));
-  return;
+    stackPush(pVM->pStack, stackGetTop(pVM->rStack));
+    return;
 }
 
 
@@ -1781,20 +1843,20 @@ static void fetchRStack(FICL_VM *pVM)
 
 static void variableParen(FICL_VM *pVM)
 {
-  FICL_WORD *fw = pVM->runningWord;
-  stackPushPtr(pVM->pStack, fw->param);
-  return;
+    FICL_WORD *fw = pVM->runningWord;
+    stackPushPtr(pVM->pStack, fw->param);
+    return;
 }
 
 
 static void variable(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  STRINGINFO si = vmGetWord(pVM);
+    FICL_DICT *dp = ficlGetDict();
+    STRINGINFO si = vmGetWord(pVM);
 
-  dictAppendWord2(dp, si, variableParen, FW_DEFAULT);
-  dictAllotCells(dp, 1);
-  return;
+    dictAppendWord2(dp, si, variableParen, FW_DEFAULT);
+    dictAllotCells(dp, 1);
+    return;
 }
 
 
@@ -1806,23 +1868,23 @@ static void variable(FICL_VM *pVM)
 
 static void base(FICL_VM *pVM)
 {
-  CELL *pBase = (CELL *)(&pVM->base);
-  stackPush(pVM->pStack, LVALUEtoCELL(pBase));
-  return;
+    CELL *pBase = (CELL *)(&pVM->base);
+    stackPush(pVM->pStack, LVALUEtoCELL(pBase));
+    return;
 }
 
 
 static void decimal(FICL_VM *pVM)
 {
-  pVM->base = 10;
-  return;
+    pVM->base = 10;
+    return;
 }
 
 
 static void hex(FICL_VM *pVM)
 {
-  pVM->base = 16;
-  return;
+    pVM->base = 16;
+    return;
 }
 
 
@@ -1833,55 +1895,55 @@ static void hex(FICL_VM *pVM)
 
 static void allot(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  FICL_INT i = stackPopINT(pVM->pStack);
+    FICL_DICT *dp = ficlGetDict();
+    FICL_INT i = stackPopINT(pVM->pStack);
 #if FICL_ROBUST
-  dictCheck(dp, pVM, i);
+    dictCheck(dp, pVM, i);
 #endif
-  dictAllot(dp, i);
-  return;
+    dictAllot(dp, i);
+    return;
 }
 
 
 static void here(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  stackPushPtr(pVM->pStack, dp->here);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    stackPushPtr(pVM->pStack, dp->here);
+    return;
 }
 
 
 static void comma(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  CELL c = stackPop(pVM->pStack);
-  dictAppendCell(dp, c);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    CELL c = stackPop(pVM->pStack);
+    dictAppendCell(dp, c);
+    return;
 }
 
 
 static void cComma(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  char c = (char)stackPopINT(pVM->pStack);
-  dictAppendChar(dp, c);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    char c = (char)stackPopINT(pVM->pStack);
+    dictAppendChar(dp, c);
+    return;
 }
 
 
 static void cells(FICL_VM *pVM)
 {
-  FICL_INT i = stackPopINT(pVM->pStack);
-  stackPushINT(pVM->pStack, i * (FICL_INT)sizeof (CELL));
-  return;
+    FICL_INT i = stackPopINT(pVM->pStack);
+    stackPushINT(pVM->pStack, i * (FICL_INT)sizeof (CELL));
+    return;
 }
 
 
 static void cellPlus(FICL_VM *pVM)
 {
-  char *cp = stackPopPtr(pVM->pStack);
-  stackPushPtr(pVM->pStack, cp + sizeof (CELL));
-  return;
+    char *cp = stackPopPtr(pVM->pStack);
+    stackPushPtr(pVM->pStack, cp + sizeof (CELL));
+    return;
 }
 
 
@@ -1894,26 +1956,26 @@ static void cellPlus(FICL_VM *pVM)
 **************************************************************************/
 static void tick(FICL_VM *pVM)
 {
-  FICL_WORD *pFW = NULL;
-  STRINGINFO si = vmGetWord(pVM);
+    FICL_WORD *pFW = NULL;
+    STRINGINFO si = vmGetWord(pVM);
     
-  pFW = dictLookup(ficlGetDict(), si);
-  if (!pFW)
-  {
-    int i = SI_COUNT(si);
-    vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
-  }
-  stackPushPtr(pVM->pStack, pFW);
-  return;
+    pFW = dictLookup(ficlGetDict(), si);
+    if (!pFW)
+    {
+        int i = SI_COUNT(si);
+        vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
+    }
+    stackPushPtr(pVM->pStack, pFW);
+    return;
 }
 
 
 static void bracketTickCoIm(FICL_VM *pVM)
 {
-  tick(pVM);
-  literalIm(pVM);
+    tick(pVM);
+    literalIm(pVM);
     
-  return;
+    return;
 }
 
 
@@ -1926,23 +1988,23 @@ static void bracketTickCoIm(FICL_VM *pVM)
 
 static void postponeCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp  = ficlGetDict();
-  FICL_WORD *pFW;
-  assert(pComma);
+    FICL_DICT *dp  = ficlGetDict();
+    FICL_WORD *pFW;
+    assert(pComma);
 
-  tick(pVM);
-  pFW = stackGetTop(pVM->pStack).p;
-  if (wordIsImmediate(pFW))
-  {
-    dictAppendCell(dp, stackPop(pVM->pStack));
-  }
-  else
-  {
-    literalIm(pVM);
-    dictAppendCell(dp, LVALUEtoCELL(pComma));
-  }
+    tick(pVM);
+    pFW = stackGetTop(pVM->pStack).p;
+    if (wordIsImmediate(pFW))
+    {
+        dictAppendCell(dp, stackPop(pVM->pStack));
+    }
+    else
+    {
+        literalIm(pVM);
+        dictAppendCell(dp, LVALUEtoCELL(pComma));
+    }
     
-  return;
+    return;
 }
 
 
@@ -1955,15 +2017,15 @@ static void postponeCoIm(FICL_VM *pVM)
 
 static void execute(FICL_VM *pVM)
 {
-  FICL_WORD *pFW;
+    FICL_WORD *pFW;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
+    vmCheckStack(pVM, 1, 0);
 #endif
 
-  pFW = stackPopPtr(pVM->pStack);
-  vmExecute(pVM, pFW);
+    pFW = stackPopPtr(pVM->pStack);
+    vmExecute(pVM, pFW);
 
-  return;
+    return;
 }
 
 
@@ -1976,17 +2038,17 @@ static void execute(FICL_VM *pVM)
 
 static void immediate(FICL_VM *pVM)
 {
-  IGNORE(pVM);
-  dictSetImmediate(ficlGetDict());
-  return;
+    IGNORE(pVM);
+    dictSetImmediate(ficlGetDict());
+    return;
 }
 
 
 static void compileOnly(FICL_VM *pVM)
 {
-  IGNORE(pVM);
-  dictSetFlags(ficlGetDict(), FW_COMPILE, 0);
-  return;
+    IGNORE(pVM);
+    dictSetFlags(ficlGetDict(), FW_COMPILE, 0);
+    return;
 }
 
 
@@ -2003,48 +2065,46 @@ static void compileOnly(FICL_VM *pVM)
 
 static void stringLit(FICL_VM *pVM)
 {
-  FICL_STRING *sp = (FICL_STRING *)(pVM->ip);
-  FICL_COUNT count = sp->count;
-  char *cp = sp->text;
-  stackPushPtr(pVM->pStack, cp);
-  stackPushUNS(pVM->pStack, count);
-  cp += count + 1;
-  cp = alignPtr(cp);
-  pVM->ip = (IPTYPE)(void *)cp;
-  return;
+    FICL_STRING *sp = (FICL_STRING *)(pVM->ip);
+    FICL_COUNT count = sp->count;
+    char *cp = sp->text;
+    stackPushPtr(pVM->pStack, cp);
+    stackPushUNS(pVM->pStack, count);
+    cp += count + 1;
+    cp = alignPtr(cp);
+    pVM->ip = (IPTYPE)(void *)cp;
+    return;
 }
 
 static void dotQuoteCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  dictAppendCell(dp, LVALUEtoCELL(pStringLit));
-  dp->here = PTRtoCELL vmGetString(pVM, (FICL_STRING *)dp->here, '\"');
-  dictAlign(dp);
-  dictAppendCell(dp, LVALUEtoCELL(pType));
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    dictAppendCell(dp, LVALUEtoCELL(pStringLit));
+    dp->here = PTRtoCELL vmGetString(pVM, (FICL_STRING *)dp->here, '\"');
+    dictAlign(dp);
+    dictAppendCell(dp, LVALUEtoCELL(pType));
+    return;
 }
 
 
 static void dotParen(FICL_VM *pVM)
 {
-  char *pSrc      = vmGetInBuf(pVM);
-  char *pEnd      = vmGetInBufEnd(pVM);
-  char *pDest     = pVM->pad;
-  char ch;
+    char *pSrc      = vmGetInBuf(pVM);
+    char *pEnd      = vmGetInBufEnd(pVM);
+    char *pDest     = pVM->pad;
+    char ch;
 
-  pSrc = skipSpace(pSrc, pEnd);
+    for (ch = *pSrc; (pEnd != pSrc) && (ch != ')'); ch = *++pSrc)
+        *pDest++ = ch;
 
-  for (ch = *pSrc; (pEnd != pSrc) && (ch != ')'); ch = *++pSrc)
-  *pDest++ = ch;
+    *pDest = '\0';
+    if ((pEnd != pSrc) && (ch == ')'))
+        pSrc++;
 
-  *pDest = '\0';
-  if ((pEnd != pSrc) && (ch == ')'))
-  pSrc++;
-
-  vmTextOut(pVM, pVM->pad, 0);
-  vmUpdateTib(pVM, pSrc);
+    vmTextOut(pVM, pVM->pad, 0);
+    vmUpdateTib(pVM, pSrc);
         
-  return;
+    return;
 }
 
 
@@ -2061,24 +2121,24 @@ static void dotParen(FICL_VM *pVM)
 **************************************************************************/
 static void sLiteralCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  char *cp, *cpDest;
-  FICL_UNS u;
-  u  = stackPopUNS(pVM->pStack);
-  cp = stackPopPtr(pVM->pStack);
+    FICL_DICT *dp = ficlGetDict();
+    char *cp, *cpDest;
+    FICL_UNS u;
+    u  = stackPopUNS(pVM->pStack);
+    cp = stackPopPtr(pVM->pStack);
 
-  dictAppendCell(dp, LVALUEtoCELL(pStringLit));
-  cpDest    = (char *) dp->here;
-  *cpDest++ = (char)   u;
+    dictAppendCell(dp, LVALUEtoCELL(pStringLit));
+    cpDest    = (char *) dp->here;
+    *cpDest++ = (char)   u;
 
-  for (; u > 0; --u)
-  {
-    *cpDest++ = *cp++;
-  }
+    for (; u > 0; --u)
+    {
+        *cpDest++ = *cp++;
+    }
 
-  *cpDest++ = 0;
-  dp->here = PTRtoCELL alignPtr(cpDest);
-  return;
+    *cpDest++ = 0;
+    dp->here = PTRtoCELL alignPtr(cpDest);
+    return;
 }
 
 
@@ -2089,8 +2149,8 @@ static void sLiteralCoIm(FICL_VM *pVM)
 **************************************************************************/
 static void state(FICL_VM *pVM)
 {
-  stackPushPtr(pVM->pStack, &pVM->state);
-  return;
+    stackPushPtr(pVM->pStack, &pVM->state);
+    return;
 }
 
 
@@ -2103,61 +2163,61 @@ static void state(FICL_VM *pVM)
 
 static void createParen(FICL_VM *pVM)
 {
-  CELL *pCell = pVM->runningWord->param;
-  stackPushPtr(pVM->pStack, pCell+1);
-  return;
+    CELL *pCell = pVM->runningWord->param;
+    stackPushPtr(pVM->pStack, pCell+1);
+    return;
 }
 
 
 static void create(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  STRINGINFO si = vmGetWord(pVM);
+    FICL_DICT *dp = ficlGetDict();
+    STRINGINFO si = vmGetWord(pVM);
 
-  dictAppendWord2(dp, si, createParen, FW_DEFAULT);
-  dictAllotCells(dp, 1);
-  return;
+    dictAppendWord2(dp, si, createParen, FW_DEFAULT);
+    dictAllotCells(dp, 1);
+    return;
 }
 
 
 static void doDoes(FICL_VM *pVM)
 {
-  CELL *pCell = pVM->runningWord->param;
-  IPTYPE tempIP = (IPTYPE)((*pCell).p);
-  stackPushPtr(pVM->pStack, pCell+1);
-  vmPushIP(pVM, tempIP);
-  return;
+    CELL *pCell = pVM->runningWord->param;
+    IPTYPE tempIP = (IPTYPE)((*pCell).p);
+    stackPushPtr(pVM->pStack, pCell+1);
+    vmPushIP(pVM, tempIP);
+    return;
 }
 
 
 static void doesParen(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  dp->smudge->code = doDoes;
-  dp->smudge->param[0] = LVALUEtoCELL(pVM->ip);
-  vmPopIP(pVM);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    dp->smudge->code = doDoes;
+    dp->smudge->param[0] = LVALUEtoCELL(pVM->ip);
+    vmPopIP(pVM);
+    return;
 }
 
 
 static void doesCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 #if FICL_WANT_LOCALS
-  assert(pUnLinkParen);
-  if (nLocals > 0)
-  {
-    FICL_DICT *pLoc = ficlGetLoc();
-    dictEmpty(pLoc, pLoc->pForthWords->size);
-    dictAppendCell(dp, LVALUEtoCELL(pUnLinkParen));
-  }
+    assert(pUnLinkParen);
+    if (nLocals > 0)
+    {
+        FICL_DICT *pLoc = ficlGetLoc();
+        dictEmpty(pLoc, pLoc->pForthWords->size);
+        dictAppendCell(dp, LVALUEtoCELL(pUnLinkParen));
+    }
 
-  nLocals = 0;
+    nLocals = 0;
 #endif
-  IGNORE(pVM);
+    IGNORE(pVM);
 
-  dictAppendCell(dp, LVALUEtoCELL(pDoesParen));
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pDoesParen));
+    return;
 }
 
 
@@ -2169,9 +2229,9 @@ static void doesCoIm(FICL_VM *pVM)
 **************************************************************************/
 static void toBody(FICL_VM *pVM)
 {
-  FICL_WORD *pFW = stackPopPtr(pVM->pStack);
-  stackPushPtr(pVM->pStack, pFW->param + 1);
-  return;
+    FICL_WORD *pFW = stackPopPtr(pVM->pStack);
+    stackPushPtr(pVM->pStack, pFW->param + 1);
+    return;
 }
 
 
@@ -2181,9 +2241,9 @@ static void toBody(FICL_VM *pVM)
 */
 static void fromBody(FICL_VM *pVM)
 {
-  char *ptr = (char *) stackPopPtr(pVM->pStack) - sizeof (FICL_WORD);
-  stackPushPtr(pVM->pStack, ptr);
-  return;
+    char *ptr = (char *) stackPopPtr(pVM->pStack) - sizeof (FICL_WORD);
+    stackPushPtr(pVM->pStack, ptr);
+    return;
 }
 
 
@@ -2194,10 +2254,10 @@ static void fromBody(FICL_VM *pVM)
 */
 static void toName(FICL_VM *pVM)
 {
-  FICL_WORD *pFW = stackPopPtr(pVM->pStack);
-  stackPushPtr(pVM->pStack, pFW->name);
-  stackPushUNS(pVM->pStack, pFW->nName);
-  return;
+    FICL_WORD *pFW = stackPopPtr(pVM->pStack);
+    stackPushPtr(pVM->pStack, pFW->name);
+    stackPushUNS(pVM->pStack, pFW->nName);
+    return;
 }
 
 
@@ -2208,15 +2268,15 @@ static void toName(FICL_VM *pVM)
 
 static void lbracketCoIm(FICL_VM *pVM)
 {
-  pVM->state = INTERPRET;
-  return;
+    pVM->state = INTERPRET;
+    return;
 }
 
 
 static void rbracket(FICL_VM *pVM)
 {
-  pVM->state = COMPILE;
-  return;
+    pVM->state = COMPILE;
+    return;
 }
 
 
@@ -2229,9 +2289,9 @@ static void rbracket(FICL_VM *pVM)
 **************************************************************************/
 static void lessNumberSign(FICL_VM *pVM)
 {
-  FICL_STRING *sp = PTRtoSTRING pVM->pad;
-  sp->count = 0;
-  return;
+    FICL_STRING *sp = PTRtoSTRING pVM->pad;
+    sp->count = 0;
+    return;
 }
 
 /*
@@ -2244,15 +2304,15 @@ static void lessNumberSign(FICL_VM *pVM)
 */
 static void numberSign(FICL_VM *pVM)
 {
-  FICL_STRING *sp = PTRtoSTRING pVM->pad;
-  DPUNS u;
-  UNS16 rem;
+    FICL_STRING *sp = PTRtoSTRING pVM->pad;
+    DPUNS u;
+    UNS16 rem;
     
-  u   = u64Pop(pVM->pStack);
-  rem = m64UMod(&u, (UNS16)(pVM->base));
-  sp->text[sp->count++] = digit_to_char(rem);
-  u64Push(pVM->pStack, u);
-  return;
+    u   = u64Pop(pVM->pStack);
+    rem = m64UMod(&u, (UNS16)(pVM->base));
+    sp->text[sp->count++] = digit_to_char(rem);
+    u64Push(pVM->pStack, u);
+    return;
 }
 
 /*
@@ -2263,13 +2323,13 @@ static void numberSign(FICL_VM *pVM)
 */
 static void numberSignGreater(FICL_VM *pVM)
 {
-  FICL_STRING *sp = PTRtoSTRING pVM->pad;
-  sp->text[sp->count] = '\0';
-  strrev(sp->text);
-  stackDrop(pVM->pStack, 2);
-  stackPushPtr(pVM->pStack, sp->text);
-  stackPushUNS(pVM->pStack, sp->count);
-  return;
+    FICL_STRING *sp = PTRtoSTRING pVM->pad;
+    sp->text[sp->count] = '\0';
+    strrev(sp->text);
+    stackDrop(pVM->pStack, 2);
+    stackPushPtr(pVM->pStack, sp->text);
+    stackPushUNS(pVM->pStack, sp->count);
+    return;
 }
 
 /*
@@ -2281,21 +2341,21 @@ static void numberSignGreater(FICL_VM *pVM)
 */
 static void numberSignS(FICL_VM *pVM)
 {
-  FICL_STRING *sp = PTRtoSTRING pVM->pad;
-  DPUNS u;
-  UNS16 rem;
+    FICL_STRING *sp = PTRtoSTRING pVM->pad;
+    DPUNS u;
+    UNS16 rem;
 
-  u = u64Pop(pVM->pStack);
+    u = u64Pop(pVM->pStack);
 
-  do 
-  {
-    rem = m64UMod(&u, (UNS16)(pVM->base));
-    sp->text[sp->count++] = digit_to_char(rem);
-  } 
-  while (u.hi || u.lo);
+    do 
+    {
+        rem = m64UMod(&u, (UNS16)(pVM->base));
+        sp->text[sp->count++] = digit_to_char(rem);
+    } 
+    while (u.hi || u.lo);
 
-  u64Push(pVM->pStack, u);
-  return;
+    u64Push(pVM->pStack, u);
+    return;
 }
 
 /*
@@ -2305,10 +2365,10 @@ static void numberSignS(FICL_VM *pVM)
 */
 static void hold(FICL_VM *pVM)
 {
-  FICL_STRING *sp = PTRtoSTRING pVM->pad;
-  int i = stackPopINT(pVM->pStack);
-  sp->text[sp->count++] = (char) i;
-  return;
+    FICL_STRING *sp = PTRtoSTRING pVM->pad;
+    int i = stackPopINT(pVM->pStack);
+    sp->text[sp->count++] = (char) i;
+    return;
 }
 
 /*
@@ -2319,11 +2379,11 @@ static void hold(FICL_VM *pVM)
 */
 static void sign(FICL_VM *pVM)
 {
-  FICL_STRING *sp = PTRtoSTRING pVM->pad;
-  int i = stackPopINT(pVM->pStack);
-  if (i < 0)
-  sp->text[sp->count++] = '-';
-  return;
+    FICL_STRING *sp = PTRtoSTRING pVM->pad;
+    int i = stackPopINT(pVM->pStack);
+    if (i < 0)
+        sp->text[sp->count++] = '-';
+    return;
 }
 
 
@@ -2343,39 +2403,39 @@ static void sign(FICL_VM *pVM)
 **************************************************************************/
 static void toNumber(FICL_VM *pVM)
 {
-  FICL_UNS count  = stackPopUNS(pVM->pStack);
-  char *cp        = (char *)stackPopPtr(pVM->pStack);
-  DPUNS accum;
-  FICL_UNS base   = pVM->base;
-  FICL_UNS ch;
-  FICL_UNS digit;
+    FICL_UNS count  = stackPopUNS(pVM->pStack);
+    char *cp        = (char *)stackPopPtr(pVM->pStack);
+    DPUNS accum;
+    FICL_UNS base   = pVM->base;
+    FICL_UNS ch;
+    FICL_UNS digit;
 
-  accum = u64Pop(pVM->pStack);
+    accum = u64Pop(pVM->pStack);
 
-  for (ch = *cp; count > 0; ch = *++cp, count--)
-  {
-    if (ch < '0')
-    break;
+    for (ch = *cp; count > 0; ch = *++cp, count--)
+    {
+        if (ch < '0')
+            break;
 
-    digit = ch - '0';
+        digit = ch - '0';
 
-    if (digit > 9)
-    digit = tolower(ch) - 'a' + 10;
-    /* 
-    ** Note: following test also catches chars between 9 and a
-    ** because 'digit' is unsigned! 
-    */
-    if (digit >= base)
-    break;
+        if (digit > 9)
+            digit = tolower(ch) - 'a' + 10;
+        /* 
+        ** Note: following test also catches chars between 9 and a
+        ** because 'digit' is unsigned! 
+        */
+        if (digit >= base)
+            break;
 
-    accum = m64Mac(accum, base, digit);
-  }
+        accum = m64Mac(accum, base, digit);
+    }
 
-  u64Push(pVM->pStack, accum);
-  stackPushPtr  (pVM->pStack, cp);
-  stackPushUNS(pVM->pStack, count);
+    u64Push(pVM->pStack, accum);
+    stackPushPtr  (pVM->pStack, cp);
+    stackPushUNS(pVM->pStack, count);
 
-  return;
+    return;
 }
 
 
@@ -2396,15 +2456,15 @@ static void toNumber(FICL_VM *pVM)
 
 static void quit(FICL_VM *pVM)
 {
-  vmThrow(pVM, VM_QUIT);
-  return;
+    vmThrow(pVM, VM_QUIT);
+    return;
 }
 
 
 static void ficlAbort(FICL_VM *pVM)
 {
-  vmThrow(pVM, VM_ABORT);
-  return;
+    vmThrow(pVM, VM_ABORT);
+    return;
 }
 
 
@@ -2430,28 +2490,28 @@ static void ficlAbort(FICL_VM *pVM)
 **************************************************************************/
 static void accept(FICL_VM *pVM)
 {
-  FICL_INT count;
-  char *cp;
-  char *pBuf      = vmGetInBuf(pVM);
-  char *pEnd      = vmGetInBufEnd(pVM);
-  FICL_INT len       = pEnd - pBuf;
+    FICL_INT count;
+    char *cp;
+    char *pBuf      = vmGetInBuf(pVM);
+    char *pEnd      = vmGetInBufEnd(pVM);
+    FICL_INT len       = pEnd - pBuf;
 
-  if (len == 0)
-  vmThrow(pVM, VM_RESTART);
+    if (len == 0)
+        vmThrow(pVM, VM_RESTART);
 
-  /*
-  ** Now we have something in the text buffer - use it 
-  */
-  count = stackPopINT(pVM->pStack);
-  cp    = stackPopPtr(pVM->pStack);
+    /*
+    ** Now we have something in the text buffer - use it 
+    */
+    count = stackPopINT(pVM->pStack);
+    cp    = stackPopPtr(pVM->pStack);
 
-  len = (count < len) ? count : len;
-  strncpy(cp, vmGetInBuf(pVM), len);
-  pBuf += len;
-  vmUpdateTib(pVM, pBuf);
-  stackPushINT(pVM->pStack, len);
+    len = (count < len) ? count : len;
+    strncpy(cp, vmGetInBuf(pVM), len);
+    pBuf += len;
+    vmUpdateTib(pVM, pBuf);
+    stackPushINT(pVM->pStack, len);
 
-  return;
+    return;
 }
 
 
@@ -2463,10 +2523,10 @@ static void accept(FICL_VM *pVM)
 **************************************************************************/
 static void align(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  IGNORE(pVM);
-  dictAlign(dp);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    IGNORE(pVM);
+    dictAlign(dp);
+    return;
 }
 
 
@@ -2476,9 +2536,9 @@ static void align(FICL_VM *pVM)
 **************************************************************************/
 static void aligned(FICL_VM *pVM)
 {
-  void *addr = stackPopPtr(pVM->pStack);
-  stackPushPtr(pVM->pStack, alignPtr(addr));
-  return;
+    void *addr = stackPopPtr(pVM->pStack);
+    stackPushPtr(pVM->pStack, alignPtr(addr));
+    return;
 }
 
 
@@ -2493,47 +2553,60 @@ static void aligned(FICL_VM *pVM)
 **************************************************************************/
 static void beginCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  markBranch(dp, pVM, destTag);
-  return;
+    FICL_DICT *dp = ficlGetDict();
+    markBranch(dp, pVM, destTag);
+    return;
 }
 
 static void untilCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pIfParen);
+    assert(pIfParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pIfParen));
-  resolveBackBranch(dp, pVM, destTag);
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pIfParen));
+    resolveBackBranch(dp, pVM, destTag);
+    return;
 }
 
 static void whileCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pIfParen);
+    assert(pIfParen);
 
-  dictAppendCell(dp, LVALUEtoCELL(pIfParen));
-  markBranch(dp, pVM, origTag);
-  twoSwap(pVM);
-  dictAppendUNS(dp, 1);
-  return;
+    dictAppendCell(dp, LVALUEtoCELL(pIfParen));
+    markBranch(dp, pVM, origTag);
+    twoSwap(pVM);
+    dictAppendUNS(dp, 1);
+    return;
 }
 
 static void repeatCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  assert(pBranchParen);
-  dictAppendCell(dp, LVALUEtoCELL(pBranchParen));
+    assert(pBranchParen);
+    dictAppendCell(dp, LVALUEtoCELL(pBranchParen));
 
-  /* expect "begin" branch marker */
-  resolveBackBranch(dp, pVM, destTag);
-  /* expect "while" branch marker */
-  resolveForwardBranch(dp, pVM, origTag);
-  return;
+    /* expect "begin" branch marker */
+    resolveBackBranch(dp, pVM, destTag);
+    /* expect "while" branch marker */
+    resolveForwardBranch(dp, pVM, origTag);
+    return;
+}
+
+
+static void againCoIm(FICL_VM *pVM)
+{
+    FICL_DICT *dp = ficlGetDict();
+
+    assert(pBranchParen);
+    dictAppendCell(dp, LVALUEtoCELL(pBranchParen));
+
+    /* expect "begin" branch marker */
+    resolveBackBranch(dp, pVM, destTag);
+    return;
 }
 
 
@@ -2553,17 +2626,17 @@ static void repeatCoIm(FICL_VM *pVM)
 **************************************************************************/
 static void ficlChar(FICL_VM *pVM)
 {
-  STRINGINFO si = vmGetWord(pVM);
-  stackPushUNS(pVM->pStack, (FICL_UNS)(si.cp[0]));
+    STRINGINFO si = vmGetWord(pVM);
+    stackPushUNS(pVM->pStack, (FICL_UNS)(si.cp[0]));
 
-  return;
+    return;
 }
 
 static void charCoIm(FICL_VM *pVM)
 {
-  ficlChar(pVM);
-  literalIm(pVM);
-  return;
+    ficlChar(pVM);
+    literalIm(pVM);
+    return;
 }
 
 /**************************************************************************
@@ -2573,9 +2646,9 @@ static void charCoIm(FICL_VM *pVM)
 **************************************************************************/
 static void charPlus(FICL_VM *pVM)
 {
-  char *cp = stackPopPtr(pVM->pStack);
-  stackPushPtr(pVM->pStack, cp + 1);
-  return;
+    char *cp = stackPopPtr(pVM->pStack);
+    stackPushPtr(pVM->pStack, cp + 1);
+    return;
 }
 
 /**************************************************************************
@@ -2590,13 +2663,13 @@ static void charPlus(FICL_VM *pVM)
 #endif
 static void ficlChars(FICL_VM *pVM)
 {
-  if (sizeof (char) > 1)
-  {
-    FICL_INT i = stackPopINT(pVM->pStack);
-    stackPushINT(pVM->pStack, i * sizeof (char));
-  }
-  /* otherwise no-op! */
-  return;
+    if (sizeof (char) > 1)
+    {
+        FICL_INT i = stackPopINT(pVM->pStack);
+        stackPushINT(pVM->pStack, i * sizeof (char));
+    }
+    /* otherwise no-op! */
+    return;
 }
 #if defined (_M_IX86)
 #pragma warning(default: 4127)
@@ -2613,10 +2686,10 @@ static void ficlChars(FICL_VM *pVM)
 **************************************************************************/
 static void count(FICL_VM *pVM)
 {
-  FICL_STRING *sp = stackPopPtr(pVM->pStack);
-  stackPushPtr(pVM->pStack, sp->text);
-  stackPushUNS(pVM->pStack, sp->count);
-  return;
+    FICL_STRING *sp = stackPopPtr(pVM->pStack);
+    stackPushPtr(pVM->pStack, sp->text);
+    stackPushUNS(pVM->pStack, sp->count);
+    return;
 }
 
 /**************************************************************************
@@ -2634,26 +2707,28 @@ static void count(FICL_VM *pVM)
 **************************************************************************/
 static void environmentQ(FICL_VM *pVM)
 {
-  FICL_DICT *envp = ficlGetEnv();
-/*      FICL_COUNT  len = (FICL_COUNT)stackPopUNS(pVM->pStack); */
-  char        *cp =  stackPopPtr(pVM->pStack);
-  FICL_WORD  *pFW;
-  STRINGINFO si;
+    FICL_DICT *envp = ficlGetEnv();
+    FICL_COUNT  len = (FICL_COUNT)stackPopUNS(pVM->pStack);
+    char        *cp =  stackPopPtr(pVM->pStack);
+    FICL_WORD  *pFW;
+    STRINGINFO si;
 
-  SI_PSZ(si, cp);
-  pFW = dictLookup(envp, si);
 
-  if (pFW != NULL)
-  {
-    vmExecute(pVM, pFW);
-    stackPushINT(pVM->pStack, FICL_TRUE);
-  }
-  else
-  {
-    stackPushINT(pVM->pStack, FICL_FALSE);
-  }
+    &len;       /* silence compiler warning... */
+    SI_PSZ(si, cp);
+    pFW = dictLookup(envp, si);
 
-  return;
+    if (pFW != NULL)
+    {
+        vmExecute(pVM, pFW);
+        stackPushINT(pVM->pStack, FICL_TRUE);
+    }
+    else
+    {
+        stackPushINT(pVM->pStack, FICL_FALSE);
+    }
+
+    return;
 }
 
 /**************************************************************************
@@ -2668,19 +2743,19 @@ static void environmentQ(FICL_VM *pVM)
 **************************************************************************/
 static void evaluate(FICL_VM *pVM)
 {
-  FICL_INT count = stackPopINT(pVM->pStack);
-  char *cp    = stackPopPtr(pVM->pStack);
-  CELL id;
-  int result;
+    FICL_INT count = stackPopINT(pVM->pStack);
+    char *cp    = stackPopPtr(pVM->pStack);
+    CELL id;
+    int result;
 
-  id = pVM->sourceID;
-  pVM->sourceID.i = -1;
-  result = ficlExecC(pVM, cp, count);
-  pVM->sourceID = id;
-  if (result != VM_OUTOFTEXT)
-  vmThrow(pVM, result);
+    id = pVM->sourceID;
+    pVM->sourceID.i = -1;
+    result = ficlExecC(pVM, cp, count);
+    pVM->sourceID = id;
+    if (result != VM_OUTOFTEXT)
+        vmThrow(pVM, result);
 
-  return;
+    return;
 }
 
 
@@ -2694,24 +2769,25 @@ static void evaluate(FICL_VM *pVM)
 **************************************************************************/
 static void stringQuoteIm(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  if (pVM->state == INTERPRET)
-  {
-    FICL_STRING *sp = (FICL_STRING *) dp->here;
-    vmGetString(pVM, sp, '\"');
-    stackPushPtr(pVM->pStack, sp->text);
-    stackPushUNS(pVM->pStack, sp->count);
-  }
-  else    /* COMPILE state */
-  {
-    dictAppendCell(dp, LVALUEtoCELL(pStringLit));
-    dp->here = PTRtoCELL vmGetString(pVM, (FICL_STRING *)dp->here, '\"');
-    dictAlign(dp);
-  }
+    if (pVM->state == INTERPRET)
+    {
+        FICL_STRING *sp = (FICL_STRING *) dp->here;
+        vmGetString(pVM, sp, '\"');
+        stackPushPtr(pVM->pStack, sp->text);
+        stackPushUNS(pVM->pStack, sp->count);
+    }
+    else    /* COMPILE state */
+    {
+        dictAppendCell(dp, LVALUEtoCELL(pStringLit));
+        dp->here = PTRtoCELL vmGetString(pVM, (FICL_STRING *)dp->here, '\"');
+        dictAlign(dp);
+    }
 
-  return;
+    return;
 }
+
 
 /**************************************************************************
                         t y p e
@@ -2719,26 +2795,26 @@ static void stringQuoteIm(FICL_VM *pVM)
 **************************************************************************/
 static void type(FICL_VM *pVM)
 {
-  FICL_UNS count = stackPopUNS(pVM->pStack);
-  char *cp    = stackPopPtr(pVM->pStack);
+    FICL_UNS count = stackPopUNS(pVM->pStack);
+    char *cp    = stackPopPtr(pVM->pStack);
 
-  /* 
-  ** Since we don't have an output primitive for a counted string
-  ** (oops), make sure the string is null terminated. If not, copy
-  ** and terminate it.
-  */
-  if (cp[count] != '\0')
-  {
-    char *pDest = (char *)ficlGetDict()->here;
-    if (cp != pDest)
-    strncpy(pDest, cp, count);
+    /* 
+    ** Since we don't have an output primitive for a counted string
+    ** (oops), make sure the string is null terminated. If not, copy
+    ** and terminate it.
+    */
+    if (cp[count] != '\0')
+    {
+        char *pDest = (char *)ficlGetDict()->here;
+        if (cp != pDest)
+            strncpy(pDest, cp, count);
 
-    pDest[count] = '\0';
-    cp = pDest;
-  }
+        pDest[count] = '\0';
+        cp = pDest;
+    }
 
-  vmTextOut(pVM, cp, 0);
-  return;
+    vmTextOut(pVM, cp, 0);
+    return;
 }
 
 /**************************************************************************
@@ -2757,21 +2833,21 @@ static void type(FICL_VM *pVM)
 **************************************************************************/
 static void ficlWord(FICL_VM *pVM)
 {
-  FICL_STRING *sp = (FICL_STRING *)pVM->pad;
-  char      delim = (char)stackPopINT(pVM->pStack);
-  STRINGINFO   si;
+    FICL_STRING *sp = (FICL_STRING *)pVM->pad;
+    char      delim = (char)stackPopINT(pVM->pStack);
+    STRINGINFO   si;
     
-  si = vmParseString(pVM, delim);
+    si = vmParseStringEx(pVM, delim, 1);
 
-  if (SI_COUNT(si) > nPAD-1)
-  SI_SETLEN(si, nPAD-1);
+    if (SI_COUNT(si) > nPAD-1)
+        SI_SETLEN(si, nPAD-1);
 
-  sp->count = (FICL_COUNT)SI_COUNT(si);
-  strncpy(sp->text, SI_PTR(si), SI_COUNT(si));
-  strcat(sp->text, " ");
+    sp->count = (FICL_COUNT)SI_COUNT(si);
+    strncpy(sp->text, SI_PTR(si), SI_COUNT(si));
+    strcat(sp->text, " ");
 
-  stackPushPtr(pVM->pStack, sp);
-  return;
+    stackPushPtr(pVM->pStack, sp);
+    return;
 }
 
 
@@ -2784,10 +2860,10 @@ static void ficlWord(FICL_VM *pVM)
 **************************************************************************/
 static void parseNoCopy(FICL_VM *pVM)
 {
-  STRINGINFO si = vmGetWord0(pVM);
-  stackPushPtr(pVM->pStack, SI_PTR(si));
-  stackPushUNS(pVM->pStack, SI_COUNT(si));
-  return;
+    STRINGINFO si = vmGetWord0(pVM);
+    stackPushPtr(pVM->pStack, SI_PTR(si));
+    stackPushUNS(pVM->pStack, SI_COUNT(si));
+    return;
 }
 
 
@@ -2802,28 +2878,13 @@ static void parseNoCopy(FICL_VM *pVM)
 **************************************************************************/
 static void parse(FICL_VM *pVM)
 {
-  char *pSrc      = vmGetInBuf(pVM);
-  char *pEnd      = vmGetInBufEnd(pVM);
-  char *cp;
-  FICL_UNS count;
-  char delim      = (char)stackPopINT(pVM->pStack);
+    STRINGINFO si;
+	char delim      = (char)stackPopINT(pVM->pStack);
 
-  cp = pSrc;              /* mark start of text */
-
-  while ((pSrc != pEnd) && (*pSrc != delim))
-  {
-    pSrc++;             /* find next delimiter or end */
-  }
-
-  count = pSrc - cp;      /* set length of result */
-
-  if ((pSrc != pEnd) && (*pSrc == delim)) /* gobble trailing delimiter */
-  pSrc++;
-
-  vmUpdateTib(pVM, pSrc);
-  stackPushPtr(pVM->pStack, cp);
-  stackPushUNS(pVM->pStack, count);
-  return;
+	si = vmParseStringEx(pVM, delim, 0);
+    stackPushPtr(pVM->pStack, SI_PTR(si));
+    stackPushUNS(pVM->pStack, SI_COUNT(si));
+    return;
 }
 
 
@@ -2835,17 +2896,17 @@ static void parse(FICL_VM *pVM)
 **************************************************************************/
 static void fill(FICL_VM *pVM)
 {
-  char ch  = (char)stackPopINT(pVM->pStack);
-  FICL_UNS  u = stackPopUNS(pVM->pStack);
-  char *cp = (char *)stackPopPtr(pVM->pStack);
+    char ch  = (char)stackPopINT(pVM->pStack);
+    FICL_UNS  u = stackPopUNS(pVM->pStack);
+    char *cp = (char *)stackPopPtr(pVM->pStack);
 
-  while (u > 0)
-  {
-    *cp++ = ch;
-    u--;
-  }
+    while (u > 0)
+    {
+        *cp++ = ch;
+        u--;
+    }
 
-  return;
+    return;
 }
 
 
@@ -2861,24 +2922,25 @@ static void fill(FICL_VM *pVM)
 **************************************************************************/
 static void find(FICL_VM *pVM)
 {
-  FICL_STRING *sp = stackPopPtr(pVM->pStack);
-  FICL_WORD *pFW;
-  STRINGINFO si;
+    FICL_STRING *sp = stackPopPtr(pVM->pStack);
+    FICL_WORD *pFW;
+    STRINGINFO si;
 
-  SI_PFS(si, sp);
-  pFW = dictLookup(ficlGetDict(), si);
-  if (pFW)
-  {
-    stackPushPtr(pVM->pStack, pFW);
-    stackPushINT(pVM->pStack, (wordIsImmediate(pFW) ? 1 : -1));
-  }
-  else
-  {
-    stackPushPtr(pVM->pStack, sp);
-    stackPushUNS(pVM->pStack, 0);
-  }
-  return;
+    SI_PFS(si, sp);
+    pFW = dictLookup(ficlGetDict(), si);
+    if (pFW)
+    {
+        stackPushPtr(pVM->pStack, pFW);
+        stackPushINT(pVM->pStack, (wordIsImmediate(pFW) ? 1 : -1));
+    }
+    else
+    {
+        stackPushPtr(pVM->pStack, sp);
+        stackPushUNS(pVM->pStack, 0);
+    }
+    return;
 }
+
 
 
 /**************************************************************************
@@ -2891,16 +2953,16 @@ static void find(FICL_VM *pVM)
 **************************************************************************/
 static void fmSlashMod(FICL_VM *pVM)
 {
-  DPINT d1;
-  FICL_INT n1;
-  INTQR qr;
+    DPINT d1;
+    FICL_INT n1;
+    INTQR qr;
 
-  n1    = stackPopINT(pVM->pStack);
-  d1 = i64Pop(pVM->pStack);
-  qr = m64FlooredDivI(d1, n1);
-  stackPushINT(pVM->pStack, qr.rem);
-  stackPushINT(pVM->pStack, qr.quot);
-  return;
+    n1    = stackPopINT(pVM->pStack);
+    d1 = i64Pop(pVM->pStack);
+    qr = m64FlooredDivI(d1, n1);
+    stackPushINT(pVM->pStack, qr.rem);
+    stackPushINT(pVM->pStack, qr.quot);
+    return;
 }
 
 
@@ -2914,31 +2976,31 @@ static void fmSlashMod(FICL_VM *pVM)
 **************************************************************************/
 static void smSlashRem(FICL_VM *pVM)
 {
-  DPINT d1;
-  FICL_INT n1;
-  INTQR qr;
+    DPINT d1;
+    FICL_INT n1;
+    INTQR qr;
 
-  n1    = stackPopINT(pVM->pStack);
-  d1 = i64Pop(pVM->pStack);
-  qr = m64SymmetricDivI(d1, n1);
-  stackPushINT(pVM->pStack, qr.rem);
-  stackPushINT(pVM->pStack, qr.quot);
-  return;
+    n1    = stackPopINT(pVM->pStack);
+    d1 = i64Pop(pVM->pStack);
+    qr = m64SymmetricDivI(d1, n1);
+    stackPushINT(pVM->pStack, qr.rem);
+    stackPushINT(pVM->pStack, qr.quot);
+    return;
 }
 
 
 static void ficlMod(FICL_VM *pVM)
 {
-  DPINT d1;
-  FICL_INT n1;
-  INTQR qr;
+    DPINT d1;
+    FICL_INT n1;
+    INTQR qr;
 
-  n1    = stackPopINT(pVM->pStack);
-  d1.lo = stackPopINT(pVM->pStack);
-  i64Extend(d1);
-  qr = m64SymmetricDivI(d1, n1);
-  stackPushINT(pVM->pStack, qr.rem);
-  return;
+    n1    = stackPopINT(pVM->pStack);
+    d1.lo = stackPopINT(pVM->pStack);
+    i64Extend(d1);
+    qr = m64SymmetricDivI(d1, n1);
+    stackPushINT(pVM->pStack, qr.rem);
+    return;
 }
 
 
@@ -2952,16 +3014,16 @@ static void ficlMod(FICL_VM *pVM)
 *************************************************************************/
 static void umSlashMod(FICL_VM *pVM)
 {
-  DPUNS ud;
-  FICL_UNS u1;
-  UNSQR qr;
+    DPUNS ud;
+    FICL_UNS u1;
+    UNSQR qr;
 
-  u1    = stackPopUNS(pVM->pStack);
-  ud    = u64Pop(pVM->pStack);
-  qr    = ficlLongDiv(ud, u1);
-  stackPushUNS(pVM->pStack, qr.rem);
-  stackPushUNS(pVM->pStack, qr.quot);
-  return;
+    u1    = stackPopUNS(pVM->pStack);
+    ud    = u64Pop(pVM->pStack);
+    qr    = ficlLongDiv(ud, u1);
+    stackPushUNS(pVM->pStack, qr.rem);
+    stackPushUNS(pVM->pStack, qr.quot);
+    return;
 }
 
 
@@ -2981,21 +3043,21 @@ static void umSlashMod(FICL_VM *pVM)
 **************************************************************************/
 static void lshift(FICL_VM *pVM)
 {
-  FICL_UNS nBits = stackPopUNS(pVM->pStack);
-  FICL_UNS x1    = stackPopUNS(pVM->pStack);
+    FICL_UNS nBits = stackPopUNS(pVM->pStack);
+    FICL_UNS x1    = stackPopUNS(pVM->pStack);
 
-  stackPushUNS(pVM->pStack, x1 << nBits);
-  return;
+    stackPushUNS(pVM->pStack, x1 << nBits);
+    return;
 }
 
 
 static void rshift(FICL_VM *pVM)
 {
-  FICL_UNS nBits = stackPopUNS(pVM->pStack);
-  FICL_UNS x1    = stackPopUNS(pVM->pStack);
+    FICL_UNS nBits = stackPopUNS(pVM->pStack);
+    FICL_UNS x1    = stackPopUNS(pVM->pStack);
 
-  stackPushUNS(pVM->pStack, x1 >> nBits);
-  return;
+    stackPushUNS(pVM->pStack, x1 >> nBits);
+    return;
 }
 
 
@@ -3006,25 +3068,25 @@ static void rshift(FICL_VM *pVM)
 **************************************************************************/
 static void mStar(FICL_VM *pVM)
 {
-  FICL_INT n2 = stackPopINT(pVM->pStack);
-  FICL_INT n1 = stackPopINT(pVM->pStack);
-  DPINT d;
+    FICL_INT n2 = stackPopINT(pVM->pStack);
+    FICL_INT n1 = stackPopINT(pVM->pStack);
+    DPINT d;
     
-  d = m64MulI(n1, n2);
-  i64Push(pVM->pStack, d);
-  return;
+    d = m64MulI(n1, n2);
+    i64Push(pVM->pStack, d);
+    return;
 }
 
 
 static void umStar(FICL_VM *pVM)
 {
-  FICL_UNS u2 = stackPopUNS(pVM->pStack);
-  FICL_UNS u1 = stackPopUNS(pVM->pStack);
-  DPUNS ud;
+    FICL_UNS u2 = stackPopUNS(pVM->pStack);
+    FICL_UNS u1 = stackPopUNS(pVM->pStack);
+    DPUNS ud;
     
-  ud = ficlLongMul(u1, u2);
-  u64Push(pVM->pStack, ud);
-  return;
+    ud = ficlLongMul(u1, u2);
+    u64Push(pVM->pStack, ud);
+    return;
 }
 
 
@@ -3034,20 +3096,20 @@ static void umStar(FICL_VM *pVM)
 **************************************************************************/
 static void ficlMax(FICL_VM *pVM)
 {
-  FICL_INT n2 = stackPopINT(pVM->pStack);
-  FICL_INT n1 = stackPopINT(pVM->pStack);
+    FICL_INT n2 = stackPopINT(pVM->pStack);
+    FICL_INT n1 = stackPopINT(pVM->pStack);
 
-  stackPushINT(pVM->pStack, (n1 > n2) ? n1 : n2);
-  return;
+    stackPushINT(pVM->pStack, (n1 > n2) ? n1 : n2);
+    return;
 }
 
 static void ficlMin(FICL_VM *pVM)
 {
-  FICL_INT n2 = stackPopINT(pVM->pStack);
-  FICL_INT n1 = stackPopINT(pVM->pStack);
+    FICL_INT n2 = stackPopINT(pVM->pStack);
+    FICL_INT n1 = stackPopINT(pVM->pStack);
 
-  stackPushINT(pVM->pStack, (n1 < n2) ? n1 : n2);
-  return;
+    stackPushINT(pVM->pStack, (n1 < n2) ? n1 : n2);
+    return;
 }
 
 
@@ -3063,30 +3125,30 @@ static void ficlMin(FICL_VM *pVM)
 **************************************************************************/
 static void move(FICL_VM *pVM)
 {
-  FICL_UNS u     = stackPopUNS(pVM->pStack);
-  char *addr2 = stackPopPtr(pVM->pStack);
-  char *addr1 = stackPopPtr(pVM->pStack);
+    FICL_UNS u     = stackPopUNS(pVM->pStack);
+    char *addr2 = stackPopPtr(pVM->pStack);
+    char *addr1 = stackPopPtr(pVM->pStack);
 
-  if (u == 0) 
-  return;
-  /*
-  ** Do the copy carefully, so as to be
-  ** correct even if the two ranges overlap
-  */
-  if (addr1 >= addr2)
-  {
-    for (; u > 0; u--)
-    *addr2++ = *addr1++;
-  }
-  else
-  {
-    addr2 += u-1;
-    addr1 += u-1;
-    for (; u > 0; u--)
-    *addr2-- = *addr1--;
-  }
+    if (u == 0) 
+        return;
+    /*
+    ** Do the copy carefully, so as to be
+    ** correct even if the two ranges overlap
+    */
+    if (addr1 >= addr2)
+    {
+        for (; u > 0; u--)
+            *addr2++ = *addr1++;
+    }
+    else
+    {
+        addr2 += u-1;
+        addr1 += u-1;
+        for (; u > 0; u--)
+            *addr2-- = *addr1--;
+    }
 
-  return;
+    return;
 }
 
 
@@ -3096,11 +3158,11 @@ static void move(FICL_VM *pVM)
 **************************************************************************/
 static void recurseCoIm(FICL_VM *pVM)
 {
-  FICL_DICT *pDict = ficlGetDict();
+    FICL_DICT *pDict = ficlGetDict();
 
-  IGNORE(pVM);
-  dictAppendCell(pDict, LVALUEtoCELL(pDict->smudge));
-  return;
+    IGNORE(pVM);
+    dictAppendCell(pDict, LVALUEtoCELL(pDict->smudge));
+    return;
 }
 
 
@@ -3112,12 +3174,12 @@ static void recurseCoIm(FICL_VM *pVM)
 **************************************************************************/
 static void sToD(FICL_VM *pVM)
 {
-  FICL_INT s = stackPopINT(pVM->pStack);
+    FICL_INT s = stackPopINT(pVM->pStack);
 
-  /* sign extend to 64 bits.. */
-  stackPushINT(pVM->pStack, s);
-  stackPushINT(pVM->pStack, (s < 0) ? -1 : 0);
-  return;
+    /* sign extend to 64 bits.. */
+    stackPushINT(pVM->pStack, s);
+    stackPushINT(pVM->pStack, (s < 0) ? -1 : 0);
+    return;
 }
 
 
@@ -3129,9 +3191,9 @@ static void sToD(FICL_VM *pVM)
 **************************************************************************/
 static void source(FICL_VM *pVM)
 {
-  stackPushPtr(pVM->pStack, pVM->tib.cp);
-  stackPushINT(pVM->pStack, vmGetInBufLen(pVM));
-  return;
+    stackPushPtr(pVM->pStack, pVM->tib.cp);
+    stackPushINT(pVM->pStack, vmGetInBufLen(pVM));
+    return;
 }
 
 
@@ -3141,8 +3203,8 @@ static void source(FICL_VM *pVM)
 **************************************************************************/
 static void ficlVersion(FICL_VM *pVM)
 {
-  vmTextOut(pVM, "ficl Version " FICL_VER, 1);
-  return;
+    vmTextOut(pVM, "ficl Version " FICL_VER, 1);
+    return;
 }
 
 
@@ -3152,8 +3214,8 @@ static void ficlVersion(FICL_VM *pVM)
 **************************************************************************/
 static void toIn(FICL_VM *pVM)
 {
-  stackPushPtr(pVM->pStack, &pVM->tib.index);
-  return;
+    stackPushPtr(pVM->pStack, &pVM->tib.index);
+    return;
 }
 
 
@@ -3167,16 +3229,16 @@ static void toIn(FICL_VM *pVM)
 **************************************************************************/
 static void definitions(FICL_VM *pVM)
 {
-  FICL_DICT *pDict = ficlGetDict();
+    FICL_DICT *pDict = ficlGetDict();
 
-  assert(pDict);
-  if (pDict->nLists < 1)
-  {
-    vmThrowErr(pVM, "DEFINITIONS error - empty search order");
-  }
+    assert(pDict);
+    if (pDict->nLists < 1)
+    {
+        vmThrowErr(pVM, "DEFINITIONS error - empty search order");
+    }
 
-  pDict->pCompile = pDict->pSearch[pDict->nLists-1];
-  return;
+    pDict->pCompile = pDict->pSearch[pDict->nLists-1];
+    return;
 }
 
 
@@ -3189,9 +3251,9 @@ static void definitions(FICL_VM *pVM)
 **************************************************************************/
 static void forthWordlist(FICL_VM *pVM)
 {
-  FICL_HASH *pHash = ficlGetDict()->pForthWords;
-  stackPushPtr(pVM->pStack, pHash);
-  return;
+    FICL_HASH *pHash = ficlGetDict()->pForthWords;
+    stackPushPtr(pVM->pStack, pHash);
+    return;
 }
 
 
@@ -3202,10 +3264,10 @@ static void forthWordlist(FICL_VM *pVM)
 **************************************************************************/
 static void getCurrent(FICL_VM *pVM)
 {
-  if (ficlLockDictionary(TRUE));
-  stackPushPtr(pVM->pStack, ficlGetDict()->pCompile);
-  if (ficlLockDictionary(FALSE));
-  return;
+    ficlLockDictionary(TRUE);
+    stackPushPtr(pVM->pStack, ficlGetDict()->pCompile);
+    ficlLockDictionary(FALSE);
+    return;
 }
 
 
@@ -3219,19 +3281,19 @@ static void getCurrent(FICL_VM *pVM)
 **************************************************************************/
 static void getOrder(FICL_VM *pVM)
 {
-  FICL_DICT *pDict = ficlGetDict();
-  int nLists = pDict->nLists;
-  int i;
+    FICL_DICT *pDict = ficlGetDict();
+    int nLists = pDict->nLists;
+    int i;
 
-  if (ficlLockDictionary(TRUE));
-  for (i = 0; i < nLists; i++)
-  {
-    stackPushPtr(pVM->pStack, pDict->pSearch[i]);
-  }
+    ficlLockDictionary(TRUE);
+    for (i = 0; i < nLists; i++)
+    {
+        stackPushPtr(pVM->pStack, pDict->pSearch[i]);
+    }
 
-  stackPushUNS(pVM->pStack, nLists);
-  if (ficlLockDictionary(FALSE));
-  return;
+    stackPushUNS(pVM->pStack, nLists);
+    ficlLockDictionary(FALSE);
+    return;
 }
 
 
@@ -3245,30 +3307,30 @@ static void getOrder(FICL_VM *pVM)
 **************************************************************************/
 static void searchWordlist(FICL_VM *pVM)
 {
-  STRINGINFO si;
-  UNS16 hashCode;
-  FICL_WORD *pFW;
-  FICL_HASH *pHash = stackPopPtr(pVM->pStack);
+    STRINGINFO si;
+    UNS16 hashCode;
+    FICL_WORD *pFW;
+    FICL_HASH *pHash = stackPopPtr(pVM->pStack);
 
-  si.count         = (FICL_COUNT)stackPopUNS(pVM->pStack);
-  si.cp            = stackPopPtr(pVM->pStack);
-  hashCode         = hashHashCode(si);
+    si.count         = (FICL_COUNT)stackPopUNS(pVM->pStack);
+    si.cp            = stackPopPtr(pVM->pStack);
+    hashCode         = hashHashCode(si);
 
-  if (ficlLockDictionary(TRUE));
-  pFW = hashLookup(pHash, si, hashCode);
-  if (ficlLockDictionary(FALSE));
+    ficlLockDictionary(TRUE);
+    pFW = hashLookup(pHash, si, hashCode);
+    ficlLockDictionary(FALSE);
 
-  if (pFW)
-  {
-    stackPushPtr(pVM->pStack, pFW);
-    stackPushINT(pVM->pStack, (wordIsImmediate(pFW) ? 1 : -1));
-  }
-  else
-  {
-    stackPushUNS(pVM->pStack, 0);
-  }
+    if (pFW)
+    {
+        stackPushPtr(pVM->pStack, pFW);
+        stackPushINT(pVM->pStack, (wordIsImmediate(pFW) ? 1 : -1));
+    }
+    else
+    {
+        stackPushUNS(pVM->pStack, 0);
+    }
 
-  return;
+    return;
 }
 
 
@@ -3279,12 +3341,12 @@ static void searchWordlist(FICL_VM *pVM)
 **************************************************************************/
 static void setCurrent(FICL_VM *pVM)
 {
-  FICL_HASH *pHash = stackPopPtr(pVM->pStack);
-  FICL_DICT *pDict = ficlGetDict();
-  if (ficlLockDictionary(TRUE));
-  pDict->pCompile = pHash;
-  if (ficlLockDictionary(FALSE));
-  return;
+    FICL_HASH *pHash = stackPopPtr(pVM->pStack);
+    FICL_DICT *pDict = ficlGetDict();
+    ficlLockDictionary(TRUE);
+    pDict->pCompile = pHash;
+    ficlLockDictionary(FALSE);
+    return;
 }
 
 
@@ -3301,32 +3363,32 @@ static void setCurrent(FICL_VM *pVM)
 **************************************************************************/
 static void setOrder(FICL_VM *pVM)
 {
-  int i;
-  int nLists = stackPopINT(pVM->pStack);
-  FICL_DICT *dp = ficlGetDict();
+    int i;
+    int nLists = stackPopINT(pVM->pStack);
+    FICL_DICT *dp = ficlGetDict();
 
-  if (nLists > FICL_DEFAULT_VOCS)
-  {
-    vmThrowErr(pVM, "set-order error: list would be too large");
-  }
-
-  if (ficlLockDictionary(TRUE));
-
-  if (nLists >= 0)
-  {
-    dp->nLists = nLists;
-    for (i = nLists-1; i >= 0; --i)
+    if (nLists > FICL_DEFAULT_VOCS)
     {
-      dp->pSearch[i] = stackPopPtr(pVM->pStack);
+        vmThrowErr(pVM, "set-order error: list would be too large");
     }
-  }
-  else
-  {
-    dictResetSearchOrder(dp);
-  }
 
-  if (ficlLockDictionary(FALSE));
-  return;
+    ficlLockDictionary(TRUE);
+
+    if (nLists >= 0)
+    {
+        dp->nLists = nLists;
+        for (i = nLists-1; i >= 0; --i)
+        {
+            dp->pSearch[i] = stackPopPtr(pVM->pStack);
+        }
+    }
+    else
+    {
+        dictResetSearchOrder(dp);
+    }
+
+    ficlLockDictionary(FALSE);
+    return;
 }
 
 
@@ -3347,25 +3409,25 @@ static void setOrder(FICL_VM *pVM)
 **************************************************************************/
 static void wordlist(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  FICL_HASH *pHash;
-  FICL_UNS nBuckets;
+    FICL_DICT *dp = ficlGetDict();
+    FICL_HASH *pHash;
+    FICL_UNS nBuckets;
     
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 1);
+    vmCheckStack(pVM, 1, 1);
 #endif
-  nBuckets = stackPopUNS(pVM->pStack);
+    nBuckets = stackPopUNS(pVM->pStack);
 
-  dictAlign(dp);
-  pHash    = (FICL_HASH *)dp->here;
-  dictAllot(dp, sizeof (FICL_HASH) 
-	    + (nBuckets-1) * sizeof (FICL_WORD *));
+    dictAlign(dp);
+    pHash    = (FICL_HASH *)dp->here;
+    dictAllot(dp, sizeof (FICL_HASH) 
+        + (nBuckets-1) * sizeof (FICL_WORD *));
 
-  pHash->size = nBuckets;
-  hashReset(pHash);
+    pHash->size = nBuckets;
+    hashReset(pHash);
 
-  stackPushPtr(pVM->pStack, pHash);
-  return;
+    stackPushPtr(pVM->pStack, pHash);
+    return;
 }
 
 
@@ -3376,18 +3438,18 @@ static void wordlist(FICL_VM *pVM)
 **************************************************************************/
 static void searchPop(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  int nLists;
+    FICL_DICT *dp = ficlGetDict();
+    int nLists;
 
-  if (ficlLockDictionary(TRUE));
-  nLists = dp->nLists;
-  if (nLists == 0)
-  {
-    vmThrowErr(pVM, "search> error: empty search order");
-  }
-  stackPushPtr(pVM->pStack, dp->pSearch[--dp->nLists]);
-  if (ficlLockDictionary(FALSE));
-  return;
+    ficlLockDictionary(TRUE);
+    nLists = dp->nLists;
+    if (nLists == 0)
+    {
+        vmThrowErr(pVM, "search> error: empty search order");
+    }
+    stackPushPtr(pVM->pStack, dp->pSearch[--dp->nLists]);
+    ficlLockDictionary(FALSE);
+    return;
 }
 
 
@@ -3398,16 +3460,16 @@ static void searchPop(FICL_VM *pVM)
 **************************************************************************/
 static void searchPush(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
+    FICL_DICT *dp = ficlGetDict();
 
-  if (ficlLockDictionary(TRUE));
-  if (dp->nLists > FICL_DEFAULT_VOCS)
-  {
-    vmThrowErr(pVM, ">search error: search order overflow");
-  }
-  dp->pSearch[dp->nLists++] = stackPopPtr(pVM->pStack);
-  if (ficlLockDictionary(FALSE));
-  return;
+    ficlLockDictionary(TRUE);
+    if (dp->nLists > FICL_DEFAULT_VOCS)
+    {
+        vmThrowErr(pVM, ">search error: search order overflow");
+    }
+    dp->pSearch[dp->nLists++] = stackPopPtr(pVM->pStack);
+    ficlLockDictionary(FALSE);
+    return;
 }
 
 
@@ -3419,18 +3481,18 @@ static void searchPush(FICL_VM *pVM)
 **************************************************************************/
 static void colonNoName(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  FICL_WORD *pFW;
-  STRINGINFO si;
+    FICL_DICT *dp = ficlGetDict();
+    FICL_WORD *pFW;
+    STRINGINFO si;
 
-  SI_SETLEN(si, 0);
-  SI_SETPTR(si, NULL);
+    SI_SETLEN(si, 0);
+    SI_SETPTR(si, NULL);
 
-  pVM->state = COMPILE;
-  pFW = dictAppendWord2(dp, si, colonParen, FW_DEFAULT | FW_SMUDGE);
-  stackPushPtr(pVM->pStack, pFW);
-  markControlTag(pVM, colonTag);
-  return;
+    pVM->state = COMPILE;
+    pFW = dictAppendWord2(dp, si, colonParen, FW_DEFAULT | FW_SMUDGE);
+    stackPushPtr(pVM->pStack, pFW);
+    markControlTag(pVM, colonTag);
+    return;
 }
 
 
@@ -3453,27 +3515,27 @@ static void colonNoName(FICL_VM *pVM)
 #if FICL_WANT_USER
 static void userParen(FICL_VM *pVM)
 {
-  FICL_INT i = pVM->runningWord->param[0].i;
-  stackPushPtr(pVM->pStack, &pVM->user[i]);
-  return;
+    FICL_INT i = pVM->runningWord->param[0].i;
+    stackPushPtr(pVM->pStack, &pVM->user[i]);
+    return;
 }
 
 
 static void userVariable(FICL_VM *pVM)
 {
-  FICL_DICT *dp = ficlGetDict();
-  STRINGINFO si = vmGetWord(pVM);
-  CELL c;
+    FICL_DICT *dp = ficlGetDict();
+    STRINGINFO si = vmGetWord(pVM);
+    CELL c;
 
-  c = stackPop(pVM->pStack);
-  if (c.i >= FICL_USER_CELLS)
-  {
-    vmThrowErr(pVM, "Error - out of user space");
-  }
+    c = stackPop(pVM->pStack);
+    if (c.i >= FICL_USER_CELLS)
+    {
+        vmThrowErr(pVM, "Error - out of user space");
+    }
 
-  dictAppendWord2(dp, si, userParen, FW_DEFAULT);
-  dictAppendCell(dp, c);
-  return;
+    dictAppendWord2(dp, si, userParen, FW_DEFAULT);
+    dictAppendCell(dp, c);
+    return;
 }
 #endif
 
@@ -3488,42 +3550,48 @@ static void userVariable(FICL_VM *pVM)
 **************************************************************************/
 static void toValue(FICL_VM *pVM)
 {
-  STRINGINFO si = vmGetWord(pVM);
-  FICL_DICT *dp = ficlGetDict();
-  FICL_WORD *pFW;
+    STRINGINFO si = vmGetWord(pVM);
+    FICL_DICT *dp = ficlGetDict();
+    FICL_WORD *pFW;
 
 #if FICL_WANT_LOCALS
-  FICL_DICT *pLoc = ficlGetLoc();
-  if ((nLocals > 0) && (pVM->state == COMPILE))
-  {
-    pFW = dictLookup(pLoc, si);
-    if (pFW)
+    if ((nLocals > 0) && (pVM->state == COMPILE))
     {
-      dictAppendCell(dp, LVALUEtoCELL(pToLocalParen));
-      dictAppendCell(dp, LVALUEtoCELL(pFW->param[0]));
-      return;
+        FICL_DICT *pLoc = ficlGetLoc();
+        pFW = dictLookup(pLoc, si);
+        if (pFW && (pFW->code == doLocalIm))
+        {
+            dictAppendCell(dp, LVALUEtoCELL(pToLocalParen));
+            dictAppendCell(dp, LVALUEtoCELL(pFW->param[0]));
+            return;
+        }
+		else if (pFW && pFW->code == do2LocalIm)
+		{
+            dictAppendCell(dp, LVALUEtoCELL(pTo2LocalParen));
+            dictAppendCell(dp, LVALUEtoCELL(pFW->param[0]));
+            return;
+		}
     }
-  }
 #endif
 
-  assert(pStore);
+    assert(pStore);
 
-  pFW = dictLookup(dp, si);
-  if (!pFW)
-  {
-    int i = SI_COUNT(si);
-    vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
-  }
+    pFW = dictLookup(dp, si);
+    if (!pFW)
+    {
+        int i = SI_COUNT(si);
+        vmThrowErr(pVM, "%.*s not found", i, SI_PTR(si));
+    }
 
-  if (pVM->state == INTERPRET)
-  pFW->param[0] = stackPop(pVM->pStack);
-  else        /* compile code to store to word's param */
-  {
-    stackPushPtr(pVM->pStack, &pFW->param[0]);
-    literalIm(pVM);
-    dictAppendCell(dp, LVALUEtoCELL(pStore));
-  }
-  return;
+    if (pVM->state == INTERPRET)
+        pFW->param[0] = stackPop(pVM->pStack);
+    else        /* compile code to store to word's param */
+    {
+        stackPushPtr(pVM->pStack, &pFW->param[0]);
+        literalIm(pVM);
+        dictAppendCell(dp, LVALUEtoCELL(pStore));
+    }
+    return;
 }
 
 
@@ -3537,17 +3605,17 @@ static void toValue(FICL_VM *pVM)
 **************************************************************************/
 static void linkParen(FICL_VM *pVM)
 {
-  FICL_INT nLink = *(FICL_INT *)(pVM->ip);
-  vmBranchRelative(pVM, 1);
-  stackLink(pVM->rStack, nLink);
-  return;
+    FICL_INT nLink = *(FICL_INT *)(pVM->ip);
+    vmBranchRelative(pVM, 1);
+    stackLink(pVM->rStack, nLink);
+    return;
 }
 
 
 static void unlinkParen(FICL_VM *pVM)
 {
-  stackUnlink(pVM->rStack);
-  return;
+    stackUnlink(pVM->rStack);
+    return;
 }
 
 
@@ -3559,45 +3627,45 @@ static void unlinkParen(FICL_VM *pVM)
 **************************************************************************/
 static void getLocalParen(FICL_VM *pVM)
 {
-  FICL_INT nLocal = *(FICL_INT *)(pVM->ip++);
-  stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal]);
-  return;
+    FICL_INT nLocal = *(FICL_INT *)(pVM->ip++);
+    stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal]);
+    return;
 }
 
 
 static void toLocalParen(FICL_VM *pVM)
 {
-  FICL_INT nLocal = *(FICL_INT *)(pVM->ip++);
-  pVM->rStack->pFrame[nLocal] = stackPop(pVM->pStack);
-  return;
+    FICL_INT nLocal = *(FICL_INT *)(pVM->ip++);
+    pVM->rStack->pFrame[nLocal] = stackPop(pVM->pStack);
+    return;
 }
 
 
 static void getLocal0(FICL_VM *pVM)
 {
-  stackPush(pVM->pStack, pVM->rStack->pFrame[0]);
-  return;
+    stackPush(pVM->pStack, pVM->rStack->pFrame[0]);
+    return;
 }
 
 
 static void toLocal0(FICL_VM *pVM)
 {
-  pVM->rStack->pFrame[0] = stackPop(pVM->pStack);
-  return;
+    pVM->rStack->pFrame[0] = stackPop(pVM->pStack);
+    return;
 }
 
 
 static void getLocal1(FICL_VM *pVM)
 {
-  stackPush(pVM->pStack, pVM->rStack->pFrame[1]);
-  return;
+    stackPush(pVM->pStack, pVM->rStack->pFrame[1]);
+    return;
 }
 
 
 static void toLocal1(FICL_VM *pVM)
 {
-  pVM->rStack->pFrame[1] = stackPop(pVM->pStack);
-  return;
+    pVM->rStack->pFrame[1] = stackPop(pVM->pStack);
+    return;
 }
 
 
@@ -3611,31 +3679,31 @@ static void toLocal1(FICL_VM *pVM)
 */
 static void doLocalIm(FICL_VM *pVM)
 {
-  FICL_DICT *pDict = ficlGetDict();
-  int nLocal = pVM->runningWord->param[0].i;
+    FICL_DICT *pDict = ficlGetDict();
+    int nLocal = pVM->runningWord->param[0].i;
 
-  if (pVM->state == INTERPRET)
-  {
-    stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal]);
-  }
-  else
-  {
-        
-    if (nLocal == 0)
+    if (pVM->state == INTERPRET)
     {
-      dictAppendCell(pDict, LVALUEtoCELL(pGetLocal0));
-    }
-    else if (nLocal == 1)
-    {
-      dictAppendCell(pDict, LVALUEtoCELL(pGetLocal1));
+        stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal]);
     }
     else
     {
-      dictAppendCell(pDict, LVALUEtoCELL(pGetLocalParen));
-      dictAppendCell(pDict, LVALUEtoCELL(nLocal));
+        
+        if (nLocal == 0)
+        {
+            dictAppendCell(pDict, LVALUEtoCELL(pGetLocal0));
+        }
+        else if (nLocal == 1)
+        {
+            dictAppendCell(pDict, LVALUEtoCELL(pGetLocal1));
+        }
+        else
+        {
+            dictAppendCell(pDict, LVALUEtoCELL(pGetLocalParen));
+            dictAppendCell(pDict, LVALUEtoCELL(nLocal));
+        }
     }
-  }
-  return;
+    return;
 }
 
 
@@ -3664,50 +3732,126 @@ static void doLocalIm(FICL_VM *pVM)
 **************************************************************************/
 static void localParen(FICL_VM *pVM)
 {
-  static CELL *pMark = NULL;
-  FICL_DICT *pDict = ficlGetDict();
-  STRINGINFO si;
-  SI_SETLEN(si, stackPopUNS(pVM->pStack));
-  SI_SETPTR(si, (char *)stackPopPtr(pVM->pStack));
+    FICL_DICT *pDict = ficlGetDict();
+    STRINGINFO si;
+    SI_SETLEN(si, stackPopUNS(pVM->pStack));
+    SI_SETPTR(si, (char *)stackPopPtr(pVM->pStack));
 
-  if (SI_COUNT(si) > 0)
-  {       /* add a local to the dict and update nLocals */
-    FICL_DICT *pLoc = ficlGetLoc();
-    if (nLocals >= FICL_MAX_LOCALS)
-    {
-      vmThrowErr(pVM, "Error: out of local space");
+    if (SI_COUNT(si) > 0)
+    {   /* add a local to the **locals** dict and update nLocals */
+        FICL_DICT *pLoc = ficlGetLoc();
+        if (nLocals >= FICL_MAX_LOCALS)
+        {
+            vmThrowErr(pVM, "Error: out of local space");
+        }
+
+        dictAppendWord2(pLoc, si, doLocalIm, FW_COMPIMMED);
+        dictAppendCell(pLoc,  LVALUEtoCELL(nLocals));
+
+        if (nLocals == 0)
+        {   /* compile code to create a local stack frame */
+            dictAppendCell(pDict, LVALUEtoCELL(pLinkParen));
+            /* save location in dictionary for #locals */
+            pMarkLocals = pDict->here;
+            dictAppendCell(pDict, LVALUEtoCELL(nLocals));
+            /* compile code to initialize first local */
+            dictAppendCell(pDict, LVALUEtoCELL(pToLocal0));
+        }
+        else if (nLocals == 1)
+        {
+            dictAppendCell(pDict, LVALUEtoCELL(pToLocal1));
+        }
+        else
+        {
+            dictAppendCell(pDict, LVALUEtoCELL(pToLocalParen));
+            dictAppendCell(pDict, LVALUEtoCELL(nLocals));
+        }
+
+        nLocals++;
+    }
+    else if (nLocals > 0)
+    {       /* write nLocals to (link) param area in dictionary */
+        *(FICL_INT *)pMarkLocals = nLocals;
     }
 
-    dictAppendWord2(pLoc, si, doLocalIm, FW_COMPIMMED);
-    dictAppendCell(pLoc,  LVALUEtoCELL(nLocals));
+    return;
+}
 
-    if (nLocals == 0)
-    {   /* compile code to create a local stack frame */
-      dictAppendCell(pDict, LVALUEtoCELL(pLinkParen));
-      /* save location in dictionary for #locals */
-      pMark = pDict->here;
-      dictAppendCell(pDict, LVALUEtoCELL(nLocals));
-      /* compile code to initialize first local */
-      dictAppendCell(pDict, LVALUEtoCELL(pToLocal0));
-    }
-    else if (nLocals == 1)
+
+static void get2LocalParen(FICL_VM *pVM)
+{
+    FICL_INT nLocal = *(FICL_INT *)(pVM->ip++);
+    stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal]);
+    stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal+1]);
+    return;
+}
+
+
+static void do2LocalIm(FICL_VM *pVM)
+{
+    FICL_DICT *pDict = ficlGetDict();
+    int nLocal = pVM->runningWord->param[0].i;
+
+    if (pVM->state == INTERPRET)
     {
-      dictAppendCell(pDict, LVALUEtoCELL(pToLocal1));
+        stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal]);
+        stackPush(pVM->pStack, pVM->rStack->pFrame[nLocal+1]);
     }
     else
     {
-      dictAppendCell(pDict, LVALUEtoCELL(pToLocalParen));
-      dictAppendCell(pDict, LVALUEtoCELL(nLocals));
+        dictAppendCell(pDict, LVALUEtoCELL(pGet2LocalParen));
+        dictAppendCell(pDict, LVALUEtoCELL(nLocal));
+    }
+    return;
+}
+
+
+static void to2LocalParen(FICL_VM *pVM)
+{
+    FICL_INT nLocal = *(FICL_INT *)(pVM->ip++);
+    pVM->rStack->pFrame[nLocal+1] = stackPop(pVM->pStack);
+    pVM->rStack->pFrame[nLocal]   = stackPop(pVM->pStack);
+    return;
+}
+
+
+static void twoLocalParen(FICL_VM *pVM)
+{
+    FICL_DICT *pDict = ficlGetDict();
+    STRINGINFO si;
+    SI_SETLEN(si, stackPopUNS(pVM->pStack));
+    SI_SETPTR(si, (char *)stackPopPtr(pVM->pStack));
+
+    if (SI_COUNT(si) > 0)
+    {   /* add a local to the **locals** dict and update nLocals */
+        FICL_DICT *pLoc = ficlGetLoc();
+        if (nLocals >= FICL_MAX_LOCALS)
+        {
+            vmThrowErr(pVM, "Error: out of local space");
+        }
+
+        dictAppendWord2(pLoc, si, do2LocalIm, FW_COMPIMMED);
+        dictAppendCell(pLoc,  LVALUEtoCELL(nLocals));
+
+        if (nLocals == 0)
+        {   /* compile code to create a local stack frame */
+            dictAppendCell(pDict, LVALUEtoCELL(pLinkParen));
+            /* save location in dictionary for #locals */
+            pMarkLocals = pDict->here;
+            dictAppendCell(pDict, LVALUEtoCELL(nLocals));
+        }
+
+		dictAppendCell(pDict, LVALUEtoCELL(pTo2LocalParen));
+        dictAppendCell(pDict, LVALUEtoCELL(nLocals));
+
+        nLocals += 2;
+    }
+    else if (nLocals > 0)
+    {       /* write nLocals to (link) param area in dictionary */
+        *(FICL_INT *)pMarkLocals = nLocals;
     }
 
-    nLocals++;
-  }
-  else if (nLocals > 0)
-  {       /* write nLocals to (link) param area in dictionary */
-    *(FICL_INT *)pMark = nLocals;
-  }
-
-  return;
+    return;
 }
 
 
@@ -3721,15 +3865,15 @@ static void localParen(FICL_VM *pVM)
 **************************************************************************/
 static void setParentWid(FICL_VM *pVM)
 {
-  FICL_HASH *parent, *child;
+    FICL_HASH *parent, *child;
 #if FICL_ROBUST > 1
-  vmCheckStack(pVM, 2, 0);
+    vmCheckStack(pVM, 2, 0);
 #endif
-  child  = (FICL_HASH *)stackPopPtr(pVM->pStack);
-  parent = (FICL_HASH *)stackPopPtr(pVM->pStack);
+    child  = (FICL_HASH *)stackPopPtr(pVM->pStack);
+    parent = (FICL_HASH *)stackPopPtr(pVM->pStack);
 
-  child->link = parent;
-  return;
+    child->link = parent;
+    return;
 }
 
 
@@ -3753,15 +3897,15 @@ static void setParentWid(FICL_VM *pVM)
 */
 static int isAFiclWord(FICL_WORD *pFW)
 {
-  FICL_DICT *pd  = ficlGetDict();
+    FICL_DICT *pd  = ficlGetDict();
 
-  if (!dictIncludes(pd, pFW))
-  return 0;
+    if (!dictIncludes(pd, pFW))
+       return 0;
 
-  if (!dictIncludes(pd, pFW->name))
-  return 0;
+    if (!dictIncludes(pd, pFW->name))
+        return 0;
 
-  return ((pFW->nName > 0) && (pFW->name[pFW->nName] == '\0'));
+    return ((pFW->nName > 0) && (pFW->name[pFW->nName] == '\0'));
 }
 
 /*
@@ -3771,83 +3915,81 @@ static int isAFiclWord(FICL_WORD *pFW)
 */
 static void seeColon(FICL_VM *pVM, CELL *pc)
 {
-  for (; pc->p != pSemiParen; pc++)
-  {
-    FICL_WORD *pFW = (FICL_WORD *)(pc->p);
-
-    if (isAFiclWord(pFW))
+    for (; pc->p != pSemiParen; pc++)
     {
-      if      (pFW->code == literalParen)
-      {
-	CELL v = *++pc;
-	if (isAFiclWord(v.p))
-	{
-	  FICL_WORD *pLit = (FICL_WORD *)v.p;
-	  sprintf(pVM->pad, "    literal %.*s (%#lx)", 
-		  pLit->nName, pLit->name, v.u);
-	}
-	else
-	sprintf(pVM->pad, "    literal %ld (%#lx)", v.i, v.u);
-      }
-      else if (pFW->code == stringLit) 
-      {
-	FICL_STRING *sp = (FICL_STRING *)(void *)++pc;
-	pc = (CELL *)alignPtr(sp->text + sp->count + 1) - 1;
-	sprintf(pVM->pad, "    s\" %.*s\"", sp->count, sp->text);
-      }
-      else if (pFW->code == ifParen) 
-      {
-	CELL c = *++pc;
-	if (c.i > 0)
-	sprintf(pVM->pad, "    if / while (branch rel %ld)", c.i);
-	else
-	sprintf(pVM->pad, "    until (branch rel %ld)", c.i);
-      }
-      else if (pFW->code == branchParen) 
-      {
-	CELL c = *++pc;
-	if (c.i > 0)
-	sprintf(pVM->pad, "    else (branch rel %ld)", c.i);
-	else
-	sprintf(pVM->pad, "    repeat (branch rel %ld)", c.i);
-      }
-      else if (pFW->code == qDoParen) 
-      {
-	CELL c = *++pc;
-	sprintf(pVM->pad, "    ?do (leave abs %#lx)", c.u);
-      }
-      else if (pFW->code == doParen) 
-      {
-	CELL c = *++pc;
-	sprintf(pVM->pad, "    do (leave abs %#lx)", c.u);
-      }
-      else if (pFW->code == loopParen) 
-      {
-	CELL c = *++pc;
-/*                  sprintf(pVM->pad, "    loop (branch rel %#ld)", c.i); */
-	sprintf(pVM->pad, "    loop (branch rel 0x%lx)", c.i);
-      }
-      else if (pFW->code == plusLoopParen) 
-      {
-	CELL c = *++pc;
-/*                  sprintf(pVM->pad, "    +loop (branch rel %#ld)", c.i); */
-	sprintf(pVM->pad, "    +loop (branch rel 0x%lx)", c.i);
-      }
-      else /* default: print word's name */
-      {
-	sprintf(pVM->pad, "    %.*s", pFW->nName, pFW->name);
-      }
+        FICL_WORD *pFW = (FICL_WORD *)(pc->p);
+
+        if (isAFiclWord(pFW))
+        {
+            if      (pFW->code == literalParen)
+            {
+                CELL v = *++pc;
+                if (isAFiclWord(v.p))
+                {
+                    FICL_WORD *pLit = (FICL_WORD *)v.p;
+                    sprintf(pVM->pad, "    literal %.*s (%#lx)", 
+                        pLit->nName, pLit->name, v.u);
+                }
+                else
+                    sprintf(pVM->pad, "    literal %ld (%#lx)", v.i, v.u);
+            }
+            else if (pFW->code == stringLit) 
+            {
+                FICL_STRING *sp = (FICL_STRING *)(void *)++pc;
+                pc = (CELL *)alignPtr(sp->text + sp->count + 1) - 1;
+                sprintf(pVM->pad, "    s\" %.*s\"", sp->count, sp->text);
+            }
+            else if (pFW->code == ifParen) 
+            {
+                CELL c = *++pc;
+                if (c.i > 0)
+                    sprintf(pVM->pad, "    if / while (branch rel %ld)", c.i);
+                else
+                    sprintf(pVM->pad, "    until (branch rel %ld)", c.i);
+            }
+            else if (pFW->code == branchParen) 
+            {
+                CELL c = *++pc;
+                if (c.i > 0)
+                    sprintf(pVM->pad, "    else (branch rel %ld)", c.i);
+                else
+                    sprintf(pVM->pad, "    repeat (branch rel %ld)", c.i);
+            }
+            else if (pFW->code == qDoParen) 
+            {
+                CELL c = *++pc;
+                sprintf(pVM->pad, "    ?do (leave abs %#lx)", c.u);
+            }
+            else if (pFW->code == doParen) 
+            {
+                CELL c = *++pc;
+                sprintf(pVM->pad, "    do (leave abs %#lx)", c.u);
+            }
+            else if (pFW->code == loopParen) 
+            {
+                CELL c = *++pc;
+                sprintf(pVM->pad, "    loop (branch rel %#ld)", c.i);
+            }
+            else if (pFW->code == plusLoopParen) 
+            {
+                CELL c = *++pc;
+                sprintf(pVM->pad, "    +loop (branch rel %#ld)", c.i);
+            }
+            else /* default: print word's name */
+            {
+                sprintf(pVM->pad, "    %.*s", pFW->nName, pFW->name);
+            }
  
-      vmTextOut(pVM, pVM->pad, 1);
+            vmTextOut(pVM, pVM->pad, 1);
+        }
+        else /* probably not a word - punt and print value */
+        {
+            sprintf(pVM->pad, "    %ld (%#lx)", pc->i, pc->u);
+            vmTextOut(pVM, pVM->pad, 1);
+        }
     }
-    else /* probably not a word - punt and print value */
-    {
-      sprintf(pVM->pad, "    %ld (%#lx)", pc->i, pc->u);
-      vmTextOut(pVM, pVM->pad, 1);
-    }
-  }
 
-  vmTextOut(pVM, ";", 1);
+    vmTextOut(pVM, ";", 1);
 }
 
 /*
@@ -3860,55 +4002,55 @@ static void seeColon(FICL_VM *pVM, CELL *pc)
 */
 static void see(FICL_VM *pVM)
 {
-  FICL_WORD *pFW;
+    FICL_WORD *pFW;
 
-  tick(pVM);
-  pFW = (FICL_WORD *)stackPopPtr(pVM->pStack);
+    tick(pVM);
+    pFW = (FICL_WORD *)stackPopPtr(pVM->pStack);
 
-  if (pFW->code == colonParen) 
-  {
-    sprintf(pVM->pad, ": %.*s", pFW->nName, pFW->name);
-    vmTextOut(pVM, pVM->pad, 1);
-    seeColon(pVM, pFW->param);
-  }
-  else if (pFW->code == doDoes)
-  {
-    vmTextOut(pVM, "does>", 1);
-    seeColon(pVM, (CELL *)pFW->param->p);
-  }
-  else if (pFW->code ==  createParen)
-  {
-    vmTextOut(pVM, "create", 1);
-  }
-  else if (pFW->code == variableParen)
-  {
-    sprintf(pVM->pad, "variable = %ld (%#lx)", 
+    if (pFW->code == colonParen) 
+    {
+        sprintf(pVM->pad, ": %.*s", pFW->nName, pFW->name);
+        vmTextOut(pVM, pVM->pad, 1);
+        seeColon(pVM, pFW->param);
+    }
+    else if (pFW->code == doDoes)
+    {
+        vmTextOut(pVM, "does>", 1);
+        seeColon(pVM, (CELL *)pFW->param->p);
+    }
+    else if (pFW->code ==  createParen)
+    {
+        vmTextOut(pVM, "create", 1);
+    }
+    else if (pFW->code == variableParen)
+    {
+        sprintf(pVM->pad, "variable = %ld (%#lx)", 
             pFW->param->i, pFW->param->u);
-    vmTextOut(pVM, pVM->pad, 1);
-  }
-  else if (pFW->code == userParen)
-  {
-    sprintf(pVM->pad, "user variable %ld (%#lx)", 
+        vmTextOut(pVM, pVM->pad, 1);
+    }
+    else if (pFW->code == userParen)
+    {
+        sprintf(pVM->pad, "user variable %ld (%#lx)", 
             pFW->param->i, pFW->param->u);
-    vmTextOut(pVM, pVM->pad, 1);
-  }
-  else if (pFW->code == constantParen)
-  {
-    sprintf(pVM->pad, "constant = %ld (%#lx)", 
+        vmTextOut(pVM, pVM->pad, 1);
+    }
+    else if (pFW->code == constantParen)
+    {
+        sprintf(pVM->pad, "constant = %ld (%#lx)", 
             pFW->param->i, pFW->param->u);
-    vmTextOut(pVM, pVM->pad, 1);
-  }
-  else 
-  {
-    vmTextOut(pVM, "primitive", 1);
-  }
+        vmTextOut(pVM, pVM->pad, 1);
+    }
+    else 
+    {
+        vmTextOut(pVM, "primitive", 1);
+    }
 
-  if (pFW->flags & FW_IMMEDIATE)
-  {
-    vmTextOut(pVM, "immediate", 1);
-  }
+    if (pFW->flags & FW_IMMEDIATE)
+    {
+        vmTextOut(pVM, "immediate", 1);
+    }
 
-  return;
+    return;
 }
 
 
@@ -3928,32 +4070,32 @@ static void see(FICL_VM *pVM)
 **************************************************************************/
 static void compareString(FICL_VM *pVM)
 {
-  char *cp1, *cp2;
-  FICL_UNS u1, u2, uMin;
-  int n = 0;
+    char *cp1, *cp2;
+    FICL_UNS u1, u2, uMin;
+    int n = 0;
 
-  vmCheckStack(pVM, 4, 1);
-  u2  = stackPopUNS(pVM->pStack);
-  cp2 = (char *)stackPopPtr(pVM->pStack);
-  u1  = stackPopUNS(pVM->pStack);
-  cp1 = (char *)stackPopPtr(pVM->pStack);
+    vmCheckStack(pVM, 4, 1);
+    u2  = stackPopUNS(pVM->pStack);
+    cp2 = (char *)stackPopPtr(pVM->pStack);
+    u1  = stackPopUNS(pVM->pStack);
+    cp1 = (char *)stackPopPtr(pVM->pStack);
 
-  uMin = (u1 < u2)? u1 : u2;
-  for ( ; (uMin > 0) && (n == 0); uMin--)
-  {
-    n = (int)(*cp1++ - *cp2++);
-  }
+    uMin = (u1 < u2)? u1 : u2;
+    for ( ; (uMin > 0) && (n == 0); uMin--)
+    {
+        n = (int)(*cp1++ - *cp2++);
+    }
 
-  if (n == 0)
-  n = (int)(u1 - u2);
+    if (n == 0)
+        n = (int)(u1 - u2);
 
-  if (n < 0) 
-  n = -1;
-  else if (n > 0)
-  n = 1;
+    if (n < 0) 
+        n = -1;
+    else if (n > 0)
+        n = 1;
 
-  stackPushINT(pVM->pStack, n);
-  return;
+    stackPushINT(pVM->pStack, n);
+    return;
 }
 
 
@@ -3972,11 +4114,11 @@ static void compareString(FICL_VM *pVM)
 **************************************************************************/
 static void refill(FICL_VM *pVM)
 {
-  FICL_INT ret = (pVM->sourceID.i == -1) ? FICL_FALSE : FICL_TRUE;
-  stackPushINT(pVM->pStack, ret);
-  if (ret)
-  vmThrow(pVM, VM_OUTOFTEXT);
-  return;
+    FICL_INT ret = (pVM->sourceID.i == -1) ? FICL_FALSE : FICL_TRUE;
+    stackPushINT(pVM->pStack, ret);
+    if (ret)
+        vmThrow(pVM, VM_OUTOFTEXT);
+    return;
 }
 
 
@@ -3994,28 +4136,28 @@ static void refill(FICL_VM *pVM)
 **************************************************************************/
 static void forgetWid(FICL_VM *pVM)
 {
-  FICL_DICT *pDict = ficlGetDict();
-  FICL_HASH *pHash;
+    FICL_DICT *pDict = ficlGetDict();
+    FICL_HASH *pHash;
 
-  pHash = (FICL_HASH *)stackPopPtr(pVM->pStack);
-  hashForget(pHash, pDict->here);
+    pHash = (FICL_HASH *)stackPopPtr(pVM->pStack);
+    hashForget(pHash, pDict->here);
 
-  return;
+    return;
 }
 
 
 static void forget(FICL_VM *pVM)
 {
-  void *where;
-  FICL_DICT *pDict = ficlGetDict();
-  FICL_HASH *pHash = pDict->pCompile;
+    void *where;
+    FICL_DICT *pDict = ficlGetDict();
+    FICL_HASH *pHash = pDict->pCompile;
 
-  tick(pVM);
-  where = ((FICL_WORD *)stackPopPtr(pVM->pStack))->name;
-  hashForget(pHash, where);
-  pDict->here = PTRtoCELL where;
+    tick(pVM);
+    where = ((FICL_WORD *)stackPopPtr(pVM->pStack))->name;
+    hashForget(pHash, where);
+    pDict->here = PTRtoCELL where;
 
-  return;
+    return;
 }
 
 
@@ -4036,118 +4178,100 @@ static void forget(FICL_VM *pVM)
 **
 ** More comments can be found throughout catch's code.
 **
-** BUGS: do not handle locals unnesting correctly... I think...
-**
 ** Daniel C. Sobral Jan 09/1999
+** sadler may 2000 -- revised to follow ficl.c:ficlExecXT.
 **************************************************************************/
 
 static void ficlCatch(FICL_VM *pVM)
 {
-  int     except;
-  jmp_buf     vmState;
-  FICL_VM     VM;
-  FICL_STACK  pStack;
-  FICL_STACK  rStack;
-  FICL_WORD   *pFW;
-  IPTYPE      exitIP;
+    static FICL_WORD *pQuit = NULL;
 
-  /*
-  ** Get xt.
-  ** We need this *before* we save the stack pointer, or
-  ** we'll have to pop one element out of the stack after
-  ** an exception. I prefer to get done with it up front. :-)
-  */
-#if FICL_ROBUST > 1
-  vmCheckStack(pVM, 1, 0);
-#endif
-/*      pFW = stackPopPtr(pVM->pStack); */
+    int         except;
+    jmp_buf     vmState;
+    FICL_VM     VM;
+    FICL_STACK  pStack;
+    FICL_STACK  rStack;
+    FICL_WORD   *pFW;
 
-  /*
-  ** Save vm's state -- a catch will not back out environmental
-  ** changes.
-  **
-  ** We are *not* saving dictionary state, since it is
-  ** global instead of per vm, and we are not saving
-  ** stack contents, since we are not required to (and,
-  ** thus, it would be useless). We save pVM, and pVM
-  ** "stacks" (a structure containing general information
-  ** about it, including the current stack pointer).
-  */
-  memcpy((void*)&VM, (void*)pVM, sizeof(FICL_VM));
-  memcpy((void*)&pStack, (void*)pVM->pStack, sizeof(FICL_STACK));
-  memcpy((void*)&rStack, (void*)pVM->rStack, sizeof(FICL_STACK));
+    if (!pQuit)
+        pQuit = ficlLookup("exit-inner");
 
-  /*
-  ** Give pVM a jmp_buf
-  */
-  pVM->pState = &vmState;
-
-  /*
-  ** Safety net
-  */
-  except = setjmp(vmState);
-
-  /* JOE : Moved from above to remove a compiler warning.  It looks like an
-   * innocent enough change... */
-  pFW = stackPopPtr(pVM->pStack);
+    assert(pVM);
+    assert(pQuit);
     
-  /*
-  ** And now, choose what to do depending on except.
-  */
-
-  /* Things having gone wrong... */
-  if(except) 
-  {
-    /* Restore vm's state */
-    memcpy((void*)pVM, (void*)&VM, sizeof(FICL_VM));
-    memcpy((void*)pVM->pStack, (void*)&pStack, sizeof(FICL_STACK));
-    memcpy((void*)pVM->rStack, (void*)&rStack, sizeof(FICL_STACK));
-
-    /* Push error */
-    stackPushINT(pVM->pStack, except);
-
-  } 
-  else /* Things being ok... */
-  {   
-    /*
-     * We need to know when to exit the inner loop
-     * Colonp, the "code" for colon words, just pushes
-     * the word's IP onto the RP, and expect the inner
-     * interpreter to do the rest. Well, I'd rather have
-     * it done *before* I return from this function,
-     * losing the automatic variables I'm using to save
-     * state. Sure, I could save this on dynamic memory
-     * and save state on RP, or I could even implement
-     * the poor man's version of this word in Forth with
-     * sp@, sp!, rp@ and rp!, but we have a lot of state
-     * neatly tucked away in pVM, so why not save it?
-     */
-    exitIP = pVM->ip;
-
-    /* Execute the xt -- inline code for vmExecute */
-
-    pVM->runningWord = pFW;
-    pFW->code(pVM);
 
     /*
-    ** Run the inner loop until we get back to exitIP
+    ** Get xt.
+    ** We need this *before* we save the stack pointer, or
+    ** we'll have to pop one element out of the stack after
+    ** an exception. I prefer to get done with it up front. :-)
     */
-    for (; pVM->ip != exitIP;) 
-    {
-      pFW = *pVM->ip++;
+#if FICL_ROBUST > 1
+    vmCheckStack(pVM, 1, 0);
+#endif
+    pFW = stackPopPtr(pVM->pStack);
 
-      /* Inline code for vmExecute */
-      pVM->runningWord = pFW;
-      pFW->code(pVM);
-    }
+    /* 
+    ** Save vm's state -- a catch will not back out environmental
+    ** changes.
+    **
+    ** We are *not* saving dictionary state, since it is
+    ** global instead of per vm, and we are not saving
+    ** stack contents, since we are not required to (and,
+    ** thus, it would be useless). We save pVM, and pVM
+    ** "stacks" (a structure containing general information
+    ** about it, including the current stack pointer).
+    */
+    memcpy((void*)&VM, (void*)pVM, sizeof(FICL_VM));
+    memcpy((void*)&pStack, (void*)pVM->pStack, sizeof(FICL_STACK));
+    memcpy((void*)&rStack, (void*)pVM->rStack, sizeof(FICL_STACK));
 
+    /*
+    ** Give pVM a jmp_buf
+    */
+    pVM->pState = &vmState;
 
-    /* Restore just the setjmp vector */
-    pVM->pState = VM.pState;
+    /*
+    ** Safety net
+    */
+    except = setjmp(vmState);
 
-    /* Push 0 -- everything is ok */
-    stackPushINT(pVM->pStack, 0);
-  }
+    switch (except)
+	{
+		/*
+		** Setup condition - push poison pill so that the VM throws
+		** VM_INNEREXIT if the XT terminates normally, then execute
+		** the XT
+		*/
+	case 0:
+		vmPushIP(pVM, &pQuit);			/* Open mouth, insert emetic */
+        vmExecute(pVM, pFW);
+        vmInnerLoop(pVM);
+		break;
+
+		/*
+		** Normal exit from XT - lose the poison pill, 
+		** restore old setjmp vector and push a zero. 
+		*/
+	case VM_INNEREXIT:
+        vmPopIP(pVM);                   /* Gack - hurl poison pill */
+        pVM->pState = VM.pState;        /* Restore just the setjmp vector */
+        stackPushINT(pVM->pStack, 0);   /* Push 0 -- everything is ok */
+		break;
+
+		/*
+		** Some other exception got thrown - restore pre-existing VM state
+		** and push the exception code
+		*/
+	default:
+        /* Restore vm's state */
+        memcpy((void*)pVM, (void*)&VM, sizeof(FICL_VM));
+        memcpy((void*)pVM->pStack, (void*)&pStack, sizeof(FICL_STACK));
+        memcpy((void*)pVM->rStack, (void*)&rStack, sizeof(FICL_STACK));
+
+        stackPushINT(pVM->pStack, except);/* Push error */
+		break;
+	}
 }
 
 /*
@@ -4162,58 +4286,58 @@ static void ficlCatch(FICL_VM *pVM)
 
 static void ficlThrow(FICL_VM *pVM)
 {
-  int except;
+    int except;
     
-  except = stackPopINT(pVM->pStack);
+    except = stackPopINT(pVM->pStack);
 
-  if (except)
-  vmThrow(pVM, except);
+    if (except)
+        vmThrow(pVM, except);
 }
 
 
 static void ansAllocate(FICL_VM *pVM)
 {
-  size_t size;
-  void *p;
+    size_t size;
+    void *p;
 
-  size = stackPopINT(pVM->pStack);
-  p = ficlMalloc(size);
-  stackPushPtr(pVM->pStack, p);
-  if (p)
-  stackPushINT(pVM->pStack, 0);
-  else
-  stackPushINT(pVM->pStack, 1);
+    size = stackPopINT(pVM->pStack);
+    p = ficlMalloc(size);
+    stackPushPtr(pVM->pStack, p);
+    if (p)
+        stackPushINT(pVM->pStack, 0);
+    else
+        stackPushINT(pVM->pStack, 1);
 }
 
 
 static void ansFree(FICL_VM *pVM)
 {
-  void *p;
+    void *p;
 
-  p = stackPopPtr(pVM->pStack);
-  ficlFree(p);
-  stackPushINT(pVM->pStack, 0);
+    p = stackPopPtr(pVM->pStack);
+    ficlFree(p);
+    stackPushINT(pVM->pStack, 0);
 }
 
 
 static void ansResize(FICL_VM *pVM)
 {
-  size_t size;
-  void *new, *old;
+    size_t size;
+    void *new, *old;
 
-  size = stackPopINT(pVM->pStack);
-  old = stackPopPtr(pVM->pStack);
-  new = ficlRealloc(old, size);
-  if (new) 
-  {
-    stackPushPtr(pVM->pStack, new);
-    stackPushINT(pVM->pStack, 0);
-  } 
-  else 
-  {
-    stackPushPtr(pVM->pStack, old);
-    stackPushINT(pVM->pStack, 1);
-  }
+    size = stackPopINT(pVM->pStack);
+    old = stackPopPtr(pVM->pStack);
+    new = ficlRealloc(old, size);
+    if (new) 
+    {
+        stackPushPtr(pVM->pStack, new);
+        stackPushINT(pVM->pStack, 0);
+    } 
+    else 
+    {
+        stackPushPtr(pVM->pStack, old);
+        stackPushINT(pVM->pStack, 1);
+    }
 }
 
 
@@ -4223,7 +4347,7 @@ static void ansResize(FICL_VM *pVM)
 */
 static void ficlExitInner(FICL_VM *pVM)
 {
-  vmThrow(pVM, VM_INNEREXIT);
+    vmThrow(pVM, VM_INNEREXIT);
 }
 
 
@@ -4234,11 +4358,11 @@ static void ficlExitInner(FICL_VM *pVM)
 **************************************************************************/
 static void dnegate(FICL_VM *pVM)
 {
-  DPINT i = i64Pop(pVM->pStack);
-  i = m64Negate(i);
-  i64Push(pVM->pStack, i);
+    DPINT i = i64Pop(pVM->pStack);
+    i = m64Negate(i);
+    i64Push(pVM->pStack, i);
 
-  return;
+    return;
 }
 
 
@@ -4249,8 +4373,8 @@ static void dnegate(FICL_VM *pVM)
 **************************************************************************/
 static void funcname(FICL_VM *pVM)
 {
-  IGNORE(pVM);
-  return;
+    IGNORE(pVM);
+    return;
 }
 
 
@@ -4262,327 +4386,345 @@ static void funcname(FICL_VM *pVM)
 
 void ficlCompileCore(FICL_DICT *dp)
 {
-  assert (dp);
+    assert (dp);
 
-  /*
-  ** CORE word set
-  ** see softcore.c for definitions of: abs bl space spaces abort"
-  */
-  pStore =
+    /*
+    ** CORE word set
+    ** see softcore.c for definitions of: abs bl space spaces abort"
+    */
+    pStore =
     dictAppendWord(dp, "!",         store,          FW_DEFAULT);
-  dictAppendWord(dp, "#",         numberSign,     FW_DEFAULT);
-  dictAppendWord(dp, "#>",        numberSignGreater,FW_DEFAULT);
-  dictAppendWord(dp, "#s",        numberSignS,    FW_DEFAULT);
-  dictAppendWord(dp, "\'",        tick,           FW_DEFAULT);
-  dictAppendWord(dp, "(",         commentHang,    FW_IMMEDIATE);
-  dictAppendWord(dp, "*",         mul,            FW_DEFAULT);
-  dictAppendWord(dp, "*/",        mulDiv,         FW_DEFAULT);
-  dictAppendWord(dp, "*/mod",     mulDivRem,      FW_DEFAULT);
-  dictAppendWord(dp, "+",         add,            FW_DEFAULT);
-  dictAppendWord(dp, "+!",        plusStore,      FW_DEFAULT);
-  dictAppendWord(dp, "+loop",     plusLoopCoIm,   FW_COMPIMMED);
-  pComma =
+    dictAppendWord(dp, "#",         numberSign,     FW_DEFAULT);
+    dictAppendWord(dp, "#>",        numberSignGreater,FW_DEFAULT);
+    dictAppendWord(dp, "#s",        numberSignS,    FW_DEFAULT);
+    dictAppendWord(dp, "\'",        tick,           FW_DEFAULT);
+    dictAppendWord(dp, "(",         commentHang,    FW_IMMEDIATE);
+    dictAppendWord(dp, "*",         mul,            FW_DEFAULT);
+    dictAppendWord(dp, "*/",        mulDiv,         FW_DEFAULT);
+    dictAppendWord(dp, "*/mod",     mulDivRem,      FW_DEFAULT);
+    dictAppendWord(dp, "+",         add,            FW_DEFAULT);
+    dictAppendWord(dp, "+!",        plusStore,      FW_DEFAULT);
+    dictAppendWord(dp, "+loop",     plusLoopCoIm,   FW_COMPIMMED);
+    pComma =
     dictAppendWord(dp, ",",         comma,          FW_DEFAULT);
-  dictAppendWord(dp, "-",         sub,            FW_DEFAULT);
-  dictAppendWord(dp, ".",         displayCell,    FW_DEFAULT);
-  dictAppendWord(dp, ".\"",       dotQuoteCoIm,   FW_COMPIMMED);
-  dictAppendWord(dp, "/",         ficlDiv,        FW_DEFAULT);
-  dictAppendWord(dp, "/mod",      slashMod,       FW_DEFAULT);
-  dictAppendWord(dp, "0<",        zeroLess,       FW_DEFAULT);
-  dictAppendWord(dp, "0=",        zeroEquals,     FW_DEFAULT);
-  dictAppendWord(dp, "0>",        zeroGreater,    FW_DEFAULT);
-  dictAppendWord(dp, "1+",        onePlus,        FW_DEFAULT);
-  dictAppendWord(dp, "1-",        oneMinus,       FW_DEFAULT);
-  dictAppendWord(dp, "2!",        twoStore,       FW_DEFAULT);
-  dictAppendWord(dp, "2*",        twoMul,         FW_DEFAULT);
-  dictAppendWord(dp, "2/",        twoDiv,         FW_DEFAULT);
-  dictAppendWord(dp, "2@",        twoFetch,       FW_DEFAULT);
-  dictAppendWord(dp, "2drop",     twoDrop,        FW_DEFAULT);
-  dictAppendWord(dp, "2dup",      twoDup,         FW_DEFAULT);
-  dictAppendWord(dp, "2over",     twoOver,        FW_DEFAULT);
-  dictAppendWord(dp, "2swap",     twoSwap,        FW_DEFAULT);
-  dictAppendWord(dp, ":",         colon,          FW_DEFAULT);
-  dictAppendWord(dp, ";",         semicolonCoIm,  FW_COMPIMMED);
-  dictAppendWord(dp, "<",         isLess,         FW_DEFAULT);
-  dictAppendWord(dp, "<#",        lessNumberSign, FW_DEFAULT);
-  dictAppendWord(dp, "=",         isEqual,        FW_DEFAULT);
-  dictAppendWord(dp, ">",         isGreater,      FW_DEFAULT);
-  dictAppendWord(dp, ">body",     toBody,         FW_DEFAULT);
-  dictAppendWord(dp, ">in",       toIn,           FW_DEFAULT);
-  dictAppendWord(dp, ">number",   toNumber,       FW_DEFAULT);
-  dictAppendWord(dp, ">r",        toRStack,       FW_DEFAULT);
-  dictAppendWord(dp, "?dup",      questionDup,    FW_DEFAULT);
-  dictAppendWord(dp, "@",         fetch,          FW_DEFAULT);
-  dictAppendWord(dp, "abort",     ficlAbort,      FW_DEFAULT);
-  dictAppendWord(dp, "accept",    accept,         FW_DEFAULT);
-  dictAppendWord(dp, "align",     align,          FW_DEFAULT);
-  dictAppendWord(dp, "aligned",   aligned,        FW_DEFAULT);
-  dictAppendWord(dp, "allot",     allot,          FW_DEFAULT);
-  dictAppendWord(dp, "and",       bitwiseAnd,     FW_DEFAULT);
-  dictAppendWord(dp, "base",      base,           FW_DEFAULT);
-  dictAppendWord(dp, "begin",     beginCoIm,      FW_COMPIMMED);
-  dictAppendWord(dp, "c!",        cStore,         FW_DEFAULT);
-  dictAppendWord(dp, "c,",        cComma,         FW_DEFAULT);
-  dictAppendWord(dp, "c@",        cFetch,         FW_DEFAULT);
-  dictAppendWord(dp, "cell+",     cellPlus,       FW_DEFAULT);
-  dictAppendWord(dp, "cells",     cells,          FW_DEFAULT);
-  dictAppendWord(dp, "char",      ficlChar,       FW_DEFAULT);
-  dictAppendWord(dp, "char+",     charPlus,       FW_DEFAULT);
-  dictAppendWord(dp, "chars",     ficlChars,      FW_DEFAULT);
-  dictAppendWord(dp, "constant",  constant,       FW_DEFAULT);
-  dictAppendWord(dp, "count",     count,          FW_DEFAULT);
-  dictAppendWord(dp, "cr",        cr,             FW_DEFAULT);
-  dictAppendWord(dp, "create",    create,         FW_DEFAULT);
-  dictAppendWord(dp, "decimal",   decimal,        FW_DEFAULT);
-  dictAppendWord(dp, "depth",     depth,          FW_DEFAULT);
-  dictAppendWord(dp, "do",        doCoIm,         FW_COMPIMMED);
-  dictAppendWord(dp, "does>",     doesCoIm,       FW_COMPIMMED);
-  dictAppendWord(dp, "drop",      drop,           FW_DEFAULT);
-  dictAppendWord(dp, "dup",       dup,            FW_DEFAULT);
-  dictAppendWord(dp, "else",      elseCoIm,       FW_COMPIMMED);
-  dictAppendWord(dp, "emit",      emit,           FW_DEFAULT);
-  dictAppendWord(dp, "environment?", environmentQ,FW_DEFAULT);
-  dictAppendWord(dp, "evaluate",  evaluate,       FW_DEFAULT);
-  dictAppendWord(dp, "execute",   execute,        FW_DEFAULT);
-  dictAppendWord(dp, "exit",      exitCoIm,       FW_COMPIMMED);
-  dictAppendWord(dp, "fill",      fill,           FW_DEFAULT);
-  dictAppendWord(dp, "find",      find,           FW_DEFAULT);
-  dictAppendWord(dp, "fm/mod",    fmSlashMod,     FW_DEFAULT);
-  dictAppendWord(dp, "here",      here,           FW_DEFAULT);
-  dictAppendWord(dp, "hex",       hex,            FW_DEFAULT);
-  dictAppendWord(dp, "hold",      hold,           FW_DEFAULT);
-  dictAppendWord(dp, "i",         loopICo,        FW_COMPILE);
-  dictAppendWord(dp, "if",        ifCoIm,         FW_COMPIMMED);
-  dictAppendWord(dp, "immediate", immediate,      FW_DEFAULT);
-  dictAppendWord(dp, "invert",    bitwiseNot,     FW_DEFAULT);
-  dictAppendWord(dp, "j",         loopJCo,        FW_COMPILE);
-  dictAppendWord(dp, "k",         loopKCo,        FW_COMPILE);
-  dictAppendWord(dp, "leave",     leaveCo,        FW_COMPILE);
-  dictAppendWord(dp, "literal",   literalIm,      FW_IMMEDIATE);
-  dictAppendWord(dp, "loop",      loopCoIm,       FW_COMPIMMED);
-  dictAppendWord(dp, "lshift",    lshift,         FW_DEFAULT);
-  dictAppendWord(dp, "m*",        mStar,          FW_DEFAULT);
-  dictAppendWord(dp, "max",       ficlMax,        FW_DEFAULT);
-  dictAppendWord(dp, "min",       ficlMin,        FW_DEFAULT);
-  dictAppendWord(dp, "mod",       ficlMod,        FW_DEFAULT);
-  dictAppendWord(dp, "move",      move,           FW_DEFAULT);
-  dictAppendWord(dp, "negate",    negate,         FW_DEFAULT);
-  dictAppendWord(dp, "or",        bitwiseOr,      FW_DEFAULT);
-  dictAppendWord(dp, "over",      over,           FW_DEFAULT);
-  dictAppendWord(dp, "postpone",  postponeCoIm,   FW_COMPIMMED);
-  dictAppendWord(dp, "quit",      quit,           FW_DEFAULT);
-  dictAppendWord(dp, "r>",        fromRStack,     FW_DEFAULT);
-  dictAppendWord(dp, "r@",        fetchRStack,    FW_DEFAULT);
-  dictAppendWord(dp, "recurse",   recurseCoIm,    FW_COMPIMMED);
-  dictAppendWord(dp, "repeat",    repeatCoIm,     FW_COMPIMMED);
-  dictAppendWord(dp, "rot",       rot,            FW_DEFAULT);
-  dictAppendWord(dp, "rshift",    rshift,         FW_DEFAULT);
-  dictAppendWord(dp, "s\"",       stringQuoteIm,  FW_IMMEDIATE);
-  dictAppendWord(dp, "s>d",       sToD,           FW_DEFAULT);
-  dictAppendWord(dp, "sign",      sign,           FW_DEFAULT);
-  dictAppendWord(dp, "sm/rem",    smSlashRem,     FW_DEFAULT);
-  dictAppendWord(dp, "source",    source,         FW_DEFAULT);
-  dictAppendWord(dp, "state",     state,          FW_DEFAULT);
-  dictAppendWord(dp, "swap",      swap,           FW_DEFAULT);
-  dictAppendWord(dp, "then",      endifCoIm,      FW_COMPIMMED);
-  pType =
+    dictAppendWord(dp, "-",         sub,            FW_DEFAULT);
+    dictAppendWord(dp, ".",         displayCell,    FW_DEFAULT);
+    dictAppendWord(dp, ".\"",       dotQuoteCoIm,   FW_COMPIMMED);
+    dictAppendWord(dp, "/",         ficlDiv,        FW_DEFAULT);
+    dictAppendWord(dp, "/mod",      slashMod,       FW_DEFAULT);
+    dictAppendWord(dp, "0<",        zeroLess,       FW_DEFAULT);
+    dictAppendWord(dp, "0=",        zeroEquals,     FW_DEFAULT);
+    dictAppendWord(dp, "0>",        zeroGreater,    FW_DEFAULT);
+    dictAppendWord(dp, "1+",        onePlus,        FW_DEFAULT);
+    dictAppendWord(dp, "1-",        oneMinus,       FW_DEFAULT);
+    dictAppendWord(dp, "2!",        twoStore,       FW_DEFAULT);
+    dictAppendWord(dp, "2*",        twoMul,         FW_DEFAULT);
+    dictAppendWord(dp, "2/",        twoDiv,         FW_DEFAULT);
+    dictAppendWord(dp, "2@",        twoFetch,       FW_DEFAULT);
+    dictAppendWord(dp, "2drop",     twoDrop,        FW_DEFAULT);
+    dictAppendWord(dp, "2dup",      twoDup,         FW_DEFAULT);
+    dictAppendWord(dp, "2over",     twoOver,        FW_DEFAULT);
+    dictAppendWord(dp, "2swap",     twoSwap,        FW_DEFAULT);
+    dictAppendWord(dp, ":",         colon,          FW_DEFAULT);
+    dictAppendWord(dp, ";",         semicolonCoIm,  FW_COMPIMMED);
+    dictAppendWord(dp, "<",         isLess,         FW_DEFAULT);
+    dictAppendWord(dp, "<#",        lessNumberSign, FW_DEFAULT);
+    dictAppendWord(dp, "=",         isEqual,        FW_DEFAULT);
+    dictAppendWord(dp, ">",         isGreater,      FW_DEFAULT);
+    dictAppendWord(dp, ">body",     toBody,         FW_DEFAULT);
+    dictAppendWord(dp, ">in",       toIn,           FW_DEFAULT);
+    dictAppendWord(dp, ">number",   toNumber,       FW_DEFAULT);
+    dictAppendWord(dp, ">r",        toRStack,       FW_DEFAULT);
+    dictAppendWord(dp, "?dup",      questionDup,    FW_DEFAULT);
+    dictAppendWord(dp, "@",         fetch,          FW_DEFAULT);
+    dictAppendWord(dp, "abort",     ficlAbort,      FW_DEFAULT);
+    dictAppendWord(dp, "accept",    accept,         FW_DEFAULT);
+    dictAppendWord(dp, "align",     align,          FW_DEFAULT);
+    dictAppendWord(dp, "aligned",   aligned,        FW_DEFAULT);
+    dictAppendWord(dp, "allot",     allot,          FW_DEFAULT);
+    dictAppendWord(dp, "and",       bitwiseAnd,     FW_DEFAULT);
+    dictAppendWord(dp, "base",      base,           FW_DEFAULT);
+    dictAppendWord(dp, "begin",     beginCoIm,      FW_COMPIMMED);
+    dictAppendWord(dp, "c!",        cStore,         FW_DEFAULT);
+    dictAppendWord(dp, "c,",        cComma,         FW_DEFAULT);
+    dictAppendWord(dp, "c@",        cFetch,         FW_DEFAULT);
+    dictAppendWord(dp, "cell+",     cellPlus,       FW_DEFAULT);
+    dictAppendWord(dp, "cells",     cells,          FW_DEFAULT);
+    dictAppendWord(dp, "char",      ficlChar,       FW_DEFAULT);
+    dictAppendWord(dp, "char+",     charPlus,       FW_DEFAULT);
+    dictAppendWord(dp, "chars",     ficlChars,      FW_DEFAULT);
+    dictAppendWord(dp, "constant",  constant,       FW_DEFAULT);
+    dictAppendWord(dp, "count",     count,          FW_DEFAULT);
+    dictAppendWord(dp, "cr",        cr,             FW_DEFAULT);
+    dictAppendWord(dp, "create",    create,         FW_DEFAULT);
+    dictAppendWord(dp, "decimal",   decimal,        FW_DEFAULT);
+    dictAppendWord(dp, "depth",     depth,          FW_DEFAULT);
+    dictAppendWord(dp, "do",        doCoIm,         FW_COMPIMMED);
+    dictAppendWord(dp, "does>",     doesCoIm,       FW_COMPIMMED);
+    dictAppendWord(dp, "drop",      drop,           FW_DEFAULT);
+    dictAppendWord(dp, "dup",       dup,            FW_DEFAULT);
+    dictAppendWord(dp, "else",      elseCoIm,       FW_COMPIMMED);
+    dictAppendWord(dp, "emit",      emit,           FW_DEFAULT);
+    dictAppendWord(dp, "environment?", environmentQ,FW_DEFAULT);
+    dictAppendWord(dp, "evaluate",  evaluate,       FW_DEFAULT);
+    dictAppendWord(dp, "execute",   execute,        FW_DEFAULT);
+    dictAppendWord(dp, "exit",      exitCoIm,       FW_COMPIMMED);
+    dictAppendWord(dp, "fill",      fill,           FW_DEFAULT);
+    dictAppendWord(dp, "find",      find,           FW_DEFAULT);
+    dictAppendWord(dp, "fm/mod",    fmSlashMod,     FW_DEFAULT);
+    dictAppendWord(dp, "here",      here,           FW_DEFAULT);
+    dictAppendWord(dp, "hex",       hex,            FW_DEFAULT);
+    dictAppendWord(dp, "hold",      hold,           FW_DEFAULT);
+    dictAppendWord(dp, "i",         loopICo,        FW_COMPILE);
+    dictAppendWord(dp, "if",        ifCoIm,         FW_COMPIMMED);
+    dictAppendWord(dp, "immediate", immediate,      FW_DEFAULT);
+    dictAppendWord(dp, "invert",    bitwiseNot,     FW_DEFAULT);
+    dictAppendWord(dp, "j",         loopJCo,        FW_COMPILE);
+    dictAppendWord(dp, "k",         loopKCo,        FW_COMPILE);
+    dictAppendWord(dp, "leave",     leaveCo,        FW_COMPILE);
+    dictAppendWord(dp, "literal",   literalIm,      FW_IMMEDIATE);
+    dictAppendWord(dp, "loop",      loopCoIm,       FW_COMPIMMED);
+    dictAppendWord(dp, "lshift",    lshift,         FW_DEFAULT);
+    dictAppendWord(dp, "m*",        mStar,          FW_DEFAULT);
+    dictAppendWord(dp, "max",       ficlMax,        FW_DEFAULT);
+    dictAppendWord(dp, "min",       ficlMin,        FW_DEFAULT);
+    dictAppendWord(dp, "mod",       ficlMod,        FW_DEFAULT);
+    dictAppendWord(dp, "move",      move,           FW_DEFAULT);
+    dictAppendWord(dp, "negate",    negate,         FW_DEFAULT);
+    dictAppendWord(dp, "or",        bitwiseOr,      FW_DEFAULT);
+    dictAppendWord(dp, "over",      over,           FW_DEFAULT);
+    dictAppendWord(dp, "postpone",  postponeCoIm,   FW_COMPIMMED);
+    dictAppendWord(dp, "quit",      quit,           FW_DEFAULT);
+    dictAppendWord(dp, "r>",        fromRStack,     FW_DEFAULT);
+    dictAppendWord(dp, "r@",        fetchRStack,    FW_DEFAULT);
+    dictAppendWord(dp, "recurse",   recurseCoIm,    FW_COMPIMMED);
+    dictAppendWord(dp, "repeat",    repeatCoIm,     FW_COMPIMMED);
+    dictAppendWord(dp, "rot",       rot,            FW_DEFAULT);
+    dictAppendWord(dp, "rshift",    rshift,         FW_DEFAULT);
+    dictAppendWord(dp, "s\"",       stringQuoteIm,  FW_IMMEDIATE);
+    dictAppendWord(dp, "s>d",       sToD,           FW_DEFAULT);
+    dictAppendWord(dp, "sign",      sign,           FW_DEFAULT);
+    dictAppendWord(dp, "sm/rem",    smSlashRem,     FW_DEFAULT);
+    dictAppendWord(dp, "source",    source,         FW_DEFAULT);
+    dictAppendWord(dp, "state",     state,          FW_DEFAULT);
+    dictAppendWord(dp, "swap",      swap,           FW_DEFAULT);
+    dictAppendWord(dp, "then",      endifCoIm,      FW_COMPIMMED);
+    pType =
     dictAppendWord(dp, "type",      type,           FW_DEFAULT);
-  dictAppendWord(dp, "u.",        uDot,           FW_DEFAULT);
-  dictAppendWord(dp, "u<",        uIsLess,        FW_DEFAULT);
-  dictAppendWord(dp, "um*",       umStar,         FW_DEFAULT);
-  dictAppendWord(dp, "um/mod",    umSlashMod,     FW_DEFAULT);
-  dictAppendWord(dp, "unloop",    unloopCo,       FW_COMPILE);
-  dictAppendWord(dp, "until",     untilCoIm,      FW_COMPIMMED);
-  dictAppendWord(dp, "variable",  variable,       FW_DEFAULT);
-  dictAppendWord(dp, "while",     whileCoIm,      FW_COMPIMMED);
-  dictAppendWord(dp, "word",      ficlWord,       FW_DEFAULT);
-  dictAppendWord(dp, "xor",       bitwiseXor,     FW_DEFAULT);
-  dictAppendWord(dp, "[",         lbracketCoIm,   FW_COMPIMMED);
-  dictAppendWord(dp, "[\']",      bracketTickCoIm,FW_COMPIMMED);
-  dictAppendWord(dp, "[char]",    charCoIm,       FW_COMPIMMED);
-  dictAppendWord(dp, "]",         rbracket,       FW_DEFAULT);
-  /* 
-  ** CORE EXT word set...
-  ** see softcore.c for other definitions
-  */
-  dictAppendWord(dp, ".(",        dotParen,       FW_DEFAULT);
-  dictAppendWord(dp, ":noname",   colonNoName,    FW_DEFAULT);
-  dictAppendWord(dp, "?do",       qDoCoIm,        FW_COMPIMMED);
-  dictAppendWord(dp, "parse",     parse,          FW_DEFAULT);
-  dictAppendWord(dp, "pick",      pick,           FW_DEFAULT);
-  dictAppendWord(dp, "roll",      roll,           FW_DEFAULT);
-  dictAppendWord(dp, "refill",    refill,         FW_DEFAULT);
-  dictAppendWord(dp, "to",        toValue,        FW_IMMEDIATE);
-  dictAppendWord(dp, "value",     constant,       FW_DEFAULT);
-  dictAppendWord(dp, "\\",        commentLine,    FW_IMMEDIATE);
+    dictAppendWord(dp, "u.",        uDot,           FW_DEFAULT);
+    dictAppendWord(dp, "u<",        uIsLess,        FW_DEFAULT);
+    dictAppendWord(dp, "um*",       umStar,         FW_DEFAULT);
+    dictAppendWord(dp, "um/mod",    umSlashMod,     FW_DEFAULT);
+    dictAppendWord(dp, "unloop",    unloopCo,       FW_COMPILE);
+    dictAppendWord(dp, "until",     untilCoIm,      FW_COMPIMMED);
+    dictAppendWord(dp, "variable",  variable,       FW_DEFAULT);
+    dictAppendWord(dp, "while",     whileCoIm,      FW_COMPIMMED);
+    dictAppendWord(dp, "word",      ficlWord,       FW_DEFAULT);
+    dictAppendWord(dp, "xor",       bitwiseXor,     FW_DEFAULT);
+    dictAppendWord(dp, "[",         lbracketCoIm,   FW_COMPIMMED);
+    dictAppendWord(dp, "[\']",      bracketTickCoIm,FW_COMPIMMED);
+    dictAppendWord(dp, "[char]",    charCoIm,       FW_COMPIMMED);
+    dictAppendWord(dp, "]",         rbracket,       FW_DEFAULT);
+    /* 
+    ** CORE EXT word set...
+    ** see softcore.c for other definitions
+    */
+    dictAppendWord(dp, ".(",        dotParen,       FW_DEFAULT);
+    dictAppendWord(dp, ":noname",   colonNoName,    FW_DEFAULT);
+    dictAppendWord(dp, "?do",       qDoCoIm,        FW_COMPIMMED);
+    dictAppendWord(dp, "again",     againCoIm,      FW_COMPIMMED);
+    dictAppendWord(dp, "parse",     parse,          FW_DEFAULT);
+    dictAppendWord(dp, "pick",      pick,           FW_DEFAULT);
+    dictAppendWord(dp, "roll",      roll,           FW_DEFAULT);
+    dictAppendWord(dp, "refill",    refill,         FW_DEFAULT);
+    dictAppendWord(dp, "to",        toValue,        FW_IMMEDIATE);
+    dictAppendWord(dp, "value",     constant,       FW_DEFAULT);
+    dictAppendWord(dp, "\\",        commentLine,    FW_IMMEDIATE);
 
 
-  /*
-  ** Set CORE environment query values
-  */
-  ficlSetEnv("/counted-string",   FICL_STRING_MAX);
-  ficlSetEnv("/hold",             nPAD);
-  ficlSetEnv("/pad",              nPAD);
-  ficlSetEnv("address-unit-bits", 8);
-  ficlSetEnv("core",              FICL_TRUE);
-  ficlSetEnv("core-ext",          FICL_FALSE);
-  ficlSetEnv("floored",           FICL_FALSE);
-  ficlSetEnv("max-char",          UCHAR_MAX);
-  ficlSetEnvD("max-d",            0x7fffffff, 0xffffffff );
-  ficlSetEnv("max-n",             0x7fffffff);
-  ficlSetEnv("max-u",             0xffffffff);
-  ficlSetEnvD("max-ud",           0xffffffff, 0xffffffff);
-  ficlSetEnv("return-stack-cells",FICL_DEFAULT_STACK);
-  ficlSetEnv("stack-cells",       FICL_DEFAULT_STACK);
+    /*
+    ** Set CORE environment query values
+    */
+    ficlSetEnv("/counted-string",   FICL_STRING_MAX);
+    ficlSetEnv("/hold",             nPAD);
+    ficlSetEnv("/pad",              nPAD);
+    ficlSetEnv("address-unit-bits", 8);
+    ficlSetEnv("core",              FICL_TRUE);
+    ficlSetEnv("core-ext",          FICL_FALSE);
+    ficlSetEnv("floored",           FICL_FALSE);
+    ficlSetEnv("max-char",          UCHAR_MAX);
+    ficlSetEnvD("max-d",            0x7fffffff, 0xffffffff );
+    ficlSetEnv("max-n",             0x7fffffff);
+    ficlSetEnv("max-u",             0xffffffff);
+    ficlSetEnvD("max-ud",           0xffffffff, 0xffffffff);
+    ficlSetEnv("return-stack-cells",FICL_DEFAULT_STACK);
+    ficlSetEnv("stack-cells",       FICL_DEFAULT_STACK);
 
-  /*
-  ** EXCEPTION word set
-  */
-  dictAppendWord(dp, "catch",     ficlCatch,      FW_DEFAULT);
-  dictAppendWord(dp, "throw",     ficlThrow,      FW_DEFAULT);
+    /*
+    ** DOUBLE word set (partial)
+    */
+    dictAppendWord(dp, "2constant", twoConstant,    FW_IMMEDIATE);
+    dictAppendWord(dp, "2literal",  twoLiteralIm,   FW_IMMEDIATE);
+    dictAppendWord(dp, "dnegate",   dnegate,        FW_DEFAULT);
 
-  ficlSetEnv("exception",         FICL_TRUE);
-  ficlSetEnv("exception-ext",     FICL_FALSE); /* abort" does not comply yet */
 
-  /*
-  ** LOCAL and LOCAL EXT
-  ** see softcore.c for implementation of locals|
-  */
+    /*
+    ** EXCEPTION word set
+    */
+    dictAppendWord(dp, "catch",     ficlCatch,      FW_DEFAULT);
+    dictAppendWord(dp, "throw",     ficlThrow,      FW_DEFAULT);
+
+    ficlSetEnv("exception",         FICL_TRUE);
+    ficlSetEnv("exception-ext",     FICL_FALSE); /* abort" does not comply yet */
+
+    /*
+    ** LOCAL and LOCAL EXT
+    ** see softcore.c for implementation of locals|
+    */
 #if FICL_WANT_LOCALS
-  pLinkParen = 
+    pLinkParen = 
     dictAppendWord(dp, "(link)",    linkParen,      FW_COMPILE);
-  pUnLinkParen = 
+    pUnLinkParen = 
     dictAppendWord(dp, "(unlink)",  unlinkParen,    FW_COMPILE);
-  dictAppendWord(dp, "doLocal",   doLocalIm,      FW_COMPIMMED);
-  pGetLocalParen =
+    dictAppendWord(dp, "doLocal",   doLocalIm,      FW_COMPIMMED);
+    pGetLocalParen =
     dictAppendWord(dp, "(@local)",  getLocalParen,  FW_COMPILE);
-  pToLocalParen =
+    pToLocalParen =
     dictAppendWord(dp, "(toLocal)", toLocalParen,   FW_COMPILE);
-  pGetLocal0 =
+    pGetLocal0 =
     dictAppendWord(dp, "(@local0)", getLocal0,      FW_COMPILE);
-  pToLocal0 =
+    pToLocal0 =
     dictAppendWord(dp, "(toLocal0)",toLocal0,       FW_COMPILE);
-  pGetLocal1 =
+    pGetLocal1 =
     dictAppendWord(dp, "(@local1)", getLocal1,      FW_COMPILE);
-  pToLocal1 =
+    pToLocal1 =
     dictAppendWord(dp, "(toLocal1)",toLocal1,       FW_COMPILE);
-  dictAppendWord(dp, "(local)",   localParen,     FW_COMPILE);
+    dictAppendWord(dp, "(local)",   localParen,     FW_COMPILE);
 
-  ficlSetEnv("locals",            FICL_TRUE);
-  ficlSetEnv("locals-ext",        FICL_TRUE);
-  ficlSetEnv("#locals",           FICL_MAX_LOCALS);
+    pGet2LocalParen =
+    dictAppendWord(dp, "(@2local)", get2LocalParen, FW_COMPILE);
+    pTo2LocalParen =
+    dictAppendWord(dp, "(to2Local)",to2LocalParen,  FW_COMPILE);
+    dictAppendWord(dp, "(2local)",  twoLocalParen,  FW_COMPILE);
+
+    ficlSetEnv("locals",            FICL_TRUE);
+    ficlSetEnv("locals-ext",        FICL_TRUE);
+    ficlSetEnv("#locals",           FICL_MAX_LOCALS);
 #endif
 
-  /*
-  ** Optional MEMORY-ALLOC word set
-  */
+    /*
+    ** Optional MEMORY-ALLOC word set
+    */
 
-  dictAppendWord(dp, "allocate",  ansAllocate,    FW_DEFAULT);
-  dictAppendWord(dp, "free",      ansFree,        FW_DEFAULT);
-  dictAppendWord(dp, "resize",    ansResize,      FW_DEFAULT);
+    dictAppendWord(dp, "allocate",  ansAllocate,    FW_DEFAULT);
+    dictAppendWord(dp, "free",      ansFree,        FW_DEFAULT);
+    dictAppendWord(dp, "resize",    ansResize,      FW_DEFAULT);
     
-  ficlSetEnv("memory-alloc",      FICL_TRUE);
-  ficlSetEnv("memory-alloc-ext",  FICL_FALSE);
+    ficlSetEnv("memory-alloc",      FICL_TRUE);
+    ficlSetEnv("memory-alloc-ext",  FICL_FALSE);
 
-  /*
-  ** optional SEARCH-ORDER word set 
-  */
-  dictAppendWord(dp, ">search",   searchPush,     FW_DEFAULT);
-  dictAppendWord(dp, "search>",   searchPop,      FW_DEFAULT);
-  dictAppendWord(dp, "definitions",
-		 definitions,    FW_DEFAULT);
-  dictAppendWord(dp, "forth-wordlist",  
-		 forthWordlist,  FW_DEFAULT);
-  dictAppendWord(dp, "get-current",  
-		 getCurrent,     FW_DEFAULT);
-  dictAppendWord(dp, "get-order", getOrder,       FW_DEFAULT);
-  dictAppendWord(dp, "search-wordlist",  
-		 searchWordlist, FW_DEFAULT);
-  dictAppendWord(dp, "set-current",  
-		 setCurrent,     FW_DEFAULT);
-  dictAppendWord(dp, "set-order", setOrder,       FW_DEFAULT);
-  dictAppendWord(dp, "ficl-wordlist", wordlist,   FW_DEFAULT);
+    /*
+    ** optional SEARCH-ORDER word set 
+    */
+    dictAppendWord(dp, ">search",   searchPush,     FW_DEFAULT);
+    dictAppendWord(dp, "search>",   searchPop,      FW_DEFAULT);
+    dictAppendWord(dp, "definitions",
+                                    definitions,    FW_DEFAULT);
+    dictAppendWord(dp, "forth-wordlist",  
+                                    forthWordlist,  FW_DEFAULT);
+    dictAppendWord(dp, "get-current",  
+                                    getCurrent,     FW_DEFAULT);
+    dictAppendWord(dp, "get-order", getOrder,       FW_DEFAULT);
+    dictAppendWord(dp, "search-wordlist",  
+                                    searchWordlist, FW_DEFAULT);
+    dictAppendWord(dp, "set-current",  
+                                    setCurrent,     FW_DEFAULT);
+    dictAppendWord(dp, "set-order", setOrder,       FW_DEFAULT);
+    dictAppendWord(dp, "ficl-wordlist", wordlist,   FW_DEFAULT);
 
-  /*
-  ** Set SEARCH environment query values
-  */
-  ficlSetEnv("search-order",      FICL_TRUE);
-  ficlSetEnv("search-order-ext",  FICL_TRUE);
-  ficlSetEnv("wordlists",         FICL_DEFAULT_VOCS);
+    /*
+    ** Set SEARCH environment query values
+    */
+    ficlSetEnv("search-order",      FICL_TRUE);
+    ficlSetEnv("search-order-ext",  FICL_TRUE);
+    ficlSetEnv("wordlists",         FICL_DEFAULT_VOCS);
 
-  /*
-  ** TOOLS and TOOLS EXT
-  */
-  dictAppendWord(dp, ".s",        displayStack,   FW_DEFAULT);
-  dictAppendWord(dp, "bye",       bye,            FW_DEFAULT);
-  dictAppendWord(dp, "forget",    forget,         FW_DEFAULT);
-  dictAppendWord(dp, "see",       see,            FW_DEFAULT);
-  dictAppendWord(dp, "words",     listWords,      FW_DEFAULT);
+    /*
+    ** TOOLS and TOOLS EXT
+    */
+    dictAppendWord(dp, ".s",        displayStack,   FW_DEFAULT);
+    dictAppendWord(dp, "bye",       bye,            FW_DEFAULT);
+    dictAppendWord(dp, "forget",    forget,         FW_DEFAULT);
+    dictAppendWord(dp, "see",       see,            FW_DEFAULT);
+    dictAppendWord(dp, "words",     listWords,      FW_DEFAULT);
 
-  /*
-  ** Set TOOLS environment query values
-  */
-  ficlSetEnv("tools",            FICL_TRUE);
-  ficlSetEnv("tools-ext",        FICL_FALSE);
+    /*
+    ** Set TOOLS environment query values
+    */
+    ficlSetEnv("tools",            FICL_TRUE);
+    ficlSetEnv("tools-ext",        FICL_FALSE);
 
-  /*
-  ** Ficl extras
-  */
-  dictAppendWord(dp, ".env",      listEnv,        FW_DEFAULT);
-  dictAppendWord(dp, ".hash",     dictHashSummary,FW_DEFAULT);
-  dictAppendWord(dp, ".ver",      ficlVersion,    FW_DEFAULT);
-  dictAppendWord(dp, "-roll",     minusRoll,      FW_DEFAULT);
-  dictAppendWord(dp, "2constant", twoConstant,    FW_IMMEDIATE); /* DOUBLE */
-  dictAppendWord(dp, ">name",     toName,         FW_DEFAULT);
-  dictAppendWord(dp, "body>",     fromBody,       FW_DEFAULT);
-  dictAppendWord(dp, "compare",   compareString,  FW_DEFAULT);   /* STRING */
-  dictAppendWord(dp, "compile-only",
-		 compileOnly,    FW_DEFAULT);
-  dictAppendWord(dp, "dnegate",   dnegate,        FW_DEFAULT); /* DOUBLE */
-  dictAppendWord(dp, "endif",     endifCoIm,      FW_COMPIMMED);
-  dictAppendWord(dp, "forget-wid",forgetWid,      FW_DEFAULT);
-  dictAppendWord(dp, "parse-word",parseNoCopy,    FW_DEFAULT);
-  dictAppendWord(dp, "sliteral",  sLiteralCoIm,   FW_COMPIMMED); /* STRING */
-  dictAppendWord(dp, "wid-set-super", 
-		 setParentWid,   FW_DEFAULT);
-  dictAppendWord(dp, "w@",        wFetch,         FW_DEFAULT);
-  dictAppendWord(dp, "w!",        wStore,         FW_DEFAULT);
-  dictAppendWord(dp, "x.",        hexDot,         FW_DEFAULT);
+    /*
+    ** Ficl extras
+    */
+    dictAppendWord(dp, ".env",      listEnv,        FW_DEFAULT);
+    dictAppendWord(dp, ".hash",     dictHashSummary,FW_DEFAULT);
+    dictAppendWord(dp, ".ver",      ficlVersion,    FW_DEFAULT);
+    dictAppendWord(dp, "-roll",     minusRoll,      FW_DEFAULT);
+    dictAppendWord(dp, ">name",     toName,         FW_DEFAULT);
+    dictAppendWord(dp, "body>",     fromBody,       FW_DEFAULT);
+    dictAppendWord(dp, "compare",   compareString,  FW_DEFAULT);   /* STRING */
+    dictAppendWord(dp, "compile-only",
+                                    compileOnly,    FW_DEFAULT);
+    dictAppendWord(dp, "endif",     endifCoIm,      FW_COMPIMMED);
+    dictAppendWord(dp, "forget-wid",forgetWid,      FW_DEFAULT);
+	dictAppendWord(dp, "hash",      hash,           FW_DEFAULT);
+	dictAppendWord(dp, "number?",   ficlIsNum,      FW_DEFAULT);
+    dictAppendWord(dp, "parse-word",parseNoCopy,    FW_DEFAULT);
+    dictAppendWord(dp, "sliteral",  sLiteralCoIm,   FW_COMPIMMED); /* STRING */
+    dictAppendWord(dp, "wid-set-super", 
+                                    setParentWid,   FW_DEFAULT);
+    dictAppendWord(dp, "w@",        wFetch,         FW_DEFAULT);
+    dictAppendWord(dp, "w!",        wStore,         FW_DEFAULT);
+    dictAppendWord(dp, "x.",        hexDot,         FW_DEFAULT);
 #if FICL_WANT_USER
-  dictAppendWord(dp, "(user)",    userParen,      FW_DEFAULT);
-  dictAppendWord(dp, "user",      userVariable,   FW_DEFAULT);
+    dictAppendWord(dp, "(user)",    userParen,      FW_DEFAULT);
+    dictAppendWord(dp, "user",      userVariable,   FW_DEFAULT);
 #endif
-  /*
-  ** internal support words
-  */
-  pExitParen =
+    /*
+    ** internal support words
+    */
+    pExitParen =
     dictAppendWord(dp, "(exit)",    exitParen,      FW_COMPILE);
-  pSemiParen =
+    pSemiParen =
     dictAppendWord(dp, "(;)",       semiParen,      FW_COMPILE);
-  pLitParen = 
+    pLitParen = 
     dictAppendWord(dp, "(literal)", literalParen,   FW_COMPILE);
-  pStringLit =
+    pTwoLitParen = 
+    dictAppendWord(dp, "(2literal)",twoLitParen,    FW_COMPILE);
+    pStringLit =
     dictAppendWord(dp, "(.\")",     stringLit,      FW_COMPILE);
-  pIfParen =
+    pIfParen =
     dictAppendWord(dp, "(if)",      ifParen,        FW_COMPILE);
-  pBranchParen =
+    pBranchParen =
     dictAppendWord(dp, "(branch)",  branchParen,    FW_COMPILE);
-  pDoParen =
+    pDoParen =
     dictAppendWord(dp, "(do)",      doParen,        FW_COMPILE);
-  pDoesParen =
+    pDoesParen =
     dictAppendWord(dp, "(does>)",   doesParen,      FW_COMPILE);
-  pQDoParen =
+    pQDoParen =
     dictAppendWord(dp, "(?do)",     qDoParen,       FW_COMPILE);
-  pLoopParen =
+    pLoopParen =
     dictAppendWord(dp, "(loop)",    loopParen,      FW_COMPILE);
-  pPLoopParen =
+    pPLoopParen =
     dictAppendWord(dp, "(+loop)",   plusLoopParen,  FW_COMPILE);
-  pInterpret =
+    pInterpret =
     dictAppendWord(dp, "interpret", interpret,      FW_DEFAULT);
-  dictAppendWord(dp, "(variable)",variableParen,  FW_COMPILE);
-  dictAppendWord(dp, "(constant)",constantParen,  FW_COMPILE);
-  dictAppendWord(dp, "exit-inner",ficlExitInner,  FW_DEFAULT);
+    dictAppendWord(dp, "(variable)",variableParen,  FW_COMPILE);
+    dictAppendWord(dp, "(constant)",constantParen,  FW_COMPILE);
+    dictAppendWord(dp, "exit-inner",ficlExitInner,  FW_DEFAULT);
 
-  assert(dictCellsAvail(dp) > 0);
-  return;
+    assert(dictCellsAvail(dp) > 0);
+    return;
 }
+

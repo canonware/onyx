@@ -68,6 +68,16 @@ object subclass c-ptr
         c-4byte => set  
     ;
 
+    \ force the pointer to be null
+	: clr-ptr
+	    0 -rot  c-ptr => .addr  c-4byte => set
+	;
+
+    \ return flag indicating null-ness
+	: ?null     ( inst class -- flag )
+	    c-ptr => get-ptr 0= 
+	;
+
     \ increment the pointer in place
     : inc-ptr   ( inst class -- )
         2dup 2dup                   ( i c i c i c )
@@ -138,5 +148,3 @@ end-class
 
 
 previous definitions
-
-\ ** E N D   C L A S S E S . F R

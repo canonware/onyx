@@ -113,6 +113,14 @@ done
 dataend
 }
 
+stile_clean :
+{
+}
+
+stile_distclean :
+{
+}
+
 /*
  * Various flags.
  */

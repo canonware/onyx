@@ -244,18 +244,13 @@
 \
 
 
-\ CR .(  ANSI Forth debugger V0.3     by Joerg Plewe, 1dec94 ) CR
+CR .(  ANSI Forth debugger V0.3     by Joerg Plewe, 1dec94 ) CR
 
 MARKER *debugger*
 
 \
 \ customization
 \
- \ Compile the decompiler feature?
- \ This will introduce an environmental dependency!
-TRUE CONSTANT withDSEE
-
-
 
 : is_defined ( <name> -- flag )
   BL WORD FIND NIP ;
@@ -357,18 +352,18 @@ IMMEDIATE
 : ?negate ( n sign -- n' )     0< IF NEGATE THEN ;
 : 0.  0 dup ;
 
-: number? ( addr c -- FALSE | u 1 )
-   \ Tries to find out, wether the given string can be interpreted
-   \ as a numeric literal.
-   \ Returns a flag and the converted number, if possible.
-        0 >R                                            \ push default sign
-        OVER C@ [CHAR] - = IF R> DROP -1 >R  THEN       \ - sign?
-        OVER C@ [CHAR] + = IF R> DROP  1 >R  THEN       \ + sign?
-        R@ ABS /STRING
-        0. 2swap >NUMBER  ( ud2 c-addr2 u2 )
-        ?DUP 0= IF  2DROP R> ?negate  1  else   ( exit: single )
-        R> DROP 2DROP FALSE endif
-    ;
+\ : number? ( addr c -- FALSE | u 1 )
+\   \ Tries to find out whether the given string can be interpreted
+\   \ as a numeric literal.
+\   \ Returns a flag and the converted number, if possible.
+\        0 >R                                            \ push default sign
+\        OVER C@ [CHAR] - = IF R> DROP -1 >R  THEN       \ - sign?
+\        OVER C@ [CHAR] + = IF R> DROP  1 >R  THEN       \ + sign?
+\        R@ ABS /STRING
+\        0. 2swap >NUMBER  ( ud2 c-addr2 u2 )
+\        ?DUP 0= IF  2DROP R> ?negate  1  else   ( exit: single )
+\        R> DROP 2DROP FALSE endif
+\    ;
 
 
 
@@ -501,7 +496,7 @@ VARIABLE savedebugstate       debugstate @ savedebugstate !
   \ or a watch is activated.
 	nodecomp @
 	IF
-        KEY?  IF  KEY DROP  [+I]  THEN
+  \      KEY?  IF  KEY DROP  [+I]  THEN
 		do_watches IF  [+I]  THEN
 	THEN ;
 
@@ -599,7 +594,6 @@ CREATE wordbuf 64 CHARS ALLOT
 \
 \ compile conditinal branches to skip 'real' code for decompiling
 \
-withDSEE [IF]
 
 CREATE CSbuffer 20 CELLS ALLOT
 VARIABLE decompilerIF     decompilerIF OFF
@@ -660,21 +654,12 @@ VARIABLE CSsaved          0 CSsaved !
         THEN
         ;
 
-[ELSE]  ( withDSEE )
-: decompiler_jump ;   IMMEDIATE
-: decompiler_target ; IMMEDIATE
-[THEN]  ( withDSEE )
-
-
 
 \
 \ now construct a complete outer interpreter
 \
 
-\ a special hack to allow F68KANS to handle files with tabs etc.
-is_defined F68kAns
-  [IF] blankbits  [ELSE]  BL  [THEN]
-  CONSTANT whitespace
+  BL CONSTANT whitespace
 
 
 : create_debugging_code ( -- )
@@ -709,7 +694,6 @@ is_defined F68kAns
 \
 \ Define the decompiler
 \
-withDSEE [IF]
 : DSEE ( <name> -- )
   \ Show a decompiler listing of a word compiled with the debugger.
   \ A non-debugger word will be executed instead.
@@ -720,13 +704,6 @@ withDSEE [IF]
         R> debugstate !
         R> nodecomp !
         ;
-[ELSE]
-: DSEE ( <name> -- )
-        CR BL WORD DROP
-        ." Debugger compiled without decompiler option! "
-        ;
-[THEN]
-
 
 \
 \ Now the replacements for the code-beginning words.
@@ -800,9 +777,6 @@ CR
 .(   [+V]   [-V]       Verbose mode on/off ) CR
 .(   [>L]   [Y]        level targeting control ) CR
 .(   [DEF]             DEFault settings ) CR
-withDSEE [IF]
 .(   DSEE              Decompile words compiled with debugger ) CR
-[THEN]
-.(   0!DBG             Reset the debugger when something goes wrong ) CR
 
 

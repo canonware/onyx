@@ -113,6 +113,14 @@ done
 dataend
 }
 
+edittest_clean :
+{
+}
+
+edittest_distclean :
+{
+}
+
 /*
  * Various flags.
  */
