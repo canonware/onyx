@@ -108,7 +108,10 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 
 #ifdef _LIBSTASH_DBG
 #  ifdef _CW_REENTRANT
-  mtx_lock(&a_mem->lock);
+  if (NULL != a_mem)
+  {
+    mtx_lock(&a_mem->lock);
+  }
 #  endif
 #endif
     
@@ -239,7 +242,10 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   
 #ifdef _LIBSTASH_DBG
 #  ifdef _CW_REENTRANT
-  mtx_lock(&a_mem->lock);
+  if (NULL != a_mem)
+  {
+    mtx_lock(&a_mem->lock);
+  }
 #  endif
 #endif
   
@@ -373,7 +379,10 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 
 #ifdef _LIBSTASH_DBG
 #  ifdef _CW_REENTRANT
-  mtx_lock(&a_mem->lock);
+  if (NULL != a_mem)
+  {
+    mtx_lock(&a_mem->lock);
+  }
 #  endif
 #endif
   
@@ -549,7 +558,10 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
 
 #ifdef _LIBSTASH_DBG
 #  ifdef _CW_REENTRANT
-  mtx_unlock(&a_mem->lock);
+  if (NULL != a_mem)
+  {
+    mtx_unlock(&a_mem->lock);
+  }
 #  endif
 #endif
 }

@@ -1,11 +1,8 @@
 *.[do]
 *.out
 *.diff
-c_*_a
-c_*_b
-c_*_c
-c_*_d
-b_*_a
+c_*_[a-z]
+b_*_[a-z]
 p*.pl
 *.core
 core

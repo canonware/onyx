@@ -1,3 +1,12 @@
+1999-08-18  Jason Evans  <jasone@canonware.com>
+
+	* test/c_libstash_a.c: Test whether libstash works correctly
+	without calling libstash_init().
+
+	* src/mem.c: Make mem methods safe to call with a NULL cw_mem_t
+	pointer again.  This breakage was created by the race condition
+	fixes made on 9 August 1999.
+
 1999-08-12  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (buf_{g,s}et_uint{32,64}): Fix endianness problems.

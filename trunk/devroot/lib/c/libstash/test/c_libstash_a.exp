@@ -1,0 +1,4 @@
+Test begin
+libstash_init()
+libstash_shutdown()
+Test end
