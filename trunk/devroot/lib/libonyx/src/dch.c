@@ -16,12 +16,130 @@
 #define CW_DCH_MAGIC 0x4327589e
 #endif
 
-static void
-dch_p_grow(cw_dch_t *a_dch);
-static void
-dch_p_shrink(cw_dch_t *a_dch);
-static void
-dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi);
+/* Given the ch API, there is no way to both safely and efficiently transfer the
+ * contents of one ch to another.  Therefore, this function mucks with ch
+ * internals. */
+CW_P_INLINE void
+dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
+{
+    cw_uint32_t slot;
+
+    /* Initialize a_chi. */
+    slot = a_ch->hash(a_chi->key) % a_ch->table_size;
+    a_chi->slot = slot;
+
+    /* Hook into ch-wide list. */
+    ql_tail_insert(&a_ch->chi_ql, a_chi, ch_link);
+
+    /* Hook into the slot list. */
+#ifdef CW_DCH_COUNT
+    if (ql_first(&a_ch->table[slot]) != NULL)
+    {
+	a_ch->num_collisions++;
+    }
+#endif
+    ql_head_insert(&a_ch->table[slot], a_chi, slot_link);
+
+    a_ch->count++;
+#ifdef CW_DCH_COUNT
+    a_ch->num_inserts++;
+#endif
+}
+
+/* Given the ch API, there is no way to both safely and efficiently transfer the
+ * contents of one ch to another.  Therefore, this function mucks with ch
+ * internals. */
+CW_P_INLINE void
+dch_p_grow(cw_dch_t *a_dch)
+{
+    cw_ch_t *t_ch;
+    cw_chi_t *chi;
+    cw_uint32_t count, i;
+
+    count = ch_count(a_dch->ch);
+
+    if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow))
+    {
+	/* Too small.  Create a new ch twice as large and populate it. */
+	t_ch = ch_new(NULL, a_dch->mema,
+		      a_dch->base_table * a_dch->grow_factor * 2,
+		      a_dch->hash, a_dch->key_comp);
+	for (i = 0; i < count; i++)
+	{
+	    chi = ql_first(&a_dch->ch->chi_ql);
+	    ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
+	    ql_elm_new(chi, slot_link);
+	    dch_p_insert(t_ch, chi);
+	}
+
+	a_dch->grow_factor *= 2;
+#ifdef CW_DCH_COUNT
+	a_dch->num_grows++;
+	t_ch->num_collisions += a_dch->ch->num_collisions;
+	t_ch->num_inserts += a_dch->ch->num_inserts;
+	t_ch->num_removes += a_dch->ch->num_removes;
+	t_ch->num_searches += a_dch->ch->num_searches;
+#endif
+	/* Set to NULL to keep ch_delete() from deleting all the items. */
+	ql_first(&a_dch->ch->chi_ql) = NULL;
+	ch_delete(a_dch->ch);
+	a_dch->ch = t_ch;
+    }
+}
+
+/* Given the ch API, there is no way to both safely and efficiently transfer the
+ * contents of one ch to another.  Therefore, this function mucks with ch
+ * internals. */
+CW_P_INLINE void
+dch_p_shrink(cw_dch_t *a_dch)
+{
+    cw_ch_t *t_ch;
+    cw_chi_t *chi;
+    cw_uint32_t count, i;
+
+    count = ch_count(a_dch->ch);
+
+    if ((count - 1 < a_dch->base_shrink * a_dch->grow_factor)
+	&& (a_dch->grow_factor > 1))
+    {
+	cw_uint32_t new_factor;
+
+	/* Too big.  Create a new ch with the smallest grow factor that does not
+	 * cause the ch to be overflowed. */
+	for (new_factor = 1;
+	     new_factor * a_dch->base_grow <= count - 1;
+	     new_factor *= 2)
+	{
+	    cw_assert(new_factor < a_dch->grow_factor);
+	}
+	cw_assert(new_factor > 0);
+	cw_assert(new_factor < a_dch->grow_factor);
+
+	t_ch = ch_new(NULL, a_dch->mema,
+		      a_dch->base_table * new_factor, a_dch->hash,
+		      a_dch->key_comp);
+	for (i = 0; i < count; i++)
+	{
+	    chi = ql_first(&a_dch->ch->chi_ql);
+	    ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
+	    ql_elm_new(chi, slot_link);
+	    dch_p_insert(t_ch, chi);
+	}
+
+	a_dch->grow_factor = new_factor;
+#ifdef CW_DCH_COUNT
+	a_dch->num_shrinks++;
+	t_ch->num_collisions += a_dch->ch->num_collisions;
+	t_ch->num_inserts += a_dch->ch->num_inserts;
+	t_ch->num_removes += a_dch->ch->num_removes;
+	t_ch->num_searches += a_dch->ch->num_searches;
+#endif
+	/* Set to NULL to keep ch_delete() from deleting all the items. */
+	ql_first(&a_dch->ch->chi_ql) = NULL;
+	ch_delete(a_dch->ch);
+	a_dch->ch = t_ch;
+    }
+}
 
 cw_dch_t *
 dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, cw_uint32_t a_base_table,
@@ -220,130 +338,4 @@ dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data,
     retval = FALSE;
     RETURN:
     return retval;
-}
-
-/* Given the ch API, there is no way to both safely and efficiently transfer the
- * contents of one ch to another.  Therefore, this function mucks with ch
- * internals. */
-static void
-dch_p_grow(cw_dch_t *a_dch)
-{
-    cw_ch_t *t_ch;
-    cw_chi_t *chi;
-    cw_uint32_t count, i;
-
-    count = ch_count(a_dch->ch);
-
-    if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow))
-    {
-	/* Too big.  Create a new ch twice as large and populate it. */
-	t_ch = ch_new(NULL, a_dch->mema,
-		      a_dch->base_table * a_dch->grow_factor * 2,
-		      a_dch->hash, a_dch->key_comp);
-	for (i = 0; i < count; i++)
-	{
-	    chi = ql_first(&a_dch->ch->chi_ql);
-	    ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
-	    ql_elm_new(chi, slot_link);
-	    dch_p_insert(t_ch, chi);
-	}
-
-	a_dch->grow_factor *= 2;
-#ifdef CW_DCH_COUNT
-	a_dch->num_grows++;
-	t_ch->num_collisions += a_dch->ch->num_collisions;
-	t_ch->num_inserts += a_dch->ch->num_inserts;
-	t_ch->num_removes += a_dch->ch->num_removes;
-	t_ch->num_searches += a_dch->ch->num_searches;
-#endif
-	/* Set to NULL to keep ch_delete() from deleting all the items. */
-	ql_first(&a_dch->ch->chi_ql) = NULL;
-	ch_delete(a_dch->ch);
-	a_dch->ch = t_ch;
-    }
-}
-
-/* Given the ch API, there is no way to both safely and efficiently transfer the
- * contents of one ch to another.  Therefore, this function mucks with ch
- * internals. */
-static void
-dch_p_shrink(cw_dch_t *a_dch)
-{
-    cw_ch_t *t_ch;
-    cw_chi_t *chi;
-    cw_uint32_t count, i;
-
-    count = ch_count(a_dch->ch);
-
-    if ((count - 1 < a_dch->base_shrink * a_dch->grow_factor)
-	&& (a_dch->grow_factor > 1))
-    {
-	cw_uint32_t new_factor;
-
-	/*
-	 * Too big.  Create a new ch with the smallest grow factor that
-	 * does not cause the ch to be overflowed.
-	 */
-	for (new_factor = 1; new_factor * a_dch->base_grow <= count - 1;
-	     new_factor *= 2)
-	{
-	    cw_assert(new_factor < a_dch->grow_factor);
-	}
-	cw_assert(new_factor > 0);
-	cw_assert(new_factor < a_dch->grow_factor);
-
-	t_ch = ch_new(NULL, a_dch->mema,
-		      a_dch->base_table * new_factor, a_dch->hash,
-		      a_dch->key_comp);
-	for (i = 0; i < count; i++)
-	{
-	    chi = ql_first(&a_dch->ch->chi_ql);
-	    ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
-	    ql_elm_new(chi, slot_link);
-	    dch_p_insert(t_ch, chi);
-	}
-
-	a_dch->grow_factor = new_factor;
-#ifdef CW_DCH_COUNT
-	a_dch->num_shrinks++;
-	t_ch->num_collisions += a_dch->ch->num_collisions;
-	t_ch->num_inserts += a_dch->ch->num_inserts;
-	t_ch->num_removes += a_dch->ch->num_removes;
-	t_ch->num_searches += a_dch->ch->num_searches;
-#endif
-	/* Set to NULL to keep ch_delete() from deleting all the items. */
-	ql_first(&a_dch->ch->chi_ql) = NULL;
-	ch_delete(a_dch->ch);
-	a_dch->ch = t_ch;
-    }
-}
-
-/* Given the ch API, there is no way to both safely and efficiently transfer the
- * contents of one ch to another.  Therefore, this function mucks with ch
- * internals. */
-static void
-dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
-{
-    cw_uint32_t slot;
-
-    /* Initialize a_chi. */
-    slot = a_ch->hash(a_chi->key) % a_ch->table_size;
-    a_chi->slot = slot;
-
-    /* Hook into ch-wide list. */
-    ql_tail_insert(&a_ch->chi_ql, a_chi, ch_link);
-
-    /* Hook into the slot list. */
-#ifdef CW_DCH_COUNT
-    if (ql_first(&a_ch->table[slot]) != NULL)
-    {
-	a_ch->num_collisions++;
-    }
-#endif
-    ql_head_insert(&a_ch->table[slot], a_chi, slot_link);
-
-    a_ch->count++;
-#ifdef CW_DCH_COUNT
-    a_ch->num_inserts++;
-#endif
 }
