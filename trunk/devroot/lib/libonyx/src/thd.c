@@ -529,6 +529,9 @@ thd_single_enter(void)
 	    thd->singled = TRUE;
 	}
     }
+    /* Unlock here, then lock again in thd_single_leave() in order to avoid
+     * the possibility of lock recursion. */
+    mtx_unlock(&s_thd_single_lock);
 }
 
 void
@@ -538,6 +541,7 @@ thd_single_leave(void)
 
     cw_assert(s_thd_initialized);
 
+    mtx_lock(&s_thd_single_lock);
     qr_foreach(thd, &s_thd, link)
     {
 	if (thd->singled)

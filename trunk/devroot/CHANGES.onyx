@@ -1,3 +1,11 @@
+2003-09-11 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/thd.c:thd_single_{enter,leave}() : Unlock
+	  s_thd_single_lock in thd_single_enter(), then re-acquire it in
+	  thd_single_leave(), in order to avoid the possibility of lock
+	  recursion.  This regression was introduced before the 1.0.0 release,
+	  but no releases of Onyx included code that triggered the failure mode.
+
 2003-08-30 : Jason Evans <jasone@canonware.com>
 
 	* Add the cdef operator.
