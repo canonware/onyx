@@ -3529,6 +3529,7 @@ systemdict_system(cw_stilt_t *a_stilt)
 	char		*path, **argv, **envp;
 	pid_t		pid;
 	int		status;
+	cw_sint64_t	result;
 
 	ostack = stilt_ostack_get(a_stilt);
 	tstack = stilt_tstack_get(a_stilt);
@@ -3626,6 +3627,10 @@ systemdict_system(cw_stilt_t *a_stilt)
 	 */
 	pid = fork();
 	switch (pid) {
+	case -1:
+		/* Error, related to some form of resource exhaustion. */
+		stilt_error(a_stilt, STILTE_LIMITCHECK);
+		goto FORK_ERROR;
 	case 0:
 		/* Child. */
 		execve(path, argv, envp);
@@ -3634,21 +3639,25 @@ systemdict_system(cw_stilt_t *a_stilt)
 		 * back to the parent.
 		 */
 		exit(1);
-	case -1:
-		/* Error, related to some form of resource exhaustion. */
-		stilt_error(a_stilt, STILTE_LIMITCHECK);
-		goto FORK_ERROR;
-	default:
-		/* Parent. */
-		waitpid(pid, &status, 0);
-		if (!WIFEXITED(status) || (WEXITSTATUS(status) != 0))
-			_cw_out_put_e("XXX Handle non-zero child exit\n");
-		else {
-			/* XXX Set equivalent of $?. */
-		}
 	}
 
-	stils_pop(ostack);
+	/*
+	 * Only the parent gets to here.
+	 */
+	waitpid(pid, &status, 0);
+	if (WIFEXITED(status)) {
+		/* Normal program exit. */
+		result = WEXITSTATUS(status);
+	} else {
+		/*
+		 * Program termination due to a signal.  Set a negative
+		 * return value.
+		 */
+		result = -WTERMSIG(status);
+	}
+
+	/* Replace the top stack element (array) with the return value. */
+	stilo_integer_new(array, result);
 
 	/*
 	 * Clean up.
