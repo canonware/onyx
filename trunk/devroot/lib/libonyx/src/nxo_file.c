@@ -616,7 +616,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 			/* Only read if data are available. */
 #ifdef HAVE_POLL
-			events.fd = finle->f.p.fd;
+			events.fd = file->f.p.fd;
 			events.events = POLLIN
 #ifdef POLLRDNORM
 			    | POLLRDNORM
