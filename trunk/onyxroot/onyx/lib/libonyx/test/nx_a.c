@@ -27,8 +27,8 @@ thread_entry_func(void *a_arg)
 
     for (i = 0; i < NITERATIONS; i++)
     {
-	cw_onyx_code(&thread,
-		     "10000 {[`a' `b' `c']} repeat clear `.' print flush");
+	cw_onyx_code(&thread, "10000 {[`a' `b' `c']} repeat clear");
+	fprintf(stderr, ".");
     }
 
     nx_delete(&nx);
