@@ -5253,29 +5253,24 @@ onyx:0> 1 die
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		For each entry in the directory represented by \oparg{path},
-		push a string that represents the entry onto ostack and
-		execute \oparg{proc}.  This operator supports the
-		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+		For each entry in the directory represented by \oparg{path}
+		except for ``.'' and ``..'', push a string that represents the
+		entry onto ostack and execute \oparg{proc}.  This operator
+		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
+		operator.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> pwd {1 sprint} dirforeach
-`.'
-`..'
 `CVS'
 `.cvsignore'
 `Cookfile'
 `Cookfile.inc'
 `latex'
-`ps'
-`pdf'
-`html'
+`Cookfile.inc.in'
 onyx:0> pwd {`Cookfile.inc' search
      {pop `Yes: ' print 1 sprint pop exit}
      {`Not: ' print 1 sprint} ifelse
 } dirforeach
-Not: `.'
-Not: `..'
 Not: `CVS'
 Not: `.cvsignore'
 Not: `Cookfile'

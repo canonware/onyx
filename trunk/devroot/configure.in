@@ -130,7 +130,7 @@ if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
     if test $PCRE_MAJOR -gt $PCRE_MAJOR_MIN \
          -o $PCRE_MAJOR -eq $PCRE_MAJOR_MIN \
          -a $PCRE_MINOR -ge $PCRE_MINOR_MIN ; then
-      AC_MSG_RESULT(yes ($PCRE_MAJOR.$PCRE_MINOR))
+      AC_MSG_RESULT($PCRE_MAJOR.$PCRE_MINOR)
       CW_BUILD_MOD(modpcre, mod_pcre)
       if test "x$mod_pcre" = "x1" ; then
         PCRE_CFLAGS=`pcre-config --cflags`
@@ -139,7 +139,7 @@ if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
         AC_SUBST(PCRE_LIBS)
       fi
     else
-      AC_MSG_RESULT(no ($PCRE_MAJOR.$PCRE_MINOR))
+      AC_MSG_RESULT(no)
     fi
   fi
 

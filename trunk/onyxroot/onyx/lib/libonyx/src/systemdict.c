@@ -2089,7 +2089,7 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
     cw_nxo_t *ostack, *estack, *tstack;
     cw_nxo_t *nxo, *tnxo, *path, *proc, *entry;
     cw_nx_t *nx;
-    cw_bool_t currentlocking;
+    cw_bool_t currentlocking, dot;
     DIR *dir;
     cw_uint32_t edepth, tdepth;
     struct dirent *entp;
@@ -2151,15 +2151,49 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 #ifdef CW_LIBONYX_USE_DIRENT_RECLEN
 #define d_namlen d_reclen
 #endif
-	    /* Push a string onto ostack that represents the directory entry. */
-	    entry = nxo_stack_push(ostack);
-	    nxo_string_new(entry, nx, currentlocking, entp->d_namlen);
-	    nxo_string_set(entry, 0, entp->d_name, entp->d_namlen);
+	    /* Ignore "." and "..". */
+	    switch (entp->d_namlen)
+	    {
+		case 2:
+		{
+		    if (entp->d_name[1] != '.')
+		    {
+			dot = FALSE;
+			break;
+		    }
+		    /* Fall through. */
+		}
+		case 1:
+		{
+		    if (entp->d_name[0] != '.')
+		    {
+			dot = FALSE;
+			break;
+		    }
+		    else
+		    {
+			dot = TRUE;
+		    }
+		    break;
+		}
+		default:
+		{
+		    dot = FALSE;
+		}
+	    }
+	    if (dot == FALSE)
+	    {
+		/* Push a string onto ostack that represents the directory
+		 * entry. */
+		entry = nxo_stack_push(ostack);
+		nxo_string_new(entry, nx, currentlocking, entp->d_namlen);
+		nxo_string_set(entry, 0, entp->d_name, entp->d_namlen);
 
-	    /* Evaluate proc. */
-	    nxo = nxo_stack_push(estack);
-	    nxo_dup(nxo, proc);
-	    nxo_thread_loop(a_thread);
+		/* Evaluate proc. */
+		nxo = nxo_stack_push(estack);
+		nxo_dup(nxo, proc);
+		nxo_thread_loop(a_thread);
+	    }
 	}
 #ifdef HAVE_READDIR_R
 	if (error && entp != NULL)

@@ -1,3 +1,9 @@
+2002-02-02  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_dirforeach): Don't report "." and
+	"..", which always exist, in order to make directory recursion
+	easier.
+
 2002-01-28  Jason Evans  <jasone@canonware.com>
 
 	* src/nx.nx.in: Move require and mrequire from onyx to libonyx.
