@@ -821,7 +821,7 @@ nxo_stack_up_get(const cw_nxo_t *a_nxo, cw_nxo_t *a_object)
     }
     else
     {
-	/* Same as nxo_stack_bget(). */ /* XXX Verify. */
+	/* Same as nxo_stack_bget(). */
 	if (stack->count == 0)
 	{
 	    retval = NULL;
