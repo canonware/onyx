@@ -64,6 +64,56 @@
 #include <ctype.h>
 #endif
 
+/* Prototypes. */
+/* histh. */
+CW_P_INLINE void
+histh_p_new(cw_histh_t *a_histh);
+CW_P_INLINE void
+histh_p_delete(cw_histh_t *a_histh);
+CW_P_INLINE cw_bufv_t *
+histh_p_bufv_get(cw_histh_t *a_histh);
+CW_P_INLINE cw_uint32_t
+histh_p_bufvcnt_get(cw_histh_t *a_histh);
+CW_P_INLINE cw_uint8_t
+histh_p_tag_get(cw_histh_t *a_histh);
+CW_P_INLINE void
+histh_p_tag_set(cw_histh_t *a_histh, cw_uint8_t a_tag);
+CW_P_INLINE cw_uint64_t
+histh_p_aux_get(cw_histh_t *a_histh);
+CW_P_INLINE void
+histh_p_aux_set(cw_histh_t *a_histh, cw_uint64_t a_aux);
+CW_P_INLINE void
+histh_p_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b);
+CW_P_INLINE void
+histh_p_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b);
+CW_P_INLINE void
+histh_p_record_prev(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
+		    cw_mkr_t *a_beg, cw_mkr_t *a_cur, cw_mkr_t *a_end,
+		    cw_mkr_t *a_tmp);
+CW_P_INLINE void
+histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
+		    cw_mkr_t *a_beg, cw_mkr_t *a_cur, cw_mkr_t *a_end,
+		    cw_mkr_t *a_tmp);
+static void
+histh_p_dump(cw_histh_t *a_histh, const char *a_beg, const char *a_mid,
+	     const char *a_end);
+
+/* hist. */
+static void
+hist_p_bufv_print(const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt);
+static void
+hist_p_record_prev(cw_hist_t *a_hist);
+static void
+hist_p_record_next(cw_hist_t *a_hist);
+CW_P_INLINE void
+hist_p_redo_flush(cw_hist_t *a_hist);
+CW_P_INLINE void
+hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos);
+static void
+hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
+		       const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+		       cw_uint8_t a_tag);
+
 /* histh. */
 CW_P_INLINE void
 histh_p_new(cw_histh_t *a_histh)
@@ -328,6 +378,42 @@ histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 	}
     }
 }
+
+#ifdef CW_HIST_DUMP
+static void
+histh_p_dump(cw_histh_t *a_histh, const char *a_beg, const char *a_mid,
+	     const char *a_end)
+{
+    const char *beg, *mid, *end;
+    static const char *tags[] =
+    {
+	"HISTH_TAG_NONE",
+	"HISTH_TAG_GRP_BEG",
+	"HISTH_TAG_GRP_END",
+	"HISTH_TAG_POS",
+	"HISTH_TAG_INS",
+	"HISTH_TAG_YNK",
+	"HISTH_TAG_REM",
+	"HISTH_TAG_DEL",
+	"HISTH_TAG_SYNC"
+    };
+
+    beg = (a_beg != NULL) ? a_beg : "";
+    mid = (a_mid != NULL) ? a_mid : beg;
+    end = (a_end != NULL) ? a_end : mid;
+
+    fprintf(stderr, "%shisth: %p\n", beg, a_histh);
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> tag: %s (%u)\n", mid,
+	    tags[a_histh->tag], a_histh->tag);
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s\\-> aux: %llu\n", mid, histh_p_aux_get(a_histh));
+
+    fprintf(stderr, "%s         \"", end);
+    hist_p_bufv_print(&(histh_p_bufv_get(a_histh))[1], 1);
+    fprintf(stderr, "\"\n");
+}
+#endif
 
 /* hist. */
 #ifdef CW_BUF_DUMP
@@ -626,14 +712,15 @@ hist_undoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf)
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
 
-    /* There is at least one undoable operation unless hcur is at BOB. */
-    if (mkr_pos(&a_hist->hcur) == 1)
+    /* There is at least one undoable operation unless hcur is at or before the
+     * beginning of the data in the first record. */
+    if (mkr_pos(&a_hist->hcur) > 1 + HISTH_LEN)
     {
-	retval = FALSE;
+	retval = TRUE;
     }
     else
     {
-	retval = TRUE;
+	retval = FALSE;
     }
 
     return retval;
@@ -648,14 +735,15 @@ hist_redoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf)
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
 
-    /* There is at least one redoable operation unless hcur is at EOB. */
-    if (mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1)
+    /* There is at least one redoable operation unless hcur is at or past the
+     * end of the data in the last record. */
+    if (mkr_pos(&a_hist->hcur) + HISTH_LEN < buf_len(&a_hist->h) + 1)
     {
-	retval = FALSE;
+	retval = TRUE;
     }
     else
     {
-	retval = TRUE;
+	retval = FALSE;
     }
 
     return retval;
@@ -1202,11 +1290,27 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
     free(pbeg);
     free(pmid);
 
-    /* hcur. */
+    /* hhead. */
     fprintf(stderr, "%s|\n", mid);
-    fprintf(stderr, "%s|-> hcur: %p\n", mid, &a_hist->hcur);
+    asprintf(&pbeg, "%s|-> hhead: ", mid);
+    asprintf(&pmid, "%s|          ", mid);
+    histh_p_dump(&a_hist->hhead, pbeg, pmid, NULL);
+    free(pbeg);
+    free(pmid);
+    
+    /* hfoot. */
+    fprintf(stderr, "%s|\n", mid);
+    asprintf(&pbeg, "%s|-> hfoot: ", mid);
+    asprintf(&pmid, "%s|          ", mid);
+    histh_p_dump(&a_hist->hfoot, pbeg, pmid, NULL);
+    free(pbeg);
+    free(pmid);
 
-    /* htmp. */
+    /* Markers. */
+    fprintf(stderr, "%s|\n", mid);
+    fprintf(stderr, "%s|-> hbeg: %p\n", mid, &a_hist->hbeg);
+    fprintf(stderr, "%s|-> hcur: %p\n", mid, &a_hist->hcur);
+    fprintf(stderr, "%s|-> hend: %p\n", mid, &a_hist->hend);
     fprintf(stderr, "%s|-> htmp: %p\n", mid, &a_hist->htmp);
 #endif
 
