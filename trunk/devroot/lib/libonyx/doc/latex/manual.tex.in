@@ -301,6 +301,22 @@ behavior and likely crashes.
 		Return a pointer to the \classname{nxo} corresponding to
 		\onyxop{envdict}{}.
 	\end{capilist}
+\label{libonyx_gcdict_get}
+\index{libonyx_gcdict_get@\cfunc{libonyx\_gcdict\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{libonyx\_\htmlref{gcdict}{sec:gcdict}\_get}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the \classname{nxo} corresponding to
+			\onyxop{gcdict}{}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \classname{nxo} corresponding to
+		\onyxop{gcdict}{}.
+	\end{capilist}
 \label{cw_opaque_alloc_t}
 \index{cw_opaque_alloc_t@\cfunc{cw\_opaque\_alloc\_t}{}}
 \citem{\cfunc[void *]{cw\_opaque\_alloc\_t}{void *a\_arg, size\_t a\_size,

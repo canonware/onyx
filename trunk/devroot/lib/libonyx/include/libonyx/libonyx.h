@@ -129,6 +129,9 @@ typedef unsigned int cw_bool_t;
  * of a hash table, which means that operations require linear searches. */
 #define CW_LIBONYX_DICT_SIZE 8
 
+/* Minimum size of envdict. */
+#define	CW_LIBONYX_ENVDICT_SIZE	128
+
 /* Default file buffer size. */
 #define CW_LIBONYX_FILE_BUFFER_SIZE 512
 
@@ -187,6 +190,9 @@ typedef unsigned int cw_bool_t;
 #define CW_LIBONYX_ISTACK_MINCOUNT CW_LIBONYX_ESTACK_MINCOUNT
 #define CW_LIBONYX_OSTACK_MINCOUNT 128
 #define CW_LIBONYX_DSTACK_MINCOUNT 8
+#ifdef CW_OOP
+#define CW_LIBONYX_CSTACK_MINCOUNT 8
+#endif
 #define CW_LIBONYX_TSTACK_MINCOUNT 64
 
 /* Initial size of threaddict. */
@@ -465,6 +471,7 @@ extern cw_nxo_t cw_g_argv;
 #ifdef CW_POSIX
 extern cw_nxo_t cw_g_envdict;
 #endif
+extern cw_nxo_t cw_g_gcdict;
 
 /* Top level libonyx function prototypes. */
 void
@@ -481,6 +488,9 @@ libonyx_argv_get(void);
 cw_nxo_t *
 libonyx_envdict_get(void);
 #endif
+
+cw_nxo_t *
+libonyx_gcdict_get(void);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_LIBONYX_C_))
@@ -497,6 +507,12 @@ libonyx_envdict_get(void)
     return &cw_g_envdict;
 }
 #endif
+
+CW_INLINE cw_nxo_t *
+libonyx_gcdict_get(void)
+{
+    return &cw_g_gcdict;
+}
 #endif /* (defined(CW_USE_INLINES) || defined(CW_LIBONYX_C_)) */
 
 #endif	/* CW_LIBONYX_H_ */

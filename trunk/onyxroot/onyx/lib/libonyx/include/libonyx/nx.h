@@ -32,7 +32,6 @@ struct cw_nx_s
     cw_nxo_t threadsdict;
     cw_nxo_t systemdict;
     cw_nxo_t globaldict;
-    cw_nxo_t gcdict;
 
     /* Files. */
     cw_nxo_t stdin_nxo;
@@ -84,9 +83,6 @@ nx_systemdict_get(cw_nx_t *a_nx);
 
 cw_nxo_t *
 nx_globaldict_get(cw_nx_t *a_nx);
-
-cw_nxo_t *
-nx_gcdict_get(cw_nx_t *a_nx);
 
 cw_nxo_t *
 nx_stdin_get(cw_nx_t *a_nx);
@@ -142,15 +138,6 @@ nx_globaldict_get(cw_nx_t *a_nx)
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
     return &a_nx->globaldict;
-}
-
-CW_INLINE cw_nxo_t *
-nx_gcdict_get(cw_nx_t *a_nx)
-{
-    cw_check_ptr(a_nx);
-    cw_dassert(a_nx->magic == CW_NX_MAGIC);
-
-    return &a_nx->gcdict;
 }
 
 CW_INLINE cw_nxo_t *

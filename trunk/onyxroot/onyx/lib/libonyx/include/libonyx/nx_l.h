@@ -66,20 +66,15 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 	    }
 	    case 3:
 	    {
-		retval = nxo_nxoe_get(&a_nx->gcdict);
+		retval = nxo_nxoe_get(&a_nx->stdin_nxo);
 		break;
 	    }
 	    case 4:
 	    {
-		retval = nxo_nxoe_get(&a_nx->stdin_nxo);
-		break;
-	    }
-	    case 5:
-	    {
 		retval = nxo_nxoe_get(&a_nx->stdout_nxo);
 		break;
 	    }
-	    case 6:
+	    case 5:
 	    {
 		retval = nxo_nxoe_get(&a_nx->stderr_nxo);
 		break;

@@ -37,8 +37,6 @@ static const struct cw_gcdict_entry gcdict_ops[] = {
     ENTRY(threshold)
 };
 
-/* This is a global dictionary, but it should never be written to except by the
- * GC thread, so don't bother locking it. */
 void
 gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue)
 {
@@ -47,7 +45,7 @@ gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue)
 #define	NEXTRA	0
 #define NENTRIES (sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-    nxo_dict_new(a_dict, FALSE, NENTRIES + NEXTRA);
+    nxo_dict_new(a_dict, TRUE, NENTRIES + NEXTRA);
 
     for (i = 0; i < NENTRIES; i++)
     {

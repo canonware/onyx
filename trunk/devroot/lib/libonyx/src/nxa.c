@@ -909,6 +909,8 @@ nxa_p_roots(cw_bool_t a_shutdown)
 #ifdef CW_POSIX
 	nxa_p_root_add(nxo_nxoe_get(libonyx_envdict_get()), &gray, &retval);
 #endif
+	/* Add gcdict to the root set. */
+	nxa_p_root_add(nxo_nxoe_get(libonyx_gcdict_get()), &gray, &retval);
     }
 
     return retval;

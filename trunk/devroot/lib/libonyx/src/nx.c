@@ -13,7 +13,6 @@
 #define	CW_NX_C_
 
 #include "../include/libonyx/libonyx.h"
-#include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
@@ -60,7 +59,6 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 
 	/* Initialize the internals such that if a collection happens before
 	 * we're done, reference iteration will work correctly. */
-	nxo_no_new(&retval->gcdict);
 	nxo_no_new(&retval->threadsdict);
 	nxo_no_new(&retval->systemdict);
 	nxo_no_new(&retval->globaldict);
@@ -84,10 +82,6 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 
 	/* Initialize threadsdict. */
 	nxo_dict_new(&retval->threadsdict, TRUE, CW_LIBONYX_THREADSDICT_HASH);
-
-	/* Initialize gcdict. */
-	gcdict_l_populate(&retval->gcdict, &retval->stdin_nxo,
-			  &retval->stdout_nxo);
 
 	/* Initialize systemdict.  This must happen after the other dict
 	 * initializations, since references to them are inserted into

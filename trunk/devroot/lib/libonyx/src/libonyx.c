@@ -18,6 +18,7 @@
 #ifdef CW_POSIX
 #include "../include/libonyx/envdict_l.h"
 #endif
+#include "../include/libonyx/gcdict_l.h"
 
 /* Prototypes for library-private functions that are only used in this file. */
 #ifdef CW_THREADS
@@ -48,6 +49,7 @@ cw_nxo_t cw_g_argv;
 #ifdef CW_POSIX
 cw_nxo_t cw_g_envdict;
 #endif
+cw_nxo_t cw_g_gcdict;
 
 void
 libonyx_init(int a_argc, char **a_argv, char **a_envp)
@@ -93,7 +95,14 @@ libonyx_init(int a_argc, char **a_argv, char **a_envp)
     }
 #endif
 
-    /* Turn the GC on, now that argv and envdict are initialized. */
+    /* Initialize gcdict. */
+    {
+	cw_nxo_t temp_a, temp_b; /* GC-unsafe, but GC is disabled. */
+
+	gcdict_l_populate(&cw_g_gcdict, &temp_a, &temp_b);
+    }
+
+    /* Turn the GC on, now that argv, envdict, and gcdict are initialized. */
     nxa_active_set(TRUE);
 }
 
