@@ -81,7 +81,7 @@
 	* lib/libonyx/include/libonyx/nx.h : Add nx_threadsdict_get().
 
 	* Change language syntax:
-	  + Radix integers are <base>@<value> instead of <base>@<value>.
+	  + Radix integers are <base>@<value> instead of <base>#<value>.
 	  + Comments start with #, not %.
 	  + Add special characters in strings:
 	    - `\0'  : Nul character (nul), equivalent to `\x00'.
