@@ -10,9 +10,22 @@
  *
  * <<< Description >>>
  *
- * Simple extensible (mostly FIFO) buffer class.  Although this may be
- * useful for other purposes, buf and bufel are designed to support
- * asynchronous buffering of I/O for the sock (socket) class.
+ * The buf, bufel, and bufc classes implement a buffer abstraction.  These
+ * classes are designed specifically to handle streaming and transparent
+ * extensible buffering of data for applications such as socket programs.  The
+ * main features include:
+ *
+ * - Dynamically extensible and contractible buffering.
+ * - Internal reference counting, which avoids copying between buf's, and allows
+ *   for compact usage of memory buffers.
+ * - 8, 32, and 64 bit read functions for arbitrary byte offsets (within the
+ *   valid data range) within buf's.
+ * - Easy ability to use with readv() and writev().
+ *
+ * The bufpool class provides a simple implementation of cached buffers of the
+ * same size, where the number of buffers to cache is dynamically settable.
+ * bufpool is useful where large numbers of bufel's, bufc's, and memory buffers
+ * are being allocated and deallocated.
  *
  ****************************************************************************/
 
@@ -797,15 +810,22 @@ bufel_set_bufc(cw_bufel_t * a_bufel, cw_bufc_t * a_bufc);
  *
  * <<< Input(s) >>>
  *
+ * a_bufc : Pointer to space for a bufc, or NULL.
  *
+ * a_dealloc_func : Pointer to a deallocation function for a_bufc, or NULL.
+ *                  Ignored if a_bufc == NULL.
+ *
+ * a_dealloc_arg : First argument to a_dealloc_func.
  *
  * <<< Output(s) >>>
  *
- *
+ * retval : Pointer to an initialized bufc.
  *
  * <<< Description >>>
  *
- *
+ * Constructor.  The return value should be used in a call to bufc_set_buffer(),
+ * then bufel_set_bufc().  bufc_delete() can be called at any time up until the
+ * call to bufel_set_bufc() to deallocate, but should not be called thereafter.
  *
  ****************************************************************************/
 #define bufc_new _CW_NS_LIBSTASH(bufc_new)
@@ -818,15 +838,16 @@ bufc_new(cw_bufc_t * a_bufc,
  *
  * <<< Input(s) >>>
  *
- *
+ * a_bufc : Pointer to a bufc.
  *
  * <<< Output(s) >>>
  *
- *
+ * None.
  *
  * <<< Description >>>
  *
- *
+ * Destructor.  Only call this if a_bufc was never used in a call to
+ * bufel_set_bufc().
  *
  ****************************************************************************/
 #define bufc_delete _CW_NS_LIBSTASH(bufc_delete)
@@ -837,15 +858,24 @@ bufc_delete(cw_bufc_t * a_bufc);
  *
  * <<< Input(s) >>>
  *
+ * a_bufc : Pointer to a bufc.
  *
+ * a_buffer : Pointer to a buffer.
+ *
+ * a_size : Size of *a_buffer.
+ *
+ * a_dealloc_func : Pointer to a deallocation function for a_buffer, or NULL.
+ *
+ * a_dealloc_arg : First argument to a_dealloc_func.
  *
  * <<< Output(s) >>>
  *
- *
+ * None.
  *
  * <<< Description >>>
  *
- *
+ * Set a_bufc's internal data buffer to a_buffer, with size a_size, and
+ * deallocation function a_dealloc_func(a_dealloc_arg, a_buffer).
  *
  ****************************************************************************/
 #define bufc_set_buffer _CW_NS_LIBSTASH(bufc_set_buffer)
