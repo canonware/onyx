@@ -85,6 +85,9 @@ BOOTSTRAP = ;
 /* Documentation. */
 #include-cooked [srcdir]/doc/Cookfile.inc
 
+/* Examples. */
+#include-cooked [srcdir]/examples/Cookfile.inc
+
 /* Tests. */
 #include-cooked [srcdir]/test/Cookfile.inc
 
@@ -104,7 +107,7 @@ BOOTSTRAP = ;
  * User targets.
  */
 
-all : libs mods bins tests docs
+all : libs mods bins examples tests docs
   set default
 ;
 
