@@ -2185,6 +2185,8 @@ ostack. \\
 \hline
 mark \dots & {\bf \htmlref{cleartomark}{systemdict:cleartomark}} & -- & Remove
 objects from ostack through topmost mark. \\
+& {\bf \htmlref{ostack}{systemdict:ostack}} & & \\
+\hline
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
@@ -2512,21 +2514,30 @@ file. \\
 file offset & {\bf \htmlref{seek}{systemdict:seek}} & -- & Move file position
 pointer. \\
 \hline
-& {\bf \htmlref{tell}{systemdict:tell}} & & \\
+file & {\bf \htmlref{tell}{systemdict:tell}} & offset & Get file position
+pointer offset. \\
 \hline
-& {\bf \htmlref{mkdir}{systemdict:mkdir}} & & \\
+path mode & {\bf \htmlref{mkdir}{systemdict:mkdir}} & -- & Create a
+directory. \\
 \hline
-& {\bf \htmlref{rename}{systemdict:rename}} & & \\
+old new & {\bf \htmlref{rename}{systemdict:rename}} & -- & Rename a file or
+directory. \\
 \hline
-& {\bf \htmlref{chmod}{systemdict:chmod}} & & \\
+file/filename mode & {\bf \htmlref{chmod}{systemdict:chmod}} & -- & Change file
+permissions. \\
 \hline
-& {\bf \htmlref{chown}{systemdict:chown}} & & \\
+file/filename uid gid & {\bf \htmlref{chown}{systemdict:chown}} & -- & Change
+file owner and group. \\
 \hline
-& {\bf \htmlref{link}{systemdict:link}} & & \\
+filename linkname & {\bf \htmlref{link}{systemdict:link}} & -- & Create a hard
+link. \\
 \hline
-& {\bf \htmlref{symlink}{systemdict:symlink}} & & \\
+filename linkname & {\bf \htmlref{symlink}{systemdict:symlink}} & -- & Create a
+symbolic link. \\
 \hline
-& {\bf \htmlref{unlink}{systemdict:unlink}} & & \\
+filename & {\bf \htmlref{unlink}{systemdict:unlink}} & -- & Unlink a file. \\
+\hline
+& {\bf \htmlref{rmdir}{systemdict:rmdir}} & & \\
 \hline
 & {\bf \htmlref{test}{systemdict:test}} & & \\
 \hline
@@ -3246,44 +3257,82 @@ onyx:0>
 	\end{description}
 \label{systemdict:chmod}
 \index{chmod@\onyxop{}{chmod}{}}
-\item[{\onyxop{--}{chmod}{--}}: ]
+\item[{\onyxop{file/filename mode}{chmod}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[filename: ]
+			A string that represents a filename.
+		\item[mode: ]
+			An integer that represents a Unix file mode.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/tdir' 8#755 mkdir 
+onyx:0> `/tmp/tdir' status /mode get 1 sprint
+16877
+onyx:0> `/tmp/tdir' `r' open 
+onyx:1> dup 8#555 chmod
+onyx:1> `/tmp/tdir' status /mode get 1 sprint
+16749
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:chown}
 \index{chown@\onyxop{}{chown}{}}
-\item[{\onyxop{--}{chown}{--}}: ]
+\item[{\onyxop{file/filename uid gid}{chown}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[file: ]
+			A file object.
+		\item[filename: ]
+			A string that represents a filename.
+		\item[uid: ]
+			An integer that represents a user ID.
+		\item[gid: ]
+			An integer that represents a group ID.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Change the owner and group of a file.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/tdir' 8#755 mkdir
+onyx:0> `/tmp/tdir' status 
+onyx:1> dup /uid get 1 sprint
+1001
+onyx:1> /gid get 1 sprint
+0
+onyx:0> `/tmp/tdir' 1001 1001 chown
+onyx:0> `/tmp/tdir' status
+onyx:1> dup /uid get 1 sprint
+1001
+onyx:1> /gid get 1 sprint
+1001
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:clear}
@@ -5034,23 +5083,40 @@ onyx:0>
 	\end{description}
 \label{systemdict:link}
 \index{link@\onyxop{}{link}{}}
-\item[{\onyxop{--}{link}{--}}: ]
+\item[{\onyxop{filename linkname}{link}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[filename: ]
+			A string that represents a filename.
+		\item[linkname: ]
+			A string that represents a filename.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Create a hard link from \oparg{linkname} to \oparg{filename}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup flushfile
+onyx:1> close
+onyx:0> `/tmp/foo' `/tmp/bar' link
+onyx:0> `/tmp/bar' `r' open
+onyx:1> readline
+onyx:2> pstack
+false
+`Hello'
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:load}
@@ -5195,23 +5261,34 @@ onyx:1>
 	\end{description}
 \label{systemdict:mkdir}
 \index{mkdir@\onyxop{}{mkdir}{}}
-\item[{\onyxop{--}{mkdir}{--}}: ]
+\item[{\onyxop{path mode}{mkdir}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[path: ]
+			A string object that represents a directory path.
+		\item[mode: ]
+			An integer that represents a Unix file mode.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Create a directory.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/tdir' 8#755 mkdir
+onyx:0> `/tmp/tdir' {1 sprint} dirforeach
+`.'
+`..'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mod}
@@ -5978,23 +6055,35 @@ onyx:0>
 	\end{description}
 \label{systemdict:rename}
 \index{rename@\onyxop{}{rename}{}}
-\item[{\onyxop{--}{rename}{--}}: ]
+\item[{\onyxop{old new}{rename}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[old: ]
+			A string object that represents a file path.
+		\item[new: ]
+			A string object that represents a file path.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
 		\end{description}
 	\item[Description: ]
+		Rename a file or directory from \oparg{old} to \oparg{new}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/tdir' 8#755 mkdir 
+onyx:0> `/tmp/tdir' `/tmp/ndir' rename
+onyx:0> `/tmp/ndir' {1 sprint} dirforeach
+`.'
+`..'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:repeat}
@@ -6944,23 +7033,41 @@ onyx:0>
 	\end{description}
 \label{systemdict:symlink}
 \index{symlink@\onyxop{}{symlink}{}}
-\item[{\onyxop{--}{symlink}{--}}: ]
+\item[{\onyxop{filename linkname}{symlink}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[filename: ]
+			A string that represents a filename.
+		\item[linkname: ]
+			A string that represents a filename.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Create a symbolic link from \oparg{linkname} to
+		\oparg{filename}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup flushfile
+onyx:1> close
+onyx:0> `/tmp/foo' `/tmp/bar' symlink
+onyx:0> `/tmp/bar' `r' open
+onyx:1> readline
+onyx:2> pstack
+false
+`Hello'
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:system}
@@ -7004,21 +7111,26 @@ onyx:0>
 	\end{description}
 \label{systemdict:tell}
 \index{tell@\onyxop{}{tell}{}}
-\item[{\onyxop{--}{tell}{--}}: ]
+\item[{\onyxop{file}{tell}{offset}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[fil: ]
+			A file object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[offset: ]
+			Offset of the file position pointer for \oparg{file}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the file position pointer offset for \oparg{file}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/tmp/foo' `w+' open
@@ -7451,23 +7563,41 @@ onyx:0>
 	\end{description}
 \label{systemdict:unlink}
 \index{unlink@\onyxop{}{unlink}{}}
-\item[{\onyxop{--}{unlink}{--}}: ]
+\item[{\onyxop{filename}{unlink}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[filename: ]
+			A string that represents a filename.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Unlink \oparg{filename}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `/tmp/foo' `w' open
+onyx:1> dup `Hello\n' write
+onyx:1> dup flushfile
+onyx:1> close
+onyx:0> `/tmp/foo' unlink
+onyx:0> `/tmp/foo' `r' open
+Error /invalidfileaccess
+ostack: (`/tmp/foo' `r')
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:      --open--
+1:      -file-
+2:      --start--
+onyx:3>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:unlock}
