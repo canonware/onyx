@@ -56,7 +56,6 @@ struct cw_sockb_s
 {
   cw_bool_t should_quit;
   cw_thd_t thread;
-  int poser_fd;
   int pipe_in;
   int pipe_out;
   cw_sem_t pipe_sem;

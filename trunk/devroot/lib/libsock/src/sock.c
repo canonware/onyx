@@ -173,28 +173,6 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
     goto RETURN;
   }
 
-  if (a_sock->sockfd >= FD_SETSIZE)
-  {
-    /* This is outside the acceptable range for sockb, so return an error. */
-    if (dbg_is_registered(cw_g_dbg, "sock_error"))
-    {
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Exceded maximum number of simultaneous connections ([i])\n",
-		FD_SETSIZE);
-    }
-    if (close(a_sock->sockfd))
-    {
-      if (dbg_is_registered(cw_g_dbg, "sock_error"))
-      {
-	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error in close(): [s]\n", strerror(errno));
-      }
-    }
-    a_sock->sockfd = -1;
-    retval = TRUE;
-    goto RETURN;
-  }
-
   if (sock_p_config_socket(a_sock))
   {
     a_sock->sockfd = -1;

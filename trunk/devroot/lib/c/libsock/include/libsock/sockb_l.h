@@ -141,24 +141,3 @@ sockb_l_in_space(cw_uint32_t a_sockfd);
  ****************************************************************************/
 cw_bool_t
 sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * None.
- *
- * <<< Output(s) >>>
- *
- * retval : File descriptor, or -1.
- *          -1 : No file descriptors available within the range that select()
- *               can use.
- *
- * <<< Description >>>
- *
- * Return a useless, but reserved file descriptor within the range that select()
- * can handle.  The caller is responsible for disposing of the file descriptor.
- *
- ****************************************************************************/
-int
-sockb_l_get_spare_fd(void);

@@ -1,3 +1,11 @@
+1999-08-25  Jason Evans  <jasone@canonware.com>
+
+	* src/socks.c (socks_listen): Don't specify -1 backlog to
+	listen(), since it doesn't do the right thing on Solaris.
+
+	* : Get rid of some more artifacts of the now non-existent
+	FD_SETSIZE limitation workarounds.
+
 1999-08-18  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c: Improve locking logic to avoid various potential

@@ -47,7 +47,6 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
 	   cw_uint32_t a_max_spare_bufcs)
 {
   cw_bool_t retval;
-  char * tmpfile_name, buf[L_tmpnam];
   struct cw_sockb_entry_s * arg;
   
   _cw_assert(a_bufc_size > 0);
@@ -93,36 +92,6 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
       goto RETURN;
     }
     bzero(g_sockb, sizeof(cw_sockb_t));
-
-    /* Open a temp file with poser_fd, such that the file will disappear as soon
-     * as the descripter goes away. */
-    tmpfile_name = tmpnam(buf);
-    if (tmpfile_name == NULL)
-    {
-      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		"Fatal error in tmpnam(): [s]\n", strerror(errno));
-      abort();
-    }
-
-    g_sockb->poser_fd = open(tmpfile_name,
-			     O_RDONLY | O_CREAT | O_TRUNC | O_EXCL,
-			     0);
-    if (g_sockb->poser_fd < 0)
-    {
-      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		"Fatal error in open(): [s]\n", strerror(errno));
-      abort();
-    }
-
-    if (unlink(tmpfile_name))
-    {
-      /* Not fatal, but make some noise. */
-      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
-      {
-	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in unlink(): [s]\n", strerror(errno));
-      }
-    }
 
     /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
      * program. */
@@ -262,15 +231,6 @@ sockb_shutdown(void)
 
   pezz_delete(&g_sockb->messages_pezz);
   mq_delete(&g_sockb->messages);
-
-  if (close(g_sockb->poser_fd))
-  {
-    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
-    {
-      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		"Error in close(): [s]\n", strerror(errno));
-    }
-  }
 
   /* Delete the gethostbyname() protection lock. */
   mtx_delete(&g_sockb->get_ip_addr_lock);
@@ -595,28 +555,6 @@ sockb_l_get_host_ip(char * a_host_str, cw_uint32_t * r_host_ip)
 	      *r_host_ip >> 24);
   }
 
-  return retval;
-}
-
-int
-sockb_l_get_spare_fd(void)
-{
-  int retval;
-  
-  _cw_check_ptr(g_sockb);
-
-  retval = dup(g_sockb->poser_fd);
-
-  if (retval < 0)
-  {
-    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
-    {
-      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		"Error in dup(): [s]\n", strerror(errno));
-    }
-    retval = -1;
-  }
-  
   return retval;
 }
 

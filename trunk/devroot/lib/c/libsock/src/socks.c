@@ -26,6 +26,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
+#include <limits.h>
 
 #include "libsock/sockb_l.h"
 
@@ -145,7 +146,17 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
   }
   
   /* Now listen.  -1 causes the OS to use the maximum backlog. */
-  listen(a_socks->sockfd, -1);
+  if (-1 == listen(a_socks->sockfd, INT_MAX))
+  {
+    if (dbg_is_registered(cw_g_dbg, "socks_error"))
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+                "Error in listen(): [s]\n", strerror(errno));
+    }
+    retval = TRUE;
+    goto RETURN;
+  }
+  
   a_socks->is_listening = TRUE;
   retval = FALSE;
 
@@ -179,32 +190,16 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
 	     &fd_read_set, NULL, NULL,
 	     a_timeout))
   {
-    int new_sockfd, spare_fd;
+    int sockfd;
     struct sockaddr_in client_addr;
     int sockaddr_struct_size = sizeof(struct sockaddr);
     cw_bool_t wrap_error;
     
-    /* Grab a spare file descriptor to make sure that sockb can actually handle
-     * this socket, even if the return value of socket() is >= FD_SETSIZE. */
-    spare_fd = sockb_l_get_spare_fd();
-    if (spare_fd < 0)
-    {
-      if (dbg_is_registered(cw_g_dbg, "socks_verbose"))
-      {
-	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Exceded maximum number of simultaneous connections "
-		  "([i])\n",
-		  FD_SETSIZE);
-      }
-      retval = NULL;
-      goto RETURN;
-    }
-
     /* There is someone who wants to connect. */
-    new_sockfd = accept(a_socks->sockfd,
-			(struct sockaddr *) &client_addr,
-			&sockaddr_struct_size);
-    if (new_sockfd < 0)
+    sockfd = accept(a_socks->sockfd,
+		    (struct sockaddr *) &client_addr,
+		    &sockaddr_struct_size);
+    if (sockfd < 0)
     {
       if (dbg_is_registered(cw_g_dbg, "socks_error"))
       {
@@ -215,42 +210,10 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
       goto RETURN;
     }
 
-    if (new_sockfd >= FD_SETSIZE)
-    {
-      /* This is outside the useable range for sockb, so transfer the socket
-       * over to spare_fd. */
-      if (dup2(new_sockfd, spare_fd))
-      {
-	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		  "Fatal error in dup2(): [s]\n", strerror(errno));
-	abort();
-      }
-      if (close(new_sockfd))
-      {
-	if (dbg_is_registered(cw_g_dbg, "socks_error"))
-	{
-	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in close(): [s]\n", strerror(errno));
-	}
-      }
-    }
-    else
-    {
-      /* Hmm, we didn't need spare_fd after all.  Release it. */
-      if (close(spare_fd))
-      {
-	if (dbg_is_registered(cw_g_dbg, "socks_error"))
-	{
-	  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in close(): [s]\n", strerror(errno));
-	}
-      }
-    }
-  
     /* Wrap the socket descriptor inside a sock. */
     retval = r_sock;
 
-    wrap_error = sock_wrap(retval, new_sockfd);
+    wrap_error = sock_wrap(retval, sockfd);
     if (wrap_error == TRUE)
     {
       retval = NULL;
