@@ -9,8 +9,10 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`modpane.nxm' `modpane_init' mrequire
-
-`modpane/modpane_defs.nx' require
-`modpane/terminfo.nx' require
-`modpane/widget.nx' require
+/widget <
+	/type		/widget
+	/parent		null
+	/children	null
+	/pane		null
+	/handlers	null
+> def
