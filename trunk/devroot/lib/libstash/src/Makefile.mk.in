@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 26 $
-# Last modified: $Date: 1998-04-12 04:09:42 -0700 (Sun, 12 Apr 1998) $
+# Current revision: $Revision: 42 $
+# Last modified: $Date: 1998-04-26 20:07:12 -0700 (Sun, 26 Apr 1998) $
 #
 # Description: Sample Makefile stub for a subdirectory.
 #              
@@ -41,7 +41,7 @@
 CURRDIR := lib/common/src
 
 $(CURRDIR)_INCS :=# List of .h headers.
-$(CURRDIR)_SRCS :=dbg.c glob.c list.c log.c mem.c oh.c thread.c
+$(CURRDIR)_SRCS :=dbg.c glob.c list.c log.c mem.c oh.c res.c thread.c
 $(CURRDIR)_LEXERS :=#res_lexer.l# List of .l sources.
 $(CURRDIR)_PARSERS :=#res_parser.y# List of .y sources.
 

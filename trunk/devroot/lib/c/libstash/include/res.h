@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 8 $
- * Last modified: $Date: 1998-02-08 22:16:40 -0800 (Sun, 08 Feb 1998) $
+ * Current revision: $Revision: 42 $
+ * Last modified: $Date: 1998-04-26 20:07:12 -0700 (Sun, 26 Apr 1998) $
  *
  * Description: 
  *              
@@ -43,25 +43,29 @@
 #ifndef _RESOURCE_H_
 #  define _RESOURCE_H_
 
-typedef struct
-{
-  int garbage;
-} res_t;
+/* Pseudo-opaque type. */
+typedef struct cw_res_s cw_res_t;
 
-typedef struct
+struct cw_res_s
 {
-  char valid_long;
-  int long_val;
-  char * res_string;
-} res_val_t;
+  cw_bool_t is_malloced;
+};
 
-res_t * res_create_context();
-void res_destroy_context(res_t * arg_res_context);
-int res_merge_file(res_t * arg_res_context, char * arg_filename);
-int res_merge_list(res_t * arg_res_context, ...);
-void res_dump(res_t * arg_res_context);
-res_val_t res_query(res_t * arg_res_context, char * arg_query_string);
-long res_val_get_long(res_val_t * arg_res_val);
-char * res_val_get_str(res_val_t * arg_res_val);
+/*
+ * Namespace definitions.
+ */
+#define res_new _CW_NS_CMN(res_new)
+#define res_delete _CW_NS_CMN(res_delete)
+#define res_merge_file _CW_NS_CMN(res_merge_file)
+#define res_merge_list _CW_NS_CMN(res_merge_list)
+#define res_get_res_val _CW_NS_CMN(res_get_res_val)
+#define res_dump _CW_NS_CMN(res_dump)
+
+cw_res_t * res_new(cw_res_t * a_res_o);
+void res_delete(cw_res_t * a_res_o);
+cw_bool_t res_merge_file(cw_res_t * a_res_o, char * a_filename);
+cw_bool_t res_merge_list(cw_res_t * a_res_o, ...);
+char * res_get_res_val(cw_res_t * a_res_o, char * a_res_name);
+void res_dump(cw_res_t * a_res_o);
 
 #endif /* _RESOURCE_H_ */
