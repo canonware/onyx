@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 28 $
- * $Date: 1998-04-13 01:22:55 -0700 (Mon, 13 Apr 1998) $
+ * $Revision: 31 $
+ * $Date: 1998-04-16 22:55:53 -0700 (Thu, 16 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -463,8 +463,8 @@ rwl_new(cw_rwl_t * arg_rwl_obj)
   cnd_new(&retval->read_wait);
   cnd_new(&retval->write_wait);
 
-  retval->readers = 0;
-  retval->writers = 0;
+  retval->num_readers = 0;
+  retval->num_writers = 0;
   retval->read_waiters = 0;
   retval->write_waiters = 0;
   
@@ -493,13 +493,13 @@ rwl_rlock(cw_rwl_t * arg_rwl_obj)
 
   mtx_lock(&arg_rwl_obj->lock);
 
-  while (arg_rwl_obj->writers > 0)
+  while (arg_rwl_obj->num_writers > 0)
   {
     arg_rwl_obj->read_waiters++;
     cnd_wait(&arg_rwl_obj->read_wait, &arg_rwl_obj->lock);
     arg_rwl_obj->read_waiters--;
   }
-  arg_rwl_obj->readers++;
+  arg_rwl_obj->num_readers++;
   
   mtx_unlock(&arg_rwl_obj->lock);
 }
@@ -511,9 +511,9 @@ rwl_runlock(cw_rwl_t * arg_rwl_obj)
 
   mtx_lock(&arg_rwl_obj->lock);
 
-  arg_rwl_obj->readers--;
+  arg_rwl_obj->num_readers--;
 
-  if ((arg_rwl_obj->readers == 0) && (arg_rwl_obj->write_waiters > 0))
+  if ((arg_rwl_obj->num_readers == 0) && (arg_rwl_obj->write_waiters > 0))
   {
     cnd_signal(&arg_rwl_obj->write_wait);
   }
@@ -528,13 +528,13 @@ rwl_wlock(cw_rwl_t * arg_rwl_obj)
 
   mtx_lock(&arg_rwl_obj->lock);
 
-  while (arg_rwl_obj->readers > 0)
+  while (arg_rwl_obj->num_readers > 0)
   {
     arg_rwl_obj->write_waiters++;
     cnd_wait(&arg_rwl_obj->write_wait, &arg_rwl_obj->lock);
     arg_rwl_obj->write_waiters--;
   }
-  arg_rwl_obj->writers++;
+  arg_rwl_obj->num_writers++;
   
   mtx_unlock(&arg_rwl_obj->lock);
 }
@@ -546,7 +546,7 @@ rwl_wunlock(cw_rwl_t * arg_rwl_obj)
 
   mtx_lock(&arg_rwl_obj->lock);
 
-  arg_rwl_obj->writers--;
+  arg_rwl_obj->num_writers--;
 
   if (arg_rwl_obj->write_waiters > 0)
   {

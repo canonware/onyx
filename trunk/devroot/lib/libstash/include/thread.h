@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 28 $
- * $Date: 1998-04-13 01:22:55 -0700 (Mon, 13 Apr 1998) $
+ * $Revision: 31 $
+ * $Date: 1998-04-16 22:55:53 -0700 (Thu, 16 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -92,8 +92,8 @@ struct cw_rwl_s
   cw_mtx_t lock;
   cw_cnd_t read_wait;
   cw_cnd_t write_wait;
-  cw_uint32_t readers;
-  cw_uint32_t writers;
+  cw_uint32_t num_readers;
+  cw_uint32_t num_writers;
   cw_uint32_t read_waiters;
   cw_uint32_t write_waiters;
 };
@@ -146,17 +146,20 @@ struct cw_tsd_s
 /*
  * Function prototypes.
  */
+/* thd : Thread. */
 cw_thd_t * thd_new(cw_thd_t * arg_thd_obj, void * (*arg_start_func)(void *),
 		   void * arg_arg);
 void thd_delete(cw_thd_t * arg_thd_obj);
 void * thd_join(cw_thd_t * arg_thd_obj);
 
+/* mtx : Mutex. */
 cw_mtx_t * mtx_new(cw_mtx_t * arg_mtx_obj);
 void mtx_delete(cw_mtx_t * arg_mtx_obj);
 void mtx_lock(cw_mtx_t * arg_mtx_obj);
 cw_bool_t mtx_trylock(cw_mtx_t * arg_mtx_obj);
 void mtx_unlock(cw_mtx_t * arg_mtx_obj);
 
+/* cnd : Condition variable. */
 cw_cnd_t * cnd_new(cw_cnd_t * arg_cnd_obj);
 void cnd_delete(cw_cnd_t * arg_cnd_obj);
 void cnd_signal(cw_cnd_t * arg_cnd_obj);
@@ -165,6 +168,7 @@ cw_bool_t cnd_timedwait(cw_cnd_t * arg_cnd_obj, cw_mtx_t * arg_mtx_obj,
 			struct timespec * arg_time);
 void cnd_wait(cw_cnd_t * arg_cnd_obj, cw_mtx_t * arg_mtx_obj);
 
+/* sem : Semaphore. */
 cw_sem_t * sem_new(cw_sem_t * arg_sem_obj, cw_uint32_t arg_count);
 void sem_delete(cw_sem_t * arg_sem_obj);
 void sem_post(cw_sem_t * arg_sem_obj);
@@ -172,6 +176,8 @@ void sem_wait(cw_sem_t * arg_sem_obj);
 cw_bool_t sem_trywait(cw_sem_t * arg_sem_obj);
 cw_uint32_t sem_getvalue(cw_sem_t * arg_sem_obj);
 
+/* rwl : Read/write lock.  Multiple readers allowed, but write lock
+ * requires exclusive access. */
 cw_rwl_t * rwl_new(cw_rwl_t * arg_rwl_obj);
 void rwl_delete(cw_rwl_t * arg_rwl_obj);
 void rwl_rlock(cw_rwl_t * arg_rwl_obj);
@@ -179,6 +185,7 @@ void rwl_runlock(cw_rwl_t * arg_rwl_obj);
 void rwl_wlock(cw_rwl_t * arg_rwl_obj);
 void rwl_wunlock(cw_rwl_t * arg_rwl_obj);
 
+/* tsd : Thread-specific data. */
 cw_tsd_t * tsd_new(cw_tsd_t * arg_tsd_obj, void (*arg_func)(void *));
 void tsd_delete(cw_tsd_t * arg_tsd_obj);
 void * tsd_get(cw_tsd_t * arg_tsd_obj);
