@@ -397,14 +397,15 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
     size = buf_get_size(&a_sock->in_buf);
     if (0 < size)
     {
-      retval = size;
       if ((a_max_read == 0) || (buf_get_size(&a_sock->in_buf) < a_max_read))
       {
 	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+	retval = size;
       }
       else
       {
 	buf_split(a_spare, &a_sock->in_buf, a_max_read);
+	retval = a_max_read;
       }
 
       mtx_unlock(&a_sock->in_lock);
@@ -457,14 +458,15 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read)
     size = buf_get_size(&a_sock->in_buf);
     if (0 < size)
     {
-      retval = size;
       if ((a_max_read == 0) || (buf_get_size(&a_sock->in_buf) < a_max_read))
       {
 	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+	retval = size;
       }
       else
       {
 	buf_split(a_spare, &a_sock->in_buf, a_max_read);
+	retval = a_max_read;
       }
 
       mtx_unlock(&a_sock->in_lock);
