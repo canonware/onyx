@@ -115,80 +115,6 @@ buf_get_size(cw_buf_t * a_buf_o)
 
 /****************************************************************************
  *
- * Returns a buf that has had all of the valid data that was in a_buf_o
- * moved to it.  If a_spare is not NULL, it is used instead of malloc()ing
- * a new buf.
- *
- * XXX What is this function useful for?
- *
- ****************************************************************************/
-cw_buf_t *
-buf_transfer_contents(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
-{
-  cw_buf_t * retval;
-
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Enter buf_transfer_contents()");
-  }
-  _cw_check_ptr(a_buf_o);
-  _cw_check_ptr(a_spare);
-  if (a_buf_o->is_threadsafe == TRUE)
-  {
-    mtx_lock(&a_buf_o->lock);
-  }
-
-  /* If we're using a_spare, assume that no one else is going to muck
-   * around in a_spare while we're working here. */
-
-  if (a_spare != NULL)
-  {
-    cw_uint64_t i, count;
-
-    retval = a_spare;
-
-    /* Delete the contents of retval's list. */
-    for (i = 0, count = list_count(&retval->bufels);
-	 i < count;
-	 i++)
-    {
-      bufel_delete(list_hpop(&retval->bufels));
-    }
-  }
-  else
-  {
-    retval = buf_new(NULL, a_buf_o->is_threadsafe);
-  }
-  
-  /* Move bufels from a_buf_o to retval. */
-  {
-    cw_uint64_t i, count;
-
-    for (i = 0, count = list_count(&a_buf_o->bufels);
-	 i < count;
-	 i++)
-    {
-      list_tpush(&retval->bufels, list_hpop(&a_buf_o->bufels));
-    }
-  }
-
-  /* Copy over size and zero it for a_buf_o. */
-  retval->size = a_buf_o->size;
-  a_buf_o->size = 0;
-  
-  if (a_buf_o->is_threadsafe == TRUE)
-  {
-    mtx_unlock(&a_buf_o->lock);
-  }
-  if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
-  {
-    _cw_marker("Exit buf_transfer_contents()");
-  }
-  return retval;
-}
-
-/****************************************************************************
- *
  * Concatenates two bufs.  After this function call, a_other is empty, but
  * it still exists.
  *
@@ -293,6 +219,7 @@ buf_append_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
   }
 
   list_tpush(&a_buf_o->bufels, a_bufel_o);
+  a_buf_o->size += (a_bufel_o->end_offset - a_bufel_o->beg_offset);
   
   if (a_buf_o->is_threadsafe == TRUE)
   {
@@ -517,7 +444,7 @@ bufel_set_end_offset(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   }
   _cw_check_ptr(a_bufel_o);
   _cw_assert(a_offset >= a_bufel_o->beg_offset);
-  _cw_assert(a_offset < a_bufel_o->buf_size);
+  _cw_assert(a_offset <= a_bufel_o->buf_size);
 
   a_bufel_o->end_offset = a_offset;
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
@@ -543,12 +470,9 @@ bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   }
   _cw_check_ptr(a_bufel_o);
   _cw_assert(a_offset < a_bufel_o->buf_size);
-  /* XXX This should be a compile-time check. */
-  _cw_assert(sizeof(u_long) == sizeof(cw_uint32_t));
 
-  /* XXX Does this make endianness assumptions? */
   t = a_bufel_o->buf[a_offset >> 2];
-  t = htonl(t);
+  t = ntohl(t);
   t >>= (8 * (a_offset & 0x3));
   t &= 0xff;
   retval = t;

@@ -29,12 +29,13 @@ main()
 
   buf_a = buf_new(NULL, FALSE);
   _cw_check_ptr(buf_a);
-  buf_delete(buf_a);
 
   _cw_assert(&buf_b == buf_new(&buf_b, TRUE));
 
   _cw_assert(buf_get_size(&buf_b) == 0);
 
+  bufel_new(&bufel_b);
+  
   bufel_a = bufel_new(NULL);
   _cw_check_ptr(bufel_a);
 
@@ -111,6 +112,36 @@ main()
 		 i + 4, bufel_get_uint32(bufel_a, i + 4));
     }
   }
+
+  _cw_marker("");
+  log_printf(g_log_o, "buf_b size == %u\n", buf_get_size(&buf_b));
+  buf_append_bufel(&buf_b, bufel_a);
+  _cw_marker("");
+  log_printf(g_log_o, "buf_b size == %u\n", buf_get_size(&buf_b));
+
+  _cw_assert(FALSE == bufel_set_size(&bufel_b, 100));
+  bufel_set_end_offset(&bufel_b, 100);
+  bufel_set_beg_offset(&bufel_b, 50);
+  
+  buf_append_bufel(&buf_b, &bufel_b);
+  _cw_marker("");
+  log_printf(g_log_o, "buf_a size == %u\n", buf_get_size(buf_a));
+  log_printf(g_log_o, "buf_b size == %u\n", buf_get_size(&buf_b));
+
+  buf_append_bufel(buf_a, buf_rm_head_bufel(&buf_b));
+  
+  _cw_marker("");
+  log_printf(g_log_o, "buf_a size == %u\n", buf_get_size(buf_a));
+  log_printf(g_log_o, "buf_b size == %u\n", buf_get_size(&buf_b));
+
+  buf_append_buf(buf_a, &buf_b);
+  
+  _cw_marker("");
+  log_printf(g_log_o, "buf_a size == %u\n", buf_get_size(buf_a));
+  log_printf(g_log_o, "buf_b size == %u\n", buf_get_size(&buf_b));
+  
+  buf_delete(buf_a);
+  buf_delete(&buf_b);
 
   glob_delete();
   return 0;

@@ -41,7 +41,6 @@ struct cw_bufel_s
 #define buf_new _CW_NS_ANY(buf_new)
 #define buf_delete _CW_NS_ANY(buf_delete)
 #define buf_get_size _CW_NS_ANY(buf_get_size)
-#define buf_transfer_contents _CW_NS_ANY(buf_transfer_contents)
 #define buf_append_buf _CW_NS_ANY(buf_append_buf)
 #define buf_rm_head_bufel _CW_NS_ANY(buf_rm_head_bufel)
 #define buf_append_bufel _CW_NS_ANY(buf_append_bufel)
@@ -64,7 +63,6 @@ void buf_delete(cw_buf_t * a_buf_o);
 
 cw_uint32_t buf_get_size(cw_buf_t * a_buf_o);
 
-cw_buf_t * buf_transfer_contents(cw_buf_t * a_buf_o, cw_buf_t * a_spare);
 void buf_append_buf(cw_buf_t * a_a, cw_buf_t * a_b);
 
 cw_bufel_t * buf_rm_head_bufel(cw_buf_t * a_buf_o);
