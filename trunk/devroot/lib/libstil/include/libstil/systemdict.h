@@ -141,6 +141,7 @@ void	systemdict_sub(cw_stilt_t *a_stilt);
 void	systemdict_sym_eq(cw_stilt_t *a_stilt);
 void	systemdict_sym_eq_eq(cw_stilt_t *a_stilt);
 void	systemdict_sym_gt_gt(cw_stilt_t *a_stilt);
+void	systemdict_sym_rb(cw_stilt_t *a_stilt);
 void	systemdict_timedwait(cw_stilt_t *a_stilt);
 void	systemdict_token(cw_stilt_t *a_stilt);
 void	systemdict_true(cw_stilt_t *a_stilt);

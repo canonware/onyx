@@ -154,7 +154,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	{">>",	systemdict_sym_gt_gt},
 	{"[",	systemdict_mark},
 	{"<<",	systemdict_mark},
-	{"]",	systemdict_array},
+	{"]",	systemdict_sym_rb},
 	_SYSTEMDICT_ENTRY(timedwait),
 	_SYSTEMDICT_ENTRY(token),
 	_SYSTEMDICT_ENTRY(true),
@@ -264,40 +264,19 @@ void
 systemdict_array(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
-	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe.*/
-	cw_uint32_t	nelements, i;
+	cw_stilo_t	*stilo;
+	cw_sint64_t	len;
 
 	stack = stilt_data_stack_get(a_stilt);
-	/* Find the mark. */
-	for (i = 0, stilo = stils_get(stack);
-	     stilo != NULL && stilo_type_get(stilo) != STILOT_MARK;
-	     i++, stilo = stils_down_get(stack, stilo));
+	
+	stilo = stils_get(stack);
+	if (stilo_type_get(stilo) != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
+	len = stilo_integer_get(stilo);
+	if (len < 0)
+		xep_throw(_CW_XEPV_RANGECHECK);
 
-	_cw_assert(stilo != NULL);
-
-	/*
-	 * i is the index of the mark, and stilo points to the mark.  Set
-	 * nelements accordingly.  When we pop the stilo's off the stack, we'll
-	 * have to pop (nelements + 1) stilo's.
-	 */
-	nelements = i;
-
-	stilo_array_new(&t_stilo, a_stilt, nelements);
-	arr = stilo_array_get(&t_stilo);
-
-	/*
-	 * Traverse down the stack, moving stilo's to the array.
-	 */
-	for (i = nelements, stilo = stils_get(stack); i > 0;
-	    i--, stilo = stils_down_get(stack, stilo))
-		stilo_move(&arr[i - 1], stilo);
-
-	/* Pop the stilo's off the stack now. */
-	stils_npop(stack, nelements + 1);
-
-	/* Push the array onto the stack. */
-	stilo = stils_push(stack);
-	stilo_move(stilo, &t_stilo);
+	stilo_array_new(stilo, a_stilt, len);
 }
 
 void
@@ -359,7 +338,7 @@ systemdict_cleartomark(cw_stilt_t *a_stilt)
 	if (stilo == NULL)
 		xep_throw(_CW_XEPV_UNMATCHEDMARK);
 
-	stils_npop(stack, i);
+	stils_npop(stack, i + 1);
 }
 
 void
@@ -474,7 +453,22 @@ systemdict_countexecstack(cw_stilt_t *a_stilt)
 void
 systemdict_counttomark(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_uint32_t	i;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	for (i = 0, stilo = stils_get(stack); stilo != NULL; i++, stilo =
+	     stils_down_get(stack, stilo)) {
+		if (stilo_type_get(stilo) == STILOT_MARK)
+			break;
+	}
+	if (stilo == NULL)
+		xep_throw(_CW_XEPV_UNMATCHEDMARK);
+
+	stilo = stils_push(stack);
+	stilo_integer_new(stilo, i);
 }
 
 void
@@ -891,7 +885,74 @@ systemdict_ge(cw_stilt_t *a_stilt)
 void
 systemdict_get(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*what, *how;
+
+	stack = stilt_data_stack_get(a_stilt);
+	how = stils_get(stack);
+	what = stils_down_get(stack, how);
+	if (what == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+
+	switch (stilo_type_get(what)) {
+	case STILOT_ARRAY: {
+		cw_sint64_t	index;
+		cw_stilo_t	*arr;
+		cw_uint32_t	len;
+
+		if (stilo_type_get(how) != STILOT_INTEGER)
+			xep_throw(_CW_XEPV_TYPECHECK);
+		index = stilo_integer_get(how);
+		len = stilo_array_len_get(what);
+		if (index < 0 || index >= len)
+			xep_throw(_CW_XEPV_RANGECHECK);
+		arr = stilo_array_get(what);
+
+		stilo_dup(how, &arr[index]);
+		stils_roll(stack, 2, 1);
+		stils_pop(stack);
+		break;
+	}
+	case STILOT_DICT: {
+		cw_stilo_t	*val;
+
+		val = stils_push(stack);
+		if (stilo_dict_lookup(what, a_stilt, how, val)) {
+			stils_pop(stack);
+			xep_throw(_CW_XEPV_UNDEFINED);
+		}
+		stils_roll(stack, 3, 1);
+		stils_npop(stack, 2);
+		break;
+	}
+	case STILOT_HOOK:
+		_cw_error("XXX Not implemented");
+		break;
+	case STILOT_STRING: {
+		cw_sint64_t	index;
+		cw_uint8_t	*str;
+		cw_uint32_t	len;
+
+		if (stilo_type_get(how) != STILOT_INTEGER)
+			xep_throw(_CW_XEPV_TYPECHECK);
+		index = stilo_integer_get(how);
+		len = stilo_string_len_get(what);
+		if (index < 0 || index >= len)
+			xep_throw(_CW_XEPV_RANGECHECK);
+		str = stilo_string_get(what);
+
+		/*
+		 * Make sure to keep the string on the stack until after we're
+		 * done with it.
+		 */
+		stilo_integer_set(how, (cw_sint64_t)str[index]);
+		stils_roll(stack, 2, 1);
+		stils_pop(stack);
+		break;
+	}
+	default:
+		xep_throw(_CW_XEPV_TYPECHECK);
+	}
 }
 
 void
@@ -1641,6 +1702,47 @@ void
 systemdict_sym_gt_gt(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
+}
+
+/* ] */
+void
+systemdict_sym_rb(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe.*/
+	cw_uint32_t	nelements, i;
+
+	stack = stilt_data_stack_get(a_stilt);
+	/* Find the mark. */
+	for (i = 0, stilo = stils_get(stack);
+	     stilo != NULL && stilo_type_get(stilo) != STILOT_MARK;
+	     i++, stilo = stils_down_get(stack, stilo));
+
+	_cw_assert(stilo != NULL);
+
+	/*
+	 * i is the index of the mark, and stilo points to the mark.  Set
+	 * nelements accordingly.  When we pop the stilo's off the stack, we'll
+	 * have to pop (nelements + 1) stilo's.
+	 */
+	nelements = i;
+
+	stilo_array_new(&t_stilo, a_stilt, nelements);
+	arr = stilo_array_get(&t_stilo);
+
+	/*
+	 * Traverse down the stack, moving stilo's to the array.
+	 */
+	for (i = nelements, stilo = stils_get(stack); i > 0;
+	    i--, stilo = stils_down_get(stack, stilo))
+		stilo_move(&arr[i - 1], stilo);
+
+	/* Pop the stilo's off the stack now. */
+	stils_npop(stack, nelements + 1);
+
+	/* Push the array onto the stack. */
+	stilo = stils_push(stack);
+	stilo_move(stilo, &t_stilo);
 }
 
 void
