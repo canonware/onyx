@@ -938,6 +938,12 @@ right. \\
 {\tt *?} & Non-greedy match 0 or more times: {\tt \{0,\}}. \\
 \hline
 {\tt +?} & Non-greedy match 1 or more times: {\tt \{1,\}}. \\
+\hline
+{\tt ?+} & Possessive match 0 or 1 times: {\tt \{0,1\}}. \\
+\hline
+{\tt *+} & Possessive match 0 or more times: {\tt \{0,\}}. \\
+\hline
+{\tt ++} & Possessive match 1 or more times: {\tt \{1,\}}. \\
 \hline \hline
 \multicolumn{2}{|l|}{Anchoring} \\
 \hline \hline
@@ -960,32 +966,36 @@ input). \\
 \hline \hline
 \multicolumn{2}{|l|}{Character classes} \\
 \hline \hline
-{\tt {\bs}N} & Newline: {\tt (?{\bs}r{\bs}n{\pipe}{\bs}n)}. \\
+{\tt {\bs}N} & Newline: {\tt (?{\bs}n{\pipe}{\bs}r{\pipe}{\bs}r{\bs}n)}. \\
 \hline
-{\tt .} & Any character but {\tt {\bs}N}. \\
+{\tt .} & Any character but {\tt {\bs}N}: {\tt
+{\lb}{\carat}{\bs}r{\bs}n{\rb}}. \\
 \hline
-{\tt @} & Any character. \\
-\hline
-{\tt {\lb}:alpha:{\rb}} & Alphabetic character. \\
+{\tt @} & Any character: {\tt {\lb}{\bs}x00-{\bs}xff{\rb}} \\
 \hline
 {\tt {\lb}:alnum:{\rb}} & Alphanumeric character. \\
 \hline
+{\tt {\lb}:alpha:{\rb}} & Alphabetic character. \\
+\hline
 {\tt {\lb}:ascii:{\rb}} & ASCII character: {\tt {\lb}{\bs}x00-{\bs}x7f{\rb}}. \\
+\hline
+{\tt {\lb}:blank:{\rb}} & Space and tab: {\tt {\lb} {\bs}t{\rb}}. \\
 \hline
 {\tt {\lb}:cntrl:{\rb}} & Control character: {\tt
 {\lb}{\bs}x01-{\bs}x1a{\rb}}. \\
 \hline
 {\tt {\lb}:digit:{\rb}} & Digit character. \\
 \hline
-{\tt {\lb}:graph:{\rb}} & Alphanumeric or punctuation character. \\
+{\tt {\lb}:graph:{\rb}} & Visible character. \\
 \hline
 {\tt {\lb}:lower:{\rb}} & Lowercase character. \\
 \hline
-{\tt {\lb}:print:{\rb}} & Alphanumeric or punctuation character. \\
+{\tt {\lb}:print:{\rb}} & Visible character or space: {\tt
+(?{\lb}:graph:{\rb}{\pipe} )}. \\
 \hline
 {\tt {\lb}:punct:{\rb}} & Punctuation character. \\
 \hline
-{\tt {\lb}:space:{\rb}} & Whitespace. \\
+{\tt {\lb}:space:{\rb}} & Whitespace: {\tt {\lb} {\bs}t{\bs}r{\bs}n{\rb}}. \\
 \hline
 {\tt {\lb}:upper:{\rb}} & Uppercase character. \\
 \hline
@@ -1009,17 +1019,6 @@ membership. \\
 {\tt {\bs}d} & Digit: {\tt {\lb}:digit:{\rb}} \\
 \hline
 {\tt {\bs}D} & Non-digit: {\tt {\lb}:{\carat}digit:{\rb}} \\
-\hline
-{\tt {\bs}pP} & Character with property {\tt P} (ex: {\tt {\bs}pw}). \\
-\hline
-{\tt {\bs}p\{P\}} & Character with property {\tt P} (ex: {\tt
-{\bs}\{xdigit\}}). \\
-\hline
-{\tt {\bs}Pp} & Character without property {\tt p}. \\
-\hline
-{\tt {\bs}P\{p\}} & Character without property {\tt p}. \\
-\hline
-{\tt {\bs}C} & Single 8 bit byte: {\tt {\lb}{\bs}x00-{\bs}x7f{\rb}}. \\
 \end{longtable}
 
 The following sequences have special meaning within strings that specify
