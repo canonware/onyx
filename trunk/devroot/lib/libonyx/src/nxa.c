@@ -706,42 +706,64 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 	    switch (nxoe_l_type_get(gray))
 	    {
 		case NXOT_ARRAY:
+		{
 		    nxoe = nxoe_l_array_ref_iter(gray, reset);
 		    break;
+		}
 #ifdef CW_THREADS
 		case NXOT_CONDITION:
+		{
 		    nxoe = nxoe_l_condition_ref_iter(gray, reset);
 		    break;
+		}
 #endif
 		case NXOT_DICT:
+		{
 		    nxoe = nxoe_l_dict_ref_iter(gray, reset);
 		    break;
+		}
 		case NXOT_FILE:
+		{
 		    nxoe = nxoe_l_file_ref_iter(gray, reset);
 		    break;
+		}
 		case NXOT_HOOK:
+		{
 		    nxoe = nxoe_l_hook_ref_iter(gray, reset);
 		    break;
+		}
 #ifdef CW_THREADS
 		case NXOT_MUTEX:
+		{
 		    nxoe = nxoe_l_mutex_ref_iter(gray, reset);
 		    break;
+		}
 #endif
 		case NXOT_NAME:
+		{
 		    nxoe = nxoe_l_name_ref_iter(gray, reset);
 		    break;
+		}
 		case NXOT_STACK:
+		{
 		    nxoe = nxoe_l_stack_ref_iter(gray, reset);
 		    break;
+		}
 		case NXOT_STRING:
+		{
 		    nxoe = nxoe_l_string_ref_iter(gray, reset);
 		    break;
+		}
 		case NXOT_THREAD:
+		{
 		    nxoe = nxoe_l_thread_ref_iter(gray, reset);
 		    break;
+		}
 		default:
+		{
 		    cw_not_reached();
 		    break;
+		}
 	    }
 
 	    if (nxoe == NULL)
@@ -810,42 +832,64 @@ nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 	    switch (nxoe_l_type_get(nxoe))
 	    {
 		case NXOT_ARRAY:
+		{
 		    notyet = nxoe_l_array_delete(nxoe, a_nxa, i);
 		    break;
+		}
 #ifdef CW_THREADS
 		case NXOT_CONDITION:
+		{
 		    notyet = nxoe_l_condition_delete(nxoe, a_nxa, i);
 		    break;
+		}
 #endif
 		case NXOT_DICT:
+		{
 		    notyet = nxoe_l_dict_delete(nxoe, a_nxa, i);
 		    break;
+		}
 		case NXOT_FILE:
+		{
 		    notyet = nxoe_l_file_delete(nxoe, a_nxa, i);
 		    break;
+		}
 		case NXOT_HOOK:
+		{
 		    notyet = nxoe_l_hook_delete(nxoe, a_nxa, i);
 		    break;
+		}
 #ifdef CW_THREADS
 		case NXOT_MUTEX:
+		{
 		    notyet = nxoe_l_mutex_delete(nxoe, a_nxa, i);
 		    break;
+		}
 #endif
 		case NXOT_NAME:
+		{
 		    notyet = nxoe_l_name_delete(nxoe, a_nxa, i);
 		    break;
+		}
 		case NXOT_STACK:
+		{
 		    notyet = nxoe_l_stack_delete(nxoe, a_nxa, i);
 		    break;
+		}
 		case NXOT_STRING:
+		{
 		    notyet = nxoe_l_string_delete(nxoe, a_nxa, i);
 		    break;
+		}
 		case NXOT_THREAD:
+		{
 		    notyet = nxoe_l_thread_delete(nxoe, a_nxa, i);
 		    break;
+		}
 		default:
+		{
 		    cw_not_reached();
 		    break;
+		}
 	    }
 
 	    if (notyet)
