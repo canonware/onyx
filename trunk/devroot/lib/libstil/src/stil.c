@@ -47,9 +47,9 @@
 #define	_CW_STIL_STDIN_BUFFER_SIZE	512
 #define	_CW_STIL_STDOUT_BUFFER_SIZE	512
 
-cw_stil_t *
-stil_new(cw_stil_t *a_stil, cw_sint32_t (*a_read_f)(void *a_read_arg,
-    cw_uint32_t a_len, cw_uint8_t *r_str), void *a_read_arg)
+cw_stil_t
+*stil_new(cw_stil_t *a_stil, cw_stil_read_t *a_stdin, cw_stil_write_t *a_stdout,
+    cw_stil_write_t *a_stderr, void *a_arg)
 {
 	cw_stil_t		*retval;
 	cw_stilt_t		stilt;
@@ -99,24 +99,34 @@ stil_new(cw_stil_t *a_stil, cw_sint32_t (*a_read_f)(void *a_read_arg,
 
 		/* Initialize stdin. */
 		stilo_file_new(&retval->stdin_stilo, &stilt);
-		if (a_read_f == NULL) {
+		if (a_stdin == NULL) {
 			stilo_file_fd_wrap(&retval->stdin_stilo, 0);
 			stilo_file_buffer_size_set(&retval->stdin_stilo,
 			    _CW_STIL_STDIN_BUFFER_SIZE);
 		} else {
-			stilo_file_interactive(&retval->stdin_stilo, a_read_f,
-			    a_read_arg);
+			stilo_file_interactive(&retval->stdin_stilo, a_stdin,
+			    NULL, a_arg);
 		}
 
 		/* Initialize stdout. */
 		stilo_file_new(&retval->stdout_stilo, &stilt);
-		stilo_file_fd_wrap(&retval->stdout_stilo, 1);
-		stilo_file_buffer_size_set(&retval->stdout_stilo,
-		    _CW_STIL_STDOUT_BUFFER_SIZE);
+		if (a_stdout == NULL) {
+			stilo_file_fd_wrap(&retval->stdout_stilo, 1);
+			stilo_file_buffer_size_set(&retval->stdout_stilo,
+			    _CW_STIL_STDOUT_BUFFER_SIZE);
+		} else {
+			stilo_file_interactive(&retval->stdout_stilo, NULL,
+			    a_stdout, a_arg);
+		}
 
 		/* Initialize stderr. */
 		stilo_file_new(&retval->stderr_stilo, &stilt);
-		stilo_file_fd_wrap(&retval->stderr_stilo, 2);
+		if (a_stderr == NULL) {
+			stilo_file_fd_wrap(&retval->stderr_stilo, 2);
+		} else {
+			stilo_file_interactive(&retval->stderr_stilo, NULL,
+			    a_stderr, a_arg);
+		}
 
 		stilt_delete(&stilt);
 	}

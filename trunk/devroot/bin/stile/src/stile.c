@@ -21,11 +21,12 @@ main(int argc, char **argv)
 
 	libstash_init();
 
-	stil_new(&stil, NULL, NULL);
+	stil_new(&stil, NULL, NULL, NULL, NULL);
 	stilt_new(&stilt, &stil);
 	stilts_new(&stilts, &stilt);
 
-	stilt_start(&stilt, FALSE);
+/*  	stilt_executive(&stilt); */
+	stilt_start(&stilt);
 
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);

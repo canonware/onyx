@@ -21,20 +21,25 @@
 #define	_BUF_SIZE	4096
 #define	_PROMPT_STRLEN	  80
 
+struct stil_arg_s {
+	cw_uint8_t	*buffer;
+	cw_uint32_t	buffer_len;
+	cw_uint32_t	buffer_offset;
+};
+
 /*
- * Globals.
+ * Globals.  These are global due to the libedit API not providing a way to pass
+ * them to the prompt function.
  */
 cw_stilt_t	stilt;
 cw_stilts_t	stilts;
-cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 EditLine	*el;
 History		*hist;
-cw_uint8_t	*buffer = NULL;
-cw_uint32_t	buffer_len = 0;
-cw_uint32_t	buffer_offset = 0;
+cw_uint8_t	prompt_str[_PROMPT_STRLEN];
 
 char		*prompt(EditLine *a_el);
-cw_sint32_t	cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str);
+cw_sint32_t	cl_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt,
+    cw_uint32_t a_len, cw_uint8_t *r_str);
 const char	*basename(const char *a_str);
 
 int
@@ -50,11 +55,12 @@ main(int argc, char **argv)
 	 * the interpreter do its thing.
 	 */
 	if (isatty(0)) {
-		cw_uint8_t	code[] =
+		cw_uint8_t		code[] =
 		    "product print `, version ' print version print \".\n\""
 		    " print flush";
+		struct stil_arg_s	arg = {NULL, 0, 0};
 
-		stil_new(&stil, cl_read, NULL);
+		stil_new(&stil, cl_read, NULL, NULL, (void *)&arg);
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts, &stilt);
 
@@ -75,21 +81,21 @@ main(int argc, char **argv)
 		el_set(el, EL_SIGNAL, 1);
 
 		/* Run the interpreter such that it will not exit on errors. */
-		stilt_start(&stilt, TRUE);
+		stilt_start(&stilt);
 
 		/* Clean up the command editor. */
 		el_end(el);
 		history_end(hist);
 
-		if (buffer != NULL)
-			_cw_free(buffer);
+		if (arg.buffer != NULL)
+			_cw_free(arg.buffer);
 	} else {
-		stil_new(&stil, NULL, NULL);
+		stil_new(&stil, NULL, NULL, NULL, NULL);
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts, &stilt);
 
 		/* Run the interpreter non-interactively. */
-		stilt_start(&stilt, FALSE);
+		stilt_start(&stilt);
 	}
 
 	stilts_delete(&stilts, &stilt);
@@ -104,7 +110,7 @@ prompt(EditLine *a_el)
 {
 	if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
 	    STILTTS_START)) {
-		cw_uint8_t	code[] = "prompt";
+		cw_uint8_t	code[] = "promptstring";
 		cw_uint8_t	*pstr;
 		cw_uint32_t	plen, maxlen;
 		cw_stilo_t	*stilo;
@@ -116,6 +122,8 @@ prompt(EditLine *a_el)
 
 		/* Get the actual prompt string. */
 		stilo = stils_get(stack, &stilt);
+		if (stilo_type_get(stilo) != STILOT_STRING)
+			stilt_error(&stilt, STILTE_TYPECHECK);
 		pstr = stilo_string_get(stilo);
 		plen = stilo_string_len_get(stilo);
 
@@ -143,16 +151,18 @@ prompt(EditLine *a_el)
 }
 
 cw_sint32_t
-cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str)
+cl_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt, cw_uint32_t a_len,
+    cw_uint8_t *r_str)
 {
 	cw_sint32_t		retval;
 	const char		*str;
 	int			count = 0;
 	static cw_bool_t	continuation = FALSE;
+	struct stil_arg_s	*arg = (struct stil_arg_s *)a_arg;
 
 	_cw_assert(a_len > 0);
 
-	if (buffer_offset == 0) {
+	if (arg->buffer_offset == 0) {
 		if ((str = el_gets(el, &count)) == NULL) {
 			retval = 0;
 			goto RETURN;
@@ -162,8 +172,8 @@ cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str)
 		/*
 		 * Update the command line history.
 		 */
-		if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
-		    STILTTS_START)) {
+		if ((stilt_deferred(a_stilt) == FALSE) && (stilt_state(a_stilt)
+		    == STILTTS_START)) {
 			const HistEvent	*hevent;
 
 			/*
@@ -197,21 +207,21 @@ cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str)
 			memcpy(r_str, str, a_len);
 			count -= a_len;
 			str += a_len;
-			if (count > buffer_len) {
+			if (count > arg->buffer_len) {
 				/*
 				 * The buffer isn't big enough.  Expand it so
 				 * that it's just large enough.
 				 */
-				if (buffer == NULL)
-					buffer = (cw_uint8_t
+				if (arg->buffer == NULL)
+					arg->buffer = (cw_uint8_t
 					    *)_cw_malloc(count);
 				else
-					buffer = (cw_uint8_t
-					    *)_cw_realloc(buffer, count);
-				buffer_len = count;
+					arg->buffer = (cw_uint8_t
+					    *)_cw_realloc(arg->buffer, count);
+				arg->buffer_len = count;
 			}
-			memcpy(buffer, str, count);
-			buffer_offset = count;
+			memcpy(arg->buffer, str, count);
+			arg->buffer_offset = count;
 
 			retval = a_len;
 		} else {
@@ -224,17 +234,18 @@ cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str)
 		 * We still have buffered data from the last time we were
 		 * called.  Return as much of it as possible.
 		 */
-		if (buffer_offset > a_len) {
+		if (arg->buffer_offset > a_len) {
 			/* There are more data than we can return. */
-			memcpy(r_str, buffer, a_len);
-			memmove(r_str, &r_str[a_len], buffer_offset - a_len);
-			buffer_offset -= a_len;
+			memcpy(r_str, arg->buffer, a_len);
+			memmove(r_str, &r_str[a_len], arg->buffer_offset -
+			    a_len);
+			arg->buffer_offset -= a_len;
 			retval = a_len;
 		} else {
 			/* Return all the data. */
-			memcpy(r_str, buffer, buffer_offset);
-			retval = buffer_offset;
-			buffer_offset = 0;
+			memcpy(r_str, arg->buffer, arg->buffer_offset);
+			retval = arg->buffer_offset;
+			arg->buffer_offset = 0;
 		}
 	}
 

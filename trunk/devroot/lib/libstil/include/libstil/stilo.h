@@ -26,6 +26,11 @@ typedef struct cw_stilt_s cw_stilt_t;
 typedef struct cw_stilsc_s cw_stilsc_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
 
+typedef cw_sint32_t cw_stil_read_t (void *a_arg, cw_stilo_t *a_file, cw_stilt_t
+    *a_stilt, cw_uint32_t a_len, cw_uint8_t *r_str);
+typedef cw_bool_t cw_stil_write_t (void *a_arg, cw_stilo_t *a_file, cw_stilt_t
+    *a_stilt, const cw_uint8_t *a_str, cw_uint32_t a_len);
+
 /* Defined here to resolve circular dependencies. */
 typedef void cw_op_t(cw_stilt_t *);
 
@@ -214,9 +219,8 @@ cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
  */
 void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
-void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_sint32_t
-    (*a_read_f)(void *a_read_arg, cw_uint32_t a_len, cw_uint8_t *r_str), void
-    *a_read_arg);
+void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_stil_read_t
+    *a_read, cw_stil_write_t *a_write, void *a_arg);
 void		stilo_file_open(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_uint8_t *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags,
     cw_uint32_t a_flen);
@@ -231,7 +235,8 @@ void		stilo_file_output_n(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_size, const char *a_format, ...);
 void		stilo_file_truncate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_length);
-cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
+cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo, cw_stilt_t
+    *a_stilt);
 void		stilo_file_position_set(cw_stilo_t *a_stilo, cw_stilt_t
     *a_stilt, cw_sint64_t a_position);
 cw_uint32_t	stilo_file_buffer_size_get(cw_stilo_t *a_stilo);
@@ -242,7 +247,7 @@ void		stilo_file_buffer_flush(cw_stilo_t *a_stilo, cw_stilt_t
     *a_stilt);
 void		stilo_file_buffer_reset(cw_stilo_t *a_stilo);
 cw_bool_t	stilo_file_status(cw_stilo_t *a_stilo);
-cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
+cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
 /*
  * hook.

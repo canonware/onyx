@@ -45,8 +45,8 @@ struct cw_stil_s {
 };
 
 /* stil. */
-cw_stil_t	*stil_new(cw_stil_t *a_stil, cw_sint32_t (*a_read_f)(void
-    *a_read_arg, cw_uint32_t a_len, cw_uint8_t *r_str), void *a_read_arg);
+cw_stil_t	*stil_new(cw_stil_t *a_stil, cw_stil_read_t *a_stdin,
+    cw_stil_write_t *a_stdout, cw_stil_write_t *a_stderr, void *a_arg);
 void		stil_delete(cw_stil_t *a_stil);
 
 #define	stil_stilag_get(a_stil) (&(a_stil)->stilag)

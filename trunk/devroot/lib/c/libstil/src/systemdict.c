@@ -83,6 +83,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(exec),
 	_SYSTEMDICT_ENTRY(execstack),
 	_SYSTEMDICT_ENTRY(executeonly),
+	_SYSTEMDICT_ENTRY(executive),
 	_SYSTEMDICT_ENTRY(exit),
 	_SYSTEMDICT_ENTRY(exp),
 	_SYSTEMDICT_ENTRY(false),
@@ -130,6 +131,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(print),
 	_SYSTEMDICT_ENTRY(product),
 	_SYSTEMDICT_ENTRY(prompt),
+	_SYSTEMDICT_ENTRY(promptstring),
 	_SYSTEMDICT_ENTRY(pstack),
 	_SYSTEMDICT_ENTRY(put),
 	_SYSTEMDICT_ENTRY(putinterval),
@@ -198,7 +200,7 @@ void
 systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 {
 	cw_uint32_t	i;
-	cw_stilo_t	name, operator;	/* XXX GC-unsafe. */
+	cw_stilo_t	name, operator;
 #define NENTRIES							\
 	((sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry)))
 
@@ -974,6 +976,49 @@ systemdict_executeonly(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_executive(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*ostack, *estack, *tstack;
+	cw_stilo_t	*estilo, *tstilo;
+	cw_uint32_t	edepth;
+
+	ostack = stilt_ostack_get(a_stilt);
+	estack = stilt_estack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	/* Create a procedure that we can execute again and again. */
+	soft_operator("{//stdin 128 //string //readstring //cvx //exec}");
+	tstilo = stils_push(tstack, a_stilt);
+	stilo_dup(tstilo, stils_get(ostack, a_stilt));
+	stils_pop(ostack, a_stilt);
+
+	/*
+	 * Cache the depth of the execution stack so that we can clean up later.
+	 */
+	edepth = stils_count(estack);
+
+	xep_begin();
+	xep_try {
+		estilo = stils_push(estack, a_stilt);
+		stilo_dup(estilo, tstilo);
+
+		stilt_loop(a_stilt);
+	}
+	xep_catch(_CW_STILX_QUIT) {
+		/*
+		 * Pop objects off the exec stack, up to and including estilo.
+		 */
+		stils_npop(estack, a_stilt, stils_count(estack) - edepth);
+
+		xep_handled();
+	}
+	/* XXX Set up exception handling. */
+	xep_end();
+
+	stils_pop(tstack, a_stilt);
+}
+
+void
 systemdict_exit(cw_stilt_t *a_stilt)
 {
 	xep_throw(_CW_STILX_EXIT);
@@ -1058,7 +1103,7 @@ systemdict_fileposition(cw_stilt_t *a_stilt)
 	if (stilo_type_get(file) != STILOT_FILE)
 		stilt_error(a_stilt, STILTE_TYPECHECK);
 
-	position = stilo_file_position_get(file);
+	position = stilo_file_position_get(file, a_stilt);
 	stilo_integer_new(file, position);
 }
 
@@ -1101,38 +1146,38 @@ systemdict_flushfile(cw_stilt_t *a_stilt)
 void
 systemdict_for(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*ostack, *estack;
-	cw_stilo_t	*exec, *stilo, *tstilo;
-	cw_sint64_t	i, inc, limit;
+	cw_stils_t	*ostack, *estack, *tstack;
+	cw_stilo_t	*exec, *ostilo, *estilo, *tstilo;
+	cw_sint64_t	i, inc, limit, edepth;
 
 	ostack = stilt_ostack_get(a_stilt);
 	estack = stilt_estack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
 
 	exec = stils_get(ostack, a_stilt);
 
-	stilo = stils_down_get(ostack, a_stilt, exec);
-	if (stilo_type_get(stilo) != STILOT_INTEGER)
+	ostilo = stils_down_get(ostack, a_stilt, exec);
+	if (stilo_type_get(ostilo) != STILOT_INTEGER)
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-	limit = stilo_integer_get(stilo);
+	limit = stilo_integer_get(ostilo);
 
-	stilo = stils_down_get(ostack, a_stilt, stilo);
-	if (stilo_type_get(stilo) != STILOT_INTEGER)
+	ostilo = stils_down_get(ostack, a_stilt, ostilo);
+	if (stilo_type_get(ostilo) != STILOT_INTEGER)
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-	inc = stilo_integer_get(stilo);
+	inc = stilo_integer_get(ostilo);
 
-	stilo = stils_down_get(ostack, a_stilt, stilo);
-	if (stilo_type_get(stilo) != STILOT_INTEGER)
+	ostilo = stils_down_get(ostack, a_stilt, ostilo);
+	if (stilo_type_get(ostilo) != STILOT_INTEGER)
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-	i = stilo_integer_get(stilo);
+	i = stilo_integer_get(ostilo);
 
-	/*
-	 * Use the execution stack for temporary storage of the stilo to be
-	 * executed, in order to be GC-safe.
-	 */
-	tstilo = stils_push(estack, a_stilt);
+	/* Move the object to be executed to tstack. */
+	tstilo = stils_push(tstack, a_stilt);
 	stilo_dup(tstilo, exec);
-
 	stils_npop(ostack, a_stilt, 4);
+
+	/* Record estack's depth so that we can clean up estack if necessary. */
+	edepth = stils_count(estack);
 
 	/*
 	 * Catch an exit exception, if thrown, but do not continue executing the
@@ -1146,15 +1191,15 @@ systemdict_for(cw_stilt_t *a_stilt)
 				 * Dup the object to execute onto the execution
 				 * stack.
 				 */
-				stilo = stils_push(estack, a_stilt);
-				stilo_dup(stilo, tstilo);
+				estilo = stils_push(estack, a_stilt);
+				stilo_dup(estilo, tstilo);
 
 				/*
 				 * Push the control variable onto the data
 				 * stack.
 				 */
-				stilo = stils_push(ostack, a_stilt);
-				stilo_integer_new(stilo, i);
+				ostilo = stils_push(ostack, a_stilt);
+				stilo_integer_new(ostilo, i);
 
 				stilt_loop(a_stilt);
 			}
@@ -1164,15 +1209,15 @@ systemdict_for(cw_stilt_t *a_stilt)
 				 * Dup the object to execute onto the execution
 				 * stack.
 				 */
-				stilo = stils_push(estack, a_stilt);
-				stilo_dup(stilo, tstilo);
+				estilo = stils_push(estack, a_stilt);
+				stilo_dup(estilo, tstilo);
 
 				/*
 				 * Push the control variable onto the data
 				 * stack.
 				 */
-				stilo = stils_push(ostack, a_stilt);
-				stilo_integer_new(stilo, i);
+				ostilo = stils_push(ostack, a_stilt);
+				stilo_integer_new(ostilo, i);
 
 				stilt_loop(a_stilt);
 			}
@@ -1182,12 +1227,12 @@ systemdict_for(cw_stilt_t *a_stilt)
 		xep_handled();
 
 		/* Clean up whatever mess was left on the execution stack. */
-		while (stils_get(estack, a_stilt) != tstilo)
+		for (i = stils_count(estack); i > edepth; i--)
 			stils_pop(estack, a_stilt);
 	}
 	xep_end();
 
-	stils_pop(estack, a_stilt);
+	stils_pop(tstack, a_stilt);
 }
 
 void
@@ -1589,21 +1634,18 @@ systemdict_lock(cw_stilt_t *a_stilt)
 void
 systemdict_loop(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*ostack, *estack;
+	cw_stils_t	*ostack, *estack, *tstack;
 	cw_stilo_t	*exec, *stilo, *tstilo;
 
 	ostack = stilt_ostack_get(a_stilt);
 	estack = stilt_estack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
 
 	exec = stils_get(ostack, a_stilt);
 
-	/*
-	 * Use the execution stack for temporary storage of the stilo to be
-	 * executed, in order to be GC-safe.
-	 */
-	tstilo = stils_push(estack, a_stilt);
+	/* Move the object to be executed to tstack. */
+	tstilo = stils_push(tstack, a_stilt);
 	stilo_dup(tstilo, exec);
-
 	stils_pop(ostack, a_stilt);
 
 	/*
@@ -1622,12 +1664,13 @@ systemdict_loop(cw_stilt_t *a_stilt)
 		xep_handled();
 
 		/* Clean up whatever mess was left on the execution stack. */
-		while (stils_get(estack, a_stilt) != tstilo)
+		while (stils_get(estack, a_stilt) != stilo)
 			stils_pop(estack, a_stilt);
 	}
 	xep_end();
 
 	stils_pop(estack, a_stilt);
+	stils_pop(tstack, a_stilt);
 }
 
 void
@@ -1785,6 +1828,12 @@ systemdict_product(cw_stilt_t *a_stilt)
 
 void
 systemdict_prompt(cw_stilt_t *a_stilt)
+{
+	soft_operator("promptstring print flush");
+}
+
+void
+systemdict_promptstring(cw_stilt_t *a_stilt)
 {
 	soft_operator("`s> '");
 }
@@ -2249,15 +2298,12 @@ systemdict_start(cw_stilt_t *a_stilt)
 		stilt_loop(a_stilt);
 	}
 	xep_catch(_CW_STILX_QUIT) {
-		cw_stils_t	*estack;
 		cw_stilo_t	*stilo;
 		cw_uint32_t	i, depth;
 
 		/*
 		 * Pop objects off the exec stack, up to and including file.
 		 */
-		estack = stilt_estack_get(a_stilt);
-
 		i = 0;
 		depth = stils_count(estack);
 		if (depth > 0) {
