@@ -58,7 +58,7 @@ void		stil_delete(cw_stil_t *a_stil);
 #define	stil_name_hash_get(a_stil) (&(a_stil)->name_hash)
 
 #define	stil_systemdict_get(a_stil) (&(a_stil)->systemdict)
-#define	stil_globaldict_get(a_stil) (&(a_stil)->systemdict)
+#define	stil_globaldict_get(a_stil) (&(a_stil)->globaldict)
 
 #define	stil_stdin_get(a_stil) (&(a_stil)->stdin_stilo)
 #define	stil_stdout_get(a_stil) (&(a_stil)->stdout_stilo)
