@@ -101,6 +101,4 @@ SQRL_SET_MAKEFILE
 
 dnl Process the following files.
 AC_OUTPUT(Makefile.bsd \
-Makefile.gnu
-test/pmerge \
-test/pstub)
+Makefile.gnu)

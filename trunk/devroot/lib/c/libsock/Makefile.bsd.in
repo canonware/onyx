@@ -267,12 +267,10 @@ clean : FORCE
 	rm -f src/*.[do]_*
 	rm -f bin/*.[do]
 	rm -f lib/lib*
-	rm -f test/*.out test/*.diff test/*.pl
-	rm -f test/*.[do]
-	rm -f test/*.diff
-	rm -f $(BTESTS)
-	rm -f $(BINS)
 
+#	rm -f test/*.out test/*.diff test/*.pl
+#	rm -f test/*.[do]
+#	rm -f test/*.diff
 #	rm -f $(CTESTS) $(PTESTS) $(BTESTS) $(BINS)
 
 distclean : clean
@@ -281,8 +279,6 @@ distclean : clean
 	rm -f config.cache config.log config.status
 	rm -f include/libsock/libsock_defs.h
 	rm -f TAGS
-	rm -f $(PMERGE)
-	rm -f $(PSTUB)
 
 etags : $(INCS) $(P_INCS) $(SRCS)
 	@ETAGS@ $(INCS) $(P_INCS) $(SRCS)
