@@ -31,6 +31,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "active",
     "add",
+    "adn",
     "and",
     "argv",
     "array",
@@ -41,6 +42,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "atime",
 #endif
+    "aup",
     "bdup",
     "begin",
     "bind",
@@ -51,7 +53,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "booleantype",
     "bpop",
-    "bpush",
 #ifdef CW_THREADS
     "broadcast",
 #endif
@@ -260,7 +261,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "nametype",
     "nbpop",
-    "nbpush",
     "ndn",
     "ndup",
     "ne",
@@ -272,7 +272,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #endif
     "not",
     "npop",
-    "npush",
 #ifdef CW_POSIX
     "nsleep",
 #endif
@@ -319,7 +318,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "print",
     "product",
     "promptstring",
-    "push",
     "put",
     "putinterval",
 #ifdef CW_POSIX
@@ -349,9 +347,12 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "rmdir",
 #endif
     "roll",
+    "rot",
 #ifdef CW_REAL
     "round",
 #endif
+    "sadn",
+    "saup",
     "sbdup",
     "sbpop",
     "sbpush",
@@ -414,12 +415,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "size",
 #endif
     "snbpop",
-    "snbpush",
     "sndn",
     "sndup",
     "snip",
     "snpop",
-    "snpush",
     "snup",
 #ifdef CW_POSIX
     "socket",
@@ -437,6 +436,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "srand",
 #endif
     "sroll",
+    "srot",
     "stack",
     "stacktype",
     "stackunderflow",

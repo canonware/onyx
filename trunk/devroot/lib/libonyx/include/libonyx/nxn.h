@@ -30,6 +30,7 @@ typedef enum
 #endif
     NXN_active,
     NXN_add,
+    NXN_adn,
     NXN_and,
     NXN_argv,
     NXN_array,
@@ -40,6 +41,7 @@ typedef enum
 #ifdef CW_POSIX
     NXN_atime,
 #endif
+    NXN_aup,
     NXN_bdup,
     NXN_begin,
     NXN_bind,
@@ -50,7 +52,6 @@ typedef enum
 #endif
     NXN_booleantype,
     NXN_bpop,
-    NXN_bpush,
 #ifdef CW_THREADS
     NXN_broadcast,
 #endif
@@ -259,7 +260,6 @@ typedef enum
 #endif
     NXN_nametype,
     NXN_nbpop,
-    NXN_nbpush,
     NXN_ndn,
     NXN_ndup,
     NXN_ne,
@@ -271,7 +271,6 @@ typedef enum
 #endif
     NXN_not,
     NXN_npop,
-    NXN_npush,
 #ifdef CW_POSIX
     NXN_nsleep,
 #endif
@@ -318,7 +317,6 @@ typedef enum
     NXN_print,
     NXN_product,
     NXN_promptstring,
-    NXN_push,
     NXN_put,
     NXN_putinterval,
 #ifdef CW_POSIX
@@ -348,9 +346,12 @@ typedef enum
     NXN_rmdir,
 #endif
     NXN_roll,
+    NXN_rot,
 #ifdef CW_REAL
     NXN_round,
 #endif
+    NXN_sadn,
+    NXN_saup,
     NXN_sbdup,
     NXN_sbpop,
     NXN_sbpush,
@@ -413,12 +414,10 @@ typedef enum
     NXN_size,
 #endif
     NXN_snbpop,
-    NXN_snbpush,
     NXN_sndn,
     NXN_sndup,
     NXN_snip,
     NXN_snpop,
-    NXN_snpush,
     NXN_snup,
 #ifdef CW_POSIX
     NXN_socket,
@@ -436,6 +435,7 @@ typedef enum
     NXN_srand,
 #endif
     NXN_sroll,
+    NXN_srot,
     NXN_stack,
     NXN_stacktype,
     NXN_stackunderflow,
