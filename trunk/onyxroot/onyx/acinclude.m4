@@ -11,14 +11,40 @@ fi
 enable_threads="1"
 )
 if test "x$enable_threads" = "x1" ; then
-  AC_CHECK_HEADERS(pthread.h, , enable_threads="0")
+  dnl Look for Mach threads.
+  have_mthreads="1"
+  AC_CHECK_HEADERS(mach/task.h, , have_mthreads="0")
+  AC_CHECK_FUNCS(mach_thread_self, , have_mthreads="0")
+  if test "x$have_mthreads" = "x1" ; then
+    AC_DEFINE(_CW_MTHREADS)
+  fi
 
+  dnl Look for Solaris threads.
+  have_sthreads="1"
+  AC_CHECK_HEADERS(thread.h, , have_sthreads="0")
+  AC_CHECK_LIB(thread, thr_suspend, , have_sthreads="0")
+  AC_CHECK_LIB(thread, thr_continue, , have_sthreads="0")
+  if test "x$have_sthreads" = "x1" ; then
+    LIBS="$LIBS -lthread"
+    AC_DEFINE(_CW_STHREADS)
+  fi
+
+  dnl Look for pthreads.
+  AC_CHECK_HEADERS(pthread.h, , enable_threads="0")
   AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
     AC_CHECK_LIB(c_r, pthread_create, \
       LIBS="$LIBS -pthread", enable_threads="0"))
-
   if test "x$enable_threads" = "x1" ; then
     AC_DEFINE(_CW_THREADS)
+    AC_DEFINE(_CW_PTHREADS)
+  fi
+
+  dnl Look for FreeBSD's non-portable suspend/resume API (libc_r).
+  have_fthreads="1"
+  AC_CHECK_FUNCS(pthread_suspend_np, , have_fthreads="0")
+  AC_CHECK_FUNCS(pthread_resume_np, , have_fthreads="0")
+  if test "x$have_fthreads" = "x1" ; then
+    AC_DEFINE(_CW_FTHREADS)
   fi
 fi
 AC_SUBST(enable_threads)

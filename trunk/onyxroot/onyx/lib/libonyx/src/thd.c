@@ -18,7 +18,7 @@
 #include <pthread_np.h>
 #endif
 
-#ifdef _CW_OS_SOLARIS
+#ifdef _CW_STHREADS
 #include <thread.h>
 #endif
 
@@ -30,7 +30,12 @@ struct cw_thd_s {
 #ifdef _CW_DBG
 	cw_uint32_t	magic;
 #endif
+#ifdef _CW_PTHREADS
 	pthread_t	thread;
+#endif
+#ifdef _CW_MTHREADS
+	thread_t	mach_thread;
+#endif
 	void		*(*start_func)(void *);
 	void		*start_arg;
 	cw_bool_t	suspendible:1;
@@ -48,8 +53,10 @@ struct cw_thd_s {
 static cw_bool_t cw_g_thd_initialized = FALSE;
 #endif
 
+#ifdef _CW_PTHREADS
 /* Thread attribute object used for all thread creations. */
 static pthread_attr_t cw_g_thd_attr;
+#endif
 
 /* Special thd structure for initial thread, needed for critical sections. */
 static cw_thd_t	cw_g_thd;
@@ -66,7 +73,7 @@ static cw_thd_t *cw_g_sr_self;
 #endif
 
 /* For thd_self(). */
-cw_tsd_t	cw_g_thd_self_key;
+static cw_tsd_t	cw_g_thd_self_key;
 
 static void	thd_p_delete(cw_thd_t *a_thd);
 static void	*thd_p_start_func(void *a_arg);
@@ -103,7 +110,9 @@ static void	thd_p_sr_handle(int a_signal);
 void
 thd_l_init(void)
 {
+#ifdef _CW_PTHREADS
 	size_t			stacksize;
+#endif
 
 #ifdef _CW_THD_GENERIC_SR
 	int			error;
@@ -128,6 +137,7 @@ thd_l_init(void)
 #endif
 	_cw_assert(cw_g_thd_initialized == FALSE);
 
+#ifdef _CW_PTHREADS
 	/*
 	 * Create a thread attribute object to be used for all thread
 	 * creations.  Make sure that the thread stack size isn't too tiny.
@@ -136,12 +146,18 @@ thd_l_init(void)
 	pthread_attr_getstacksize(&cw_g_thd_attr, &stacksize);
 	if (stacksize < _CW_THD_MINSTACK)
 		pthread_attr_setstacksize(&cw_g_thd_attr, _CW_THD_MINSTACK);
+#endif
 
 	mtx_new(&cw_g_thd_single_lock);
 	tsd_new(&cw_g_thd_self_key, NULL);
 
 	/* Initialize the main thread's thd structure. */
+#ifdef _CW_PTHREADS
 	cw_g_thd.thread = pthread_self();
+#endif
+#ifdef _CW_MTHREADS
+	cw_g_thd.mach_thread = mach_thread_self();
+#endif
 	cw_g_thd.start_func = NULL;
 	cw_g_thd.start_arg = NULL;
 #ifdef _CW_THD_GENERIC_SR
@@ -161,7 +177,7 @@ thd_l_init(void)
 #endif
 	/* Make thd_self() work for the main thread. */
 	tsd_set(&cw_g_thd_self_key, (void *)&cw_g_thd);
-	
+
 #ifdef _CW_DBG
 	cw_g_thd_initialized = TRUE;
 #endif
@@ -176,7 +192,9 @@ thd_l_shutdown(void)
 
 	_cw_assert(cw_g_thd_initialized);
 
+#ifdef _CW_PTHREADS
 	pthread_attr_destroy(&cw_g_thd_attr);
+#endif
 
 	mtx_delete(&cw_g_thd.crit_lock);
 #ifdef _CW_THD_GENERIC_SR
@@ -200,7 +218,9 @@ cw_thd_t *
 thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 {
 	cw_thd_t	*retval;
+#ifdef _CW_PTHREADS
 	int		error;
+#endif
 
 	_cw_assert(cw_g_thd_initialized);
 
@@ -225,6 +245,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 	retval->magic = _CW_THD_MAGIC;
 #endif
 
+#ifdef _CW_PTHREADS
 	error = pthread_create(&retval->thread, &cw_g_thd_attr,
 	    thd_p_start_func, (void *)retval);
 	if (error) {
@@ -232,6 +253,7 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
+#endif
 
 	return retval;
 }
@@ -239,18 +261,22 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 void
 thd_delete(cw_thd_t *a_thd)
 {
+#ifdef _CW_PTHREADS
 	int		error;
+#endif
 
 	_cw_check_ptr(a_thd);
 	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
+#ifdef _CW_PTHREADS
 	error = pthread_detach(a_thd->thread);
 	if (error) {
 		fprintf(stderr, "%s:%u:%s(): Error in pthread_detach(): %s\n",
 		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
+#endif
 
 	thd_p_delete(a_thd);
 }
@@ -259,19 +285,22 @@ void *
 thd_join(cw_thd_t *a_thd)
 {
 	void	*retval;
+#ifdef _CW_PTHREADS
 	int	error;
+#endif
 
 	_cw_check_ptr(a_thd);
 	_cw_dassert(a_thd->magic == _CW_THD_MAGIC);
 	_cw_assert(cw_g_thd_initialized);
 
+#ifdef _CW_PTHREADS
 	error = pthread_join(a_thd->thread, &retval);
 	if (error) {
 		fprintf(stderr, "%s:%u:%s(): Error in pthread_join(): %s\n",
 		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
-
+#endif
 	mtx_delete(&a_thd->crit_lock);
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_destroy(&a_thd->sem);
@@ -305,6 +334,7 @@ thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
 	_cw_assert(a_how == SIG_BLOCK || a_how == SIG_UNBLOCK || a_how ==
 	    SIG_SETMASK);
 
+#ifdef _CW_PTHREADS
 #ifdef _CW_THD_GENERIC_SR
 	{
 		sigset_t	set;
@@ -318,7 +348,15 @@ thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
 		pthread_sigmask(a_how, &set, r_oset);
 	}
 #else
+/*
+ * XXX Signal handling for Darwin's pthreads is badly broken up to and including
+ * 1.4.1 (OS X 10.1).  This hack *really* needs to go away as soon as Darwin's
+ * signal handling support is improved.
+ */
+#ifndef _CW_OS_DARWIN
 	pthread_sigmask(a_how, a_set, r_oset);
+#endif
+#endif
 #endif
 }
 
@@ -490,6 +528,9 @@ thd_p_start_func(void *a_arg)
 	if (thd->suspendible) {
 		/* Insert this thread into the thread ring. */
 		mtx_lock(&cw_g_thd_single_lock);
+#ifdef _CW_MTHREADS
+		thd->mach_thread = mach_thread_self();
+#endif
 		qr_before_insert(&cw_g_thd, thd, link);
 		mtx_unlock(&cw_g_thd_single_lock);
 	
@@ -510,7 +551,11 @@ thd_p_start_func(void *a_arg)
 static void
 thd_p_suspend(cw_thd_t *a_thd)
 {
-	int	error;
+#ifdef _CW_MTHREADS
+	kern_return_t	mach_error;
+#elif (defined(_CW_PTHREADS))
+	int		error;
+#endif
 
 #ifdef _CW_THD_GENERIC_SR
 	/*
@@ -537,7 +582,7 @@ thd_p_suspend(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
-#ifdef _CW_THD_FREEBSD_SR
+#ifdef _CW_FTHREADS
 	a_thd->suspended = TRUE;
 	error = pthread_suspend_np(a_thd->thread);
 	if (error) {
@@ -547,7 +592,7 @@ thd_p_suspend(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
-#ifdef _CW_THD_SOLARIS_SR
+#ifdef _CW_STHREADS
 	a_thd->suspended = TRUE;
 	error = thr_suspend(a_thd->thread);
 	if (error) {
@@ -556,12 +601,25 @@ thd_p_suspend(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
+#ifdef _CW_MTHREADS
+	a_thd->suspended = TRUE;
+	mach_error = thread_suspend(a_thd->mach_thread);
+	if (mach_error != KERN_SUCCESS) {
+		fprintf(stderr, "%s:%u:%s(): Error in thread_suspend(): %d\n",
+		    __FILE__, __LINE__, __FUNCTION__, mach_error);
+		abort();
+	}
+#endif
 }
 
 static void
 thd_p_resume(cw_thd_t *a_thd)
 {
-	int	error;
+#ifdef _CW_MTHREADS
+	kern_return_t	mach_error;
+#elif (defined(_CW_PTHREADS))
+	int		error;
+#endif
 
 #ifdef _CW_THD_GENERIC_SR
 	/*
@@ -588,7 +646,7 @@ thd_p_resume(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
-#ifdef _CW_THD_FREEBSD_SR
+#ifdef _CW_FTHREADS
 	error = pthread_resume_np(a_thd->thread);
 	if (error) {
 		fprintf(stderr,
@@ -597,11 +655,19 @@ thd_p_resume(cw_thd_t *a_thd)
 		abort();
 	}
 #endif
-#ifdef _CW_THD_SOLARIS_SR
+#ifdef _CW_STHREADS
 	error = thr_continue(a_thd->thread);
 	if (error) {
 		fprintf(stderr, "%s:%u:%s(): Error in thr_continue(): %s\n",
 		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
+		abort();
+	}
+#endif
+#ifdef _CW_MTHREADS
+	mach_error = thread_resume(a_thd->mach_thread);
+	if (mach_error != KERN_SUCCESS) {
+		fprintf(stderr, "%s:%u:%s(): Error in thread_resume(): %d\n",
+		    __FILE__, __LINE__, __FUNCTION__, mach_error);
 		abort();
 	}
 #endif

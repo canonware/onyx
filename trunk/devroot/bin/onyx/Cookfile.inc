@@ -251,7 +251,9 @@ onyx_install_self : [ONYX]
 #if [enable_libedit]
        [LIBEDIT_A]
 #endif
+#if [matches elf [abi]]
        [RPATH][PREFIX]/lib
+#endif
        [LDFLAGS] -lonyx
 #if [enable_libedit]
        -lcurses
@@ -305,8 +307,10 @@ onyx_distclean :
 #if [enable_libedit]
        [LIBEDIT_A]
 #endif
+#if [matches elf [abi]]
 /*       [RPATH][abs_objdir]/lib/c/libedit/lib */
        [RPATH][abs_objdir]/lib/c/libonyx/lib
+#endif
        [LDFLAGS] -lonyx
 #if [enable_libedit]
        -lcurses

@@ -15,6 +15,7 @@
 #undef _CW_ASSERT
 #endif
 
+#undef _CW_OS_DARWIN
 #undef _CW_OS_FREEBSD
 #undef _CW_OS_LINUX
 #undef _CW_OS_SOLARIS
@@ -25,6 +26,10 @@
 #undef WORDS_BIGENDIAN
 
 #undef _CW_THREADS
+#undef _CW_PTHREADS
+#undef _CW_FTHREADS
+#undef _CW_MTHREADS
+#undef _CW_STHREADS
 
 #undef _CW_POSIX
 

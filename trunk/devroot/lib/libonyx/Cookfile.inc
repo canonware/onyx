@@ -148,16 +148,31 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 }
 
 /* Libraries. */
+LIBONYX_COMPAT = 4;
 LIBONYX_REV = 4;
 
 LIBONYX_A = [objdir]/lib/c/libonyx/lib/libonyx.a;
-LIBONYX_S = [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_REV];
+#if [matches elf [abi]]
+LIBONYX_SNAME = libonyx.so.[LIBONYX_REV];
+LIBONYX_LNAME = libonyx.so;
+LIBONYX_S = [objdir]/lib/c/libonyx/lib/[LIBONYX_SNAME];
+#elif [matches macho [abi]]
+LIBONYX_SNAME = libonyx.[LIBONYX_COMPAT].[LIBONYX_REV].dylib;
+LIBONYX_LNAME = libonyx.dylib;
+LIBONYX_S = [objdir]/lib/c/libonyx/lib/[LIBONYX_SNAME];
+#else
+LIBONYX_S = ;
+#endif
 
 LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libonyx/lib;
 LIBS = [LIBS] -lonyx;
 A_LIBS = [A_LIBS] [LIBONYX_A];
 S_LIBS = [S_LIBS] [LIBONYX_S];
+#if [matches elf [abi]]
 S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
+#elif [matches macho [abi]]
+S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.dylib;
+#endif
 
 /*
  * User cook'ables.
@@ -239,10 +254,21 @@ libonyx_install_a : [LIBONYX_A] libonyx_install_common
 
 libonyx_install_s : [LIBONYX_S] libonyx_install_common
 {
+#if [matches macho [abi]]
+  /* Set install_name correctly before installing. */
+  [LD] -undefined suppress -flat_namespace -dylib -dynamic -all_load
+       -dylib_compatibility_version [LIBONYX_COMPAT]
+       -dylib_current_version [LIBONYX_REV]
+       -dylib_install_name
+       [PREFIX]/lib/libonyx.[LIBONYX_COMPAT].[LIBONYX_REV].dylib
+       -ldylib1.o -lcc_dynamic
+       -o [LIBONYX_S] [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBONYX_SRCS]];
+#endif
+
   [INSTALL] -m 0444 [LIBONYX_S] [PREFIX]/lib;
 
-  rm -f [PREFIX]/lib/libonyx.so;
-  [LN] -s libonyx.so.[LIBONYX_REV] [PREFIX]/lib/libonyx.so;
+  rm -f [PREFIX]/lib/[LIBONYX_LNAME];
+  [LN] -s [LIBONYX_SNAME] [PREFIX]/lib/[LIBONYX_LNAME];
 }
 
 /*
@@ -259,8 +285,16 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
 [LIBONYX_S] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBONYX_SRCS]]
   set mkdir
 {
+#if [matches elf [abi]]
   [CC] -shared -o [target] [need];
+#elif [matches macho [abi]]
+  [LD] -undefined suppress -flat_namespace -dylib -dynamic -all_load
+       -dylib_compatibility_version [LIBONYX_COMPAT]
+       -dylib_current_version [LIBONYX_REV]
+       -ldylib1.o -lcc_dynamic
+       -o [target] [need];
+#endif
 
-  rm -f [objdir]/lib/c/libonyx/lib/libonyx.so;
-  [LN] -s libonyx.so.[LIBONYX_REV] [objdir]/lib/c/libonyx/lib/libonyx.so;
+  rm -f [objdir]/lib/c/libonyx/lib/[LIBONYX_LNAME];
+  [LN] -s [LIBONYX_SNAME] [objdir]/lib/c/libonyx/lib/[LIBONYX_LNAME];
 }

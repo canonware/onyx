@@ -75,7 +75,9 @@ fi
 
 dnl Look for binaries.
 CW_BUILD_BIN(onyx, bin_onyx)
-CW_BUILD_BIN(slate, bin_slate)
+if test "x$build_modslate" = "x1" ; then
+  CW_BUILD_BIN(slate, bin_slate)
+fi
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
@@ -85,28 +87,34 @@ AC_SUBST(libs)
 
 AC_CANONICAL_HOST
 case "${host}" in
+  *-*-darwin*)
+	AC_DEFINE(_CW_OS_DARWIN, )
+	abi="macho"
+	RPATH="-Wl,-dylib_install_name,"
+	;;
   *-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
+	abi="elf"
 	RPATH="-Wl,-rpath,"
         ;;
   *-*-linux*)
 	AC_DEFINE(_CW_OS_LINUX, )
+	abi="elf"
 	RPATH="-Wl,-rpath,"
         ;;
   *-*-solaris2*)
 	AC_DEFINE(_CW_OS_SOLARIS, )
 	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
+	abi="elf"
 	RPATH="-Wl,-R,"
 	LIBS="$LIBS -lposix4"
-	if test "x$enable_threads" = "x1" ; then
-		LIBS="$LIBS -lthread"
-	fi
         ;;
   *)
 	AC_MSG_RESULT(Unsupported operating system: ${host})
 	RPATH="-Wl,-rpath,"
 	;;
 esac
+AC_SUBST(abi)
 AC_SUBST(RPATH)
 
 AC_PROG_INSTALL

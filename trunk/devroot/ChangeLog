@@ -1,3 +1,7 @@
+2001-10-31  Jason Evans  <jasone@canonware.com>
+
+	* : Port to Darwin (Apple OS X).
+
 2001-09-15  Jason Evans  <jasone@canonware.com>
 
 	* : Rename the manual from manual.{ps,pdf,html} to onyx.{ps,pdf,html}.

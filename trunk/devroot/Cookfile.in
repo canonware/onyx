@@ -22,6 +22,9 @@ objdir = @objdir@;
 abs_objdir = @abs_objdir@;
 PREFIX = @prefix@;
 
+/* Executable format. */
+abi = @abi@;
+
 /* Paths to programs used by the build system. */
 SHELL = /bin/sh;
 CC = @CC@;
@@ -50,7 +53,11 @@ CPPDEFS = -D_REENTRANT;
 
 CFLAGS = @CFLAGS@;
 A_CFLAGS = [CFLAGS];
-S_CFLAGS = [CFLAGS] -fPIC -DPIC;
+S_CFLAGS = [CFLAGS] -fPIC -DPIC
+#if [matches elf [abi]]
+           -dynamic
+#endif
+           ;
 
 LDFLAGS = @LDFLAGS@;
 EXTRALIBS = @LIBS@;

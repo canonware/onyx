@@ -62,10 +62,12 @@ test_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [objdir]/%0test/%1.o_a
+#if [matches elf [abi]]
        [split " "
               [prepost [prepost [RPATH] "/lib/c/" [abs_objdir]]
                        "/lib"
                        [libs]]]
+#endif
        [LDFLAGS] [LIBS] [EXTRALIBS];
 }
 
