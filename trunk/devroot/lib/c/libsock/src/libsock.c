@@ -207,7 +207,6 @@ sockb_shutdown(void)
   g_sockb->should_quit = TRUE;
   sockb_l_wakeup();
   thd_join(&g_sockb->thread);
-  thd_delete(&g_sockb->thread);
 
   sem_delete(&g_sockb->pipe_sem);
   
