@@ -1044,7 +1044,7 @@ Each thread has its own errordict, which is used by default by the error
 handling machinery.
 
 \begin{longtable}{\optableformat{3}}
-\caption[errordict summary]{errordict summary by functional group} \\
+\caption[errordict summary]{errordict summary} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
@@ -8576,7 +8576,7 @@ onyx:0>
 		\item{Push the object that was being executed before throw was
 		called onto ostack.}
 		\item{If there is an error handler in the errordict dictionary
-		that corresponding to \oparg{name}, evaluate it.  Otherwise,
+		that corresponds to \oparg{name}, evaluate it.  Otherwise,
 		evaluate errordict's
 		\htmlref{\onyxop{}{handleerror}{}}{errordict:handleerror} and
 		\htmlref{\onyxop{}{stop}{}}{errordict:stop} operators.}
