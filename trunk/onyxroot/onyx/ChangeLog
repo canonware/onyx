@@ -1,3 +1,12 @@
+2002-07-07 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + socket
+	  + socketpair
+	  + connect
+
+	* Add the argcheck error.
+
 2002-06-22 : Jason Evans <jasone@canonware.com>
 
 	* Add support for GNU pth (--enable-pth).

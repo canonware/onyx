@@ -24,6 +24,9 @@
 #include <sys/resource.h>
 #include <sys/stat.h>
 #include <dirent.h> /* For dirforeach operator. */
+#ifdef CW_POSIX
+#include <netdb.h> /* For socket and socketpair operators. */
+#endif
 #ifndef HAVE_ASPRINTF
 #include "asprintf.c"
 #endif
@@ -1523,7 +1526,130 @@ systemdict_condition(cw_nxo_t *a_thread)
 void
 systemdict_connect(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *sock, *addr;
+    cw_uint32_t npop;
+    struct sockaddr sockname;
+    socklen_t socknamelen;
+    struct sockaddr_in sockaddr;
+    int sockport, error;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(addr, ostack, a_thread);
+    if (nxo_type_get(addr) == NXOT_INTEGER)
+    {
+	sockport = nxo_integer_get(addr);
+	NXO_STACK_DOWN_GET(addr, ostack, a_thread, addr);
+	npop = 3;
+    }
+    else
+    {
+	npop = 2;
+    }
+    NXO_STACK_DOWN_GET(sock, ostack, a_thread, addr);
+    if (nxo_type_get(sock) != NXOT_FILE || nxo_type_get(addr) != NXOT_STRING)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    socknamelen = sizeof(socklen_t);
+    if (getsockname(nxo_file_fd_get(sock), &sockname, &socknamelen) == -1)
+    {
+	switch (errno)
+	{
+	    case EBADF:
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		return;
+	    case ENOTSOCK:
+		fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    case ENOBUFS:
+		xep_throw(CW_ONYXX_OOM);
+		/* Not reached. */
+	    default:
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	}
+    }
+
+    switch (sockname.sa_family)
+    {
+	case AF_INET:
+#ifdef AF_INET6
+	case AF_INET6:
+#endif
+	    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
+	    error = inet_pton(sockname.sa_family, nxo_string_get(addr),
+			      &sockaddr.sin_addr);
+	    if (error < 0)
+	    {
+		fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+	    else if (error == 0)
+	    {
+		struct hostent *ent;
+		struct in_addr *iaddr;
+
+		/* Not a dotted number IP address.  Try it as a hostname. */
+		/* XXX Not reentrant. */
+		ent = gethostbyname(nxo_string_get(addr));
+		if (ent == NULL)
+		{
+		    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
+		    nxo_thread_nerror(a_thread, NXN_argcheck);
+		    return;
+		}
+
+		iaddr = (struct in_addr *) ent->h_addr_list[0];
+
+		sockaddr.sin_addr = *iaddr;
+	    }
+
+	    sockaddr.sin_port = htons(sockport);
+
+	    break;
+	case AF_LOCAL:
+	case AF_ROUTE:
+	    cw_error("XXX Not implemented");
+#ifdef AF_KEY
+	case AF_KEY:
+	    cw_error("XXX Not implemented");
+	    break;
+#endif
+	default:
+	    cw_not_reached();
+    }
+
+    error = connect(nxo_file_fd_get(sock), &sockaddr, sizeof(sockaddr));
+    if (error == -1)
+    {
+	switch (errno)
+	{
+	    /* XXX */
+	    case EBADF:
+	    case EFAULT:
+	    case ENOTSOCK:
+	    case EISCONN:
+	    case ECONNREFUSED:
+	    case ETIMEDOUT:
+	    case ENETUNREACH:
+	    case EADDRINUSE:
+	    case EINPROGRESS:
+	    case EALREADY:
+	    case EAGAIN:
+	    case EAFNOSUPPORT:
+	    case EACCES:
+	    case EPERM:
+	    default:
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
 }
 #endif
 
@@ -7629,10 +7755,236 @@ systemdict_snup(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_POSIX
+struct cw_systemdict_socket_arg
+{
+    cw_nxn_t nxn;
+    int arg;
+};
+
+static const struct cw_systemdict_socket_arg socket_family[] =
+{
+    {NXN_AF_INET, AF_INET},
+    {NXN_AF_LOCAL, AF_LOCAL},
+    {NXN_AF_ROUTE, AF_ROUTE}
+#ifdef AF_INET6
+    ,
+    {NXN_AF_INET6, AF_INET6}
+#endif
+#ifdef AF_KEY
+    ,
+    {NXN_AF_KEY, AF_KEY}
+#endif
+};
+
+static const struct cw_systemdict_socket_arg socket_type[] =
+{
+    {NXN_SOCK_STREAM, SOCK_STREAM},
+    {NXN_SOCK_DGRAM, SOCK_DGRAM},
+    {NXN_SOCK_RAW, SOCK_RAW}
+#ifdef SOCK_RDM
+    ,
+    {NXN_SOCK_RDM, SOCK_RDM}
+#endif
+#ifdef SOCK_SEQPACKET
+    ,
+    {NXN_SOCK_SEQPACKET, SOCK_SEQPACKET}
+#endif
+};
+
+/* Compare a_name to the names in a_arg.  If successful, return the index of the
+ * matching element.  Otherwise, return a_argcnt. */
+static cw_uint32_t
+systemdict_p_socket_arg(cw_nxo_t *a_name,
+			const struct cw_systemdict_socket_arg *a_arg,
+			cw_uint32_t a_argcnt)
+{
+    const cw_uint8_t *str;
+    cw_uint32_t len, i;
+
+    cw_assert(nxo_type_get(a_name) == NXOT_NAME);
+
+    str = nxo_name_str_get(a_name);
+    len = nxo_name_len_get(a_name);
+    for (i = 0; i < a_argcnt; i++)
+    {
+	if (nxn_len(a_arg[i].nxn) == len
+	    && memcmp(nxn_str(a_arg[i].nxn), str, len) == 0)
+	{
+	    break;
+	}
+    }
+
+    return i;
+}
+
+static void
+systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
+{
+    cw_nxo_t *ostack, *nxo;
+    cw_uint32_t argcnt, argind, npop;
+    int family, type, protocol = 0;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack,  a_thread);
+    if (nxo_type_get(nxo) != NXOT_NAME)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    /* See if nxo is a socket type. */
+    argcnt = sizeof(socket_type) / sizeof(struct cw_systemdict_socket_arg);
+    argind = systemdict_p_socket_arg(nxo, socket_type, argcnt);
+    if (argind != argcnt)
+    {
+	/* Socket type. */
+	type = socket_type[argind].arg;
+
+	npop = 2;
+    }
+    else
+    {
+	cw_nxo_t *tstack, *tnxo;
+	struct protoent *ent;
+
+	/* Not a socket type.  Try it as a socket protocol. */
+
+	tstack = nxo_thread_tstack_get(a_thread);
+	tnxo = nxo_stack_push(tstack);
+	nxo_string_cstring(tnxo, nxo, a_thread);
+
+	/* XXX This doesn't look reentrant. */
+	ent = getprotobyname(nxo_string_get(tnxo));
+
+	nxo_stack_pop(tstack);
+
+	if (ent == NULL)
+	{
+	    /* Not a socket protocol. */
+	    endprotoent();
+	    nxo_thread_nerror(a_thread, NXN_argcheck);
+	    return;
+	}
+
+	endprotoent();
+	protocol = ent->p_proto;
+
+	/* The next argument must be the socket type. */
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	if (nxo_type_get(nxo) != NXOT_NAME)
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+	argcnt = sizeof(socket_type)
+	    / sizeof(struct cw_systemdict_socket_arg);
+	argind = systemdict_p_socket_arg(nxo, socket_type, argcnt);
+	if (argind != argcnt)
+	{
+	    /* Socket type. */
+	    type = socket_type[argind].arg;
+	}
+	else
+	{
+	    /* Not a socket type. */
+	    nxo_thread_nerror(a_thread, NXN_argcheck);
+	    return;
+	}
+
+	npop = 3;
+    }
+
+    /* Get the socket family. */
+    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    if (nxo_type_get(nxo) != NXOT_NAME)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    argcnt = sizeof(socket_family) / sizeof(struct cw_systemdict_socket_arg);
+    argind = systemdict_p_socket_arg(nxo, socket_family, argcnt);
+    if (argind != argcnt)
+    {
+	/* Socket family. */
+	family = socket_family[argind].arg;
+    }
+    else
+    {
+	/* Not a socket family. */
+	nxo_thread_nerror(a_thread, NXN_argcheck);
+	return;
+    }
+
+    if (a_pair == FALSE)
+    {
+	int sockfd;
+
+	sockfd = socket(family, type, protocol);
+	if (sockfd == -1)
+	{
+	    goto ERROR;
+	}
+
+	/* Wrap sockfd. */
+	nxo = nxo_stack_under_push(ostack, nxo);
+	nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
+		     nxo_thread_currentlocking(a_thread));
+	nxo_file_fd_wrap(nxo, sockfd);
+    }
+    else
+    {
+	cw_uint32_t i;
+	int sockfds[2];
+
+	if (socketpair(family, type, protocol, sockfds))
+	{
+	    goto ERROR;
+	}
+
+	/* Wrap sockfds. */
+	for (i = 0; i < 2; i++) {
+	    nxo = nxo_stack_under_push(ostack, nxo);
+	    nxo_file_new(nxo, nxo_thread_nx_get(a_thread),
+			 nxo_thread_currentlocking(a_thread));
+	    nxo_file_fd_wrap(nxo, sockfds[i]);
+	}
+    }
+
+    /* Pop inputs. */
+    nxo_stack_npop(ostack, npop);
+    return;
+
+    ERROR:
+    switch (errno)
+    {
+	case EAFNOSUPPORT:
+	case EPFNOSUPPORT:
+	case EOPNOTSUPP:
+	case EPROTONOSUPPORT:
+	case ESOCKTNOSUPPORT:
+	    nxo_thread_nerror(a_thread, NXN_argcheck);
+	    return;
+	case EACCES:
+	    nxo_thread_nerror(a_thread, NXN_invalidaccess);
+	    return;
+	case ENFILE:
+	case EMFILE:
+	case ENOBUFS:
+	case ENOMEM:
+	    xep_throw(CW_ONYXX_OOM);
+	    /* Not reached. */
+	case EINVAL:
+	default:
+	    nxo_thread_nerror(a_thread, NXN_unregistered);
+	    return;
+    }
+}
+#endif
+
+#ifdef CW_POSIX
 void
 systemdict_socket(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    systemdict_p_socket(a_thread, FALSE);
 }
 #endif
 
@@ -7640,7 +7992,7 @@ systemdict_socket(cw_nxo_t *a_thread)
 void
 systemdict_socketpair(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    systemdict_p_socket(a_thread, TRUE);
 }
 #endif
 
@@ -8159,9 +8511,9 @@ systemdict_stopped(cw_nxo_t *a_thread)
 	 * stack, so there's no going back.  After throwing an error, do the
 	 * equivalent of what the quit operator does, so that we'll unwind to
 	 * the innermost start context. */
-	nxo_thread_nerror(a_thread, NXN_invalidexit);
-
 	xep_handled();
+
+	nxo_thread_nerror(a_thread, NXN_invalidexit);
 
 	xep_throw(CW_ONYXX_QUIT);
     }

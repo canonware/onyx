@@ -1652,7 +1652,7 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 
     if (buffer != (struct cw_buffer *) nxo_hook_data_get(&marker_b->buffer_nxo))
     {
-	nxo_thread_serror(a_thread, "argcheck", strlen("argcheck"));
+	nxo_thread_nerror(a_thread, NXN_argcheck);
 	return;
     }
 
@@ -1721,7 +1721,7 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 
     if (buffer != (struct cw_buffer *) nxo_hook_data_get(&marker_b->buffer_nxo))
     {
-	nxo_thread_serror(a_thread, "argcheck", strlen("argcheck"));
+	nxo_thread_nerror(a_thread, NXN_argcheck);
 	return;
     }
 

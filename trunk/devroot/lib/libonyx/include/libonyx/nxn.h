@@ -39,6 +39,17 @@ typedef enum
     NXN_SENTRY(sym_gt, ">"),
     NXN_SENTRY(sym_lb, "["),
     NXN_SENTRY(sym_rb, "]"),
+#ifdef CW_POSIX
+    NXN_ENTRY(AF_INET),
+#ifdef AF_INET6
+    NXN_ENTRY(AF_INET6),
+#endif
+#ifdef AF_KEY
+    NXN_ENTRY(AF_KEY),
+#endif
+    NXN_ENTRY(AF_LOCAL),
+    NXN_ENTRY(AF_ROUTE),
+#endif
     NXN_ENTRY(abs),
 #ifdef CW_POSIX
     NXN_ENTRY(accept),
@@ -47,6 +58,7 @@ typedef enum
     NXN_ENTRY(add),
     NXN_ENTRY(adn),
     NXN_ENTRY(and),
+    NXN_ENTRY(argcheck),
     NXN_ENTRY(argv),
     NXN_ENTRY(array),
     NXN_ENTRY(arraytype),
@@ -196,6 +208,32 @@ typedef enum
     NXN_ENTRY(hooktype),
 #ifdef CW_POSIX
     NXN_ENTRY(hostbyname),
+    NXN_ENTRY(IPPROTO_IP),
+    NXN_ENTRY(IPPROTO_HOPOPTS),
+    NXN_ENTRY(IPPROTO_ICMP),
+    NXN_ENTRY(IPPROTO_IGMP),
+    NXN_ENTRY(IPPROTO_IPIP),
+    NXN_ENTRY(IPPROTO_TCP),
+    NXN_ENTRY(IPPROTO_EGP),
+    NXN_ENTRY(IPPROTO_PUP),
+    NXN_ENTRY(IPPROTO_UDP),
+    NXN_ENTRY(IPPROTO_IDP),
+    NXN_ENTRY(IPPROTO_TP),
+    NXN_ENTRY(IPPROTO_IPV6),
+    NXN_ENTRY(IPPROTO_ROUTING),
+    NXN_ENTRY(IPPROTO_FRAGMENT),
+    NXN_ENTRY(IPPROTO_RSVP),
+    NXN_ENTRY(IPPROTO_GRE),
+    NXN_ENTRY(IPPROTO_ESP),
+    NXN_ENTRY(IPPROTO_AH),
+    NXN_ENTRY(IPPROTO_ICMPV6),
+    NXN_ENTRY(IPPROTO_NONE),
+    NXN_ENTRY(IPPROTO_DSTOPTS),
+    NXN_ENTRY(IPPROTO_MTP),
+    NXN_ENTRY(IPPROTO_ENCAP),
+    NXN_ENTRY(IPPROTO_PIM),
+    NXN_ENTRY(IPPROTO_COMP),
+    NXN_ENTRY(IPPROTO_RAW),
 #endif
     NXN_ENTRY(ibdup),
     NXN_ENTRY(ibpop),
@@ -294,6 +332,16 @@ typedef enum
     NXN_ENTRY(ostack),
     NXN_ENTRY(over),
 #ifdef CW_POSIX
+    NXN_ENTRY(POLLERR),
+    NXN_ENTRY(POLLHUP),
+    NXN_ENTRY(POLLIN),
+    NXN_ENTRY(POLLNVAL),
+    NXN_ENTRY(POLLOUT),
+    NXN_ENTRY(POLLPRI),
+    NXN_ENTRY(POLLRDBAND),
+    NXN_ENTRY(POLLRDNORM),
+    NXN_ENTRY(POLLWRNORM),
+    NXN_ENTRY(POLLWRBAND),
     NXN_ENTRY(peername),
 #endif
 #ifdef CW_PTHREADS
@@ -307,16 +355,6 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(pipe),
     NXN_ENTRY(poll),
-    NXN_ENTRY(POLLERR),
-    NXN_ENTRY(POLLHUP),
-    NXN_ENTRY(POLLIN),
-    NXN_ENTRY(POLLNVAL),
-    NXN_ENTRY(POLLOUT),
-    NXN_ENTRY(POLLPRI),
-    NXN_ENTRY(POLLRDBAND),
-    NXN_ENTRY(POLLRDNORM),
-    NXN_ENTRY(POLLWRNORM),
-    NXN_ENTRY(POLLWRBAND),
 #endif
     NXN_ENTRY(pop),
 #ifdef CW_POSIX
@@ -357,6 +395,17 @@ typedef enum
     NXN_ENTRY(rot),
 #ifdef CW_REAL
     NXN_ENTRY(round),
+#endif
+#ifdef CW_POSIX
+    NXN_ENTRY(SOCK_DGRAM),
+    NXN_ENTRY(SOCK_RAW),
+#ifdef SOCK_RDM
+    NXN_ENTRY(SOCK_RDM),
+#endif
+#ifdef SOCK_SEQPACKET
+    NXN_ENTRY(SOCK_SEQPACKET),
+#endif
+    NXN_ENTRY(SOCK_STREAM),
 #endif
     NXN_ENTRY(sadn),
     NXN_ENTRY(saup),
