@@ -1,4 +1,33 @@
+2003-08-22 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_lookup() : Make sure that the
+	  search key and the dictionary item key are the same type when
+	  searching a dict that is in compact array format.  Before this fix,
+	  string and name keys were treated equivalently for dicts that had
+	  never grown beyond 8 items.  This was a regression that existed since
+	  the 4.0.0 release.
+
+2003-08-21 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/libonyx.h:libonyx_gcdict_get() : Add.
+
+	* lib/libonyx/include/libonyx/nx.h:nx_gcdict_get() : Remove.
+
 2003-08-18 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_thread.c:nxo_thread_loop() : Restructure code so
+	  that object attribute always takes precedence over type in the outer
+	  loop, thus allowing all object types to serve as keys in method and
+	  data lookups.
+
+	* Add operators:
+	  + this
+	  + cstack
+	  + threadcstack
+	  + cvf
+	  + cvi
+	  + fcheck
+	  + icheck
 
 	* Modify the build system to prepend/append headers/footers when
 	  creating tests written in Onyx.  Modify error output in the header so
@@ -439,14 +468,14 @@
 	* lib/libonyx/include/libonyx/nxo_dict_l.h:nxoe_l_dict_delete() : Make
 	  the embedded dch non-shrinkable to avoid rehashes during finalization,
 	  in order to avoid accessing already-finalized objects.  This was a
-	  regression that has existed since the 4.0.0 release.
+	  regression that existed since the 4.0.0 release.
 
 	* lib/libonyx/src/dch.c : Add dch_shrinkable_[gs]et().
 
 	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Initialize the dch
 	  before inserting the contents of the array into it.  This bug could
 	  cause memory corruption and/or crashes if a dict grew from 7-->8-->9
-	  (assuming CW_LIBONYX_DICT_SIZE == 8).  This was a regression that has
+	  (assuming CW_LIBONYX_DICT_SIZE == 8).  This was a regression that
 	  existed since the 4.0.0 release.
 
 2003-02-01 : Jason Evans <jasone@canonware.com>
