@@ -191,6 +191,24 @@ nxo_hook_data_get(cw_nxo_t *a_nxo)
 }
 
 void
+nxo_hook_data_set(cw_nxo_t *a_nxo, void *a_data)
+{
+	cw_nxoe_hook_t	*hook;
+
+	_cw_check_ptr(a_nxo);
+	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_HOOK);
+
+	hook = (cw_nxoe_hook_t *)a_nxo->o.nxoe;
+
+	_cw_check_ptr(hook);
+	_cw_dassert(hook->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(hook->nxoe.type == NXOT_HOOK);
+
+	hook->data = a_data;
+}
+
+void
 nxo_hook_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 {
 	cw_nxoe_hook_t		*hook;

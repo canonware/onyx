@@ -150,8 +150,23 @@ cw\_bool\_t a\_reset}}
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
-		Return the opaque data pointer that was specified during
-		construction.
+		Return the opaque data pointer associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_hook_data_set}
+\index{nxo_hook_data_set@\cfunc{nxo\_hook\_data\_set}{}}
+\citem{\cfunc[void]{nxo\_hook\_data\_set}{cw\_nxo\_t *a\_nxo, void *a\_data}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a hook \classname{nxo}.
+		\item[a\_data: ]
+			Opaque data pointer.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the opaque data pointer associated with \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_hook_eval}
 \index{nxo_hook_eval@\cfunc{nxo\_hook\_eval}{}}
