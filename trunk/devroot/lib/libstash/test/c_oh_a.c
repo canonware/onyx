@@ -116,6 +116,7 @@ main()
   {
     _cw_free(strings[i]);
   }
+  _cw_free(strings);
 
   oh_delete(&hash);
   libstash_shutdown();

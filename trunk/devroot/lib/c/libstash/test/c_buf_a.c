@@ -19,24 +19,10 @@
 #define _LIBSTASH_USE_BUF
 #include <libstash/libstash_r.h>
 
-void
-free_buffer(void * a_blah, void * a_buffer);
-
-void
-free_buffer(void * a_blah, void * a_buffer)
-{
-  _cw_check_ptr(a_buffer);
-
-  _cw_free(a_buffer);
-}
-
 int
 main()
 {
   libstash_init();
-
-  dbg_register(cw_g_dbg, "mem_verbose");
-  dbg_register(cw_g_dbg, "mem_error");
 
   /* bufpool_new(), bufpool_delete(). */
   {
@@ -49,7 +35,7 @@ main()
     _cw_check_ptr(bufpool_p);
     bufpool_delete(bufpool_p);
   }
-  
+
   /* bufpool_get_buffer_size(). */
   {
     cw_bufpool_t bufpool;
@@ -145,6 +131,8 @@ main()
       bufpool_put_buffer(&bufpool, pointers[i]);
       pointers[i] = NULL;
     }
+    
+    bufpool_delete(&bufpool);
   }
   
   /* bufel_new(), bufel_delete(). */
@@ -392,7 +380,7 @@ main()
     a = (cw_uint8_t *) _cw_malloc(1);
     a[0] = 0;
     bufel_new(&bufel, NULL, NULL);
-    bufel_set_data_ptr(&bufel, (void *) a, 1, free_buffer, NULL);
+    bufel_set_data_ptr(&bufel, (void *) a, 1, mem_dealloc, cw_g_mem);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
 
@@ -417,7 +405,7 @@ main()
     d[2] = 8;
     d[3] = 9;
     bufel_new(&bufel, NULL, NULL);
-    bufel_set_data_ptr(&bufel, (void *) d, 4, free_buffer, NULL);
+    bufel_set_data_ptr(&bufel, (void *) d, 4, mem_dealloc, cw_g_mem);
     buf_append_bufel(&buf, &bufel);
     bufel_delete(&bufel);
 
@@ -807,7 +795,7 @@ main()
     buf_split(&buf_a, &buf_b, 17);
     _cw_assert(17 == buf_get_size(&buf_a));
     _cw_assert(31 == buf_get_size(&buf_b));
-    
+
     buf_split(&buf_a, &buf_b, 30);
     _cw_assert(47 == buf_get_size(&buf_a));
     _cw_assert(1 == buf_get_size(&buf_b));
@@ -815,6 +803,18 @@ main()
     buf_split(&buf_a, &buf_b, 1);
     _cw_assert(48 == buf_get_size(&buf_a));
     _cw_assert(0 == buf_get_size(&buf_b));
+
+    buf_split(&buf_b, &buf_a, 1);
+    _cw_assert(47 == buf_get_size(&buf_a));
+    _cw_assert(1 == buf_get_size(&buf_b));
+
+    buf_split(&buf_b, &buf_a, 4);
+    _cw_assert(43 == buf_get_size(&buf_a));
+    _cw_assert(5 == buf_get_size(&buf_b));
+
+    buf_split(&buf_b, &buf_a, 3);
+    _cw_assert(40 == buf_get_size(&buf_a));
+    _cw_assert(8 == buf_get_size(&buf_b));
 
     buf_catenate_buf(&buf_b, &buf_c, TRUE);
     _cw_assert(24 == buf_get_size(&buf_b));
@@ -887,13 +887,12 @@ main()
     buf_catenate_buf(&buf_b, &buf_c, TRUE);
     _cw_assert(56 == buf_get_size(&buf_b));
     _cw_assert(56 == buf_get_size(&buf_c));
-    
     buf_delete(&buf_a);
     buf_delete(&buf_b);
     buf_delete(&buf_c);
     bufpool_delete(&bufpool);
   }
-
+  
   libstash_shutdown();
   return 0;
 }

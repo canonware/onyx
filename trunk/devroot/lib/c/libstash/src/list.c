@@ -26,7 +26,8 @@ list_item_new()
   cw_list_item_t * retval;
 
   retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
-
+  _cw_check_ptr(retval);
+  
   return retval;
 }
 
@@ -66,6 +67,7 @@ list_new(cw_list_t * a_list, cw_bool_t a_is_thread_safe)
   if (a_list == NULL)
   {
     retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
+    _cw_check_ptr(retval);
     retval->is_malloced = TRUE;
   }
   else

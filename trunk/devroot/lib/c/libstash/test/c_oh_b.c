@@ -46,6 +46,8 @@ insert_items(void * a_arg)
 /*     log_eprintf(cw_g_log, NULL, 0, "insert_items", */
 /* 		"thread %u, end iteration %u\n", foo_var->thread_num, i); */
   }
+
+  _cw_free(a_arg);
   
   return NULL;
 }
@@ -78,12 +80,26 @@ main()
   {
     thd_join(&threads[i]);
   }
-  
+
   {
     char buf[21];
     
     log_printf(cw_g_log, "Number of items in hash table: %s\n",
 	       log_print_uint64(oh_get_num_items(hash), 10, buf));
+  }
+  
+  /* Delete all the strings. */
+  {
+    cw_uint64_t i, num_strings;
+    void * string, * junk;
+
+    for (i = 0, num_strings = oh_get_num_items(hash);
+	 i < num_strings;
+	 i++)
+    {
+      _cw_assert(FALSE == oh_item_delete_iterate(hash, &string, &junk));
+      _cw_free(string);
+    }
   }
 
   rwl_delete(&lock);

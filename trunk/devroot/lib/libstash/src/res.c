@@ -88,12 +88,24 @@ res_new(cw_res_t * a_res)
 void
 res_delete(cw_res_t * a_res)
 {
+  cw_uint64_t i, num_resources;
+  void * name, * val;
+  
   _cw_check_ptr(a_res);
 
   /* Clean up internals. */
 #ifdef _CW_REENTRANT
   rwl_delete(&a_res->rw_lock);
 #endif
+
+  for (i = 0, num_resources = oh_get_num_items(&a_res->hash);
+       i < num_resources;
+       i++)
+  {
+    oh_item_delete_iterate(&a_res->hash, &name, &val);
+    _cw_free(name);
+    _cw_free(val);
+  }
   oh_delete(&a_res->hash);
   
   if (a_res->is_malloced)

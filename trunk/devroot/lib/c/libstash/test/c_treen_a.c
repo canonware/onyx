@@ -25,7 +25,6 @@ main()
   
   libstash_init();
 
-
   treen_a = treen_new(FALSE);
   _cw_check_ptr(treen_a);
   

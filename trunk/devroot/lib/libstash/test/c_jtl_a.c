@@ -88,6 +88,7 @@ main()
   libstash_init();
 
   _cw_assert(&jtl_a == jtl_new(&jtl_a));
+  
   jtl_slock(&jtl_a);
   jtl_2qlock(&jtl_a);
   jtl_2rlock(&jtl_a);

@@ -354,6 +354,11 @@ main()
   
     list_delete(list1);
     list_delete(&list2);
+
+    for (i = 0; i < NUM_ITEMS; i++)
+    {
+      _cw_free(strings[i]);
+    }
   }
   
   libstash_shutdown();

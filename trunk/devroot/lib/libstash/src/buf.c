@@ -80,11 +80,11 @@ bufpool_delete(cw_bufpool_t * a_bufpool)
     _cw_free(buffer);
   }
 
-#ifdef _LIBSTASH_DBG
-  bzero(a_bufpool, sizeof(cw_bufpool_t));
-#endif
   if (a_bufpool->is_malloced)
   {
+#ifdef _LIBSTASH_DBG
+    bzero(a_bufpool, sizeof(cw_bufpool_t));
+#endif
     _cw_free(a_bufpool);
   }
 }
@@ -285,11 +285,14 @@ buf_delete(cw_buf_t * a_buf)
 			      % a_buf->array_size].bufel);
   }
 
-#ifdef _LIBSTASH_DBG
-  bzero(a_buf, sizeof(cw_buf_t));
-#endif
+  _cw_free(a_buf->array);
+  _cw_free(a_buf->iov);
+  
   if (a_buf->is_malloced)
   {
+#ifdef _LIBSTASH_DBG
+    bzero(a_buf, sizeof(cw_buf_t));
+#endif
     _cw_free(a_buf);
   }
 }
@@ -515,7 +518,7 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
     buf_p_fit_array(a_a, a_a->array_num_valid + num_bufels_to_move);
 
     /* Try to merge first bufel of a_b and last bufel of a_a. */
-    if ((num_bufels_to_move > 0) && (a_a->array_num_valid > 0))
+    if ((num_bufels_to_move > 1) && (a_a->array_num_valid > 0))
     {
       cw_uint32_t last_element_index;
     
@@ -532,6 +535,14 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
 	a_a->array[last_element_index].cumulative_size = a_a->size;
       
 	num_bufels_to_move--;
+
+	if (bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel)
+	    <= a_offset)
+	{
+	  /* Need to decrement the bufc's reference count. */
+	  bufc_ref_decrement(a_b->array[a_b->array_start].bufel.bufc);
+	}
+	
 #ifdef _LIBSTASH_DBG
 	bzero(&a_b->array[a_b->array_start], sizeof(cw_bufel_array_el_t));
 #endif
@@ -539,58 +550,103 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
 	a_b->array_num_valid--;
       }
     }
+    else if ((num_bufels_to_move == 1) && (a_a->array_num_valid > 0))
+    {
+      cw_uint32_t last_element_index;
     
-    /* Iterate through the bufel's in a_b and move them to a_a, up to and
+      last_element_index = ((a_a->array_end + a_a->array_size - 1)
+			    % a_a->array_size);
+
+      did_bufel_merge
+	= ! bufel_p_merge_bufel(&a_a->array[last_element_index].bufel,
+				&a_b->array[a_b->array_start].bufel);
+      if (did_bufel_merge)
+      {
+	a_a->size += a_offset;
+	a_a->array[last_element_index].cumulative_size = a_a->size;
+      
+	num_bufels_to_move--;
+
+	if (bufel_get_valid_data_size(&a_b->array[a_b->array_start].bufel)
+	    == a_offset)
+	{
+	  /* Need to decrement the bufc's reference count. */
+	  bufc_ref_decrement(a_b->array[a_b->array_start].bufel.bufc);
+#ifdef _LIBSTASH_DBG
+	  bzero(&a_b->array[a_b->array_start], sizeof(cw_bufel_array_el_t));
+#endif
+	  a_b->array_start = (a_b->array_start + 1) % a_b->array_size;
+	  a_b->array_num_valid--;
+	}
+	else
+	{
+	  bufel_set_beg_offset(&a_b->array[a_b->array_start].bufel,
+			       bufel_get_beg_offset(
+				 &a_b->array[a_b->array_start].bufel)
+			       + a_offset);
+	  bufel_set_end_offset(&a_a->array[last_element_index].bufel,
+			       bufel_get_end_offset(
+				 &a_a->array[last_element_index].bufel)
+			       - bufel_get_valid_data_size(
+				 &a_b->array[a_b->array_start].bufel));
+	}
+      }
+    }
+
+    if (num_bufels_to_move > 0)
+    {
+      /* Iterate through the bufel's in a_b and move them to a_a, up to and
      * including the bufel where the split occurs. */
-    for (i = 0,
-	   a_a_index = a_a->array_end,
-	   a_b_index = a_b->array_start;
-	 i < num_bufels_to_move;
-	 i++)
-    {
-      a_a_index = (i + a_a->array_end) % a_a->array_size;
-      a_b_index = (i + a_b->array_start) % a_b->array_size;
+      for (i = 0,
+	     a_a_index = a_a->array_end,
+	     a_b_index = a_b->array_start;
+	   i < num_bufels_to_move;
+	   i++)
+      {
+	a_a_index = (i + a_a->array_end) % a_a->array_size;
+	a_b_index = (i + a_b->array_start) % a_b->array_size;
     
-      memcpy(&a_a->array[a_a_index].bufel,
-	     &a_b->array[a_b_index].bufel,
-	     sizeof(cw_bufel_t));
+	memcpy(&a_a->array[a_a_index].bufel,
+	       &a_b->array[a_b_index].bufel,
+	       sizeof(cw_bufel_t));
 
-      a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
-      a_a->array[a_a_index].cumulative_size = a_a->size;
+	a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+	a_a->array[a_a_index].cumulative_size = a_a->size;
     
 #ifdef _LIBSTASH_DBG
-      bzero(&a_b->array[a_b_index], sizeof(cw_bufel_array_el_t));
+	bzero(&a_b->array[a_b_index], sizeof(cw_bufel_array_el_t));
 #endif
-    }
+      }
 
-    /* Deal with the bufel that the split is in. */
-    if (bufel_offset == 0)
-    {
-      /* The split is actually between bufel's. */
-    }
-    else
-    {
+      /* Deal with the bufel that the split is in. */
+      if (bufel_offset == 0)
+      {
+	/* The split is actually between bufel's. */
+      }
+      else
+      {
 #ifdef _LIBSTASH_DBG
-      /* Copy the bufel back to a_b, since the data is split and the original
-       * bufel must still remain valid. */
-      memcpy(&a_b->array[a_b_index].bufel,
-	     &a_a->array[a_a_index].bufel,
-	     sizeof(cw_bufel_t));
+	/* Copy the bufel back to a_b, since the data is split and the original
+	 * bufel must still remain valid. */
+	memcpy(&a_b->array[a_b_index].bufel,
+	       &a_a->array[a_a_index].bufel,
+	       sizeof(cw_bufel_t));
 #endif
-      /* Decrement a_a->size, since we don't want the whole bufc. */
-      a_a->size -= bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+	/* Decrement a_a->size, since we don't want the whole bufc. */
+	a_a->size -= bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
 
-      /* Increment the reference count for the buffer, and set the offsets
-       * appropriately for both bufel's. */
-      bufc_ref_increment(a_a->array[a_a_index].bufel.bufc);
+	/* Increment the reference count for the buffer, and set the offsets
+	 * appropriately for both bufel's. */
+	bufc_ref_increment(a_a->array[a_a_index].bufel.bufc);
 		  
-      bufel_set_end_offset(&a_a->array[a_a_index].bufel, bufel_offset);
-      bufel_set_beg_offset(&a_b->array[a_b_index].bufel, bufel_offset);
+	bufel_set_end_offset(&a_a->array[a_a_index].bufel, bufel_offset);
+	bufel_set_beg_offset(&a_b->array[a_b_index].bufel, bufel_offset);
 
-      a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
-      a_a->array[a_a_index].cumulative_size = a_a->size;
+	a_a->size += bufel_get_valid_data_size(&a_a->array[a_a_index].bufel);
+	a_a->array[a_a_index].cumulative_size = a_a->size;
+      }
     }
-
+    
     /* Make a_a's and a_b's states consistent. */
     a_a->array_num_valid += num_bufels_to_move;
     a_a->array_end = (a_a_index + 1) % a_a->array_size;

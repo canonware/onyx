@@ -24,6 +24,7 @@ dbg_new()
   cw_dbg_t * retval;
 
   retval = (cw_dbg_t *) _cw_malloc(sizeof(cw_dbg_t));
+  _cw_check_ptr(retval);
 
 #ifdef _CW_REENTRANT
   oh_new(&retval->flag_hash, TRUE);

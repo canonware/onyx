@@ -32,6 +32,7 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   if (a_oh == NULL)
   {
     retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
+    _cw_check_ptr(retval);
     retval->is_malloced = TRUE;
   }
   else
@@ -64,6 +65,7 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   /* Create the items pointer array. */
   retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
 					       * sizeof(cw_oh_item_t *));
+  _cw_check_ptr(retval->items);
   bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
 
   /* Create the spare items list. */
@@ -504,6 +506,7 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
     else
     {
       item = (cw_oh_item_t *) _cw_malloc(sizeof(cw_oh_item_t));
+      _cw_check_ptr(item);
     }
 
     item->key = a_key;
@@ -948,6 +951,7 @@ oh_p_grow(cw_oh_t * a_oh)
     a_oh->items
       = (cw_oh_item_t **) _cw_realloc(a_oh->items,
 				      a_oh->size * sizeof(cw_oh_item_t *));
+    _cw_check_ptr(a_oh->items);
     bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
 
     /* Re-calculate curr_* fields. */
@@ -1003,6 +1007,7 @@ oh_p_shrink(cw_oh_t * a_oh)
     a_oh->items
       = (cw_oh_item_t **) _cw_realloc(a_oh->items,
 				      a_oh->size * sizeof(cw_oh_item_t *));
+    _cw_check_ptr(a_oh->items);
     bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
   
     /* Re-calculate curr_* fields. */

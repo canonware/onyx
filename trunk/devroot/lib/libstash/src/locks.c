@@ -141,17 +141,16 @@ jtl_new(cw_jtl_t * a_jtl)
   if (a_jtl == NULL)
   {
     retval = (cw_jtl_t *) _cw_malloc(sizeof(cw_jtl_t));
+    bzero(retval, sizeof(cw_jtl_t));
     retval->is_malloced = TRUE;
   }
   else
   {
     retval = a_jtl;
+    bzero(retval, sizeof(cw_jtl_t));
     retval->is_malloced = FALSE;
   }
 
-  /* Initialize various structures and variables. */
-  bzero(retval, sizeof(cw_jtl_t)); /* So that we don't have to individually 
-				    * set lots of variables to 0. */
   mtx_new(&retval->lock);
   cnd_new(&retval->slock_wait);
   list_new(&retval->tlock_wait, FALSE);

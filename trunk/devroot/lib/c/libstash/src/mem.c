@@ -28,7 +28,11 @@ mem_new()
   _cw_check_ptr(retval);
 
 #ifdef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
   oh_new(&retval->addr_hash, TRUE);
+#  else
+  oh_new(&retval->addr_hash);
+#  endif
   oh_set_h1(&retval->addr_hash, mem_p_oh_h1);
   oh_set_key_compare(&retval->addr_hash, mem_p_oh_key_compare);
 #endif
@@ -253,8 +257,6 @@ static cw_uint64_t
 mem_p_oh_h1(cw_oh_t * a_oh, const void * a_key)
 {
   cw_uint64_t retval, key = (cw_uint32_t) a_key;
-
-  _cw_check_ptr(a_oh);
 
   retval = key >> 4;
 

@@ -32,6 +32,7 @@ log_new()
   cw_log_t * retval;
 
   retval = (cw_log_t *) _cw_malloc(sizeof(cw_log_t));
+  _cw_check_ptr(retval);
   
 #ifdef _CW_REENTRANT
   mtx_new(&retval->lock);
@@ -108,6 +109,7 @@ log_set_logfile(cw_log_t * a_log,
       _cw_free(a_log->logfile_name);
     }
     a_log->logfile_name = (char *) _cw_malloc(strlen(a_logfile) + 1);
+    _cw_check_ptr(a_log->logfile_name);
     strcpy(a_log->logfile_name, a_logfile);
   }
   else
@@ -253,6 +255,7 @@ log_nprintf(cw_log_t * a_log,
   }
 
   t_buf = (char *) _cw_malloc(a_size + 1);
+  _cw_check_ptr(t_buf);
   
   va_start(ap, a_format);
   vsnprintf(t_buf, (size_t) a_size + 1, a_format, ap);

@@ -58,6 +58,10 @@ treen_delete(cw_treen_t * a_treen)
     {
       treen_delete(a_treen->children[i]);
     }
+    if (0 < a_treen->num_children)
+    {
+      _cw_free(a_treen->children);
+    }
 
     /* Delete self. */
 #ifdef _CW_REENTRANT
