@@ -56,15 +56,6 @@ thd_new(cw_thd_t * a_thd_o,
 		"Error in pthread_create(): %s\n", strerror(error));
     abort();
   }
-
-  /*   error = pthread_detach(retval->thread); */
-
-  /*   if (error) */
-  /*   { */
-  /*     log_eprintf(g_log_o, NULL, 0, "thd_new", */
-  /* 		"Cannot detach thread: %s\n", strerror(error)); */
-  /*     abort(); */
-  /*   } */
   
   return retval;
 }
@@ -129,7 +120,7 @@ mtx_new(cw_mtx_t * a_mtx_o)
   error = pthread_mutex_init(&retval->mutex, NULL);
   if (error)
   {
-    log_eprintf(g_log_o, NULL, 0, "mtx_new",
+    log_eprintf(NULL, NULL, 0, "mtx_new",
 		"Error in pthread_mutex_init: %s\n", strerror(error));
     abort();
   }
@@ -147,7 +138,7 @@ mtx_delete(cw_mtx_t * a_mtx_o)
   error = pthread_mutex_destroy(&a_mtx_o->mutex);
   if (error)
   {
-    log_eprintf(g_log_o, NULL, 0, "mtx_delete",
+    log_eprintf(NULL, NULL, 0, "mtx_delete",
 		"Error in pthread_mutex_destroy(): %s\n", strerror(error));
     abort();
   }
@@ -164,15 +155,11 @@ mtx_lock(cw_mtx_t * a_mtx_o)
   int error;
   
   _cw_check_ptr(a_mtx_o);
-  fprintf(stderr, "Bang A\n");
-  log_eprintf(g_log_o, NULL, 0, "mtx_lock",
-	      "Error in pthread_mutex_lock(): %s\n", strerror(error));
-  fprintf(stderr, "Bang B\n");
   
   error = pthread_mutex_lock(&a_mtx_o->mutex);
   if (error)
   {
-    log_eprintf(g_log_o, NULL, 0, "mtx_lock",
+    log_eprintf(NULL, NULL, 0, "mtx_lock",
 		"Error in pthread_mutex_lock(): %s\n", strerror(error));
     abort();
   }
@@ -197,7 +184,7 @@ mtx_trylock(cw_mtx_t * a_mtx_o)
   }
   else 
   {
-    log_eprintf(g_log_o, NULL, 0, "mtx_trylock",
+    log_eprintf(NULL, NULL, 0, "mtx_trylock",
 		"Error in pthread_mutex_trylock(): %s\n", strerror(error));
     abort();
   }
@@ -215,7 +202,7 @@ mtx_unlock(cw_mtx_t * a_mtx_o)
   error = pthread_mutex_unlock(&a_mtx_o->mutex);
   if (error)
   {
-    log_eprintf(g_log_o, NULL, 0, "mtx_unlock",
+    log_eprintf(NULL, NULL, 0, "mtx_unlock",
 		"Error in pthread_mutex_unlock(): %s\n", strerror(error));
     abort();
   }
