@@ -1,4 +1,7 @@
 Test begin
+-array-_________
+[1 -array- 4]___
+[1 [2 3] 4]_____
 ___false
 _false__
 false___

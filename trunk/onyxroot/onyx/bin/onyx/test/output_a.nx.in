@@ -12,6 +12,10 @@
 
 `Test begin\n' print
 
+[1 [2 3] 4] </w 16 /p `_' /j /l /r 0> output `\n' print
+[1 [2 3] 4] </w 16 /p `_' /j /l /r 1> output `\n' print
+[1 [2 3] 4] </w 16 /p `_' /j /l /r 2> output `\n' print
+
 false </w 8 /p `_' /j /r> output `\n' print
 false </w 8 /p `_' /j /c> output `\n' print
 false </w 8 /p `_' /j /l> output `\n' print
