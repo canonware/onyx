@@ -75,9 +75,9 @@ EXTRALIBS = @LIBS@;
  * User targets.
  */
 
-all : bins_a;
+default : libs bins_a;
 
-everything : libs bins tests;
+all : libs bins tests release;
 
 release : html;
 
