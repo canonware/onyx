@@ -576,6 +576,24 @@ execution stack operators} \\
 	{Modify signal mask.}
 \hline
 \optableent
+	{set}
+	{{\bf \htmlref{sigpending}{systemdict:sigpending}}}
+	{set}
+	{Get pending signals.}
+\hline
+\optableent
+	{set}
+	{{\bf \htmlref{sigsuspend}{systemdict:sigsuspend}}}
+	{--}
+	{Suspend until interrupted by a signal.}
+\hline
+\optableent
+	{set}
+	{{\bf \htmlref{sigwait}{systemdict:sigwait}}}
+	{sig}
+	{Wait for a signal.}
+\hline
+\optableent
 	{--}
 	{{\bf \htmlref{pid}{systemdict:pid}}}
 	{pid}
@@ -634,6 +652,30 @@ execution stack operators} \\
 	{{\bf \htmlref{setegid}{systemdict:setegid}}}
 	{boolean}
 	{Set the process's effective group ID.}
+\hline
+\optableent
+	{pid}
+	{{\bf \htmlref{getpgid}{systemdict:getpgid}}}
+	{pgid}
+	{Get process group ID.}
+\hline
+\optableent
+	{pid pgid}
+	{{\bf \htmlref{setpgid}{systemdict:setpgid}}}
+	{--}
+	{Set process group ID.}
+\hline
+\optableent
+	{pid}
+	{{\bf \htmlref{getsid}{systemdict:getsid}}}
+	{sid}
+	{Get session ID.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{setsid}{systemdict:setsid}}}
+	{sid}
+	{Create new session.}
 \hline
 \optableent
 	{--}
@@ -5686,37 +5728,46 @@ onyx:0>
 	\end{description}
 \label{systemdict:getpgid}
 \index{getpgid@\onyxop{}{getpgid}{}}
-\item[{\onyxop{OPARGS}{getpgid}{OPOUTS}}: ]
+\item[{\onyxop{pid}{getpgid}{pgid}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pid: ]
+			Process ID, or 0 (same as specifying the calling
+			process's ID).
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pgid: ] Process group ID.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the process group ID for the process with ID \oparg{pid}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 getpgid 1 sprint
+15864
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:getsid}
 \index{getsid@\onyxop{}{getsid}{}}
-\item[{\onyxop{OPARGS}{getsid}{OPOUTS}}: ]
+\item[{\onyxop{pid}{getsid}{sid}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pid: ]
+			Process ID, or 0 (same as specifying the calling
+			process's ID).
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sid: ] Session ID.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
@@ -5724,8 +5775,12 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Get the session ID for the process with ID \oparg{pid}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 getsid 1 sprint
+1120
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:gid}
@@ -10368,46 +10423,60 @@ onyx:1>
 	\end{description}
 \label{systemdict:setpgid}
 \index{setpgid@\onyxop{}{setpgid}{}}
-\item[{\onyxop{OPARGS}{setpgid}{OPOUTS}}: ]
+\item[{\onyxop{pid pgid}{setpgid}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[pid: ]
+			Process ID, or 0 (same as specifying the calling
+			process's ID).
+		\item[pgid: ] Process group ID.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> pid pid setpgid
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setsid}
 \index{setsid@\onyxop{}{setsid}{}}
-\item[{\onyxop{OPARGS}{setsid}{OPOUTS}}: ]
+\item[{\onyxop{--}{setsid}{sid}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sid: ] Session ID.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create a new session.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> setsid
+Error $invalidaccess
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..2):
+0:      --setsid--
+1:      -file-
+2:      --start--
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setsockopt}

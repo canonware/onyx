@@ -5345,7 +5345,33 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 void
 systemdict_getpgid(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t pid;
+    pid_t id;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    pid = nxo_integer_get(nxo);
+    if (pid < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    id = getpgid((pid_t) pid);
+    if (id != -1)
+    {
+	nxo_integer_new(nxo, id);
+    }
+    else
+    {
+	nxo_null_new(nxo);
+    }
 }
 #endif
 
@@ -5353,7 +5379,33 @@ systemdict_getpgid(cw_nxo_t *a_thread)
 void
 systemdict_getsid(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t pid;
+    pid_t id;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    pid = nxo_integer_get(nxo);
+    if (pid < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    id = getsid((pid_t) pid);
+    if (id != -1)
+    {
+	nxo_integer_new(nxo, id);
+    }
+    else
+    {
+	nxo_null_new(nxo);
+    }
 }
 #endif
 
@@ -10875,7 +10927,59 @@ systemdict_setnonblocking(cw_nxo_t *a_thread)
 void
 systemdict_setpgid(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    cw_nxoi_t pid, pgrp;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    pgrp = nxo_integer_get(nxo);
+    if (pgrp < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    NXO_STACK_NGET(nxo, ostack, a_thread, 1);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    pid = nxo_integer_get(nxo);
+    if (pid < 0)
+    {
+	nxo_thread_nerror(a_thread, NXN_rangecheck);
+	return;
+    }
+
+    if (setpgid((pid_t) pid, (pid_t) pgrp) == -1)
+    {
+	switch (errno)
+	{
+	    case EPERM:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
+		return;
+	    }
+	    case ESRCH:
+	    {
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
+		return;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, 2);
 }
 #endif
 
@@ -10883,7 +10987,29 @@ systemdict_setpgid(cw_nxo_t *a_thread)
 void
 systemdict_setsid(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    pid_t sid;
+
+    if ((sid = setsid()) == -1)
+    {
+	switch (errno)
+	{
+	    case EPERM:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
+		return;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_integer_new(nxo, sid);
 }
 #endif
 

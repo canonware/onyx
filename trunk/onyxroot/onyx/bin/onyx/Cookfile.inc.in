@@ -130,9 +130,10 @@ ONYX_OTESTS =
               forkexec_a.nx.in forkexec_b.nx.in forkexec_c.nx.in
               forkexec_d.nx.in forkexec_e.nx.in forkexec_f.nx.in
               forkexec_g.nx.in forkexec_h.nx.in forkexec_i.nx.in
-              forkexec_j.nx.in gid_a.nx.in kill_a.nx.in kill_b.nx.in
-              kill_c.nx.in kill_d.nx.in kill_e.nx.in kill_f.nx.in
-              localtime_a.nx.in localtime_b.nx.in localtime_c.nx.in
+              forkexec_j.nx.in getpgid_a.nx.in getpgid_b.nx.in getpgid_c.nx.in
+              getsid_a.nx.in getsid_b.nx.in getsid_c.nx.in gid_a.nx.in
+              kill_a.nx.in kill_b.nx.in kill_c.nx.in kill_d.nx.in kill_e.nx.in
+              kill_f.nx.in localtime_a.nx.in localtime_b.nx.in localtime_c.nx.in
               localtime_d.nx.in mkfifo_a.nx.in mkfifo_b.nx.in mkfifo_c.nx.in
               mkfifo_d.nx.in mkfifo_e.nx.in nsleep_a.nx.in nsleep_b.nx.in
               nsleep_c.nx.in nsleep_d.nx.in path_a.nx.in path_b.nx.in
@@ -144,7 +145,8 @@ ONYX_OTESTS =
               setegid_c.nx.in setegid_d.nx.in setenv_a.nx.in setenv_b.nx.in
               setenv_c.nx.in seteuid_a.nx.in seteuid_b.nx.in seteuid_c.nx.in
               seteuid_d.nx.in setgid_a.nx.in setgid_b.nx.in setgid_c.nx.in
-              setgid_d.nx.in setuid_a.nx.in setuid_b.nx.in setuid_c.nx.in
+              setgid_d.nx.in setpgid_a.nx.in setpgid_b.nx.in setpgid_c.nx.in
+              setpgid_d.nx.in setuid_a.nx.in setuid_b.nx.in setuid_c.nx.in
               setuid_d.nx.in sigmask_a.nx.in sigmask_b.nx.in sigmask_c.nx.in
               sigmask_d.nx.in sigmask_e.nx.in sigmask_f.nx.in sigmask_g.nx.in
               sigmask_h.nx.in sigmask_i.nx.in sigmask_j.nx.in sigmask_k.nx.in
