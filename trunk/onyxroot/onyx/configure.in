@@ -97,10 +97,9 @@ dnl Platform-specific settings.  abi and RPATH can probably be determined
 dnl programmatically, but doing so is error-prone, which makes it generally
 dnl not worth the trouble.
 dnl 
-dnl Define cpp macros in CFLAGS, rather than doing AC_DEFINE(macro), since the
+dnl Define cpp macros in CPPFLAGS, rather than doing AC_DEFINE(macro), since the
 dnl definitions need to be seen before and headers are included, which is a pain
-dnl to make happen otherwise.   Ideally, this would be defined in CPPFLAGS, but
-dnl that causes c_incl to fail.
+dnl to make happen otherwise.
 AC_CANONICAL_HOST
 case "${host}" in
   *-*-darwin*)
@@ -115,7 +114,7 @@ case "${host}" in
   *-*-linux*)
 	abi="elf"
 	dnl Linux needs this for things like asprintf() and poll() flags.
-	CFLAGS="$CFLAGS -D_GNU_SOURCE"
+	CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
 	RPATH="-Wl,-rpath,"
 	;;
   *-*-netbsd*)
@@ -134,7 +133,7 @@ case "${host}" in
 	abi="elf"
 	RPATH="-Wl,-R,"
 	dnl Solaris needs this for sigwait().
-	CFLAGS="$CFLAGS -D_POSIX_PTHREAD_SEMANTICS"
+	CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
 	LIBS="$LIBS -lposix4"
 	;;
   *)
@@ -255,7 +254,7 @@ if test "x$enable_threads" = "x1" ; then
   fi
 fi
 if test "x$enable_threads" = "x1" ; then
-  CFLAGS="$CFLAGS -D_REENTRANT"
+  CPPFLAGS="$CPPFLAGS -D_REENTRANT"
 fi
 AC_SUBST(enable_threads)
 

@@ -36,13 +36,12 @@ mods_distclean : [addsuffix _mods_distclean @mods@];
 @objroot@/mod/%0src/%1.o_s : @srcroot@/mod/%0src/%1.c
   set mkdir
 {
-  [TCC] [S_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @srcroot@/mod/%0src/%1.c
+  [TCC] [S_CFLAGS] [CPPFLAGS] -c @srcroot@/mod/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @srcroot@/mod/%0src/%1.c
          "--prefix='"[target]" : "@srcroot@/mod/%0src/%1.c"'"
          "--suffix='set nodefault;'"
          -o [fromto mod/%0src/%1.o_s mod/%0src/%1.d_s [target]];
 }
-

@@ -1,5 +1,10 @@
 2003-03-03 : Jason Evans <jasone@canonware.com>
 
+	* Remove CPPDEFS from the build system, and modify calls to c_incl so
+	  that -D flags are filtered out of CPPFLAGS, thus allowing cpp
+	  definitions to be set in CPPFLAGS where they belong.  Move definitions
+	  such as -D_REENTRANT and -D_GNU_SOURCE from CFLAGS to CPPFLAGS.
+
 	* Make calls to promptstring resilient to errors.
 
 	* lib/libonyx/src/systemdict.c:systemdict_{copy,get}() : Use

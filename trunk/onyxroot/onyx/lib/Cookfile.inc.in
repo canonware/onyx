@@ -42,10 +42,10 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
 @objroot@/lib/%0src/%1.o_a : @srcroot@/lib/%0src/%1.c
   set mkdir
 {
-  [TCC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @srcroot@/lib/%0src/%1.c
+  [TCC] [A_CFLAGS] [CPPFLAGS] -c @srcroot@/lib/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @srcroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@srcroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
@@ -55,10 +55,10 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
 @objroot@/lib/%0src/%1.o_b : @srcroot@/lib/%0src/%1.c
   set mkdir
 {
-  [HCC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @srcroot@/lib/%0src/%1.c
+  [HCC] [A_CFLAGS] [CPPFLAGS] -c @srcroot@/lib/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @srcroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@srcroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
@@ -68,10 +68,10 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
 @objroot@/lib/%0src/%1.o_s : @srcroot@/lib/%0src/%1.c
   set mkdir
 {
-  [TCC] [S_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @srcroot@/lib/%0src/%1.c
+  [TCC] [S_CFLAGS] [CPPFLAGS] -c @srcroot@/lib/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @srcroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@srcroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
@@ -82,10 +82,10 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
 @objroot@/lib/%0src/%1.o_a : @objroot@/lib/%0src/%1.c
   set mkdir
 {
-  [TCC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @objroot@/lib/%0src/%1.c
+  [TCC] [A_CFLAGS] [CPPFLAGS] -c @objroot@/lib/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @objroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@objroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
@@ -95,10 +95,10 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
 @objroot@/lib/%0src/%1.o_b : @objroot@/lib/%0src/%1.c
   set mkdir
 {
-  [HCC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @objroot@/lib/%0src/%1.c
+  [HCC] [A_CFLAGS] [CPPFLAGS] -c @objroot@/lib/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @objroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@objroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"
@@ -108,10 +108,10 @@ libs_distclean : [addsuffix _libs_distclean @libs@];
 @objroot@/lib/%0src/%1.o_s : @objroot@/lib/%0src/%1.c
   set mkdir
 {
-  [TCC] [S_CFLAGS] [CPPFLAGS] [CPPDEFS] -c @objroot@/lib/%0src/%1.c
+  [TCC] [S_CFLAGS] [CPPFLAGS] -c @objroot@/lib/%0src/%1.c
         -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @objroot@/lib/%0src/%1.c
          "--prefix='"[target]" : "@objroot@/lib/%0src/%1.c"'"
          "--suffix='set nodefault;'"

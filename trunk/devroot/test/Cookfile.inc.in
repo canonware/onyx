@@ -46,10 +46,10 @@ tests_distclean :
 @objroot@/%0test/%1.o_a : @srcroot@/%0test/%1.c
   set mkdir
 {
-  [TCC] [A_CFLAGS] [CPPFLAGS] [CPPDEFS] -DCW_ASSERT
+  [TCC] [A_CFLAGS] [CPPFLAGS] -DCW_ASSERT
         -c @srcroot@/%0test/%1.c -o [target];
 
-  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
          @srcroot@/%0test/%1.c
          "--prefix='"[target]" : "@srcroot@/%0test/%1.c"'"
          "--suffix='set nodefault;'"

@@ -292,11 +292,11 @@ HCC="?"
 TCC="?"
 	Use this to invoke the target C compiler.
 
-CPPDEFS="?"
-	Pass these flags to the C preprocessor.
-
 CFLAGS="?"
 	Pass these flags to the compiler.
+
+CPPFLAGS="?"
+	Pass these flags to the C preprocessor.
 
 LDFLAGS="?"
 	Pass these flags when linking.
