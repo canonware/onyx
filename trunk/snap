@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 157 $
-# $Date: 1998-07-29 17:24:13 -0700 (Wed, 29 Jul 1998) $
+# $Revision: 188 $
+# $Date: 1998-08-31 12:01:21 -0700 (Mon, 31 Aug 1998) $
 #
 # <<< Description >>>
 #
@@ -103,24 +103,31 @@ if (($#ARGV >= 0)
     &print_usage;
     exit(1);
   }
+if ($opt_tag =~ /^[^A-Za-z]/)
+  {
+    print STDERR "Error: tag must start with a letter\n";
+    &print_usage;
+    exit(1);
+  }
+
 
 if ($opt_verbose)
   {
-    print STDERR "cvs tag SNAP_$opt_tag $opt_subdir\n";
+    print STDERR "cvs tag $opt_tag $opt_subdir\n";
   }
 unless ($opt_noact)
   {
-    `cvs tag SNAP_$opt_tag $opt_subdir`;
+    `cvs tag $opt_tag $opt_subdir`;
   }
 
 if ($opt_verbose)
   {
     print STDERR 
-      "cvs export -r SNAP_$opt_tag -d $opt_subdir\_$opt_tag $dot/$opt_subdir\n";
+      "cvs export -r $opt_tag -d $opt_subdir\_$opt_tag $dot/$opt_subdir\n";
   }
 unless ($opt_noact)
   {
-    `cvs export -r SNAP_$opt_tag -d $opt_subdir\_$opt_tag $dot/$opt_subdir`;
+    `cvs export -r $opt_tag -d $opt_subdir\_$opt_tag $dot/$opt_subdir`;
   }
 
 # Find all the files that need the copyright tag expanded.
