@@ -232,7 +232,6 @@ nxo_array_len_get(const cw_nxo_t *a_nxo)
     return retval;
 }
 
-#ifdef CW_USE_INLINES
 void
 nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {
@@ -289,7 +288,6 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
     }
 #endif
 }
-#endif
 
 void
 nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)

@@ -10,8 +10,8 @@
  *
  ******************************************************************************/
 
-/* This is private, but is exposed here to make inlining nxo_array_el_get()
- * possible.  nxo_thread_loop() calls nxo_array_el_get() a lot, so this is
+/* This is private, but is exposed here to make inlining nxo_l_array_el_get()
+ * possible.  nxo_thread_loop() calls nxo_l_array_el_get() a lot, so this is
  * critical to performance. */
 typedef struct cw_nxoe_array_s cw_nxoe_array_t;
 struct cw_nxoe_array_s
@@ -46,16 +46,14 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
 cw_nxoe_t *
 nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
-#define nxo_l_array_el_get nxo_array_el_get
-
 #ifdef CW_THREADS
 void
-nxo_l_array_lock(const cw_nxo_t *a_nxo)
+nxo_l_array_lock(const cw_nxo_t *a_nxo);
 #endif
 
 #ifdef CW_THREADS
 void
-nxo_l_array_unlock(const cw_nxo_t *a_nxo)
+nxo_l_array_unlock(const cw_nxo_t *a_nxo);
 #endif
 
 cw_nxo_t *
