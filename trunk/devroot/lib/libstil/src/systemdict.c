@@ -47,7 +47,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(currentdict),
 	_SYSTEMDICT_ENTRY(currentfile),
 	_SYSTEMDICT_ENTRY(currentglobal),
-	_SYSTEMDICT_ENTRY(currentobjectformat),
 	_SYSTEMDICT_ENTRY(cvlit),
 	_SYSTEMDICT_ENTRY(cvm),
 	_SYSTEMDICT_ENTRY(cvn),
@@ -123,8 +122,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(rand),
 	_SYSTEMDICT_ENTRY(rcheck),
 	_SYSTEMDICT_ENTRY(read),
-	_SYSTEMDICT_ENTRY(readhexstring),
-	_SYSTEMDICT_ENTRY(readline),
 	_SYSTEMDICT_ENTRY(readonly),
 	_SYSTEMDICT_ENTRY(readstring),
 	_SYSTEMDICT_ENTRY(realtime),
@@ -138,7 +135,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(search),
 	_SYSTEMDICT_ENTRY(setfileposition),
 	_SYSTEMDICT_ENTRY(setglobal),
-	_SYSTEMDICT_ENTRY(setobjectformat),
 	_SYSTEMDICT_ENTRY(shift),
 	_SYSTEMDICT_ENTRY(srand),
 	_SYSTEMDICT_ENTRY(stack),
@@ -169,8 +165,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(wcheck),
 	_SYSTEMDICT_ENTRY(where),
 	_SYSTEMDICT_ENTRY(write),
-	_SYSTEMDICT_ENTRY(writehexstring),
-	_SYSTEMDICT_ENTRY(writeobject),
 	_SYSTEMDICT_ENTRY(writestring),
 	_SYSTEMDICT_ENTRY(xcheck),
 	_SYSTEMDICT_ENTRY(xor),
@@ -498,12 +492,6 @@ systemdict_currentglobal(cw_stilt_t *a_stilt)
 	stack = stilt_data_stack_get(a_stilt);
 	stilo = stils_push(stack);
 	stilo_boolean_new(stilo, stilt_currentglobal(a_stilt));
-}
-
-void
-systemdict_currentobjectformat(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1257,6 +1245,12 @@ systemdict_or(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_output(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_pop(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
@@ -1371,18 +1365,6 @@ systemdict_rcheck(cw_stilt_t *a_stilt)
 
 void
 systemdict_read(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_readhexstring(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_readline(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
@@ -1528,12 +1510,6 @@ systemdict_setglobal(cw_stilt_t *a_stilt)
 	stilo = stils_get(stack);
 	stilt_setglobal(a_stilt, stilo_boolean_get(stilo));
 	stils_pop(stack);
-}
-
-void
-systemdict_setobjectformat(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1841,18 +1817,6 @@ systemdict_where(cw_stilt_t *a_stilt)
 
 void
 systemdict_write(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_writehexstring(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_writeobject(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }

@@ -109,9 +109,6 @@ struct cw_stilo_s {
 			cw_bool_t	val;
 		}	boolean;
 		struct {
-			cw_sint32_t	fd;
-		}	file;
-		struct {
 			cw_sint64_t	i;
 		}	integer;
 		struct {
@@ -219,6 +216,28 @@ cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
  * file.
  */
 void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
+void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_bool_t
+    (*a_read)(void *a_opaque, cw_uint32_t a_len, cw_uint8_t *r_str));
+void		stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
+    *a_filename, const cw_uint8_t *a_flags);
+void		stilo_file_close(cw_stilo_t *a_stilo);
+cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len,
+    cw_uint8_t *r_str);
+void		stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str,
+    cw_uint32_t a_len);
+void		stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length);
+cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
+void		stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t
+    a_position);
+cw_uint32_t	stilo_file_buffer_size_get(cw_stilo_t *a_stilo);
+void		stilo_file_buffer_size_set(cw_stilo_t *a_stilo, cw_uint32_t
+    a_size);
+cw_sint64_t	stilo_file_buffer_count(cw_stilo_t *a_stilo);
+void		stilo_file_buffer_flush(cw_stilo_t *a_stilo);
+void		stilo_file_buffer_reset(cw_stilo_t *a_stilo);
+cw_bool_t	stilo_file_status(cw_stilo_t *a_stilo);
+cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
 
 /*
  * hook.

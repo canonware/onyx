@@ -13,6 +13,9 @@
 
 #include <stdarg.h>
 #include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILOE_MAGIC	0x0fa6e798
@@ -20,6 +23,7 @@
 
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
+typedef struct cw_stiloe_file_s cw_stiloe_file_t;
 typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
 typedef struct cw_stiloe_name_s cw_stiloe_name_t;
@@ -121,10 +125,30 @@ struct cw_stiloe_dict_s {
 	}	e;
 };
 
+struct cw_stiloe_file_s {
+	cw_stiloe_t	stiloe;
+	cw_stilt_t	*stilt;
+	cw_sint32_t	fd;
+	union {
+		struct {
+			cw_uint8_t	*buffer;
+			cw_uint32_t	buffer_size;
+			cw_uint32_t	buffer_offset;
+		}	b;
+		struct {
+			cw_bool_t	(*read) (void *a_opaque, cw_uint32_t
+			    a_len, cw_uint8_t *r_str);
+			void		*opaque;
+		}	i;
+	}	t;
+};
+
 struct cw_stiloe_hook_s {
 	cw_stiloe_t	stiloe;
 	void		*data;
 	void		(*exec) (void *);
+	void		(*copy) (void *);
+	void		(*get) (void *);
 	void		(*dealloc) (void *);
 	cw_stiloe_t	*(*ref_iterator) (void *);
 };
@@ -1099,8 +1123,6 @@ stilo_p_dict_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	_cw_check_ptr(dict);
 	_cw_assert(dict->stiloe.magic == _CW_STILOE_MAGIC);
 
-	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
-
 	if (dict->stiloe.indirect == FALSE) {
 		cw_stiloe_dicto_t	*dicto;
 		cw_chi_t		*chi;
@@ -1387,25 +1409,82 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 void
 stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
+	cw_stiloe_file_t	*file;
+
 	stilo_p_new(a_stilo, STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)stilt_malloc(a_stilt,
+	    sizeof(cw_stiloe_file_t));
+
+	file->stilt = a_stilt;
+	file->fd = -1;
+	file->t.b.buffer = NULL;
+	file->t.b.buffer_size = 0;
+	file->t.b.buffer_offset = 0;
+
+	a_stilo->o.stiloe = (cw_stiloe_t *)file;
+
+	stiloe_p_new(a_stilo->o.stiloe, STILOT_FILE);
 }
 
 static void
 stilo_p_file_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stiloe_file_t	*file;
+	cw_bool_t		ioerror = FALSE;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (file->fd == -2) {
+		/* Interactive. */
+		goto RETURN;
+	}
+
+	if (file->t.b.buffer != NULL) {
+		if (file->fd != -1 && file->t.b.buffer_offset > 0) {
+			if (write(file->fd, file->t.b.buffer,
+			    file->t.b.buffer_offset) == -1)
+				ioerror = TRUE;
+		}
+		stilt_free(file->stilt, file->t.b.buffer);
+	}
+	if (file->fd != -1) {
+		if (close(file->fd) == -1)
+			ioerror = TRUE;
+	}
+
+	if (ioerror)
+		xep_throw(_CW_XEPV_IOERROR);
+	RETURN:
 }
 
 static cw_stiloe_t *
-stiloe_p_file_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
+stiloe_p_file_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 {
-	_cw_error("XXX Not implemented");
-	return NULL;	/* XXX */
+	cw_stiloe_file_t	*file;
+
+	file = (cw_stiloe_file_t *)a_stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	return NULL;
 }
 
 static void
 stilo_p_file_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
 	_cw_error("XXX Not implemented");
 }
 
@@ -1413,12 +1492,550 @@ static void
 stilo_p_file_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
     cw_bool_t a_newline)
 {
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
-	
+	cw_stiloe_file_t	*file;
+	cw_uint8_t		newline = (a_newline) ? '\n' : '\0';
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
 	if (a_syntactic)
 		_cw_out_put_f(a_fd, "-file-[c]", newline);
 	else
 		_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
+}
+
+void
+stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd == -1);
+
+	file->fd = a_fd;
+}
+
+void
+stilo_file_interactive(cw_stilo_t *a_stilo, cw_bool_t (*a_read)(void *a_opaque,
+    cw_uint32_t a_len, cw_uint8_t *r_str))
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd == -1);
+
+	/* Discard the buffer if it exists. */
+	if (file->t.b.buffer != NULL) {
+		stilt_free(file->stilt, file->t.b.buffer);
+		file->t.b.buffer_size = 0;
+	}
+
+	/*
+	 * -2 is a special value that signifies this is an interactive editor
+	 * "file".
+	 */
+	file->fd = -2;
+	file->t.i.read = a_read;
+}
+
+void
+stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t *a_filename, const
+    cw_uint8_t *a_flags)
+{
+	cw_stiloe_file_t	*file;
+	int			flags;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (file->fd >= 0)
+		xep_throw(_CW_XEPV_INVALIDFILEACCESS);
+
+	/* Convert a_flags to the integer representation. */
+	switch (a_filename[0]) {
+	case 'r':
+		switch (a_filename[1]) {
+		case '\0':
+			flags = O_RDONLY;
+			break;
+		case '+':
+			flags = O_RDWR;
+			break;
+		default:
+			xep_throw(_CW_XEPV_INVALIDFILEACCESS);
+		}
+		break;
+	case 'w':
+		switch (a_filename[1]) {
+		case '\0':
+			flags = O_WRONLY | O_CREAT | O_TRUNC;
+			break;
+		case '+':
+			flags = O_RDWR | O_CREAT | O_TRUNC;
+			break;
+		default:
+			xep_throw(_CW_XEPV_INVALIDFILEACCESS);
+		}
+		break;
+	case 'a':
+		switch (a_filename[1]) {
+		case '\0':
+			flags = O_WRONLY | O_CREAT;
+			break;
+		case '+':
+			flags = O_RDWR | O_CREAT;
+			break;
+		default:
+			xep_throw(_CW_XEPV_INVALIDFILEACCESS);
+		}
+		break;
+	default:
+		xep_throw(_CW_XEPV_INVALIDFILEACCESS);
+	}
+
+	file->fd = open(a_filename, flags, 0x1ff);
+	if (file->fd == -1) {
+		switch (errno) {
+		case ENOSPC:
+		case EMFILE:
+		case ENFILE:
+			xep_throw(_CW_XEPV_IOERROR);
+		default:
+			xep_throw(_CW_XEPV_INVALIDFILEACCESS);
+		}
+	}
+}
+
+void
+stilo_file_close(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_file_t	*file;
+	cw_bool_t		ioerror = FALSE;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (file->fd == -2) {
+		/* Interactive file object. */
+		file->fd = -1;
+		file->t.i.read = NULL;
+		goto RETURN;
+	}
+
+	if (file->fd == -1)
+		xep_throw(_CW_XEPV_IOERROR);
+
+	/* Flush the buffer if necessary. */
+	if (file->t.b.buffer != NULL && file->t.b.buffer_offset > 0) {
+		if (write(file->fd, file->t.b.buffer, file->t.b.buffer_offset)
+		    == -1)
+			ioerror = TRUE;
+		file->t.b.buffer_offset = 0;
+	}
+
+	if (close(file->fd) == -1)
+		ioerror = TRUE;
+
+	file->fd = -1;
+
+	if (ioerror)
+		xep_throw(_CW_XEPV_IOERROR);
+	RETURN:
+}
+
+cw_sint32_t
+stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
+{
+	cw_sint32_t		retval;
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (file->fd == -1)
+		xep_throw(_CW_XEPV_IOERROR);
+
+	if (file->fd == -2) {
+		retval = file->t.i.read(file->t.i.opaque, a_len, r_str);
+		if (retval == -1) {
+			file->fd = -1;
+			file->t.i.read = NULL;
+			file->t.i.opaque = NULL;
+		}
+	} else {
+		/*
+		 * Use the internal buffer if it exists.  If there aren't enough
+		 * data in the buffer to fill r_str, copy what we have to r_str,
+		 * then do a readv() to fill r_str and the buffer.  If the
+		 * buffer is empty, also do a readv() to replenish it.
+		 */
+		if (file->t.b.buffer != NULL) {
+			if ((file->t.b.buffer_offset > 0) && (a_len <=
+			    file->t.b.buffer_offset)) {
+				/* We had enough buffered data. */
+				memcpy(r_str, file->t.b.buffer, a_len);
+				memcpy(file->t.b.buffer,
+				    &file->t.b.buffer[file->t.b.buffer_offset],
+				    file->t.b.buffer_offset - a_len);
+				retval = a_len;
+				file->t.b.buffer_offset -= a_len;
+			} else {
+				ssize_t		nread;
+				struct iovec	iov[2];
+
+				/*
+				 * Copy what we have buffered before reading
+				 * more data.
+				 */
+				memcpy(r_str, file->t.b.buffer,
+				    file->t.b.buffer_offset);
+				retval = file->t.b.buffer_offset;
+				r_str += file->t.b.buffer_offset;
+				a_len -= file->t.b.buffer_offset;
+				file->t.b.buffer_offset = 0;
+
+				/*
+				 * Finish filling r_str and replenish the
+				 * internal buffer.
+				 */
+				iov[0].iov_base = r_str;
+				iov[0].iov_len = a_len;
+				iov[1].iov_base = file->t.b.buffer;
+				iov[1].iov_len = file->t.b.buffer_size;
+
+				nread = readv(file->fd, iov, 2);
+				if (nread == -1) {
+					/*
+					 * There was an error, but we already
+					 * managed to provide some data, so
+					 * don't report an error this time
+					 * around.
+					 */
+				} else if (nread <= a_len) {
+					/*
+					 * We didn't get enough data to start
+					 * filling the internal buffer.
+					 */
+					retval += nread;
+				} else {
+					retval += a_len;
+					file->t.b.buffer_offset = nread - a_len;
+				}
+			}
+		} else {
+			retval = read(file->fd, r_str, a_len);
+		}
+	}
+
+	return retval;
+}
+
+void
+stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str, cw_uint32_t
+    a_len)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	if (file->fd == -1)
+		xep_throw(_CW_XEPV_IOERROR);
+
+	if (file->t.b.buffer != NULL) {
+		/*
+		 * Use the internal buffer.  If a_str won't entirely fit, do a
+		 * writev().
+		 */
+		if (a_len <= file->t.b.buffer_size - file->t.b.buffer_offset) {
+			memcpy(&file->t.b.buffer[file->t.b.buffer_offset],
+			    a_str, a_len);
+			file->t.b.buffer_offset += a_len;
+		} else {
+			struct iovec	iov[2];
+
+			iov[0].iov_base = file->t.b.buffer;
+			iov[0].iov_len = file->t.b.buffer_size;
+			iov[1].iov_base = (char *)a_str;
+			iov[1].iov_len = a_len;
+
+			if (writev(file->fd, iov, 2) == -1)
+				xep_throw(_CW_XEPV_IOERROR);
+
+			file->t.b.buffer_offset = 0;
+		}
+	} else {
+		if (write(file->fd, a_str, a_len) == -1)
+			xep_throw(_CW_XEPV_IOERROR);
+	}
+}
+
+void
+stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	if (ftruncate(file->fd, a_length))
+		xep_throw(_CW_XEPV_IOERROR);
+}
+
+cw_sint64_t
+stilo_file_position_get(cw_stilo_t *a_stilo)
+{
+	cw_sint64_t		retval;
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	retval = lseek(file->fd, 0, SEEK_CUR);
+
+	return retval;
+}
+
+void
+stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t a_position)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	lseek(file->fd, a_position, SEEK_SET);
+}
+
+cw_uint32_t
+stilo_file_buffer_size_get(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	return file->t.b.buffer_size;
+}
+
+void
+stilo_file_buffer_size_set(cw_stilo_t *a_stilo, cw_uint32_t a_size)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	if (a_size == 0) {
+		if (file->t.b.buffer != NULL) {
+			stilt_free(file->stilt, file->t.b.buffer);
+			file->t.b.buffer = NULL;
+			file->t.b.buffer_size = 0;
+			file->t.b.buffer_offset = 0;
+		}
+	} else {
+		if (file->t.b.buffer != NULL)
+			stilt_free(file->stilt, file->t.b.buffer);
+		file->t.b.buffer = (cw_uint8_t *)stilt_malloc(file->stilt,
+		    a_size);
+		file->t.b.buffer_size = a_size;
+	}
+}
+
+cw_sint64_t
+stilo_file_buffer_count(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	return file->t.b.buffer_offset;
+}
+
+void
+stilo_file_buffer_flush(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	if ((file->t.b.buffer != NULL) && (file->t.b.buffer_offset > 0)) {
+		if (write(file->fd, file->t.b.buffer, file->t.b.buffer_offset)
+		    == -1) {
+			xep_throw(_CW_XEPV_IOERROR);
+		}
+		file->t.b.buffer_offset = 0;
+	}
+}
+
+void
+stilo_file_buffer_reset(cw_stilo_t *a_stilo)
+{
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	file->t.b.buffer_offset = 0;
+}
+
+cw_bool_t
+stilo_file_status(cw_stilo_t *a_stilo)
+{
+	cw_bool_t		retval;
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	if (file->fd != -1)
+		retval = FALSE;
+	else
+		retval = TRUE;
+
+	return retval;
+}
+
+cw_sint64_t
+stilo_file_mtime(cw_stilo_t *a_stilo)
+{
+	cw_sint64_t		retval;
+	struct stat		sb;
+	cw_stiloe_file_t	*file;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+	_cw_assert(file->fd != -2);
+
+	if (file->fd == -1)
+		retval = -1;
+	else {
+		if (fstat(file->fd, &sb) == -1)
+			retval = -1;
+		else {
+			/* Keep 63 bits of accuracy. */
+			retval = sb.st_mtimespec.tv_sec;
+			retval <<= 31;
+			retval |= (sb.st_mtimespec.tv_nsec >> 1);
+		}
+	}
+
+	return retval;
 }
 
 /*
@@ -2080,6 +2697,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 	if (string->e.s.len > 0) {
 		string->e.s.str = (cw_uint8_t
 		    *)stilt_malloc(a_stilt, string->e.s.len);
+		memset(string->e.s.str, 0, string->e.s.len);
 	} else
 		string->e.s.str = NULL;
 
