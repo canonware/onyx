@@ -88,8 +88,11 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 		       &capturecount) != 0)
 	|| (pcre_fullinfo(regex->pcre, regex->extra, PCRE_INFO_SIZE,
 			  &regex->size) != 0)
+#ifdef PCRE_INFO_EXTRASIZE
 	|| (pcre_fullinfo(regex->pcre, regex->extra, PCRE_INFO_EXTRASIZE,
-			 &regex->extrasize) != 0))
+			 &regex->extrasize) != 0)
+#endif
+	)
     {
 	free(regex->pcre);
 	if (regex->extra != NULL)
@@ -107,7 +110,11 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 
     /* Tell the GC about the space being taken up by regex->pcre and
      * regex->extra. */
-    nxa_l_count_adjust(nxa, regex->size + regex->extrasize);
+    nxa_l_count_adjust(nxa, regex->size
+#ifdef PCRE_INFO_EXTRASIZE
+		       + regex->extrasize
+#endif
+		       );
 
     /* Create a reference to the regex object. */
     nxo_no_new(a_nxo);
