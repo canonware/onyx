@@ -109,6 +109,13 @@ static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
 #define _CW_STILT_ROOTS_BASE_SHRINK	  8
 
 /*
+ * Size of buffer to use when executing file objects.  This generally doesn't
+ * need to be huge, because there is usually additional buffering going on
+ * upstream.
+ */
+#define	_CW_STILT_FILE_READ_SIZE	128
+
+/*
  * stilts.
  */
 cw_stilts_t *
@@ -293,7 +300,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 }
 
 void
-stilt_exec(cw_stilt_t *a_stilt)
+stilt_loop(cw_stilt_t *a_stilt)
 {
 	cw_stilo_t	*stilo, *tstilo;
 	cw_uint32_t	sdepth;
@@ -369,7 +376,7 @@ stilt_exec(cw_stilt_t *a_stilt)
 					tstilo =
 					    stils_push(&a_stilt->exec_stils);
 					stilo_dup(tstilo, &array[i]);
-					stilt_exec(a_stilt);
+					stilt_loop(a_stilt);
 				}
 			}
 
@@ -425,7 +432,7 @@ stilt_exec(cw_stilt_t *a_stilt)
 			stilo = stils_get(&a_stilt->exec_stils);
 			stilo_no_new(&val);
 			if (stilt_dict_stack_search(a_stilt, stilo, &val))
-				xep_throw(_CW_XEPV_UNDEFINED);
+				xep_throw(_CW_STILX_UNDEFINED);
 			stilo_move(stilo, &val);
 			break;
 		}
@@ -433,7 +440,29 @@ stilt_exec(cw_stilt_t *a_stilt)
 			stilo->o.operator.f(a_stilt);
 			stils_pop(&a_stilt->exec_stils);
 			break;
-		case STILOT_FILE:
+		case STILOT_FILE: {
+			cw_stilts_t	stilts;
+			cw_sint32_t	nread;
+			cw_uint8_t	buffer[_CW_STILT_FILE_READ_SIZE];
+
+			stilts_new(&stilts, a_stilt);
+			/*
+			 * Read data from the file and interpret it until an EOF
+			 * (0 byte read).
+			 */
+			for (nread = stilo_file_read(stilo,
+			    _CW_STILT_FILE_READ_SIZE, buffer); nread > 0;
+			    nread = stilo_file_read(stilo,
+			    _CW_STILT_FILE_READ_SIZE, buffer)) {
+				stilt_interpret(a_stilt, &stilts, buffer,
+				    nread);
+			}
+			stilt_flush(a_stilt, &stilts);
+			stilts_delete(&stilts, a_stilt);
+
+			stils_pop(&a_stilt->exec_stils);
+			break;
+		}
 		case STILOT_HOOK:
 		case STILOT_LOCK:
 			_cw_not_reached();	/* XXX */
@@ -629,7 +658,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					a_stilt->defer_count--;
 				else {
 					/* Missing '{'. */
-					xep_throw(_CW_XEPV_SYNTAXERROR);
+					xep_throw(_CW_STILX_SYNTAXERROR);
 				}
 				stilt_p_procedure_accept(a_stilt);
 				break;
@@ -845,7 +874,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					    10);
 					if ((errno == ERANGE) && ((val ==
 					    QUAD_MIN) || (val == QUAD_MAX)))
-						xep_throw(_CW_XEPV_RANGECHECK);
+						xep_throw(_CW_STILX_RANGECHECK);
 
 					stilo =
 					    stils_push(&a_stilt->data_stils);
@@ -933,7 +962,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					    a_stilt->m.n.base);
 					if ((errno == ERANGE) && ((val ==
 					    QUAD_MIN) || (val == QUAD_MAX)))
-						xep_throw(_CW_XEPV_RANGECHECK);
+						xep_throw(_CW_STILX_RANGECHECK);
 
 					stilo =
 					    stils_push(&a_stilt->data_stils);
@@ -1566,10 +1595,10 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 	stilo = stils_push(&a_stilt->exec_stils);
 	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
 		stils_pop(&a_stilt->exec_stils);
-		xep_throw(_CW_XEPV_UNDEFINED);
+		xep_throw(_CW_STILX_UNDEFINED);
 	}
 
-	stilt_exec(a_stilt);
+	stilt_loop(a_stilt);
 }
 
 static void
@@ -1647,7 +1676,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 			stilt_p_reset(a_stilt);
-			stilt_exec(a_stilt);
+			stilt_loop(a_stilt);
 		} else {
 			/* Push the name object onto the data stack. */
 			stilo = stils_push(&a_stilt->data_stils);
@@ -1676,7 +1705,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		
 		stilo = stils_push(&a_stilt->data_stils);
 		if (stilt_dict_stack_search(a_stilt, &key, stilo))
-			xep_throw(_CW_XEPV_UNDEFINED);
+			xep_throw(_CW_STILX_UNDEFINED);
 
 		stilt_p_reset(a_stilt);
 		break;

@@ -25,42 +25,42 @@
  * Globals.
  */
 cw_stilt_t	stilt;
-cw_stilts_t	estilts;
+cw_stilts_t	stilts;
 cw_uint8_t	prompt_str[_PROMPT_STRLEN];
+EditLine	*el;
+History		*hist;
+cw_uint8_t	*buffer = NULL;
+cw_uint32_t	buffer_len = 0;
+cw_uint32_t	buffer_offset = 0;
 
-char *prompt(EditLine *a_el);
-const char *basename(const char *a_str);
+char		*prompt(EditLine *a_el);
+cw_sint32_t	cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str);
+const char	*basename(const char *a_str);
 
 int
 main(int argc, char **argv)
 {
 	cw_stil_t	stil;
-	cw_stilts_t	stilts;
-	cw_out_t	out;
 
 	libstash_init();
 
-	out_new(&out, cw_g_mem);
-	out_set_default_fd(&out, 1);
-
-	stil_new(&stil);
-	stilt_new(&stilt, &stil);
-	stilts_new(&stilts, &stilt);
-	stilts_new(&estilts, &stilt);
-
+	/*
+	 * Do a bunch of extra setup work to hook in command editing
+	 * functionality if this is an interactive session.  Otherwise, just let
+	 * the interpreter do its thing.
+	 */
 	if (isatty(0)) {
 		cw_uint8_t	code[] =
 		    "product print `, version ' print version print \".\n\""
 		    " print flush";
-		EditLine	*el;
-		History		*hist;
-		const char	*str;
-		int		count;
-		cw_bool_t	continuation = FALSE;
+
+		stil_new(&stil, cl_read, NULL);
+		stilt_new(&stilt, &stil);
+		stilts_new(&stilts, &stilt);
 
 		/* Print product and version info. */
-		stilt_interpret(&stilt, &estilts, code, sizeof(code) - 1);
-		stilt_flush(&stilt, &estilts);
+		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(&stilt, &stilts);
 
 		/*
 		 * Initialize the command editor.
@@ -74,61 +74,24 @@ main(int argc, char **argv)
 		el_set(el, EL_EDITOR, "emacs");
 		el_set(el, EL_SIGNAL, 1);
 
-		/* Loop on input until the user quits. */
-		for (;;) {
-			if ((str = el_gets(el, &count)) == NULL)
-				break;
-			if ((stilt_deferred(&stilt) == FALSE) &&
-			    (stilt_state(&stilt) == STATE_START)) {
-				const HistEvent	*hevent;
-
-				/*
-				 * Completion of a history element.  Insert it,
-				 * taking care to avoid simple (non-continued)
-				 * duplicates.
-				 */
-				if (continuation) {
-					history(hist, H_ENTER, str);
-					continuation = FALSE;
-				} else {
-					hevent = history(hist, H_FIRST);
-					if (hevent == NULL || strcmp(str,
-					    hevent->str))
-					history(hist, H_ENTER, str);
-				}
-			} else {
-				/*
-				 * Continuation.  Append it to the current
-				 * history element.
-				 */
-				history(hist, H_ADD, str);
-				continuation = TRUE;
-			}
-
-			stilt_interpret(&stilt, &stilts, str,
-			    (cw_uint32_t)count);
-		}
-		stilt_flush(&stilt, &stilts);
+		/* Run the interpreter. */
+		stilt_exec(&stilt);
 
 		/* Clean up the command editor. */
 		el_end(el);
 		history_end(hist);
-	} else {
-		char	input[_BUF_SIZE];
-		ssize_t	bytes_read;
 
-		/* Loop on input until EOF. */
-		for (;;) {
-			bytes_read = read(0, input, _BUF_SIZE - 1);
-			if (bytes_read <= 0)
-				break;
-			stilt_interpret(&stilt, &stilts, input,
-			    (cw_uint32_t)bytes_read);
-		}
-		stilt_flush(&stilt, &stilts);
+		if (buffer != NULL)
+			_cw_free(buffer);
+	} else {
+		stil_new(&stil, NULL, NULL);
+		stilt_new(&stilt, &stil);
+		stilts_new(&stilts, &stilt);
+
+		/* Run the interpreter. */
+		stilt_exec(&stilt);
 	}
 
-	stilts_delete(&estilts, &stilt);
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);
@@ -148,8 +111,8 @@ prompt(EditLine *a_el)
 		cw_stils_t	*stack = stilt_data_stack_get(&stilt);
 
 		/* Push the prompt onto the data stack. */
-		stilt_interpret(&stilt, &estilts, code, sizeof(code) - 1);
-		stilt_flush(&stilt, &estilts);
+		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
+		stilt_flush(&stilt, &stilts);
 
 		/* Get the actual prompt string. */
 		stilo = stils_get(stack);
@@ -177,6 +140,106 @@ prompt(EditLine *a_el)
 	}
 
 	return prompt_str;
+}
+
+cw_sint32_t
+cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str)
+{
+	cw_sint32_t		retval;
+	const char		*str;
+	int			count = 0;
+	static cw_bool_t	continuation = FALSE;
+
+	_cw_assert(a_len > 0);
+
+	if (buffer_offset == 0) {
+		if ((str = el_gets(el, &count)) == NULL) {
+			retval = 0;
+			goto RETURN;
+		}
+		_cw_assert(count > 0);
+
+		/*
+		 * Update the command line history.
+		 */
+		if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
+		    STATE_START)) {
+			const HistEvent	*hevent;
+
+			/*
+			 * Completion of a history element.  Insert it, taking
+			 * care to avoid simple (non-continued) duplicates.
+			 */
+			if (continuation) {
+				history(hist, H_ENTER, str);
+				continuation = FALSE;
+			} else {
+				hevent = history(hist, H_FIRST);
+				if (hevent == NULL || strcmp(str,
+				    hevent->str))
+					history(hist, H_ENTER, str);
+			}
+		} else {
+			/*
+			 * Continuation.  Append it to the current history
+			 * element.
+			 */
+			history(hist, H_ADD, str);
+			continuation = TRUE;
+		}
+
+		/*
+		 * Return as much data as possible.  If necessary, store the
+		 * rest in buffer.
+		 */
+		if (count > a_len) {
+			/* It won't fit. */
+			memcpy(r_str, str, a_len);
+			count -= a_len;
+			str += a_len;
+			if (count > buffer_len) {
+				/*
+				 * The buffer isn't big enough.  Expand it so
+				 * that it's just large enough.
+				 */
+				if (buffer == NULL)
+					buffer = (cw_uint8_t
+					    *)_cw_malloc(count);
+				else
+					buffer = (cw_uint8_t
+					    *)_cw_realloc(buffer, count);
+				buffer_len = count;
+			}
+			memcpy(buffer, str, count);
+			buffer_offset = count;
+
+			retval = a_len;
+		} else {
+			/* It will fit. */
+			memcpy(r_str, str, count);
+			retval = count;
+		}
+	} else {
+		/*
+		 * We still have buffered data from the last time we were
+		 * called.  Return as much of it as possible.
+		 */
+		if (buffer_offset > a_len) {
+			/* There are more data than we can return. */
+			memcpy(r_str, buffer, a_len);
+			memmove(r_str, &r_str[a_len], buffer_offset - a_len);
+			buffer_offset -= a_len;
+			retval = a_len;
+		} else {
+			/* Return all the data. */
+			memcpy(r_str, buffer, buffer_offset);
+			retval = buffer_offset;
+			buffer_offset = 0;
+		}
+	}
+
+	RETURN:
+	return retval;
 }
 
 /* Doesn't strip trailing '/' characters. */

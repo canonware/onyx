@@ -7,6 +7,21 @@
  *
  * Version: <Version>
  *
+ * Stacks are implemented by the stils class.  Stack object space is allocated
+ * in chunks (implemented by the stilsc class) in order to improve locality and
+ * reduce memory fragmentation.  Freed objects within a chunk are kept in a
+ * stack (LIFO ordering) and re-used.  This has the potential to cause adjacent
+ * stack objects to be scattered throughout the stilsc's, but typical stack
+ * operations have the same effect anyway, so little care is taken to keep stack
+ * object re-allocation contiguous, or even local.
+ *
+ * Since the GC must traverse the entire stack at every collection, we use that
+ * opportunity to tidy things up.  The entire stack is re-written contiguously,
+ * and the old stilsc's are returned to the global pool.
+ *
+ * By keeping the re-allocation algorithm simple, we are able to make common
+ * stack operations very fast.
+ *
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
@@ -175,7 +190,7 @@ stils_pop(cw_stils_t *a_stils)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stils->count == 0)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	stilso = qs_top(&a_stils->stack);
 	qs_pop(&a_stils->stack, link);
@@ -194,7 +209,7 @@ stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	_cw_assert(a_count > 0);
 
 	if (a_count > a_stils->count)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	/* Get a pointer to what will be the new stack top. */
 	for (i = 0, bottom = qs_top(&a_stils->stack); i < a_count - 1; i++)
@@ -242,9 +257,9 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_count < 1)
-		xep_throw(_CW_XEPV_RANGECHECK);
+		xep_throw(_CW_STILX_RANGECHECK);
 	if (a_count > a_stils->count)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	/*
 	 * Calculate the current index of the element that will end up on top of
@@ -335,7 +350,7 @@ stils_get(cw_stils_t *a_stils)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stils->count == 0)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	stilso = qs_top(&a_stils->stack);
 
@@ -352,7 +367,7 @@ stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_index >= a_stils->count)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	for (i = 0, stilso = qs_top(&a_stils->stack); i < a_index; i++)
 		stilso = qs_down(stilso, link);
@@ -369,12 +384,12 @@ stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stils->count <= 1)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	stilso = (cw_stilso_t *)a_stilo;
 	stilso = qs_down(stilso, link);
 	if (stilso == NULL)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	return &stilso->stilo;
 }

@@ -217,8 +217,9 @@ cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
  */
 void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
-void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_bool_t
-    (*a_read)(void *a_opaque, cw_uint32_t a_len, cw_uint8_t *r_str));
+void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_sint32_t
+    (*a_read_f)(void *a_read_arg, cw_uint32_t a_len, cw_uint8_t *r_str), void
+    *a_read_arg);
 void		stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
     *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags, cw_uint32_t
     a_flen);

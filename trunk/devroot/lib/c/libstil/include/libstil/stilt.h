@@ -166,11 +166,11 @@ void		stilts_position_set(cw_stilts_t *a_stilt, cw_uint32_t a_line,
  */
 cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void		stilt_delete(cw_stilt_t *a_stilt);
+#define		stilt_exec(a_stilt) systemdict_start(a_stilt)
+
 #define		stilt_state(a_stilt) (a_stilt)->state
 #define		stilt_deferred(a_stilt) ((a_stilt)->defer_count ? TRUE : FALSE)
-
-void		stilt_exec(cw_stilt_t *a_stilt);
-
+void		stilt_loop(cw_stilt_t *a_stilt);
 void		stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 void		stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts);

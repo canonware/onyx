@@ -7,21 +7,6 @@
  *
  * Version: <Version>
  *
- * Stacks are implemented by the stils class.  Stack object space is allocated
- * in chunks (implemented by the stilsc class) in order to improve locality and
- * reduce memory fragmentation.  Freed objects within a chunk are kept in a ring
- * (LIFO ordering) and re-used.  This has the potential to cause adjacent stack
- * objects to be scattered throughout the stilsc's, but typical stack operations
- * have the same effect anyway, so little care is taken to keep stack object
- * re-allocation contiguous, or even local.
- *
- * Since the GC must traverse the entire stack at every collection, we use that
- * opportunity to tidy things up.  The entire stack is re-written contiguously,
- * and the old stilsc's are returned to the global pool.
- *
- * By keeping the re-allocation algorithm simple, we are able to make common
- * stack operations very fast.
- *
  ******************************************************************************/
 
 /* Calculate stilsc size, given the number of stilo's. */
