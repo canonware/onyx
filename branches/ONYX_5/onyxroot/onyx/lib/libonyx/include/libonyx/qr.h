@@ -14,8 +14,8 @@
 #define qr(a_type)							\
 struct									\
 {									\
-	a_type *qre_next;						\
-	a_type *qre_prev;						\
+    a_type *qre_next;							\
+    a_type *qre_prev;							\
 }
 
 /* Ring functions. */
@@ -68,9 +68,9 @@ struct									\
     do									\
     {									\
 	(a_qr)->a_field.qre_prev->a_field.qre_next			\
-	    = (a_qr)->a_field.qre_next;					\
+	  = (a_qr)->a_field.qre_next;					\
 	(a_qr)->a_field.qre_next->a_field.qre_prev			\
-	    = (a_qr)->a_field.qre_prev;					\
+	  = (a_qr)->a_field.qre_prev;					\
 	(a_qr)->a_field.qre_next = (a_qr);				\
 	(a_qr)->a_field.qre_prev = (a_qr);				\
     } while (0)
