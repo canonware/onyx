@@ -1029,6 +1029,16 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	}								\
     } while (0)
 
+#define NXO_STACK_BPOP(a_nxo, a_thread)					\
+    do									\
+    {									\
+	if (nxo_stack_bpop(a_nxo))					\
+	{								\
+	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
+	    return;							\
+	}								\
+    } while (0)
+
 #define NXO_STACK_NPOP(a_nxo, a_thread, a_count)			\
     do									\
     {									\
@@ -1039,10 +1049,31 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	}								\
     } while (0)
 
+#define NXO_STACK_BNPOP(a_nxo, a_thread, a_count)			\
+    do									\
+    {									\
+	if (nxo_stack_bnpop((a_nxo), (a_count)))			\
+	{								\
+	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
+	    return;							\
+	}								\
+    } while (0)
+
 #define NXO_STACK_GET(r_nxo, a_nxo, a_thread)				\
      do									\
      {									\
 	(r_nxo) = nxo_stack_get(a_nxo);					\
+	if ((r_nxo) == NULL)						\
+	{								\
+	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
+	    return;							\
+	}								\
+    } while (0)
+
+#define NXO_STACK_BGET(r_nxo, a_nxo, a_thread)				\
+     do									\
+     {									\
+	(r_nxo) = nxo_stack_bget(a_nxo);				\
 	if ((r_nxo) == NULL)						\
 	{								\
 	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
@@ -1061,10 +1092,32 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	}								\
     } while (0)
 
+#define NXO_STACK_BNGET(r_nxo, a_nxo, a_thread, a_index)		\
+    do									\
+    {									\
+	(r_nxo) = nxo_stack_bnget((a_nxo), (a_index));			\
+	if ((r_nxo) == NULL)						\
+	{								\
+	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
+	    return;							\
+	}								\
+    } while (0)
+
 #define NXO_STACK_DOWN_GET(r_nxo, a_nxo, a_thread, a_object)		\
     do									\
     {									\
 	(r_nxo) = nxo_stack_down_get((a_nxo), (a_object));		\
+	if ((r_nxo) == NULL)						\
+	{								\
+	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
+	    return;							\
+	}								\
+    } while (0)
+
+#define NXO_STACK_UP_GET(r_nxo, a_nxo, a_thread, a_object)		\
+    do									\
+    {									\
+	(r_nxo) = nxo_stack_up_get((a_nxo), (a_object));		\
 	if ((r_nxo) == NULL)						\
 	{								\
 	    nxo_thread_nerror((a_thread), NXN_stackunderflow);		\
