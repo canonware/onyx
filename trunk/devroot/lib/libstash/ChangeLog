@@ -1,3 +1,8 @@
+1999-04-28  J. Owen Evans  <jasone@canonware.com>
+
+	* src/buf.c (buf_p_get_data_position): Simplify (and improve
+	performance of) the binary search code.
+
 1999-04-16  Jason Evans  <jasone@canonware.com>
 
 	* src/buf.c (buf_get_iovec): Add a_is_sys_iovec argument.

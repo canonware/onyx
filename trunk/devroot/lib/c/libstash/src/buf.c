@@ -1353,7 +1353,7 @@ buf_p_get_data_position(cw_buf_t * a_buf,
   }
   else
   {
-    cw_uint32_t first, last;
+    cw_uint32_t first, last, index;
     
     if (FALSE == a_buf->is_cumulative_valid)
     {
@@ -1389,53 +1389,40 @@ buf_p_get_data_position(cw_buf_t * a_buf,
       last = a_buf->array_end;
     }
     
+    /* Binary search, where "first" is the index of the first element in the
+     * range to search, and "last" is one plus the index of the last element in
+     * the range to search. */
+    if (a_offset < a_buf->cumulative_index[first])
     {
-      cw_uint32_t adjust, index;
-      
-      /* Binary search, where "first" is the index of the first element in the
-       * range to search, and "last" is one plus the index of the last element
-       * in the range to search. */
-      adjust = (last - first) >> 1;
-      index = first + adjust;
+      index = first;
+    }
+    else
+    {
       while (1)
       {
-	adjust >>= 1;
+	index = (first + last) >> 1;
+	  
 	if (a_buf->cumulative_index[index] <= a_offset)
 	{
-	  if (adjust != 0)
-	  {
-	    index += adjust;
-	  }
-	  else
-	  {
-	    index++;
-	  }
+	  first = index + 1;
 	}
-	else if ((a_buf->cumulative_index[index]
-		  - bufel_get_valid_data_size(&a_buf->bufel_array[index]))
-		 > a_offset)
+	else if (a_buf->cumulative_index[index - 1] > a_offset)
 	{
-	  if (adjust != 0)
-	  {
-	    index -= adjust;
-	  }
-	  else
-	  {
-	    index--;
-	  }
+	  last = index;
 	}
 	else
 	{
-	  *a_array_element = index;
-	  *a_bufel_offset = (bufel_get_end_offset(&a_buf->bufel_array[index])
-			     - (a_buf->cumulative_index[index] - a_offset));
-
-	  a_buf->is_cached_bufel_valid = TRUE;
-	  a_buf->cached_bufel = index;
 	  break;
 	}
       }
     }
+	    
+    *a_array_element = index;
+    *a_bufel_offset = (bufel_get_end_offset(&a_buf->bufel_array[index])
+		       - (a_buf->cumulative_index[index] - a_offset));
+
+    a_buf->is_cached_bufel_valid = TRUE;
+    a_buf->cached_bufel = index;
   }
 }
 
