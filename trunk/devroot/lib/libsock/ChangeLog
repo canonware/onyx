@@ -1,3 +1,8 @@
+1999-04-05  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_read_block, sock_read_noblock): Don't try to
+	read more data than has been received.
+
 1999-03-24  Jason Evans  <jasone@canonware.com>
 
 	* src/sockb.c (sockb_init): Deal with being called, even if sockb
