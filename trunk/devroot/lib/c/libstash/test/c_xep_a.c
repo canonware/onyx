@@ -16,6 +16,7 @@
 #define	_CW_XEPV_BIZ	-130
 #define	_CW_XEPV_BAZ	-131
 #define	_CW_XEPV_BANG	-132
+#define	_CW_XEPV_BAM	-133
 
 void
 func_a(void)
@@ -61,7 +62,7 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	for (i = 0; i < 10; i++) {
+	for (i = 0; i < 11; i++) {
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "i == [i]\n", i);
 		xep_begin();
 		xep_try {
@@ -79,6 +80,8 @@ main()
 				xep_throw(_CW_XEPV_BAZ);
 			if (i == 8)
 				xep_throw(_CW_XEPV_BANG);
+			if (i == 9)
+				xep_throw(_CW_XEPV_BAM);
 		}
 		xep_catch(_CW_XEPV_FOO) {
 			_cw_assert(xep_value() == _CW_XEPV_FOO);
@@ -110,6 +113,13 @@ main()
 			} else {
 				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 				    "_CW_XEPV_BANG\n");
+				xep_handled();
+			}
+		}
+		xep_acatch {
+			if (xep_value() == _CW_XEPV_BAM) {
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "_CW_XEPV_BAM\n");
 				xep_handled();
 			}
 		}

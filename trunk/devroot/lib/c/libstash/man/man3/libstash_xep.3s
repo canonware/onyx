@@ -34,6 +34,10 @@ xep - Exception handling.
 .RI ( "cw_xepv_t a_xepv" )
 .I "..."
 
+.B xep_acatch
+.RI ( "void" )
+.I "..."
+
 .B xep_finally
 .I "..."
 
@@ -109,6 +113,14 @@ xep_catch(_CW_XEPV_ANOTHER_EXCEPTION)
 xep_mcatch(_CW_XEPV_YET_ANOTHER) {
 .RS
 /* React to exception, but propagate... */
+.RE
+}
+.br
+xep_acatch {
+.RS
+/* Handle all exceptions not explicitly handled above... */
+.br
+xep_handled();
 .RE
 }
 .br
@@ -255,6 +267,31 @@ Begin a block of code that catches an exception.
 Must immediately follow a \fBxep_catch\fR() call.
 This interface is used for the case where more than one exception type is to be
 handled by the same code block.
+The exception is not considered handled unless \fBxep_handled\fR() is called.
+.RE
+.RE
+
+.B xep_acatch
+.RI ( "void" )
+.I "..."
+.RS
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+None.
+.RE
+Exception(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Begin a block of code that catches all exceptions not explicitly caught by
+\fBxep_catch\fR() and \fBxep_mcatch\fR() blocks.
+There may only be one \fBxep_acatch\fR() block within a try/catch block.
 The exception is not considered handled unless \fBxep_handled\fR() is called.
 .RE
 .RE

@@ -38,5 +38,9 @@ main(): _CW_XEPV_BANG
 main(): _CW_XEPV_FINALLY
 main(): i == 9
 main(): _CW_XEPV_CODE
+main(): _CW_XEPV_BAM
+main(): _CW_XEPV_FINALLY
+main(): i == 10
+main(): _CW_XEPV_CODE
 main(): _CW_XEPV_FINALLY
 Test end

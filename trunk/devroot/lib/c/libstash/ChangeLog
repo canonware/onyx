@@ -1,3 +1,7 @@
+2000-11-30  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/xep.h (xep_acatch): Add.
+
 2000-11-28  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c (out_put_fvn): Add.
