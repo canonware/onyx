@@ -5,10 +5,10 @@
 COOK="cook"
 COOKPAR="-par 8"
 
-SRCDIR="onyx-latest"
-OBJDIR="onyx_obj"
+SRCDIR="slate-latest"
+OBJDIR="slate_obj"
 
-PREFIX=`pwd`/onyx_prefix
+PREFIX=`pwd`/slate_prefix
 
 #
 # Set up.
@@ -80,7 +80,7 @@ for d in 0 1 ; do
 done
 
 libs="libonyx"
-bins="onyx"
+bins="onyx slate"
 #
 # Test everything with every allowable combination of configure options.
 #

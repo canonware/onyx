@@ -52,7 +52,8 @@ $opt_retval =
 		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
-		"t|tag=s" => \$opt_tag
+		"t|tag=s" => \$opt_tag,
+		"V|version=s%" => \%OPT_VERSION
 		);
 
 if (($#ARGV >= 0)
@@ -66,7 +67,8 @@ if (($#ARGV >= 0)
 
 $run =
     "./snap @ARGS -T ONYX_ -p onyx -r devroot -f ChangeLog -f Cookfile.in"
-    . " -f COPYING -f INSTALL -f PLATFORMS -f README -f aclocal.m4"
+    . " -f COPYING -f INSTALL -f PLATFORMS -f README"
+    . " -f acinclude.m4 -f aclocal.m4"
     . " -f config.guess -f config.sub -f configure -f configure.in"
     . " -f install-sh"
     . " -f doc -f test"
@@ -95,5 +97,6 @@ sub print_usage
     print <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose] [--tag=<tag> | -t <tag>]
+       {--version <key>=<version> | -V <key>=<version>}*
 EOF
 }

@@ -46,7 +46,7 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2001 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2002 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
 = "All rights reserved.";
 $COPYRIGHT{"nectar", 0}
@@ -105,6 +105,7 @@ $opt_retval =
 		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
+		"V|version=s%" => \%OPT_VERSION,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
 		"T|tagprefix=s" => \$opt_tagprefix,
@@ -326,6 +327,7 @@ sub print_usage
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose] [--tag=<tag> | -t <tag>]
        [--tagprefix=<prefix> | -T <prefix>]
+       {--version <key>=<version> | -V <key>=<version>}*
        {--pkgname=<name> | -p <pkgname>}
        {--root=<treeroot> | -r <treeroot>}
        {--filetree=<filetree> | -f <filetree>}+
@@ -393,10 +395,22 @@ sub expand_tags
 		    print $ofh "$1$_$2\n";
 		}
 	    }
-	    elsif (/^(.*)\<Version\>(.*)\n/)
+	    elsif (/^(.*)\<Version([ \t]*=[ \t]*([A-Za-z0-9]+))?\>(.*)\n/)
 	    {
 		$did_subst = 1;
-		print $ofh "$1$opt_tag$2\n";
+		if (defined($OPT_VERSION{$3}))
+		{
+		    print $ofh "$1$OPT_VERSION{$3}$4\n";
+		}
+		elsif ($3 eq "")
+		{
+		    print $ofh "$1$opt_tag$4\n";
+		}
+		else
+		{
+		    print STDERR "Missing Version tag value for \"$3\"\n";
+		    exit(1);
+		}
 	    }
 	    else
 	    {
