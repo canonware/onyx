@@ -29,8 +29,10 @@ proxy - transparent logging TCP/IP proxy
 .IR <ip> ]
 .RB [ \-p
 .IR <port> ]
-.B \-r
+.RB [ \-r
 .RI [ <rhost> :] <rport>
+|
+.BR \-t ]
 .SH DESCRIPTION
 .B proxy
 is a transparent TCP/IP proxy that listens for connections and forwards
@@ -107,10 +109,10 @@ is not specified, then localhost is assumed.
 .RE
 .PP
 .B \-t
-.I <timeout>
 .RS
-Specify minimum timeout in seconds.
-If zero, then there is no timeout.
+This option is only available on systems that include ipfilter functionality.
+Use /dev/ipnat to determine what host:port to connect to.
+See ipnat(4), ipnat(5), ipf(8), and ipfstat(8) for ipfilter details.
 .RE
 .PP
 .IP \-V

@@ -1,6 +1,7 @@
 /******************************************************************************
  *
  * <Copyright = jasone>
+ * <Copyright = nectar>
  * <License>
  *
  ******************************************************************************
@@ -12,6 +13,17 @@
  ******************************************************************************/
 
 #include <libsock/libsock.h>
+#include "proxy_defs.h"
+
+#ifdef _CW_IPFILTER
+#include <sys/ioctl.h>
+#include <netinet/tcp.h>
+#include <net/if.h>
+#include <netinet/ip_compat.h>
+#include <netinet/ip_fil.h>
+#include <netinet/ip_proxy.h>
+#include <netinet/ip_nat.h>
+#endif
 
 #include <signal.h>
 #include <sys/stat.h>
@@ -54,6 +66,9 @@ char	*get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
 char	*get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
 void	*handle_client_send(void *a_arg);
 void	*handle_client_recv(void *a_arg);
+#ifdef _CW_IPFILTER
+cw_bool_t ipnat_set_connect(connection_t *a_conn);
+#endif
 void	usage(void);
 void	version(void);
 const char *basename(const char *a_str);
@@ -77,6 +92,9 @@ main(int argc, char **argv)
 	int		opt_port = 0, opt_rport = 0;
 	cw_uint32_t	opt_ip = htonl(INADDR_ANY);
 	char		*opt_rhost = NULL, *opt_dirname = NULL;
+#ifdef _CW_IPFILTER
+	cw_bool_t	opt_transparent = FALSE;
+#endif
 
 	libstash_init();
 	g_progname = basename(argv[0]);
@@ -89,7 +107,11 @@ main(int argc, char **argv)
 /*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
 
 	/* Parse command line. */
-	while ((c = getopt(argc, argv, "hVvqi:p:r:lf:d:")) != -1) {
+	while ((c = getopt(argc, argv, "hVvqi:p:r:lf:d:"
+#ifdef _CW_IPFILTER
+	    "t"
+#endif
+	    )) != -1) {
 		switch (c) {
 		case 'h':
 			opt_help = TRUE;
@@ -125,8 +147,9 @@ main(int argc, char **argv)
 
 				if (inet_aton(optarg, &addr) == 0) {
 					/* Conversion error. */
-					_cw_out_put("Invalid IP address "
-					    "specified with \"-i\" flag\n");
+					_cw_out_put("[s]: Invalid IP address "
+					    "specified with \"-i\" flag\n",
+					    g_progname);
 					usage();
 					retval = 1;
 					goto CLERROR;
@@ -175,6 +198,11 @@ main(int argc, char **argv)
 		case 'd':
 			opt_dirname = optarg;
 			break;
+#ifdef _CW_IPFILTER
+		case 't':
+			opt_transparent = TRUE;
+			break;
+#endif
 		default:
 			cl_error = TRUE;
 			break;
@@ -182,7 +210,7 @@ main(int argc, char **argv)
 	}
 
 	if ((cl_error) || (optind < argc)) {
-		_cw_out_put("Unrecognized option(s)\n");
+		_cw_out_put("[s]: Unrecognized option(s)\n", g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
@@ -197,30 +225,48 @@ main(int argc, char **argv)
 	}
 	/* Check validity of command line options. */
 	if ((opt_verbose) && (opt_quiet)) {
-		_cw_out_put("\"-v\" and \"-q\" are incompatible\n");
+		_cw_out_put("[s]: \"-v\" and \"-q\" are incompatible\n",
+		    g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if ((opt_log) && (opt_dirname != NULL)) {
-		_cw_out_put("\"-l\" and \"-d\" are incompatible\n");
+		_cw_out_put("[s]: \"-l\" and \"-d\" are incompatible\n",
+		    g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	if ((opt_dirname != NULL) && (strlen(opt_dirname) > 512)) {
-		_cw_out_put("Argument to \"-d\" flag is too long "
-		    "(512 bytes max)\n");
+		_cw_out_put("[s]: Argument to \"-d\" flag is too long "
+		    "(512 bytes max)\n", g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
+#ifdef _CW_IPFILTER
+	if (opt_transparent && opt_rhost != NULL) {
+		_cw_out_put("[s]: \"-r\" and \"-t\" are incompatible\n",
+		    g_progname);
+		usage();
+		retval = 1;
+		goto CLERROR;
+	} else if (!opt_transparent && opt_rhost == NULL) {
+		_cw_out_put("[s]: \"-r\" or \"-t\" must be specified\n",
+		    g_progname);
+		usage();
+		retval = 1;
+		goto CLERROR;
+	}
+#else
 	if (opt_rhost == NULL) {
-		_cw_out_put("\"-r\" flag must be specified\n");
+		_cw_out_put("[s]: \"-r\" must be specified\n", g_progname);
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
+#endif
 	/*
 	 * Set the per-thread signal masks such that only one thread will catch
 	 * the signal.
@@ -241,20 +287,21 @@ main(int argc, char **argv)
 		    0644);
 		if (fd == -1) {
 			if (dbg_is_registered(cw_g_dbg, "prog_error")) {
-				_cw_out_put_e("Error opening \"[s]\": [s]\n",
-				    logfile, strerror(errno));
+				_cw_out_put_e("[s]: Error opening \"[s]\": "
+				    "[s]\n", g_progname, logfile,
+				    strerror(errno));
 			}
 		}
 		out_set_default_fd(cw_g_out, fd);
 	}
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
-		_cw_out_put("pid: [i]\n", getpid());
+		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
 	libsock_init(1024, 2048, 4096);
 	socks = socks_new();
 	if (socks_listen(socks, opt_ip, &opt_port))
 		exit(1);
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
-		_cw_out_put_l("[s]: Listening on port [i]\n", argv[0],
+		_cw_out_put_l("[s]: Listening on port [i]\n", g_progname,
 		    opt_port);
 	}
 	for (conn_num = 0; should_quit == FALSE;) {
@@ -288,8 +335,9 @@ main(int argc, char **argv)
 				if (fd == -1) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "prog_error")) {
-						_cw_out_put_e("Error opening"
-						    " \"[s]\": [s]\n", logfile,
+						_cw_out_put_e("[s]: Error "
+						    "opening \"[s]\": [s]\n",
+						    g_progname, logfile,
 						    strerror(errno));
 					}
 					out_delete(conn->out);
@@ -297,8 +345,19 @@ main(int argc, char **argv)
 				}
 				out_set_default_fd(conn->out, fd);
 			}
-			conn->rhost = opt_rhost;
-			conn->rport = opt_rport;
+#ifdef _CW_IPFILTER
+			if (opt_transparent) {
+				if (ipnat_set_connect(conn)) {
+					retval = 1;
+					goto CLERROR;
+				}
+			} else {
+#endif
+				conn->rhost = strdup(opt_rhost);
+				conn->rport = opt_rport;
+#ifdef _CW_IPFILTER
+			}
+#endif
 			if (opt_log)
 				conn->is_verbose = TRUE;
 			conn->format = opt_format;
@@ -329,7 +388,8 @@ sig_handler(void *a_arg)
 	if (error || (sig != SIGHUP && sig != SIGINT))
 		_cw_error("sigwait() error");
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
-		out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "Caught signal\n");
+		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "[s]: Caught signal\n", g_progname);
 	should_quit = TRUE;
 
 	return NULL;
@@ -587,7 +647,7 @@ handle_client_send(void *a_arg)
 	connection_t	*conn = (connection_t *) a_arg;
 	char		*str = NULL;
 
-	out_put(conn->out, "New connection\n");
+	out_put(conn->out, "[s]: New connection\n", g_progname);
 
 	buf_new(&buf, cw_g_mem);
 
@@ -595,16 +655,16 @@ handle_client_send(void *a_arg)
 	mtx_new(&conn->lock);
 	conn->should_quit = FALSE;
 
-	out_put(conn->out, "Connecting to \"[s]\" on port [i]\n",
-	    conn->rhost, conn->rport);
+	out_put(conn->out, "[s]: Connecting to \"[s]\" on port [i]\n",
+	    g_progname, conn->rhost, conn->rport);
 
 	/* Connect to the remote end. */
 	sock_new(&conn->remote_sock, 16384);
 	if (sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL) !=
 	    0) {
 		out_put_e(conn->out, __FILE__, __LINE__, __FUNCTION__,
-		    "Error in sock_connect(&conn->remote_sock, \"[s]\", [i])\n",
-		    conn->rhost, conn->rport);
+		    "[s]: Error in sock_connect(&conn->remote_sock, \"[s]\", "
+		    "[i])\n", g_progname, conn->rhost, conn->rport);
 		goto RETURN;
 	}
 	/*
@@ -676,7 +736,10 @@ handle_client_send(void *a_arg)
 
 	buf_delete(&buf);
 
-	out_put(conn->out, "Connection closed\n");
+	/* Allocated via strdup(). */
+	free(conn->rhost);
+
+	out_put(conn->out, "[s]: Connection closed\n", g_progname);
 	if (conn->out != NULL)
 		out_delete(conn->out);
 	_cw_free(conn);
@@ -741,13 +804,81 @@ handle_client_recv(void *a_arg)
 	return NULL;
 }
 
+#ifdef _CW_IPFILTER
+cw_bool_t
+ipnat_set_connect(connection_t *conn)
+{
+	cw_bool_t		retval;
+	struct sockaddr_in	here, there;
+	natlookup_t		natl, *natlp;
+	int			fd;
+	socklen_t		namelen;
+
+	fd = sock_fd_get(&conn->client_sock);
+	namelen = sizeof(here);
+	if (getsockname(fd, (struct sockaddr *)&here, &namelen) == -1) {
+		_cw_out_put_e("[s]: NAT: getsockname failed: [s]\n",
+		    g_progname, strerror(errno));
+		retval = TRUE;
+		goto RETURN;
+	}
+	namelen = sizeof(there);
+	if (getpeername(fd, (struct sockaddr *)&there, &namelen) == -1) {
+		_cw_out_put_e("[s]: NAT: getpeername failed: [s]\n",
+		    g_progname, strerror(errno));
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	memset(&natl, 0, sizeof(natl));	
+	natl.nl_outip = there.sin_addr;
+	natl.nl_outport = there.sin_port;
+	natl.nl_inip = here.sin_addr;
+	natl.nl_inport = here.sin_port;
+	natl.nl_flags = IPN_TCP;
+	natlp = &natl;
+	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
+		_cw_out_put("[s]: natlookup  out: [s],[i]\n", g_progname,
+		    inet_ntoa(natl.nl_outip), ntohs(natl.nl_outport));
+		_cw_out_put("[s]: natlookup   in: [s],[i]\n", g_progname,
+		    inet_ntoa(natl.nl_inip), ntohs(natl.nl_inport));
+	}
+	fd = open(IPL_NAT, O_RDONLY);
+	if (ioctl(fd, SIOCGNATL, &natlp) == -1) {
+		_cw_out_put_e("[s]: NAT: ioctl failed: [s]", g_progname,
+		    strerror(errno));
+		close(fd);
+		retval = TRUE;
+		goto RETURN;
+	}
+	close(fd);
+	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
+		_cw_out_put("[s]: natlookup real: [s],[i]\n", g_progname,
+		    inet_ntoa(natl.nl_realip), ntohs(natl.nl_realport));
+	}
+	conn->rhost = strdup(inet_ntoa(natl.nl_realip));
+	conn->rport = ntohs(natl.nl_realport);
+
+	retval = FALSE;
+	RETURN:
+	return retval;
+}
+#endif
+
 void
 usage(void)
 {
 	_cw_out_put("[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
-	    "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>] [[-p <port>] -r [[<rhost>:]<rport>\n"
+	    "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>]"
+	    " [[-p <port>]", g_progname, g_progname, g_progname, g_progname);
+#ifdef _CW_IPFILTER
+	_cw_out_put(" [[-r [[<rhost>:]<rport> | -t]\n");
+#else
+	_cw_out_put(" -r [[<rhost>:]<rport>\n");
+#endif
+	_cw_out_put(
 	    "\n"
 	    "    Option               | Description\n"
 	    "    ---------------------+------------------------------------------\n"
@@ -765,9 +896,11 @@ usage(void)
 	    "                         | (Default \"ANY\".)\n"
 	    "    -p <port>            | Listen on port <port>.\n"
 	    "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
-	    "                         | port <rport>.\n",
-	    g_progname, g_progname, g_progname, g_progname
-	);
+	    "                         | port <rport>.\n");
+#ifdef _CW_IPFILTER
+	_cw_out_put(
+	    "    -t                   | Use ipfilter via /dev/ipnat.\n");
+#endif
 }
 
 void

@@ -8,3 +8,8 @@
  * Version: <Version>
  *
  ******************************************************************************/
+
+/*
+ * Defined if Darren Reed's ipfilter is present.
+ */
+#undef _CW_IPFILTER
