@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 211 $
-# $Date: 1998-09-08 12:36:49 -0700 (Tue, 08 Sep 1998) $
+# $Revision: 240 $
+# $Date: 1998-10-15 21:15:32 -0700 (Thu, 15 Oct 1998) $
 #
 # <<< Description >>>
 #
@@ -221,6 +221,11 @@ sub expand_copyright
 		  {
 		    print $ofh "$1$_$2\n";
 		  }
+	      }
+	    elsif (/^(.*)\<Version\>(.*)\n/)
+	      {
+		$did_subst = 1;
+		print $ofh "$1$opt_tag$2\n";
 	      }
 	    else
 	      {
