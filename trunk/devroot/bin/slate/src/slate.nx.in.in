@@ -127,7 +127,6 @@ dstack saup
     hs
     `\r\n' print
     tpoint dup 0 /SEEK_BOB marker_seek pop bpoint marker_range_get
-#    bob dup 0 /SEEK_REL marker_seek pop bpoint marker_range_get
     srender flush
 } def
 
