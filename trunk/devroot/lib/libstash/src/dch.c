@@ -208,7 +208,7 @@ dch_p_grow(cw_dch_t *a_dch)
 
 	count = ch_count(a_dch->ch);
 
-	if ((a_dch->grow_factor * a_dch->base_grow) < (count + 1)) {
+	if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow)) {
 		/* Too big.  Create a new ch twice as large and populate it. */
 		t_ch = ch_new(NULL, a_dch->base_table * a_dch->grow_factor * 2,
 		    a_dch->hash, a_dch->key_comp);
@@ -258,8 +258,8 @@ dch_p_shrink(cw_dch_t *a_dch)
 
 	count = ch_count(a_dch->ch);
 
-	if ((a_dch->grow_factor > 1) && ((a_dch->grow_factor *
-	    a_dch->base_shrink) > (count - 1))) {
+	if ((count - 1) < (a_dch->grow_factor > 1) && ((a_dch->grow_factor *
+	    a_dch->base_shrink))) {
 		/* Too big.  Create a new ch half as large and populate it. */
 		t_ch = ch_new(NULL, a_dch->base_table * a_dch->grow_factor / 2,
 		    a_dch->hash, a_dch->key_comp);
