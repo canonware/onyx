@@ -85,13 +85,6 @@ typedef unsigned long long cw_uint64_t;
 #endif
 #endif
 
-#if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) ||	\
-    !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) ||	\
-    !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) ||	\
-    !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED))
-#error "Lacking mandatory typedefs"
-#endif
-
 #if (SIZEOF_FLOAT == 4)
 #define _TYPE_FP32_DEFINED
 typedef float cw_fp32_t;
@@ -102,12 +95,12 @@ typedef float cw_fp32_t;
 typedef double cw_fp64_t;
 #endif
 
-#if (SIZEOF_LONG_DOUBLE == 12)
-#define _TYPE_FP96_DEFINED
-typedef long double cw_fp96_t;
-#elif (SIZEOF_LONG_DOUBLE == 16)
-#define _TYPE_FP128_DEFINED
-typedef long double cw_fp128_t;
+#if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) ||	\
+    !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) ||	\
+    !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) ||	\
+    !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED) ||	\
+    !defined(_TYPE_FP32_DEFINED) || !defined(_TYPE_FP64_DEFINED))
+#error "Lacking mandatory typedefs"
 #endif
 
 /*
@@ -129,13 +122,6 @@ typedef enum {
 } cw_bool_t;
 
 /*
- * Generic typedef used for memory deallocation hooks.  This typedef is
- * compatible with functions such as mem_free(), pezz_put() and pool_put().
- */
-typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
-    cw_uint32_t);
-
-/*
  * More grossness to make sure things still work, even if TRUE and/or FALSE
  * are/is defined.
  */
@@ -147,6 +133,13 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 #define TRUE (1)
 #undef _CW_TRUE_DEFINED
 #endif
+
+/*
+ * Generic typedef used for memory deallocation hooks.  This typedef is
+ * compatible with functions such as mem_free(), pezz_put() and pool_put().
+ */
+typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
+    cw_uint32_t);
 
 /*
  * Project headers to always be included.

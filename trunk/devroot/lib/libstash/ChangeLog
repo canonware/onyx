@@ -1,3 +1,14 @@
+2000-11-23  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c (out_p_fp_render): Implement the [f] specifier for
+	printing floating point numbers in decimal format.
+
+	(out_put_sn): '\0'-terminate the output string if there is room,
+	as advertized.
+
+	(out_p_put_svn): Fix an off-by-one error that could cause text to
+	get printed to the wrong buffer, thereby getting lost.
+
 2000-11-12  Jason Evans  <jasone@canonware.com>
 
 	* mem: Rename mem_{m,c,re}alloc() --> mem_{m,c,re}alloc_e(),

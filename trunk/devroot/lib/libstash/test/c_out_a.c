@@ -296,356 +296,469 @@ main()
 
 		/* i. wjpbs+. */
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "i: [i]", 42) >= 0);
+		_cw_assert(out_put_sn(out_p, str, 5, "i: [i]", 42) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i] [s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 20, "[i] [s]", 42,
 		    "<trailing string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:2]_2", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 34, "[i|b:2]_2", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:3]_3", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 23, "[i|b:3]_3", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:7]_7", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 14, "[i|b:7]_7", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:8]_8", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 13, "[i|b:8]_8", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:10]_10", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 13, "[i|b:10]_10", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:16]_16", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 11, "[i|b:16]_16", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:32]_32", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 10, "[i|b:32]_32", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|b:36]_36", 0xffffffff)
+		_cw_assert(out_put_sn(out_p, str, 10, "[i|b:36]_36", 0xffffffff)
 		    >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 19, "[i|w:10]:[s]", 42,
 		    "[i|w:10]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|j:l]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 23, "[i|w:10|j:l]:[s]", 42,
 		    "[i|w:10|j:l]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|j:c]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 23, "[i|w:10|j:c]:[s]", 42,
 		    "[i|w:10|j:c]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|j:r]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 23, "[i|w:10|j:r]:[s]", 42,
 		    "[i|w:10|j:r]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|p:_]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 23, "[i|w:10|p:_]:[s]", 42,
 		    "[i|w:10|p:_]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|j:l|p:_]:[s]",
+		_cw_assert(out_put_sn(out_p, str, 27, "[i|w:10|j:l|p:_]:[s]",
 		    42, "[i|w:10|j:l|p:_]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|j:c|p:_]:[s]",
+		_cw_assert(out_put_sn(out_p, str, 27, "[i|w:10|j:c|p:_]:[s]",
 		    42, "[i|w:10|j:c|p:_]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|j:r|p:_]:[s]",
+		_cw_assert(out_put_sn(out_p, str, 27, "[i|w:10|j:r|p:_]:[s]",
 		    42, "[i|w:10|j:r|p:_]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|s:u]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 10, "[i|s:u]:[s]", 42,
 		    "[i|s:u]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|s:s]:[s]", 42,
+		_cw_assert(out_put_sn(out_p, str, 10, "[i|s:s]:[s]", 42,
 		    "[i|s:s]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|s:s]:[s]", -42,
+		_cw_assert(out_put_sn(out_p, str, 11, "[i|s:s]:[s]", -42,
 		    "[i|s:s]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|s:s|w:10|p:_|j:l]:[s]", -42, "[i|s:s|w:10|p:_|j:l]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|s:s|w:10|p:_|j:c]:[s]", -42, "[i|s:s|w:10|p:_|j:c]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|s:s|w:10|p:_|j:r]:[s]", -42, "[i|s:s|w:10|p:_|j:r]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|p:_|+:-]:[s]",
+		_cw_assert(out_put_sn(out_p, str, 27, "[i|w:10|p:_|+:-]:[s]",
 		    42, "[i|w:10|p:_|+:-]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|w:10|j:l|p:_|+:-]:[s]", 42, "[i|w:10|j:l|p:_|+:-]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|w:10|j:c|p:_|+:-]:[s]", 42, "[i|w:10|j:c|p:_|+:-]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|w:10|j:r|p:_|+:-]:[s]", 42, "[i|w:10|j:r|p:_|+:-]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[i|w:10|p:_|+:+]:[s]",
+		_cw_assert(out_put_sn(out_p, str, 27, "[i|w:10|p:_|+:+]:[s]",
 		    42, "[i|w:10|p:_|+:+]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|w:10|j:l|p:_|+:+]:[s]", 42, "[i|w:10|j:l|p:_|+:+]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|w:10|j:c|p:_|+:+]:[s]", 42, "[i|w:10|j:c|p:_|+:+]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|w:10|j:r|p:_|+:+]:[s]", 42, "[i|w:10|j:r|p:_|+:+]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|s:s|w:10|p:_|+:-]:[s]", -42, "[i|s:s|w:10|p:_|+:-]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 35,
 		    "[i|s:s|w:10|j:l|p:_|+:-]:[s]", -42,
 		    "[i|s:s|w:10|j:l|p:_|+:-]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 35,
 		    "[i|s:s|w:10|j:c|p:_|+:-]:[s]", -42,
 		    "[i|s:s|w:10|j:c|p:_|+:-]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 35,
 		    "[i|s:s|w:10|j:r|p:_|+:-]:[s]", -42,
 		    "[i|s:s|w:10|j:r|p:_|+:-]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 31,
 		    "[i|s:s|w:10|p:_|+:+]:[s]", -42, "[i|s:s|w:10|p:_|+:+]") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 35,
 		    "[i|s:s|w:10|j:l|p:_|+:+]:[s]", -42,
 		    "[i|s:s|w:10|j:l|p:_|+:+]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 35,
 		    "[i|s:s|w:10|j:c|p:_|+:+]:[s]", -42,
 		    "[i|s:s|w:10|j:c|p:_|+:+]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,
+		_cw_assert(out_put_sn(out_p, str, 35,
 		    "[i|s:s|w:10|j:r|p:_|+:+]:[s]", -42,
 		    "[i|s:s|w:10|j:r|p:_|+:+]") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		/* i64. wjpbs+. */
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "i64: [q]",
+		_cw_assert(out_put_sn(out_p, str, 7, "i64: [q]",
 		    (cw_uint64_t)42) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[q] [s]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[q] [s]",
 		    (cw_uint64_t)42, "<trailing string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[q|b:2]_2",
+		_cw_assert(out_put_sn(out_p, str, 66, "[q|b:2]_2",
 		    ((cw_uint64_t)0xffffffff << 32) + 0xffffffff) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[q|b:36]_36",
+		_cw_assert(out_put_sn(out_p, str, 16, "[q|b:36]_36",
 		    ((cw_uint64_t)0xffffffff << 32) + 0xffffffff) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[q]", (cw_uint64_t)42) >=
+		_cw_assert(out_put_sn(out_p, str, 2, "[q]", (cw_uint64_t)42) >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		/* c. wjp. */
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "c: [c]", 'c') >= 0);
+		_cw_assert(out_put_sn(out_p, str, 4, "c: [c]", 'c') >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c] [s]", 'c',
+		_cw_assert(out_put_sn(out_p, str, 19, "[c] [s]", 'c',
 		    "<trailing string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3]", 'c') >= 0);
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3]", 'c') >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3]", 'c') >= 0);
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3]", 'c') >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3|j:l]", 'c') >= 0);
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3|j:l]", 'c') >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3|j:c]", 'c') >= 0);
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3|j:c]", 'c') >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3|j:r]", 'c') >= 0);
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3|j:r]", 'c') >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3|j:l|p:_]", 'c') >=
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3|j:l|p:_]", 'c') >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3|j:c|p:_]", 'c') >=
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3|j:c|p:_]", 'c') >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[c|w:3|j:r|p:_]", 'c') >=
+		_cw_assert(out_put_sn(out_p, str, 3, "[c|w:3|j:r|p:_]", 'c') >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		/* s. wjp. */
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "s: [s]", "<string>") >=
+		_cw_assert(out_put_sn(out_p, str, 11, "s: [s]", "<string>") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s] [s]", "<string>",
+		_cw_assert(out_put_sn(out_p, str, 26, "[s] [s]", "<string>",
 		    "<trailing string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20]", "<string>") >=
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20]", "<string>") >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20|j:l]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20|j:l]",
 		    "<string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20|j:c]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20|j:c]",
 		    "<string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20|j:r]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20|j:r]",
 		    "<string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20|j:l|p:_]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20|j:l|p:_]",
 		    "<string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20|j:c|p:_]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20|j:c|p:_]",
 		    "<string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[s|w:20|j:r|p:_]",
+		_cw_assert(out_put_sn(out_p, str, 20, "[s|w:20|j:r|p:_]",
 		    "<string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		/* p. wjpbs+. */
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "p: [p]", 0x42) >= 0);
+		_cw_assert(out_put_sn(out_p, str, 5, "p: [p]", 0x42) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70,"[p] [s]", 0x42,
+		_cw_assert(out_put_sn(out_p, str, 20,"[p] [s]", 0x42,
 		    "<trailing string>") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[p]_16", 0xffffffff) >=
+		_cw_assert(out_put_sn(out_p, str, 11, "[p]_16", 0xffffffff) >=
 		    0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
-		_cw_assert(out_put_sn(out_p, str, 70, "[p]", 0x42) >= 0);
+		_cw_assert(out_put_sn(out_p, str, 2, "[p]", 0x42) >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+		/* f. wjpa+. */
+		{
+			union {
+				cw_uint64_t	i;
+				cw_fp32_t	f;
+				cw_fp64_t	d;
+			}	x;
+
+			/*
+			 * Zero.
+			 */
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 4, "[f]", 0.0) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 1, "[f|a:0]", 0.0) >=
+			    0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 6, "[f|a:4]", 0.0) >=
+			    0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 7, "[f|a:4|+:+]",
+			    0.0) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			/*
+			 * inf.
+			 */
+			x.i = ((cw_uint64_t)0x7ff00000 << 32) + 0x00000000;
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 3, "[f]", x.d) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+			
+			/*
+			 * nan.
+			 */
+			x.i = ((cw_uint64_t)0x7ff80000 << 32) + 0x00000000;
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 3, "[f]", x.d) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			/*
+			 * Normal numbers.
+			 */
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 4, "[f]", 1.0) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 4, "[f]", 1.1) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 4, "[f]", 2.0) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 5, "[f]", 99.0) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 6, "[f]", 101.0) >=
+			    0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 4, "[f]", 3.1415927)
+			    >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 6, "[f|a:4]",
+			    3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 10,
+			    "[f|a:4|w:10|j:r|p:_]", 3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 10,
+			    "[f|a:4|w:10|j:c|p:_]", 3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 10,
+			    "[f|a:4|w:10|j:l|p:_]", 3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 10,
+			    "[f|a:4|w:10|j:l|p:_]", -3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 10,
+			    "[f|a:4|w:10|j:l|p:_|+:-]", -3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+			memcpy(buf, ibuf, 81);
+			_cw_assert(out_put_sn(out_p, str, 10,
+			    "[f|a:4|w:10|j:l|p:_|+:+]", 3.1415927) >= 0);
+			_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+
+		}
 
 		out_delete(out_p);
 	}
