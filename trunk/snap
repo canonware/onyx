@@ -107,6 +107,7 @@ $opt_retval =
 		"v|verbose" => \$opt_verbose,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
+		"T|tagprefix=s" => \$opt_tagprefix,
 		"t|tag=s" => \$opt_tag,
 		"f|filetree=s@" => \@OPT_FILETREES
 		);
@@ -136,10 +137,14 @@ $pkgname_base = $opt_pkgname;
 
 if (defined($opt_tag) && !defined($opt_cvsnotag))
 {
+    if (!defined($opt_tagprefix))
+    {
+	$opt_tagprefix="";
+    }
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = $opt_tag;
     $tag_cvs =~ s/\./_/g;
-    $tag_cvs = "ONYX_$tag_cvs";
+    $tag_cvs = "$opt_tagprefix$tag_cvs";
     $tag_cmd = "-r $tag_cvs";
 }
 elsif (defined($opt_tag) && defined($opt_cvsnotag))
@@ -317,9 +322,10 @@ unless ($opt_noact)
 
 sub print_usage
 {
-    print <<EOF;
+    print STDERR <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose] [--tag=<tag> | -t <tag>]
+       [--tagprefix=<prefix> | -T <prefix>]
        {--pkgname=<name> | -p <pkgname>}
        {--root=<treeroot> | -r <treeroot>}
        {--filetree=<filetree> | -f <filetree>}+
