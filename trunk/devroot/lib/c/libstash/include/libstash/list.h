@@ -120,7 +120,7 @@ list_item_set(cw_list_item_t * a_cont, void * a_data);
  * <<< Output(s) >>>
  *
  * retval : Pointer to a list, or NULL.
- *          NULL : Memory allocation error.
+ *          NULL : Memory allocation error.  Can only occur if (NULL == a_list).
  *
  * <<< Description >>>
  *
