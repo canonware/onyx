@@ -171,7 +171,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"repeat",
 	"rmdir",
 	"roll",
-	"run",
 	"sclear",
 	"scleartomark",
 	"scount",

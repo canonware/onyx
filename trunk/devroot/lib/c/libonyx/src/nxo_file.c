@@ -65,7 +65,6 @@ void
 nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 {
 	cw_nxoe_file_t	*file;
-	cw_bool_t	ioerror = FALSE;
 
 	file = (cw_nxoe_file_t *)a_nxoe;
 
@@ -82,9 +81,8 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 				nxo_p_new(&tnxo, NXOT_FILE);
 				tnxo.o.nxoe = (cw_nxoe_t *)file;
 
-				if (file->write_f(file->arg, &tnxo,
-				    file->buffer, file->buffer_offset))
-					ioerror = TRUE;
+				file->write_f(file->arg, &tnxo, file->buffer,
+				    file->buffer_offset);
 				break;
 			}
 			case -1:
@@ -92,10 +90,8 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 			default:
 				while (write(file->fd, file->buffer,
 				    file->buffer_offset) == -1) {
-					if (errno != EINTR) {
-						ioerror = TRUE;
+					if (errno != EINTR)
 						break;
-					}
 				}
 				break;
 			}
@@ -107,17 +103,8 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	/*
 	 * Don't automatically close() predefined or wrapped descriptors.
 	 */
-	if (file->fd >= 3) {
-		if (close(file->fd) == -1)
-			ioerror = TRUE;
-	}
-
-	if (ioerror) {
-		/*
-		 * GC-induced deletion can get a write error, but there's no
-		 * thread to report it to.  Oh well.
-		 */
-	}
+	if (file->fd >= 3)
+		close(file->fd);
 
 	_CW_NXOE_FREE(file);
 }

@@ -169,7 +169,6 @@ typedef enum {
 	NXN_repeat,
 	NXN_rmdir,
 	NXN_roll,
-	NXN_run,
 	NXN_sclear,
 	NXN_scleartomark,
 	NXN_scount,

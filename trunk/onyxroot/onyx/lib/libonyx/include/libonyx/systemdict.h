@@ -106,7 +106,6 @@ void	systemdict_rename(cw_nxo_t *a_thread);
 void	systemdict_repeat(cw_nxo_t *a_thread);
 void	systemdict_rmdir(cw_nxo_t *a_thread);
 void	systemdict_roll(cw_nxo_t *a_thread);
-void	systemdict_run(cw_nxo_t *a_thread);
 void	systemdict_sclear(cw_nxo_t *a_thread);
 void	systemdict_scleartomark(cw_nxo_t *a_thread);
 void	systemdict_scount(cw_nxo_t *a_thread);

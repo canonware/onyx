@@ -157,7 +157,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(rename),
 	ENTRY(repeat),
 	ENTRY(rmdir),
-	ENTRY(run),
 	ENTRY(sclear),
 	ENTRY(scleartomark),
 	ENTRY(scount),
@@ -3772,66 +3771,6 @@ systemdict_roll(cw_nxo_t *a_thread)
 #endif
 
 void
-systemdict_run(cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*ostack, *estack, *tstack;
-	cw_nxo_t		*nxo, *tfile;
-	cw_nxo_threade_t	error;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	estack = nxo_thread_estack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-	NXO_STACK_GET(nxo, ostack, a_thread);
-	if (nxo_type_get(nxo) != NXOT_STRING) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-
-	tfile = nxo_stack_push(tstack);
-	nxo_file_new(tfile, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread));
-	nxo_string_lock(nxo);
-	error = nxo_file_open(tfile, nxo_string_get(nxo),
-	    nxo_string_len_get(nxo), "r", 1);
-	nxo_string_unlock(nxo);
-	if (error) {
-		nxo_stack_pop(tstack);
-		nxo_thread_error(a_thread, error);
-		return;
-	}
-	nxo_stack_pop(ostack);
-	nxo_attr_set(tfile, NXOA_EXECUTABLE);
-	nxo = nxo_stack_push(estack);
-
-	nxo_dup(nxo, tfile);
-
-	xep_begin();
-	xep_try {
-		nxo_thread_loop(a_thread);
-	}
-	xep_catch(_CW_ONYXX_EXIT) {
-		nxo_thread_error(a_thread, NXO_THREADE_INVALIDEXIT);
-
-		xep_retry();
-	}
-	xep_catch(_CW_ONYXX_STOP)
-	xep_mcatch(_CW_ONYXX_QUIT) {
-		/* Close the file, but don't handle the exception. */
-		error = nxo_file_close(tfile);
-		if (error)
-			nxo_thread_error(a_thread, error);
-
-		/*
-		 * We don't need to clean up the stack, since the exception
-		 * catcher will do it.
-		 */
-	}
-	xep_end();
-
-	nxo_stack_pop(tstack);
-}
-
-void
 systemdict_sclear(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *stack;
@@ -4278,7 +4217,7 @@ systemdict_start(cw_nxo_t *a_thread)
 	xep_end();
 
 	/*
-	 * Pop all objects off estack and tstack that weren't there
+	 * Pop all objects off estack, istack, and tstack that weren't there
 	 * before entering this function.
 	 */
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
@@ -4536,6 +4475,19 @@ systemdict_stopped(cw_nxo_t *a_thread)
 		nxo_stack_npop(istack, nxo_stack_count(istack) -
 		    nxo_stack_count(estack));
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+	}
+	xep_catch(_CW_ONYXX_EXIT) {
+		/*
+		 * This is a serious program error, and we've already unwound
+		 * the C stack, so there's no going back.  After throwing an
+		 * error, do the equivalent of what the quit operator does, so
+		 * that we'll unwind to the innermost start context.
+		 */
+		nxo_thread_error(a_thread, NXO_THREADE_INVALIDEXIT);
+
+		xep_handled();
+
+		xep_throw(_CW_ONYXX_QUIT);
 	}
 	xep_end();
 
