@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 28 $
- * Last modified: $Date: 1998-04-13 01:22:55 -0700 (Mon, 13 Apr 1998) $
+ * Current revision: $Revision: 32 $
+ * Last modified: $Date: 1998-04-19 01:42:19 -0700 (Sun, 19 Apr 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -56,6 +56,10 @@
 
 #if (defined(_INC_THREAD_H_) || defined(_INC_ALL_))
 #  ifndef _THREAD_H_
+#    ifndef _LIST_H_
+#      include <list.h>
+#      define _LIST_H_
+#    endif
 #    include <thread.h>
 #    define _THREAD_H_
 #  endif

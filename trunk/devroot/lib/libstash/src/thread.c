@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 31 $
- * $Date: 1998-04-16 22:55:53 -0700 (Thu, 16 Apr 1998) $
+ * $Revision: 32 $
+ * $Date: 1998-04-19 01:42:19 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -44,25 +44,25 @@
 #include <config.h>
 
 cw_thd_t *
-thd_new(cw_thd_t * arg_thd_obj,
-	void * (*arg_start_func)(void *),
-	void * arg_arg)
+thd_new(cw_thd_t * a_thd_o,
+	void * (*a_start_func)(void *),
+	void * a_arg)
 {
   cw_thd_t * retval;
   int error;
 
-  if (arg_thd_obj == NULL)
+  if (a_thd_o == NULL)
   {
     retval = (cw_thd_t *) _cw_malloc(sizeof(cw_thd_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = arg_thd_obj;
+    retval = a_thd_o;
     retval->is_malloced = FALSE;
   }
 
-  error = pthread_create(&retval->thread, NULL, arg_start_func, arg_arg);
+  error = pthread_create(&retval->thread, NULL, a_start_func, a_arg);
 
   if (error)
   {
@@ -84,44 +84,44 @@ thd_new(cw_thd_t * arg_thd_obj,
 }
 
 void
-thd_delete(cw_thd_t * arg_thd_obj)
+thd_delete(cw_thd_t * a_thd_o)
 {
-  _cw_check_ptr(arg_thd_obj);
+  _cw_check_ptr(a_thd_o);
 
-  pthread_detach(arg_thd_obj->thread);
+  pthread_detach(a_thd_o->thread);
 
-  if (arg_thd_obj->is_malloced == TRUE)
+  if (a_thd_o->is_malloced == TRUE)
   {
-    _cw_free(arg_thd_obj);
+    _cw_free(a_thd_o);
   }
 }
 
 void *
-thd_join(cw_thd_t * arg_thd_obj)
+thd_join(cw_thd_t * a_thd_o)
 {
   void * retval;
   
-  _cw_check_ptr(arg_thd_obj);
+  _cw_check_ptr(a_thd_o);
 
-  pthread_join(arg_thd_obj->thread, &retval);
+  pthread_join(a_thd_o->thread, &retval);
 
   return retval;
 }
 
 cw_mtx_t *
-mtx_new(cw_mtx_t * arg_mtx_obj)
+mtx_new(cw_mtx_t * a_mtx_o)
 {
   cw_mtx_t * retval;
   int error;
 
-  if (arg_mtx_obj == NULL)
+  if (a_mtx_o == NULL)
   {
     retval = (cw_mtx_t *) _cw_malloc(sizeof(cw_mtx_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = arg_mtx_obj;
+    retval = a_mtx_o;
     retval->is_malloced = FALSE;
   }
 
@@ -138,13 +138,13 @@ mtx_new(cw_mtx_t * arg_mtx_obj)
 }
 
 void
-mtx_delete(cw_mtx_t * arg_mtx_obj)
+mtx_delete(cw_mtx_t * a_mtx_o)
 {
   int error;
   
-  _cw_check_ptr(arg_mtx_obj);
+  _cw_check_ptr(a_mtx_o);
 
-  error = pthread_mutex_destroy(&arg_mtx_obj->mutex);
+  error = pthread_mutex_destroy(&a_mtx_o->mutex);
 
   if (error)
   {
@@ -153,20 +153,20 @@ mtx_delete(cw_mtx_t * arg_mtx_obj)
     abort();
   }
 
-  if (arg_mtx_obj->is_malloced == TRUE)
+  if (a_mtx_o->is_malloced == TRUE)
   {
-    _cw_free(arg_mtx_obj);
+    _cw_free(a_mtx_o);
   }
 }
 
 void
-mtx_lock(cw_mtx_t * arg_mtx_obj)
+mtx_lock(cw_mtx_t * a_mtx_o)
 {
   int error;
   
-  _cw_check_ptr(arg_mtx_obj);
+  _cw_check_ptr(a_mtx_o);
 
-  error = pthread_mutex_lock(&arg_mtx_obj->mutex);
+  error = pthread_mutex_lock(&a_mtx_o->mutex);
 
   if (error)
   {
@@ -177,25 +177,25 @@ mtx_lock(cw_mtx_t * arg_mtx_obj)
 }
 
 cw_bool_t
-mtx_trylock(cw_mtx_t * arg_mtx_obj)
+mtx_trylock(cw_mtx_t * a_mtx_o)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(arg_mtx_obj);
+  _cw_check_ptr(a_mtx_o);
 
-  retval = pthread_mutex_trylock(&arg_mtx_obj->mutex);
+  retval = pthread_mutex_trylock(&a_mtx_o->mutex);
 
   return retval;
 }
 
 void
-mtx_unlock(cw_mtx_t * arg_mtx_obj)
+mtx_unlock(cw_mtx_t * a_mtx_o)
 {
   int error;
   
-  _cw_check_ptr(arg_mtx_obj);
+  _cw_check_ptr(a_mtx_o);
 
-  error = pthread_mutex_unlock(&arg_mtx_obj->mutex);
+  error = pthread_mutex_unlock(&a_mtx_o->mutex);
   
   if (error)
   {
@@ -206,19 +206,19 @@ mtx_unlock(cw_mtx_t * arg_mtx_obj)
 }
 
 cw_cnd_t *
-cnd_new(cw_cnd_t * arg_cnd_obj)
+cnd_new(cw_cnd_t * a_cnd_o)
 {
   cw_cnd_t * retval;
   int error;
 
-  if (arg_cnd_obj == NULL)
+  if (a_cnd_o == NULL)
   {
     retval = (cw_cnd_t *) _cw_malloc(sizeof(cw_cnd_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = arg_cnd_obj;
+    retval = a_cnd_o;
     retval->is_malloced = FALSE;
   }
 
@@ -235,13 +235,13 @@ cnd_new(cw_cnd_t * arg_cnd_obj)
 }
 
 void
-cnd_delete(cw_cnd_t * arg_cnd_obj)
+cnd_delete(cw_cnd_t * a_cnd_o)
 {
   int error;
 
-  _cw_check_ptr(arg_cnd_obj);
+  _cw_check_ptr(a_cnd_o);
 
-  error = pthread_cond_destroy(&arg_cnd_obj->condition);
+  error = pthread_cond_destroy(&a_cnd_o->condition);
   if (error)
   {
     log_printf(g_log_obj, __FILE__, __LINE__, "cnd_delete",
@@ -249,20 +249,20 @@ cnd_delete(cw_cnd_t * arg_cnd_obj)
     abort();
   }
 
-  if (arg_cnd_obj->is_malloced == TRUE)
+  if (a_cnd_o->is_malloced == TRUE)
   {
-    _cw_free(arg_cnd_obj);
+    _cw_free(a_cnd_o);
   }
 }
 
 void
-cnd_signal(cw_cnd_t * arg_cnd_obj)
+cnd_signal(cw_cnd_t * a_cnd_o)
 {
   int error;
 
-  _cw_check_ptr(arg_cnd_obj);
+  _cw_check_ptr(a_cnd_o);
 
-  pthread_cond_signal(&arg_cnd_obj->condition);
+  pthread_cond_signal(&a_cnd_o->condition);
   if (error)
   {
     log_printf(g_log_obj, __FILE__, __LINE__, "cnd_signal",
@@ -272,13 +272,13 @@ cnd_signal(cw_cnd_t * arg_cnd_obj)
 }
 
 void
-cnd_broadcast(cw_cnd_t * arg_cnd_obj)
+cnd_broadcast(cw_cnd_t * a_cnd_o)
 {
   int error;
 
-  _cw_check_ptr(arg_cnd_obj);
+  _cw_check_ptr(a_cnd_o);
 
-  pthread_cond_broadcast(&arg_cnd_obj->condition);
+  pthread_cond_broadcast(&a_cnd_o->condition);
   if (error)
   {
     log_printf(g_log_obj, __FILE__, __LINE__, "cnd_broadcast",
@@ -288,16 +288,16 @@ cnd_broadcast(cw_cnd_t * arg_cnd_obj)
 }
 
 cw_bool_t
-cnd_timedwait(cw_cnd_t * arg_cnd_obj, cw_mtx_t * arg_mtx_obj,
-	      struct timespec * arg_time)
+cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
+	      struct timespec * a_time)
 {
   int error;
 
-  _cw_check_ptr(arg_cnd_obj);
-  _cw_check_ptr(arg_mtx_obj);
+  _cw_check_ptr(a_cnd_o);
+  _cw_check_ptr(a_mtx_o);
 
-  pthread_cond_timedwait(&arg_cnd_obj->condition, &arg_mtx_obj->mutex,
-			 arg_time);
+  pthread_cond_timedwait(&a_cnd_o->condition, &a_mtx_o->mutex,
+			 a_time);
   if (error)
   {
     log_printf(g_log_obj, __FILE__, __LINE__, "cnd_timedwait",
@@ -310,14 +310,14 @@ cnd_timedwait(cw_cnd_t * arg_cnd_obj, cw_mtx_t * arg_mtx_obj,
 }
 
 void
-cnd_wait(cw_cnd_t * arg_cnd_obj, cw_mtx_t * arg_mtx_obj)
+cnd_wait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o)
 {
   int error;
 
-  _cw_check_ptr(arg_cnd_obj);
-  _cw_check_ptr(arg_mtx_obj);
+  _cw_check_ptr(a_cnd_o);
+  _cw_check_ptr(a_mtx_o);
 
-  pthread_cond_wait(&arg_cnd_obj->condition, &arg_mtx_obj->mutex);
+  pthread_cond_wait(&a_cnd_o->condition, &a_mtx_o->mutex);
   if (error)
   {
     log_printf(g_log_obj, __FILE__, __LINE__, "cnd_wait",
@@ -327,20 +327,20 @@ cnd_wait(cw_cnd_t * arg_cnd_obj, cw_mtx_t * arg_mtx_obj)
 }
 
 cw_sem_t *
-sem_new(cw_sem_t * arg_sem_obj, cw_uint32_t arg_count)
+sem_new(cw_sem_t * a_sem_o, cw_uint32_t a_count)
 {
   cw_sem_t * retval;
 
-  _cw_assert(arg_count >= 0);
+  _cw_assert(a_count >= 0);
 
-  if (arg_sem_obj == NULL)
+  if (a_sem_o == NULL)
   {
     retval = (cw_sem_t *) _cw_malloc(sizeof(cw_sem_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = arg_sem_obj;
+    retval = a_sem_o;
     retval->is_malloced = FALSE;
   }
 
@@ -354,66 +354,66 @@ sem_new(cw_sem_t * arg_sem_obj, cw_uint32_t arg_count)
 }
 
 void
-sem_delete(cw_sem_t * arg_sem_obj)
+sem_delete(cw_sem_t * a_sem_o)
 {
-  _cw_check_ptr(arg_sem_obj);
+  _cw_check_ptr(a_sem_o);
 
-  mtx_delete(&arg_sem_obj->lock);
-  cnd_delete(&arg_sem_obj->nonzero);
+  mtx_delete(&a_sem_o->lock);
+  cnd_delete(&a_sem_o->nonzero);
 
-  if (arg_sem_obj->is_malloced == TRUE)
+  if (a_sem_o->is_malloced == TRUE)
   {
-    _cw_free(arg_sem_obj);
+    _cw_free(a_sem_o);
   }
 }
 
 void
-sem_post(cw_sem_t * arg_sem_obj)
+sem_post(cw_sem_t * a_sem_o)
 {
-  _cw_check_ptr(arg_sem_obj);
+  _cw_check_ptr(a_sem_o);
 
-  mtx_lock(&arg_sem_obj->lock);
+  mtx_lock(&a_sem_o->lock);
 
-  if (arg_sem_obj->waiters)
+  if (a_sem_o->waiters)
   {
-    cnd_signal(&arg_sem_obj->nonzero);
+    cnd_signal(&a_sem_o->nonzero);
   }
-  arg_sem_obj++;
+  a_sem_o++;
 
-  mtx_unlock(&arg_sem_obj->lock);
+  mtx_unlock(&a_sem_o->lock);
 }
 
 void
-sem_wait(cw_sem_t * arg_sem_obj)
+sem_wait(cw_sem_t * a_sem_o)
 {
-  _cw_check_ptr(arg_sem_obj);
+  _cw_check_ptr(a_sem_o);
 
-  mtx_lock(&arg_sem_obj->lock);
+  mtx_lock(&a_sem_o->lock);
 
-  while (arg_sem_obj->count == 0)
+  while (a_sem_o->count == 0)
   {
-    arg_sem_obj->waiters++;
-    cnd_wait(&arg_sem_obj->nonzero, &arg_sem_obj->lock);
-    arg_sem_obj->waiters--;
+    a_sem_o->waiters++;
+    cnd_wait(&a_sem_o->nonzero, &a_sem_o->lock);
+    a_sem_o->waiters--;
   }
-  arg_sem_obj->count--;
+  a_sem_o->count--;
 
-  mtx_unlock(&arg_sem_obj->lock);
+  mtx_unlock(&a_sem_o->lock);
 }
 
 cw_bool_t
-sem_trywait(cw_sem_t * arg_sem_obj)
+sem_trywait(cw_sem_t * a_sem_o)
 {
   cw_bool_t retval;
 
-  _cw_check_ptr(arg_sem_obj);
+  _cw_check_ptr(a_sem_o);
 
-  mtx_lock(&arg_sem_obj->lock);
+  mtx_lock(&a_sem_o->lock);
   
-  if (arg_sem_obj->count > 0)
+  if (a_sem_o->count > 0)
   {
     /* Success. */
-    arg_sem_obj->count--;
+    a_sem_o->count--;
     retval = FALSE;
   }
   else
@@ -422,40 +422,40 @@ sem_trywait(cw_sem_t * arg_sem_obj)
     retval = TRUE;
   }
 
-  mtx_unlock(&arg_sem_obj->lock);
+  mtx_unlock(&a_sem_o->lock);
   
   return retval;
 }
 
 cw_uint32_t
-sem_getvalue(cw_sem_t * arg_sem_obj)
+sem_getvalue(cw_sem_t * a_sem_o)
 {
   cw_uint32_t retval;
   
-  _cw_check_ptr(arg_sem_obj);
+  _cw_check_ptr(a_sem_o);
 
   /* I don't think we need to lock, since we're just reading. */
-/*   mtx_lock(&arg_sem_obj->lock); */
+/*   mtx_lock(&a_sem_o->lock); */
 
-  retval = arg_sem_obj->count;
+  retval = a_sem_o->count;
 
-/*   mtx_unlock(&arg_sem_obj->lock); */
+/*   mtx_unlock(&a_sem_o->lock); */
   return retval;
 }
 
 cw_rwl_t *
-rwl_new(cw_rwl_t * arg_rwl_obj)
+rwl_new(cw_rwl_t * a_rwl_o)
 {
   cw_rwl_t * retval;
 
-  if (arg_rwl_obj == NULL)
+  if (a_rwl_o == NULL)
   {
     retval = (cw_rwl_t *) _cw_malloc(sizeof(cw_rwl_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = arg_rwl_obj;
+    retval = a_rwl_o;
     retval->is_malloced = FALSE;
   }
 
@@ -472,148 +472,148 @@ rwl_new(cw_rwl_t * arg_rwl_obj)
 }
 
 void
-rwl_delete(cw_rwl_t * arg_rwl_obj)
+rwl_delete(cw_rwl_t * a_rwl_o)
 {
-  _cw_check_ptr(arg_rwl_obj);
+  _cw_check_ptr(a_rwl_o);
 
-  mtx_delete(&arg_rwl_obj->lock);
-  cnd_delete(&arg_rwl_obj->read_wait);
-  cnd_delete(&arg_rwl_obj->write_wait);
+  mtx_delete(&a_rwl_o->lock);
+  cnd_delete(&a_rwl_o->read_wait);
+  cnd_delete(&a_rwl_o->write_wait);
 
-  if (arg_rwl_obj->is_malloced)
+  if (a_rwl_o->is_malloced)
   {
-    _cw_free(arg_rwl_obj);
+    _cw_free(a_rwl_o);
   }
 }
 
 void
-rwl_rlock(cw_rwl_t * arg_rwl_obj)
+rwl_rlock(cw_rwl_t * a_rwl_o)
 {
-  _cw_check_ptr(arg_rwl_obj);
+  _cw_check_ptr(a_rwl_o);
 
-  mtx_lock(&arg_rwl_obj->lock);
+  mtx_lock(&a_rwl_o->lock);
 
-  while (arg_rwl_obj->num_writers > 0)
+  while (a_rwl_o->num_writers > 0)
   {
-    arg_rwl_obj->read_waiters++;
-    cnd_wait(&arg_rwl_obj->read_wait, &arg_rwl_obj->lock);
-    arg_rwl_obj->read_waiters--;
+    a_rwl_o->read_waiters++;
+    cnd_wait(&a_rwl_o->read_wait, &a_rwl_o->lock);
+    a_rwl_o->read_waiters--;
   }
-  arg_rwl_obj->num_readers++;
+  a_rwl_o->num_readers++;
   
-  mtx_unlock(&arg_rwl_obj->lock);
+  mtx_unlock(&a_rwl_o->lock);
 }
 
 void
-rwl_runlock(cw_rwl_t * arg_rwl_obj)
+rwl_runlock(cw_rwl_t * a_rwl_o)
 {
-  _cw_check_ptr(arg_rwl_obj);
+  _cw_check_ptr(a_rwl_o);
 
-  mtx_lock(&arg_rwl_obj->lock);
+  mtx_lock(&a_rwl_o->lock);
 
-  arg_rwl_obj->num_readers--;
+  a_rwl_o->num_readers--;
 
-  if ((arg_rwl_obj->num_readers == 0) && (arg_rwl_obj->write_waiters > 0))
+  if ((a_rwl_o->num_readers == 0) && (a_rwl_o->write_waiters > 0))
   {
-    cnd_signal(&arg_rwl_obj->write_wait);
+    cnd_signal(&a_rwl_o->write_wait);
   }
   
-  mtx_unlock(&arg_rwl_obj->lock);
+  mtx_unlock(&a_rwl_o->lock);
 }
 
 void
-rwl_wlock(cw_rwl_t * arg_rwl_obj)
+rwl_wlock(cw_rwl_t * a_rwl_o)
 {
-  _cw_check_ptr(arg_rwl_obj);
+  _cw_check_ptr(a_rwl_o);
 
-  mtx_lock(&arg_rwl_obj->lock);
+  mtx_lock(&a_rwl_o->lock);
 
-  while (arg_rwl_obj->num_readers > 0)
+  while (a_rwl_o->num_readers > 0)
   {
-    arg_rwl_obj->write_waiters++;
-    cnd_wait(&arg_rwl_obj->write_wait, &arg_rwl_obj->lock);
-    arg_rwl_obj->write_waiters--;
+    a_rwl_o->write_waiters++;
+    cnd_wait(&a_rwl_o->write_wait, &a_rwl_o->lock);
+    a_rwl_o->write_waiters--;
   }
-  arg_rwl_obj->num_writers++;
+  a_rwl_o->num_writers++;
   
-  mtx_unlock(&arg_rwl_obj->lock);
+  mtx_unlock(&a_rwl_o->lock);
 }
 
 void
-rwl_wunlock(cw_rwl_t * arg_rwl_obj)
+rwl_wunlock(cw_rwl_t * a_rwl_o)
 {
-  _cw_check_ptr(arg_rwl_obj);
+  _cw_check_ptr(a_rwl_o);
 
-  mtx_lock(&arg_rwl_obj->lock);
+  mtx_lock(&a_rwl_o->lock);
 
-  arg_rwl_obj->num_writers--;
+  a_rwl_o->num_writers--;
 
-  if (arg_rwl_obj->write_waiters > 0)
+  if (a_rwl_o->write_waiters > 0)
   {
-    cnd_signal(&arg_rwl_obj->write_wait);
+    cnd_signal(&a_rwl_o->write_wait);
   }
-  else if (arg_rwl_obj->read_waiters > 0)
+  else if (a_rwl_o->read_waiters > 0)
   {
-    cnd_broadcast(&arg_rwl_obj->read_wait);
+    cnd_broadcast(&a_rwl_o->read_wait);
   }
   
-  mtx_unlock(&arg_rwl_obj->lock);
+  mtx_unlock(&a_rwl_o->lock);
 }
 
 cw_tsd_t *
-tsd_new(cw_tsd_t * arg_tsd_obj, void (*arg_func)(void *))
+tsd_new(cw_tsd_t * a_tsd_o, void (*a_func)(void *))
 {
   cw_tsd_t * retval;
 
-  if (arg_tsd_obj == NULL)
+  if (a_tsd_o == NULL)
   {
     retval = (cw_tsd_t *) _cw_malloc(sizeof(cw_tsd_t));
     retval->is_malloced = TRUE;
   }
   else
   {
-    retval = arg_tsd_obj;
+    retval = a_tsd_o;
     retval->is_malloced = FALSE;
   }
 
-  pthread_key_create(&retval->key, arg_func);
+  pthread_key_create(&retval->key, a_func);
   
   return retval;
 }
 
 void
-tsd_delete(cw_tsd_t * arg_tsd_obj)
+tsd_delete(cw_tsd_t * a_tsd_o)
 {
-  _cw_check_ptr(arg_tsd_obj);
+  _cw_check_ptr(a_tsd_o);
 
-  pthread_key_delete(arg_tsd_obj->key);
+  pthread_key_delete(a_tsd_o->key);
 
-  if (arg_tsd_obj->is_malloced == TRUE)
+  if (a_tsd_o->is_malloced == TRUE)
   {
-    _cw_free(arg_tsd_obj);
+    _cw_free(a_tsd_o);
   }
 }
 
 void *
-tsd_get(cw_tsd_t * arg_tsd_obj)
+tsd_get(cw_tsd_t * a_tsd_o)
 {
   void * retval;
   
-  _cw_check_ptr(arg_tsd_obj);
+  _cw_check_ptr(a_tsd_o);
 
-  retval = pthread_getspecific(arg_tsd_obj->key);
+  retval = pthread_getspecific(a_tsd_o->key);
   
   return retval;
 }
 
 void
-tsd_set(cw_tsd_t * arg_tsd_obj, void * arg_val)
+tsd_set(cw_tsd_t * a_tsd_o, void * a_val)
 {
   int error;
   
-  _cw_check_ptr(arg_tsd_obj);
+  _cw_check_ptr(a_tsd_o);
 
-  error = pthread_setspecific(arg_tsd_obj->key, arg_val);
+  error = pthread_setspecific(a_tsd_o->key, a_val);
   if (error)
   {
     log_printf(g_log_obj, __FILE__, __LINE__, "tsd_set",
@@ -621,3 +621,224 @@ tsd_set(cw_tsd_t * arg_tsd_obj, void * arg_val)
     abort();
   }
 }
+
+cw_lwq_t *
+lwq_new(cw_lwq_t * a_lwq_o)
+{
+  cw_lwq_t * retval;
+
+  if (a_lwq_o == NULL)
+  {
+    retval = (cw_lwq_t *) _cw_malloc(sizeof(cw_lwq_t));
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_lwq_o;
+    retval->is_malloced = FALSE;
+  }
+
+  mtx_new(&retval->lock);
+  retval->list = list_new();
+
+  return retval;
+}
+
+void
+lwq_delete(cw_lwq_t * a_lwq_o)
+{
+  _cw_check_ptr(a_lwq_o);
+
+  mtx_delete(&a_lwq_o->lock);
+  list_delete(a_lwq_o->list);
+}
+
+void
+lwq_lock(cw_lwq_t * a_lwq_o)
+{
+  cw_list_item_t * item;
+  cw_cnd_t condition;
+  
+  _cw_check_ptr(a_lwq_o);
+  
+  mtx_lock(&a_lwq_o->lock);
+
+  if ((a_lwq_o->num_lockers > 0) ||(a_lwq_o->num_lockers > 0))
+  {
+    /* Create a condition variable. */
+    cnd_new(&condition);
+
+    /* Create a list_item and append it to the list. */
+    item = list_item_new(); /* XXX This is calling malloc() internally.
+			     * Perhaps we should be keeping a list of free
+			     * list items, or something like that. =) */
+    list_item_set(item, (void *) &condition);
+    list_tpush(a_lwq_o->list, item);
+
+    /* Wait on the condition variable. */
+    a_lwq_o->num_lock_waiters++;
+    cnd_wait(&condition, &a_lwq_o->lock);
+    a_lwq_o->num_lock_waiters--;
+    
+    /* Clean this up while we're still in this stack frame. */
+    cnd_delete(&condition);
+  }
+
+  /* If we didn't enter the above block, it means no one else is holding
+   * the lock, so in either case we've got the lock now. */
+  a_lwq_o->num_lockers++;
+  
+  mtx_unlock(&a_lwq_o->lock);
+}
+
+void
+lwq_unlock(cw_lwq_t * a_lwq_o)
+{
+  cw_list_item_t * item;
+  cw_cnd_t * condition;
+
+  _cw_check_ptr(a_lwq_o);
+  
+  mtx_lock(&a_lwq_o->lock);
+
+  a_lwq_o->num_lockers--;
+
+  if (list_count(a_lwq_o->list) > 0)
+  {
+    item = list_hpop(a_lwq_o->list);
+    _cw_check_ptr(item); /* XXX Is this really necessary? */
+
+    condition = list_item_get(item);
+    _cw_free(item);
+    
+    cnd_signal(condition);
+
+    /* We do NOT free condition here, since it's on another thread's
+     * stack.  That thread cleans it up after unblocking. */
+  }
+  
+  mtx_unlock(&a_lwq_o->lock);
+}
+
+cw_btl_t *
+btl_new(cw_btl_t * a_btl_o)
+{
+  cw_btl_t * retval;
+
+  if (a_btl_o == NULL)
+  {
+    retval = (cw_btl_t *) _cw_malloc(sizeof(cw_btl_t));
+    retval->is_malloced = TRUE;
+  }
+  else
+  {
+    retval = a_btl_o;
+    retval->is_malloced = FALSE;
+  }
+
+  /* Initialize various structure variables. */
+  
+
+  return retval;
+}
+
+void
+btl_delete(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_slock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_tlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_dlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_rlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_wlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_xlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_s2dlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_s2rlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_s2wlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_s2xlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_t2rlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_t2wlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_t2xlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_sunlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_tunlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_dunlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_runlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_wunlock(cw_btl_t * a_btl_o)
+{
+}
+
+void
+btl_xunlock(cw_btl_t * a_btl_o)
+{
+}
+
