@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 141 $
-# Last modified: $Date: 1998-07-10 15:34:34 -0700 (Fri, 10 Jul 1998) $
+# Current revision: $Revision: 166 $
+# Last modified: $Date: 1998-08-12 15:02:15 -0700 (Wed, 12 Aug 1998) $
 #
 # Description: Stub included by every Makefile.mk.
 #              
@@ -66,7 +66,7 @@ LOBJS := $(LOBJS) $($(CURRDIR)_LOBJS)
 
 # Add an update rule for the objects in this directory.
 lib$(LIB).la : $($(CURRDIR)_LOBJS)
-	$(LIBTOOL) $(CC) -o $@ $? $(LIBPATH) $(EXTRALIBS) -rpath @prefix@/lib
+	$(LIBTOOL) $(CC) -o $@ $^ $(LIBPATH) $(EXTRALIBS) -rpath @prefix@/lib
 
 vpath %.d $(CURRDIR)
 vpath %.c $(CURRDIR)
