@@ -45,19 +45,19 @@ clopt <
 	exch cat
 	`\n' cat
 
-	stderr exch write pop
-    }
+	{stderr exch write}{} until
+    } bind
 
     # Handle an error, and unwind to :parse.
     #
     #instance#
-    #errstr p_error
+    #errstr p_error -
     $p_error {
 	;error_print
 
 	# Unwind to :parse.
 	true escape
-    }
+    } bind
 
     # Parse #argv, and clean up from errors.
     #
@@ -72,7 +72,7 @@ clopt <
 	}{
 	    false
 	} ifelse
-    }
+    } bind
 
     # Parse #argv.
     #
