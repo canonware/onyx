@@ -780,8 +780,10 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 */
 			name = stils_push(&a_stilt->tstack);
 			stilo_dup(name, stilo);
-			if (stilt_dict_stack_search(a_stilt, name, stilo))
+			if (stilt_dict_stack_search(a_stilt, name, stilo)) {
 				stilt_error(a_stilt, STILTE_UNDEFINED);
+				stils_pop(&a_stilt->estack);
+			}
 			stils_pop(&a_stilt->tstack);
 			break;
 		}
