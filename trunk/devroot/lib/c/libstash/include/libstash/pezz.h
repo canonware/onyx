@@ -32,6 +32,12 @@ struct cw_pezz_s {
 	cw_uint32_t	buffer_size;
 
 	/*
+	 * Size of one buffer internally, subject to machine alignment
+	 * constraints.
+	 */
+	cw_uint32_t	aligned_size;
+
+	/*
 	 * Number of buffers in one block.  One block is (buffer_size *
 	 * block_num_buffers) bytes.
 	 */

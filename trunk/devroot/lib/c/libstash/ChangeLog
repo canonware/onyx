@@ -1,3 +1,10 @@
+2001-02-10  Jason Evans  <jasone@canonware.com>
+
+	* src/pezz.c: Round element size up to the nearest multiple of
+	machine alignment in order to avoid unaligned access errors, and
+	probably improve performance on architectures that can handle
+	arbitrary alignment.
+
 2001-02-09  Jason Evans  <jasone@canonware.com>
 
 	* : Add _LIBSTASH_MEM_DBG, _LIBSTASH_PEZZ_DBG, and

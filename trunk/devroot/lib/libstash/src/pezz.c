@@ -50,6 +50,20 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		else
 			retval->buffer_size = sizeof(cw_pezzi_t);
 
+		/*
+		 * Round element size up to the nearest multiple of alignment
+		 * required on this architecture.
+		 *
+		 * __alignof__ is a GCCism.
+		 *
+		 * This code assumes that alignment is a power of 2.
+		 */
+		retval->aligned_size = retval->buffer_size;
+		if (retval->buffer_size & (__alignof__(void *) - 1)) {
+			retval->aligned_size += __alignof__(void *);
+			retval->aligned_size &= ~(__alignof__(void *) - 1);
+		}
+
 		retval->block_num_buffers = a_num_buffers;
 
 		/* Allocate and initialize first block. */
@@ -58,7 +72,7 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		try_stage = 2;
 
 		retval->mem_blocks[0] = (void *)mem_calloc(a_mem,
-		    retval->block_num_buffers, retval->buffer_size);
+		    retval->block_num_buffers, retval->aligned_size);
 		try_stage = 3;
 
 		/* Initialize spares to have something in it. */
@@ -67,7 +81,7 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		for (i = 0; i < retval->block_num_buffers; i++) {
 			pezzi = (cw_pezzi_t *)(((cw_uint8_t
 			    *)retval->mem_blocks[0]) + (i *
-			    retval->buffer_size));
+			    retval->aligned_size));
 			qs_elm_new(pezzi, link);
 			qs_push(&retval->spares, pezzi, link);
 		}
@@ -191,14 +205,14 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 
 		a_pezz->mem_blocks[a_pezz->num_blocks] = (void
 		    *)mem_calloc(a_pezz->mem, a_pezz->block_num_buffers,
-		    a_pezz->buffer_size);
+		    a_pezz->aligned_size);
 		/* All of the allocation succeeded. */
 
 		/* Initialize spares to have something in it. */
 		for (i = 0; i < a_pezz->block_num_buffers; i++) {
 			pezzi = (cw_pezzi_t *)(((cw_uint8_t
 			    *)a_pezz->mem_blocks[a_pezz->num_blocks]) + (i *
-			    a_pezz->buffer_size));
+			    a_pezz->aligned_size));
 			qs_elm_new(pezzi, link);
 			qs_push(&a_pezz->spares, pezzi, link);
 		}
@@ -248,7 +262,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				    sizeof(cw_pezz_item_t));
 				try_stage = 1;
 
-				memset(retval, 0xa5, a_pezz->buffer_size);
+				memset(retval, 0xa5, a_pezz->aligned_size);
 
 				allocation->filename = a_filename;
 				allocation->line_num = a_line_num;
@@ -330,7 +344,7 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 				    a_buffer, a_filename, a_line_num,
 				    allocation->filename, allocation->line_num);
 			}
-			memset(a_buffer, 0x5a, a_pezz->buffer_size);
+			memset(a_buffer, 0x5a, a_pezz->aligned_size);
 			mem_free(a_pezz->mem, allocation);
 		}
 	}
@@ -361,6 +375,8 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	    a_prefix);
 	_cw_out_put("[s]buffer_size : [i]\n",
 	    a_prefix, a_pezz->buffer_size);
+	_cw_out_put("[s]aligned_size : [i]\n",
+	    a_prefix, a_pezz->aligned_size);
 	_cw_out_put("[s]block_num_buffers : [i]\n",
 	    a_prefix, a_pezz->block_num_buffers);
 	_cw_out_put("[s]num_blocks : [i]\n",
