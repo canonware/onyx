@@ -567,7 +567,6 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	{
 	    /* Insert in reverse order. */
 	    mkr_l_insert(&a_hist->hcur, TRUE, FALSE, a_bufv, a_bufvcnt, TRUE);
-
 	    break;
 	}
 	default:
@@ -1105,7 +1104,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
     hist_p_redo_flush(a_hist);
 
     /* Initialize header. */
-    histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GRP_BEG);
+    histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GRP_END);
     histh_p_aux_set(&a_hist->hhead, 0);
 
     /* Relocate hbeg. */
@@ -1120,7 +1119,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
     mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
 
     /* Initialize footer. */
-    histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GRP_BEG);
+    histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GRP_END);
     histh_p_aux_set(&a_hist->hfoot, 0);
 
     /* Insert footer. */
