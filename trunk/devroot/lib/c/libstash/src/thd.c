@@ -31,8 +31,8 @@ struct cw_thd_s {
 	void		*start_arg;
 #ifdef _CW_THD_GENERIC_SR
 	sem_t		sem;	/* For suspend/resume. */
-#endif
 	cw_bool_t	suspended:1;
+#endif
 	cw_mtx_t	crit_lock;
 	cw_bool_t	singled:1;	/* Suspended by thd_single_enter()? */
 	qr(cw_thd_t)	link;
@@ -119,8 +119,8 @@ thd_l_init(void)
 		    "Error in sem_init(): [s]\n", strerror(error));
 		abort();
 	}
-#endif
 	cw_g_thd.suspended = FALSE;
+#endif
 	mtx_new(&cw_g_thd.crit_lock);
 	cw_g_thd.singled = FALSE;
 	qr_new(&cw_g_thd, link);
@@ -179,8 +179,8 @@ thd_new(void *(*a_start_func)(void *), void *a_arg)
 		    "Error in sem_init(): [s]\n", strerror(error));
 		abort();
 	}
-#endif
 	retval->suspended = FALSE;
+#endif
 	mtx_new(&retval->crit_lock);
 	retval->singled = FALSE;
 	retval->delete = FALSE;
@@ -379,6 +379,11 @@ thd_resume(cw_thd_t *a_thd)
 		    strerror(error));
 		abort();
 	}
+	error = sem_wait(&a_thd->sem);
+	if (error != 0) {
+		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(error));
+		abort();
+	}
 #endif
 #ifdef _CW_THD_FREEBSD_SR
 	error = pthread_resume_np(a_thd->thread);
@@ -488,17 +493,28 @@ thd_p_sr_handle(int a_signal)
 	cw_thd_t	*thd;
 
 	thd = thd_self();
+
+	/*
+	 * Only enter the following block of code if we're being suspended;
+	 * this function also gets entered again when the resume signal is sent.
+	 */
 	if (thd->suspended == FALSE) {
+		thd->suspended = TRUE;
 		/*
-		 * Block all signals except _CW_THD_SIGSR while
-		 * suspended.
+		 * Block all signals except _CW_THD_SIGSR while suspended.
 		 */
 		sigfillset(&set);
 		sigdelset(&set, _CW_THD_SIGSR);
-		thd->suspended = TRUE;
+
+		/* Tell suspender we're suspended. */
 		sem_post(&thd->sem);
+
+		/* Suspend. */
 		sigsuspend(&set);
-	} else
+
+		/* Tell resumer we're resumed. */
 		thd->suspended = FALSE;
+		sem_post(&thd->sem);
+	}
 }
 #endif
