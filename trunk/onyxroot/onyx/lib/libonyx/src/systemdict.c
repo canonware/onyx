@@ -313,9 +313,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 			len = strlen(a_argv[i]);
 			nxo_string_new(&str_nxo, a_nx, TRUE, len);
 			t_str = nxo_string_get(&str_nxo);
-			nxo_string_lock(&str_nxo);
 			memcpy(t_str, a_argv[i], len);
-			nxo_string_unlock(&str_nxo);
 
 			nxo_array_el_set(&argv_nxo, &str_nxo, i);
 		}
@@ -702,10 +700,9 @@ systemdict_cd(cw_nxo_t *a_thread)
 	 * terminator.
 	 */
 	tpath = nxo_stack_push(tstack);
-	nxo_string_new(tpath, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(path) + 1);
+	nxo_string_new(tpath, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(path) + 1);
 	nxo_string_lock(path);
-	nxo_string_lock(tpath);
 	nxo_string_set(tpath, 0, nxo_string_get(path),
 	    nxo_string_len_get(path));
 	nxo_string_el_set(tpath, '\0', nxo_string_len_get(tpath) - 1);
@@ -723,8 +720,6 @@ systemdict_cd(cw_nxo_t *a_thread)
 		}
 		goto ERROR;
 	}
-
-	nxo_string_unlock(tpath);
 
 	nxo_stack_pop(ostack);
 
@@ -772,19 +767,15 @@ systemdict_chmod(cw_nxo_t *a_thread)
 		 * terminator.
 		 */
 		tfile = nxo_stack_push(tstack);
-		nxo_string_new(tfile, nxo_thread_nx_get(a_thread),
-		    nxo_thread_currentlocking(a_thread),
+		nxo_string_new(tfile, nxo_thread_nx_get(a_thread), FALSE,
 		    nxo_string_len_get(file) + 1);
 		nxo_string_lock(file);
-		nxo_string_lock(tfile);
 		nxo_string_set(tfile, 0, nxo_string_get(file),
 		    nxo_string_len_get(file));
 		nxo_string_el_set(tfile, '\0', nxo_string_len_get(tfile) - 1);
 		nxo_string_unlock(file);
 
 		error = chmod(nxo_string_get(tfile), nxo_integer_get(mode));
-
-		nxo_string_unlock(tfile);
 
 		nxo_stack_pop(tstack);
 	}
@@ -861,11 +852,9 @@ systemdict_chown(cw_nxo_t *a_thread)
 		 * terminator.
 		 */
 		tfile = nxo_stack_push(tstack);
-		nxo_string_new(tfile, nxo_thread_nx_get(a_thread),
-		    nxo_thread_currentlocking(a_thread),
+		nxo_string_new(tfile, nxo_thread_nx_get(a_thread), FALSE,
 		    nxo_string_len_get(file) + 1);
 		nxo_string_lock(file);
-		nxo_string_lock(tfile);
 		nxo_string_set(tfile, 0, nxo_string_get(file),
 		    nxo_string_len_get(file));
 		nxo_string_el_set(tfile, '\0', nxo_string_len_get(tfile) - 1);
@@ -873,8 +862,6 @@ systemdict_chown(cw_nxo_t *a_thread)
 
 		error = chown(nxo_string_get(tfile), nxo_integer_get(uid),
 		    nxo_integer_get(gid));
-
-		nxo_string_unlock(tfile);
 
 		nxo_stack_pop(tstack);
 	}
@@ -1199,10 +1186,8 @@ systemdict_cvn(cw_nxo_t *a_thread)
 	tnxo = nxo_stack_push(tstack);
 	nxo_dup(tnxo, nxo);
 
-	nxo_string_lock(tnxo);
 	nxo_name_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxo_string_get(tnxo), nxo_string_len_get(tnxo), FALSE);
-	nxo_string_unlock(tnxo);
 	nxo_attr_set(nxo, nxo_attr_get(tnxo));
 
 	nxo_stack_pop(tstack);
@@ -1344,8 +1329,6 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		 * since no other threads have a possible way of accessing it
 		 * yet.
 		 */
-		nxo_string_lock(tnxo);
-
 		/* Calculate the length of the new string. */
 		for (i = 0, newlen = 2; i < len; i++) {
 			switch (str[i]) {
@@ -1425,7 +1408,6 @@ systemdict_cvs(cw_nxo_t *a_thread)
 			}
 		}
 
-		nxo_string_unlock(tnxo);
 		nxo_stack_pop(tstack);
 		break;
 	}
@@ -1572,12 +1554,10 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	path = nxo_stack_push(tstack);
 	nxo_string_new(path, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(nxo) + 1);
-	nxo_string_lock(path);
 	nxo_string_lock(nxo);
 	nxo_string_set(path, 0, nxo_string_get(nxo), nxo_string_len_get(nxo));
 	nxo_string_el_set(path, '\0', nxo_string_len_get(path) - 1);
 	nxo_string_unlock(nxo);
-	nxo_string_unlock(path);
 
 	/*
 	 * Open the directory.
@@ -2788,12 +2768,10 @@ systemdict_link(cw_nxo_t *a_thread)
 	 * terminator.
 	 */
 	tfilename = nxo_stack_push(tstack);
-	nxo_string_new(tfilename, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(filename) +
-	    1);
+	nxo_string_new(tfilename, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(filename) + 1);
 	
 	nxo_string_lock(filename);
-	nxo_string_lock(tfilename);
 	nxo_string_set(tfilename, 0, nxo_string_get(filename),
 	    nxo_string_len_get(filename));
 	nxo_string_el_set(tfilename, '\0', nxo_string_len_get(tfilename) - 1);
@@ -2804,11 +2782,9 @@ systemdict_link(cw_nxo_t *a_thread)
 	 * terminator.
 	 */
 	tlinkname = nxo_stack_push(tstack);
-	nxo_string_new(tlinkname, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(linkname) +
-	    1);
+	nxo_string_new(tlinkname, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(linkname) + 1);
 	nxo_string_lock(linkname);
-	nxo_string_lock(tlinkname);
 	nxo_string_set(tlinkname, 0, nxo_string_get(linkname),
 	    nxo_string_len_get(linkname));
 	nxo_string_el_set(tlinkname, '\0', nxo_string_len_get(tlinkname) - 1);
@@ -2993,10 +2969,9 @@ systemdict_mkdir(cw_nxo_t *a_thread)
 	 * Create a copy of path with an extra byte to store a '\0' terminator.
 	 */
 	tpath = nxo_stack_push(tstack);
-	nxo_string_new(tpath, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(path) + 1);
+	nxo_string_new(tpath, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(path) + 1);
 	nxo_string_lock(path);
-	nxo_string_lock(tpath);
 	nxo_string_set(tpath, 0, nxo_string_get(path),
 	    nxo_string_len_get(path));
 	nxo_string_el_set(tpath, '\0', nxo_string_len_get(tpath) - 1);
@@ -3004,7 +2979,6 @@ systemdict_mkdir(cw_nxo_t *a_thread)
 
 	error = mkdir(nxo_string_get(tpath), nxo_integer_get(mode));
 
-	nxo_string_unlock(tpath);
 	nxo_stack_pop(tstack);
 
 	if (error == -1) {
@@ -3895,10 +3869,9 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 	 * Create a copy of path with an extra byte to store a '\0' terminator.
 	 */
 	tpath = nxo_stack_push(tstack);
-	nxo_string_new(tpath, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(path) + 1);
+	nxo_string_new(tpath, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(path) + 1);
 	nxo_string_lock(path);
-	nxo_string_lock(tpath);
 	nxo_string_set(tpath, 0, nxo_string_get(path),
 	    nxo_string_len_get(path));
 	nxo_string_el_set(tpath, '\0', nxo_string_len_get(tpath) - 1);
@@ -3906,7 +3879,6 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 
 	error = rmdir(nxo_string_get(tpath));
 
-	nxo_string_unlock(tpath);
 	nxo_stack_pop(tstack);
 
 	if (error == -1) {
@@ -4547,18 +4519,14 @@ systemdict_status(cw_nxo_t *a_thread)
 		 * terminator.
 		 */
 		tfile = nxo_stack_push(tstack);
-		nxo_string_new(tfile, nx, nxo_thread_currentlocking(a_thread),
-		    nxo_string_len_get(file) + 1);
+		nxo_string_new(tfile, nx, FALSE, nxo_string_len_get(file) + 1);
 		nxo_string_lock(file);
-		nxo_string_lock(tfile);
 		nxo_string_set(tfile, 0, nxo_string_get(file),
 		    nxo_string_len_get(file));
 		nxo_string_el_set(tfile, '\0', nxo_string_len_get(tfile) - 1);
 		nxo_string_unlock(file);
 
 		error = stat(nxo_string_get(tfile), &sb);
-
-		nxo_string_unlock(tfile);
 
 		nxo_stack_pop(tstack);
 	}
@@ -5025,11 +4993,9 @@ systemdict_symlink(cw_nxo_t *a_thread)
 	 * terminator.
 	 */
 	tfilename = nxo_stack_push(tstack);
-	nxo_string_new(tfilename, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(filename) +
-	    1);
+	nxo_string_new(tfilename, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(filename) + 1);
 	nxo_string_lock(filename);
-	nxo_string_lock(tfilename);
 	nxo_string_set(tfilename, 0, nxo_string_get(filename),
 	    nxo_string_len_get(filename));
 	nxo_string_el_set(tfilename, '\0', nxo_string_len_get(tfilename) - 1);
@@ -5040,11 +5006,9 @@ systemdict_symlink(cw_nxo_t *a_thread)
 	 * terminator.
 	 */
 	tlinkname = nxo_stack_push(tstack);
-	nxo_string_new(tlinkname, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(linkname) +
-	    1);
+	nxo_string_new(tlinkname, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(linkname) + 1);
 	nxo_string_lock(linkname);
-	nxo_string_lock(tlinkname);
 	nxo_string_set(tlinkname, 0, nxo_string_get(linkname),
 	    nxo_string_len_get(linkname));
 	nxo_string_el_set(tlinkname, '\0', nxo_string_len_get(tlinkname) - 1);
@@ -5163,19 +5127,15 @@ systemdict_test(cw_nxo_t *a_thread)
 		 * terminator.
 		 */
 		tfile = nxo_stack_push(tstack);
-		nxo_string_new(tfile, nxo_thread_nx_get(a_thread),
-		    nxo_thread_currentlocking(a_thread),
+		nxo_string_new(tfile, nxo_thread_nx_get(a_thread), FALSE,
 		    nxo_string_len_get(file) + 1);
 		nxo_string_lock(file);
-		nxo_string_lock(tfile);
 		nxo_string_set(tfile, 0, nxo_string_get(file),
 		    nxo_string_len_get(file));
 		nxo_string_el_set(tfile, '\0', nxo_string_len_get(tfile) - 1);
 		nxo_string_unlock(file);
 
 		error = stat(nxo_string_get(tfile), &sb);
-
-		nxo_string_unlock(tfile);
 
 		nxo_stack_pop(tstack);
 	}
@@ -5656,11 +5616,9 @@ systemdict_unlink(cw_nxo_t *a_thread)
 	 * terminator.
 	 */
 	tfilename = nxo_stack_push(tstack);
-	nxo_string_new(tfilename, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(filename) +
-	    1);
+	nxo_string_new(tfilename, nxo_thread_nx_get(a_thread), FALSE,
+	    nxo_string_len_get(filename) + 1);
 	nxo_string_lock(filename);
-	nxo_string_lock(tfilename);
 	nxo_string_set(tfilename, 0, nxo_string_get(filename),
 	    nxo_string_len_get(filename));
 	nxo_string_el_set(tfilename, '\0', nxo_string_len_get(tfilename) - 1);
@@ -5668,7 +5626,6 @@ systemdict_unlink(cw_nxo_t *a_thread)
 
 	error = unlink(nxo_string_get(tfilename));
 
-	nxo_string_unlock(tfilename);
 	nxo_stack_pop(tstack);
 
 	if (error == -1) {
@@ -5742,7 +5699,7 @@ systemdict_unsetenv(cw_nxo_t *a_thread)
 	 */
 	len = nxo_name_len_get(key);
 	tkey = nxo_stack_push(tstack);
-	nxo_string_new(tkey, nx, nxo_thread_currentlocking(a_thread), len + 1);
+	nxo_string_new(tkey, nx, FALSE, len + 1);
 	nxo_string_set(tkey, 0, nxo_name_str_get(key), len);
 	nxo_string_el_set(tkey, '\0', len);
 
