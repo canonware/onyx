@@ -1,3 +1,12 @@
+1999-07-25  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c (mem_[mc]alloc): Don't abort() if hash insertion fails
+	due to the library user not consistently using the mem class for
+	allocation.
+
+	Add a mutex to the mem class to avoid race conditions when
+	inserting and deleting keys in the hash table.
+
 1999-07-21  J. Owen Evans  <jasone@canonware.com>
 
 	* src/out.c (out_p_metric_int, out_p_render_int): Use modulus and

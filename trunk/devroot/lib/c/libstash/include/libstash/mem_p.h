@@ -18,6 +18,9 @@ struct cw_mem_s
 {
 #ifdef _LIBSTASH_DBG
   cw_oh_t addr_hash;
+#  ifdef _CW_REENTRANT
+  cw_mtx_t lock;
+#  endif
 #else
   int garbage;
 #endif

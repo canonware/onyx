@@ -28,7 +28,8 @@ mem_new(void)
 
 #ifdef _LIBSTASH_DBG
 #  ifdef _CW_REENTRANT
-  oh_new(&retval->addr_hash, TRUE);
+  oh_new(&retval->addr_hash, FALSE);
+  mtx_new(&retval->lock);
 #  else
   oh_new(&retval->addr_hash);
 #  endif
@@ -86,6 +87,7 @@ mem_delete(cw_mem_t * a_mem)
       }
     }
     oh_delete(&a_mem->addr_hash);
+    mtx_delete(&a_mem->lock);
   }
 #endif
   
@@ -125,6 +127,9 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   {
     struct cw_mem_item_s * old_allocation;
     
+#ifdef _CW_REENTRANT
+    mtx_lock(&a_mem->lock);
+#endif
     if (FALSE == oh_item_search(&a_mem->addr_hash,
 				a_mem,
 				(void **) &old_allocation))
@@ -186,10 +191,27 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	  out_put(cw_g_out, buf);
 	}
 
-	_cw_assert(0 == oh_item_insert(&a_mem->addr_hash, retval,
-				       allocation));
+	if (0 != oh_item_insert(&a_mem->addr_hash, retval, allocation))
+	{
+	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
+	  {
+	    char buf[1025];
+
+	    bzero(buf, sizeof(buf));
+
+	    out_put_sn(cw_g_out, buf, 1024,
+		       "[s](): 0x[p] multiply-allocated "
+		       "(probably used free() directly) at [s], line [i32]\n",
+		       __FUNCTION__, retval,
+		       (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+	    out_put(cw_g_out, buf);
+	  }
+	}
       }
     }
+#ifdef _CW_REENTRANT
+    mtx_unlock(&a_mem->lock);
+#endif
   }
 #endif
 
@@ -229,6 +251,10 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   else if (NULL != a_mem)
   {
     struct cw_mem_item_s * old_allocation;
+    
+#ifdef _CW_REENTRANT
+    mtx_lock(&a_mem->lock);
+#endif
     
     if (FALSE == oh_item_search(&a_mem->addr_hash,
 				a_mem,
@@ -292,10 +318,27 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	  out_put(cw_g_out, buf);
 	}
       
-	_cw_assert(0 == oh_item_insert(&a_mem->addr_hash, retval,
-				       allocation));
+	if (0 != oh_item_insert(&a_mem->addr_hash, retval, allocation))
+	{
+	  if (dbg_is_registered(cw_g_dbg, "mem_error"))
+	  {
+	    char buf[1025];
+
+	    bzero(buf, sizeof(buf));
+
+	    out_put_sn(cw_g_out, buf, 1024,
+		       "[s](): 0x[p] multiply-allocated "
+		       "(probably used free() directly) at [s], line [i32]\n",
+		       __FUNCTION__, retval,
+		       (NULL == a_filename) ? "<?>" : a_filename, a_line_num);
+	    out_put(cw_g_out, buf);
+	  }
+	}
       }
     }
+#ifdef _CW_REENTRANT
+    mtx_unlock(&a_mem->lock);
+#endif
   }
 #endif
 
@@ -336,10 +379,13 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   }
   else if (NULL != a_mem)
   {
-    void * junk;
     struct cw_mem_item_s * allocation;
     
-    if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, &junk,
+#ifdef _CW_REENTRANT
+    mtx_lock(&a_mem->lock);
+#endif
+    
+    if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
 			       (void **) &allocation))
     {
       if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -407,6 +453,9 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	out_put(cw_g_out, buf);
       }
     }
+#ifdef _CW_REENTRANT
+    mtx_unlock(&a_mem->lock);
+#endif
   }
 #endif
 
@@ -426,6 +475,10 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
   if (NULL != a_mem)
   {
     struct cw_mem_item_s * allocation;
+    
+#ifdef _CW_REENTRANT
+    mtx_lock(&a_mem->lock);
+#endif
     
     if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
 			       (void **) &allocation))
@@ -466,6 +519,9 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
       memset(a_ptr, 0x5a, allocation->size);
       _cw_free(allocation);
     }
+#ifdef _CW_REENTRANT
+    mtx_unlock(&a_mem->lock);
+#endif
   }
 #endif
 
