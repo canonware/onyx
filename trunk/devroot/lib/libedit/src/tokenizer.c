@@ -35,7 +35,7 @@
  */
 #include <string.h>
 #include <stdlib.h>
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 typedef enum { Q_none, Q_single, Q_double, Q_one, Q_doubleone } quote_t;
 

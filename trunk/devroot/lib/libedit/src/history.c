@@ -43,7 +43,7 @@
 
 static const char hist_cookie[] = "_HiStOrY_V1_\n";
 
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 typedef const HistEvent *	(*history_gfun_t) __P((ptr_t));
 typedef const HistEvent *	(*history_efun_t) __P((ptr_t, const char *));

@@ -43,7 +43,7 @@
  *	settc
  *	setty
  */
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 private struct {
     char *name;

@@ -33,7 +33,7 @@
 /*
  * vi.c: Vi mode commands.
  */
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 private el_action_t cv_action __P((EditLine *, int));
 

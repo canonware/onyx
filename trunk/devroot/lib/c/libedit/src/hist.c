@@ -34,7 +34,7 @@
  * hist.c: History access functions
  */
 #include <stdlib.h>
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 /* hist_init():
  *	Initialization function.

@@ -46,7 +46,7 @@
 #include <unistd.h>
 #include <dirent.h>
 
-#include "libedit.h"
+#include <libedit/libedit.h>
 
 static int continuation = 0;
 static EditLine *el = NULL;

@@ -1,4 +1,4 @@
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 private el_func_t el_func[] = {
     ed_argument_digit,         ed_clear_screen,           
     ed_command,                ed_delete_next_char,       

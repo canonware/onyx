@@ -37,7 +37,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 #define OKCMD -1
 

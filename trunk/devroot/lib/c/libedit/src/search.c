@@ -39,7 +39,7 @@
 #elif defined(REGEXP)
 #include <regexp.h>
 #endif
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 /*
  * Adjust cursor in vi mode to include the character under it

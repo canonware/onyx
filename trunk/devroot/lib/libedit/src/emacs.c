@@ -33,7 +33,7 @@
 /*
  * emacs.c: Emacs functions
  */
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 /* em_delete_or_list():
  *	Delete character under cursor or list completions if at end of line

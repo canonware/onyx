@@ -34,7 +34,7 @@
  * prompt.c: Prompt printing functions
  */
 #include <stdio.h>
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 private char *prompt_default	__P((EditLine *));
 

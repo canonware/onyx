@@ -35,7 +35,7 @@
 /*
  * tty.c: tty interface stuff
  */
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 typedef struct ttymodes_t {
     char *m_name;

@@ -33,7 +33,7 @@
 /*
  * common.c: Common Editor functions
  */
-#include "libedit.h"
+#include "libedit/libedit.h"
 
 /* ed_end_of_file():
  *	Indicate end of file

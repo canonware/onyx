@@ -34,7 +34,7 @@
  * map.c: Editor function definitions
  */
 #include <stdlib.h>
-#include "libedit.h"
+#include "../include/libedit/libedit.h"
 
 #define N_KEYS 256
 
