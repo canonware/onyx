@@ -36,7 +36,7 @@
 `
 % Define promptstring in systemdict.
 systemdict begin
-% - promptstring <string>
+% - promptstring %string
 /promptstring {
     count cvs `onyx:' exch catenate `> ' catenate
 } bind def
