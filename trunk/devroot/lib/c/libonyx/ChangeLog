@@ -1,3 +1,8 @@
+2001-08-19  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_roots): Don't iterate through objects once a
+	root object is found; nxa_p_mark() does that just fine.
+
 2001-08-18  Jason Evans  <jasone@canonware.com>
 
 	* src/nxo_file.c: Remove nxo_file_output() and

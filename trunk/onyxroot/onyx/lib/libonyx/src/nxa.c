@@ -503,43 +503,13 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 			nxoe_l_color_set(nxoe, !a_nxa->white);
 			ql_first(&a_nxa->seq_set) = nxoe;
 			gray = nxoe;
-			goto HAVE_ROOT;
+			retval = TRUE;
+			goto RETURN;
 		}
 	}
-	/*
-	 * If we completed the above loop, there are no roots, and therefore we
-	 * should not enter the main root set acquisition loop below.
-	 */
+	/* If we completed the above loop, there are no roots. */
+
 	retval = FALSE;
-	goto RETURN;
-
-	/*
-	 * Main root set acquisition loop.
-	 */
-	HAVE_ROOT:
-
-	/* XXX Is this necessary? */
-	/*
-	 * Iterate through nxoe's.
-	 */
-	for (nxoe = nx_l_ref_iter(a_nxa->nx, TRUE); nxoe != NULL; nxoe =
-	    nx_l_ref_iter(a_nxa->nx, FALSE)) {
-		if (nxoe_l_color_get(nxoe) == a_nxa->white &&
-		    nxoe_l_registered_get(nxoe)) {
-			nroot++;
-			/*
-			 * Paint object gray.
-			 */
-			nxoe_l_color_set(nxoe, !a_nxa->white);
-			if (nxoe != qr_next(gray, link)) {
-				qr_remove(nxoe, link);
-				qr_after_insert(gray, nxoe, link);
-			}
-			gray = qr_next(gray, link);
-		}
-	}
-
-	retval = TRUE;
 	RETURN:
 	*r_nroot = nroot;
 	return retval;
