@@ -4884,7 +4884,7 @@ EOF
 
 fi
 
-if test "x$build_libonyx" = "xyes" ; then
+if test "x$lib_onyx" = "x1" ; then
   echo "$as_me:4888: checking for ANSI C header files" >&5
 echo $ECHO_N "checking for ANSI C header files... $ECHO_C" >&6
 if test "${ac_cv_header_stdc+set}" = set; then
@@ -8554,7 +8554,7 @@ done
 fi
 fi
 
-if test "x$build_onyx" = "xyes" ; then
+if test "x$bin_onyx" = "x1" ; then
   if test "x$prefix" = "xNONE" ; then
     CW_ONYX_RPATH="/usr/local/share/onyx/nx"
     CW_ONYX_MPATH="/usr/local/share/onyx/nxm"
@@ -8590,7 +8590,7 @@ EOF
 
 fi
 
-if test "x$build_slate" = "xyes" ; then
+if test "x$bin_slate" = "x1" ; then
   if test "x$prefix" = "xNONE" ; then
     CW_SLATE_RPATH="/usr/local/share/slate/nx:/usr/local/share/onyx/nx"
     CW_SLATE_MPATH="/usr/local/share/slate/nxm:/usr/local/share/onyx/nxm"
@@ -8626,7 +8626,7 @@ EOF
 
 fi
 
-if test "x$build_modgtk" = "xyes" ; then
+if test "x$mod_gtk" = "x1" ; then
   cfgoutputs="$cfgoutputs mod/modgtk/nx/modgtk/modgtk_defs.nx"
 fi
 

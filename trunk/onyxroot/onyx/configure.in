@@ -211,7 +211,7 @@ AC_C_BIGENDIAN
 dnl 
 dnl libonyx configuration.
 dnl 
-if test "x$build_libonyx" = "xyes" ; then
+if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_SIZEOF(signed char, 1)
   AC_CHECK_SIZEOF(unsigned char, 1)
   AC_CHECK_SIZEOF(signed short, 2)
@@ -261,7 +261,7 @@ fi
 dnl 
 dnl onyx configuration.
 dnl 
-if test "x$build_onyx" = "xyes" ; then
+if test "x$bin_onyx" = "x1" ; then
   if test "x$prefix" = "xNONE" ; then
     CW_ONYX_RPATH="/usr/local/share/onyx/nx"
     CW_ONYX_MPATH="/usr/local/share/onyx/nxm"
@@ -287,7 +287,7 @@ fi
 dnl 
 dnl slate configuration.
 dnl 
-if test "x$build_slate" = "xyes" ; then
+if test "x$bin_slate" = "x1" ; then
   if test "x$prefix" = "xNONE" ; then
     CW_SLATE_RPATH="/usr/local/share/slate/nx:/usr/local/share/onyx/nx"
     CW_SLATE_MPATH="/usr/local/share/slate/nxm:/usr/local/share/onyx/nxm"
@@ -313,7 +313,7 @@ fi
 dnl 
 dnl modgtk configuration.
 dnl 
-if test "x$build_modgtk" = "xyes" ; then
+if test "x$mod_gtk" = "x1" ; then
   cfgoutputs="$cfgoutputs mod/modgtk/nx/modgtk/modgtk_defs.nx"
 fi
 

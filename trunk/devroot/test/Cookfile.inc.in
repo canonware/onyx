@@ -33,7 +33,7 @@ tests_distclean :
 /*
  * Build rules for tests.
  */
-[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a libs
+[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a libs_s
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
@@ -42,9 +42,9 @@ tests_distclean :
        [split " "
               [prepost [prepost [RPATH] "/lib/" [abs_objdir]]
                        "/lib"
-                       [libs]]]
+                       @libs@]]
 #endif
-       [LDFLAGS] [addprefix -l [fromto lib% % @libs@]] [EXTRALIBS];
+       [LDFLAGS] [subst lib -l [filter_out libedit @libs@]] [EXTRALIBS];
 }
 
 [objdir]/%0test/%1.o_a : [srcdir]/%0test/%1.c

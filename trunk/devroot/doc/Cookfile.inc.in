@@ -14,14 +14,6 @@
 
 #include-cooked [fromto % [objdir]/doc/latex/%/Cookfile.inc @docs@]
 
-/* Paths to programs. */
-LATEX = @LATEX@;
-PDFLATEX = @PDFLATEX@;
-DVIPS = @DVIPS@;
-FIG2DEV = @FIG2DEV@;
-LATEX2HTML = @LATEX2HTML@;
-MAKEINDEX = @MAKEINDEX@;
-
 /*
  * Targets.
  */
@@ -52,5 +44,87 @@ docs_relclean : [addsuffix _docs_relclean @docs@]
 [objdir]/%0%.ps : [srcdir]/%0%.fig
   set mkdir
 {
-  [FIG2DEV] -L ps [srcdir]/%0%.fig [objdir]/%0%.ps;
+  @FIG2DEV@ -L ps [srcdir]/%0%.fig [objdir]/%0%.ps;
+}
+
+[objdir]/%0ps/%1/%.ps : [objdir]/%0latex/%1/%.tex
+  set mkdir
+{
+  /*
+   * Clean up the temp files to keep {pdf}latex from stumbling over the output
+   * of each other.
+   *
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   */
+
+  rm -f [addprefix [objdir]/%0latex/%1/%.
+                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
+  rm -f [objdir]/%0latex/%1/texput.log;
+
+  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @LATEX@ %.tex;
+  cd [objdir]/%0latex/%1/\; @MAKEINDEX@ -c -l
+                                        -s [abs_srcdir]/%0latex/%1/%.mst
+                                        %.idx;
+  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @LATEX@ %.tex;
+  @DVIPS@ [objdir]/%0latex/%1/%.dvi -o [objdir]/%0ps/%1/%.ps;
+}
+
+[objdir]/%0pdf/%1/%.pdf : [objdir]/%0latex/%1/%.tex
+  set mkdir
+{
+  /*
+   * Clean up the temp files to keep {pdf}latex from stumbling over the output
+   * of each other.
+   *
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   */
+
+  rm -f [addprefix [objdir]/%0latex/%1/%.
+                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
+  rm -f [objdir]/%0latex/%1/texput.log;
+
+  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @PDFLATEX@
+                                   %.tex;
+  cd [objdir]/%0latex/%1/\; @MAKEINDEX@ -c -l 
+                                        -s [abs_srcdir]/%0latex/%1/%.mst
+                                        %.idx;
+  cd [objdir]/%0latex/%1/\; @PERL@ [abs_srcdir]/%0latex/ltx2e @PDFLATEX@
+                                   %.tex;
+  cp [objdir]/%0latex/%1/%.pdf [objdir]/%0pdf/%1/%.pdf;
+}
+
+[objdir]/%0html/%1/%.html : [objdir]/%0latex/%1/%.tex
+  set mkdir
+{
+  @LATEX2HTML@ -init_file [srcdir]/%0latex/%1/.latex2html-init
+    -dir [abs_objdir]/%0html/%1 -split 5 -toc_depth 4 -show_section_numbers
+    -footnode -noinfo -auto_link -transparent -image_type png -local_icons
+    [abs_objdir]/%0latex/%1/%.tex;
+  /*
+   * Fix up [, ], and \ characters.
+   * Get rid of spurious <> at the end of tables.
+   */
+  [SHELL] -e;
+data
+  for i in `find [objdir]/%0html/%1/ -type f |grep "\.html$"` ; do
+    mv $i $i.tmp
+    cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
+      | sed -e s/YYYlbZZZ/\[/g \\
+      | sed -e s/YYYrbZZZ/\]/g \\
+      | sed -e \\
+        "s/^\\\\\\(\\\\\\<\\\\/TABLE\\\\\\>\\\\\\)\\\\\\<\\\\\\>/\\\\1/g" \\
+      > $i
+    rm $i.tmp
+  done
+dataend
+
+  /*
+   * Clean up temp files so that they won't get installed.
+   */
+  rm -f [objdir]/%0html/%1/WARNINGS;
+  rm -f [addprefix [objdir]/%0html/%1/images. aux idx log pl tex];
+  rm -f [objdir]/%0html/%1/internals.pl;
+  rm -f [objdir]/%0html/%1/labels.pl;
 }

@@ -11,7 +11,7 @@ if ($ARGV[0] eq '-v') {
 $latex = $ARGV[0];
 shift(@ARGV);
 #
-die "$Pgm: must have exactly one argument\n" if $#ARGV != 0;
+die "$Pgm: must have exactly two arguments\n" if $#ARGV != 0;
 # figure out input file and its filename root
 if (-f $ARGV[0]) {
     $TeX_input = $ARGV[0];

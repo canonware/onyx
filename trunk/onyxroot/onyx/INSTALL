@@ -42,17 +42,17 @@ Additional build targets of finer granularity include:
 
 Additional install targets of finer granularity include:
 
-	install_{bins,libs,mods,docs}
-	<binname>_install
-	<libname>_install
-	<libname>_install_[as]
-	<modname>_install
+	{bins,libs,mods,docs}_install
+	<binname>_bins_install
+	<libname>_libs_install
+	<libname>_libs_install_[as]
+	<modname>_mods_install
 	docs_install_{ps,pdf,html}
 
 Uninstall targets include:
 
 	uninstall
-	uninstall_{bins,libs,mods,docs}
+	{bins,libs,mods,docs}_uninstall
 	<binname>_uninstall
 	<libname>_uninstall
 	<modname>_uninstall
@@ -85,7 +85,7 @@ Optionally, pass any of the following (not a definitive list) arguments to
 		./configure --prefix=/usr/local
 
 	will cause files to be installed into /usr/local/bin, /usr/local/man,
-	/usr/local/include, and /usr/local/lib.
+	/usr/local/include, /usr/local/lib, and /usr/local/share.
 
 --disable-threads
 	Do not support threads.  Specifying this option disables significant
