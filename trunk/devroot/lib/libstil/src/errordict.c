@@ -125,8 +125,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 	    stiln_len(STILN_errorname), TRUE);
 	stiln = stilte_stiln(stilt_error_get(a_stilt));
 	stilo_string_new(tstilo, a_stilt, stiln_len(stiln));
-	stilo_string_set(tstilo, a_stilt, 0, stiln_str(stiln),
-	    stiln_len(stiln));
+	stilo_string_set(tstilo, 0, stiln_str(stiln), stiln_len(stiln));
 	stilo_dict_def(derror, a_stilt, tname, tstilo);
 	
 	switch (stilt_error_get(a_stilt)) {
@@ -194,8 +193,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			stilo_array_new(arr, a_stilt, count);
 			for (i = count - 1, stilo = NULL; i >= 0; i--) {
 				stilo = stils_down_get(ostack, stilo);
-				stilo_dup(stilo_array_el_get(arr, a_stilt, i),
-				    stilo);
+				stilo_dup(stilo_array_el_get(arr, i), stilo);
 			}
 			stilo_dict_def(derror, a_stilt, tname, arr);
 			
@@ -210,8 +208,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			for (i = count - 1, stilo = stils_get(estack);
 			     i >= 0; i--) {
 				stilo = stils_down_get(estack, stilo);
-				stilo_dup(stilo_array_el_get(arr, a_stilt, i),
-				    stilo);
+				stilo_dup(stilo_array_el_get(arr, i), stilo);
 			}
 			stilo_dict_def(derror, a_stilt, tname, arr);
 			
@@ -222,8 +219,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			stilo_array_new(arr, a_stilt, count);
 			for (i = count - 1, stilo = NULL; i >= 0; i--) {
 				stilo = stils_down_get(dstack, stilo);
-				stilo_dup(stilo_array_el_get(arr, a_stilt, i),
-				    stilo);
+				stilo_dup(stilo_array_el_get(arr, i), stilo);
 			}
 			stilo_dict_def(derror, a_stilt, tname, arr);
 			

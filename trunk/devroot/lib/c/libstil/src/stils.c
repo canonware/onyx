@@ -112,7 +112,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
 	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link),
 		 i++) {
 		new_stilo = stils_push(a_stils);
-		stilo_move(new_stilo, &old_stilso->stilo);
+		stilo_dup(new_stilo, &old_stilso->stilo);
 
 		switch (stilo_type_get(new_stilo)) {
 		case STILOT_ARRAY:

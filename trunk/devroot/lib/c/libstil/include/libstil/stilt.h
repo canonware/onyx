@@ -15,35 +15,6 @@
 #define	_CW_STILT_BUFFER_SIZE	256
 #endif
 
-typedef enum {
-	/* Interpreter errors. */
-	STILTE_NONE,			/* No error. */
-	STILTE_DICTSTACKOVERFLOW,	/* dstack too deep. */
-	STILTE_DICTSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
-	STILTE_EXECSTACKOVERFLOW,	/* estack too deep. */
-	STILTE_INTERRUPT,		/* Interrupt. */
-	STILTE_INVALIDACCESS,		/* Permission error. */
-	STILTE_INVALIDCONTEXT,		/* Bad thread context. */
-	STILTE_INVALIDEXIT,		/* exit operator called outside loop. */
-	STILTE_INVALIDFILEACCESS,	/* Insufficient file permissions. */
-	STILTE_IOERROR,			/* read()/write()/etc. error. */
-	STILTE_LIMITCHECK,		/* Value outside legal range. */
-	STILTE_RANGECHECK,		/* Out of bounds string or array use. */
-	STILTE_STACKOVERFLOW,		/* ostack too full. */
-	STILTE_STACKUNDERFLOW,		/* Not enough objects on ostack. */
-	STILTE_SYNTAXERROR,		/* Scanner syntax error. */
-	STILTE_TIMEOUT,			/* Timeout. */
-	STILTE_TYPECHECK,		/* Incorrect argument type. */
-	STILTE_UNDEFINED,		/* Object not found in dstack. */
-	STILTE_UNDEFINEDFILENAME,	/* Bad filename. */
-	STILTE_UNDEFINEDRESOURCE,	/* Resource not found. */
-	STILTE_UNDEFINEDRESULT,
-	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
-	STILTE_UNREGISTERED,		/* Other non-enumerated error. */
-	STILTE_VMERROR			/* Out of memory. */
-#define	STILTE_LAST	STILTE_VMERROR
-} cw_stilte_t;
-
 typedef struct cw_stilts_s cw_stilts_t;
 typedef enum {
 	STILTTS_START,

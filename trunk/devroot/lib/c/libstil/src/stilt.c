@@ -1161,7 +1161,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					stilo = stils_push(&a_stilt->ostack);
 					stilo_string_new(stilo, a_stilt,
 					    a_stilt->index);
-					stilo_string_set(stilo, a_stilt, 0,
+					stilo_string_set(stilo, 0,
 					    a_stilt->tok_str, a_stilt->index);
 
 					stilt_p_reset(a_stilt);
@@ -1367,8 +1367,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilo = stils_push(&a_stilt->ostack);
 				stilo_string_new(stilo, a_stilt,
 				    a_stilt->index);
-				stilo_string_set(stilo, a_stilt, 0,
-				    a_stilt->tok_str, a_stilt->index);
+				stilo_string_set(stilo, 0, a_stilt->tok_str,
+				    a_stilt->index);
 
 				stilt_p_reset(a_stilt);
 
@@ -1774,7 +1774,7 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 static void
 stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 {
-	cw_stilo_t	t_stilo, *stilo, *arr;	/* XXX GC-unsafe. */
+	cw_stilo_t	*tstilo, *stilo, *arr;
 	cw_uint32_t	nelements, i, depth;
 
 	/* Find the no "mark". */
@@ -1793,9 +1793,10 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	 */
 	nelements = i;
 
-	stilo_array_new(&t_stilo, a_stilt, nelements);
-	stilo_attrs_set(&t_stilo, STILOA_EXECUTABLE);
-	arr = stilo_array_get(&t_stilo);
+	tstilo = stils_push(&a_stilt->tstack);
+	stilo_array_new(tstilo, a_stilt, nelements);
+	stilo_attrs_set(tstilo, STILOA_EXECUTABLE);
+	arr = stilo_array_get(tstilo);
 
 	/*
 	 * Traverse down the stack, moving stilo's to the array.
@@ -1810,7 +1811,8 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 
 	/* Push the array onto the stack. */
 	stilo = stils_push(&a_stilt->ostack);
-	stilo_move(stilo, &t_stilo);
+	stilo_dup(stilo, tstilo);
+	stils_pop(&a_stilt->tstack);
 }
 
 static void
