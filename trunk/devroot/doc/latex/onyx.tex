@@ -152,6 +152,11 @@ reached.
 used by applications that extend the interpreter as a container object.  Hooks
 can be executed, but the results are application dependent.
 
+Each hook has a tag associated with it that can used by C extension code as a
+form of type checking.  By default, the tag is a null object.  In most cases, an
+application that extends the interpreter using hook objects will set hook tags
+to be name objects.
+
 \item[integer: ] An integer is a signed integer in the range $-2^{63}$ to
 $2^{63} - 1$.
 
@@ -422,6 +427,10 @@ The onyx scanner handles syntax errors specially, in that it pushes an
 executable string onto the operand stack that represents the code that caused
 the syntax error and records the line and column numbers in currenterror before
 invoking \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
+
+The onyx scanner also handles immediate name evaluation errors specially, in
+that it pushes the name that could not be evaluated onto ostack before invoking
+\htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
 
 \section{Threads}
 
@@ -1962,13 +1971,10 @@ onyx:1>
 		Syntactically print \oparg{operator} to stdout.
 	\item[Example(s): ]
 		The following example shows an operator printed out with two
-		leading and trailing dashes.  For some operators, it is possible
-		for them to print out with three leading and trailing dashes,
-		which indicates that the operator is treated specially in the
-		interpreter loop to improve performance.  If the interpreter
-		cannot determine the name associated with an operator, as will
-		be the case for custom operators, the operator will be printed
-		as {\tt -operator-}.
+		leading and trailing dashes.  If the interpreter cannot
+		determine the name associated with an operator, as will be the
+		case for custom operators, the operator will be printed as
+		{\tt -operator-}.
 		\begin{verbatim}
 
 onyx:0> sprintdict begin
@@ -2222,8 +2228,6 @@ nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 \hline \hline
 \multicolumn{4}{|l|}{Stack operators} \\
 \hline \hline
--- & {\bf \htmlref{fino}{systemdict:fino}} & fino & Create a fino. \\
-\hline
 -- & {\bf \htmlref{(}{systemdict:sym_lp}} & fino & Begin a stack declaration. \\
 \hline
 fino objects & {\bf \htmlref{)}{systemdict:sym_rp}} & stack & Create a stack. \\
@@ -2311,6 +2315,8 @@ objecs from stack down through topmost mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Array operators} \\
 \hline \hline
+& {\bf \htmlref{argv}{systemdict:argv}} & & \\
+\hline
 & {\bf \htmlref{[}{systemdict:sym_lb}} & & \\
 \hline
 & {\bf \htmlref{]}{systemdict:sym_rb}} & & \\
@@ -2323,6 +2329,8 @@ objecs from stack down through topmost mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
+& {\bf \htmlref{envdict}{systemdict:envdict}} & & \\
+\hline
 & {\bf \htmlref{gcdict}{systemdict:gcdict}} & & \\
 \hline
 & {\bf \htmlref{globaldict}{systemdict:globaldict}} & & \\
@@ -2581,7 +2589,8 @@ onyx:1>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[fino: ]
-			A fino object, usually created by the ) operator.
+			A fino object, usually created by the \onyxop{}{)}{}
+			operator.
 		\item[objects: ]
 			0 or more objects.
 		\end{description}
@@ -2763,6 +2772,27 @@ onyx:0>
 \label{systemdict:and}
 \index{and@\onyxop{}{and}{}}
 \item[{\onyxop{--}{and}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:argv}
+\index{argv@\onyxop{}{argv}{}}
+\item[{\onyxop{--}{argv}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -3650,6 +3680,27 @@ onyx:2>
 
 		\end{verbatim}
 	\end{description}
+\label{systemdict:envdict}
+\index{envdict@\onyxop{}{envdict}{}}
+\item[{\onyxop{--}{envdict}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:eq}
 \index{eq@\onyxop{}{eq}{}}
 \item[{\onyxop{--}{eq}{--}}: ]
@@ -3811,26 +3862,6 @@ onyx:2>
 
 		\end{verbatim}
 	\end{description}
-\label{systemdict:fino}
-\index{fino@\onyxop{}{fino}{}}
-\item[{\onyxop{--}{fino}{fino}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ] None.
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[fino: ]
-			A fino object.
-		\end{description}
-	\item[Errors(s): ] None.
-	\item[Description: ]
-		Push a fino onto ostack.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> fino pstack
--fino-
-onyx:1>
-		\end{verbatim}
-	\end{description}
 \label{systemdict:flush}
 \index{flush@\onyxop{}{flush}{}}
 \item[{\onyxop{--}{flush}{--}}: ]
@@ -3918,6 +3949,27 @@ onyx:1>
 \label{systemdict:fork}
 \index{fork@\onyxop{}{fork}{}}
 \item[{\onyxop{--}{fork}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:gcdict}
+\index{gcdict@\onyxop{}{gcdict}{}}
+\item[{\onyxop{--}{gcdict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -5378,6 +5430,27 @@ onyx:2>
 \label{systemdict:sprint}
 \index{sprint@\onyxop{}{sprint}{}}
 \item[{\onyxop{--}{sprint}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sprintdict}
+\index{sprintdict@\onyxop{}{sprintdict}{}}
+\item[{\onyxop{--}{sprintdict}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
