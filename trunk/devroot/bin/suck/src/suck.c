@@ -121,7 +121,7 @@ main(int argc, char ** argv)
     goto CLERROR;
   }
     
-  if (sockb_init(1024, opt_bsize, 8))
+  if (sockb_init(4096, opt_bsize, 8))
   {
     _cw_error("Initialization failure in sockb_init()");
   }
