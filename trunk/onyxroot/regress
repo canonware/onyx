@@ -1,0 +1,179 @@
+#!/home/jasone/cw/devroot/bin/onyx/bin/tonyx
+# -*- mode: onyx -*-
+#!/usr/bin/onyx
+#
+# regress [<srcdir>] [<par>]
+
+argv length 2 ge {
+    $SRCDIR argv 1 get def
+}{
+    $SRCDIR `onyx-latest' def
+} ifelse
+
+argv length 3 ge {
+    $nworker_threads argv 2 get cvx eval def
+}{
+    $nworker_threads 4 def
+} ifelse
+
+$PREFIX pwd `/regress_' cat SRCDIR cat def
+
+$CONFIGURE_FLAGS `' def
+
+# $CC `gcc30' setenv
+$CFLAGS `-Wall -Werror -Wno-uninitialized -g3' setenv
+
+# Create a stack and mutex to be used as a job queue.
+globaldict begin
+$jobs () def
+$jobs_mutex mutex def
+end
+
+# Use recursion to generate all permutations of a multiset of configuration
+# flags.
+#
+# #pstk #cstk #fstks
+#   conf_recurse
+# #pstk #cstk #fstks
+$conf_recurse {
+    dup scount 0 gt {
+	# #pstk #cstk #fstks
+	dup spop dup aup
+	# #fstk ... #pstk #cstk #fstks #fstk
+	{
+	    # #fstk ... #pstk #cstk #fstks #flag
+	    # Push #flag onto #cstk.
+	    2 idup exch sbpush
+
+	    # #fstk ... #pstk #cstk #fstks
+	    # Recurse.
+	    conf_recurse
+
+	    # Pop flag off #cstk.
+	    over sbpop pop
+	} foreach
+	# #fstk ... #pstk #cstk #fstks
+	dup adn spush
+	# #pstk #cstk #fstks
+    }{
+	# Terminate recursion.
+	up
+	2 ndup () copy spush
+	dn
+    } ifelse
+} def
+
+# Generate all permutations of a multiset of configuration flags.
+#
+# #fstks conf_permute #pstk
+$conf_permute {
+    () () dn
+      conf_recurse
+    2 npop
+} def
+
+$worker_entry {
+    {
+	jobs_mutex lock
+	jobs dup scount 0 gt {
+	    # Grab a job.
+	    sbpop true
+	}{
+	    # No more jobs.
+	    false
+	} ifelse
+	jobs_mutex unlock
+    }{
+	# Launch job.
+	`==[regress]==>' print
+	dup {
+	    ` ' print
+	    print
+	} foreach
+	`\n' print flush
+
+	dup system 0 ne
+	{
+	    `==[regress]==>> Error in: ' print
+	    dup {
+		` ' print
+		print
+	    } foreach
+	    `\n' print flush
+	}{
+	    # Success.
+	    pop
+	} ifelse
+
+    } while
+} def
+
+#
+# Beginning of main execution.
+#
+
+# Create a stack of stacks of configuration flag permutations.
+(
+    (
+	`'
+	`--enable-pth'
+	`--disable-threads'
+    )
+    (
+	`'
+	`--disable-real'
+    )
+    (
+	`'
+	`--enable-debug'
+    )
+    (
+	`'
+	`--disable-modprompt'
+    )
+    (
+	`'
+	`--disable-posix'
+	`--disable-posix-file'
+    )
+    (
+	`'
+	`--disable-inlines'
+    )
+) conf_permute
+
+0 # Iteration Counter for uniquifying build directories.
+exch {
+    # #iter #conf
+ 
+    # Increment iteration counter.
+    exch inc exch
+
+    # Create build directory name.
+    PREFIX `_' cat 2 idup <$w 3 $p `0'> outputs cat
+    # #iter #conf #prefix
+
+    # Create array for call to system operator.
+    [
+	`./regress_check'
+	dn
+	SRCDIR
+	5 ndn {
+	    dup `' eq {
+		pop
+	    } if
+	} foreach
+    ]
+
+    jobs exch spush
+} foreach
+
+# Create worker threads.
+nworker_threads {
+    () {$$worker_entry} thread
+} repeat
+
+# Join on worker threads.
+nworker_threads {
+    join
+} repeat

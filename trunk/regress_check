@@ -1,0 +1,221 @@
+#!/home/jasone/cw/devroot/bin/onyx/bin/tonyx
+# -*- mode: onyx -*-
+#!/usr/bin/onyx
+#
+# regress_check <prefix> <srcdir> [<conf>...]
+
+argv length 3 lt {
+    stderr `regress_check usage: regress_check <prefix> <srcdir> [<conf>...]\n'
+    write pop
+    1 die
+} if
+
+$PREFIX argv 1 get def
+
+$SRCDIR argv 2 get def
+$OBJDIR PREFIX `/obj' cat def
+$DSTDIR PREFIX `/dst' cat def
+
+$conf [
+    argv length 3 gt {
+	argv 3 argv length 3 sub getinterval {} foreach
+    } if
+    `--prefix=' PREFIX cat `/dst' cat
+] def
+
+$COOK `/usr/bin/cook' def
+#$COOKPAR [`-par' `8'] def
+$COOKPAR [] def
+
+$libs [`libonyx'] def
+$bins [`onyx'] def
+
+#
+# Procedures.
+#
+
+# #obj log_print -
+$log_print {
+    `==[regress_check (' PREFIX cat `)]==> 'cat
+    exch 1 sprints cat `\n' cat print flush
+} def
+
+# #obj log_eprint -
+$log_eprint {
+    `==[regress_check (' PREFIX cat `)]==>> 'cat
+    exch 1 sprints cat `\n' cat print flush
+} def
+
+# #arr call -
+$call {
+    dup log_print
+    dup system 0 ne {
+	log_eprint
+	1 die
+    }{
+	# Success.
+	pop
+    } ifelse
+} def
+
+# #target cook -
+$cook {
+    [
+	exch
+	COOK exch
+    ] call
+} def
+
+# #target cookpar -
+$cookpar {
+    [
+	exch
+	COOK exch
+	COOKPAR {exch} foreach
+    ] call
+} def
+
+# Recursively delete directories, files, and symlinks in a directory tree.
+#
+# #dirname deltree -
+$deltree {
+    dup `e' test {
+	dup {
+	    1 idup `/' cat exch cat
+	    dup `f' test {
+		unlink
+	    }{ dup `L' test {
+		unlink
+	    }{ dup `d' test {
+		deltree
+	    }{
+		`Unknown file type for: ' exch cat log_eprint
+		1 die
+	    } ifelse
+	    } ifelse
+	    } ifelse
+	} dirforeach
+	rmdir
+    } if
+} def
+
+# Make sure a directory tree contains nothing but directories.
+#
+# #dir dir_empty -
+$tree_empty {
+    dup {
+	over `/' cat exch cat
+	dup `d' test {
+	    tree_empty
+	}{
+	    `Directory tree not empty' log_eprint
+	    1 die
+	} ifelse
+    } dirforeach
+    pop
+} def
+
+#
+# Set up.
+#
+
+`Start' log_print
+
+PREFIX ` deltree' cat log_print
+PREFIX deltree
+
+PREFIX ` mkdir' cat log_print
+PREFIX mkdir
+
+OBJDIR ` mkdir' cat log_print
+OBJDIR mkdir
+
+OBJDIR ` cd' cat log_print
+OBJDIR cd
+
+[
+    `../../' SRCDIR cat `/configure' cat
+    conf {} foreach
+] call
+
+#
+# Run tests.
+#
+
+# Libraries
+libs {
+    # Parallelizable.
+    dup cookpar
+
+    # Non-parallelizable.
+    aup
+    [
+	bdup `_libs_install' cat
+	bdup `_libs_uninstall' cat
+	`clean'
+    ]{
+	cook
+    } foreach
+    bpop
+
+    # Make sure things were adequately cleaned up.
+    DSTDIR tree_empty
+} foreach
+
+# Binaries.
+bins {
+    # Parallelizable.
+    dup cookpar
+
+    # Non-parallelizable.
+    aup
+    [
+	bdup `_bins_install' cat
+    ]{
+	cook
+    } foreach
+
+    # Make sure the application runs.
+    [
+	DSTDIR `/bin/' cat bdup cat
+	`-h'
+    ] call
+    bpop
+
+    # Non-parallelizable.
+    [
+	`uninstall'
+	`clean'
+    ]{
+	cook
+    } foreach
+
+    # Make sure things were adequately cleaned up.
+    DSTDIR tree_empty
+} foreach
+
+# General targets.
+# Parallelizable.
+[
+    `bins'
+    `mods'
+    `libs'
+    `check'
+]{
+    cookpar
+} foreach
+
+# Non-parallelizable.
+[
+    `install' `install' # Yes, this is intentional.
+    `uninstall'
+    `distclean'
+]{
+    cook
+} foreach
+
+# Make sure things were adequately cleaned up.
+DSTDIR tree_empty
+OBJDIR tree_empty
+
+`Finish' log_print
