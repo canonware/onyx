@@ -186,7 +186,7 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
     /* XXX Use cw_g_nxaa. */
     ds_new(&display->ds, (cw_opaque_alloc_t *) nxa_malloc_e,
 	   (cw_opaque_realloc_t *) nxa_realloc_e,
-	   (cw_opaque_dealloc_t *) nxa_free_e, (void *) cw_g_nxa,
+	   (cw_opaque_dealloc_t *) nxa_free_e, NULL,
 	   nxo_file_fd_get(infile), nxo_file_fd_get(outfile));
 
     /* Initialize the protection mutex; ds's aren't thread-safe. */
