@@ -1,4 +1,0 @@
-2001-07-21  Jason Evans  <jasone@canonware.com>
-
-	* : Check for EINTR in all calls to fputc(), fflush(), and
-	ioctl().  read() was already done.

@@ -12,8 +12,8 @@
  ******************************************************************************/
 
 /* Include generated dependency files. */
-#include-cooked [glob [objdir]/lib/c/libonyx/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libonyx/test/"*.d_*"]
+#include-cooked [glob [objdir]/lib/libonyx/src/"*.d_*"]
+#include-cooked [glob [objdir]/lib/libonyx/test/"*.d_*"]
 
 /*
  * File lists.
@@ -30,8 +30,8 @@
                cnd.h mq.h mtx.h nxo_condition.h nxo_mutex.h thd.h tsd.h
 #endif
                ;
-  incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [incs]];
-  incs = [incs] [objdir]/lib/c/libonyx/include/libonyx/libonyx_defs.h;
+  incs = [fromto % [srcdir]/lib/libonyx/include/libonyx/% [incs]];
+  incs = [incs] [objdir]/lib/libonyx/include/libonyx/libonyx_defs.h;
 
   LIBONYX_INCS = [incs];
   INCS = [INCS] [incs];
@@ -49,10 +49,10 @@
                     envdict_l.h
 #endif
                     ;
-  priv_incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [priv_incs]];
+  priv_incs = [fromto % [srcdir]/lib/libonyx/include/libonyx/% [priv_incs]];
 
   local priv_cincs = nx_nxcode.c nxo_thread_nxcode.c;
-  prix_cincs = [fromto % [srcdir]/lib/c/libonyx/src/% [priv_cincs]];
+  prix_cincs = [fromto % [srcdir]/lib/libonyx/src/% [priv_cincs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
 }
@@ -71,7 +71,7 @@ LIBONYX_SRCS = libonyx.c ch.c dch.c gcdict.c mem.c nx.c nxa.c nxn.c nxo.c
 #endif
                ;
 
-LIBONYX_SRCS = [fromto % [srcdir]/lib/c/libonyx/src/% [LIBONYX_SRCS]];
+LIBONYX_SRCS = [fromto % [srcdir]/lib/libonyx/src/% [LIBONYX_SRCS]];
 SRCS = [SRCS] [LIBONYX_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
@@ -84,7 +84,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
                  hook_a.c
 #endif
                  ;
-  ctests = [fromto % [srcdir]/lib/c/libonyx/test/% [ctests]];
+  ctests = [fromto % [srcdir]/lib/libonyx/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
 }
@@ -95,7 +95,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
  */
 {
   local otests = ;
-  otests = [fromto % [srcdir]/lib/c/libonyx/test/% [otests]];
+  otests = [fromto % [srcdir]/lib/libonyx/test/% [otests]];
 
   OTESTS = [OTESTS] [otests];
 }
@@ -103,7 +103,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 /* Perl scripts that drive other tests. */
 {
   local ptests = ;
-  ptests = [fromto % [srcdir]/lib/c/libonyx/test/% [ptests]];
+  ptests = [fromto % [srcdir]/lib/libonyx/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
 }
@@ -111,7 +111,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 /* C programs that are driven by tests. */
 {
   local cbtests = ;
-  cbtests = [fromto % [srcdir]/lib/c/libonyx/test/% [cbtests]];
+  cbtests = [fromto % [srcdir]/lib/libonyx/test/% [cbtests]];
 
   CBTESTS = [CBTESTS] [cbtests];
 }
@@ -119,7 +119,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 /* onyx programs that are driven by tests. */
 {
   local obtests = ;
-  obtests = [fromto % [srcdir]/lib/c/libonyx/test/% [obtests]];
+  obtests = [fromto % [srcdir]/lib/libonyx/test/% [obtests]];
 
   OBTESTS = [OBTESTS] [obtests];
 }
@@ -133,8 +133,8 @@ SRCS = [SRCS] [LIBONYX_SRCS];
                    nxo_no.tex nxo_null.tex nxo_operator.tex nxo_pmark.tex
                    nxo_stack.tex nxo_string.tex nxo_thread.tex ql.tex qr.tex
                    qs.tex systemdict.tex thd.tex tsd.tex xep.tex;
-  tex_srcs = [fromto % [srcdir]/lib/c/libonyx/doc/latex/% [tex_srcs]];
-  tex_srcs = [tex_srcs] [objdir]/lib/c/libonyx/doc/latex/manual.tex;
+  tex_srcs = [fromto % [srcdir]/lib/libonyx/doc/latex/% [tex_srcs]];
+  tex_srcs = [tex_srcs] [objdir]/lib/libonyx/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }
@@ -142,7 +142,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 /* xfig source files. */
 {
   local fig_srcs = ;
-  fig_srcs = [fromto % [srcdir]/lib/c/libonyx/doc/latex/% [fig_srcs]];
+  fig_srcs = [fromto % [srcdir]/lib/libonyx/doc/latex/% [fig_srcs]];
 
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
@@ -150,27 +150,27 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 /* Libraries. */
 LIBONYX_REV = 4;
 
-LIBONYX_A = [objdir]/lib/c/libonyx/lib/libonyx.a;
+LIBONYX_A = [objdir]/lib/libonyx/lib/libonyx.a;
 #if [matches elf [abi]]
 LIBONYX_SNAME = libonyx.so.[LIBONYX_REV];
 LIBONYX_LNAME = libonyx.so;
-LIBONYX_S = [objdir]/lib/c/libonyx/lib/[LIBONYX_SNAME];
+LIBONYX_S = [objdir]/lib/libonyx/lib/[LIBONYX_SNAME];
 #elif [matches macho [abi]]
 LIBONYX_SNAME = libonyx.[LIBONYX_REV].[LIBONYX_REV].dylib;
 LIBONYX_LNAME = libonyx.dylib;
-LIBONYX_S = [objdir]/lib/c/libonyx/lib/[LIBONYX_SNAME];
+LIBONYX_S = [objdir]/lib/libonyx/lib/[LIBONYX_SNAME];
 #else
 LIBONYX_S = ;
 #endif
 
-LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libonyx/lib;
+LDFLAGS = [LDFLAGS] -L[objdir]/lib/libonyx/lib;
 LIBS = [LIBS] -lonyx;
 A_LIBS = [A_LIBS] [LIBONYX_A];
 S_LIBS = [S_LIBS] [LIBONYX_S];
 #if [matches elf [abi]]
-S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.so;
+S_LINKS = [S_LINKS] [objdir]/lib/libonyx/lib/libonyx.so;
 #elif [matches macho [abi]]
-S_LINKS = [S_LINKS] [objdir]/lib/c/libonyx/lib/libonyx.dylib;
+S_LINKS = [S_LINKS] [objdir]/lib/libonyx/lib/libonyx.dylib;
 #endif
 
 /*
@@ -181,12 +181,12 @@ BOOTSTRAP = [BOOTSTRAP] libonyx_bootstrap;
 
 libonyx_bootstrap : [TONYX]
 {
-  cat [srcdir]/lib/c/libonyx/src/nx_nxcode.nx
-    | [ONYX] [srcdir]/lib/c/libonyx/src/nx_nxcode_gen.nx
-    > [srcdir]/lib/c/libonyx/src/nx_nxcode.c;
-  cat [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode.nx
-    | [ONYX] [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode_gen.nx
-    > [srcdir]/lib/c/libonyx/src/nxo_thread_nxcode.c;
+  cat [srcdir]/lib/libonyx/src/nx_nxcode.nx
+    | [ONYX] [srcdir]/lib/libonyx/src/nx_nxcode_gen.nx
+    > [srcdir]/lib/libonyx/src/nx_nxcode.c;
+  cat [srcdir]/lib/libonyx/src/nxo_thread_nxcode.nx
+    | [ONYX] [srcdir]/lib/libonyx/src/nxo_thread_nxcode_gen.nx
+    > [srcdir]/lib/libonyx/src/nxo_thread_nxcode.c;
 }
 
 libonyx : [LIBONYX_A] [LIBONYX_S];
@@ -213,15 +213,15 @@ libonyx_clean :
 
 libonyx_distclean :
 {
-  rm -f [objdir]/lib/c/libonyx/doc/latex/manual.tex;
+  rm -f [objdir]/lib/libonyx/doc/latex/manual.tex;
 }
 
 /*
  * Various flags.
  */
 
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libonyx/include
-                      -I[objdir]/lib/c/libonyx/include/libonyx;
+CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/libonyx/include
+                      -I[objdir]/lib/libonyx/include/libonyx;
 
 /*
  * Build rules.
@@ -294,6 +294,6 @@ libonyx_install_s : [LIBONYX_S] libonyx_install_common
        -o [target] [need];
 #endif
 
-  rm -f [objdir]/lib/c/libonyx/lib/[LIBONYX_LNAME];
-  [LN] -s [LIBONYX_SNAME] [objdir]/lib/c/libonyx/lib/[LIBONYX_LNAME];
+  rm -f [objdir]/lib/libonyx/lib/[LIBONYX_LNAME];
+  [LN] -s [LIBONYX_SNAME] [objdir]/lib/libonyx/lib/[LIBONYX_LNAME];
 }

@@ -170,16 +170,16 @@ dnl var : Name of variable to substitute in configure output.
 AC_DEFUN(CW_BUILD_LIB,
 [
 AC_MSG_CHECKING(whether to include $1 in build)
-if test -d "$srcdir/lib/c/$1" ; then
+if test -d "$srcdir/lib/$1" ; then
   build_$1="yes"
   $2=1
   $2_manual=""
-  if test -f "$srcdir/lib/c/$1/doc/latex/manual.tex.in" ; then
-    mkdir -p $objdir/lib/c/$1/doc/latex
-    cfgoutputs="$cfgoutputs lib/c/$1/doc/latex/manual.tex"
+  if test -f "$srcdir/lib/$1/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/lib/$1/doc/latex
+    cfgoutputs="$cfgoutputs lib/$1/doc/latex/manual.tex"
   fi
-  mkdir -p $objdir/lib/c/$1/include/$1
-  cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
+  mkdir -p $objdir/lib/$1/include/$1
+  cfghdrs="$cfghdrs $objdir/lib/$1/include/$1/$1_defs.h"
   libs="$libs $1"
 else
   build_$1="no"

@@ -305,7 +305,7 @@ onyx_distclean :
        [LIBEDIT_A]
 #endif
 #if [matches elf [abi]]
-       [RPATH][abs_objdir]/lib/c/libonyx/lib
+       [RPATH][abs_objdir]/lib/libonyx/lib
 #endif
        [LDFLAGS] -lonyx
        [EXTRALIBS];

@@ -144,6 +144,6 @@ cover_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
-       [RPATH][abs_objdir]/lib/c/libonyx/lib
+       [RPATH][abs_objdir]/lib/libonyx/lib
        [LDFLAGS] -lonyx [EXTRALIBS];
 }

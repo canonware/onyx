@@ -14,8 +14,8 @@
  ******************************************************************************/
 
 /* Include generated dependency files. */
-#include-cooked [glob [objdir]/lib/c/libedit/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libedit/test/"*.d_*"]
+#include-cooked [glob [objdir]/lib/libedit/src/"*.d_*"]
+#include-cooked [glob [objdir]/lib/libedit/test/"*.d_*"]
 
 /*
  * File lists.
@@ -26,8 +26,8 @@
   local incs = tty.h vi.h libedit_term.h parse.h libedit_key.h chared.h hist.h
                histedit.h refresh.h search.h map.h libedit.h prompt.h
                libedit_incs.h emacs.h common.h fcns.h help.h tokenizer.h;
-  incs = [fromto % [srcdir]/lib/c/libedit/include/libedit/% [incs]];
-  incs = [incs] [objdir]/lib/c/libedit/include/libedit/libedit_defs.h;
+  incs = [fromto % [srcdir]/lib/libedit/include/libedit/% [incs]];
+  incs = [incs] [objdir]/lib/libedit/include/libedit/libedit_defs.h;
 
   LIBEDIT_INCS = [incs];
   INCS = [INCS] [incs];
@@ -36,7 +36,7 @@
 /* Include files that are _not_ installed. */
 {
   local priv_incs = ;
-  priv_incs = [fromto % [srcdir]/lib/c/libedit/include/libedit/% [priv_incs]];
+  priv_incs = [fromto % [srcdir]/lib/libedit/include/libedit/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];
 }
@@ -45,13 +45,13 @@
 LIBEDIT_SRCS = chared.c common.c edit.c emacs.c hist.c history.c key.c map.c
              parse.c prompt.c read.c refresh.c search.c term.c
              tokenizer.c tty.c vi.c fcns.c help.c;
-LIBEDIT_SRCS = [fromto % [srcdir]/lib/c/libedit/src/% [LIBEDIT_SRCS]];
+LIBEDIT_SRCS = [fromto % [srcdir]/lib/libedit/src/% [LIBEDIT_SRCS]];
 SRCS = [SRCS] [LIBEDIT_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = ;
-  ctests = [fromto % [srcdir]/lib/c/libedit/test/% [ctests]];
+  ctests = [fromto % [srcdir]/lib/libedit/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
 }
@@ -62,7 +62,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
  */
 {
   local otests = ;
-  otests = [fromto % [srcdir]/lib/c/libedit/test/% [otests]];
+  otests = [fromto % [srcdir]/lib/libedit/test/% [otests]];
 
   OTESTS = [OTESTS] [otests];
 }
@@ -70,7 +70,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* Perl scripts that drive other tests and use the sequence mode of verify. */
 {
   local ptests = ;
-  ptests = [fromto % [srcdir]/lib/c/libedit/test/% [ptests]];
+  ptests = [fromto % [srcdir]/lib/libedit/test/% [ptests]];
 
   PTESTS = [PTESTS] [ptests];
 }
@@ -78,7 +78,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* C programs that are driven by tests. */
 {
   local cbtests = ;
-  cbtests = [fromto % [srcdir]/lib/c/libedit/test/% [cbtests]];
+  cbtests = [fromto % [srcdir]/lib/libedit/test/% [cbtests]];
 
   CBTESTS = [CBTESTS] [cbtests];
 }
@@ -86,7 +86,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* onyx programs that are driven by tests. */
 {
   local obtests = ;
-  obtests = [fromto % [srcdir]/lib/c/libedit/test/% [obtests]];
+  obtests = [fromto % [srcdir]/lib/libedit/test/% [obtests]];
 
   OBTESTS = [OBTESTS] [obtests];
 }
@@ -94,7 +94,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* LaTeX source files. */
 {
   local tex_srcs = ;
-  tex_srcs = [fromto % [srcdir]/lib/c/libedit/doc/latex/% [tex_srcs]];
+  tex_srcs = [fromto % [srcdir]/lib/libedit/doc/latex/% [tex_srcs]];
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }
@@ -102,7 +102,7 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* xfig source files. */
 {
   local fig_srcs = ;
-  fig_srcs = [fromto % [srcdir]/lib/c/libedit/doc/latex/% [fig_srcs]];
+  fig_srcs = [fromto % [srcdir]/lib/libedit/doc/latex/% [fig_srcs]];
 
   FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
@@ -110,14 +110,14 @@ SRCS = [SRCS] [LIBEDIT_SRCS];
 /* Libraries. */
 LIBEDIT_REV = 1;
 
-LIBEDIT_A = [objdir]/lib/c/libedit/lib/libedit.a;
-LIBEDIT_S = [objdir]/lib/c/libedit/lib/libedit.so.[LIBEDIT_REV];
+LIBEDIT_A = [objdir]/lib/libedit/lib/libedit.a;
+LIBEDIT_S = [objdir]/lib/libedit/lib/libedit.so.[LIBEDIT_REV];
 
-LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libedit/lib;
+LDFLAGS = [LDFLAGS] -L[objdir]/lib/libedit/lib;
 /* LIBS = [LIBS] -ledit; */
 A_LIBS = [A_LIBS] [LIBEDIT_A];
 /* S_LIBS = [S_LIBS] [LIBEDIT_S]; */
-/* S_LINKS = [S_LINKS] [objdir]/lib/c/libedit/lib/libedit.so; */
+/* S_LINKS = [S_LINKS] [objdir]/lib/libedit/lib/libedit.so; */
 
 /*
  * User cook'ables.
@@ -153,8 +153,8 @@ libedit_distclean :
  * Various flags.
  */
 
-CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libedit/include
-                      -I[objdir]/lib/c/libedit/include/libedit;
+CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/libedit/include
+                      -I[objdir]/lib/libedit/include/libedit;
 
 /*
  * Build rules.
@@ -208,6 +208,6 @@ libedit_install_s : [LIBEDIT_S] libedit_install_common
 {
   [CC] -shared -o [target] [need];
 
-  rm -f [objdir]/lib/c/libedit/lib/libedit.so;
-  [LN] -s libedit.so.[LIBEDIT_REV] [objdir]/lib/c/libedit/lib/libedit.so;
+  rm -f [objdir]/lib/libedit/lib/libedit.so;
+  [LN] -s libedit.so.[LIBEDIT_REV] [objdir]/lib/libedit/lib/libedit.so;
 }

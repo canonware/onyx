@@ -81,8 +81,8 @@ BOOTSTRAP = ;
 #include-cooked [srcdir]/test/Cookfile.inc
 
 /* Libraries. */
-#include-cooked [srcdir]/lib/c/Cookfile.inc
-#include-cooked [fromto % [srcdir]/lib/c/%/Cookfile.inc @libs@]
+#include-cooked [srcdir]/lib/Cookfile.inc
+#include-cooked [fromto % [srcdir]/lib/%/Cookfile.inc @libs@]
 
 /* Modules. */
 #include-cooked [srcdir]/mod/Cookfile.inc

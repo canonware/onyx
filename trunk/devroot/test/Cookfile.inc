@@ -64,7 +64,7 @@ test_distclean :
        [objdir]/%0test/%1.o_a
 #if [matches elf [abi]]
        [split " "
-              [prepost [prepost [RPATH] "/lib/c/" [abs_objdir]]
+              [prepost [prepost [RPATH] "/lib/" [abs_objdir]]
                        "/lib"
                        [libs]]]
 #endif

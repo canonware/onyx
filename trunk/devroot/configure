@@ -1816,16 +1816,16 @@ fi
 
 echo $ac_n "checking whether to include libonyx in build""... $ac_c" 1>&6
 echo "configure:1819: checking whether to include libonyx in build" >&5
-if test -d "$srcdir/lib/c/libonyx" ; then
+if test -d "$srcdir/lib/libonyx" ; then
   build_libonyx="yes"
   lib_onyx=1
   lib_onyx_manual=""
-  if test -f "$srcdir/lib/c/libonyx/doc/latex/manual.tex.in" ; then
-    mkdir -p $objdir/lib/c/libonyx/doc/latex
-    cfgoutputs="$cfgoutputs lib/c/libonyx/doc/latex/manual.tex"
+  if test -f "$srcdir/lib/libonyx/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/lib/libonyx/doc/latex
+    cfgoutputs="$cfgoutputs lib/libonyx/doc/latex/manual.tex"
   fi
-  mkdir -p $objdir/lib/c/libonyx/include/libonyx
-  cfghdrs="$cfghdrs $objdir/lib/c/libonyx/include/libonyx/libonyx_defs.h"
+  mkdir -p $objdir/lib/libonyx/include/libonyx
+  cfghdrs="$cfghdrs $objdir/lib/libonyx/include/libonyx/libonyx_defs.h"
   libs="$libs libonyx"
 else
   build_libonyx="no"
@@ -1840,16 +1840,16 @@ if test "x$enable_libedit" = "x1" ; then
   
 echo $ac_n "checking whether to include libedit in build""... $ac_c" 1>&6
 echo "configure:1843: checking whether to include libedit in build" >&5
-if test -d "$srcdir/lib/c/libedit" ; then
+if test -d "$srcdir/lib/libedit" ; then
   build_libedit="yes"
   lib_edit=1
   lib_edit_manual=""
-  if test -f "$srcdir/lib/c/libedit/doc/latex/manual.tex.in" ; then
-    mkdir -p $objdir/lib/c/libedit/doc/latex
-    cfgoutputs="$cfgoutputs lib/c/libedit/doc/latex/manual.tex"
+  if test -f "$srcdir/lib/libedit/doc/latex/manual.tex.in" ; then
+    mkdir -p $objdir/lib/libedit/doc/latex
+    cfgoutputs="$cfgoutputs lib/libedit/doc/latex/manual.tex"
   fi
-  mkdir -p $objdir/lib/c/libedit/include/libedit
-  cfghdrs="$cfghdrs $objdir/lib/c/libedit/include/libedit/libedit_defs.h"
+  mkdir -p $objdir/lib/libedit/include/libedit
+  cfghdrs="$cfghdrs $objdir/lib/libedit/include/libedit/libedit_defs.h"
   libs="$libs libedit"
 else
   build_libedit="no"
