@@ -212,4 +212,16 @@ data
     rm $i.tmp
   done
 dataend
+
+  /*
+   * Clean up temp files so that they won't get installed.
+   */
+  rm -f [objdir]/%0html/WARNINGS;
+  rm -f [objdir]/%0html/images.aux;
+  rm -f [objdir]/%0html/images.idx;
+  rm -f [objdir]/%0html/images.log;
+  rm -f [objdir]/%0html/images.pl;
+  rm -f [objdir]/%0html/images.tex;
+  rm -f [objdir]/%0html/internals.pl;
+  rm -f [objdir]/%0html/labels.pl;
 }
