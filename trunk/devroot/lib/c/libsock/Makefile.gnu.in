@@ -281,7 +281,7 @@ clean : FORCE
 	rm -f *.bak *.BAK
 	rm -f core test/core *.core test/*.core
 	rm -f src/*.[do]_*
-	rm -f bin/*.[do]_b
+	rm -f bin/*.[do]
 	rm -f lib/lib*
 	rm -f test/*.out test/*.diff test/*.pl
 	rm -f test/*.[do]

@@ -76,6 +76,7 @@ main(int argc, char ** argv)
   connection_t * conn;
   char logfile[2048];
   cw_uint32_t conn_num;
+  struct timeval timeout;
 
   struct handler_s handler_arg;
   void * junk;
@@ -275,15 +276,13 @@ main(int argc, char ** argv)
     
     bzero(conn, sizeof(connection_t));
     sock_new(&conn->client_sock, 4096);
+
+    timeout.tv_sec = 5;
+    timeout.tv_usec = 0;
     
-    if (NULL == socks_accept_block(socks, &conn->client_sock)
+    if (NULL == socks_accept(socks, &timeout, &conn->client_sock)
 	|| should_quit)
     {
-      if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
-      {
-	log_lprintf(cw_g_log, "socks_accept_block() error\n");
-      }
-      
       sock_delete(&conn->client_sock);
       _cw_free(conn);
     }

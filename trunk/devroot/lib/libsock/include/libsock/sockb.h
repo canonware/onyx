@@ -42,7 +42,11 @@ extern cw_sockb_t * g_sockb;
  *
  * a_bufel_size : Size of bufel to use for memory buffering.
  *
- * a_max_spare_bufels : Maximum number of bufel's to cache.
+ * a_max_spare_bufcs : Maximum number of bufc's to cache in one pezz block.
+ *                     If more than this number of bufc's is needed, the sockb
+ *                     code will attempt to allocate another block of bufc's.
+ *                     Note that once allocated, the space is not freed until
+ *                     sockb_shutdown() is called.
  *
  * <<< Output(s) >>>
  *

@@ -625,7 +625,6 @@ sockb_p_entry_func(void * a_arg)
 	  ssize_t bytes_read;
 	  cw_sint32_t max_read;
 	  cw_bufc_t * bufc;
-/*  	  cw_bufel_t * bufel; */
 	  
 	  j++;
 
@@ -641,9 +640,7 @@ sockb_p_entry_func(void * a_arg)
 	  /* Build up buf_in to be at least large enough for the readv(). */
 	  while (buf_get_size(&buf_in) < max_read)
 	  {
-/*  	    bufel = sockb_get_spare_bufel(); */
 	    bufc = sockb_get_spare_bufc();
-/*  	    if (NULL == bufel) */
 	    if (NULL == bufc)
 	    {
 	      /* There isn't enough free memory to make the incoming buffer as
@@ -668,14 +665,12 @@ sockb_p_entry_func(void * a_arg)
 		_cw_error("No space in &buf_in");
 	      }
 	    }
-/*  	    if (TRUE == buf_append_bufel(&buf_in, bufel)) */
 	    if (TRUE
 		== buf_append_bufc(&buf_in, bufc, 0,
 				   pezz_get_buffer_size(&g_sockb->buffer_pool)))
 	    {
 	      /* As above, we have a memory allocation problem.  Clean up bufc,
 	       * but otherwise take the same approach. */
-/*  	      bufel_delete(bufel); */
 	      bufc_delete(bufc);
 	      
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
@@ -695,7 +690,6 @@ sockb_p_entry_func(void * a_arg)
 		_cw_error("No space in &buf_in");
 	      }
 	    }
-/*  	    bufel_delete(bufel); */
 	    bufc_delete(bufc);
 	  }
 

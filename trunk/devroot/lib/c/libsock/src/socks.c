@@ -141,104 +141,11 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
 }
 
 cw_sock_t *
-socks_accept_block(cw_socks_t * a_socks, cw_sock_t * r_sock)
-{
-  cw_sock_t * retval;
-  cw_bool_t wrap_error;
-  int sockaddr_struct_size = sizeof(struct sockaddr);
-  int new_sockfd, spare_fd;
-  struct sockaddr_in client_addr;
-
-  _cw_check_ptr(a_socks);
-  _cw_check_ptr(r_sock);
-
-  /* Are we even listening right now? */
-  if (a_socks->is_listening == FALSE)
-  {
-    retval = NULL;
-    goto RETURN;
-  }
-
-  /* Grab a spare file descriptor to make sure that sockb can actually handle
-   * this socket, even if the return value of socket() is >= FD_SETSIZE. */
-  spare_fd = sockb_l_get_spare_fd();
-  if (spare_fd < 0)
-  {
-    if (dbg_is_registered(cw_g_dbg, "socks_verbose"))
-    {
-      log_eprintf(cw_g_log, NULL, 0, "socks_accept_block",
-		  "Exceded maximum number of simultaneous connections (%d)\n",
-		  FD_SETSIZE);
-    }
-    retval = NULL;
-    goto RETURN;
-  }
-
-  /* Wait for a connection. */
-  new_sockfd = accept(a_socks->sockfd,
-		      (struct sockaddr *) &client_addr, &sockaddr_struct_size);
-  if (new_sockfd < 0)
-  {
-    if (dbg_is_registered(cw_g_dbg, "socks_error"))
-    {
-      log_eprintf(cw_g_log, NULL, 0, "socks_accept_block",
-		  "Error in accept(): %s\n", strerror(errno));
-    }
-    retval = NULL;
-    goto RETURN;
-  }
-
-  if (new_sockfd >= FD_SETSIZE)
-  {
-    /* This is outside the useable range for sockb, so transfer the socket over
-     * to spare_fd. */
-    if (dup2(new_sockfd, spare_fd))
-    {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
-		  "Fatal error in dup2(): %s\n", strerror(errno));
-      abort();
-    }
-    if (close(new_sockfd))
-    {
-      if (dbg_is_registered(cw_g_dbg, "socks_error"))
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
-		    "Error in close(): %s\n", strerror(errno));
-      }
-    }
-  }
-  else
-  {
-    /* Hmm, we didn't need spare_fd after all.  Release it. */
-    if (close(spare_fd))
-    {
-      if (dbg_is_registered(cw_g_dbg, "socks_error"))
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, "socks_accept_block",
-		    "Error in close(): %s\n", strerror(errno));
-      }
-    }
-  }
-
-  /* Wrap the socket descriptor inside a sock. */
-  retval = r_sock;
-
-  wrap_error = sock_wrap(retval, new_sockfd);
-  if (wrap_error == TRUE)
-  {
-    retval = NULL;
-  }
-  
-  RETURN:
-  return retval;
-}
-
-cw_sock_t *
-socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * r_sock)
+socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
+	     cw_sock_t * r_sock)
 {
   cw_sock_t * retval;
   fd_set fd_read_set;
-  struct timeval timeout;
 
   _cw_check_ptr(a_socks);
 
@@ -248,10 +155,6 @@ socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * r_sock)
     retval = NULL;
     goto RETURN;
   }
-
-  /* Set timeout to the shortest possible time. */
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 1;
 
   /* Clear the file descriptor set and add our descriptor. */
   FD_ZERO(&fd_read_set);
@@ -260,7 +163,7 @@ socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * r_sock)
   /* See if someone wants to connect. */
   if (select(a_socks->sockfd + 1,
 	     &fd_read_set, NULL, NULL,
-	     &timeout))
+	     a_timeout))
   {
     int new_sockfd, spare_fd;
     struct sockaddr_in client_addr;

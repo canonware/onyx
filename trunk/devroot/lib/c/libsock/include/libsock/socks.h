@@ -89,30 +89,8 @@ socks_listen(cw_socks_t * a_socks, int * r_port);
  *
  * a_socks : Pointer to a socks.
  *
- * r_sock : Pointer to a sock that is not connected.
- *
- * <<< Output(s) >>>
- *
- * retval : r_sock, or NULL.
- *          NULL : Not listening.
- *               : Cannot allocate a file descriptor.
- *               : accept() error.
- *               : sock_wrap() error.
- *
- * <<< Description >>>
- *
- * Accept a connection.  Don't return until someone connects.  If a_sock is
- * non-NULL, use it for wrapping the socket descriptor.
- *
- ****************************************************************************/
-cw_sock_t *
-socks_accept_block(cw_socks_t * a_socks, cw_sock_t * r_sock);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_socks : Pointer to a socks.
+ * a_timeout : Pointer to a timeout value, or NULL.  A NULL value will cause
+ *             this function to block indefinitely.
  *
  * r_sock : Pointer to a sock that is not connected.
  *
@@ -126,8 +104,10 @@ socks_accept_block(cw_socks_t * a_socks, cw_sock_t * r_sock);
  *
  * <<< Description >>>
  *
- * Accept a connection.  If no one is waiting to connect, return immediately.
+ * Accept a connection.  Don't return until someone connects, or the timeout
+ * expires.  If a_sock is non-NULL, use it for wrapping the socket descriptor.
  *
  ****************************************************************************/
 cw_sock_t *
-socks_accept_noblock(cw_socks_t * a_socks, cw_sock_t * a_sock);
+socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
+	     cw_sock_t * r_sock);

@@ -1,3 +1,10 @@
+1999-06-18  Jason Evans  <jasone@canonware.com>
+
+	* include/libsock/socks.h (socks_accept): Remove
+	socks_accept_[no]block() and replace them with socks_accept()
+	which offers the capabilities of both removed functions, as well
+	as timeout capability.
+
 1999-05-20  J. Owen Evans  <jasone@canonware.com>
 
 	* include/libsock/sockb.h : sockb_get_spare_bufel() -->
