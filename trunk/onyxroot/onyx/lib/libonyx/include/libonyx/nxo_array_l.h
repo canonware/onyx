@@ -47,6 +47,11 @@ cw_nxoe_t *
 nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #ifdef CW_THREADS
+cw_bool_t
+nxo_l_array_locking(const cw_nxo_t *a_nxo);
+#endif
+
+#ifdef CW_THREADS
 void
 nxo_l_array_lock(const cw_nxo_t *a_nxo);
 #endif
@@ -138,6 +143,36 @@ nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 }
 
 #ifdef CW_THREADS
+CW_INLINE cw_bool_t
+nxo_l_array_locking(const cw_nxo_t *a_nxo)
+{
+    cw_bool_t retval;
+    cw_nxoe_array_t *array;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
+
+    array = (cw_nxoe_array_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(array);
+    cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(array->nxoe.type == NXOT_ARRAY);
+
+    if (array->nxoe.indirect == FALSE && array->nxoe.locking)
+    {
+	retval = TRUE;
+    }
+    else
+    {
+	retval = FALSE;
+    }
+
+    return retval;
+}
+#endif
+
+#ifdef CW_THREADS
 CW_INLINE void
 nxo_l_array_lock(const cw_nxo_t *a_nxo)
 {
@@ -153,10 +188,9 @@ nxo_l_array_lock(const cw_nxo_t *a_nxo)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    if (array->nxoe.indirect == FALSE && array->nxoe.locking)
-    {
-	mtx_lock(&array->lock);
-    }
+    cw_assert(array->nxoe.indirect == FALSE && array->nxoe.locking);
+
+    mtx_lock(&array->lock);
 }
 #endif
 
@@ -176,10 +210,9 @@ nxo_l_array_unlock(const cw_nxo_t *a_nxo)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-    if (array->nxoe.indirect == FALSE && array->nxoe.locking)
-    {
-	mtx_unlock(&array->lock);
-    }
+    cw_assert(array->nxoe.indirect == FALSE && array->nxoe.locking);
+
+    mtx_unlock(&array->lock);
 }
 #endif
 

@@ -616,6 +616,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    case NXOT_ARRAY:
 	    {
 		cw_uint32_t i, len, tailopt;
+#ifdef CW_THREADS
+		cw_bool_t alocking;
+#endif
 		cw_nxo_t *el;
 		cw_nxoa_t attr;
 
@@ -634,7 +637,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		 * common simple cases and handle them specially. */
 
 #ifdef CW_THREADS
-		nxo_l_array_lock(nxo);
+		alocking = nxo_l_array_locking(nxo);
+		if (alocking)
+		{
+		    nxo_l_array_lock(nxo);
+		}
 #endif
 
 		/* thread->tailopt may change between now and when it is last
@@ -670,12 +677,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				tnxo = nxo_stack_push(&thread->estack);
 				nxo_dup(tnxo, el);
 #ifdef CW_THREADS
-				nxo_l_array_unlock(nxo);
+				if (alocking)
+				{
+				    nxo_l_array_unlock(nxo);
+				    nxo_thread_loop(a_nxo);
+				    nxo_l_array_lock(nxo);
+				}
+				else
 #endif
-				nxo_thread_loop(a_nxo);
-#ifdef CW_THREADS
-				nxo_l_array_lock(nxo);
-#endif
+				{
+				    nxo_thread_loop(a_nxo);
+				}
 			    }
 			    else
 			    {
@@ -725,7 +737,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    cw_uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 #ifdef CW_THREADS
-			    nxo_l_array_unlock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_unlock(nxo);
+			    }
 #endif
 			    nxo_threadp_new(&threadp);
 			    /* Read data from the file and interpret it until an
@@ -745,7 +760,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			     * caught. */
 			    nxo_threadp_delete(&threadp, a_nxo);
 #ifdef CW_THREADS
-			    nxo_l_array_lock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_lock(nxo);
+			    }
 #endif
 			    break;
 			}
@@ -757,13 +775,19 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    handle = nxo_stack_push(&thread->tstack);
 			    nxo_dup(handle, el);
 #ifdef CW_THREADS
-			    nxo_l_array_unlock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_unlock(nxo);
+				nxo_handle_eval(handle, a_nxo);
+				nxo_stack_pop(&thread->tstack);
+				nxo_l_array_lock(nxo);
+			    }
+			    else
 #endif
-			    nxo_handle_eval(handle, a_nxo);
-			    nxo_stack_pop(&thread->tstack);
-#ifdef CW_THREADS
-			    nxo_l_array_lock(nxo);
-#endif
+			    {
+				nxo_handle_eval(handle, a_nxo);
+				nxo_stack_pop(&thread->tstack);
+			    }
 			    break;
 			}
 #endif
@@ -775,12 +799,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    tnxo = nxo_stack_push(&thread->estack);
 			    nxo_dup(tnxo, el);
 #ifdef CW_THREADS
-			    nxo_l_array_unlock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_unlock(nxo);
+				nxo_thread_loop(a_nxo);
+				nxo_l_array_lock(nxo);
+			    }
+			    else
 #endif
-			    nxo_thread_loop(a_nxo);
-#ifdef CW_THREADS
-			    nxo_l_array_lock(nxo);
-#endif
+			    {
+				nxo_thread_loop(a_nxo);
+			    }
 			    break;
 			}
 			case NXOT_NULL:
@@ -791,12 +820,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			case NXOT_OPERATOR:
 			{
 #ifdef CW_THREADS
-			    nxo_l_array_unlock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_unlock(nxo);
+				nxo_operator_f(el)(a_nxo);
+				nxo_l_array_lock(nxo);
+			    }
+			    else
 #endif
-			    nxo_operator_f(el)(a_nxo);
-#ifdef CW_THREADS
-			    nxo_l_array_lock(nxo);
-#endif
+			    {
+				nxo_operator_f(el)(a_nxo);
+			    }
 			    break;
 			}
 			case NXOT_STRING:
@@ -808,22 +842,24 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    string = nxo_stack_push(&thread->tstack);
 			    nxo_dup(string, el);
 #ifdef CW_THREADS
-			    nxo_l_array_unlock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_unlock(nxo);
+			    }
 #endif
 			    nxo_threadp_new(&threadp);
-#ifdef CW_THREADS
 			    nxo_string_lock(string);
-#endif
 			    nxo_thread_interpret(a_nxo, &threadp,
 						 nxo_string_get(string),
 						 nxo_string_len_get(string));
-#ifdef CW_THREADS
 			    nxo_string_unlock(string);
-#endif
 			    nxo_thread_flush(a_nxo, &threadp);
 			    nxo_threadp_delete(&threadp, a_nxo);
 #ifdef CW_THREADS
-			    nxo_l_array_lock(nxo);
+			    if (alocking)
+			    {
+				nxo_l_array_lock(nxo);
+			    }
 #endif
 			    nxo_stack_pop(&thread->tstack);
 			    break;
@@ -857,7 +893,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			tnxo = nxo_stack_push(&thread->ostack);
 			nxo_dup(tnxo, el);
 #ifdef CW_THREADS
-			nxo_l_array_unlock(nxo);
+			if (alocking)
+			{
+			    nxo_l_array_unlock(nxo);
+			}
 #endif
 			nxo_stack_pop(&thread->estack);
 		    }
@@ -867,7 +906,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			tnxo = nxo_stack_push(&thread->tstack);
 			nxo_dup(tnxo, el);
 #ifdef CW_THREADS
-			nxo_l_array_unlock(nxo);
+			if (alocking)
+			{
+			    nxo_l_array_unlock(nxo);
+			}
 #endif
 			nxo_dup(nxo, tnxo);
 			nxo_stack_pop(&thread->tstack);
@@ -878,7 +920,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		{
 		    /* Do not optimize tail calls. */
 #ifdef CW_THREADS
-		    nxo_l_array_unlock(nxo);
+		    if (alocking)
+		    {
+			nxo_l_array_unlock(nxo);
+		    }
 #endif
 		    nxo_stack_pop(&thread->estack);
 		}
