@@ -1258,7 +1258,7 @@ systemdict_fileposition(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	position = stilo_file_position_get(file, a_stilt);
+	position = stilo_file_position_get(file);
 	if (position == -1) {
 		stilt_error(a_stilt, STILTE_IOERROR);
 		return;

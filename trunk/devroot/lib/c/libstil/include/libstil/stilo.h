@@ -261,10 +261,8 @@ cw_stilte_t	stilo_file_output(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     const char *a_format, ...);
 cw_stilte_t	stilo_file_output_n(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_size, const char *a_format, ...);
-cw_stilte_t	stilo_file_truncate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    cw_uint32_t a_length);
-cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo, cw_stilt_t
-    *a_stilt);
+cw_stilte_t	stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length);
+cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
 cw_stilte_t	stilo_file_position_set(cw_stilo_t *a_stilo, cw_stilt_t
     *a_stilt, cw_sint64_t a_position);
 cw_uint32_t	stilo_file_buffer_size_get(cw_stilo_t *a_stilo);
@@ -275,7 +273,7 @@ cw_stilte_t	stilo_file_buffer_flush(cw_stilo_t *a_stilo, cw_stilt_t
     *a_stilt);
 void		stilo_file_buffer_reset(cw_stilo_t *a_stilo);
 cw_bool_t	stilo_file_status(cw_stilo_t *a_stilo);
-cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
 
 /*
  * hook.

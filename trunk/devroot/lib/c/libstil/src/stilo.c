@@ -2281,8 +2281,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 
 /* STILTE_IOERROR */
 cw_stilte_t
-stilo_file_truncate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
-    a_length)
+stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_file_t	*file;
@@ -2315,7 +2314,7 @@ stilo_file_truncate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 
 /* -1: STILTE_IOERROR */
 cw_sint64_t
-stilo_file_position_get(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+stilo_file_position_get(cw_stilo_t *a_stilo)
 {
 	cw_sint64_t		retval;
 	cw_stiloe_file_t	*file;
@@ -2551,7 +2550,7 @@ stilo_file_status(cw_stilo_t *a_stilo)
 
 /* -1: STILTE_IOERROR */
 cw_sint64_t
-stilo_file_mtime(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+stilo_file_mtime(cw_stilo_t *a_stilo)
 {
 	cw_sint64_t		retval;
 	struct stat		sb;
