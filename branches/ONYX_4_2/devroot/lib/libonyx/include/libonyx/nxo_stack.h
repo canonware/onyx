@@ -404,7 +404,7 @@ nxo_stack_bpop(cw_nxo_t *a_nxo)
     qr_remove(stacko, link);
     if (stack->nspare < CW_LIBONYX_STACK_CACHE)
     {
-	qr_meld(ql_first(&stack->stack), stacko, link);
+	qr_meld(ql_first(&stack->stack), stacko, cw_nxoe_stacko_t, link);
 	stack->nspare++;
     }
     else
@@ -515,9 +515,9 @@ nxo_stack_nbpop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 
 	if (bottom != ql_first(&stack->stack))
 	{
-	    qr_split(&stack->under, bottom, link);
+	    qr_split(&stack->under, bottom, cw_nxoe_stacko_t, link);
 	    /* Reinsert the spares in the spares region. */
-	    qr_meld(ql_first(&stack->stack), bottom, link);
+	    qr_meld(ql_first(&stack->stack), bottom, cw_nxoe_stacko_t, link);
 	}
 	else
 	{
@@ -899,10 +899,10 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
     stack->below = below;
     mb_write();
 #endif
-    qr_split(ql_first(&stack->stack), below, link);
+    qr_split(ql_first(&stack->stack), below, cw_nxoe_stacko_t, link);
     ql_first(&stack->stack) = top;
     mb_write();
-    qr_meld(top, below, link);
+    qr_meld(top, below, cw_nxoe_stacko_t, link);
 #ifdef CW_THREADS
     mb_write();
     stack->below = NULL;
@@ -963,10 +963,12 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
     /* Get a pointer to the new top of the stack. */
     /* Start from whichever end is closest to what will be the new top of
      * stack. */
-    if (a_amount < stack->count / 2)
+    if ((cw_uint32_t) a_amount < stack->count / 2)
     {
 	/* Iterate down from the top. */
-	for (i = 0, top = ql_first(&stack->stack); i < a_amount; i++)
+	for (i = 0, top = ql_first(&stack->stack);
+	     i < (cw_uint32_t) a_amount;
+	     i++)
 	{
 	    top = qr_next(top, link);
 	}
@@ -975,7 +977,7 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
     {
 	/* Iterate up from the bottom. */
 	for (i = 1, top = qr_prev(&stack->under, link);
-	     i < stack->count - a_amount;
+	     i < (cw_uint32_t) (stack->count - a_amount);
 	     i++)
 	{
 	    top = qr_prev(top, link);
@@ -999,10 +1001,10 @@ nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount)
      *                             |          | |  |
      *                             \----------/ /  /
      */
-    qr_split(ql_first(&stack->stack), &stack->under, link);
+    qr_split(ql_first(&stack->stack), &stack->under, cw_nxoe_stacko_t, link);
     ql_first(&stack->stack) = top;
     mb_write();
-    qr_meld(top, &stack->under, link);
+    qr_meld(top, &stack->under, cw_nxoe_stacko_t, link);
 #ifdef CW_THREADS
     nxoe_p_stack_unlock(stack);
 #endif
@@ -1064,7 +1066,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	retval = TRUE;
 	goto ERROR;
     }
-    for (i = 0, top = ql_first(&stack->stack); i < a_amount; i++)
+    for (i = 0, top = ql_first(&stack->stack); i < (cw_uint32_t) a_amount; i++)
     {
 	top = qr_next(top, link);
     }
@@ -1105,10 +1107,10 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
     stack->below = below;
     mb_write();
 #endif
-    qr_split(ql_first(&stack->stack), below, link);
+    qr_split(ql_first(&stack->stack), below, cw_nxoe_stacko_t, link);
     ql_first(&stack->stack) = top;
     mb_write();
-    qr_meld(top, below, link);
+    qr_meld(top, below, cw_nxoe_stacko_t, link);
 #ifdef CW_THREADS
     mb_write();
     stack->below = NULL;

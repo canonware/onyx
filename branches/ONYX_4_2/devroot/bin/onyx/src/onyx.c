@@ -262,7 +262,7 @@ batch_run(int argc, char **argv, char **envp)
 
 	/* Push the string onto the execution stack. */
 	string = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(string, &nx, FALSE, strlen(opt_expression));
+	nxo_string_new(string, &nx, FALSE, strlen((char *) opt_expression));
 	nxo_attr_set(string, NXOA_EXECUTABLE);
 	str = nxo_string_get(string);
 	memcpy(str, opt_expression, nxo_string_len_get(string));

@@ -783,7 +783,7 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
     if (gray != ql_first(&a_nxa->seq_set))
     {
 	/* Split the ring. */
-	qr_split(ql_first(&a_nxa->seq_set), gray, link);
+	qr_split(ql_first(&a_nxa->seq_set), gray, cw_nxoe_t, link);
 	retval = gray;
     }
     else

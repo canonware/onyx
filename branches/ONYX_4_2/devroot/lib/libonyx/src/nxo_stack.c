@@ -185,7 +185,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
      * Remove the region from stacko (inclusive) down to top
      * (exclusive), then deallocate those stacko's. */
     ql_first(&a_stack->stack) = top;
-    qr_split(stacko, top, link);
+    qr_split(stacko, top, cw_nxoe_stacko_t, link);
 
     for (i = 0; i < a_stack->nspare + a_count - CW_LIBONYX_STACK_CACHE; i++)
     {
@@ -251,9 +251,9 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
      * 3) Meld first/stacko.
      * 4) Deallocate the ring pointed to by bottom. */
 
-    qr_split(bottom, &a_stack->under, link);
-    qr_split(bottom, stacko, link);
-    qr_meld(ql_first(&a_stack->stack), stacko, link);
+    qr_split(bottom, &a_stack->under, cw_nxoe_stacko_t, link);
+    qr_split(bottom, stacko, cw_nxoe_stacko_t, link);
+    qr_meld(ql_first(&a_stack->stack), stacko, cw_nxoe_stacko_t, link);
     
     for (i = 0; i < a_stack->nspare + a_count - CW_LIBONYX_STACK_CACHE; i++)
     {
