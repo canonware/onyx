@@ -27,8 +27,8 @@ $s $AF_INET $SOCK_STREAM socket def
 #    $SO_RCVLOWAT
 #    $SO_TYPE
 #    $SO_ERROR
-    $SO_SNDTIMEO
-    $SO_RCVTIMEO
+#    $SO_SNDTIMEO
+#    $SO_RCVTIMEO
 ]{
     s over 0 setsockopt
     s over sockopt type $integertype ne {

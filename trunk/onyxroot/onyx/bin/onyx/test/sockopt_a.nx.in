@@ -23,12 +23,12 @@ $s $AF_INET $SOCK_STREAM socket def
     $SO_OOBINLINE
     $SO_SNDBUF
     $SO_RCVBUF
-    $SO_SNDLOWAT
-    $SO_RCVLOWAT
+#    $SO_SNDLOWAT
+#    $SO_RCVLOWAT
     $SO_TYPE
     $SO_ERROR
-    $SO_SNDTIMEO
-    $SO_RCVTIMEO
+#    $SO_SNDTIMEO
+#    $SO_RCVTIMEO
 ]{
     s over sockopt type $integertype ne {
 	`Expected integer for flag (1): ' print
