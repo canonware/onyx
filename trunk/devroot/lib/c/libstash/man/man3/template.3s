@@ -22,16 +22,6 @@ Version: <Version>
 \fB#include <libstash/libstash_r.h>\fR
 
 .SS General
-.I cw_<template>_t *
-.br
-.B <template>_new
-.RI ( <XXX_Args> )
-
-.I void
-.br
-.B <template>_delete
-.RI ( "cw_<template>_t * a_<template>" )
-
 .I <return type>
 .br
 .B <template>_<func>
@@ -46,58 +36,8 @@ Version: <Version>
 <XXX Description>
 
 .SH USAGE
-.I cw_<template>_t *
-.br
-.B <template>_new
-.RI ( <args> )
-.RS
-Input(s):
-.RS
-.IR <input> :
-.RS
-<input description>
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-<retval description>
-.RE
-.RE
-Description:
-.RS
-Constructor.
-.RE
-.RE
 
-.I void
 .br
-.B <template>_delete
-.RI ( "cw_<template>_t * a_<template>" )
-.RS
-Input(s):
-.RS
-.IR <input> :
-.RS
-Pointer to a<n> <template>.
-.RE
-.RE
-Output(s):
-.RS
-None.
-.RE
-Description:
-.RS
-Destructor.
-.RE
-.RE
-
-.I <return type>
-.br
-.B <template>_<func>
-.RI ( "cw_<template>_t * a_<template>" ", " <args> )
-.RS
 Input(s):
 .RS
 .IR a_<template> :

@@ -1,0 +1,772 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_list 3s "libstash, version <Version>"
+.Nm libstash_list
+.hy 1
+.SH NAME
+list, list_item - Doubly linked list.
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_LIST
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_LIST
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_list_t *
+.br
+.B list_new_r
+.RI ( "cw_list_t * a_list" )
+
+.SS General
+.I cw_list_item_t *
+.br
+.B list_item_new
+.RI ( "void" )
+
+.I void
+.br
+.B list_item_delete
+.RI ( "cw_list_item_t * a_list_item" )
+
+.I void *
+.br
+.B list_item_get
+.RI ( "cw_list_item_t * a_list_item" )
+
+.I void
+.br
+.B list_item_set
+.RI ( "cw_list_item_t * a_list_item" ", " "void * a_data" )
+
+.I cw_list_t *
+.br
+.B list_new
+.RI ( "cw_list_t * a_list" )
+
+.I void
+.br
+.B list_delete
+.RI ( "cw_list_t * a_list" )
+
+.I cw_uint64_t
+.br
+.B list_count
+.RI ( "cw_list_t * a_list" )
+
+.I void
+.br
+.B list_catenate_list
+.RI ( "cw_list_t * a_a" ", " "cw_list_t * a_b" )
+
+.I cw_list_item_t *
+.br
+.B list_hpush
+.RI ( "cw_list_t * a_list" ", " "void * a_data" )
+
+.I void *
+.br
+.B list_hpop
+.RI ( "cw_list_t * a_list" )
+
+.I void *
+.br
+.B list_hpeek
+.RI ( "cw_list_t * a_list" )
+
+.I cw_list_item_t *
+.br
+.B list_tpush
+.RI ( "cw_list_t * a_list" ", " "void * a_data" )
+
+.I void *
+.br
+.B list_tpop
+.RI ( "cw_list_t * a_list" )
+
+.I void *
+.br
+.B list_tpeek
+.RI ( "cw_list_t * a_list" )
+
+.I cw_list_item_t *
+.br
+.B list_get_next
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" )
+
+.I cw_list_item_t *
+.br
+.B list_get_prev
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" )
+
+.I cw_list_item_t *
+.br
+.B list_insert_before
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" ", " 
+.IR "void * a_data" )
+
+.I cw_list_item_t *
+.br
+.B list_insert_after
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" ", " 
+.IR "void * a_data" )
+
+.I void *
+.br
+.B list_remove_item
+.RI ( "cw_list_t * a_list" ", " "void * a_data" )
+
+.I void *
+.br
+.B list_remove_container
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_to_remove" )
+
+.I void
+.br
+.B list_purge_spares
+.RI ( "cw_list_t * a_list" )
+
+.I void
+.br
+.B list_dump
+.RI ( "cw_list_t * a_list" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBlist\fR is a doubly linked list implementation with all the normal trimmings.
+Each data item is pointed to by a \fBlist_item\fR instance.  \fBlist\fR caches
+\fBlist_item\fR instances in order to amortize the cost of allocation.  Since
+there are no reasonable heuristics for deciding when to discard the cached
+\fBlist_item\fR instances, the user must manually call \fBlist_purge_spares\fR()
+whenever deemed logical.
+
+.SH USAGE
+.I cw_list_item_t *
+.br
+.B list_item_new
+.RI ( "void" )
+.br
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a list_item.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B list_item_delete
+.RI ( "cw_list_item_t * a_list_item" )
+.br
+Input(s):
+.RS
+.IR a_list_item :
+.RS
+Pointer to a list_item.
+.RE
+.RE
+Output(s):
+.RS
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void *
+.br
+.B list_item_get
+.RI ( "cw_list_item_t * a_list_item" )
+.br
+Input(s):
+.RS
+.IR a_list_item :
+.RS
+Pointer to a list_item.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Data pointer.
+.RE
+.RE
+Description:
+.RS
+Get the value of the data pointer.
+.RE
+.RE
+
+.I void
+.br
+.B list_item_set
+.RI ( "cw_list_item_t * a_list_item" ", " "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_list_item :
+.RS
+Pointer to a list_item.
+.RE
+.IR a_data :
+.RS
+Data pointer
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Set the value of a_list_item's data pointer to a_data.
+.RE
+.RE
+
+.I cw_list_t *
+.br
+.B list_new
+.RI ( "cw_list_t * a_list" )
+.br
+.I cw_list_t *
+.br
+.B list_new_r
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to space for a list, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a list.
+.br
+NULL: Memory allocation error.  Can only occur if (NULL == a_list).
+.RE
+.RE
+Description:
+.RS
+Non-thread-safe and thread-safe constructors.
+.RE
+.RE
+
+.I void
+.br
+.B list_delete
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B list_count
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of items in a_list.
+.RE
+.RE
+Description:
+.RS
+Return the number of items in a_list.
+.RE
+.RE
+
+.I void
+.br
+.B list_catenate_list
+.RI ( "cw_list_t * a_a" ", " "cw_list_t * a_b" )
+.br
+Input(s):
+.RS
+.IR a_a :
+.RS
+Pointer to a list.
+.RE
+.IR a_b :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Append the contents of a_b to a_a.
+.RE
+.RE
+
+.I cw_list_item_t *
+.br
+.B list_hpush
+.RI ( "cw_list_t * a_list" ", " "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_data :
+.RS
+Data pointer.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to the list_item that contains a_data.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Push an item onto the head of a_list.
+.RE
+.RE
+
+.I void *
+.br
+.B list_hpop
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Data pointer.
+.br
+NULL: a_list is empty.
+.RE
+.RE
+Description:
+.RS
+ Pop an item off the head of a_list.
+.RE
+.RE
+
+.I void *
+.br
+.B list_hpeek
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Data poirter.
+.br
+NULL: a_list is empty.
+.RE
+.RE
+Description:
+.RS
+Return the item at the head of the list, without removing it.
+.RE
+.RE
+
+.I cw_list_item_t *
+.br
+.B list_tpush
+.RI ( "cw_list_t * a_list" ", " "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_data :
+.RS
+Data pointer.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to the list_item that contains a_data.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Push an item onto the tail of a_list.
+.RE
+.RE
+
+.I void *
+.br
+.B list_tpop
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Data pointer.
+.br
+NULL: a_list is empty.
+.RE
+.RE
+Description:
+.RS
+Pop an item of the tail of a_list.
+.RE
+.RE
+
+.I void *
+.br
+.B list_tpeek
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Data pointer.
+.br
+NULL: a_list is empty.
+.RE
+.RE
+Description:
+.RS
+Return the item at the tail of the list, without removing it.
+.RE
+.RE
+
+.I cw_list_item_t *
+.br
+.B list_get_next
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_in_list :
+.RS
+Pointer to an item container in a_list, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to an item container.
+.br
+NULL: a_in_list is the tail of a_list.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the next container after a_in_list in a_list (NULL if
+a_in_list is the last container).  If a_in_list is NULL, return a pointer to the
+first container in a_list.
+.RE
+.RE
+
+.I cw_list_item_t *
+.br
+.B list_get_prev
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_in_list :
+.RS
+Pointer to an item container in a_list, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a list_item.
+.br
+NULL: a_in_list is the head of a_list.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the container before a_in_list in a_list (NULL if a_in_list
+is the first container).  If a_in_list is NULL, return a pointer to the last
+container in a_list.
+.RE
+.RE
+
+.I cw_list_item_t *
+.br
+.B list_insert_before
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" ", " 
+.IR "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_in_list :
+.RS
+Pointer to a list_item in a_list.
+.RE
+.IR a_data :
+.RS
+Data pointer.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to the list_item that contains a_data.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Insert an item before the list node pointed to by a_in_list.
+.RE
+.RE
+
+.I cw_list_item_t *
+.br
+.B list_insert_after
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_in_list" ", " 
+.IR "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_in_list :
+.RS
+Pointer to a list_item in a_list.
+.RE
+.IR a_data :
+.RS
+Data pointer.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to the list_item that contains a_data.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Insert an item after the list node pointed to by a_in_list.
+.RE
+.RE
+
+.I void *
+.br
+.B list_remove_item
+.RI ( "cw_list_t * a_list" ", " "void * a_data" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_data :
+.RS
+Pointer to data.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a_data.
+.br
+NULL: a_data not found in a_list.
+.RE
+.RE
+Description:
+.RS
+Find a_data in a_list and remove it from the list.
+.RE
+.RE
+
+.I void *
+.br
+.B list_remove_container
+.RI ( "cw_list_t * a_list" ", " "cw_list_item_t * a_to_remove" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.IR a_to_remove :
+.RS
+Pointer to a list_item.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Data pointer.
+.RE
+.RE
+Description:
+.RS
+Given a pointer to an item, remove the item from the list and return the data
+pointer.
+.RE
+.RE
+
+.I void
+.br
+.B list_purge_spares
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Free the space used by the internal free item list.
+.RE
+.RE
+
+.I void
+.br
+.B list_dump
+.RI ( "cw_list_t * a_list" )
+.br
+Input(s):
+.RS
+.IR a_list :
+.RS
+Pointer to a list.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Print debugging spew to cw_g_out.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.
