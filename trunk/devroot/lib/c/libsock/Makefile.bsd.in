@@ -16,27 +16,7 @@
 #
 # File lists.
 #
-
-# Include files that _are_ installed.
-INCS := libsock.h libsock_incs.h sock.h sockb.h socks.h
-
-# Include files that are _not_ installed.
-P_INCS := sock_p.h sockb_p.h socks_p.h
-
-# Source files.
-SRCS := sock.c sockb.c socks.c
-
-# Executables.
-BINS := proxy.c blow.c suck.c
-
-# Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS :=
-
-# Perl scripts that drive the BTESTS.
-PTESTS :=
-
-# Backend test programs that are driven by the PTESTS.
-BTESTS := b_echos.c b_proxy.c
+.include "Makefile.files"
 
 # Munge the filename lists so that they are prefixed by the directory they're
 # in, relative to @top_srcdir@.  Also, convert the test and binary names to
