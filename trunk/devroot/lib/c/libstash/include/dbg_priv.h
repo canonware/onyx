@@ -29,37 +29,50 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 51 $
+ * $Date: 1998-04-30 02:37:04 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  *
- *
+ * Private header for debug spew code.  Additional debug flags can be added
+ * here, in conjunction with dbg.h.
  *
  ****************************************************************************/
 
 #ifndef _DBG_PRIV_H_
 #define _DBG_PRIV_H_
 
+/* This file will die a horrible death if included before dbg.h. */
+#ifndef _DBG_H_
+#  error "Must include dbg.h first."
+#endif
+
 /*
- * Row definitions for debug flag table.
+ * Row definitions for debug flag table.  Each row consists of 0 or more
+ * "on" columns.  Each define is terminated by a -1.
  */
 
-#define _CW_DBG_T_FUNC_ENTRY 0, -1
-#define _CW_DBG_T_FUNC_EXIT 1, -1
-#define _CW_DBG_T_MISC 2, -1
-#define _CW_DBG_T_FUNC 0, 1, -1
+#define _CW_DBG_T_FUNC_ENTRY _CW_DBG_FUNC_ENTRY, -1
+#define _CW_DBG_T_FUNC_EXIT _CW_DBG_FUNC_EXIT, -1
+#define _CW_DBG_T_MISC _CW_DBG_MISC, -1
+#define _CW_DBG_T_FUNC _CW_DBG_FUNC_ENTRY, _CW_DBG_FUNC_EXIT, -1
+#define _CW_DBG_T_RES_STATE _CW_DBG_RES_STATE, -1
+/* <ADD> */
 
-#define _CW_DBG_T_MAX 3 /* Highest numbered row in table. */
-#define _CW_DBG_C_MAX 2 /* Highest numbered column in table. */
+#define _CW_DBG_T_MAX 4 /* Highest numbered row in table. */
+#define _CW_DBG_C_MAX 4 /* Highest numbered column in table. */
+/* <ADD> */
 
+/* These are globals so that we don't have to have multiple copies of them,
+ * even if there are multiple dbg instances.  We mangle the names to keep
+ * them from interfering with other code. */
 #define dbg_raw_tbl _CW_NS_CMN(dbg_raw_tbl)
 #define dbg_raw_on _CW_NS_CMN(dbg_raw_on)
-#define dbg_build_tbl _CW_NS_CMN(dbg_build_tbl)
-#define dbg_recalc_fpmatch _CW_NS_CMN(dbg_recalc_fpmatch)
 
 /*
- * Array used to construct the debug table.
+ * Array used to construct the debug table.  Make sure to add *_T_* here.
+ * Order *IS* important.  These should be in the same order as the
+ * externally visible macros for which they are named.
  */
 cw_sint32_t dbg_raw_tbl[] =
 {
@@ -67,6 +80,8 @@ cw_sint32_t dbg_raw_tbl[] =
   _CW_DBG_T_FUNC_EXIT,
   _CW_DBG_T_MISC,
   _CW_DBG_T_FUNC,
+  _CW_DBG_T_RES_STATE,
+  /* <ADD> */
   -1
 };
 
@@ -75,7 +90,8 @@ cw_sint32_t dbg_raw_tbl[] =
  */
 cw_sint32_t dbg_raw_on[] =
 {
-  _CW_DBG_FUNC,
+/*   _CW_DBG_FUNC, */
+  /* <ADD> */
   -1
 };
 
@@ -87,6 +103,9 @@ struct cw_dbg_s
   cw_bool_t pmatch[_CW_DBG_T_MAX + 1];
   cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_T_MAX + 1];
 };
+
+#define dbg_build_tbl _CW_NS_CMN(dbg_build_tbl)
+#define dbg_recalc_fpmatch _CW_NS_CMN(dbg_recalc_fpmatch)
 
 void dbg_build_tbl(cw_dbg_t * a_dbg_o);
 void dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o);

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 51 $
+ * $Date: 1998-04-30 02:37:04 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -49,6 +49,8 @@
 #define _CW_DBG_FUNC_EXIT 1
 #define _CW_DBG_MISC 2
 #define _CW_DBG_FUNC 3
+#define _CW_DBG_RES_STATE 4
+/* <ADD> */
 
 typedef struct cw_dbg_s cw_dbg_t;
 
