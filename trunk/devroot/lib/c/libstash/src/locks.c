@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 218 $
- * $Date: 1998-09-11 00:24:05 -0700 (Fri, 11 Sep 1998) $
+ * $Revision: 223 $
+ * $Date: 1998-09-15 17:27:27 -0700 (Tue, 15 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -416,20 +416,13 @@ jtl_sunlock(cw_jtl_t * a_jtl_o)
     cw_jtl_tq_el_t * tq_el;
 
     _cw_assert(list_count(&a_jtl_o->tlock_wait) > 0);
-    tq_el = (cw_jtl_tq_el_t *) list_hpop(&a_jtl_o->tlock_wait);
+    tq_el = (cw_jtl_tq_el_t *) list_hpeek(&a_jtl_o->tlock_wait);
     _cw_check_ptr(tq_el);
 
     if (tq_el->is_blocked == TRUE)
     {
       cnd_signal(&tq_el->tlock_wait);
     }
-    /* Unconditionally push tq_el back on the list, because we can't delete
-     * it, no matter what, since the condition variable must exist until
-     * after the blocked thread wakes up.  That thread is responsible for
-     * cleaning up. */
-    /* XXX Perhaps a more efficient way of getting at the head/tail is in
-     * order. */
-    list_hpush(&a_jtl_o->tlock_wait, tq_el);
   }
   
   mtx_unlock(&a_jtl_o->lock);
@@ -449,16 +442,13 @@ jtl_tunlock(cw_jtl_t * a_jtl_o)
     cw_jtl_tq_el_t * tq_el;
 
     _cw_assert(list_count(&a_jtl_o->tlock_wait) > 0);
-    tq_el = (cw_jtl_tq_el_t *) list_hpop(&a_jtl_o->tlock_wait);
+    tq_el = (cw_jtl_tq_el_t *) list_hpeek(&a_jtl_o->tlock_wait);
     _cw_check_ptr(tq_el);
 
     if (tq_el->is_blocked == TRUE)
     {
       cnd_signal(&tq_el->tlock_wait);
     }
-    
-    /* Unconditionally push tq_el back on the list. */
-    list_hpush(&a_jtl_o->tlock_wait, tq_el);
   }
 
   mtx_unlock(&a_jtl_o->lock);
@@ -490,8 +480,7 @@ jtl_qunlock(cw_jtl_t * a_jtl_o)
   mtx_lock(&a_jtl_o->lock);
 
   a_jtl_o->qlock_holders--;
-
-  /* XXX Implement. */
+  jtl_p_qrwx_unlock(a_jtl_o);
   
   mtx_unlock(&a_jtl_o->lock);
 }
@@ -503,7 +492,8 @@ jtl_runlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
 
-  /* XXX Implement. */
+  a_jtl_o->rlock_holders--;
+  jtl_p_qrwx_unlock(a_jtl_o);
 
   mtx_unlock(&a_jtl_o->lock);
 }
@@ -515,7 +505,8 @@ jtl_wunlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
 
-  /* XXX Implement. */
+  a_jtl_o->wlock_holders--;
+  jtl_p_qrwx_unlock(a_jtl_o);
   
   mtx_unlock(&a_jtl_o->lock);
 }
@@ -527,7 +518,8 @@ jtl_xunlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
 
-  /* XXX Implement. */
+  a_jtl_o->xlock_holders--;
+  jtl_p_qrwx_unlock(a_jtl_o);
 
   mtx_unlock(&a_jtl_o->lock);
 }
@@ -577,4 +569,60 @@ jtl_get_num_stlocks(cw_jtl_t * a_jtl_o)
   mtx_unlock(&a_jtl_o->lock);
 
   return retval;
+}
+
+void
+jtl_p_qrwx_unlock(cw_jtl_t * a_jtl_o)
+{
+  /* Grant locks in this order: x, w, r & q. */
+  if ((a_jtl_o->qlock_holders == 0) && (a_jtl_o->rlock_holders == 0))
+  {
+    if (a_jtl_o->wlock_holders == 0)
+    {
+      if (a_jtl_o->xlock_holders == 0)
+      {
+	if (a_jtl_o->xlock_waiters > 0)
+	{
+	  /* Grant xlock. */
+	  cnd_signal(&a_jtl_o->xlock_wait);
+	}
+	else if (a_jtl_o->wlock_waiters > 0)
+	{
+	  /* Grant wlock. */
+	  cnd_signal(&a_jtl_o->wlock_wait);
+	}
+	else
+	{
+	  if (a_jtl_o->qlock_waiters > 0)
+	  {
+	    /* Grant qlocks. */
+	    cnd_broadcast(&a_jtl_o->qlock_wait);
+	  }
+	  if (a_jtl_o->rlock_waiters > 0)
+	  {
+	    /* Grant rlocks. */
+	    cnd_broadcast(&a_jtl_o->rlock_wait);
+	  }
+	}
+      }
+    }
+    else if (a_jtl_o->rlock_waiters > 0)
+    {
+      /* Grant rlocks. */
+      cnd_broadcast(&a_jtl_o->rlock_wait);
+    }
+  }
+  else if ((a_jtl_o->wlock_waiters == 0) && (a_jtl_o->xlock_waiters == 0))
+  {
+    if (a_jtl_o->qlock_waiters > 0)
+    {
+      /* Grant qlocks. */
+      cnd_broadcast(&a_jtl_o->qlock_wait);
+    }
+    if (a_jtl_o->rlock_waiters > 0)
+    {
+      /* Grant rlocks. */
+      cnd_broadcast(&a_jtl_o->rlock_wait);
+    }
+  }
 }

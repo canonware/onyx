@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 223 $
+ * $Date: 1998-09-15 17:27:27 -0700 (Tue, 15 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -307,6 +307,48 @@ list_hpop(cw_list_t * a_list_o)
 /****************************************************************************
  * <<< Description >>>
  *
+ * Returns the item at the head of the list, without removing it.
+ *
+ ****************************************************************************/
+void *
+list_hpeek(cw_list_t * a_list_o)
+{
+  void * retval;
+
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_hpeek()");
+  }
+  _cw_check_ptr(a_list_o);
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_lock(&a_list_o->lock);
+  }
+
+  if (a_list_o->head == NULL)
+  {
+    /* List is empty. */
+    retval = NULL;
+  }
+  else
+  {
+    retval = a_list_o->head->item;
+  }
+
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_unlock(&a_list_o->lock);
+  }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_hpeek()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
  * Pushes an item onto the tail of the list.
  *
  ****************************************************************************/
@@ -400,6 +442,48 @@ list_tpop(cw_list_t * a_list_o)
   if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
   {
     _cw_marker("Exit list_tpop()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Returns the item at the tail of the list without removing it.
+ *
+ ****************************************************************************/
+void *
+list_tpeek(cw_list_t * a_list_o)
+{
+  void * retval;
+
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Enter list_tpeek()");
+  }
+  _cw_check_ptr(a_list_o);
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_lock(&a_list_o->lock);
+  }
+
+  if (a_list_o->head == NULL)
+  {
+    /* List is empty. */
+    retval = NULL;
+  }
+  else
+  {
+    retval = a_list_o->tail->item;
+  }
+
+  if (a_list_o->is_thread_safe)
+  {
+    mtx_unlock(&a_list_o->lock);
+  }
+  if (_cw_pmatch(_STASH_DBG_R_LIST_FUNC))
+  {
+    _cw_marker("Exit list_tpeek()");
   }
   return retval;
 }

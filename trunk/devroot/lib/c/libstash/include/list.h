@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 156 $
- * $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * $Revision: 223 $
+ * $Date: 1998-09-15 17:27:27 -0700 (Tue, 15 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -50,8 +50,10 @@ struct cw_list_s
 #define list_count _CW_NS_ANY(list_count)
 #define list_hpush _CW_NS_ANY(list_hpush)
 #define list_hpop _CW_NS_ANY(list_hpop)
+#define list_hpeek _CW_NS_ANY(list_hpeek)
 #define list_tpush _CW_NS_ANY(list_tpush)
 #define list_tpop _CW_NS_ANY(list_tpop)
+#define list_tpeek _CW_NS_ANY(list_tpeek)
 #define list_insert_after _CW_NS_ANY(list_insert_after)
 #define list_remove _CW_NS_ANY(list_remove)
 #define list_purge_spares _CW_NS_ANY(list_purge_spares)
@@ -67,8 +69,10 @@ void list_delete(cw_list_t * a_list_o);
 cw_uint64_t list_count(cw_list_t * a_list_o);
 cw_list_item_t * list_hpush(cw_list_t * a_list_o, void * a_data);
 void * list_hpop(cw_list_t * a_list_o);
+void * list_hpeek(cw_list_t * a_list_o);
 cw_list_item_t * list_tpush(cw_list_t * a_list_o, void * a_data);
 void * list_tpop(cw_list_t * a_list_o);
+void * list_tpeek(cw_list_t * a_list_o);
 cw_list_item_t * list_insert_after(cw_list_t * a_list_o,
 		       cw_list_item_t * a_in_list,
 		       void * a_data);
