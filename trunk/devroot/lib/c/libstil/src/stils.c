@@ -114,8 +114,6 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 		case STILOT_CONDITION:
 		case STILOT_DICT:
 		case STILOT_LOCK:
-		case STILOT_MSTATE:
-		case STILOT_NUMBER:
 		case STILOT_STRING:
 			a_add_root_func(a_add_root_arg, new_stilo);
 			break;

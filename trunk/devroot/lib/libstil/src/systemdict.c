@@ -44,15 +44,11 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(countdictstack),
 	_SYSTEMDICT_ENTRY(countexecstack),
 	_SYSTEMDICT_ENTRY(counttomark),
-	_SYSTEMDICT_ENTRY(currentaccuracy),
-	_SYSTEMDICT_ENTRY(currentbase),
 	_SYSTEMDICT_ENTRY(currentcontext),
 	_SYSTEMDICT_ENTRY(currentdict),
 	_SYSTEMDICT_ENTRY(currentfile),
 	_SYSTEMDICT_ENTRY(currentglobal),
-	_SYSTEMDICT_ENTRY(currentmstate),
 	_SYSTEMDICT_ENTRY(currentobjectformat),
-	_SYSTEMDICT_ENTRY(currentpoint),
 	_SYSTEMDICT_ENTRY(cvlit),
 	_SYSTEMDICT_ENTRY(cvm),
 	_SYSTEMDICT_ENTRY(cvn),
@@ -94,10 +90,10 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(get),
 	_SYSTEMDICT_ENTRY(getinterval),
 	_SYSTEMDICT_ENTRY(gt),
+	_SYSTEMDICT_ENTRY(idiv),
 	_SYSTEMDICT_ENTRY(if),
 	_SYSTEMDICT_ENTRY(ifelse),
 	_SYSTEMDICT_ENTRY(index),
-	_SYSTEMDICT_ENTRY(initmath),
 	_SYSTEMDICT_ENTRY(join),
 	_SYSTEMDICT_ENTRY(known),
 	_SYSTEMDICT_ENTRY(le),
@@ -109,10 +105,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(mark),
 	_SYSTEMDICT_ENTRY(maxlength),
 	_SYSTEMDICT_ENTRY(mod),
-	_SYSTEMDICT_ENTRY(mrestore),
-	_SYSTEMDICT_ENTRY(mrestoreall),
-	_SYSTEMDICT_ENTRY(msave),
-	_SYSTEMDICT_ENTRY(mstate),
 	_SYSTEMDICT_ENTRY(mul),
 	_SYSTEMDICT_ENTRY(mutex),
 	_SYSTEMDICT_ENTRY(ne),
@@ -149,13 +141,9 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(rrand),
 	_SYSTEMDICT_ENTRY(run),
 	_SYSTEMDICT_ENTRY(search),
-	_SYSTEMDICT_ENTRY(setaccuracy),
-	_SYSTEMDICT_ENTRY(setbase),
 	_SYSTEMDICT_ENTRY(setfileposition),
 	_SYSTEMDICT_ENTRY(setglobal),
-	_SYSTEMDICT_ENTRY(setmstate),
 	_SYSTEMDICT_ENTRY(setobjectformat),
-	_SYSTEMDICT_ENTRY(setpoint),
 	_SYSTEMDICT_ENTRY(shift),
 	_SYSTEMDICT_ENTRY(sqrt),
 	_SYSTEMDICT_ENTRY(srand),
@@ -176,6 +164,7 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(timedwait),
 	_SYSTEMDICT_ENTRY(token),
 	_SYSTEMDICT_ENTRY(true),
+	_SYSTEMDICT_ENTRY(truncate),
 	_SYSTEMDICT_ENTRY(trylock),
 	_SYSTEMDICT_ENTRY(type),
 	_SYSTEMDICT_ENTRY(undef),
@@ -242,7 +231,7 @@ systemdict_add(cw_stilt_t *a_stilt)
 	/* XXX Check type of a. */
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);
-	stilo_number_add(&t_stilo, b, a);
+	stilo_add(&t_stilo, b, a);
 	stils_pop(stack, a_stilt, 1);
 	stilo_delete(&t_stilo, a_stilt);
 }
@@ -365,7 +354,7 @@ systemdict_copy(cw_stilt_t *a_stilt)
 
 	copy = stils_get(stack, 0);
 	orig = stils_get_down(stack, copy);
-	if (stilo_type_get(copy) == STILOT_NUMBER) {
+	if (stilo_type_get(copy) == STILOT_INTEGER) {
 		/* Copy a range of the stack. */
 		/* XXX Check that number is > 0. */
 		/* XXX Implement. */
@@ -374,7 +363,6 @@ systemdict_copy(cw_stilt_t *a_stilt)
 		case STILOT_ARRAY:
 		case STILOT_DICT:
 		case STILOT_STRING:
-		case STILOT_MSTATE:
 			stilo_copy(copy, orig, a_stilt);
 			break;
 		default:
@@ -409,11 +397,6 @@ systemdict_currentaccuracy(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_currentbase(cw_stilt_t *a_stilt)
-{
-}
-
-void
 systemdict_currentcontext(cw_stilt_t *a_stilt)
 {
 }
@@ -434,17 +417,7 @@ systemdict_currentglobal(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_currentmstate(cw_stilt_t *a_stilt)
-{
-}
-
-void
 systemdict_currentobjectformat(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_currentpoint(cw_stilt_t *a_stilt)
 {
 }
 
@@ -673,17 +646,17 @@ systemdict_if(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_idiv(cw_stilt_t *a_stilt)
+{
+}
+
+void
 systemdict_ifelse(cw_stilt_t *a_stilt)
 {
 }
 
 void
 systemdict_index(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_initmath(cw_stilt_t *a_stilt)
 {
 }
 
@@ -745,26 +718,6 @@ systemdict_maxlength(cw_stilt_t *a_stilt)
 
 void
 systemdict_mod(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_mrestore(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_mrestoreall(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_msave(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_mstate(cw_stilt_t *a_stilt)
 {
 }
 
@@ -1013,16 +966,6 @@ systemdict_search(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_setaccuracy(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_setbase(cw_stilt_t *a_stilt)
-{
-}
-
-void
 systemdict_setfileposition(cw_stilt_t *a_stilt)
 {
 }
@@ -1040,17 +983,7 @@ systemdict_setglobal(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_setmstate(cw_stilt_t *a_stilt)
-{
-}
-
-void
 systemdict_setobjectformat(cw_stilt_t *a_stilt)
-{
-}
-
-void
-systemdict_setpoint(cw_stilt_t *a_stilt)
 {
 }
 
@@ -1181,6 +1114,11 @@ systemdict_true(cw_stilt_t *a_stilt)
 	stack = stilt_data_stack_get(a_stilt);
 	stilo = stils_push(stack);
 	stilo_boolean_new(stilo, TRUE);
+}
+
+void
+systemdict_truncate(cw_stilt_t *a_stilt)
+{
 }
 
 void

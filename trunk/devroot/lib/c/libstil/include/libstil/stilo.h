@@ -33,13 +33,13 @@ typedef enum {
 	STILOT_DICT		=  4,
 	STILOT_FILE		=  5,
 	STILOT_HOOK		=  6,
-	STILOT_LOCK		=  7,
-	STILOT_MARK		=  8,
-	STILOT_MSTATE		=  9,
+	STILOT_INTEGER		=  7,
+	STILOT_LOCK		=  8,
+	STILOT_MARK		=  9,
 	STILOT_NAME		= 10,
 	STILOT_NULL		= 11,
-	STILOT_NUMBER		= 12,
-	STILOT_OPERATOR		= 13,
+	STILOT_OPERATOR		= 12,
+	STILOT_REAL		= 13,
 	STILOT_STRING		= 14
 }	cw_stilot_t;
 
@@ -109,8 +109,11 @@ struct cw_stilo_s {
 			cw_sint32_t	fd;
 		}	file;
 		struct {
-			cw_sint32_t	s32;
-		}	number;
+			cw_sint64_t	i;
+		}	integer;
+		struct {
+			cw_fp64_t	r;
+		}	real;
 		struct {
 			cw_op_t		*f;
 		}	operator;
@@ -144,6 +147,30 @@ void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline);
+
+/*
+ * integer/real.
+ */
+void		stilo_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_sum);
+void		stilo_sub(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_sub, cw_stilo_t *r_result);
+void		stilo_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_product);
+void		stilo_div(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_div, cw_stilo_t *r_quotient);
+void		stilo_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_abs);
+void		stilo_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
+    cw_stilo_t *r_neg);
+void		stilo_ceiling(const cw_stilo_t *a_num, cw_stilo_t
+    *r_ceiling);
+void		stilo_floor(const cw_stilo_t *a_num, cw_stilo_t
+    *r_floor);
+void		stilo_round(const cw_stilo_t *a_num, cw_stilo_t
+    *r_round);
+void		stilo_truncate(const cw_stilo_t *a_num, cw_stilo_t
+    *r_truncate);
 
 /* XXX For the GC only. */
 cw_stiloe_t	*stilo_l_stiloe_get(cw_stilo_t *a_stilo);
@@ -204,6 +231,18 @@ void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
 /*
+ * integer.
+ */
+void		stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_div, cw_stilo_t *r_mod);
+void		stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_div, cw_stilo_t *r_mod);
+void		stilo_integer_rrand(cw_stilo_t *r_seed);
+void		stilo_integer_srand(const cw_stilo_t *a_seed);
+void		stilo_integer_rand(cw_stilo_t *r_num);
+
+/*
  * lock.
  */
 void		stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
@@ -233,41 +272,18 @@ cw_bool_t	stilo_name_key_comp(const void *a_k1, const void *a_k2);
 void		stilo_null_new(cw_stilo_t *a_stilo);
 
 /*
- * number.
- */
-void		stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_number_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_sum);
-void		stilo_number_sub(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_sub, cw_stilo_t *r_result);
-void		stilo_number_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_product);
-void		stilo_number_div(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_div, cw_stilo_t *r_quotient);
-void		stilo_number_mod(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_div, cw_stilo_t *r_mod);
-void		stilo_number_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_abs);
-void		stilo_number_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b,
-    cw_stilo_t *r_neg);
-void		stilo_number_ceiling(const cw_stilo_t *a_num, cw_stilo_t
-    *r_ceiling);
-void		stilo_number_floor(const cw_stilo_t *a_num, cw_stilo_t
-    *r_floor);
-void		stilo_number_round(const cw_stilo_t *a_num, cw_stilo_t
-    *r_round);
-void		stilo_number_sqrt(const cw_stilo_t *a_num, cw_stilo_t
-    *r_sqrt);
-void		stilo_number_exp(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_exp, cw_stilo_t *r_result);
-void		stilo_number_srand(const cw_stilo_t *a_seed);
-void		stilo_number_rrand(cw_stilo_t *r_seed);
-void		stilo_number_rand(cw_stilo_t *r_num);
-
-/*
  * operator.
  */
 void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op);
+
+/*
+ * real.
+ */
+void		stilo_real_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_real_sqrt(const cw_stilo_t *a_num, cw_stilo_t
+    *r_sqrt);
+void		stilo_real_exp(const cw_stilo_t *a_num, const cw_stilo_t
+    *a_exp, cw_stilo_t *r_result);
 
 /*
  * string.

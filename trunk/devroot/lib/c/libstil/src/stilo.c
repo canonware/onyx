@@ -23,9 +23,7 @@ typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
-typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
 typedef struct cw_stiloe_name_s cw_stiloe_name_t;
-typedef struct cw_stiloe_number_s cw_stiloe_number_t;
 typedef struct cw_stiloe_string_s cw_stiloe_string_t;
 
 /*
@@ -137,13 +135,6 @@ struct cw_stiloe_lock_s {
 	cw_mtx_t	lock;
 };
 
-struct cw_stiloe_mstate_s {
-	cw_stiloe_t	stiloe;
-	cw_uint32_t	accuracy;
-	cw_uint32_t	point;
-	cw_uint32_t	base;
-};
-
 /*
  * Size and fullness control for keyed reference hashes.  For each keyed
  * reference, there is a global dictionary with a key that corresponds to the
@@ -191,24 +182,6 @@ struct cw_stiloe_name_s {
 			cw_uint32_t	len;
 		}	n;
 	}	e;
-};
-
-struct cw_stiloe_number_s {
-	cw_stiloe_t	stiloe;
-	/* Offset in val that the "decimal point" precedes. */
-	cw_uint32_t	point;
-	/* Base.  Can be from 2 to 36, inclusive. */
-	cw_uint32_t	base;
-	/* Number of bytes that val points to. */
-	cw_uint32_t	val_len;
-	/* Offset of most significant non-zero digit. */
-	cw_uint32_t	val_msd;
-	/*
-	 * The least significant digit is at val[0].  Each byte can range in
-	 * value from 0 to 35, depending on the base.  This representation is
-	 * not compact, but it is easy to work with.
-	 */
-	cw_uint8_t	*val;
 };
 
 struct cw_stiloe_string_s {
@@ -312,6 +285,11 @@ static void	stilo_p_hook_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
 static void	stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
+/* integer. */
+static void	stilo_p_integer_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
+static void	stilo_p_integer_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
+    cw_bool_t a_syntactic, cw_bool_t a_newline);
+
 /* lock. */
 static void	stilo_p_lock_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 static cw_stiloe_t *stiloe_p_lock_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
@@ -323,16 +301,6 @@ static void	stilo_p_lock_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
 /* mark. */
 static void	stilo_p_mark_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static void	stilo_p_mark_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
-
-/* mstate. */
-static void	stilo_p_mstate_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-static cw_stiloe_t *stiloe_p_mstate_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
-    a_reset);
-static void	stilo_p_mstate_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
-static void	stilo_p_mstate_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
-static void	stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
 /* name. */
@@ -359,19 +327,14 @@ static void	stilo_p_null_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static void	stilo_p_null_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
-/* number. */
-static void	stilo_p_number_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-static cw_stiloe_t *stiloe_p_number_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t
-    a_reset);
-static void	stilo_p_number_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
-static void	stilo_p_number_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stilt_t *a_stilt);
-static void	stilo_p_number_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
-    cw_bool_t a_syntactic, cw_bool_t a_newline);
-
 /* operator. */
 static void	stilo_p_operator_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static void	stilo_p_operator_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
+    cw_bool_t a_syntactic, cw_bool_t a_newline);
+
+/* real. */
+static void	stilo_p_real_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
+static void	stilo_p_real_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
 /* string. */
@@ -462,6 +425,13 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	 stilo_p_hook_copy,
 	 stilo_p_hook_print},
 
+	/* STILOT_INTEGER */
+	{NULL,
+	 NULL,
+	 stilo_p_integer_cast,
+	 NULL,
+	 stilo_p_integer_print},
+
 	/* STILOT_LOCK */
 	{stilo_p_lock_delete,
 	 stiloe_p_lock_ref_iterate,
@@ -475,13 +445,6 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	 stilo_p_mark_cast,
 	 NULL,
 	 stilo_p_mark_print},
-
-	/* STILOT_MSTATE */
-	{stilo_p_mstate_delete,
-	 stiloe_p_mstate_ref_iterate,
-	 stilo_p_mstate_cast,
-	 stilo_p_mstate_copy,
-	 stilo_p_mstate_print},
 
 	/* STILOT_NAME */
 	{stilo_p_name_delete,
@@ -497,19 +460,19 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	 NULL,
 	 stilo_p_null_print},
 
-	/* STILOT_NUMBER */
-	{stilo_p_number_delete,
-	 stiloe_p_number_ref_iterate,
-	 stilo_p_number_cast,
-	 stilo_p_number_copy,	/* XXX Same as dup. */
-	 stilo_p_number_print},
-
 	/* STILOT_OPERATOR */
 	{NULL,
 	 NULL,
 	 stilo_p_operator_cast,
 	 NULL,
 	 stilo_p_operator_print},
+
+	/* STILOT_REAL */
+	{NULL,
+	 NULL,
+	 stilo_p_real_cast,
+	 NULL,
+	 stilo_p_real_print},
 
 	/* STILOT_STRING */
 	{stilo_p_string_delete,
@@ -522,7 +485,6 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 /*
  * stilo.
  */
-
 void
 stilo_clobber(cw_stilo_t *a_stilo)
 {
@@ -626,11 +588,6 @@ stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	/* Copy. */
 	memcpy(a_to, a_from, sizeof(cw_stilo_t));
 
-	/* Numbers are not composite, so handle them specially. */
-	if ((a_from->type == STILOT_NUMBER) && (a_from->extended)) {
-		/* XXX Create a duplicate stiloe. */
-	}
-
 	/* Reset debug flags on new copy. */
 	a_to->breakpoint = FALSE;
 	a_to->watchpoint = FALSE;
@@ -676,7 +633,6 @@ stilo_l_stiloe_get(cw_stilo_t *a_stilo)
 	case STILOT_DICT:
 	case STILOT_HOOK:
 	case STILOT_LOCK:
-	case STILOT_MSTATE:
 	case STILOT_STRING:
 		retval = a_stilo->o.stiloe;
 		break;
@@ -759,9 +715,73 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 }
 
 /*
+ * integer/real.
+ */
+void
+stilo_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_sum)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
+    *r_result)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_product)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
+    *r_quotient)
+{
+	_cw_not_reached();	/* XXX */
+}
+	
+void
+stilo_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_abs)
+{
+	_cw_not_reached();	/* XXX */
+}
+	
+void
+stilo_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_neg)
+{
+	_cw_not_reached();	/* XXX */
+}
+	
+void
+stilo_ceiling(const cw_stilo_t *a_num, cw_stilo_t *r_ceiling)
+{
+	_cw_not_reached();	/* XXX */
+}
+	
+void
+stilo_floor(const cw_stilo_t *a_num, cw_stilo_t *r_floor)
+{
+	_cw_not_reached();	/* XXX */
+}
+	
+void
+stilo_round(const cw_stilo_t *a_num, cw_stilo_t *r_round)
+{
+	_cw_not_reached();	/* XXX */
+}
+	
+void
+stilo_truncate(const cw_stilo_t *a_num, cw_stilo_t *r_truncate)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+/*
  * stiloe.
  */
-
 /* Can be called at any time during stiloe_* initialization. */
 static void
 stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type)
@@ -1601,6 +1621,62 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 }
 
 /*
+ * integer.
+ */
+void
+stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+{
+	stilo_p_new(a_stilo, STILOT_INTEGER);
+}
+
+static void
+stilo_p_integer_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+static void
+stilo_p_integer_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
+    a_syntactic, cw_bool_t a_newline)
+{
+	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
+	
+	_cw_out_put_f(a_fd, "[q|s:s][c]", a_stilo->o.integer.i, newline);
+}
+
+void
+stilo_integer_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
+    *r_quotient)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_integer_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
+    *r_mod)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_integer_srand(const cw_stilo_t *a_seed)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_integer_rrand(cw_stilo_t *r_seed)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_integer_rand(cw_stilo_t *r_num)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+/*
  * lock.
  */
 void
@@ -1663,51 +1739,6 @@ stilo_p_mark_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 	
 	if (a_syntactic)
 		_cw_out_put_f(a_fd, "-mark-[c]", newline);
-	else
-		_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
-}
-
-/*
- * mstate.
- */
-void
-stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
-{
-	stilo_p_new(a_stilo, STILOT_MSTATE);
-}
-
-static void
-stilo_p_mstate_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-static cw_stiloe_t *
-stiloe_p_mstate_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
-{
-	return NULL;	/* XXX */
-}
-
-static void
-stilo_p_mstate_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-static void
-stilo_p_mstate_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-static void
-stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
-{
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
-	
-	if (a_syntactic)
-		_cw_out_put_f(a_fd, "-mstate-[c]", newline);
 	else
 		_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
 }
@@ -2156,150 +2187,6 @@ stilo_p_null_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 }
 
 /*
- * number.
- */
-void
-stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
-{
-	stilo_p_new(a_stilo, STILOT_NUMBER);
-}
-
-static void
-stilo_p_number_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-static cw_stiloe_t *
-stiloe_p_number_ref_iterate(cw_stiloe_t *a_stilo, cw_bool_t a_reset)
-{
-	/* Numbers never have any references. */
-	return NULL;
-}
-
-static void
-stilo_p_number_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-static void
-stilo_p_number_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-static void
-stilo_p_number_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
-    a_syntactic, cw_bool_t a_newline)
-{
-	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
-	
-	if (a_syntactic)
-		_cw_out_put_f(a_fd, "-XXX number-[c]", newline);
-	else
-		_cw_out_put_f(a_fd, "-XXX number-[c]", newline);
-}
-
-void
-stilo_number_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_sum)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
-    *r_result)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_product)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_div(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
-    *r_quotient)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_mod(const cw_stilo_t *a_num, const cw_stilo_t *a_div, cw_stilo_t
-    *r_mod)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_abs(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_abs)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_neg(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
-    *r_neg)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_ceiling(const cw_stilo_t *a_num, cw_stilo_t *r_ceiling)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_floor(const cw_stilo_t *a_num, cw_stilo_t *r_floor)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_round(const cw_stilo_t *a_num, cw_stilo_t *r_round)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_sqrt(const cw_stilo_t *a_num, cw_stilo_t *r_sqrt)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
-    *r_result)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_srand(const cw_stilo_t *a_seed)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_rrand(cw_stilo_t *r_seed)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-void
-stilo_number_rand(cw_stilo_t *r_num)
-{
-	_cw_not_reached();	/* XXX */
-}
-
-/*
  * operator.
  */
 void
@@ -2325,6 +2212,43 @@ stilo_p_operator_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 		_cw_out_put_f(a_fd, "-operator-[c]", newline);
 	else
 		_cw_out_put_f(a_fd, "--nostringval--[c]", newline);
+}
+
+/*
+ * real.
+ */
+void
+stilo_real_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+{
+	stilo_p_new(a_stilo, STILOT_REAL);
+}
+
+static void
+stilo_p_real_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+static void
+stilo_p_real_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
+    a_syntactic, cw_bool_t a_newline)
+{
+	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
+	
+	_cw_out_put_f(a_fd, "[f64][c]", a_stilo->o.real.r, newline);
+}
+
+void
+stilo_real_sqrt(const cw_stilo_t *a_num, cw_stilo_t *r_sqrt)
+{
+	_cw_not_reached();	/* XXX */
+}
+
+void
+stilo_real_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
+    *r_result)
+{
+	_cw_not_reached();	/* XXX */
 }
 
 /*
@@ -2399,7 +2323,7 @@ stilo_p_string_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 	case STILOT_NAME:
 		_cw_not_reached();	/* XXX */
 		break;
-	case STILOT_NUMBER:
+	case STILOT_INTEGER:
 		_cw_not_reached();	/* XXX */
 		break;
 	default:
