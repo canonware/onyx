@@ -23,6 +23,11 @@ struct node_s
 void
 tree_dump(node_t *a_node, node_t *a_nil)
 {
+    if (a_node == a_nil)
+    {
+	fprintf(stderr, ".");
+	return;
+    }
     /* Self. */
     fprintf(stderr, "%u%c", a_node->key, a_node->link.rbn_red ? 'r' : 'b');
 
@@ -41,9 +46,9 @@ tree_dump(node_t *a_node, node_t *a_nil)
     /* Right subtree. */
     if (a_node->link.rbn_right != a_nil)
     {
-	fprintf(stderr, "[");
+	fprintf(stderr, "<");
 	tree_dump(a_node->link.rbn_right, a_nil);
-	fprintf(stderr, "]");
+	fprintf(stderr, ">");
     }
     else
     {
