@@ -46,118 +46,120 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
 {
   char * tmpfile_name, buf[L_tmpnam];
   
-  _cw_assert(g_sockb == NULL);
   _cw_assert(a_bufel_size > 0);
 
-  g_sockb = (cw_sockb_t *) _cw_malloc(sizeof(cw_sockb_t));
-  bzero(g_sockb, sizeof(cw_sockb_t));
+  if (NULL == g_sockb)
+  {
+    g_sockb = (cw_sockb_t *) _cw_malloc(sizeof(cw_sockb_t));
+    bzero(g_sockb, sizeof(cw_sockb_t));
 
-  /* Open a temp file with poser_fd, such that the file will disappear as soon
+    /* Open a temp file with poser_fd, such that the file will disappear as soon
    * as the descripter goes away. */
-  tmpfile_name = tmpnam(buf);
-  if (tmpfile_name == NULL)
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		 "Fatal error in tmpnam(): %s\n", strerror(errno));
-    abort();
-  }
-
-  g_sockb->poser_fd = open(tmpfile_name,
-			   O_RDONLY | O_CREAT | O_TRUNC | O_EXCL,
-			   0);
-  if (g_sockb->poser_fd < 0)
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		 "Fatal error in open(): %s\n", strerror(errno));
-    abort();
-  }
-
-  if (unlink(tmpfile_name))
-  {
-    /* Not fatal, but make some noise. */
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		 "Error in unlink(): %s\n", strerror(errno));
-  }
-
-  /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
-   * program. */
-  signal(SIGPIPE, SIG_IGN);
-  
-  /* Create a pipe that will be used in conjunction with the message queues to
-   * make the back end thread return from the select() call. */
-  {
-    int filedes[2];
-
-    if (-1 == pipe(filedes))
+    tmpfile_name = tmpnam(buf);
+    if (tmpfile_name == NULL)
     {
       log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "Fatal error in pipe(): %s\n", strerror(errno));
+		  "Fatal error in tmpnam(): %s\n", strerror(errno));
       abort();
     }
-    g_sockb->pipe_out = filedes[0];
-    g_sockb->pipe_in = filedes[1];
 
-    /* Set g_sockb->pipe_in to non-blocking. */
-    /* XXX Why?  What about pipe_out (below)? */
+    g_sockb->poser_fd = open(tmpfile_name,
+			     O_RDONLY | O_CREAT | O_TRUNC | O_EXCL,
+			     0);
+    if (g_sockb->poser_fd < 0)
     {
-      int val;
-      val = fcntl(g_sockb->pipe_in, F_GETFL, 0);
-      if (val == -1)
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "Fatal error for F_GETFL in fcntl(): %s\n",
-		    strerror(errno));
-	abort();
-      }
-      if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK))
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "Fatal error for F_SETFL in fcntl(): %s\n",
-		    strerror(errno));
-	abort();
-      }
+      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		  "Fatal error in open(): %s\n", strerror(errno));
+      abort();
     }
+
+    if (unlink(tmpfile_name))
     {
-      int val;
-      val = fcntl(g_sockb->pipe_out, F_GETFL, 0);
-      if (val == -1)
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "Fatal error for F_GETFL in fcntl(): %s\n",
-		    strerror(errno));
-	abort();
-      }
-      if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK))
-      {
-	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "Fatal error for F_SETFL in fcntl(): %s\n",
-		    strerror(errno));
-	abort();
-      }
+      /* Not fatal, but make some noise. */
+      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		  "Error in unlink(): %s\n", strerror(errno));
     }
-  }
+
+    /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
+   * program. */
+    signal(SIGPIPE, SIG_IGN);
   
-  g_sockb->should_quit = FALSE;
+    /* Create a pipe that will be used in conjunction with the message queues to
+   * make the back end thread return from the select() call. */
+    {
+      int filedes[2];
+
+      if (-1 == pipe(filedes))
+      {
+	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		    "Fatal error in pipe(): %s\n", strerror(errno));
+	abort();
+      }
+      g_sockb->pipe_out = filedes[0];
+      g_sockb->pipe_in = filedes[1];
+
+      /* Set g_sockb->pipe_in to non-blocking. */
+      /* XXX Why?  What about pipe_out (below)? */
+      {
+	int val;
+	val = fcntl(g_sockb->pipe_in, F_GETFL, 0);
+	if (val == -1)
+	{
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		      "Fatal error for F_GETFL in fcntl(): %s\n",
+		      strerror(errno));
+	  abort();
+	}
+	if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK))
+	{
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		      "Fatal error for F_SETFL in fcntl(): %s\n",
+		      strerror(errno));
+	  abort();
+	}
+      }
+      {
+	int val;
+	val = fcntl(g_sockb->pipe_out, F_GETFL, 0);
+	if (val == -1)
+	{
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		      "Fatal error for F_GETFL in fcntl(): %s\n",
+		      strerror(errno));
+	  abort();
+	}
+	if (fcntl(g_sockb->pipe_in, F_SETFL, val | O_NONBLOCK))
+	{
+	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
+		      "Fatal error for F_SETFL in fcntl(): %s\n",
+		      strerror(errno));
+	  abort();
+	}
+      }
+    }
+  
+    g_sockb->should_quit = FALSE;
 
   /* Create the semaphore used for determining whether data should be written to
    * the pipe in order to force a return from select(). */
-  sem_new(&g_sockb->pipe_sem, 1);
+    sem_new(&g_sockb->pipe_sem, 1);
 
-  /* Create the spare bufel pool and initialize associated variables. */
-  bufpool_new(&g_sockb->bufel_pool, sizeof(cw_bufel_t), a_max_spare_bufels);
-  bufpool_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t), a_max_spare_bufels);
-  bufpool_new(&g_sockb->buffer_pool, a_bufel_size, a_max_spare_bufels);
+    /* Create the spare bufel pool and initialize associated variables. */
+    bufpool_new(&g_sockb->bufel_pool, sizeof(cw_bufel_t), a_max_spare_bufels);
+    bufpool_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t), a_max_spare_bufels);
+    bufpool_new(&g_sockb->buffer_pool, a_bufel_size, a_max_spare_bufels);
   
-  /* Create the message queues. */
-  list_new(&g_sockb->registrations, TRUE);
-  list_new(&g_sockb->unregistrations, TRUE);
-  list_new(&g_sockb->out_notifications, TRUE);
+    /* Create the message queues. */
+    list_new(&g_sockb->registrations, TRUE);
+    list_new(&g_sockb->unregistrations, TRUE);
+    list_new(&g_sockb->out_notifications, TRUE);
 
-  /* Create the lock used for protecting gethostbyaddr(). */
-  mtx_new(&g_sockb->get_ip_addr_lock);
+    /* Create the lock used for protecting gethostbyaddr(). */
+    mtx_new(&g_sockb->get_ip_addr_lock);
 
-  /* Create a new thread to handle all of the back end socket foo. */
-  thd_new(&g_sockb->thread, sockb_p_entry_func, NULL);
+    /* Create a new thread to handle all of the back end socket foo. */
+    thd_new(&g_sockb->thread, sockb_p_entry_func, NULL);
+  }
 }
 
 void

@@ -1,5 +1,8 @@
 1999-03-24  Jason Evans  <jasone@canonware.com>
 
+	* src/sockb.c (sockb_init): Deal with being called, even if sockb
+	is already initialized.
+
 	* src/sock.c (sock_read_noblock): Add a_max_read parameter.
 	(sock_read_block): Add a_max_read parameter.
 
