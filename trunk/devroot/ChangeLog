@@ -1,3 +1,8 @@
+2001-11-09  Jason Evans  <jasone@canonware.com>
+
+	* configure.in: Add the --with-docs flag to cleanly avoid building
+	documentation in the common case.
+
 2001-11-04  Jason Evans  <jasone@canonware.com>
 
 	* Cookfile.in: Allow CC, CPPFLAGS, CFLAGS, and LDFLAGS to be

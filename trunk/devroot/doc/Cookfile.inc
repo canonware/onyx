@@ -7,8 +7,8 @@
  *
  * Version: <Version>
  *
- * Documentation build rules.  The install targets do not depend on the
- * manual build targets, so that the manual won't be automatically rebuilt.
+ * Documentation build rules.  Documentation is only rebuilt if the --with-docs
+ * option is specified.
  *
  ******************************************************************************/
 
@@ -19,9 +19,17 @@ TEX_SRCS = ;
 FIG_SRCS = ;
 
 T_ONYX = [objdir]/doc/latex/onyx.tex;
-PS_ONYX = [objdir]/doc/ps/onyx.ps;
-PDF_ONYX = [objdir]/doc/pdf/onyx.pdf;
-HTML_ONYX = [objdir]/doc/html/onyx.html;
+#if [with_docs]
+  PS_ONYX = [objdir]/doc/ps/onyx.ps;
+  PDF_ONYX = [objdir]/doc/pdf/onyx.pdf;
+  HTML_ONYX = [objdir]/doc/html/onyx.html;
+  htmldir = [objdir]/doc/html;
+#else
+  PS_ONYX = [srcdir]/doc/ps/onyx.ps;
+  PDF_ONYX = [srcdir]/doc/pdf/onyx.pdf;
+  HTML_ONYX = [srcdir]/doc/html/onyx.html;
+  htmldir = [srcdir]/doc/html;
+#endif
 
 /* LaTeX source files. */
 {
@@ -40,19 +48,29 @@ HTML_ONYX = [objdir]/doc/html/onyx.html;
 }
 
 install_docs : docs_install_ps docs_install_pdf docs_install_html;
-docs_install_ps : /* [PS_ONYX] */
+docs_install_ps :
+#if [with_docs]
+                  [PS_ONYX]
+#endif
 {
   [INSTALL] -d [PREFIX]/share/onyx/doc/ps;
   [INSTALL] -m 0444 [PS_ONYX] [PREFIX]/share/onyx/doc/ps;
 }
 
-docs_install_pdf : /* [PDF_ONYX] */
+docs_install_pdf :
+#if [with_docs]
+                   [PDF_ONYX]
+#endif
 {
   [INSTALL] -d [PREFIX]/share/onyx/doc/pdf;
   [INSTALL] -m 0444 [PDF_ONYX] [PREFIX]/share/onyx/doc/pdf;
 }
 
-docs_install_html : /* [HTML_ONYX] */
+/* [srcdir] instead of [objdir] for user builds in separate objdir. */
+docs_install_html :
+#if [with_docs]
+                    [HTML_ONYX]
+#endif
 {
   [SHELL] -e;
 data
@@ -61,7 +79,7 @@ data
 echo [INSTALL] -d [PREFIX]/share/onyx/doc/html
 [INSTALL] -d [PREFIX]/share/onyx/doc/html
 
-for i in `find [objdir]/doc/html -type f`; do
+for i in `find [htmldir] -type f`; do
   echo [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
   [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
 done

@@ -15,9 +15,9 @@ see:
 Optional: Running the regression tests requires perl.
 
 Optional: Rebuilding the documentation requires LaTeX (teTeX distribution),
-latex2html, and perl.  However, the source distribution should come with the
-documentation already built, so you should not need to do so unless making
-documentation modifications.
+transfig, latex2html, and perl.  However, the source distribution should come
+with the documentation already built, so you should not need to do so unless
+making documentation modifications.
 
 Building this distribution in many cases is as simple as typing the following
 while in the root directory of the source tree:
@@ -65,7 +65,6 @@ Cleanup targets include:
 
 Targets that depend on optional supporting software include:
 
-	all
 	docs
 	docs_{ps,pdf,html}
 	release
@@ -131,6 +130,15 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 --enable-profile
 	Instrument binaries, libraries, and modules for profiling.
+
+--with-docs
+	Enable build system rules to build the documentation.  Unless this
+	option is specified, the build system assumes that pre-built
+	documentation resides in the source directory (which is the case for all
+	Onyx distributions).  Note that the documentation lands in the objdir,
+	so in order to completely empty the objdir, the relclean target must be
+	used.  This option is only useful when modifications have been made to
+	the documentation source.
 
 Optionally, define environment variables, including (not exclusively):
 

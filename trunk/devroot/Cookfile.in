@@ -71,6 +71,7 @@ enable_threads = @enable_threads@;
 enable_posix = @enable_posix@;
 enable_posix_file = @enable_posix_file@;
 enable_libedit = @enable_libedit@;
+with_docs = @with_docs@;
 
 BOOTSTRAP = ;
 
@@ -96,11 +97,9 @@ BOOTSTRAP = ;
  * User targets.
  */
 
-standard : libs mods bins
+all : libs mods bins tests docs
   set default
 ;
-
-all : libs mods bins tests docs;
 
 libs_a : [A_LIBS];
 libs_s : [S_LIBS];

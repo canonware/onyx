@@ -1,3 +1,32 @@
+dnl Do not build documentation by default.
+AC_DEFUN(CW_WITHOUT_DOCS,
+[
+AC_ARG_WITH(docs, [  --with-docs             Build documentation],
+if test "x$with_docs" = "xno" ; then
+  with_docs="0"
+else
+  with_docs="1"
+fi
+,
+with_docs="0"
+)
+if test "x$with_docs" = "x1" ; then
+  AC_PATH_PROG(LATEX, latex, , $PATH)
+  AC_PATH_PROG(PDFLATEX, pdflatex, , $PATH)
+  AC_PATH_PROG(DVIPS, dvips, , $PATH)
+  AC_PATH_PROG(FIG2DEV, fig2dev, , $PATH)
+  AC_PATH_PROG(LATEX2HTML, latex2html, , $PATH)
+  AC_PATH_PROG(MAKEINDEX, makeindex, , $PATH)
+
+  if test "x$LATEX" = "x" -o "x$PDFLATEX" = "x" -o "x$DVIPS" = "x" \
+     -o "x$FIG2DEV" = "x" -o "x$LATEX2HTML" = "x" -o "x$MAKEINDEX" = "x" ; then
+    AC_MSG_ERROR(Missing one or more programs necessary for documentation build)
+  fi
+
+fi
+AC_SUBST(with_docs)
+])
+
 dnl Use threads by default.
 AC_DEFUN(CW_ENABLE_THREADS,
 [
