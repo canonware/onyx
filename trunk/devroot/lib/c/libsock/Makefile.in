@@ -71,8 +71,8 @@ CAT     := @CAT@
 PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
-PMERGE  := @top_srcdir@/bin/pmerge
-PSTUB   := @top_srcdir@/bin/pstub
+PMERGE  := @top_srcdir@/test/pmerge
+PSTUB   := @top_srcdir@/test/pstub
 
 #
 # Compiler flags.
