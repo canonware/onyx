@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+#define	_NXO_FINO_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxo_fino_l.h"
 
