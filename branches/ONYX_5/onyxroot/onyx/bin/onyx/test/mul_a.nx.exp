@@ -1,0 +1,16 @@
+Test begin
+`0 0 mul'
+0
+`0 5 mul'
+0
+`5 0 mul'
+0
+`5 -3 mul'
+-15
+`-5 3 mul'
+-15
+`7 13 mul'
+91
+`-7 -13 mul'
+91
+Test end
