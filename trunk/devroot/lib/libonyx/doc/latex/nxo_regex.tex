@@ -194,11 +194,11 @@ a\_singleline, cw\_nxo\_t *a\_input, cw\_nxo\_t *r\_matches}}
 		the data between those matches.
 
 		If there are capturing subpatterns in the regular expression,
-		substrings are also created for those capturing subpatterns and
-		inserted into the substring array.
+		also create substrings for those capturing subpatterns and
+		insert them into the substring array.
 
 		As a special case, if the regular expression matches the empty
-		string, a single character is split.  This avoids an infinite
+		string, split a single character.  This avoids an infinite
 		loop.
 
 		As a side effect, set the thread's match cache, which can be
@@ -252,7 +252,6 @@ cw\_nxo\_t *a\_input, cw\_nxo\_t *r\_array}}
 		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
-
 		Use the regex specified by \cvar{a\_pattern}, \cvar{a\_len},
 		\cvar{a\_insensitive}, \cvar{a\_multiline}, and
 		\cvar{a\_singleline} to find matches in \cvar{a\_input} and
@@ -260,11 +259,11 @@ cw\_nxo\_t *a\_input, cw\_nxo\_t *r\_array}}
 		those matches.
 
 		If there are capturing subpatterns in the regular expression,
-		substrings are also created for those capturing subpatterns and
-		inserted into the substring array.
+		also create substrings for those capturing subpatterns and
+		insert them into the substring array.
 
 		As a special case, if the regular expression matches the empty
-		string, a single character is split.  This avoids an infinite
+		string, split a single character.  This avoids an infinite
 		loop.
 
 		As a side effect, set the thread's match cache, which can be
