@@ -372,10 +372,10 @@ ch_direct_hash(const void *a_key)
 	/* Shift right until we've shifted one 1 bit off. */
 	for (i = 0; i < 8 * sizeof(void *); i++) {
 		if ((t & 0x1) == 1) {
-			retval >>= 1;
+			t >>= 1;
 			break;
 		} else
-			retval >>= 1;
+			t >>= 1;
 	}
 
 #if (SIZEOF_INT_P == 4)
