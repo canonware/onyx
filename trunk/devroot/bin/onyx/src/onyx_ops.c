@@ -66,7 +66,9 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 /*  	_cw_out_put("dlopen(\"[s]\")\n", str); */
 	handle = dlopen(str, RTLD_LAZY);
 	if (handle == NULL) {
-/*  		_cw_out_put("dlopen() error: [s]\n", dlerror()); */
+#ifdef _CW_DBG
+		_cw_out_put("dlopen() error: [s]\n", dlerror());
+#endif
 		nxo_stack_pop(tstack);
 		nxo_thread_error(a_thread, NXO_THREADE_INVALIDFILEACCESS);
 		return;
@@ -94,7 +96,9 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 
 	if (symbol == NULL) {
 		/* Couldn't find the symbol. */
-/*  		_cw_out_put("dlsym() error: [s]\n", dlerror()); */
+#ifdef _CW_DBG
+		_cw_out_put("dlsym() error: [s]\n", dlerror());
+#endif
 		dlclose(handle);
 		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);
 		return;
