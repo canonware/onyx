@@ -4063,7 +4063,7 @@ systemdict_sload(cw_stilo_t *a_thread)
 void
 systemdict_spop(cw_stilo_t *a_thread)
 {
-	cw_stilo_t	*ostack, *stack;
+	cw_stilo_t	*ostack, *stack, *sstilo, *ostilo;
 
 	ostack = stilo_thread_ostack_get(a_thread);
 	STILO_STACK_GET(stack, ostack, a_thread);
@@ -4071,6 +4071,10 @@ systemdict_spop(cw_stilo_t *a_thread)
 		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
 		return;
 	}
+
+	STILO_STACK_GET(sstilo, stack, a_thread);
+	ostilo = stilo_stack_push(ostack);
+	stilo_dup(ostilo, sstilo);
 
 	STILO_STACK_POP(stack, a_thread);
 }
