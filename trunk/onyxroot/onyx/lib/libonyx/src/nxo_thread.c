@@ -95,27 +95,17 @@ static void	nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
 /*
  * nxo_threadp.
  */
-cw_nxo_threadp_t *
+void
 nxo_threadp_new(cw_nxo_threadp_t *a_threadp)
 {
-	cw_nxo_threadp_t	*retval;
+	_cw_check_ptr(a_threadp);
 
-	if (a_threadp != NULL) {
-		retval = a_threadp;
-		retval->is_malloced = FALSE;
-	} else {
-		retval = (cw_nxo_threadp_t
-		    *)_cw_malloc(sizeof(cw_nxo_threadp_t));
-		retval->is_malloced = TRUE;
-	}
-
-	retval->line = 1;
-	retval->column = 0;
+	a_threadp->line = 1;
+	a_threadp->column = 0;
 
 #ifdef _LIBONYX_DBG
-	retval->magic = _CW_NXO_THREADP_MAGIC;
+	a_threadp->magic = _CW_NXO_THREADP_MAGIC;
 #endif
-	return retval;
 }
 
 void
@@ -139,11 +129,8 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 		nxoe_p_thread_reset(thread);
 	}
 
-	if (a_threadp->is_malloced)
-		_cw_free(a_threadp);
 #ifdef _LIBONYX_DBG
-	else
-		memset(a_threadp, 0x5a, sizeof(cw_nxo_threadp_t));
+	memset(a_threadp, 0x5a, sizeof(cw_nxo_threadp_t));
 #endif
 }
 

@@ -51,9 +51,6 @@ struct cw_nxo_threadp_s {
 #ifdef _LIBONYX_DBG
 	cw_uint32_t	magic;
 #endif
-
-	cw_bool_t	is_malloced;
-
 	/*
 	 * Current line number (counting starts at 1 by convention) and column
 	 * number (counting starts at 0).
@@ -178,7 +175,7 @@ cw_nxn_t nxo_threade_nxn(cw_nxo_threade_t a_threade);
 /*
  * nxo_threadp.
  */
-cw_nxo_threadp_t *nxo_threadp_new(cw_nxo_threadp_t *a_threadp);
+void	nxo_threadp_new(cw_nxo_threadp_t *a_threadp);
 void	nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread);
 void	nxo_threadp_position_get(cw_nxo_threadp_t *a_threadp, cw_uint32_t
     *r_line, cw_uint32_t *r_column);
@@ -213,6 +210,13 @@ void	nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_threade);
 cw_bool_t nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t
     *r_value);
 
+cw_nxo_t *nxo_thread_userdict_get(cw_nxo_t *a_nxo);
+cw_nxo_t *nxo_thread_errordict_get(cw_nxo_t *a_nxo);
+cw_nxo_t *nxo_thread_currenterror_get(cw_nxo_t *a_nxo);
+
+cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
+void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
+
 #ifndef _CW_USE_INLINES
 cw_nx_t *nxo_thread_nx_get(cw_nxo_t *a_nxo);
 
@@ -224,13 +228,6 @@ cw_nxo_t *nxo_thread_stdin_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_stdout_get(cw_nxo_t *a_nxo);
 cw_nxo_t *nxo_thread_stderr_get(cw_nxo_t *a_nxo);
 #endif
-
-cw_nxo_t *nxo_thread_userdict_get(cw_nxo_t *a_nxo);
-cw_nxo_t *nxo_thread_errordict_get(cw_nxo_t *a_nxo);
-cw_nxo_t *nxo_thread_currenterror_get(cw_nxo_t *a_nxo);
-
-cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
-void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 
 #if (defined(_CW_USE_INLINES) || defined(_NXO_THREAD_C_))
 _CW_INLINE cw_nx_t *
