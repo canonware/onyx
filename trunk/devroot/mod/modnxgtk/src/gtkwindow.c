@@ -1,7 +1,7 @@
 
 #include "libonyx/libonyx.h"
-
 #include "gtk/gtk.h"
+#include "gtkdict.h"
 
 void
 nx_gtk_window_new (cw_nxo_t *a_thread)
@@ -28,5 +28,5 @@ nx_gtk_window_new (cw_nxo_t *a_thread)
   w_hook = nxo_stack_push (ostack);
   gtk_object_set_data (GTK_OBJECT (w), "_cw_hook_object", w_hook);
 
-  nxo_hook_new (w_hook, nx, w, NULL, NULL, NULL);
+  nxo_hook_new (w_hook, nx, w, NULL, NULL, nx_gtk_object_delete);
 }

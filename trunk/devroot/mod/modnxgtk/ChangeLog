@@ -1,3 +1,24 @@
+2001-07-12  Chris Toshok  <toshok@toshok.org>
+
+	* include/gtkdict.h: more prototypes.
+
+	* src/gtksignal.c (nx_gtk_signal_marshal): create an array
+	containing the signal args.
+
+	* src/gtkobject.c (nx_gtk_object_destroyed): new function - going
+	to be the destroyed signal, to hopefully get around both gtk+ and
+	onyx trying to destroy the same object twice.
+	(nx_gtk_object_delete): delete function for the nxgtk hook
+	objects.
+
+	* src/gtkbutton.c (nx_gtk_button_new): "_cw_hook_object" on
+	widgets is the hook object.
+	(nx_gtk_button_new_with_label): same.
+
+	* src/gtklabel.c (nx_gtk_label_new): same.
+
+	* src/gtkwindow.c (nx_gtk_window_new): same.
+
 2001-07-11  Chris Toshok  <toshok@ximian.com>
 
 	* src/gtkwindow.c (nx_gtk_window_new): store the hook object as

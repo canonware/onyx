@@ -27,6 +27,82 @@ nx_gtk_signal_marshal (GtkObject *object,
 		       GtkType	  return_type)
 {
   NxGtkSignalClosure *closure = data;
+  cw_nxo_t *tstack;
+  cw_nx_t *nx;
+
+  nx = nxo_thread_nx_get(closure->a_thread);
+  tstack = nxo_thread_tstack_get (closure->a_thread);
+
+  if (nparams > 0) {
+    cw_nxo_t *array;
+    int i;
+
+    array = nxo_stack_push (tstack);
+
+    nxo_array_new (array, nx, FALSE, nparams);
+
+    for (i = 0; i < nparams; i ++) {
+      cw_nxo_t *el;
+
+      printf ("arg_name = %s\n", args[i].name);
+
+      switch (arg_types[i]) {
+      case GTK_TYPE_CHAR:
+	el = nxo_stack_push (tstack);
+	nxo_integer_new (el, GTK_VALUE_CHAR(args[i]));
+	break;
+      case GTK_TYPE_UCHAR:
+	el = nxo_stack_push (tstack);
+	nxo_integer_new (el, GTK_VALUE_UCHAR(args[i]));
+	break;
+      case GTK_TYPE_BOOL:
+	el = nxo_stack_push (tstack);
+	nxo_boolean_new (el, GTK_VALUE_BOOL(args[i]));
+	break;
+      case GTK_TYPE_ENUM:
+      case GTK_TYPE_INT:
+	el = nxo_stack_push (tstack);
+	nxo_integer_new (el, GTK_VALUE_INT(args[i]));
+	break;
+      case GTK_TYPE_FLAGS:
+      case GTK_TYPE_UINT:
+	el = nxo_stack_push (tstack);
+	nxo_integer_new (el, GTK_VALUE_UINT(args[i]));
+	break;
+      case GTK_TYPE_LONG:
+	el = nxo_stack_push (tstack);
+	nxo_integer_new (el, GTK_VALUE_LONG(args[i]));
+	break;
+      case GTK_TYPE_ULONG:
+	el = nxo_stack_push (tstack);
+	nxo_integer_new (el, GTK_VALUE_ULONG(args[i]));
+	break;
+      case GTK_TYPE_FLOAT:
+      case GTK_TYPE_DOUBLE:
+	g_assert (0);
+	break;
+      case GTK_TYPE_BOXED:
+      case GTK_TYPE_POINTER:
+	g_assert (0);
+	break;
+      case GTK_TYPE_STRING:
+	el = nxo_stack_push (tstack);
+	nxo_string_new (el, nx, FALSE, strlen(GTK_VALUE_STRING(args[i])));
+	nxo_string_set (el, 0, GTK_VALUE_STRING(args[i]), strlen(GTK_VALUE_STRING(args[i])));
+	break;
+      case GTK_TYPE_OBJECT: {
+	  GtkObject *o = GTK_VALUE_OBJECT (args[i]);
+	  cw_nxo_t *hook = gtk_object_get_data (o, "_cw_hook_object");
+
+	  el = nxo_stack_push (tstack);
+	  nxo_dup (el, hook);
+	  break;
+      }
+      }
+
+      nxo_array_el_set (array, el, i);
+    }
+  }
 
   nxgtk_code (closure->a_thread, closure->wrapped_code);
 }
