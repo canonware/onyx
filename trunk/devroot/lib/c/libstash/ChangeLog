@@ -1,5 +1,9 @@
 2000-07-21  Jason Evans  <jasone@canonware.com>
 
+	* include/libstash/libstash.h : Do not use cw_g_out in debug
+	macros in order to avoid infinite recursion for libstash-internal
+	bugs.
+
 	* src/libstash.c: For the debug version of libstash, create an
 	allocator for cw_g_mem, in order to hopefully detect bugs within
 	the mem class.

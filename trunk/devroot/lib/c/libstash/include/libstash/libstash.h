@@ -198,7 +198,7 @@ extern cw_out_t	*cw_g_out;
  */
 #define _cw_error(a)							\
 	do {								\
-		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,	\
+		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\
 		    "Error: [s]\n", a);					\
 		abort();						\
 	} while (0)
@@ -207,7 +207,7 @@ extern cw_out_t	*cw_g_out;
 #define _cw_assert(a)							\
 	do {								\
 		if (!(a)) {						\
-			out_put_e(cw_g_out, __FILE__, __LINE__,		\
+			out_put_e(NULL, __FILE__, __LINE__,		\
 			    __FUNCTION__, "Failed assertion: \"[s]\"\n", \
 			    #a);					\
 			abort();					\
@@ -219,7 +219,7 @@ extern cw_out_t	*cw_g_out;
 	do {								\
 		if (((x) == NULL) || ((x) == (void *) 0xa5a5a5a5) ||	\
 		    ((x) == (void *) 0x5a5a5a5a)) {			\
-			out_put_e(cw_g_out, __FILE__, __LINE__,		\
+			out_put_e(NULL, __FILE__, __LINE__,		\
 			    __FUNCTION__,				\
 			    "[s] (0x[p]) is an invalid pointer\n", #x, (x)); \
 			abort();					\
