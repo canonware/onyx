@@ -5,7 +5,7 @@ dnl
 dnl Version: <Version>
 dnl 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Cookfile.in)
+AC_INIT([Cookfile.in])
 
 dnl 
 dnl Version requirements for external software we depend on.
