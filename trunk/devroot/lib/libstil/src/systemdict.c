@@ -1816,7 +1816,11 @@ systemdict_print(cw_stilt_t *a_stilt)
 	stdout_stilo = stilt_stdout_get(a_stilt);
 
 	stilo = stils_get(ostack, a_stilt);
-	stilo_print(stilo, a_stilt, stdout_stilo, FALSE, FALSE);
+	if (stilo_type_get(stilo) != STILOT_STRING)
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+
+	stilo_file_write(stdout_stilo, a_stilt, stilo_string_get(stilo),
+	    stilo_string_len_get(stilo));
 	stils_pop(ostack, a_stilt);
 }
 
