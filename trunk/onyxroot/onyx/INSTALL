@@ -6,33 +6,42 @@
 #
 ################################################################################
 
-This software depends on the excellent 'cook' program for building.  'cook' is
-freely available (GPLed), and runs on many platforms.  For more information,
-see:
+Required: This software depends on the excellent 'cook' program for building.
+	  'cook' is freely available (GPLed), and runs on many platforms.  For
+	  more information, see:
 
-	http://www.canb.auug.org.au/~millerp/cook/cook.html
+		http://www.canb.auug.org.au/~millerp/cook/cook.html
 
 Optional: Regular expression support in Onyx depends on the pcre library.  pcre
-is distributed separately, and needs to be installed before building this
-software:
+	  is distributed separately, and needs to be installed before building
+	  this software:
 
-	ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+		ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
 
 Optional: Interactive command line editing is implemented in modprompt, which
-relies on libedit.  libedit is distributed separately, and needs to be installed
-before building this software:
+	  relies on libedit.  libedit is distributed separately, and needs to be
+	  installed before building this software:
 
-	http://www.canonware.com/download/libedit/
+		ftp://ftp.astron.com:/pub/libedit/
+		http://www.canonware.com/download/libedit/
+
+Optional: When running on Apple OS X, module support depends on OpenDarwin's
+	  dlcompat shim library, which implements dlopen() and friends.
+	  dlcompat is distributed separately, and needs to be installed before
+	  building this software:
+
+		http://www.opendarwin.org/projects/dlcompat/
+		http://www.canonware.com/download/dlcompat/
 
 Optional: Running the regression tests requires perl.
 
 Optional: Rebuilding the documentation requires LaTeX (teTeX distribution),
-transfig, latex2html, and perl.  However, the source distribution should come
-with the documentation already built, so you should not need to do so unless
-making documentation modifications.
+	  transfig, latex2html, and perl.  However, the source distribution
+	  should come with the documentation already built, so you should not
+	  need to do so unless making documentation modifications.
 
 Optional: Regenerating the configure script requires GNU autoconf and GNU
-automake.
+	  automake.
 
 Building this distribution in many cases is as simple as typing the following
 while in the root directory of the source tree:
