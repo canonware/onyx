@@ -22,7 +22,7 @@ cw_dbg_t * g_dbg = NULL;
 cw_log_t * g_log = NULL;
 
 void
-libstash_init()
+libstash_init(void)
 {
   /* Start up global modules. */
   g_mem = mem_new();
@@ -31,7 +31,7 @@ libstash_init()
 }
 
 void
-libstash_shutdown()
+libstash_shutdown(void)
 {
   /* Shut down global modules in reverse order. */
   log_delete(g_log);

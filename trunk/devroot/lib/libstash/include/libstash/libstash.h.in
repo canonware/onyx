@@ -163,11 +163,11 @@ typedef enum
  */
 #  define libstash_init _CW_NS_STASH(libstash_init)
 void
-libstash_init();
+libstash_init(void);
   
 #  define libstash_shutdown _CW_NS_STASH(libstash_shutdown)
 void
-libstash_shutdown();
+libstash_shutdown(void);
   
 /*
  * Global variables.

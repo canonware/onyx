@@ -441,12 +441,10 @@ sem_getvalue(cw_sem_t * a_sem)
   
   _cw_check_ptr(a_sem);
 
-  /* I don't think we need to lock, since we're just reading. */
-  /*   mtx_lock(&a_sem->lock); */
-
+  mtx_lock(&a_sem->lock);
   retval = a_sem->count;
-
-  /*   mtx_unlock(&a_sem->lock); */
+  mtx_unlock(&a_sem->lock);
+  
   return retval;
 }
 
