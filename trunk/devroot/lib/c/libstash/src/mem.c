@@ -491,20 +491,23 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
       allocation->line_num = a_line_num;
 
       error = oh_item_insert(&a_mem->addr_hash, retval, allocation);
-      if (1 == error)
+      if (-1 == error)
       {
 	if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	{
 	  char buf[1025];
 
 	  bzero(buf, sizeof(buf));
+
 	  out_put_sn(cw_g_out, buf, 1024,
-		     "[s](): 0x[p] multiply-allocated\n",
-		     __FUNCTION__, retval);
+		     "[s](): Memory allocation error; "
+		     "unable to record allocation 0x[p] at [s], line [i]\n",
+		     __FUNCTION__, retval,
+		     a_filename, a_line_num);
 	  out_put(cw_g_out, buf);
 	}
       }
-      else if (-1 == error)
+      else if (1 == error)
       {
 	if (dbg_is_registered(cw_g_dbg, "mem_error"))
 	{
