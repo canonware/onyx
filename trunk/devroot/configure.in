@@ -20,8 +20,9 @@ bins=
 libs=
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
-dnl works on the link line (-lonyx -ledit -lsock -lstash).
+dnl works on the link line (-lonyx -lprism -ledit -lsock -lstash).
 CW_BUILD_LIB(libonyx, lib_onyx)
+CW_BUILD_LIB(libprism, lib_prism)
 CW_BUILD_LIB(libedit, lib_edit)
 CW_BUILD_LIB(libsock, lib_sock)
 CW_BUILD_LIB(libstash, lib_stash)
@@ -206,6 +207,7 @@ bin/onyx/doc/latex/manual.tex \
 bin/proxy/doc/latex/manual.tex \
 lib/c/libstash/doc/latex/manual.tex \
 lib/c/libsock/doc/latex/manual.tex \
+lib/c/libprism/doc/latex/manual.tex \
 lib/c/libonyx/doc/latex/manual.tex \
 doc/latex/manual.tex \
 doc/latex/ltx2e \

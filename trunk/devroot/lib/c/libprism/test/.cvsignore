@@ -1,0 +1,9 @@
+*.[do]_d
+*.out
+*.diff
+*.perf
+*_[a-z]
+b_*_[a-z]
+p*.pl
+*.nx
+Cookfile.list

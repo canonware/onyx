@@ -49,6 +49,7 @@ AC_MSG_CHECKING(include $1 in build)
 if test -d "$srcdir/lib/c/$1" ; then
   build_$1="yes"
   $2=1
+  $2_manual=""
   cfghdrs="$cfghdrs $objdir/lib/c/$1/include/$1/$1_defs.h"
   libs="$libs $1"
   mkdir -p $objdir/lib/c/$1/include/$1
@@ -56,9 +57,11 @@ if test -d "$srcdir/lib/c/$1" ; then
 else
   build_$1="no"
   $2=0
+  $2_manual="%"
 fi
 AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
+AC_SUBST($2_manual)
 ])
 
 dnl CW_BUILD_BIN(bin, var)
@@ -70,6 +73,7 @@ AC_MSG_CHECKING(include $1 in build)
 if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
+  $2_manual=""
   cfghdrs="$cfghdrs $objdir/bin/$1/include/$1_defs.h"
   bins="$bins $1"
   mkdir -p $objdir/bin/$1/include
@@ -77,7 +81,9 @@ if test -d "$srcdir/bin/$1" ; then
 else
   build_$1="no"
   $2=0
+  $2_manual="%"
 fi
 AC_MSG_RESULT($build_$1)
 AC_SUBST($2)
+AC_SUBST($2_manual)
 ])
