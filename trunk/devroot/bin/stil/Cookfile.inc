@@ -220,9 +220,9 @@ stil_install_p : [STIL_P] stil_install_common
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [STIL_SRCS]]
 #if [ENABLE_SHARED]
-       -rpath [objdir]/lib/c/libstil/lib
-       -rpath [objdir]/lib/c/libedit/lib
-       -rpath [objdir]/lib/c/libstash/lib
+       -rpath [abs_objdir]/lib/c/libstil/lib
+       -rpath [abs_objdir]/lib/c/libedit/lib
+       -rpath [abs_objdir]/lib/c/libstash/lib
 #endif
        [LDFLAGS] -lstil -ledit -lstash -ltermcap [EXTRALIBS];
 }

@@ -210,7 +210,7 @@ cover_install_p : [COVER_P] cover_install_common
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [COVER_SRCS]]
 #if [ENABLE_SHARED]
-       -rpath [objdir]/lib/c/libstash/lib
+       -rpath [abs_objdir]/lib/c/libstash/lib
 #endif
        [LDFLAGS] -lstash [EXTRALIBS];
 }

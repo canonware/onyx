@@ -210,7 +210,7 @@ xvx_install_p : [XVX_P] xvx_install_common
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [XVX_SRCS]]
 #if [ENABLE_SHARED]
-       -rpath [objdir]/lib/c/libstash/lib
+       -rpath [abs_objdir]/lib/c/libstash/lib
 #endif
        [LDFLAGS] -lstash [EXTRALIBS];
 }

@@ -210,8 +210,8 @@ blow_install_p : [BLOW_P] blow_install_common
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BLOW_SRCS]]
 #if [ENABLE_SHARED]
-       -rpath [objdir]/lib/c/libsock/lib
-       -rpath [objdir]/lib/c/libstash/lib
+       -rpath [abs_objdir]/lib/c/libsock/lib
+       -rpath [abs_objdir]/lib/c/libstash/lib
 #endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }

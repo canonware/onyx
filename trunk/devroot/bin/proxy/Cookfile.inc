@@ -212,8 +212,8 @@ proxy_install_p : [PROXY_P] proxy_install_common
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
 #if [ENABLE_SHARED]
-       -rpath [objdir]/lib/c/libsock/lib
-       -rpath [objdir]/lib/c/libstash/lib
+       -rpath [abs_objdir]/lib/c/libsock/lib
+       -rpath [abs_objdir]/lib/c/libstash/lib
 #endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }

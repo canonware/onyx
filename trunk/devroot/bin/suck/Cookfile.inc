@@ -210,8 +210,8 @@ suck_install_p : [SUCK_P] suck_install_common
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SUCK_SRCS]]
 #if [ENABLE_SHARED]
-       -rpath [objdir]/lib/c/libsock/lib
-       -rpath [objdir]/lib/c/libstash/lib
+       -rpath [abs_objdir]/lib/c/libsock/lib
+       -rpath [abs_objdir]/lib/c/libstash/lib
 #endif
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
