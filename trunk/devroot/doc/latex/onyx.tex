@@ -472,6 +472,7 @@ lower case letter in names (for example, capital letters, numbers, underscore,
 etc.).
 
 \subsection{currenterror}
+\label{sec:currenterror}
 
 \begin{longtable}{|r|l|l|p{3in}|}
 \caption[currenterror summary]{currenterror summary by functional group}
@@ -511,7 +512,10 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \end{longtable}
 
 \subsection{envdict}
+\label{sec:envdict}
+
 \subsection{errordict}
+\label{sec:errordict}
 
 \begin{longtable}{|r|l|l|p{3in}|}
 \caption{errordict summary} \\
@@ -622,10 +626,61 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \end{longtable}
 
 \subsection{globaldict}
+\label{sec:globaldict}
 
 All threads share the same globaldict, which is meant as a repository for
 globally shared objects.  globaldict is empty when the onyx interpreter is
 initialized.
+
+\subsection{sprintdict}
+\label{sec:sprintdict}
+
+\begin{longtable}{|r|l|l|p{3in}|}
+\caption[sprintdict summary]{sprintdict summary}
+\\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+Input(s) & Op/Proc/Var & Output(s) & Description \\
+\hline \hline \endhead
+\hline
+\multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+& {\bf \htmlref{array}{sprintdict:array}} & & \\
+\hline
+& {\bf \htmlref{boolean}{sprintdict:boolean}} & & \\
+\hline
+& {\bf \htmlref{condition}{sprintdict:condition}} & & \\
+\hline
+& {\bf \htmlref{dict}{sprintdict:dict}} & & \\
+\hline
+& {\bf \htmlref{file}{sprintdict:file}} & & \\
+\hline
+& {\bf \htmlref{fino}{sprintdict:fino}} & & \\
+\hline
+& {\bf \htmlref{hook}{sprintdict:hook}} & & \\
+\hline
+& {\bf \htmlref{integer}{sprintdict:integer}} & & \\
+\hline
+& {\bf \htmlref{mark}{sprintdict:mark}} & & \\
+\hline
+& {\bf \htmlref{mutex}{sprintdict:mutex}} & & \\
+\hline
+& {\bf \htmlref{name}{sprintdict:name}} & & \\
+\hline
+& {\bf \htmlref{operator}{sprintdict:operator}} & & \\
+\hline
+& {\bf \htmlref{stack}{sprintdict:stack}} & & \\
+\hline
+& {\bf \htmlref{string}{sprintdict:string}} & & \\
+\hline
+& {\bf \htmlref{thread}{sprintdict:thread}} & & \\
+\end{longtable}
 
 \subsection{systemdict}
 \label{sec:systemdict}
@@ -1556,6 +1611,7 @@ onyx:1> pstack
 \end{description}
 
 \subsection{userdict}
+\label{sec:userdict}
 
 Each thread has its own userdict, which is not shared with any other threads.
 userdict is meant to be used for general storage of definitions that do not need

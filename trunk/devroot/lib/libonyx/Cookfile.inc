@@ -101,7 +101,11 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = gcdict.tex nx.tex nxa.tex nxn.tex nxo.tex systemdict.tex;
+  local tex_srcs = gcdict.tex nx.tex nxa.tex nxn.tex nxo.tex nxo_array.tex
+                   nxo_boolean.tex nxo_dict.tex nxo_file.tex nxo_fino.tex
+                   nxo_hook.tex nxo_integer.tex nxo_mark.tex nxo_mutex.tex
+                   nxo_name.tex nxo_no.tex nxo_null.tex nxo_operator.tex
+                   nxo_stack.tex nxo_string.tex nxo_thread.tex systemdict.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libonyx/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libonyx/doc/latex/manual.tex;
 

@@ -160,7 +160,7 @@ nx_delete(cw_nx_t *a_nx)
 {
 	_cw_check_ptr(a_nx);
 	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
-	
+
 	/*
 	 * Flush stdout.  There's nowhere to report an error, so don't even
 	 * check whether an error occurs.

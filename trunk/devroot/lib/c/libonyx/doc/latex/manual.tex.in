@@ -24,6 +24,39 @@ interpreter instance with multiple threads.
 documents the C API with as little information about the
 \htmlref{onyx}{onyxlang} language as possible.
 
+A minimal program that runs the onyx interpreter interactively looks something
+like:
+\begin{verbatim}
+#include <libonyx/libonyx.h>
+
+int
+main(int argc, char **argv, char **envp)
+{
+        cw_nx_t         nx;
+        cw_nxo_t        thread, *nxo;
+
+        /* Initialize libstash and the onyx interpreter. */
+        libstash_init();
+        nx_new(&nx, argc, argv, envp, NULL, NULL, NULL, NULL, NULL);
+
+        /* Create a thread. */
+        nxo_thread_new(&thread, &nx);
+
+        /* Set up stdin for evaluation by the start operator. */
+        nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+        nxo_dup(nxo, nxo_thread_stdin_get(&thread));
+        nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+
+        /* Start the thread. */
+        nxo_thread_start(&thread);
+
+        /* Clean up. */
+        nx_delete(&nx);
+        libstash_shutdown();
+        return 0;
+}
+\end{verbatim}
+
 \section{Compilation}
 \begin{description}
 \item[Normal: ] cc \filename{file} -lonyx -lstash -lpthread
@@ -178,6 +211,23 @@ behavior and likely crashes.
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxa}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxn}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_array}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_boolean}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_condition}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_dict}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_file}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_fino}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_hook}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_integer}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_mark}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_mutex}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_name}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_no}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_null}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_operator}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_stack}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_string}
+\input{@abs_srcdir@/lib/c/libonyx/doc/latex/nxo_thread}
 
 \section{Dictionaries}
 \input{@abs_srcdir@/lib/c/libonyx/doc/latex/gcdict}
