@@ -74,8 +74,7 @@ main(int argc, char **argv, char **envp)
 	libstash_init();
 	out_put(out_err, "Test begin\n");
 
-	_cw_assert(nx_new(&nx, argc, argv, envp, NULL, NULL, NULL, NULL,
-	    NULL) == &nx);
+	_cw_assert(nx_new(&nx, NULL, argc, argv, envp) == &nx);
 	nxo_thread_new(&thread, &nx);
 
 	/* Define anon_hook and mark_hook. */

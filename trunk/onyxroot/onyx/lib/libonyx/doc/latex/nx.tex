@@ -26,33 +26,22 @@ objects are deallocated.
 \begin{capi}
 \label{nx_new}
 \index{nx_new@\cfunc{nx\_new}{}}
-\citem{\cfunc[cw\_nx\_t *]{nx\_new}{cw\_nx\_t *a\_nx, int a\_argc, char
-**a\_argv, char **a\_envp, cw\_nxo\_file\_read\_t *a\_stdin,
-cw\_nxo\_file\_write\_t *a\_stdout, cw\_nxo\_file\_write\_t *a\_stderr, void
-*a\_arg, cw\_op\_t *a\_thread\_init}}
+\citem{\cfunc[cw\_nx\_t *]{nx\_new}{cw\_nx\_t *a\_nx, cw\_op\_t
+*a\_thread\_init, int a\_argc, char **a\_argv, char **a\_envp}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nx: ]
 			Pointer to space for an \classname{nx}, or NULL.
+		\item[a\_thread\_init: ]
+			Pointer to an initialization function to be called
+			during thread initialization, or NULL.
 		\item[a\_argc: ]
 			Number of command line arguments.
 		\item[a\_argv: ]
 			Pointer to an array of command line argument strings.
 		\item[a\_envp: ]
 			Pointer to an array of environment variable strings.
-		\item[a\_stdin: ]
-			Pointer to a \cvar{stdin} file read function, or NULL.
-		\item[a\_stdout: ]
-			Pointer to a \cvar{stdout} file write function, or NULL.
-		\item[a\_stderr: ]
-			Pointer to a \cvar{stderr} file write function, or NULL.
-		\item[a\_arg: ]
-			Pointer to an opaque argument to be passed to the file
-			read/write wrapper functions.
-		\item[a\_thread\_init: ]
-			Pointer to an initialization function to be called
-			during thread initialization, or NULL.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]

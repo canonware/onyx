@@ -23,9 +23,8 @@
 #include "nx_nxcode.c"
 
 cw_nx_t *
-nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
-    cw_nxo_file_read_t *a_stdin, cw_nxo_file_write_t *a_stdout,
-    cw_nxo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_thread_init)
+nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
+    **a_envp)
 {
 	cw_nx_t			*retval;
 	volatile cw_uint32_t	try_stage = 0;
@@ -62,36 +61,21 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 
 		/* Initialize stdin. */
 		nxo_file_new(&retval->stdin_nxo, retval, TRUE);
-		if (a_stdin == NULL)
-			nxo_file_fd_wrap(&retval->stdin_nxo, 0);
-		else {
-			nxo_file_interactive(&retval->stdin_nxo, a_stdin, NULL,
-			    a_arg);
-		}
+		nxo_file_fd_wrap(&retval->stdin_nxo, 0);
 		nxo_file_buffer_size_set(&retval->stdin_nxo,
 		    _CW_LIBONYX_FILE_BUFFER_SIZE);
 		try_stage = 4;
 
 		/* Initialize stdout. */
 		nxo_file_new(&retval->stdout_nxo, retval, TRUE);
-		if (a_stdout == NULL)
-			nxo_file_fd_wrap(&retval->stdout_nxo, 1);
-		else {
-			nxo_file_interactive(&retval->stdout_nxo, NULL,
-			    a_stdout, a_arg);
-		}
+		nxo_file_fd_wrap(&retval->stdout_nxo, 1);
 		nxo_file_buffer_size_set(&retval->stdout_nxo,
 		    _CW_LIBONYX_FILE_BUFFER_SIZE);
 		try_stage = 5;
 
 		/* Initialize stderr. */
 		nxo_file_new(&retval->stderr_nxo, retval, TRUE);
-		if (a_stderr == NULL)
-			nxo_file_fd_wrap(&retval->stderr_nxo, 2);
-		else {
-			nxo_file_interactive(&retval->stderr_nxo, NULL,
-			    a_stderr, a_arg);
-		}
+		nxo_file_fd_wrap(&retval->stderr_nxo, 2);
 		try_stage = 6;
 
 		/* Initialize globaldict. */

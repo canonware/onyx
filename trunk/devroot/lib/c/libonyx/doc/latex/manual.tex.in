@@ -36,7 +36,7 @@ main(int argc, char **argv, char **envp)
 
         /* Initialize libstash and the onyx interpreter. */
         libstash_init();
-        nx_new(&nx, argc, argv, envp, NULL, NULL, NULL, NULL, NULL);
+        nx_new(&nx, NULL, argc, argv, envp);
 
         /* Create a thread. */
         nxo_thread_new(&thread, &nx);

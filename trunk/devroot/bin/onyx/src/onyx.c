@@ -126,6 +126,7 @@ stdin cvx
 	struct sigaction action;
 	sigset_t	set, oset;
 	cw_nx_t		nx;
+	cw_nxo_t	*stdin_nxo;
 	cw_thd_t	*nx_thd;
 	char		*editor;
 
@@ -187,7 +188,14 @@ stdin cvx
 	arg.buffer_count = 0;
 
 	/* Initialize the interpreter. */
-	nx_new(&nx, argc, argv, envp, nx_read, NULL, NULL, (void *)&arg, NULL);
+	nx_new(&nx, NULL, argc, argv, envp);
+
+	/* Set up the interactive wrapper for stdin. */
+	stdin_nxo = nx_stdin_get(&nx);
+	nxo_file_new(stdin_nxo, &nx, TRUE);
+	nxo_file_interactive(stdin_nxo, nx_read, NULL, (void *)&arg);
+
+	/* Create the initial thread. */
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
 
@@ -538,8 +546,7 @@ end
 	 * Since this is a non-interactive invocation, don't include all
 	 * elements of argv, and wrap stdin.
 	 */
-	nx_new(&nx, argc - optind, &argv[optind], envp, NULL, NULL,
-	    NULL, NULL, NULL);
+	nx_new(&nx, NULL, argc - optind, &argv[optind], envp);
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
 

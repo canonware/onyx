@@ -64,9 +64,8 @@ struct cw_nx_s {
 };
 
 /* nx. */
-cw_nx_t *nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
-    cw_nxo_file_read_t *a_stdin, cw_nxo_file_write_t *a_stdout,
-    cw_nxo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_thread_init);
+cw_nx_t *nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char
+    **a_argv, char **a_envp);
 void	nx_delete(cw_nx_t *a_nx);
 
 #ifndef _CW_USE_INLINES
