@@ -85,7 +85,9 @@ $flags <
 	@enable_debug@ 1 eq {
 	    ` debug'
 	} if
-	counttomark ncat strip_print
+	counttomark dup 0 gt {
+	    ncat strip_print
+	} if
 	pop # Remove mark.
     }
     `--cppflags' {
