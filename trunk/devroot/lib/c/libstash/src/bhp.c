@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -408,7 +408,7 @@ bhp_union(cw_bhp_t * a_bhp_o, cw_bhp_t * a_other)
   next_node = curr_node->sibling;
   while(next_node != NULL)
   {
-    if ((curr_node->degree != NULL)
+    if ((curr_node->degree != 0) /* XXX Is this correct? */
 	|| ((next_node->sibling != NULL)
 	    && (next_node->sibling->degree == curr_node->degree)))
     {

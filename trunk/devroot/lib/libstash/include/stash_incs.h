@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 181 $
- * Last modified: $Date: 1998-08-29 21:02:22 -0700 (Sat, 29 Aug 1998) $
+ * Current revision: $Revision: 198 $
+ * Last modified: $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -93,11 +93,20 @@
 
 #if (defined(_INC_BR_H_))
 #  ifndef _BR_H_
+#    ifndef _OH_H_
+#      include <oh.h>
+#    endif
+#    ifndef _RES_H_
+#      include <res.h>
+#    endif
 #    ifndef _BRBLK_H_
 #      include <brblk.h>
 #    endif
 #    ifndef _BRBS_H_
 #      include <brbs.h>
+#    endif
+#    ifndef _BRMAP_H_
+#      include <brmap.h>
 #    endif
 #    include <br.h>
 #    define _BR_H_

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -22,6 +22,7 @@
 #define _INC_BUF_H_
 #include <libstash.h>
 
+#include <netinet/in.h>
 #include <sys/param.h>
 
 /****************************************************************************
@@ -201,7 +202,7 @@ buf_get_buf(cw_buf_t * a_buf_o, cw_buf_t * a_spare)
 cw_bool_t
 buf_put_buf(cw_buf_t * a_buf_o, cw_buf_t * a_other)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
 
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {
@@ -291,7 +292,7 @@ buf_get_bufel(cw_buf_t * a_buf_o)
 cw_bool_t
 buf_put_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
 
   if (_cw_pmatch(_STASH_DBG_R_BUF_FUNC))
   {

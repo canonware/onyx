@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 193 $
- * $Date: 1998-09-01 18:16:45 -0700 (Tue, 01 Sep 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -28,7 +28,9 @@
 #include <sys/uio.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
-#include <sys/disklabel.h>
+#ifdef _ARCH_FREEBSD
+#  include <sys/disklabel.h>
+#endif
 
 #define _INC_BRBS_H_
 #include <libstash.h>
@@ -305,6 +307,7 @@ brbs_create(cw_brbs_t * a_brbs_o, cw_uint64_t a_size)
   cw_bool_t retval;
 
   /* XXX Implement. */
+  retval = TRUE; /* XXX */
   
   return retval;
 }
@@ -321,6 +324,7 @@ brbs_destroy(cw_brbs_t * a_brbs_o)
   cw_bool_t retval;
   
   /* XXX Implement. */
+  retval = TRUE; /* XXX */
 
   return retval;
 }
@@ -649,6 +653,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
 cw_bool_t
 brbs_p_get_raw_info(cw_brbs_t * a_brbs_o)
 {
+#ifdef _ARCH_FREEBSD
   cw_bool_t retval;
   struct disklabel dlp;
   
@@ -696,6 +701,9 @@ brbs_p_get_raw_info(cw_brbs_t * a_brbs_o)
     _cw_marker("Exit brbs_p_get_raw_info()");
   }
   return retval;
+#else
+  return TRUE;
+#endif
 }
 
 /****************************************************************************

@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 187 $
-# Last modified: $Date: 1998-08-31 12:00:28 -0700 (Mon, 31 Aug 1998) $
+# Current revision: $Revision: 198 $
+# Last modified: $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -21,17 +21,17 @@
 #
 
 # Include files that _are_ installed.
-INCS := stash_incs.h bhp.h br.h brblk.h brbs.h buf.h dbg.h \
+INCS := stash_incs.h bhp.h br.h brblk.h brbs.h brmap.h buf.h dbg.h \
 	glob.h jt.h list.h locks.h log.h matrix.h mem.h oh.h res.h \
 	sock.h socks.h thread.h
 
 # Include files that are _not_ installed.
-PRIV_INCS := bhp_priv.h br_priv.h  brbs_priv.h \
+PRIV_INCS := bhp_priv.h br_priv.h brbs_priv.h \
 	dbg_priv.h jt_priv.h list_priv.h \
 	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
 
 # Source files.
-SRCS := bhp.c br.c brblk.c brbs.c buf.c dbg.c \
+SRCS := bhp.c br.c brblk.c brbs.c brmap.c buf.c dbg.c \
 	glob.c jt.c list.c locks.c log.c matrix.c mem.c oh.c res.c sock.c \
 	socks.c thread.c zt.c
 
@@ -134,7 +134,7 @@ all : default
 # This rule is used to build the tests.
 % : %.c $(LIB_ST_D)
 	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(INCPATH) $(DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
-	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(EXTRALIBS) -static -l$(strip $(LIB))_d
+	$(CC) -o $@ $(@:=.o) $(LIBPATH) -static -l$(strip $(LIB))_d -dynamic $(EXTRALIBS)
 
 obj/st_d/%.o_st_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 196 $
- * $Date: 1998-09-05 18:26:34 -0700 (Sat, 05 Sep 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -47,15 +47,17 @@ struct cw_brmap_list_s
   cw_brbs_t brbs_list[_STASH_BRMAP_INTERNAL_LIST_SIZE]; /* Array of first
 							 * backings. */
   cw_brbs_t * external_brbs_list; /* Overflow array of backings. */
-}
+};
+
 
 struct cw_brmap_s
 {
   cw_oh_t vaddr_hash; /* Hash table of cached blocks. */
-  cw_uint32_t num_backings; /* Number of brbs instances currently mapped. */
-  cw_brmap_el_s * backings; /* Array of mapped brbs instances. */
-  cw_brmap_list_s * map; /* List used for finding the brbs(es) that
-			  * correspond(s) to any given address. */
+  cw_uint32_t num_backings; /* Number of brbs instances currently
+			     * mapped. */
+  struct cw_brmap_el_s * backings; /* Array of mapped brbs instances. */
+  struct cw_brmap_list_s * map; /* List used for finding the brbs(es) that
+				 * correspond(s) to any given address. */
   cw_uint64_t num_cache_brblks; /* Number of brblk's to keep in memory
 				 * cache. */
   cw_list_t spare_brblk_list; /* Spare brblk instances. */

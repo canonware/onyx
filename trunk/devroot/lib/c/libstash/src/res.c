@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 192 $
- * Last modified: $Date: 1998-09-01 18:15:41 -0700 (Tue, 01 Sep 1998) $
+ * Current revision: $Revision: 198 $
+ * Last modified: $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -168,7 +168,8 @@ res_clear(cw_res_t * a_res_o)
   _cw_check_ptr(a_res_o);
   rwl_wlock(&a_res_o->rw_lock);
 
-  while (FALSE == oh_item_delete_iterate(&a_res_o->hash_o, &key, &val))
+  while (FALSE == oh_item_delete_iterate(&a_res_o->hash_o, (void **) &key,
+					 (void **) &val))
   {
     _cw_free(key);
     _cw_free(val);
@@ -199,7 +200,7 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
   _cw_check_ptr(a_res_o);
   _cw_check_ptr(a_other);
   rwl_wlock(&a_res_o->rw_lock);
-  rwl_rlock(&other->rw_lock);
+  rwl_rlock(&a_other->rw_lock);
 
   if (a_res_o == a_other)
   {
@@ -220,7 +221,8 @@ res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
     
     for (i = 0, retval = FALSE; (i < num_resources) && (retval == FALSE); i++)
     {
-      oh_item_delete_iterate(&a_res_o->hash_o, &key, &val);
+      oh_item_delete_iterate(&a_res_o->hash_o, (void **) &key,
+			     (void **) &val);
 
       if (NULL == res_get_res_val(a_other, key))
       {
@@ -404,7 +406,8 @@ res_extract_res(cw_res_t * a_res_o, char * a_res_key,
   _cw_check_ptr(a_res_o);
   rwl_wlock(&a_res_o->rw_lock);
 
-  retval = oh_item_delete(&a_res_o->hash_o, a_res_key, a_res_name, a_res_val);
+  retval = oh_item_delete(&a_res_o->hash_o, a_res_key,
+			  (void **) a_res_name, (void **) a_res_val);
 
   rwl_wunlock(&a_res_o->rw_lock);
   if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
@@ -496,16 +499,13 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 {
   cw_bool_t retval = FALSE;
   size_t i, name_pos = 0, val_pos = 0;
-  cw_uint32_t state = _STASH_RES_STATE_START, col_num, line_num = 1;
+  cw_uint32_t state = _STASH_RES_STATE_START, col_num = 1, line_num = 1;
   char c, name[_STASH_RES_BUFFSIZE], val[_STASH_RES_BUFFSIZE];
 
   if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
   {
     _cw_marker("Enter res_p_parse_res()");
   }
-  /* These switch statements look awful, but they should be fast, since the
-   * compiler supposedly builds perfect hashes for them.  I'm not sure why
-   * I'm so worried about performance.  Oh well, it's neat at least. */
   for (i = 0;
        ((state != _STASH_RES_STATE_FINISH) && (retval != TRUE));
        i++, col_num++)
@@ -554,7 +554,6 @@ res_p_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
 	/* Initialize counters, buffers, etc. */
 	name_pos = 0;
 	val_pos = 0;
-	col_num = 1;
 	/* Truncate.  Not strictly necessary with static buffers. */
 	/* 	name = '\0'; */
 	/* 	val = '\0'; */

@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -295,7 +295,7 @@ sock_disconnect(cw_sock_t * a_sock_o)
 cw_bool_t
 sock_wait_for_in_data(cw_sock_t * a_sock_o)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
   {
@@ -321,7 +321,7 @@ sock_wait_for_in_data(cw_sock_t * a_sock_o)
 cw_uint32_t
 sock_get_max_read(cw_sock_t * a_sock_o)
 {
-  cw_uint32_t retval;
+  cw_uint32_t retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
   {
@@ -347,7 +347,7 @@ sock_get_max_read(cw_sock_t * a_sock_o)
 cw_buf_t *
 sock_read_noblock(cw_sock_t * a_sock_o, cw_buf_t * a_spare)
 {
-  cw_buf_t * retval;
+  cw_buf_t * retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
   {
@@ -373,7 +373,7 @@ sock_read_noblock(cw_sock_t * a_sock_o, cw_buf_t * a_spare)
 cw_buf_t *
 sock_read_block(cw_sock_t * a_sock_o, cw_buf_t * a_spare)
 {
-  cw_buf_t * retval;
+  cw_buf_t * retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
   {
@@ -399,7 +399,7 @@ sock_read_block(cw_sock_t * a_sock_o, cw_buf_t * a_spare)
 cw_bool_t
 sock_write(cw_sock_t * a_sock_o, cw_buf_t * a_buf_o)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
   {
@@ -425,7 +425,7 @@ sock_write(cw_sock_t * a_sock_o, cw_buf_t * a_buf_o)
 cw_bool_t
 sock_flush_out(cw_sock_t * a_sock_o)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCK_FUNC))
   {

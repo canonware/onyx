@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 173 $
- * $Date: 1998-08-26 12:34:42 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -37,7 +37,7 @@
 cw_socks_t *
 socks_new(cw_socks_t * a_socks_o)
 {
-  cw_socks_t * retval;
+  cw_socks_t * retval = FALSE; /* XXX Never used. */
   
   if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
   {
@@ -78,7 +78,7 @@ socks_delete(cw_socks_t * a_socks_o)
 cw_bool_t
 socks_listen(cw_socks_t * a_socks_o, int a_port)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
 
   if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
   {
@@ -100,7 +100,7 @@ socks_listen(cw_socks_t * a_socks_o, int a_port)
 cw_sock_t *
 socks_accept_block(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
 {
-  cw_sock_t * retval;
+  cw_sock_t * retval = FALSE; /* XXX Never used. */
 
   if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
   {
@@ -122,7 +122,7 @@ socks_accept_block(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
 cw_sock_t *
 socks_accept_noblock(cw_socks_t * a_socks_o, cw_sock_t * a_sock_o)
 {
-  cw_sock_t * retval;
+  cw_sock_t * retval = FALSE; /* XXX Never used. */
 
   if (_cw_pmatch(_STASH_DBG_R_SOCKS_FUNC))
   {

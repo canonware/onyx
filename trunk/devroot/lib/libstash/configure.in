@@ -23,14 +23,11 @@ dnl  AC_CHECK_PROG(MAKE, gmake, , $PATH,
 dnl    AC_MSG_ERROR(Cannot find GNU make anywhere)))
 
 dnl Check for libraries.
-AC_CHECK_LIB(pthread, pthread_create, ,
-AC_CHECK_LIB(c_r, pthread_create,
-  AC_DEFINE(_THREAD_SAFE)
-  LIBS="-pthread $LIBS"), AC_MSG_ERROR(Cannot find pthreads anywhere))
+AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -pthread", \
+  AC_CHECK_LIB(c_r, pthread_create, \
+    LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
 
 dnl Define preprocessor macros.
-AC_DEFINE(_REENTRANT)
-AC_DEFINE(_CW_PEDANTIC) dnl XXX Need to make this optional.
 
 dnl Check for header files.
 AC_HEADER_STDC

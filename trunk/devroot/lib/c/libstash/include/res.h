@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 192 $
- * Last modified: $Date: 1998-09-01 18:15:41 -0700 (Tue, 01 Sep 1998) $
+ * Current revision: $Revision: 198 $
+ * Last modified: $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * Description: 
  *              
@@ -53,8 +53,8 @@ cw_bool_t res_is_equal(cw_res_t * a_res_o, cw_res_t * a_res_other);
 cw_bool_t res_merge_file(cw_res_t * a_res_o, char * a_filename);
 cw_bool_t res_merge_list(cw_res_t * a_res_o, ...);
 char * res_get_res_val(cw_res_t * a_res_o, char * a_res_name);
-cw_bool_t res_extract_res(cw_res_t * a_res_o, char ** a_res_name,
-			  char ** a_res_val);
+cw_bool_t res_extract_res(cw_res_t * a_res_o, char * a_res_key,
+			  char ** a_res_name, char ** a_res_val);
 cw_bool_t res_dump(cw_res_t * a_res_o, char * a_filename);
 
 #endif /* _RES_H_ */

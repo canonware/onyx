@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 195 $
- * $Date: 1998-09-05 13:34:19 -0700 (Sat, 05 Sep 1998) $
+ * $Revision: 198 $
+ * $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -373,7 +373,7 @@ br_new(cw_br_t * a_br_o)
   rwl_new(&retval->rw_lock);
   /* Non-thread-safe hash table, since we're already taking care of the
    * locking. */
-  oh_new(&retval->vaddr_hash, FALSE);
+/*   oh_new(&retval->vaddr_hash, FALSE); */
   res_new(&retval->res);
   retval->res_file_a
     = retval->res_file_b
@@ -415,7 +415,7 @@ br_delete(cw_br_t * a_br_o)
   }
 
   rwl_delete(&a_br_o->rw_lock);
-  oh_delete(&a_br_o->vaddr_hash);
+/*   oh_delete(&a_br_o->vaddr_hash); */
   res_delete(&a_br_o->res);
   if (a_br_o->res_file_a != NULL)
   {
@@ -453,7 +453,7 @@ br_create(cw_br_t * a_br_o, cw_uint32_t a_block_size)
 {
   cw_bool_t retval = FALSE;
 #define _STASH_BR_BS_STRLEN 17
-  char block_size[_STASH_BR_BS_STRLEN],
+  char block_size[_STASH_BR_BS_STRLEN];
 
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
@@ -562,7 +562,7 @@ cw_bool_t
 br_set_res_files(cw_br_t * a_br_o, char * a_res_file_a,
 		 char * a_res_file_b, char * a_res_file_c)
 {
-  cw_bool_t retval;
+  cw_bool_t retval = FALSE; /* XXX Never used. */
 
   if (_cw_pmatch(_STASH_DBG_R_BR_FUNC))
   {
@@ -699,8 +699,8 @@ br_fsck(cw_br_t * a_br_o)
 	{
 	  /* Assume the crash happened while updating file C.  Files A
 	   * and B agree, so roll forward and use file A. */
-	  which_valid = 'a'
-	    }
+	  which_valid = 'a';
+	}
 	else
 	{
 	  /* Something bad happened.  An error in file C indicates it was 
@@ -881,9 +881,6 @@ br_open(cw_br_t * a_br_o)
     _cw_marker("Enter br_open()");
   }
   _cw_check_ptr(a_br_o);
-  _cw_check_ptr(a_res_file_a);
-  _cw_check_ptr(a_res_file_b);
-  _cw_check_ptr(a_res_file_c);
   rwl_wlock(&a_br_o->rw_lock);
 
   if (br_fsck(a_br_o))
@@ -892,7 +889,8 @@ br_open(cw_br_t * a_br_o)
   }
   else
   {
-  
+    retval = FALSE; /* XXX */
+    
     /* Get size of config space. */
     /* Parse config space (res format). */
     /* Create and initialize internal data structures. */

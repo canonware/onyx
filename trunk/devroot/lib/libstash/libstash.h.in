@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 156 $
- * Last modified: $Date: 1998-07-29 16:59:01 -0700 (Wed, 29 Jul 1998) $
+ * Current revision: $Revision: 198 $
+ * Last modified: $Date: 1998-09-07 09:48:15 -0700 (Mon, 07 Sep 1998) $
  *
  * Description: Master header file for libstash.
  *
@@ -18,24 +18,15 @@
 #ifndef _LIBSTASH_H_
 #  define _LIBSTASH_H_
 
-/*
- * Defined by configure if we have the corresponding header on this system.
- */
-
-#undef HAVE_PTHREAD_H
-#undef HAVE_UNISTD_H
-
-/*
- * Defined by configure if necessary for pthreads.
- */
-#undef _REENTRANT
-#undef _THREAD_SAFE
+/* Must be defined for pthreads. */
+#define _REENTRANT
 
 /*
  * Various macros possibly defined by configure.
  */
-#undef _CW_PEDANTIC
- 
+#undef HAVE_PTHREAD_H
+#undef HAVE_UNISTD_H
+
 #undef SIZEOF_SIGNED_CHAR
 #undef SIZEOF_UNSIGNED_CHAR
 #undef SIZEOF_SIGNED_SHORT
@@ -59,7 +50,7 @@
  * Global typedefs.
  */
 
-/* XXX These typedefs will likely only work for FreeBSD/x86. */
+/* XXX These typedefs will likely only work for x86 architectures. */
 
 #if (SIZEOF_SIGNED_CHAR == 1)
 #  define _TYPE_SINT8_DEFINED
@@ -126,8 +117,12 @@ typedef double cw_float8_t;
 typedef long double cw_float12_t;
 #endif
 
-#if (!defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
-  || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED))
+#if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
+  || !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) \
+  || !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
+  || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED) \
+  || !defined(_TYPE_FLOAT4_DEFINED) || !defined(_TYPE_FLOAT8_DEFINED) \
+  || !defined(_TYPE_FLOAT12_DEFINED))
 #  error "Lacking mandatory typedefs"
 #endif
 
