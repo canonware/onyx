@@ -93,7 +93,7 @@ sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 		buf_new(&retval->out_buf, cw_g_mem);
 		try_stage = 3;
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
 		case 2:
 			buf_delete(&retval->in_buf);
@@ -394,7 +394,7 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	xep_try {
 		libsock_l_message(a_sock, LIBSOCK_MSG_REGISTER);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		mtx_unlock(&a_sock->lock);
 	}
 	xep_end();
@@ -467,7 +467,7 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		xep_try {
 			libsock_l_message(a_sock, LIBSOCK_MSG_REGISTER);
 		}
-		xep_catch(_CW_XEPV_OOM) {
+		xep_catch(_CW_STASHX_OOM) {
 			mtx_unlock(&a_sock->lock);
 		}
 		xep_end();
@@ -543,7 +543,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 				buf_buf_catenate(a_spare, &a_sock->in_buf,
 				    FALSE);
 			}
-			xep_catch(_CW_XEPV_OOM) {
+			xep_catch(_CW_STASHX_OOM) {
 				mtx_unlock(&a_sock->in_lock);
 			}
 			xep_end();
@@ -554,7 +554,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 			xep_try {
 				buf_split(a_spare, &a_sock->in_buf, a_max_read);
 			}
-			xep_catch(_CW_XEPV_OOM) {
+			xep_catch(_CW_STASHX_OOM) {
 				mtx_unlock(&a_sock->in_lock);
 			}
 			xep_end();
@@ -594,7 +594,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 					libsock_l_message(a_sock,
 					    LIBSOCK_MSG_IN_SPACE);
 				}
-				xep_catch(_CW_XEPV_OOM) {
+				xep_catch(_CW_STASHX_OOM) {
 					thd_yield();
 					xep_retry();
 				}
@@ -606,7 +606,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 					buf_buf_catenate(a_spare,
 					    &a_sock->in_buf, FALSE);
 				}
-				xep_catch(_CW_XEPV_OOM) {
+				xep_catch(_CW_STASHX_OOM) {
 					mtx_unlock(&a_sock->in_lock);
 				}
 				xep_end();
@@ -618,7 +618,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 					buf_split(a_spare, &a_sock->in_buf,
 					    a_max_read);
 				}
-				xep_catch(_CW_XEPV_OOM) {
+				xep_catch(_CW_STASHX_OOM) {
 					mtx_unlock(&a_sock->in_lock);
 				}
 				xep_end();
@@ -866,7 +866,7 @@ sock_l_out_data_put_back(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		xep_try {
 			buf_buf_catenate(a_buf, &a_sock->out_buf, FALSE);
 		}
-		xep_catch(_CW_XEPV_OOM) {
+		xep_catch(_CW_STASHX_OOM) {
 			if (dbg_is_registered(cw_g_dbg, "sock_error"))
 				_cw_out_put_e("Memory allocation error; "
 				    "yielding\n");
@@ -879,7 +879,7 @@ sock_l_out_data_put_back(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	xep_try {
 		buf_buf_catenate(&a_sock->out_buf, a_buf, FALSE);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
@@ -915,7 +915,7 @@ sock_l_in_data_put(cw_sock_t *a_sock, cw_buf_t *a_buf)
 	xep_try {
 		buf_buf_catenate(&a_sock->in_buf, a_buf, FALSE);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		if (dbg_is_registered(cw_g_dbg, "sock_error"))
 			_cw_out_put_e("Memory allocation error; yielding\n");
 		thd_yield();
@@ -1184,7 +1184,7 @@ sock_p_disconnect(cw_sock_t *a_sock)
 				libsock_l_message(a_sock,
 				    LIBSOCK_MSG_UNREGISTER);
 			}
-			xep_catch(_CW_XEPV_OOM) {
+			xep_catch(_CW_STASHX_OOM) {
 				mtx_unlock(&a_sock->lock);
 			}
 			xep_end();

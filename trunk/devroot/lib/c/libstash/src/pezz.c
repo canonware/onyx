@@ -97,7 +97,7 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		retval->magic = _CW_PEZZ_MAGIC;
 #endif
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_pezz_t *)v_retval;
 		switch (try_stage) {
 		case 3:
@@ -281,7 +281,7 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				    allocation, NULL);
 				try_stage = 2;
 			}
-			xep_catch (_CW_XEPV_OOM) {
+			xep_catch (_CW_STASHX_OOM) {
 				allocation = (cw_pezz_item_t *)v_allocation;
 				switch (try_stage) {
 				case 1:

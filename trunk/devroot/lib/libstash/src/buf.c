@@ -1288,7 +1288,7 @@ buf_range_set(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
 		xep_try {
 			buf_p_array_fit(a_buf, a_buf->array_num_valid + 1);
 		}
-		xep_catch(_CW_XEPV_OOM) {
+		xep_catch(_CW_STASHX_OOM) {
 			bufc_delete(bufc);
 		}
 		xep_end();
@@ -2075,7 +2075,7 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 			    a_length) - a_buf->size);
 			try_stage = 2;
 		}
-		xep_catch(_CW_XEPV_OOM) {
+		xep_catch(_CW_STASHX_OOM) {
 			bufc = (cw_bufc_t *)v_bufc;
 			switch (try_stage) {
 			case 1:
@@ -2096,7 +2096,7 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		xep_try {
 			buf_p_array_fit(a_buf, a_buf->array_num_valid + 1);
 		}
-		xep_catch(_CW_XEPV_OOM) {
+		xep_catch(_CW_STASHX_OOM) {
 			bufc = (cw_bufc_t *)v_bufc;
 			bufc_delete(bufc);
 		}
@@ -2150,7 +2150,7 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 			xep_try {
 				bufc = bufc_new(NULL, a_buf->mem, NULL, NULL);
 			}
-			xep_catch(_CW_XEPV_OOM) {
+			xep_catch(_CW_STASHX_OOM) {
 				mem_free(a_buf->mem, buffer);
 			}
 			xep_end();

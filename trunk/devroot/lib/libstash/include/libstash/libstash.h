@@ -131,6 +131,12 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
     cw_uint32_t);
 
 /*
+ * Exception numbers.  libstash reserves 0 through 127.
+ */
+#define	_CW_STASHX_OOM		3
+#define _CW_STASHX_OUT_PARSE	4
+
+/*
  * Project headers to always be included.
  */
 

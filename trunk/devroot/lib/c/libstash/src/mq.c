@@ -86,7 +86,7 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 		retval->magic = _LIBSTASH_MQ_MAGIC;
 #endif
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_mq_t *)v_retval;
 		switch (try_stage) {
 		case 1:

@@ -231,7 +231,7 @@ libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 			    *)arg);
 		}
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
 		case 7:
 			pezz_delete(&g_libsock->messages_pezz);
@@ -298,7 +298,7 @@ libsock_spare_bufc_get(void)
 	xep_try {
 		buffer = pezz_get(&g_libsock->buffer_pool);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		bufc_delete(retval);
 	}
 	xep_end();
@@ -343,7 +343,7 @@ libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 		mq_put(&g_libsock->messages, message);
 		try_stage = 2;
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		switch(try_stage) {
 		case 1:
 			pezz_put(&g_libsock->messages_pezz, (void *)message);
@@ -399,7 +399,7 @@ libsock_l_message(cw_sock_t *a_sock, cw_libsock_msg_type_t a_msg)
 	xep_try {
 		mq_put(&g_libsock->messages, message);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		pezz_put(&g_libsock->messages_pezz, (void *)message);
 	}
 	xep_end();
@@ -490,7 +490,7 @@ libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
 	xep_try {
 		error = mq_put(a_mq, a_sockfd);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		/*
 		 * We can't afford to lose the message, since it could end up
 		 * causing deadlock.
@@ -964,7 +964,7 @@ libsock_p_entry_func(void *a_arg)
 							bufc =
 							    libsock_spare_bufc_get();
 						}
-						xep_catch(_CW_XEPV_OOM) {
+						xep_catch(_CW_STASHX_OOM) {
 							thd_yield();
 							xep_retry();
 						}
@@ -976,7 +976,7 @@ libsock_p_entry_func(void *a_arg)
 							    bufc, 0,
 							    pezz_buffer_size_get(&g_libsock->buffer_pool));
 						}
-						xep_catch(_CW_XEPV_OOM) {
+						xep_catch(_CW_STASHX_OOM) {
 							thd_yield();
 							xep_retry();
 						}
@@ -1018,7 +1018,7 @@ libsock_p_entry_func(void *a_arg)
 							    &buf_in,
 							    bytes_read);
 						}
-						xep_catch(_CW_XEPV_OOM) {
+						xep_catch(_CW_STASHX_OOM) {
 							thd_yield();
 							xep_retry();
 						}
@@ -1158,7 +1158,7 @@ libsock_p_entry_func(void *a_arg)
 								bufc =
 								    libsock_spare_bufc_get();
 							}
-							xep_catch(_CW_XEPV_OOM) {
+							xep_catch(_CW_STASHX_OOM) {
 								thd_yield();
 								xep_retry();
 							}
@@ -1170,7 +1170,7 @@ libsock_p_entry_func(void *a_arg)
 								    bufc, 0,
 								    buffer_size);
 							}
-							xep_catch(_CW_XEPV_OOM) {
+							xep_catch(_CW_STASHX_OOM) {
 								thd_yield();
 								xep_retry();
 							}
@@ -1202,7 +1202,7 @@ libsock_p_entry_func(void *a_arg)
 							    &buf_in,
 							    bytes_read);
 						}
-						xep_catch(_CW_XEPV_OOM) {
+						xep_catch(_CW_STASHX_OOM) {
 							thd_yield();
 							xep_retry();
 						}

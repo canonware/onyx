@@ -275,7 +275,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 		stils_npop(&retval->tstack, 4);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_stilt_t *)v_retval;
 		switch (try_stage) {
 		case 5:

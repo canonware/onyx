@@ -12,17 +12,11 @@
 /* Pseudo-opaque type. */
 typedef struct cw_xep_s cw_xep_t;
 
-typedef cw_sint32_t cw_xepv_t;
+typedef cw_uint32_t cw_xepv_t;
 
-#define	_CW_XEPV_NONE		 0
-#define	_CW_XEPV_CODE		-1
-#define	_CW_XEPV_FINALLY	-2
-#define	_CW_XEPV_OOM		-3
-#define _CW_XEPV_OUT_PARSE	-4
-/*
- * Exceptions should be numbered negatively, and care should be taken to avoid
- * duplicates.  -1 through -127 are reserved by libstash.
- */
+#define	_CW_XEPV_NONE		0
+#define	_CW_XEPV_CODE		1
+#define	_CW_XEPV_FINALLY	2
 
 typedef enum {
 	_CW_XEPS_TRY,

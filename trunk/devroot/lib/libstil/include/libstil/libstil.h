@@ -83,22 +83,22 @@ extern  "C" {
 #define	_LIBSTASH_USERDICT_HASH		  64
 
 /*
- * Exception numbers.  libstil reserves -128 to -255.
+ * Exception numbers.  libstil reserves 128 through 255.
  */
-#define	_CW_STILX_MAX			-128
-#define	_CW_STILX_MIN			-255
+#define	_CW_STILX_MIN			128
+#define	_CW_STILX_MAX			255
 
 /* errordict not found, or handler not found in errordict. */
-#define	_CW_STILX_ERRORDICT		-128
+#define	_CW_STILX_ERRORDICT		128
 /* Error accessing currenterror. */
-#define	_CW_STILX_CURRENTERROR		-129
+#define	_CW_STILX_CURRENTERROR		129
 
 /* Internal use, for the exit operator. */
-#define	_CW_STILX_EXIT			-129
+#define	_CW_STILX_EXIT			130
 /* Internal use, for the stop operator. */
-#define	_CW_STILX_STOP			-130
+#define	_CW_STILX_STOP			131
 /* Internal use, for the quit operator, caught by the start operator. */
-#define	_CW_STILX_QUIT			-131
+#define	_CW_STILX_QUIT			132
 
 #include "libstil_defs.h"
 #include "libstil_incs.h"

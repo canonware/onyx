@@ -54,7 +54,7 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 		retval->magic = _CW_POOL_MAGIC;
 #endif
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_pool_t *)v_retval;
 		switch (try_stage) {
 		case 1:
@@ -231,7 +231,7 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 				    allocation, NULL);
 				try_stage = 2;
 			}
-			xep_catch (_CW_XEPV_OOM) {
+			xep_catch (_CW_STASHX_OOM) {
 				allocation = (cw_pool_item_t *)v_allocation;
 				switch (try_stage) {
 				case 1:

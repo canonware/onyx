@@ -85,7 +85,7 @@ res_new(cw_res_t *a_res, cw_mem_t *a_mem)
 		    ch_string_key_comp);
 		try_stage = 2;
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_res_t *)v_retval;
 		switch (try_stage) {
 		case 1:
@@ -1055,7 +1055,7 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 		temp_val = (char *)mem_malloc(a_res->mem, strlen(a_val) +
 		    1);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		mem_free(a_res->mem, temp_name);
 	}
 	xep_end();
@@ -1089,7 +1089,7 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 		dch_insert(&a_res->hash, (void *)temp_name, (void *)temp_val,
 		    NULL);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		/*
 		 * We may have removed the old definition of the resource
 		 * without inserting the new definition, which means that state

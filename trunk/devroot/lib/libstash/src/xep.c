@@ -44,7 +44,7 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 	cw_xep_t	*xep_first, *xep;
 
 	_cw_assert(cw_g_xep_initialized);
-	_cw_assert(a_value < _CW_XEPS_FINALLY);
+	_cw_assert(a_value > _CW_XEPS_FINALLY);
 
 	/*
 	 * Iterate backward through the exception handlers until the exception
@@ -55,7 +55,7 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 		xep = qr_prev(xep_first, link);
 	else {
 		/* No exception handlers at all. */
-		_cw_out_put("[s](): Unhandled exception [i|s:s] "
+		_cw_out_put("[s](): Unhandled exception [i] "
 		    "thrown at [s], line [i]\n",
 		    __FUNCTION__, a_value, a_filename, a_line_num);
 		abort();
@@ -90,7 +90,7 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 	} while (xep != xep_first);
 
 	/* No more exception handlers. */
-	_cw_out_put("[s](): Unhandled exception [i|s:s] "
+	_cw_out_put("[s](): Unhandled exception [i] "
 	    "thrown at [s], line [i]\n",
 	    __FUNCTION__, a_value, xep->filename, xep->line_num);
 	abort();
@@ -198,7 +198,7 @@ xep_p_unlink(cw_xep_t *a_xep)
 			} else {
 				/* No more exception handlers. */
 				_cw_out_put("[s](): Unhandled exception "
-				    "[i|s:s] thrown at [s], line [i]\n",
+				    "[i] thrown at [s], line [i]\n",
 				    __FUNCTION__, a_xep->value, a_xep->filename,
 				    a_xep->line_num);
 				abort();

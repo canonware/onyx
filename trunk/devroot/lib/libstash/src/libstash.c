@@ -60,7 +60,7 @@ libstash_init(void)
 		out_default_fd_set(cw_g_out, 1);
 		try_stage = 4;
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
 		case 3:
 			mem_delete(cw_g_mem);

@@ -110,7 +110,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		/* Now that we have an initial thread, activate the GC. */
 		stila_active_set(&retval->stila, TRUE);
 	}
-	xep_catch (_CW_XEPV_OOM) {
+	xep_catch (_CW_STASHX_OOM) {
 		retval = (cw_stil_t *)v_retval;
 		switch (try_stage) {
 		case 10:

@@ -55,7 +55,7 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 		retval->ch = ch_new(NULL, a_mem, retval->base_table,
 		    retval->hash, retval->key_comp);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_dch_t *)v_retval;
 		if (a_dch->is_malloced)
 			mem_free(a_mem, retval);

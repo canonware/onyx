@@ -1,3 +1,8 @@
+2001-02-22  Jason Evans  <jasone@canonware.com>
+
+	* : Rename exceptions from _CW_XEPV_* to _CW_STASHX_*, and
+	renumber to positive numbers.
+
 2001-02-20  Jason Evans  <jasone@canonware.com>
 
 	* src/ch.c (ch_get_iterate): Do not lose the internal list when

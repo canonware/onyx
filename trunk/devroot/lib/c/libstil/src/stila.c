@@ -235,7 +235,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 		try_stage = 7;
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
 		case 7:
 		case 6:

@@ -921,7 +921,7 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 			ent = out_p_ent_get(a_out, type, type_len);
 			if (ent == NULL) {
 				/* No handler. */
-				xep_throw(_CW_XEPV_OUT_PARSE);
+				xep_throw(_CW_STASHX_OUT_PARSE);
 			}
 
 			switch (ent->size) {
@@ -1027,7 +1027,7 @@ out_p_buffer_expand(cw_out_t *a_out, cw_uint32_t *ar_acount, cw_uint8_t
 			    a_out->mem : NULL, a_buffer, a_expand_size);
 			/* realloc() copies for us. */
 		}
-		xep_catch(_CW_XEPV_OOM) {
+		xep_catch(_CW_STASHX_OOM) {
 			mem_free((a_out != NULL) ? a_out->mem : NULL,
 			    a_buffer);
 		}
@@ -1098,7 +1098,7 @@ out_p_format_scan(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 		}
 	}
 	if (state != NORMAL)
-		xep_throw(_CW_XEPV_OUT_PARSE);
+		xep_throw(_CW_STASHX_OUT_PARSE);
 	/*
 	 * Accept the last el, if there is one.
 	 */

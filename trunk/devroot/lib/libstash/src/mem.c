@@ -68,7 +68,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 #endif
 		retval->handler_data = NULL;
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_mem_t *)v_retval;
 		switch (try_stage) {
 		case 1:
@@ -139,7 +139,7 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 	retval = _cw_malloc(a_size);
 	if (retval == NULL)
-		xep_throw(_CW_XEPV_OOM);
+		xep_throw(_CW_STASHX_OOM);
 
 #ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)
@@ -216,7 +216,7 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 
 	retval = _cw_calloc(a_number, a_size);
 	if (retval == NULL)
-		xep_throw(_CW_XEPV_OOM);
+		xep_throw(_CW_STASHX_OOM);
 
 #ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)
@@ -298,7 +298,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 
 	retval = _cw_realloc(a_ptr, a_size);
 	if (retval == NULL)
-		xep_throw(_CW_XEPV_OOM);
+		xep_throw(_CW_STASHX_OOM);
 
 #ifdef _LIBSTASH_MEM_DBG
 	if (a_filename == NULL)

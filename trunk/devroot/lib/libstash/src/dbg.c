@@ -35,7 +35,7 @@ dbg_new(cw_mem_t *a_mem)
 		retval->flag_hash = ch_new(NULL, a_mem, _CW_DBG_TABLE_SIZE,
 		    ch_string_hash, ch_string_key_comp);
 	}
-	xep_catch(_CW_XEPV_OOM) {
+	xep_catch(_CW_STASHX_OOM) {
 		mtx_delete(&retval->lock);
 		mem_free(a_mem, retval);
 	}
@@ -74,7 +74,7 @@ dbg_register(cw_dbg_t *a_dbg, const char *a_flag)
 				chi = (cw_chi_t *)mem_malloc(a_dbg->mem,
 				    sizeof(cw_chi_t));
 			}
-			xep_catch(_CW_XEPV_OOM) {
+			xep_catch(_CW_STASHX_OOM) {
 				mtx_unlock(&a_dbg->lock);
 			}
 			xep_end();

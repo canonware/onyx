@@ -62,7 +62,7 @@ void		libsock_l_wakeup(void);
  *
  * <<< Exception(s) >>>
  *
- * _CW_XEPV_OOM.
+ * _CW_STASHX_OOM.
  *
  * <<< Description >>>
  *

@@ -667,7 +667,7 @@ main()
 		xep_try {
 			out_put(out_p, "[");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}
@@ -681,7 +681,7 @@ main()
 		xep_try {
 			out_put(out_p, "[i");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}
@@ -695,7 +695,7 @@ main()
 		xep_try {
 			out_put(out_p, "[i|");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}
@@ -709,7 +709,7 @@ main()
 		xep_try {
 			out_put(out_p, "[i|]");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}
@@ -723,7 +723,7 @@ main()
 		xep_try {
 			out_put(out_p, "[i|x]");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}
@@ -737,7 +737,7 @@ main()
 		xep_try {
 			out_put(out_p, "[i|x:|]");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}
@@ -751,7 +751,7 @@ main()
 		xep_try {
 			out_put(out_p, "[foo]");
 		}
-		xep_catch(_CW_XEPV_OUT_PARSE) {
+		xep_catch(_CW_STASHX_OUT_PARSE) {
 			xep_handled();
 			caught = TRUE;
 		}

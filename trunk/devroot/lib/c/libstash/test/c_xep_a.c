@@ -11,12 +11,12 @@
 
 #include "../include/libstash/libstash.h"
 
-#define	_CW_XEPV_FOO	-128
-#define	_CW_XEPV_BAR	-129
-#define	_CW_XEPV_BIZ	-130
-#define	_CW_XEPV_BAZ	-131
-#define	_CW_XEPV_BANG	-132
-#define	_CW_XEPV_BAM	-133
+#define	_CW_XEPV_FOO	128
+#define	_CW_XEPV_BAR	129
+#define	_CW_XEPV_BIZ	130
+#define	_CW_XEPV_BAZ	131
+#define	_CW_XEPV_BANG	132
+#define	_CW_XEPV_BAM	133
 
 void
 func_a(void)
