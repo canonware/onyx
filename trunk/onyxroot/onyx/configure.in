@@ -470,6 +470,7 @@ if test "x$enable_slate" = "x1" ; then
      -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" \
      -o "x$enable_modules" = "x0" ; then
     enable_slate="0"
+    dnl XXX We need modpane too, which is configured later.
   fi
 
   if test "x$enable_slate" = "x0" ; then
@@ -621,10 +622,57 @@ if test "x$enable_modules" = "x1" ; then
   else
     enable_modprompt="0"
   fi
+  if test "x$enable_modprompt" = "x0" ; then
+    AC_MSG_RESULT(Missing features or configuration options necessary for modprompt)
+  fi
+
+  dnl modpane.
+  if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" \
+     -o "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" ; then
+    enable_modpane="1"
+
+    dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
+    TEMP_CPPFLAGS="$CPPFLAGS"
+    TEMP_LDFLAGS="$LDFLAGS"
+    if test "x$MODPANE_CPPFLAGS" = "x" ; then
+      MODPANE_CPPFLAGS=
+    else
+      CPPFLAGS="$MODPANE_CPPFLAGS $CPPFLAGS"
+    fi
+    if test "x$MODPANE_LDFLAGS" = "x" ; then
+      MODPANE_LDFLAGS=
+    else
+      LDFLAGS="$MODPANE_LDFLAGS $LDFLAGS"
+    fi
+
+    dnl XXX Check for pty-related functionality.
+
+    dnl Check if modpane is in the source tree.
+    if test "x$enable_modpane" = "x1" ; then
+      CW_BUILD_MOD(modpane, enable_modpane)
+    fi
+    if test "x$enable_modpane" = "x1" ; then
+      AC_DEFINE(CW_USE_MODPANE)
+      AC_SUBST(MODPANE_CPPFLAGS)
+      AC_SUBST(MODPANE_LDFLAGS)
+    fi
+
+    dnl Restore CPPFLAGS and LDFLAGS.
+    CPPFLAGS="$TEMP_CPPFLAGS"
+    LDFLAGS="$TEMP_LDFLAGS"
+  else
+    enable_modpane="0"
+  fi
+  if test "x$enable_modpane" = "x0" ; then
+    AC_MSG_RESULT(Missing features or configuration options necessary for modpane)
+  fi
 else
+  AC_MSG_RESULT(Modules disabled; not doing module configuration)
   enable_modprompt="0"
+  enable_modpane="0"
 fi
 AC_SUBST(enable_modprompt)
+AC_SUBST(enable_modpane)
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
