@@ -32,3 +32,4 @@
 #include "stils.h"
 #include "stilt.h"
 #include "systemdict.h"
+#include "threaddict.h"

@@ -84,6 +84,12 @@ struct cw_stilt_s {
 	cw_stils_t	dict_stils;
 
 	/*
+	 * Local dictionaries.
+	 */
+	cw_stilo_t	threaddict;
+	cw_stilo_t	localdict;
+
+	/*
 	 * File handles.
 	 *
 	 * XXX File handles should eventually be objects in threaddict.

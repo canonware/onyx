@@ -18,6 +18,9 @@
 
 /*  #define	_CW_STILT_SCANNER_DEBUG */
 
+/* Initial size of localdict. */
+#define	_CW_STILT_LOCALDICT_SIZE	 64
+
 #define _CW_STILT_GETC(a_i)						\
 	a_stilt->tok_str[(a_i)]
 
@@ -208,6 +211,8 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 			memset(a_stilt, 0, sizeof(cw_stilt_t));
 			retval->is_malloced = TRUE;
 		}
+		retval->stil = a_stil;
+		retval->tok_str = retval->buffer;
 		try_stage = 1;
 
 		stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil));
@@ -231,10 +236,30 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 6;
 
+		/* Create and push threaddict onto the dictionary stack. */
+		threaddict_populate(&retval->threaddict, retval);
+		stilo = stils_push(&retval->dict_stils);
+		stilo_dup(stilo, &retval->threaddict);
+
+		/* Push systemdict onto the dictionary stack. */
+		stilo = stils_push(&retval->dict_stils);
+		stilo_dup(stilo, stil_systemdict_get(a_stil));
+
+		/* Push globaldict onto the dictionary stack. */
+		stilo = stils_push(&retval->dict_stils);
+		stilo_dup(stilo, stil_globaldict_get(a_stil));
+
+		/* Create and push localdict onto the dictionary stack. */
+		stilo_dict_new(&retval->localdict, retval,
+		    _CW_STILT_LOCALDICT_SIZE);
+		stilo = stils_push(&retval->dict_stils);
+		stilo_dup(stilo, &retval->localdict);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
 		switch (try_stage) {
+		case 6:
+			stils_delete(&retval->dict_stils, retval);
 		case 5:
 			stils_delete(&retval->data_stils, retval);
 		case 4:
@@ -252,17 +277,6 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		}
 	}
 	xep_end();
-
-	/* XXX Create and push threaddict onto the dictionary stack. */
-	/* Push systemdict onto the dictionary stack. */
-	stilo = stils_push(&retval->dict_stils);
-	stilo_dup(stilo, stil_systemdict_get(a_stil));
-	/* XXX Push globaldict onto the dictionary stack. */
-	/* XXX Create and push localdict onto the dictionary stack. */
-
-	retval->stil = a_stil;
-
-	retval->tok_str = retval->buffer;
 
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILT_MAGIC;

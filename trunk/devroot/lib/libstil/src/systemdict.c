@@ -233,7 +233,7 @@ void
 systemdict_add(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*stack;
-	cw_stilo_t	t_stilo, *a, *b;
+	cw_stilo_t	*a, *b;
 
 	stack = stilt_data_stack_get(a_stilt);
 	
@@ -243,8 +243,7 @@ systemdict_add(cw_stilt_t *a_stilt)
 	    STILOT_INTEGER)
 		xep_throw(_CW_STILX_TYPECHECK);
 
-	stilo_integer_new(&t_stilo, stilo_integer_get(a));
-	stilo_integer_add(&t_stilo, b, a);
+	stilo_integer_add(a, b, a);
 	stils_pop(stack);
 }
 
