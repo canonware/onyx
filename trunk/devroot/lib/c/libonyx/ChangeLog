@@ -1,3 +1,10 @@
+2001-09-21  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_gc_entry): Only do periodic collection if there
+	has been allocation activity since the last collection.  Before
+	this fix, the code was doing periodic collection if there had been
+	no allocation since the last periodic check.
+
 2001-09-16  Jason Evans  <jasone@canonware.com>
 
 	* src/nxo_string.c (nxo_string_cstring): Add.

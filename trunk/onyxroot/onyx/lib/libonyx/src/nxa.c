@@ -779,7 +779,7 @@ nxa_p_gc_entry(void *a_arg)
 	cw_nxa_t	*nxa = (cw_nxa_t *)a_arg;
 	struct timespec	period;
 	cw_nxam_t	message;
-	cw_bool_t	shutdown;
+	cw_bool_t	allocated, shutdown;
 
         /*
 	 * Any of the following conditions will cause a collection:
@@ -792,7 +792,7 @@ nxa_p_gc_entry(void *a_arg)
 	 * 3) Collection was explicitly requested.
 	 */
 	period.tv_nsec = 0;
-	for (shutdown = FALSE; shutdown == FALSE;) {
+	for (allocated = shutdown = FALSE; shutdown == FALSE;) {
 		mtx_lock(&nxa->lock);
 		period.tv_sec = nxa->gcdict_period;
 		mtx_unlock(&nxa->lock);
@@ -807,13 +807,26 @@ nxa_p_gc_entry(void *a_arg)
 		case NXAM_NONE:
 			mtx_lock(&nxa->lock);
 			if (nxa->gcdict_active) {
-				if (nxa->gc_allocated == FALSE) {
+				if (nxa->gc_allocated) {
 					/*
-					 * No additional registrations have
-					 * happened since the last mq_timedget()
-					 * timeout; collect.
+					 * Record the fact that there has been
+					 * allocation activity.
 					 */
-					nxa_p_collect(nxa);
+					allocated = TRUE;
+				}
+
+				if (nxa->gc_allocated == FALSE) {
+					if (allocated) {
+						/*
+						 * No additional registrations
+						 * have happened since the last
+						 * mq_timedget() timeout and
+						 * some allocation has occurred;
+						 * collect.
+						 */
+						nxa_p_collect(nxa);
+						allocated = FALSE;
+					}
 				} else {
 					/*
 					 * Reset the allocated flag so that at
@@ -830,6 +843,7 @@ nxa_p_gc_entry(void *a_arg)
 		case NXAM_COLLECT:
 			mtx_lock(&nxa->lock);
 			nxa_p_collect(nxa);
+			allocated = FALSE;
 			mtx_unlock(&nxa->lock);
 			break;
 		case NXAM_RECONFIGURE:
