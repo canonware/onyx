@@ -42,7 +42,7 @@ The \classname{nxo} class is the basis for the onyx type system.
 Due to limitations of the C programming language, it is the responsibility of
 the application to do type checking to assure that an incompatible
 \classname{nxo} object is not passed to a type-specific function.  For example,
-passing a file \classname{nxo} to \cfunc{nxo_string_get}{} is prohibited, and
+passing a file \classname{nxo} to \cfunc{nxo\_string\_get}{} is prohibited, and
 will result in undefined behaviour (including crashes).
 
 Composite objects contain a reference to an \classname{nxoe} object.  For the
@@ -89,8 +89,8 @@ The following functions are applicable to all types of \classname{nxo} objects.
 		Compare \cvar{a\_a} and \cvar{a\_b}.
 	\end{capilist}
 \label{nxo_dup}
-\index{\cppmacro{nxo\_dup}{}}
-\citem{\cppmacro[void]{nxo\_dup}{cw\_nxo\_t *a\_to, cw\_nxo\_t *a\_from}}
+\index{\cfunc{nxo\_dup}{}}
+\citem{\cfunc[void]{nxo\_dup}{cw\_nxo\_t *a\_to, cw\_nxo\_t *a\_from}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -107,8 +107,8 @@ The following functions are applicable to all types of \classname{nxo} objects.
 		the value of a composite object.
 	\end{capilist}
 \label{nxo_type_get}
-\index{\cppmacro{nxo\_type\_get}{}}
-\citem{\cppmacro[cw\_nxot\_t]{nxo\_type\_get}{cw\_nxo\_t *a\_nxo}}
+\index{\cfunc{nxo\_type\_get}{}}
+\citem{\cfunc[cw\_nxot\_t]{nxo\_type\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -222,8 +222,8 @@ The following functions are applicable to all types of \classname{nxo} objects.
 		return whether \cvar{a\_nxo} is implicitly locked.
 	\end{capilist}
 \label{nxo_attr_get}
-\index{\cppmacro{nxo\_attr\_get}{}}
-\citem{\cppmacro[cw\_nxoa\_t]{nxo\_attr\_get}{cw\_nxo\_t *a\_nxo}}
+\index{\cfunc{nxo\_attr\_get}{}}
+\citem{\cfunc[cw\_nxoa\_t]{nxo\_attr\_get}{cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -245,8 +245,8 @@ The following functions are applicable to all types of \classname{nxo} objects.
 		Return the attribute for \cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_attr_get}
-\index{\cppmacro{nxo\_attr\_set}{}}
-\citem{\cppmacro[void]{nxo\_attr\_set}{cw\_nxo\_t *a\_nxo, cw\_nxoa\_t a\_attr}}
+\index{\cfunc{nxo\_attr\_set}{}}
+\citem{\cfunc[void]{nxo\_attr\_set}{cw\_nxo\_t *a\_nxo, cw\_nxoa\_t a\_attr}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
