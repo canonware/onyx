@@ -3981,7 +3981,30 @@ systemdict_token(cw_stilt_t *a_stilt)
 void
 systemdict_truncate(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*file, *length;
+	cw_stilte_t	error;
+
+	ostack = stilt_ostack_get(a_stilt);
+	STILS_GET(length, ostack, a_stilt);
+	STILS_DOWN_GET(file, ostack, a_stilt, length);
+	if (stilo_type_get(file) != STILOT_FILE || stilo_type_get(length) !=
+	    STILOT_INTEGER) {
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+		return;
+	}
+	if (stilo_integer_get(length) < 0) {
+		stilt_error(a_stilt, STILTE_RANGECHECK);
+		return;
+	}
+
+	error = stilo_file_truncate(file, stilo_integer_get(length));
+	if (error) {
+		stilt_error(a_stilt, error);
+		return;
+	}
+
+	stils_npop(ostack, 2);
 }
 
 void

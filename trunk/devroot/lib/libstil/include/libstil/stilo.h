@@ -245,7 +245,7 @@ cw_stilte_t	stilo_file_output(cw_stilo_t *a_stilo, const char *a_format,
     ...);
 cw_stilte_t	stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size,
     const char *a_format, ...);
-cw_stilte_t	stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length);
+cw_stilte_t	stilo_file_truncate(cw_stilo_t *a_stilo, off_t a_length);
 cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
 cw_stilte_t	stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t
     a_position);

@@ -2741,7 +2741,7 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 
 /* STILTE_IOERROR */
 cw_stilte_t
-stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length)
+stilo_file_truncate(cw_stilo_t *a_stilo, off_t a_length)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_file_t	*file;
