@@ -4820,9 +4820,9 @@ systemdict_nbpop(cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
     }
-    if (count - 1 >= nxo_stack_count(ostack))
+    if (count > nxo_stack_count(ostack) - 1)
     {
-	nxo_thread_nerror(a_thread, NXN_typecheck);
+	nxo_thread_nerror(a_thread, NXN_stackunderflow);
 	return;
     }
 
