@@ -1,3 +1,17 @@
+2002-04-04 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + poll
+	  + gstdin, gstdout, gstderr
+	  + setstdin, setstdout, setstderr
+	  + gsetstdin, gsetstdout, geststderr
+
+	* lib/libonyx/src/nx.c : Add nx_stdin_set(), nx_stdout_set(), and
+          nx_stderr_set().
+
+	* lib/libonyx/src/nxo_thread.c : Add nxo_thread_stdin_set(),
+          nxo_thread_stdout_set(), and nxo_thread_stderr_set().
+
 2002-03-31 : Jason Evans <jasone@canonware.com>
 
 	* Add optional mode argument to the open operator.
