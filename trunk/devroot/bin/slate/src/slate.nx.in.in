@@ -192,6 +192,23 @@ $keytable <
     `\x00' {
 	bmark 0 bpoint marker_seek pop
     }
+    `\ck' {
+	# Move bmark to eol.
+	bmark 0 bpoint marker_seek pop
+	bmark 1 marker_seekline
+
+	# Cut if there are any data to remove.
+	bpoint bmark marker_range_get length 0 gt {
+	    # Start group.
+	    scratch bpoint buffer_history_startgroup
+
+	    # Cut.
+	    bpoint bmark marker_range_cut pop
+
+	    # End group.
+	    scratch buffer_history_endgroup
+	} if
+    }
     `\cw' {
 	scratch bpoint buffer_history_startgroup
 	bmark bpoint marker_range_cut pop
