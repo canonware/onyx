@@ -1,0 +1,336 @@
+#!@PERL@ -w
+#-*-mode:perl-*-
+#############################################################################
+#
+# <Copyright = "jasone">
+# <License>
+#
+#############################################################################
+#
+# Version: <Version>
+#
+# <<< Description >>>
+#
+# Test harness.
+#
+#############################################################################
+
+# Shut off buffering.
+select(STDOUT);
+$| = 1;
+
+#
+# Parse command-line arguments.
+#
+use Getopt::Long;
+Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
+
+# Set option defaults for optional arguments.
+$opt_help = 0;
+$opt_verbose = 0;
+$opt_quiet = 0;
+$opt_ustats = 0;
+$opt_sequence = 0;
+$opt_diff = 0;
+
+$opt_retval = 
+&GetOptions("h|help" => \$opt_help,
+	    "v|verbose" => \$opt_verbose,
+	    "q|quiet" => \$opt_quiet,
+	    "u|ustats" => \$opt_ustats#,
+#	    "s|sequence" => \$opt_sequence,
+#	    "d|diff" => \$opt_diff
+#	    "pristinedir=s" => \$opt_pristinedir,
+# 	    "" => \$opt_?,
+	    );
+
+$mode = "s";
+for ($i = 0; $i < $#ARGV; $i++)
+{
+    if (($ARGV[$i] eq "-s") || ($ARGV[$i] eq "--sequence"))
+    {
+	$mode = "s";
+    }
+    elsif (($ARGV[$i] eq "-d") || ($ARGV[$i] eq "--diff"))
+    {
+	$mode = "d";
+    }
+    elsif (-x $ARGV[$i])
+    {
+	if ($mode eq "s")
+	{
+	    @STESTS = (@STESTS, $ARGV[$i]);
+	}
+	else
+	{
+	    @DTESTS = (@DTESTS, $ARGV[$i]);
+	}
+    }
+    else
+    {
+	if (!$opt_quiet)
+	{
+	    print STDERR "Cannot run \"$ARGV[$i]\"\n";
+	}
+    }
+}
+
+if ($opt_help)
+{
+    &usage();
+    exit(0);
+}
+
+if (($#ARGV < 0)
+    || ($opt_retval == 0))
+{
+    &usage();
+    exit 1;
+}
+
+if ($opt_verbose && $opt_quiet)
+{
+    print STDERR "-v and -q are incompatible\n";
+    &usage();
+    exit 1;
+}
+
+if ($opt_sequence && $opt_diff)
+{
+    print STDERR "-s and -d are incompatible\n";
+    &usage();
+    exit 1;
+}
+elsif (!$opt_sequence && !$opt_diff)
+{
+    # Set default, since the mode wasn't specified on the command line.
+    $opt_sequence = 1;
+}
+
+if ($opt_verbose)
+{
+    print STDERR "Option values: h:$opt_help, v:$opt_verbose, q:$opt_quiet, "
+	. "u:$opt_ustats, s:$opt_sequence, d:$opt_diff\n";
+    printf STDERR "Sequence tests (%d total): @STESTS\n", $#STESTS + 1;
+    printf STDERR "Diff tests (%d total): @DTESTS\n", $#DTESTS + 1;
+}
+
+@TSTATS =
+(
+ "---------------------------------------------------------------\n",
+ "Test                            c_user c_system c_total    chng\n",
+ "passed/FAILED                   h_user h_system h_total  %% chng\n"
+ );
+@STATS = (@TSTATS);
+
+if (!$opt_quiet)
+{
+    foreach $line (@TSTATS)
+    {
+	printf STDOUT "$line";
+    }
+}
+
+foreach $test (@STESTS)
+{
+    # sequence mode.
+    $okay = 1;
+
+    &run_test();
+
+    if (open (STEST_OUT, "<./$test.out"))
+    {
+
+
+    }
+
+    &print_stats();
+}
+foreach $test (@DTESTS)
+{
+    # Diff mode.
+    $okay = 1;
+
+    &run_test();
+
+    if (-e "./$test.out" && -e "./$test.exp")
+    {
+	`diff ./$test.out ./$test.exp > ./$test.diff 2>&1`;
+	if ($?)
+	{
+	    $okay = 0;
+	    if ($opt_verbose)
+	    {
+		print STDERR 
+		    "Unable to run \"diff ./$test.out ./$test.exp > " 
+			. "./$test.diff 2>&1\"\n";
+	    }
+	}
+
+	if (-s "$test.diff")
+	{
+	    $okay = 0;
+	}
+    }
+    else
+    {
+	$okay = 0;
+	if ($opt_verbose)
+	{
+	    print STDERR "Nonexistent expected output file \"$test.exp\"\n";
+	}
+    }
+
+    &print_stats();
+}
+
+# Print summary stats.
+$tt_str = sprintf ("%d / %d passed (%5.2f%%%%)",
+		   ($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1),
+		   $#STESTS + $#DTESTS + 2,
+		   (($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1)) 
+		   / ($#STESTS + $#DTESTS + 2) * 100);
+
+$t_str = sprintf ("Totals                         %7.2f  %7.2f %7.2f %7.2f\n"
+		  . "%s%s %7.2f  %7.2f %7.2f %7.2f\n",
+		  0, 0, 0, 0,
+		  $tt_str, ' ' x (31 - length($tt_str)),
+		  0, 0, 0, 0);
+
+@TSTATS = ("===============================================================\n",
+	   $t_str,
+	   "---------------------------------------------------------------\n");
+@STATS = (@STATS, @TSTATS);
+if (!$opt_quiet)
+{
+    foreach $line (@TSTATS)
+    {
+	printf STDOUT "$line";
+    }
+}
+
+#  if (!$opt_quiet)
+#  {
+#      foreach $line (@STATS)
+#      {
+#  	printf STDOUT "$line";
+#      }
+#  }
+    
+
+# End of main execution.
+
+sub run_test
+{
+    if ($test eq $ARGV[0])
+    {
+	@TSTATS = ("===============================================================\n");
+    }
+    else
+    {
+	@TSTATS = ("---------------------------------------------------------------\n");
+    }
+
+    $t_str = sprintf ("%s%s", $test, ' ' x (30 - length($test)));
+    @TSTATS = (@TSTATS, $t_str);
+    @STATS = (@STATS, @TSTATS);
+    if (!$opt_quiet)
+    {
+	foreach $line (@TSTATS)
+	{
+	    printf STDOUT "$line";
+	}
+    }
+
+    ($utime, $stime, $cutime_a, $cstime_a) = times;
+    `./$test > ./$test.out 2>&1`;
+    ($utime, $stime, $cutime_b, $cstime_b) = times;
+
+    if ($?)
+    {
+	$okay = 0;
+	if ($opt_verbose)
+	{
+	    print STDERR "Unable to run \"./$test > ./$test.out 2>&1\"\n";
+	}
+    }
+}
+
+sub print_stats
+{
+    if (!$okay)
+    {
+	@FAILED_TESTS = (@FAILED_TESTS, $test);
+    }
+
+    if (-e "$test.perf")
+    {
+	# XXX Open perf file and read $hutime and $hstime.
+	die "Unimplemented\n";
+	$t_str = sprintf (" %7.2f %7.2f %7.2f %7.2f\n"
+			  . " %30s %7.2f %7.2f %7.2f %7.2f\n",
+			  $cutime_b - $cutime_a,
+			  $cstime_b - $cstime_a,
+			  ($cutime_b - $cutime_a) + ($cstime_b - $cstime_a),
+			  ((($cutime_b - $cutime_a) + ($cstime_b - $cstime_a))
+			   - ($hutime + $hstime)),
+			  $hutime, $hstime, 
+			  (((($cutime_b - $cutime_a) + ($cstime_b - $cstime_a))
+			    - ($hutime + $hstime)) / ($hutime + $hstime)));
+    }
+    else
+    {
+	$t_str = sprintf (" %7.2f  %7.2f %7.2f        \n"
+			  . "%s%s                                 \n",
+			  $cutime_b - $cutime_a,
+			  $cstime_b - $cstime_a,
+			  ($cutime_b - $cutime_a) + ($cstime_b - $cstime_a),
+			  $okay ? "passed" : "FAILED",
+			  ' ' x (30 - length($okay ? "(passed)" : "(FAILED)")));
+    }
+    @TSTATS = ($t_str);
+    @STATS = (@STATS, @TSTATS);
+    if (!$opt_quiet)
+    {
+	foreach $line (@TSTATS)
+	{
+	    printf STDOUT "$line";
+	}
+    }
+}
+
+sub usage
+{
+    print <<EOF;
+$0 usage:
+    $0 [<options>] -- {[-s | -d | --sequence | --diff] <test>+}+
+
+    Option        | Description
+    --------------+-------------------------------------------------------------
+    -h --help     | Print usage and exit.
+    -v --verbose  | Verbose (incompatible with quiet).
+    -q --quiet    | Quiet (incompatible with verbose).
+    -u --ustats   | Update historical statistics (stored in "<test>.perf".
+    --------------+-------------------------------------------------------------
+
+    Flag          | Description
+    --------------+-------------------------------------------------------------
+    -s --sequence | Sequence mode (default).
+                  | Output to stdout of the following form is expected:
+                  | 
+                  | -----------------
+                  | 1..<n>
+                  | {not}* ok [1]
+                  | {not}* ok [2]
+                  | ...
+                  | {not}* ok [n]
+                  | -----------------
+                  | 
+                  | 1 <= <n> < 2^31
+                  | 
+    -d --diff     | Diff mode (incompatible with sequence mode).
+                  | If <test>.exp exists, diff it with the output from <test> to
+                  | determine success or failure.
+    --------------+-------------------------------------------------------------
+EOF
+}

@@ -98,6 +98,7 @@ CAT     := @CAT@
 PERL    := @PERL@
 BASENAME:= @BASENAME@
 DIFF    := @DIFF@
+VERIFY  := test/verify
 PMERGE  := test/pmerge
 PSTUB   := test/pstub
 
@@ -287,33 +288,35 @@ bins :
 tests : $(CTESTS) $(PTESTS) $(BTESTS)
 
 check : tests
-	@$(SHELL) -c \
-	'printf "Running regression tests:\\n" ;\
-	printf "%s\\n" "---------------------------------------------" ;\
-	for i in $(PTESTS); do \
-	printf "%s" "$$i..." ;\
-	$$i ;\
-	done ;\
-	for i in $(CTESTS); do \
-	printf "%s" "$$i..."; \
-	$$i > $$i.out 2>&1 ;\
-	$(DIFF) $$i.out $$i.exp > $$i.diff ;\
-	if [ -s $$i.diff ] ; then \
-	printf "%s\\n" "failed. ****************" ;\
-	else \
-	printf "%s\\n" "passed." ;\
-	rm $$i.diff ;\
-	fi \
-	done ;\
-	printf "%s\\n\\n" "---------------------------------------------" ;\
-	printf "%s\\n" "The following regression tests failed:" ;\
-	printf "%s\\n" "---------------------------------------------" ;\
-	for i in `find ./test -print | grep "\.diff$$"`; do \
-	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"` ;\
-	done ;\
-	printf "%s\\n" "---------------------------------------------" ;\
-	cd - \
-	'
+	@$(VERIFY) -d $(CTESTS)
+
+# 	@$(SHELL) -c \
+# 	'printf "Running regression tests:\\n" ;\
+# 	printf "%s\\n" "---------------------------------------------" ;\
+# 	for i in $(PTESTS); do \
+# 	printf "%s" "$$i..." ;\
+# 	$$i ;\
+# 	done ;\
+# 	for i in $(CTESTS); do \
+# 	printf "%s" "$$i..."; \
+# 	$$i > $$i.out 2>&1 ;\
+# 	$(DIFF) $$i.out $$i.exp > $$i.diff ;\
+# 	if [ -s $$i.diff ] ; then \
+# 	printf "%s\\n" "failed. ****************" ;\
+# 	else \
+# 	printf "%s\\n" "passed." ;\
+# 	rm $$i.diff ;\
+# 	fi \
+# 	done ;\
+# 	printf "%s\\n\\n" "---------------------------------------------" ;\
+# 	printf "%s\\n" "The following regression tests failed:" ;\
+# 	printf "%s\\n" "---------------------------------------------" ;\
+# 	for i in `find ./test -print | grep "\.diff$$"`; do \
+# 	echo `echo $$i | sed "s/\.\/\(.*\)\.diff/\1/g"` ;\
+# 	done ;\
+# 	printf "%s\\n" "---------------------------------------------" ;\
+# 	cd - \
+# 	'
 
 install : install_s @without_threads@install_r
 
@@ -391,6 +394,7 @@ distclean : clean
 	rm -f config.status
 	rm -f include/libstash/libstash_defs.h
 	rm -f TAGS
+	rm -f $(VERIFY)
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 

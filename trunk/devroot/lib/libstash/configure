@@ -2403,7 +2403,8 @@ ac_given_INSTALL="$INSTALL"
 trap 'rm -fr `echo "Makefile.bsd \
 Makefile.gnu \
 test/pmerge \
-test/pstub include/libstash/libstash_defs.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+test/pstub \
+test/verify include/libstash/libstash_defs.h" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2499,7 +2500,8 @@ cat >> $CONFIG_STATUS <<EOF
 CONFIG_FILES=\${CONFIG_FILES-"Makefile.bsd \
 Makefile.gnu \
 test/pmerge \
-test/pstub"}
+test/pstub \
+test/verify"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then
@@ -2677,3 +2679,6 @@ chmod +x $CONFIG_STATUS
 rm -fr confdefs* $ac_clean_files
 test "$no_create" = yes || ${CONFIG_SHELL-/bin/sh} $CONFIG_STATUS || exit 1
 
+
+echo chmod u+x test/verify
+chmod u+x test/verify

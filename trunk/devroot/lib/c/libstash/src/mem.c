@@ -142,7 +142,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
       if (allocation == NULL)
       {
 	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "malloc(%d) returned NULL\n",
+		    "malloc(%lu) returned NULL\n",
 		    sizeof(struct cw_mem_item_s));
       }
       else
@@ -169,7 +169,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   if (retval == NULL)
   {
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"malloc(%d) returned NULL\n", a_size);
+		"malloc(%lu) returned NULL\n", a_size);
   }
 #endif
 
@@ -232,7 +232,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
       if (allocation == NULL)
       {
 	log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		    "malloc(%d) returned NULL\n",
+		    "malloc(%lu) returned NULL\n",
 		    sizeof(struct cw_mem_item_s));
       }
       else
@@ -260,7 +260,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   if (retval == NULL)
   {
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"calloc(%d, %d) returned NULL\n", a_number, a_size);
+		"calloc(%lu, %lu) returned NULL\n", a_number, a_size);
   }
 #endif
 
@@ -359,7 +359,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   if (retval == NULL)
   {
     log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"realloc(%p, %d) returned NULL\n", a_ptr, a_size);
+		"realloc(%p, %lu) returned NULL\n", a_ptr, a_size);
   }
 #endif
 
