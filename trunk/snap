@@ -223,11 +223,11 @@ unless ($opt_noact)
 # cook release.
 if ($opt_verbose)
 {
-    print STDERR "cd $tmpdir/devroot && ./configure\n";
+    print STDERR "cd $tmpdir/devroot && ./configure --with-docs\n";
 }
 unless ($opt_noact)
 {
-    `cd $tmpdir/devroot && ./configure`;
+    `cd $tmpdir/devroot && ./configure --with-docs`;
 }
 if ($opt_verbose)
 {

@@ -66,11 +66,12 @@ if (($#ARGV >= 0)
 
 $run =
     "./snap @ARGS -T ONYX_ -p onyx -r devroot -f ChangeLog -f Cookfile.in"
-    . " -f COPYING -f INSTALL -f README -f aclocal.m4 -f config.guess"
-    . " -f config.sub -f configure -f configure.in -f install-sh"
+    . " -f COPYING -f INSTALL -f PLATFORMS -f README -f aclocal.m4"
+    . " -f config.guess -f config.sub -f configure -f configure.in"
+    . " -f install-sh"
     . " -f doc -f test -f mod/Cookfile.inc -f mod/Cookfile"
-    . " -f lib/Cookfile -f lib/c/Cookfile -f lib/c/Cookfile.inc"
-    . " -f lib/c/libedit -f lib/c/libonyx"
+    . " -f lib/Cookfile -f lib/Cookfile.inc"
+    . " -f lib/libedit -f lib/libonyx"
     . " -f bin/.cvsignore -f bin/Cookfile -f bin/Cookfile.inc"
     . " -f bin/onyx";
 if (defined($opt_verbose))
