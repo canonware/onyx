@@ -127,20 +127,6 @@ struct cw_stilo_s {
 	 * procedures.
 	 */
 	cw_bool_t	array_bound:1;
-	/*
-	 * If TRUE, there is a breakpoint set on this object.  In general, this
-	 * field is not looked at unless the interpreter has been put into
-	 * debugging mode.
-	 */
-	cw_bool_t	breakpoint:1;
-	/*
-	 * If TRUE, there is a watchpoint set on this object.  In general, this
-	 * field is not looked at unless the interpreter has been put into
-	 * debugging mode. Note that setting a watchpoint on a reference to an
-	 * extended type only detects changes that are made via that particular
-	 * reference to the extension.
-	 */
-	cw_bool_t	watchpoint:1;
 };
 
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b);
@@ -157,10 +143,6 @@ cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b);
 #define		stilo_dup(a_to, a_from) do {				\
 	/* Copy. */							\
 	memcpy((a_to), (a_from), sizeof(cw_stilo_t));			\
-									\
-	/* Reset debug flags on new copy. */				\
-	(a_to)->breakpoint = FALSE;					\
-	(a_to)->watchpoint = FALSE;					\
 } while (0)
 	
 #define		stilo_type_get(a_stilo)	(a_stilo)->type

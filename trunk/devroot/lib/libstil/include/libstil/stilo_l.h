@@ -35,13 +35,6 @@ struct cw_stiloe_s {
 	 */
 	cw_bool_t	name_static:1;
 	/*
-	 * If TRUE, there is a watchpoint set on this object.  In general, this
-	 * field is not looked at unless the interpreter has been put into
-	 * debugging mode. Note that setting a watchpoint on an extended type
-	 * causes modification via *any* reference to be watched.
-	 */
-	cw_bool_t	watchpoint:1;
-	/*
 	 * The GC toggles this value at each collection in order to maintain
 	 * state.
 	 */
