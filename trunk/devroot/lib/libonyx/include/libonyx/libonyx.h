@@ -296,6 +296,7 @@ extern cw_mem_t *cw_g_mem;
 #if (defined(CW_POSIX) && defined(CW_THREADS))
 extern cw_mtx_t cw_g_gethostbyname_mtx;
 extern cw_mtx_t cw_g_getprotobyname_mtx;
+extern cw_mtx_t cw_g_getservbyname_mtx;
 #endif
 
 /* Used for deallocation via an opaque function pointer.  These macros are used
