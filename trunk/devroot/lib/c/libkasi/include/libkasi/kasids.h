@@ -10,33 +10,27 @@
  *
  ****************************************************************************/
 
-#define _CW_KASI_BUFC_SIZE 256
+typedef struct cw_kasids_s cw_kasids_t;
 
-typedef struct cw_kasi_s cw_kasi_t;
-typedef struct cw_kasi_bufc_s cw_kasi_bufc_t;
-
-struct cw_kasi_s
+struct cw_kasids_s
 {
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
   cw_uint32_t magic;
 #endif
-  
-  cw_bool_t is_malloced;
-  cw_pezz_t kasi_bufc_pezz;
+
+  cw_kasis_t stack;
+
+  cw_ch_t hash;
 };
 
-/* Not opaque. */
-struct cw_kasi_bufc_s
+struct cw_kasidsi_s
 {
-  cw_bufc_t bufc;
-  cw_uint8_t buffer[_CW_KASI_BUFC_SIZE];
+#if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
+  cw_uint32_t magic;
+#endif
+
+  cw_kasio_t name;
+
+  /* Linkage into a ring of kasido's that all have the same name. */
+  cw_ring_t link;
 };
-
-cw_kasi_t *
-kasi_new(cw_kasi_t * a_kasi);
-
-void
-kasi_delete(cw_kasi_t * a_kasi);
-
-cw_kasi_bufc_t *
-kasi_get_kasi_bufc(cw_kasi_t * a_kasi);

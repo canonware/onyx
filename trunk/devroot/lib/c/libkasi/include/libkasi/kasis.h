@@ -11,10 +11,10 @@
  ****************************************************************************/
 
 /* Calculate kasisc size, given the number of kasio's. */
-#define _CW_KASISC_O2SIZE(n)
+#define _CW_KASISC_O2SIZEOF(n)
 
 /* Calculate number of kasio's per kasisc, given kasisc size. */
-#define _CW_KASISC_SIZE2O(s)
+#define _CW_KASISC_SIZEOF2O(s)
 
 typedef struct cw_kasis_s cw_kasis_t;
 typedef struct cw_kasiso_s cw_kasiso_t;
@@ -69,8 +69,8 @@ struct cw_kasisc_s
   
   cw_ring_t * spares;
 
-  /* Must be last field, since it is used for array addressing of kasiso's
-   * beyond the end of the structure. */
+  /* Must be last field, since it is used for array indexing of kasiso's beyond
+   * the end of the structure. */
   cw_kasiso_t ops;
 };
 

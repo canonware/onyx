@@ -193,9 +193,6 @@ struct cw_dictext_s
 };
 #endif
 
-/* Forward reference. */
-/*  typedef struct cw_kasid_s cw_kasid_t; */
-
 struct cw_lockext_s
 {
   cw_kasio_ext_t ext;
@@ -248,7 +245,7 @@ struct cw_stringext_s
 struct cw_kasio_s
 {
 #if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
-  cw_uint32_t magic_a;
+  cw_uint32_t magic;
 #endif
 
   cw_kasio_type_t type;
@@ -271,8 +268,4 @@ struct cw_kasio_s
     cw_savetype_t save;
     cw_stringtype_t string;
   } object;
-
-#if (defined(_LIBKASI_DBG) || defined(_LIBKASI_DEBUG))
-  cw_uint32_t magic_b;
-#endif
 };

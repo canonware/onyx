@@ -38,6 +38,7 @@ main(int argc, char ** argv)
   kasi_new(&kasi);
   kasit_new(&kasit, NULL, NULL, &kasi);
 
+#if (0)
   out_put(cw_g_out, "sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
   out_put(cw_g_out, "\n");
 
@@ -48,28 +49,36 @@ main(int argc, char ** argv)
   out_put(cw_g_out, "\n");
   
   out_put(cw_g_out, "sizeof(cw_kasid_t): [i]\n", sizeof(cw_kasid_t));
+  out_put(cw_g_out, "sizeof(cw_kasid_t)[[[i]]: [i]\n",
+	  256, _CW_KASID_ENTS2SIZEOF(256));
+  out_put(cw_g_out, "sizeof(cw_kasid_t)[[[i]]: [i]\n",
+	  16, _CW_KASID_ENTS2SIZEOF(16));
   out_put(cw_g_out, "sizeof(cw_kasido_t): [i]\n", sizeof(cw_kasido_t));
   out_put(cw_g_out, "\n");
   
+  out_put(cw_g_out, "sizeof(cw_buf_t): [i]\n", sizeof(cw_buf_t));
   out_put(cw_g_out, "sizeof(cw_ring_t): [i]\n", sizeof(cw_ring_t));
   out_put(cw_g_out, "sizeof(cw_oh_t): [i]\n", sizeof(cw_oh_t));
+  out_put(cw_g_out, "sizeof(cw_ch_t): [i]\n", sizeof(cw_ch_t));
+  out_put(cw_g_out, "sizeof(cw_chi_t): [i]\n", sizeof(cw_chi_t));
+  out_put(cw_g_out, "sizeof(cw_ch_t)[[[i]]: [i]\n",
+	  256, _CW_CH_TABLE2SIZEOF(256));
+  out_put(cw_g_out, "sizeof(cw_ch_t)[[[i]]: [i]\n",
+	  16, _CW_CH_TABLE2SIZEOF(16));
   out_put(cw_g_out, "\n");
-
+#endif
+  
   while (1)
   {
     out_put(&out, "kasi> ");
     
     /* Read input. */
     bytes_read = read(0, input, _BUF_SIZE - 1);
-    if (-1 == bytes_read)
+    if (0 >= bytes_read)
     {
-      out_put(cw_g_out, "read() error: [s]\n", strerror(errno));
       break;
     }
-    /* Terminate the input string. */
-    input[bytes_read] = '\0';
-    
-    kasit_interp_str(&kasit, input);
+    kasit_interp_str(&kasit, input, (cw_uint32_t) bytes_read);
   }
     
   out_put(cw_g_out, "Woohoo\n");
