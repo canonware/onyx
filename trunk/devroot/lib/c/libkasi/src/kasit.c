@@ -406,6 +406,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    a_kasit->state = _CW_KASIT_STATE_NAME;
 	    a_kasit->meta.name.is_literal = TRUE;
 	    a_kasit->meta.name.is_immediate = FALSE;
+	    _CW_KASIT_PUTC(c);
 	    break;
 	  }
 	}
@@ -551,7 +552,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    break;
 	  }
 	  case '(': case ')': case '<': case '>': case '[': case ']':
-	  case '{': case '}': case '%':
+	  case '{': case '}': case '/': case '%':
 	  {
 	    /* New token. */
 	    a_kasit->state = _CW_KASIT_STATE_START;
@@ -592,6 +593,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    a_kasit->state = _CW_KASIT_STATE_NAME;
 	    a_kasit->meta.name.is_literal = FALSE;
 	    a_kasit->meta.name.is_immediate = FALSE;
+	    _CW_KASIT_PUTC(c);
 	    break;
 	  }
 	}
@@ -929,7 +931,7 @@ kasit_p_feed(cw_kasit_t * a_kasit, const char * a_str, cw_uint32_t a_len)
 	    break;
 	  }
 	  case '(': case ')': case '<': case '>': case '[': case ']':
-	  case '{': case '}': case '%':
+	  case '{': case '}': case '/': case '%':
 	  {
 	    /* New token. */
 	    a_kasit->state = _CW_KASIT_STATE_START;

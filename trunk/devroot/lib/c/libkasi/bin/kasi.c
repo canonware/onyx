@@ -28,9 +28,12 @@ main(int argc, char ** argv)
   char input[_BUF_SIZE];
   ssize_t bytes_read;
   cw_out_t out;
+  cw_bool_t is_tty;
   
   libstash_init();
   /* XXX Set up oom handler. */
+
+  is_tty = (cw_bool_t) isatty(0);
 
   out_new(&out);
   out_set_default_fd(&out, 1);
@@ -38,7 +41,7 @@ main(int argc, char ** argv)
   kasi_new(&kasi);
   kasit_new(&kasit, NULL, NULL, &kasi);
 
-#if (1)
+#if (0)
   out_put(cw_g_out, "sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
   out_put(cw_g_out, "\n");
 
@@ -70,7 +73,10 @@ main(int argc, char ** argv)
   
   while (1)
   {
-    out_put(&out, "kasi> ");
+    if (TRUE == is_tty)
+    {
+      out_put(&out, "kasi> ");
+    }
     
     /* Read input. */
     bytes_read = read(0, input, _BUF_SIZE - 1);
@@ -80,8 +86,6 @@ main(int argc, char ** argv)
     }
     kasit_interp_str(&kasit, input, (cw_uint32_t) bytes_read);
   }
-    
-  out_put(cw_g_out, "Woohoo\n");
 		     
   kasi_delete(&kasi);
   libstash_shutdown();
