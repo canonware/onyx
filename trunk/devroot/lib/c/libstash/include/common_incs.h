@@ -1,36 +1,14 @@
 /* -*-mode:c-*-
  ****************************************************************************
  *
- * Copyright (c) 1996-1998
- * Jason Evans <jasone@canonware.com>.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer as
- *    the first lines of this file unmodified.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY JASON EVANS ``AS IS'' AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL JASON EVANS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * <Copyright>
  *
  ****************************************************************************
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 84 $
- * Last modified: $Date: 1998-05-26 23:47:28 -0700 (Tue, 26 May 1998) $
+ * Current revision: $Revision: 86 $
+ * Last modified: $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -115,10 +93,37 @@
 #  endif
 #endif
 
-#if (defined(_INC_DAG_H_))
-#  ifndef _DAG_H_
-#    include <dag.h>
-#    define _DAG_H_
+#if (defined(_INC_DEPG_H_))
+#  ifndef _DEPG_H_
+#    ifndef _LIST_H_
+#      include <list.h>
+#      define _LIST_H_
+#    endif
+#    ifndef _OH_H_
+#      include <oh.h>
+#      define _OH_H_
+#    endif
+#    ifndef _DEPGN_H_
+#      include <depgn.h>
+#      define _DEPGN_H_
+#    endif
+#    include <depg.h>
+#    define _DEPG_H_
+#  endif
+#endif
+
+#if (defined(_INC_DEPGN_H_))
+#  ifndef _DEPGN_H_
+#    ifndef _LIST_H_
+#      include <list.h>
+#      define _LIST_H_
+#    endif
+#    ifndef _OH_H_
+#      include <oh.h>
+#      define _OH_H_
+#    endif
+#    include <depgn.h>
+#    define _DEPGN_H_
 #  endif
 #endif
 
