@@ -157,7 +157,7 @@ nxo_l_name_print(cw_nxo_t *a_thread)
 	_cw_assert(name->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(name->nxoe.type == NXOT_NAME);
 
-	if (nxo_attrs_get(nnxo) == NXOA_LITERAL) {
+	if (nxo_attr_get(nnxo) == NXOA_LITERAL) {
 		error = nxo_file_output(stdout_nxo, "/");
 		if (error) {
 			nxo_thread_error(a_thread, error);

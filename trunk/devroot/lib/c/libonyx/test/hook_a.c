@@ -49,7 +49,7 @@ anon_hook(cw_nxo_t *a_thread)
 	hook = nxo_stack_push(ostack);
 	nxo_hook_new(hook, nxo_thread_nx_get(a_thread), (void *)data,
 	    hook_eval, hook_ref_iter, hook_delete);
-	nxo_attrs_set(hook, NXOA_EXECUTABLE);
+	nxo_attr_set(hook, NXOA_EXECUTABLE);
 }
 
 void
@@ -86,7 +86,7 @@ main(int argc, char **argv, char **envp)
 	nxo_name_new(name, &nx, NAME_anon_hook, strlen(NAME_anon_hook),
 	    FALSE);
 	nxo_operator_new(operator, anon_hook, NXN_ZERO);
-	nxo_attrs_set(operator, NXOA_EXECUTABLE);
+	nxo_attr_set(operator, NXOA_EXECUTABLE);
 	_cw_onyx_code(&thread, "def");
 
 	name = nxo_stack_push(ostack);
@@ -94,7 +94,7 @@ main(int argc, char **argv, char **envp)
 	nxo_name_new(name, &nx, NAME_mark_hook, strlen(NAME_mark_hook),
 	    FALSE);
 	nxo_operator_new(operator, mark_hook, NXN_ZERO);
-	nxo_attrs_set(operator, NXOA_EXECUTABLE);
+	nxo_attr_set(operator, NXOA_EXECUTABLE);
 	_cw_onyx_code(&thread, "def");
 
 	_cw_onyx_code(&thread, "

@@ -152,7 +152,7 @@ nxo_l_array_print(cw_nxo_t *a_thread)
 		cw_nxo_t	*nxo;
 		cw_uint32_t	nelms, i;
 
-		if (nxo_attrs_get(array) == NXOA_EXECUTABLE) {
+		if (nxo_attr_get(array) == NXOA_EXECUTABLE) {
 			error = nxo_file_output(stdout_nxo, "{");
 			if (error) {
 				nxo_thread_error(a_thread, error);
@@ -184,7 +184,7 @@ nxo_l_array_print(cw_nxo_t *a_thread)
 			}
 		}
 
-		if (nxo_attrs_get(array) == NXOA_EXECUTABLE) {
+		if (nxo_attr_get(array) == NXOA_EXECUTABLE) {
 			error = nxo_file_output(stdout_nxo, "}");
 			if (error) {
 				nxo_thread_error(a_thread, error);

@@ -381,7 +381,7 @@ nxo_thread_start(cw_nxo_t *a_nxo)
 
 	start = nxo_stack_push(&thread->estack);
 	nxo_operator_new(start, systemdict_start, NXN_start);
-	nxo_attrs_set(start, NXOA_EXECUTABLE);
+	nxo_attr_set(start, NXOA_EXECUTABLE);
 
 	nxo_thread_loop(a_nxo);
 }
@@ -642,7 +642,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		}
 
 		nxo = nxo_stack_get(&thread->estack);
-		if (nxo_attrs_get(nxo) == NXOA_LITERAL) {
+		if (nxo_attr_get(nxo) == NXOA_LITERAL) {
 			/* Always push literal objects onto the data stack. */
 			tnxo = nxo_stack_push(&thread->ostack);
 			nxo_dup(tnxo, nxo);
@@ -694,7 +694,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			el = nxo_stack_push(&thread->tstack);
 			for (i = 0; i < len - 1; i++) {
 				nxo_l_array_el_get(nxo, i, el);
-				if (nxo_attrs_get(el) == NXOA_LITERAL) {
+				if (nxo_attr_get(el) == NXOA_LITERAL) {
 					/*
 					 * Always push literal objects onto the
 					 * data stack.
@@ -763,7 +763,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			 * element before executing the last element.
 			 */
 			nxo_l_array_el_get(nxo, i, el);
-			if ((nxo_attrs_get(el) == NXOA_LITERAL) ||
+			if ((nxo_attr_get(el) == NXOA_LITERAL) ||
 			    (nxo_type_get(el) == NXOT_ARRAY)) {
 				/*
 				 * Always push literal objects and nested arrays
@@ -1816,7 +1816,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 
 	nxo_string_new(nxo, a_thread->nx, a_thread->locking, strlen(a_prefix) +
 	    a_thread->index + strlen(a_suffix) + 1);
-	nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
 	/* Prefix. */
 	nxo_string_set(nxo, 0, a_prefix, strlen(a_prefix));
@@ -1935,7 +1935,7 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 
 	tnxo = nxo_stack_push(&a_thread->tstack);
 	nxo_array_new(tnxo, a_thread->nx, a_thread->locking, nelements);
-	nxo_attrs_set(tnxo, NXOA_EXECUTABLE);
+	nxo_attr_set(tnxo, NXOA_EXECUTABLE);
 
 	/*
 	 * Traverse down the stack, moving nxo's to the array.
@@ -1970,7 +1970,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 			nxo = nxo_stack_push(&a_thread->estack);
 			nxo_name_new(nxo, a_thread->nx, a_thread->tok_str,
 			    a_thread->index, FALSE);
-			nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+			nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
 			nxoe_p_thread_reset(a_thread);
 			nxo_thread_loop(&a_thread->self);
@@ -1979,7 +1979,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 			nxo = nxo_stack_push(&a_thread->ostack);
 			nxo_name_new(nxo, a_thread->nx, a_thread->tok_str,
 			    a_thread->index, FALSE);
-			nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+			nxo_attr_set(nxo, NXOA_EXECUTABLE);
 			nxoe_p_thread_reset(a_thread);
 		}
 		break;

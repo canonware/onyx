@@ -217,7 +217,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 		    nxn_len(systemdict_ops[i].nxn), TRUE);
 		nxo_operator_new(&value, systemdict_ops[i].op_f,
 		    systemdict_ops[i].nxn);
-		nxo_attrs_set(&value, NXOA_EXECUTABLE);
+		nxo_attr_set(&value, NXOA_EXECUTABLE);
 
 		nxo_dict_def(a_dict, a_nx, &name, &value);
 	}
@@ -497,7 +497,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 
 	for (i = 0, count = nxo_array_len_get(a_proc); i < count; i++) {
 		nxo_array_el_get(a_proc, i, el);
-		if (nxo_attrs_get(el) != NXOA_EXECUTABLE)
+		if (nxo_attr_get(el) != NXOA_EXECUTABLE)
 			continue;
 
 		switch (nxo_type_get(el)) {
@@ -539,7 +539,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 						    i);
 					}
 #undef NFASTOPS
-				} else if (nxo_attrs_get(val) !=
+				} else if (nxo_attr_get(val) !=
 				    NXOA_EXECUTABLE) {
 					/* Replace el with val. */
 					nxo_dup(el, val);
@@ -1243,7 +1243,7 @@ systemdict_cvlit(cw_nxo_t *a_thread)
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
-	nxo_attrs_set(nxo, NXOA_LITERAL);
+	nxo_attr_set(nxo, NXOA_LITERAL);
 }
 
 void
@@ -1268,7 +1268,7 @@ systemdict_cvn(cw_nxo_t *a_thread)
 	nxo_name_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxo_string_get(tnxo), nxo_string_len_get(tnxo), FALSE);
 	nxo_string_unlock(tnxo);
-	nxo_attrs_set(nxo, nxo_attrs_get(tnxo));
+	nxo_attr_set(nxo, nxo_attr_get(tnxo));
 
 	nxo_stack_pop(tstack);
 }
@@ -1429,7 +1429,7 @@ systemdict_cvx(cw_nxo_t *a_thread)
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
-	nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 }
 
 void
@@ -3751,7 +3751,7 @@ systemdict_run(cw_nxo_t *a_thread)
 		return;
 	}
 	nxo_stack_pop(ostack);
-	nxo_attrs_set(tfile, NXOA_EXECUTABLE);
+	nxo_attr_set(tfile, NXOA_EXECUTABLE);
 	nxo = nxo_stack_push(estack);
 
 	nxo_dup(nxo, tfile);
@@ -5330,7 +5330,7 @@ systemdict_type(cw_nxo_t *a_thread)
 
 	nxo_name_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxn_str(typenames[type]), nxn_len(typenames[type]), TRUE);
-	nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 }
 
 void
@@ -5580,14 +5580,11 @@ systemdict_xcheck(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
 	cw_nxo_t	*nxo;
-	cw_nxoa_t	attr;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
 	
-	attr = nxo_attrs_get(nxo);
-
-	if (attr == NXOA_EXECUTABLE)
+	if (nxo_attr_get(nxo) == NXOA_EXECUTABLE)
 		nxo_boolean_new(nxo, TRUE);
 	else
 		nxo_boolean_new(nxo, FALSE);

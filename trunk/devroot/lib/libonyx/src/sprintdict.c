@@ -74,7 +74,7 @@ sprintdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx)
 		    nxn_len(sprintdict_ops[i].nxn), TRUE);
 		nxo_operator_new(&value, sprintdict_ops[i].op_f,
 		    sprintdict_ops[i].nxn);
-		nxo_attrs_set(&value, NXOA_EXECUTABLE);
+		nxo_attr_set(&value, NXOA_EXECUTABLE);
 
 		nxo_dict_def(a_dict, a_nx, &name, &value);
 	}

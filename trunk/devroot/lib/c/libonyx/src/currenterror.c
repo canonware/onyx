@@ -34,7 +34,7 @@ currenterror_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_thread)
 	nxo_name_new(name, nxo_thread_nx_get(a_thread),
 	    nxn_str(NXN_stop), nxn_len(NXN_stop), TRUE);
 	nxo_operator_new(val, systemdict_stop, NXN_stop);
-	nxo_attrs_set(val, NXOA_EXECUTABLE);
+	nxo_attr_set(val, NXOA_EXECUTABLE);
 	nxo_dict_def(a_dict, nxo_thread_nx_get(a_thread), name, val);
 
 	/*

@@ -259,7 +259,7 @@ stdin cvx
 			string = nxo_stack_push(nxo_thread_ostack_get(&thread));
 			nxo_string_new(string, &nx, FALSE,
 			    strlen(opt_expression));
-			nxo_attrs_set(string, NXOA_EXECUTABLE);
+			nxo_attr_set(string, NXOA_EXECUTABLE);
 			str = nxo_string_get(string);
 			memcpy(str, opt_expression, nxo_string_len_get(string));
 		} else if (optind < argc) {
@@ -281,7 +281,7 @@ stdin cvx
 			}
 			file = nxo_stack_push(nxo_thread_ostack_get(&thread));
 			nxo_file_new(file, &nx, FALSE);
-			nxo_attrs_set(file, NXOA_EXECUTABLE);
+			nxo_attr_set(file, NXOA_EXECUTABLE);
 			nxo_file_fd_wrap(file, src_fd);
 		} else if (argc == 1) {
 			/*
@@ -294,7 +294,7 @@ stdin cvx
 			 */
 			file = nxo_stack_push(nxo_thread_ostack_get(&thread));
 			nxo_dup(file, nx_stdin_get(&nx));
-			nxo_attrs_set(file, NXOA_EXECUTABLE);
+			nxo_attr_set(file, NXOA_EXECUTABLE);
 		} else
 			_cw_not_reached();
 

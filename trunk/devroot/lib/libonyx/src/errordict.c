@@ -71,7 +71,7 @@ errordict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_thread)
 		    nxn_len(errordict_ops[i].nxn), TRUE);
 		nxo_operator_new(value, errordict_ops[i].op_f,
 		    errordict_ops[i].nxn);
-		nxo_attrs_set(value, NXOA_EXECUTABLE);
+		nxo_attr_set(value, NXOA_EXECUTABLE);
 
 		nxo_dict_def(a_dict, nxo_thread_nx_get(a_thread), name, value);
 	}

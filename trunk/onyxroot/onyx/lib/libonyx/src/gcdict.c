@@ -59,7 +59,7 @@ gcdict_l_populate(cw_nxo_t *a_dict, cw_nxa_t *a_nxa)
 		    nxn_str(gcdict_ops[i].nxn), nxn_len(gcdict_ops[i].nxn),
 		    TRUE);
 		nxo_operator_new(&value, gcdict_ops[i].op_f, gcdict_ops[i].nxn);
-		nxo_attrs_set(&value, NXOA_EXECUTABLE);
+		nxo_attr_set(&value, NXOA_EXECUTABLE);
 
 		nxo_dict_def(a_dict, nxa_l_nx_get(a_nxa), &name, &value);
 	}
