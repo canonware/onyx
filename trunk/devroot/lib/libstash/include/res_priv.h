@@ -1,7 +1,7 @@
 /* -*-mode:c-*-
  ****************************************************************************
  *
- * Copyright (c) 1996-1998
+ * Copyright (c) 1998
  * Jason Evans <jasone@canonware.com>.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,47 +29,22 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 60 $
- * Last modified: $Date: 1998-05-01 14:50:34 -0700 (Fri, 01 May 1998) $
+ * $Revision: 60 $
+ * $Date: 1998-05-01 14:50:34 -0700 (Fri, 01 May 1998) $
  *
- * Description: 
- *              
- *              
- *              
- *              
- ****************************************************************************
- */
+ * <<< Description >>>
+ *
+ * Private definitions for the res class.
+ *
+ ****************************************************************************/
 
-#ifndef _RESOURCE_H_
-#  define _RESOURCE_H_
+#ifndef _RES_PRIV_H_
+#define _RES_PRIV_H_
 
-/* Pseudo-opaque type. */
-typedef struct cw_res_s cw_res_t;
+#define res_parse_res _CW_NS_CMN(res_parse_res)
 
-struct cw_res_s
-{
-  cw_bool_t is_malloced;
-  cw_rwl_t rw_lock;
-  cw_oh_t hash_o;
-  FILE * fd;
-  char * str;
-};
+cw_bool_t res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file);
+cw_uint32_t res_char_type(char a_char);
+void res_merge_res(cw_res_t * a_res_o, char * a_nam, char * a_val);
 
-/*
- * Namespace definitions.
- */
-#define res_new _CW_NS_CMN(res_new)
-#define res_delete _CW_NS_CMN(res_delete)
-#define res_merge_file _CW_NS_CMN(res_merge_file)
-#define res_merge_list _CW_NS_CMN(res_merge_list)
-#define res_get_res_val _CW_NS_CMN(res_get_res_val)
-#define res_dump _CW_NS_CMN(res_dump)
-
-cw_res_t * res_new(cw_res_t * a_res_o);
-void res_delete(cw_res_t * a_res_o);
-cw_bool_t res_merge_file(cw_res_t * a_res_o, char * a_filename);
-cw_bool_t res_merge_list(cw_res_t * a_res_o, ...);
-char * res_get_res_val(cw_res_t * a_res_o, char * a_res_name);
-void res_dump(cw_res_t * a_res_o);
-
-#endif /* _RESOURCE_H_ */
+#endif /* _RES_PRIV_H_ */

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 46 $
- * Last modified: $Date: 1998-04-26 22:54:24 -0700 (Sun, 26 Apr 1998) $
+ * Current revision: $Revision: 60 $
+ * Last modified: $Date: 1998-05-01 14:50:34 -0700 (Fri, 01 May 1998) $
  *
  * Description: 
  *              
@@ -49,7 +49,10 @@ typedef struct cw_res_s cw_res_t;
 struct cw_res_s
 {
   cw_bool_t is_malloced;
+  cw_rwl_t rw_lock;
   cw_oh_t hash_o;
+  FILE * fd;
+  char * str;
 };
 
 /*
