@@ -3197,7 +3197,7 @@ systemdict_shift(cw_stilt_t *a_stilt)
 		    stilo_integer_get(shift));
 	} else if (stilo_integer_get(shift) < 0) {
 		stilo_integer_set(integer, stilo_integer_get(integer) >>
-		    stilo_integer_get(shift));
+		    -stilo_integer_get(shift));
 	}
 
 	stils_pop(ostack);
