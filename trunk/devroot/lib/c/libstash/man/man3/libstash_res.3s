@@ -12,13 +12,9 @@ Version: <Version>
 res - Simple resource class.
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_RES
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_RES
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .SS General

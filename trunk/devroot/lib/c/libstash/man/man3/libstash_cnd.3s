@@ -1,0 +1,218 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_cnd 3s "libstash, version <Version>"
+.Nm libstash_cnd
+.hy 1
+.SH NAME
+cnd - Condition variable.
+.SH SYNOPSIS
+.SS Single-threaded
+N/A.
+
+.SS Multi-threaded
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_cnd_t *
+.br
+.B cnd_new
+.RI ( "cw_cnd_t * a_cnd" )
+
+.I void
+.br
+.B cnd_delete
+.RI ( "cw_cnd_t * a_cnd" )
+
+.I void
+.br
+.B cnd_signal
+.RI ( "cw_cnd_t * a_cnd" )
+
+.I void
+.br
+.B cnd_broadcast
+.RI ( "cw_cnd_t * a_cnd" )
+
+.I cw_bool_t
+.br
+.B cnd_timedwait
+.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" ", " 
+.IR "const struct timespec * a_timeout" )
+
+.I void
+.br
+.B cnd_wait
+.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBcnd\fR implements condition variables, which can be used in conjunction with
+the \fBmtx\fR class to wait for a condition to occur.
+
+.SH USAGE
+.I cw_cnd_t *
+.br
+.B cnd_new
+.RI ( "cw_cnd_t * a_cnd" )
+.br
+Input(s):
+.RS
+.IR a_cnd :
+.RS
+Pointer to space for a cnd, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a cnd.
+.br
+NULL: Memory allocation error.  Can only occur if (NULL == a_cnd).
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B cnd_delete
+.RI ( "cw_cnd_t * a_cnd" )
+.br
+Input(s):
+.RS
+.IR a_cnd :
+.RS
+Pointer to a cnd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void
+.br
+.B cnd_signal
+.RI ( "cw_cnd_t * a_cnd" )
+.br
+Input(s):
+.RS
+.IR a_cnd :
+.RS
+Pointer to a cnd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Signal one thread waiting on a_cnd.
+.RE
+.RE
+
+.I void
+.br
+.B cnd_broadcast
+.RI ( "cw_cnd_t * a_cnd" )
+.br
+Input(s):
+.RS
+.IR a_cnd :
+.RS
+Pointer to a cnd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Signal all threads waiting on a_cnd.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B cnd_timedwait
+.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" ", " 
+.IR "const struct timespec * a_timeout" )
+.br
+Input(s):
+.RS
+.IR a_cnd :
+.RS
+Pointer to a cnd.
+.RE
+.IR a_mtx :
+.RS
+Pointer to a mtx.
+.RE
+.IR a_timeout :
+.RS
+Timeout, specified as an absolute time interval.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Timeout.
+.RE
+.RE
+Description:
+.RS
+Wait for a_cnd for at least a_time.
+.RE
+.RE
+
+.I void
+.br
+.B cnd_wait
+.RI ( "cw_cnd_t * a_cnd" ", " "cw_mtx_t * a_mtx" )
+.br
+Input(s):
+.RS
+.IR a_cnd :
+.RS
+Pointer to a cnd.
+.RE
+.IR a_mtx :
+.RS
+Pointer to a mtx.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Wait for a_cnd.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

@@ -12,13 +12,9 @@ Version: <Version>
 treen - Arbitrary tree (tree node).
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_TREEN
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_TREEN
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .I cw_treen_t *

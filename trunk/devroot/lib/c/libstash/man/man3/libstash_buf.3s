@@ -12,8 +12,6 @@ Version: <Version>
 buf, bufc - Reference-counted extensible buffer.
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_BUF
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .I cw_buf_t *
@@ -22,8 +20,6 @@ buf, bufc - Reference-counted extensible buffer.
 .RI ( "cw_buf_t * a_buf" )
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_BUF
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .I cw_buf_t *

@@ -499,12 +499,6 @@ for automatic cleanup during destruction.  This feature enables improved
 performance and cache locality, but if misunderstood, can result in mysterious
 memory corruption and leaks.
 
-.SS Including headers
-Rather than directly including header files, preprocessor macros are defined
-before including libstash.h.  For example, to use the oh class, _LIBSTASH_USE_OH
-should be defined.  The manpages for individual classes tell what preprocessor
-macros to define when using various classes.
-
 .SS Variable naming
 Though the variable naming conventions used in \fBlibstash\fR are far short of
 what Hungarian and other naming conventions attempt, there are a few to take

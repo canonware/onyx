@@ -1,0 +1,192 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_thd 3s "libstash, version <Version>"
+.Nm libstash_thd
+.hy 1
+.SH NAME
+thd - Thread.
+.SH SYNOPSIS
+.SS Single-threaded
+N/A.
+
+.SS Multi-threaded
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_thd_t *
+.br
+.B thd_new
+.RI ( "cw_thd_t * a_thd" ", " "void * (*a_start_func)(void *)" ", " 
+.IR "void * a_arg" )
+
+.I void
+.br
+.B thd_delete
+.RI ( "cw_thd_t * a_thd" )
+
+.I void *
+.br
+.B thd_join
+.RI ( "cw_thd_t * a_thd" )
+
+.I void
+.br
+.B thd_yield
+.RI ( "void" )
+
+.I int
+.br
+.B thd_sigmask
+.RI ( "int a_action" ", " "sigset_t * a_sigset" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBthd\fR implements a thread creation and deletion interface.
+
+.SH USAGE
+.I cw_thd_t *
+.br
+.B thd_new
+.RI ( "cw_thd_t * a_thd" ", " "void * (*a_start_func)(void *)" ", " 
+.IR "void * a_arg" )
+.br
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.IR a_start_func :
+.RS
+Pointer to a start function.
+.RE
+.IR a_arg :
+.RS
+Argument passed to a_start_func().
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a thd.
+.br
+NULL: Memory allocation error.  Can only occur if (NULL == a_thd).
+.RE
+.RE
+Description:
+.RS
+Constructor (creates new thread).
+.RE
+.RE
+
+.I void
+.br
+.B thd_delete
+.RI ( "cw_thd_t * a_thd" )
+.br
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void *
+.br
+.B thd_join
+.RI ( "cw_thd_t * a_thd" )
+.br
+Input(s):
+.RS
+.IR a_thd :
+.RS
+Pointer to a thd.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Return value from thread entry function.
+.RE
+.RE
+Description:
+.RS
+Join (wait for) the thread associated with a_thd.
+.RE
+.RE
+
+.I void
+.br
+.B thd_yield
+.RI ( "void" )
+.br
+Input(s):
+.RS
+None.
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Give up the rest of this thread's time slice.
+.RE
+.RE
+
+.I int
+.br
+.B thd_sigmask
+.RI ( "int a_action" ", " "sigset_t * a_sigset" )
+.br
+Input(s):
+.RS
+.IR a_action :
+.RS
+SIG_BLOCK: Block signals in a_sigset.
+.br
+SIG_UNBLOCK: Unblock signals in a_sigset.
+.br
+SIG_SETMASK: Set signal mask to a_sigset.
+.RE
+.IR a_sigset :
+.RS
+Pointer to a signal set (sigset_t *).
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Always zero, unless the arguments are invalid.
+.RE
+.RE
+Description:
+.RS
+Set the current thread's signal mask.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

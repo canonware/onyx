@@ -12,13 +12,9 @@ Version: <Version>
 bhp, bhpi - Binomial heap.
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_BHP
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_BHP
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .I cw_bhp_t *

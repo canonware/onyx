@@ -12,13 +12,9 @@ Version: <Version>
 list, list_item - Doubly linked list.
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_LIST
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_LIST
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .I cw_list_t *

@@ -12,8 +12,6 @@ Version: <Version>
 oh - Dynamic open hashing.
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_OH
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .I cw_oh_t *
@@ -22,8 +20,6 @@ oh - Dynamic open hashing.
 .RI ( "cw_oh_t * a_oh" )
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_OH
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .I cw_oh_t *

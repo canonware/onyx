@@ -1,0 +1,177 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_mtx 3s "libstash, version <Version>"
+.Nm libstash_mtx
+.hy 1
+.SH NAME
+mtx - Mutex (mutual exclusion lock).
+.SH SYNOPSIS
+.SS Single-threaded
+N/A.
+
+.SS Multi-threaded
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_mtx_t *
+.br
+.B mtx_new
+.RI ( "cw_mtx_t * a_mtx" )
+
+.I void
+.br
+.B mtx_delete
+.RI ( "cw_mtx_t * a_mtx" )
+
+.I void
+.br
+.B mtx_lock
+.RI ( "cw_mtx_t * a_mtx" )
+
+.I cw_bool_t
+.br
+.B mtx_trylock
+.RI ( "cw_mtx_t * a_mtx" )
+
+.I void
+.br
+.B mtx_unlock
+.RI ( "cw_mtx_t * a_mtx" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBmtx\fR is a typical mutual exclusion lock.  Only one thread can hold the lock
+at a time, and attempting to attain the lock while already owing it has
+undefined results.
+
+.SH USAGE
+.I cw_mtx_t *
+.br
+.B mtx_new
+.RI ( "cw_mtx_t * a_mtx" )
+.br
+Input(s):
+.RS
+.IR a_mtx :
+.RS
+Pointer to space for a mtx, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to a mtx.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B mtx_delete
+.RI ( "cw_mtx_t * a_mtx" )
+.br
+Input(s):
+.RS
+.IR a_mtx :
+.RS
+Pointer to a mtx.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I void
+.br
+.B mtx_lock
+.RI ( "cw_mtx_t * a_mtx" )
+.br
+Input(s):
+.RS
+.IR a_mtx :
+.RS
+Pointer to a mtx.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Lock a_mtx.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B mtx_trylock
+.RI ( "cw_mtx_t * a_mtx" )
+.br
+Input(s):
+.RS
+.IR a_mtx :
+.RS
+Pointer to a mtx.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Failure.
+.RE
+.RE
+Description:
+.RS
+Try to lock a_mtx, but return immediately instead of blocking if a_mtx is
+already locked.
+.RE
+.RE
+
+.I void
+.br
+.B mtx_unlock
+.RI ( "cw_mtx_t * a_mtx" )
+.br
+Input(s):
+.RS
+.IR a_mtx :
+.RS
+Pointer to a mtx.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Unlock a_mtx.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

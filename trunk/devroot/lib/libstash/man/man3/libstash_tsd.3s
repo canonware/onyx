@@ -5,28 +5,25 @@
 
 Version: <Version>
 ..
-.TH libstash_<template> 3s "libstash, version <Version>"
-.Nm libstash_<template>
+.TH libstash_tsd 3s "libstash, version <Version>"
+.Nm libstash_tsd
 .hy 1
 .SH NAME
-<template> - <XXX Description>
+tsd - Thread-specific data.
 .SH SYNOPSIS
 .SS Single-threaded
-\fB#include <libstash/libstash.h>\fR
+N/A.
 
 .SS Multi-threaded
 \fB#include <libstash/libstash_r.h>\fR
 
-.SS General
 .I <return type>
 .br
-.B <template>_<func>
-.RI ( "cw_<template>_t * a_<template>" ", " <args> )
+.B tsd_<func>
+.RI ( "cw_tsd_t * a_tsd" ", " <args> )
 
 .SS Debugging (dbg) symbols
-.TP \" XXX
-\*(lq<XXX symbol>\*(rq
-<XXX Symbol description>
+None.
 
 .SH DESCRIPTION
 <XXX Description>
@@ -36,9 +33,9 @@ Version: <Version>
 .br
 Input(s):
 .RS
-.IR a_<template> :
+.IR a_tsd :
 .RS
-Pointer to a<n> <template>.
+Pointer to a tsd.
 .RE
 .IR <input> :
 .RS

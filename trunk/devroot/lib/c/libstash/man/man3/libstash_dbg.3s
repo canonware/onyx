@@ -13,13 +13,9 @@ dbg - Dynamic debug spew.
 
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_DBG
-.br
 \fB#include <libstash/libstash.h>\fR
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_DBG
-.br
 \fB#include <libstash/libstash_r.h>\fR
 
 .SS General

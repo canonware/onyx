@@ -1,6 +1,7 @@
 1999-09-30  Jason Evans  <jasone@canonware.com>
 
-	* : Remove all _LIBSTASH_USE_* macros.
+	* : Remove all _LIBSTASH_USE_* macros.  All headers are now always
+	included when possible.
 
 	* Makefile.bsd.in: Include the threads-specific object files when
 	building stat_prof_r.
