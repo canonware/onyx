@@ -214,6 +214,8 @@ libonyx_libs_uninstall :
 
 libonyx_libs_clean :
 {
+  rm -f [LIBOONYX_INIT] [LIBONYX_INIT];
+
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBONYX_COMMON_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_b [LIBONYX_COMMON_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [LIBONYX_COMMON_SRCS]];
