@@ -430,11 +430,13 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 */
 			array = stilo_array_get(stilo);
 			for (i = 0; i < len - 1; i++) {
-				if (stilo_attrs_get(&array[i]) ==
-				    STILOA_LITERAL) {
+				if ((stilo_attrs_get(&array[i]) ==
+				    STILOA_LITERAL) ||
+				    (stilo_type_get(&array[i]) ==
+				    STILOT_ARRAY)) {
 					/*
-					 * Always push literal objects onto the
-                                         * data stack.
+					 * Always push literal objects and
+					 * nested arrays onto the data stack.
 					 */
 					tstilo =
 					    stils_push(&a_stilt->ostack);
@@ -472,10 +474,10 @@ stilt_loop(cw_stilt_t *a_stilt)
 				 * Possible recursion, so use the generic
 				 * algorithm.
 				 */
-				/* XXX GC-unsafe. */
-				stils_pop(&a_stilt->estack);
 				tstilo = stils_push(&a_stilt->estack);
 				stilo_dup(tstilo, &array[i]);
+				stils_roll(&a_stilt->estack, 2, 1);
+				stils_pop(&a_stilt->estack);
 			}
 			break;
 		}
