@@ -46,7 +46,6 @@ typedef enum {
 	STILTE_TYPECHECK,		/* Incorrect argument type. */
 	STILTE_UNDEFINED,		/* Object not found in dstack. */
 	STILTE_UNDEFINEDFILENAME,	/* Bad filename. */
-	STILTE_UNDEFINEDRESOURCE,	/* Resource not found. */
 	STILTE_UNDEFINEDRESULT,
 	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
 	STILTE_UNREGISTERED,		/* Other non-enumerated error. */
@@ -156,8 +155,6 @@ struct cw_stiloe_dicto_s {
 	cw_stilo_t	val;
 };
 
-void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t
     *a_stilt);
 #define		stilo_dup(a_to, a_from) do {				\
@@ -170,6 +167,8 @@ cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t
 } while (0)
 	
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
+
+cw_stiloe_t	*stilo_stiloe_get(cw_stilo_t *a_stilo);
 
 #define		stilo_type_get(a_stilo)	(a_stilo)->type
 cw_bool_t	stilo_global_get(cw_stilo_t *a_stilo);
@@ -185,8 +184,9 @@ cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
     *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
 
 /* XXX For the GC only. */
-cw_stiloe_t	*stilo_l_stiloe_get(cw_stilo_t *a_stilo);
 cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
+void		stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
+#define		stiloe_l_next(a_stiloe) (qr_next((a_stiloe), link))
 
 /*
  * no.
@@ -301,11 +301,11 @@ cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
 typedef cw_stilte_t cw_stilo_hook_exec_t (void *a_data, cw_stilt_t *a_stilt);
 typedef cw_stiloe_t *cw_stilo_hook_ref_iterate_t (void *a_data, cw_bool_t
     a_reset);
-typedef void cw_stilo_hook_dealloc_t (void *a_data, cw_stilt_t *a_stilt);
+typedef void cw_stilo_hook_delete_t (void *a_data, cw_stilt_t *a_stilt);
 
 void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, void
-    *a_data, cw_stilo_hook_exec_t *a_exec, cw_stilo_hook_ref_iterate_t
-    *a_ref_iterate, cw_stilo_hook_dealloc_t *a_dealloc);
+    *a_data, cw_stilo_hook_exec_t *a_exec_f, cw_stilo_hook_ref_iterate_t
+    *a_ref_iterate_f, cw_stilo_hook_delete_t *a_delete_f);
 void		*stilo_hook_get(cw_stilo_t *a_stilo);
 cw_stilte_t	stilo_hook_exec(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
