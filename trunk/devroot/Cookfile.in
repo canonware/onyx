@@ -80,10 +80,8 @@ bootstrap : [addsuffix _bootstrap bins libs];
 
 release : docs;
 
-mods_install : [addsuffix _install @mods@];
 install : [addsuffix _install bins mods libs docs];
 
-mods_uninstall : [addsuffix _uninstall @mods@];
 uninstall : [addsuffix _uninstall bins mods libs docs];
 
 clean : [addsuffix _clean docs tests bins mods libs]
