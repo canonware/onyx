@@ -1,5 +1,7 @@
 2002-04-20 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/include/libonyx/nx.h : Add nx_threadsdict_get().
+
 	* Change language syntax:
 	  + Radix integers are <base>@<value> instead of <base>@<value>.
 	  + Comments start with #, not %.
@@ -8,6 +10,10 @@
 	    - `\cC' : Control C, where C is [A-Za-z].
 	    - `\a'  : Alarm (bel).
 	    - `\e'  : Escape (ec).
+
+	* Add operators:
+	  + threadsdict
+	  + threaddstack, threadestack, threadistack, threadostack
 
 	* Remove operators:
 	  + #!
