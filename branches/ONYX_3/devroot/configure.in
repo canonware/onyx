@@ -388,15 +388,15 @@ if test "x$enable_modules" = "xyes" ; then
       CPPFLAGS="$TEMP_CPPFLAGS"
 
       TEMP_LIBS="$LIBS"
-      LIBS=
-      AC_CHECK_LIB(termcap, tgetent, LIBS="-ltermcap", \
-        AC_CHECK_LIB(tinfo, tgetent, LIBS="-ltinfo", \
-          AC_CHECK_LIB(curses, tgetent, LIBS="-lcurses", \
-            AC_CHECK_LIB(ncurses, tgetent, LIBS="-lncurses"))), \
+      LIBS="$LIBEDIT_LDFLAGS $LIBS"
+      AC_CHECK_LIB(termcap, tgetent, MODPROMPT_LDFLAGS="-ltermcap", \
+        AC_CHECK_LIB(tinfo, tgetent, MODPROMPT_LDFLAGS="-ltinfo", \
+          AC_CHECK_LIB(curses, tgetent, MODPROMPT_LDFLAGS="-lcurses", \
+            AC_CHECK_LIB(ncurses, tgetent, MODPROMPT_LDFLAGS="-lncurses"))), \
         enable_modprompt="0")
-      AC_CHECK_LIB(edit, el_init, LIBS="$LIBS -ledit", \
-        enable_modprompt="0")
-      MODPROMPT_LDFLAGS="$LIBS"
+      LIBS="$LIBS $MODPROMPT_LDFLAGS"
+      AC_CHECK_LIB(edit, el_init, \
+        MODPROMPT_LDFLAGS="$MODPROMPT_LDFLAGS -ledit", enable_modprompt="0")
       LIBS="$TEMP_LIBS"
       AC_SUBST(MODPROMPT_CPPFLAGS)
       AC_SUBST(MODPROMPT_LDFLAGS)
