@@ -17,6 +17,7 @@
 \usepackage{longtable}
 \usepackage{float}
 \usepackage{html}
+\usepackage{verbatim}
 \usepackage{makeidx}
 %begin{latexonly}
 \usepackage{newcent}
@@ -97,12 +98,36 @@
 	{\setlength{\parskip}{0pt}}
 	{\setlength{\parskip}{8pt}}
 
+%begin{latexonly}
+\newcommand{\example}[3]{
+  % Force a new paragraph.
+  \parbox{0pt}{}
+
+  \fbox{
+    \parbox{5.7in}{{\tt #1}:\\
+    \fbox{\parbox{5.55in}{\verbatiminput{#2}}}
+    \verbatiminput{#3}
+}}}
+%end{latexonly}
+\begin{htmlonly}
+\newcommand{\example}[3]{
+    {\tt #1}:\\
+    {\hr}
+    \verbatiminput{#2}
+    {\hr}
+    \verbatiminput{#3}
+    {\hr}
+}}}
+\end{htmlonly}
+
+\newcommand{\examplefile}[1]{\fbox{\parbox{5.0in}{\verbatiminput{#1}}}}
 \providecommand{\ifthenelse}[3]{ } % For latex2html.
 \newcommand{\cfunc}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
 \newcommand{\cvar}[1]{{\em #1}}
 \newcommand{\ctype}[1]{#1}
 \newcommand{\cppmacro}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
 \newcommand{\cppdef}[1]{{\em #1}}
+\newcommand{\method}[1]{{\em #1}}
 \newcommand{\binname}[1]{{\em #1}}
 \newcommand{\libname}[1]{{\em #1}}
 \newcommand{\filename}[1]{{\em #1}}
@@ -147,6 +172,7 @@
 \newcommand{\twid}{\~}
 \newcommand{\lb}{YYYlbZZZ}
 \newcommand{\rb}{YYYrbZZZ}
+\newcommand{\hr}{YYYhrZZZ}
 \end{htmlonly}
 
 %

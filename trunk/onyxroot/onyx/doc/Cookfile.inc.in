@@ -87,6 +87,7 @@ data
     cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
       | sed -e s/YYYlbZZZ/\[/g \\
       | sed -e s/YYYrbZZZ/\]/g \\
+      | sed -e s/YYYhrZZZ/\\<hr\\>/g \\
       | sed -e \\
         "s/^\\\\\\(\\\\\\<\\\\/TABLE\\\\\\>\\\\\\)\\\\\\<\\\\\\>/\\\\1/g" \\
       > $i

@@ -22,7 +22,8 @@
 /* LaTeX source files. */
 ONYX_TEX_SRCS = [addprefix @srcroot@/doc/latex/onyx/
 
-                           front.tex back.tex lang_class_vclass.tex
+                           front.tex back.tex lang_class_mclass.tex
+                           lang_class_module.tex lang_class_vclass.tex
                            lang_dict_currenterror.tex lang_dict_envdict.tex
                            lang_dict_errordict.tex lang_dict_gcdict.tex
                            lang_dict_globaldict.tex lang_dict_onyxdict.tex

@@ -32,6 +32,9 @@ MODCLOPT_OTESTS = [addprefix @srcroot@/mod/modclopt/test/
                              modclopt_a.nx.in
                              ];
 
+/* LaTeX source files. */
+ONYX_TEX_SRCS += @objroot@/mod/modclopt/doc/latex/manual.tex;
+
 /*
  * User cook'ables.
  */
