@@ -180,7 +180,7 @@ mq_tryget(cw_mq_t *a_mq, ...)
 }
 
 cw_bool_t
-mq_timedget(cw_mq_t *a_mq, const struct timespec * a_timeout, ...)
+mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout, ...)
 {
 	cw_bool_t	retval;
 	union {
