@@ -45,15 +45,15 @@ struct cw_stils_s {
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
+	cw_uint32_t		ref_stage;
 	cw_stilso_t		*ref_stilso;
+	cw_stilso_t		*noroll;
 };
 
 void		stils_new(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
 void		stils_delete(cw_stils_t *a_stils);
 #define		stils_count(a_stils) (a_stils)->count
 cw_uint32_t	stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
-void		stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t
-    a_amount);
 
 #ifndef _CW_USE_INLINES
 cw_stilo_t	*stils_push(cw_stils_t *a_stils);
@@ -64,6 +64,9 @@ cw_bool_t	stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count);
 cw_stilo_t	*stils_get(cw_stils_t *a_stils);
 cw_stilo_t	*stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index);
 cw_stilo_t	*stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
+
+void		stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t
+    a_amount);
 #endif
 
 /* Private, but the inline functions need their prototypes. */
@@ -263,6 +266,93 @@ stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	retval = &stilso->stilo;
 	RETURN:
 	return retval;
+}
+
+_CW_INLINE void
+stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
+{
+	cw_stilso_t	*top, *noroll;
+	cw_uint32_t	i;
+
+	_cw_check_ptr(a_stils);
+	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
+	_cw_assert(a_count > 0);
+	_cw_assert(a_count <= a_stils->count);
+
+	/*
+	 * Calculate the current index of the element that will end up on top of
+	 * the stack.  This allows us to save a pointer to it as we iterate down
+	 * the stack on the way to the bottom of the roll region.  This code
+	 * also has the side effect of 'mod'ing the roll amount, so that we
+	 * don't spend a bunch of time rolling the stack if the user specifies a
+	 * roll amount larger than the roll region.  A decent program will never
+	 * do this, so it's not worth specifically optimizing, but it falls out
+	 * of these calculations with no extra work, since we already have to
+	 * deal with upward versus downward rolling calculations.
+	 */
+	if (a_amount < 0) {
+		/* Convert a_amount to a positive equivalent. */
+		a_amount += ((a_amount - a_count) / a_count) * a_count;
+	}
+	a_amount %= a_count;
+	a_amount += a_count;
+	a_amount %= a_count;
+
+	/*
+	 * Do this check after the above calculations, just in case the roll
+	 * amount is an even multiple of the roll region.
+	 */
+	if (a_amount == 0) {
+		/* Noop. */
+		goto RETURN;
+	}
+
+	/*
+	 * Get a pointer to the new top of the stack.  Then continue on to find
+	 * the end of the roll region.
+	 */
+	for (i = 0, top = ql_first(&a_stils->stack); i < a_amount; i++)
+		top = qr_next(top, link);
+	noroll = top;
+
+	for (i = 0; i < a_count - a_amount; i++)
+		noroll = qr_next(noroll, link);
+
+	/*
+	 * We now have:
+	 *
+	 * ql_first(&a_stils->stack) --> /----------\ \  \
+	 *                               |          | |  |
+	 *                               |          | |   \
+	 *                               |          | |   / a_amount
+	 *                               |          | |  |
+	 *                               |          | |  /
+	 *                               \----------/  \
+	 *                       top --> /----------\  / a_count
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               \----------/ /
+	 *                    noroll --> /----------\
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               \----------/
+	 *
+	 * Set a_stils->noroll so that if the GC runs during the following code,
+	 * it can get at the noroll region.
+	 */
+	a_stils->noroll = noroll;
+	qr_split(ql_first(&a_stils->stack), noroll, link);
+	ql_first(&a_stils->stack) = top;
+	qr_meld(top, noroll, link);
+	a_stils->noroll = NULL;
+
+	RETURN:
 }
 #endif	/* (defined(_CW_USE_INLINES) || defined(_STILS_C_)) */
 

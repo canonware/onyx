@@ -27,6 +27,9 @@
  *
  ******************************************************************************/
 
+/* Compile non-inlined functions if not using inlines. */
+#define	_STILS_C_
+
 #include "../include/libstil/libstil.h"
 
 void
@@ -44,6 +47,7 @@ stils_new(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 	ql_elm_new(&a_stils->under, link);
 	ql_head_insert(&a_stils->stack, &a_stils->under, link);
 
+	a_stils->noroll = NULL;
 #ifdef _LIBSTIL_DBG
 	a_stils->magic = _CW_STILS_MAGIC;
 #endif
@@ -58,8 +62,7 @@ stils_delete(cw_stils_t *a_stils)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	/*
-	 * Pop objects off the stack and delete them.  Then delete all the
-	 * stilsc's.
+	 * Pop objects off the stack.  Then delete all the stilsc's.
 	 */
 	if (a_stils->count > 0)
 		stils_npop(a_stils, a_stils->count);
@@ -84,17 +87,69 @@ stils_l_ref_iter(cw_stils_t *a_stils, cw_bool_t a_reset)
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	retval = NULL;
 	if (a_reset) {
+		if (a_stils->noroll != NULL) {
+			/*
+			 * We're in the middle of a roll operation, so need to
+			 * handle the noroll region specially.  It's entirely
+			 * possible that we'll end up reporting some/all stack
+			 * elements twice, but that doesn't cause a correctness
+			 * problem, whereas not reporting them at all does.
+			 */
+			a_stils->ref_stage = 0;
+		} else
+			a_stils->ref_stage = 2;
+	}
+
+	retval = NULL;
+	switch (a_stils->ref_stage) {
+	case 0:
+		/* Set up for stage 1. */
+		a_stils->ref_stilso = a_stils->noroll;
+		a_stils->ref_stage++;
+		/* Fall through. */
+	case 1:
+		/* noroll region stack iteration. */
+		for (; retval == NULL && a_stils->ref_stilso != &a_stils->under;
+		    a_stils->ref_stilso = qr_next(a_stils->ref_stilso, link))
+			retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
+
+		if (retval != NULL)
+			break;
+		a_stils->ref_stage++;
+		/* Fall through. */
+	case 2:
+		/* First roll region iteration. */
 		a_stils->ref_stilso = ql_first(&a_stils->stack);
 		if (a_stils->ref_stilso != &a_stils->under)
 			retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
+
+		a_stils->ref_stage++;
+		if (retval != NULL)
+			break;
+		/* Fall through. */
+	case 3:
+		/* Set up for stage 4. */
+		if (a_stils->ref_stilso != &a_stils->under) {
+			a_stils->ref_stilso = qr_next(a_stils->ref_stilso,
+			    link);
+		}
+		a_stils->ref_stage++;
+		/* Fall through. */
+	case 4:
+		/* Main roll region iteration. */
+		for (; retval == NULL && a_stils->ref_stilso != &a_stils->under
+		    && a_stils->ref_stilso != ql_first(&a_stils->stack);
+		    a_stils->ref_stilso = qr_next(a_stils->ref_stilso, link))
+			retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
+
+		if (retval != NULL)
+			break;
+		a_stils->ref_stage++;
+		/* Fall through. */
+	default:
+		retval = NULL;
 	}
-
-	for (; retval == NULL && a_stils->ref_stilso != &a_stils->under;
-	    a_stils->ref_stilso = qr_next(a_stils->ref_stilso, link))
-		retval = stilo_stiloe_get(&a_stils->ref_stilso->stilo);
-
 	return retval;
 }
 
@@ -113,90 +168,6 @@ stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	_cw_assert(i < a_stils->count);
 
 	return i;
-}
-
-void
-stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
-{
-	cw_stilso_t	*top, *noroll;
-	cw_uint32_t	i;
-
-	_cw_check_ptr(a_stils);
-	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-	_cw_assert(a_count > 0);
-	_cw_assert(a_count <= a_stils->count);
-
-	/*
-	 * Calculate the current index of the element that will end up on top of
-	 * the stack.  This allows us to save a pointer to it as we iterate down
-	 * the stack on the way to the bottom of the roll region.  This code
-	 * also has the side effect of 'mod'ing the roll amount, so that we
-	 * don't spend a bunch of time rolling the stack if the user specifies a
-	 * roll amount larger than the roll region.  A decent program will never
-	 * do this, so it's not worth specifically optimizing, but it falls out
-	 * of these calculations with no extra work, since we already have to
-	 * deal with upward versus downward rolling calculations.
-	 */
-	if (a_amount < 0) {
-		/* Convert a_amount to a positive equivalent. */
-		a_amount += ((a_amount - a_count) / a_count) * a_count;
-	}
-	a_amount %= a_count;
-	a_amount += a_count;
-	a_amount %= a_count;
-
-	/*
-	 * Do this check after the above calculations, just in case the roll
-	 * amount is an even multiple of the roll region.
-	 */
-	if (a_amount == 0) {
-		/* Noop. */
-		goto RETURN;
-	}
-
-	/*
-	 * Get a pointer to the new top of the stack.  Then continue on to find
-	 * the end of the roll region.
-	 */
-	for (i = 0, top = ql_first(&a_stils->stack); i < a_amount; i++)
-		top = qr_next(top, link);
-	noroll = top;
-
-	for (i = 0; i < a_count - a_amount; i++)
-		noroll = qr_next(noroll, link);
-
-	/*
-	 * We now have:
-	 *
-	 * ql_first(&a_stils->stack) --> /----------\ \  \
-	 *                               |          | |  |
-	 *                               |          | |   \
-	 *                               |          | |   / a_amount
-	 *                               |          | |  |
-	 *                               |          | |  /
-	 *                               \----------/  \
-	 *                       top --> /----------\  / a_count
-	 *                               |          | |
-	 *                               |          | |
-	 *                               |          | |
-	 *                               |          | |
-	 *                               |          | |
-	 *                               \----------/ /
-	 *                    noroll --> /----------\
-	 *                               |          |
-	 *                               |          |
-	 *                               |          |
-	 *                               |          |
-	 *                               |          |
-	 *                               \----------/
-	 */
-	thd_crit_enter();
-	qr_split(ql_first(&a_stils->stack), noroll, link);
-	qr_meld(top, noroll, link);
-	ql_first(&a_stils->stack) = top;
-	thd_crit_leave();
-
-	RETURN:
 }
 
 void
