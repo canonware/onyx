@@ -12,16 +12,16 @@ Version: <Version>
 <template> - <XXX Description>
 .SH SYNOPSIS
 .SS Single-threaded
-#define _LIBSTASH_USE_<template>
+#define _LIBSTASH_USE_<XXX template caps>
 .br
 \fB#include <libstash/libstash.h>\fR
 
 .SS Multi-threaded
-#define _LIBSTASH_USE_<template>
+#define _LIBSTASH_USE_<XXX template caps>
 .br
 \fB#include <libstash/libstash_r.h>\fR
 
-.SS Functions
+.SS General
 .I cw_<template>_t *
 .br
 .B <template>_new
@@ -34,18 +34,16 @@ Version: <Version>
 
 .I <return type>
 .br
-.B <func>
-.RI ( <args> )
+.B <template>_<func>
+.RI ( "cw_<template>_t * a_<template>" ", " <args> )
 
 .SS Debugging (dbg) symbols
-.TP \" XXX 
+.TP \" XXX
 \*(lq<XXX symbol>\*(rq
 <XXX Symbol description>
 
 .SH DESCRIPTION
 <XXX Description>
-
-\"  .SH OPTIONS
 
 .SH USAGE
 .I cw_<template>_t *
@@ -82,7 +80,7 @@ Input(s):
 .RS
 .IR <input> :
 .RS
-Pointer to a <template>.
+Pointer to a<n> <template>.
 .RE
 .RE
 Output(s):
@@ -97,11 +95,15 @@ Destructor.
 
 .I <return type>
 .br
-.B <func>
-.RI ( <args> )
+.B <template>_<func>
+.RI ( "cw_<template>_t * a_<template>" ", " <args> )
 .RS
 Input(s):
 .RS
+.IR a_<template> :
+.RS
+Pointer to a<n> <template>..
+.RE
 .IR <input> :
 .RS
 <input description>
@@ -120,14 +122,8 @@ Description:
 .RE
 .RE
 
-\"  .SH RETURN VALUES
-\"  .SH EXIT STATUS
-\"  .SH FILES
 .SH SEE ALSO
 libstash(3s).
 
-\"  .SH DIAGNOSTICS
-\"  .SH BUGS
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
-

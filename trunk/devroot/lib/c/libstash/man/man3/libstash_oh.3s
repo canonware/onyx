@@ -1,0 +1,1078 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_oh 3s "libstash, version <Version>"
+.Nm libstash_oh
+.hy 1
+.SH NAME
+oh - Dynamic open hashing.
+.SH SYNOPSIS
+.SS Single-threaded
+#define _LIBSTASH_USE_OH
+.br
+\fB#include <libstash/libstash.h>\fR
+
+.I cw_oh_t *
+.br
+.B oh_new
+.RI ( "cw_oh_t * a_oh" )
+
+.SS Multi-threaded
+#define _LIBSTASH_USE_OH
+.br
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_oh_t *
+.br
+.B oh_new
+.RI ( "cw_oh_t * a_oh" ", " "cw_bool_t a_is_thread_safe" )
+
+.SS General
+.br
+
+.I void
+.br
+.B oh_delete
+.RI ( void )
+
+.I cw_uint64_t
+.br
+.B oh_get_size
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_get_num_items
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_get_base_size
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint32_t
+.br
+.B oh_get_base_h2
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint32_t
+.br
+.B oh_get_base_shrink_point
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint32_t
+.br
+.B oh_get_base_grow_point
+.RI ( "cw_oh_t * a_oh" )
+
+.I oh_h1_t *
+.br
+.B oh_oh_set_h1
+.RI ( "cw_oh_t * a_oh" ", " "oh_h1_t * a_new_h1" )
+
+.I oh_key_comp_t *
+.br
+.B oh_set_key_compare
+.RI ( "cw_oh_t * a_oh" ", " "oh_key_comp_t * a_new_key_compare" )
+
+.I cw_bool_t
+.br
+.B oh_set_base_h2
+.RI ( "cw_oh_t * a_oh" ", " "cw_uint32_t a_h2" )
+
+.I cw_bool_t
+.br
+.B oh_set_base_shrink_point
+.RI ( "cw_oh_t * a_oh" ", " "cw_uint32_t a_shrink_point" )
+
+.I cw_bool_t
+.br
+.B oh_set_base_grow_point
+.RI ( "cw_oh_t * a_oh" ", " "cw_uint32_t a_grow_point" )
+
+.I cw_sint32_t
+.br
+.B oh_item_insert
+.RI ( "cw_oh_t * a_oh" ", " "const void * a_key" ", " "const void * a_data " )
+
+.I cw_bool_t
+.br
+.B oh_item_delete
+.RI ( "cw_oh_t * a_oh" ", " "const void * a_search_key" ", " "void ** r_key" 
+.RI ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B oh_item_search
+.RI ( "cw_oh_t * a_oh" ", " "const void * a_key" ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B oh_item_get_iterate
+.RI ( "cw_oh_t * a_oh" ", " "void ** r_key" ", " "void ** r_data" )
+
+.I cw_bool_t
+.br
+.B oh_item_delete_iterate
+.RI ( "cw_oh_t * a_oh" ", " "void ** r_key" ", " "void ** r_data" )
+
+.I void
+.br
+.B oh_dump
+.RI ( "cw_oh_t * a_oh" ", " "cw_bool_t a_all" )
+
+.I cw_uint64_t
+.br
+.B oh_get_num_collisions
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_get_num_inserts
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_get_num_deletes
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_get_num_grows
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_get_num_shrinks
+.RI ( "cw_oh_t * a_oh" )
+
+.I cw_uint64_t
+.br
+.B oh_h1_string
+.RI ( "const void * a_key" )
+
+.I cw_uint64_t
+.br
+.B oh_h1_direct
+.RI ( "const void * a_key" )
+
+.I cw_bool_t
+.br
+.B oh_key_compare_string
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+
+.I cw_bool_t
+.br
+.B oh_key_compare_direct
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+Dynamic open hashing class.  This is a somewhat sophisticated implementation of
+hashing.  All internal consistency, growth, shrinkage, etc. issues are taken
+care of internally.  The hash functions to use, as well as just about any other
+useful parameter, can be modified on the fly with no worries of inconsistency.
+This class is thread safe, thanks to read/write locks.  That is, multiple
+readers can be in the code simultaneously, but only one locker (with no readers)
+can be in the code at any given time.
+
+This implementation uses a secondary hash function instead of bucket chaining.
+As a result, the table needs to be kept a little emptier than some
+implementations in order to avoid excessive secondary hashing.
+
+This code never rehashes during normal operation, because it is careful to
+shuffle slot contents (items) whenever items are deleted.  This code also keeps
+an internal list of all items to allow fast table rebuilding when growing,
+shrinking, and rehashing (done only when hashing functions are changed).  This
+also makes it possible to use \fBrealloc\fR() instead of \fBmalloc\fR(), since
+the table can be \fBbzero\fR()ed, then rebuilt from the list.
+
+Decisions on when to grow and shrink are based on the base table size.  The
+growth and shrinkage thresholds are in always in direct proportion to the
+thresholds set for the base table size.
+
+A useful side effect of the internal list is that calling
+\fBoh_item_delete_iterate\fR() and \fBoh_item_get_iterate\fR() are guaranteed to
+operate on the oldest item in the hash table, which means that the hash code has
+an integrated FIFO queue.
+
+A list of spare item containers is kept around to avoid excessive calls to
+\fBmalloc\fR() during insertion/deletion.  All internal lists and buffers are
+kept tidy and at reasonable sizes.
+
+\"  .SH OPTIONS
+
+.SH USAGE
+.I cw_oh_t *
+.br
+.B oh_new
+.RI ( "cw_oh_t * a_oh" )
+.br
+.I cw_oh_t *
+.br
+.B oh_new
+.RI ( "cw_oh_t * a_oh" ", " "cw_bool_t a_is_thread_safe" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to space for an oh, or NULL.
+.RE
+.IR a_is_thread_safe :
+.RS
+FALSE: Not thread-safe.
+.br
+TRUE: Thread-safe.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to an oh.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B oh_delete
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_size
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Internal table size.
+.RE
+.RE
+Description:
+.RS
+Return the internal table size.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_num_items
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of items in a_oh.
+.RE
+.RE
+Description:
+.RS
+Return the number of items in a_oh.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_base_size
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Base table size.
+.RE
+.RE
+Description:
+.RS
+Return the base table size on which the expansion and contraction parameters
+depend.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B oh_get_base_h2
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Base table size.
+.RE
+.RE
+Description:
+.RS
+Return the value of the base secondary hashing function.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B oh_get_base_shrink_point
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Base shrink point.
+.RE
+.RE
+Description:
+.RS
+Return the value of the base shrink point, which is used to determine when to
+shrink the internal table.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B oh_get_base_grow_point
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Base grow point.
+.RE
+.RE
+Description:
+.RS
+Return the value of the base grow point, which is used to determine when to grow
+the internal table.
+.RE
+.RE
+
+.I oh_h1_t *
+.br
+.B oh_oh_set_h1
+.RI ( "cw_oh_t * a_oh" ", " "oh_h1_t * a_new_h1" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_new_h1 :
+.RS
+Pointer to a primary hashing function.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to the old primary hashing function.
+.RE
+.RE
+Description:
+.RS
+Set the primary hashing function.  Calling this function causes an internal
+rehash.
+.RE
+.RE
+
+.I oh_key_comp_t *
+.br
+.B oh_set_key_compare
+.RI ( "cw_oh_t * a_oh" ", " "oh_key_comp_t * a_new_key_compare" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_new_key_compare :
+.RS
+Pointer to a key comparison function.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to the old key comparison function.
+.RE
+.RE
+Description:
+.RS
+Set the key comparison function.
+
+Note: There is no good reason to specify a new key comparison function after
+a_ah has been populated.  This function should probably be folded into
+\fBoh_new\fR().
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_set_base_h2
+.RI ( "cw_oh_t * a_oh" ", " "cw_uint32_t a_h2" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_h2 :
+.RS
+Secondary hash.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_h2 is not an odd number less than a_oh's base table size.
+.RE
+.RE
+Description:
+.RS
+Set the base secondary hash.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_set_base_shrink_point
+.RI ( "cw_oh_t * a_oh" ", " "cw_uint32_t a_shrink_point" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_shrink_point :
+.RS
+Base shrink point.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_shrink_point is > the base grow point or table size.
+.RE
+.RE
+Description:
+.RS
+Set the base shrink point.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_set_base_grow_point
+.RI ( "cw_oh_t * a_oh" ", " "cw_uint32_t a_grow_point" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_grow_point :
+.RS
+Base grow point.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_grow_point is <= the base shrink point or >= the base table size.
+.RE
+.RE
+Description:
+.RS
+Set the base grow point.
+.RE
+.RE
+
+.I cw_sint32_t
+.br
+.B oh_item_insert
+.RI ( "cw_oh_t * a_oh" ", " "const void * a_key" ", " "const void * a_data " )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.IR a_data :
+.RS
+Pointer to data associated with a_key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+-1: Memory allocation error.
+.br
+0: Success.
+.br
+1: a_key already exists in a_oh.
+.RE
+.RE
+Description:
+.RS
+Insert an item, unless an item with the same key already exists in a_oh.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_item_delete
+.RI ( "cw_oh_t * a_oh" ", " "const void * a_search_key" ", " "void ** r_key" 
+.RI ", " "void ** r_data" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_search_key :
+.RS
+Pointer to a key.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Item with key a_search_key not found.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Delete an item with key a_search_key.  If successful, set *r_key and *r_data to
+point to the key and data, respectively.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_item_search
+.RI ( "cw_oh_t * a_oh" ", " "const void * a_key" ", " "void ** r_data" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: Item with key a_key not found in a_oh.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Search for an item with key a_key.  If found, set *r_data to point to the
+associated data.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_item_get_iterate
+.RI ( "cw_oh_t * a_oh" ", " "void ** r_key" ", " "void ** r_data" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_oh is empty.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Set *r_key and *r_data to point to the oldest item in a_oh.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_item_delete_iterate
+.RI ( "cw_oh_t * a_oh" ", " "void ** r_key" ", " "void ** r_data" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR r_key :
+.RS
+Pointer to a key pointer, or NULL.
+.RE
+.IR r_data :
+.RS
+Pointer to a data pointer, or NULL.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Success.
+.br
+TRUE: a_oh is empty.
+.RE
+.IR *r_key :
+.RS
+If (NULL != r_key) and (FALSE == retval): Pointer to a key.
+.br
+Otherwise: Undefined.
+.RE
+.IR *r_data :
+.RS
+If (NULL != r_data) and (FALSE == retval): Pointer to data.
+.br
+Otherwise: Undefined.
+.RE
+.RE
+Description:
+.RS
+Set *r_key and *r_data to point to the oldest item in a_oh, and delete the item
+from a_oh.
+.RE
+.RE
+
+.I void
+.br
+.B oh_dump
+.RI ( "cw_oh_t * a_oh" ", " "cw_bool_t a_all" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.IR a_all :
+.RS
+TRUE: Dump the contents of the hash table.
+.br
+FALSE: Only dump the metadata.
+.RE
+.RE
+Output(s):
+.RS
+Internal state of a_oh printed to cw_g_out.
+.RE
+Description:
+.RS
+Print the internal state of a_oh.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_num_collisions
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of collisions.
+.RE
+.RE
+Description:
+.RS
+Return the number of collisions that have occurred.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_num_inserts
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of insertions.
+.RE
+.RE
+Description:
+.RS
+Return the number of insertions.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_num_deletes
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of deletions.
+.RE
+.RE
+Description:
+.RS
+Return the number of deletions.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_num_grows
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of table grows.
+.RE
+.RE
+Description:
+.RS
+Return the number of table grows.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_get_num_shrinks
+.RI ( "cw_oh_t * a_oh" )
+.RS
+Input(s):
+.RS
+.IR a_oh :
+.RS
+Pointer to an oh.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Number of table shrinks.
+.RE
+.RE
+Description:
+.RS
+Return the number of table shrinks.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_h1_string
+.RI ( "const void * a_key" )
+.RS
+Input(s):
+.RS
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Hash result.
+.RE
+.RE
+Description:
+.RS
+Default primary hash function.  This is a string hash, so if the keys being used
+for an oh instance aren't strings, don't use this.
+.RE
+.RE
+
+.I cw_uint64_t
+.br
+.B oh_h1_direct
+.RI ( "const void * a_key" )
+.RS
+Input(s):
+.RS
+.IR a_key :
+.RS
+Pointer to a key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Hash result.
+.RE
+.RE
+Description:
+.RS
+Alternate primary hash function.  This is a direct pointer hash.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_key_compare_string
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+.RS
+Input(s):
+.RS
+.IR a_k1 :
+.RS
+Pointer to a key.
+.RE
+.IR a_k2 :
+.RS
+Pointer to a key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Not equal.
+.br
+TRUE: Equal.
+.RE
+.RE
+Description:
+.RS
+Compare two keys (NULL-terminated strings) for equality.
+.RE
+.RE
+
+.I cw_bool_t
+.br
+.B oh_key_compare_direct
+.RI ( "const void * a_k1" ", " "const void * a_k2" )
+.RS
+Input(s):
+.RS
+.IR a_k1 :
+.RS
+Pointer to a key.
+.RE
+.IR a_k2 :
+.RS
+Pointer to a key.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+FALSE: Not equal.
+.br
+TRUE: Equal.
+.RE
+.RE
+Description:
+.RS
+Compare two keys (pointers) for equality.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

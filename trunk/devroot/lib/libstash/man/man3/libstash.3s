@@ -42,7 +42,7 @@ cc -pg
 
 \fB#include <libstash/libstash_r.h>\fR
 
-.SS Functions
+.SS General
 .I cw_bool_t
 .br
 .B libstash_init
