@@ -17,9 +17,9 @@
 \label{onyxlang}
 
 Onyx is a stack-based, threaded, interpreted language.  Its closest relative is
-Adobe PostScript, followed by Forth.  Experienced PostScript programmers should
-find most aspects of Onyx familiar, but there are significant differences that
-will prevent a knowledgeable PostScript programmer from programming in Onyx
+Adobe PostScript$_{TM}$, followed by Forth.  Experienced PostScript programmers
+should find most aspects of Onyx familiar, but there are significant differences
+that will prevent a knowledgeable PostScript programmer from programming in Onyx
 without first skimming this chapter.  This chapter does not assume specific
 knowledge of other programming languages, so stands as a definitive reference
 for Onyx.
@@ -5534,6 +5534,37 @@ same systemdict, which is implicitly locked.
 	{Find regex matches in input string.}
 \hline
 \optableent
+	{input pattern flags limit}
+	{{\bf \htmlref{split}{systemdict:split}}}
+	{array}
+	{Split input into an array of substrings.}
+\optableent
+	{input pattern flags}
+	{{\bf \htmlref{split}{systemdict:split}}}
+	{array}
+	{Split input into an array of substrings.}
+\optableent
+	{input pattern limit}
+	{{\bf \htmlref{split}{systemdict:split}}}
+	{array}
+	{Split input into an array of substrings.}
+\optableent
+	{input pattern}
+	{{\bf \htmlref{split}{systemdict:split}}}
+	{array}
+	{Split input into an array of substrings.}
+\optableent
+	{input regex limit}
+	{{\bf \htmlref{split}{systemdict:split}}}
+	{array}
+	{Split input into an array of substrings.}
+\optableent
+	{input regex}
+	{{\bf \htmlref{split}{systemdict:split}}}
+	{array}
+	{Split input into an array of substrings.}
+\hline
+\optableent
 	{integer}
 	{{\bf \htmlref{submatch}{systemdict:submatch}}}
 	{substring}
@@ -9322,6 +9353,12 @@ onyx:1>
 		specified by \oparg{regex}/\oparg{pattern}/\oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `input' `I' <$i true> match {0 submatch 1 sprint} if
+`i'
+onyx:0> `input' `I' <$i true> regex match {0 submatch 1 sprint} if
+`i'
+onyx:0> `input' `I' match {0 submatch 1 sprint} if
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:mkdir}
@@ -10098,6 +10135,9 @@ onyx:5>
 		\oparg{input}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `input' dup `n(p)u' match {1 submatch offset 1 sprint} if
+2
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:onyxdict}
@@ -11079,6 +11119,11 @@ onyx:1>
 		\oparg{flags}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `pattern' regex 1 sprint
+-regex-
+onyx:0> `pattern' <$g true> regex 1 sprint
+-regex-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:regsub}
@@ -13024,24 +13069,72 @@ onyx:1>
 	\end{description}
 \label{systemdict:split}
 \index{split@\onyxop{}{split}{}}
-\item[{\onyxop{OPARGS}{split}{OPOUTS}}: ]
+\item[{\onyxop{input pattern flags limit}{split}{array}}: ]
+\item[{\onyxop{input pattern flags}{split}{array}}: ]
+\item[{\onyxop{input pattern limit}{split}{array}}: ]
+\item[{\onyxop{input pattern}{split}{array}}: ]
+\item[{\onyxop{input regex limit}{split}{array}}: ]
+\item[{\onyxop{input regex}{split}{array}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[input: ]
+			An input string to find matches in.
+		\item[pattern: ]
+			A string that specifies a regular expression.  See
+			Section~\ref{sec:onyx_regular_expressions} for syntax.
+		\item[flags: ]
+			A dictionary of optional flags:
+			\begin{description}%\item[]
+			\item[\$i: ] Case insensitive.  Defaults to false.
+			\item[\$m: ] Treat input as a multi-line string.
+				Defaults to false.
+			\item[\$s: ] Treat input as a single line, so that
+				the dot metacharacter matches any character,
+				including a newline.  Defaults to false.
+			\end{description}
+		\item[regex: ]
+			A regex object.
+		\item[limit: ]
+			Split \oparg{input} into no more than \oparg{limit}
+			substrings.  0 is treated as infinity.  Defaults to 0.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array of substrings containing the text between
+			pattern matches.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{regexerror}{regexerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create an array of substrings from \oparg{input} that are
+		separated by portions of \oparg{input} that match a regular
+		expression.
+
+		If there are capturing subpatterns in the regular expression,
+		also create substrings for those capturing subpatterns and
+		insert them into the substring array.
+
+		As a special case, if the regular expression matches the empty
+		string, split a single character.  This avoids an infinite
+		loop.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a:b:c' `:' split 1 sprint
+[`a' `b' `c']
+onyx:0> `a:b:c' `:' 2 split 1 sprint
+[`a' `b:c']
+onyx:0> `a:b:c' `(:)' split 1 sprint
+[`a' `:' `b' `:' `c']
+onyx:0> `a:b:c' `' split 1 sprint
+[`a' `:' `b' `:' `c']
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spop}
@@ -13679,6 +13772,10 @@ onyx:0>
 		matched against.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `input' `n(p)u' match {0 submatch 1 sprint 1 submatch 1 sprint} if
+`npu'
+`p'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:subst}
