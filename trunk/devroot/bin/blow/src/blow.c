@@ -127,8 +127,7 @@ main(int argc, char **argv)
 		retval = 1;
 		goto CLERROR;
 	}
-	if (libsock_init(_LIBSOCK_BLOW_MAX_CONNS, opt_bsize, 8))
-		_cw_error("Initialization failure in libsock_init()");
+	libsock_init(_LIBSOCK_BLOW_MAX_CONNS, opt_bsize, 8);
 	/* Open the connections. */
 	sock_array = (cw_sock_t *)_cw_calloc(opt_nsocks, sizeof(cw_sock_t));
 	for (i = 0; i < opt_nsocks; i++) {

@@ -95,8 +95,7 @@ main(int argc, char **argv)
 		retval = 1;
 		goto CLERROR;
 	}
-	if (libsock_init(_LIBSOCK_SUCK_MAX_CONNS, opt_bsize, 8))
-		_cw_error("Initialization failure in libsock_init()");
+	libsock_init(_LIBSOCK_SUCK_MAX_CONNS, opt_bsize, 8);
 	socks = socks_new();
 	if (socks == NULL)
 		_cw_error("Memory allocation error");
@@ -133,8 +132,7 @@ main(int argc, char **argv)
 					/* Throw the data away. */
 					buf_head_data_release(&buf, bytes_read);
 				} else if (bytes_read < 0) {
-					while (libsock_in_notify(NULL, sockfd))
-						thd_yield();
+					libsock_in_notify(NULL, sockfd);
 
 					sock_delete(sock_vec[sockfd]);
 					sock_vec[sockfd] = NULL;
@@ -167,8 +165,7 @@ accept_entry_func(void *a_arg)
 
 			sock_vec[sock_fd_get(sock)] = sock;
 
-			while (libsock_in_notify(mq, sock_fd_get(sock)))
-				thd_yield();
+			libsock_in_notify(mq, sock_fd_get(sock));
 
 			/*
 			 * Create another sock object for the next time we call

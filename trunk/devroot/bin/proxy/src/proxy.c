@@ -115,13 +115,11 @@ main(int argc, char **argv)
 			dbg_unregister(cw_g_dbg, "sock_error");
 			break;
 		case 'i':
-			if (strcmp(optarg, "INADDR_ANY") == 0) {
+			if (strcmp(optarg, "ANY") == 0) {
 				/* Same as default. */
 				opt_ip = htonl(INADDR_ANY);
-			} else if (strcmp(optarg, "INADDR_LOOPBACK") == 0)
+			} else if (strcmp(optarg, "LOOPBACK") == 0)
 				opt_ip = htonl(INADDR_LOOPBACK);
-			else if (strcmp(optarg, "INADDR_BROADCAST") == 0)
-				opt_ip = htonl(INADDR_BROADCAST);
 			else {
 				struct in_addr	addr;
 
@@ -251,8 +249,7 @@ main(int argc, char **argv)
 	}
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
 		_cw_out_put("pid: [i]\n", getpid());
-	if (libsock_init(1024, 2048, 4096))
-		_cw_error("Initialization failure");
+	libsock_init(1024, 2048, 4096);
 	socks = socks_new();
 	if (socks_listen(socks, opt_ip, &opt_port))
 		exit(1);
@@ -765,7 +762,7 @@ usage(void)
 	    "                         |   h : Hex.\n"
 	    "                         |   a : Ascii.\n"
 	    "    -i <ip>              | Bind to interface with address <ip>.\n"
-	    "                         | (Default INADDR_ANY.)\n"
+	    "                         | (Default \"ANY\".)\n"
 	    "    -p <port>            | Listen on port <port>.\n"
 	    "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
 	    "                         | port <rport>.\n",

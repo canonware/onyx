@@ -73,33 +73,41 @@ static cw_bool_t	sock_p_disconnect(cw_sock_t *a_sock);
 cw_sock_t *
 sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 {
-	cw_sock_t	*retval;
+	cw_sock_t		*retval;
+	volatile cw_uint32_t	try_stage = 0;
 
-	if (a_sock == NULL) {
-		retval = (cw_sock_t *)_cw_malloc(sizeof(cw_sock_t));
-		if (retval == NULL)
-			goto RETURN;
-		retval->is_malloced = TRUE;
-	} else {
-		retval = a_sock;
-		retval->is_malloced = FALSE;
+	xep_begin();
+	xep_try {
+		if (a_sock == NULL) {
+			retval = (cw_sock_t *)_cw_malloc(sizeof(cw_sock_t));
+			retval->is_malloced = TRUE;
+		} else {
+			retval = a_sock;
+			retval->is_malloced = FALSE;
+		}
+		try_stage = 1;
+
+		buf_new(&retval->in_buf, cw_g_mem);
+		try_stage = 2;
+
+		buf_new(&retval->out_buf, cw_g_mem);
+		try_stage = 3;
 	}
-
-	if (buf_new(&retval->in_buf, cw_g_mem) == NULL) {
-		if (retval->is_malloced) {
-			_cw_free(retval);
-			retval = NULL;
-			goto RETURN;
+	xep_catch(_CW_XEPV_OOM) {
+		switch (try_stage) {
+		case 2:
+			buf_delete(&retval->in_buf);
+		case 1:
+			if (retval->is_malloced)
+				_cw_free(retval);
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
 		}
 	}
-	if (buf_new(&retval->out_buf, cw_g_mem) == NULL) {
-		buf_delete(&retval->in_buf);
-		if (retval->is_malloced) {
-			_cw_free(retval);
-			retval = NULL;
-			goto RETURN;
-		}
-	}
+	xep_end();
+
 	mtx_new(&retval->lock);
 	cnd_new(&retval->callback_cnd);
 
@@ -124,7 +132,6 @@ sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 	retval->magic = _LIBSOCK_SOCK_MAGIC;
 #endif
 
-	RETURN:
 	return retval;
 }
 
@@ -383,11 +390,15 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	a_sock->error = FALSE;
 
 	mtx_lock(&a_sock->lock);
-	if (libsock_l_sock_register(a_sock)) {
-		mtx_unlock(&a_sock->lock);
-		retval = -1;
-		goto RETURN;
+	xep_begin();
+	xep_try {
+		libsock_l_message(a_sock, LIBSOCK_MSG_REGISTER);
 	}
+	xep_catch(_CW_XEPV_OOM) {
+		mtx_unlock(&a_sock->lock);
+	}
+	xep_end();
+
 	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
 	if (a_sock->error) {
 		mtx_unlock(&a_sock->lock);
@@ -452,11 +463,15 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		a_sock->error = FALSE;
 
 		mtx_lock(&a_sock->lock);
-		if (libsock_l_sock_register(a_sock)) {
-			mtx_unlock(&a_sock->lock);
-			retval = TRUE;
-			goto RETURN;
+		xep_begin();
+		xep_try {
+			libsock_l_message(a_sock, LIBSOCK_MSG_REGISTER);
 		}
+		xep_catch(_CW_XEPV_OOM) {
+			mtx_unlock(&a_sock->lock);
+		}
+		xep_end();
+
 		cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
 		if (a_sock->error) {
 			mtx_unlock(&a_sock->lock);
@@ -521,12 +536,29 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 
 		size = buf_size_get(&a_sock->in_buf);
 		if (size == 0)
-			retval = -2;
+			retval = -1;
 		else if ((a_max_read == 0) || (size < a_max_read)) {
-			buf_buf_catenate(a_spare, &a_sock->in_buf, FALSE);
+			xep_begin();
+			xep_try {
+				buf_buf_catenate(a_spare, &a_sock->in_buf,
+				    FALSE);
+			}
+			xep_catch(_CW_XEPV_OOM) {
+				mtx_unlock(&a_sock->in_lock);
+			}
+			xep_end();
+
 			retval = size;
 		} else {
-			buf_split(a_spare, &a_sock->in_buf, a_max_read);
+			xep_begin();
+			xep_try {
+				buf_split(a_spare, &a_sock->in_buf, a_max_read);
+			}
+			xep_catch(_CW_XEPV_OOM) {
+				mtx_unlock(&a_sock->in_lock);
+			}
+			xep_end();
+
 			retval = a_max_read;
 		}
 
@@ -557,14 +589,40 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 				 * The incoming buffer was maxed, but now there
 				 * is space.
 				 */
-				while (libsock_l_in_space(a_sock->sockfd));
+				xep_begin();
+				xep_try {
+					libsock_l_message(a_sock,
+					    LIBSOCK_MSG_IN_SPACE);
+				}
+				xep_catch(_CW_XEPV_OOM) {
+					thd_yield();
+					xep_retry();
+				}
+				xep_end();
 			}
 			if ((a_max_read == 0) || (size < a_max_read)) {
-				buf_buf_catenate(a_spare, &a_sock->in_buf,
-				    FALSE);
+				xep_begin();
+				xep_try {
+					buf_buf_catenate(a_spare,
+					    &a_sock->in_buf, FALSE);
+				}
+				xep_catch(_CW_XEPV_OOM) {
+					mtx_unlock(&a_sock->in_lock);
+				}
+				xep_end();
+
 				retval = size;
 			} else {
-				buf_split(a_spare, &a_sock->in_buf, a_max_read);
+				xep_begin();
+				xep_try {
+					buf_split(a_spare, &a_sock->in_buf,
+					    a_max_read);
+				}
+				xep_catch(_CW_XEPV_OOM) {
+					mtx_unlock(&a_sock->in_lock);
+				}
+				xep_end();
+
 				retval = a_max_read;
 			}
 
@@ -575,7 +633,7 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 		} else {
 			/* Make sure there wasn't an error. */
 			if (a_sock->error)
-				retval = -2;
+				retval = -1;
 			else
 				retval = 0;
 
@@ -650,20 +708,15 @@ sock_write(cw_sock_t *a_sock, cw_buf_t *a_buf)
 					 * Notify the I/O thread that we now
 					 * have data.
 					 */
-					if (libsock_l_out_notify(a_sock->sockfd)) {
-						retval = TRUE;
-						goto RETURN;
-					}
+					libsock_l_message(a_sock,
+					    LIBSOCK_MSG_OUT_NOTIFY);
 					a_sock->out_is_flushed = FALSE;
 				}
 			} else
 				a_sock->out_is_flushed = TRUE;
 		} else if (a_sock->out_is_flushed) {
 			/* Notify the I/O thread that we now have data. */
-			if (libsock_l_out_notify(a_sock->sockfd)) {
-				retval = TRUE;
-				goto RETURN;
-			}
+			libsock_l_message(a_sock, LIBSOCK_MSG_OUT_NOTIFY);
 			a_sock->out_is_flushed = FALSE;
 		}
 	}
@@ -1126,11 +1179,15 @@ sock_p_disconnect(cw_sock_t *a_sock)
 			mtx_unlock(&a_sock->in_lock);
 			mtx_unlock(&a_sock->state_lock);
 
-			if (libsock_l_sock_unregister(a_sock->sockfd)) {
-				mtx_unlock(&a_sock->lock);
-				retval = TRUE;
-				goto RETURN;
+			xep_begin();
+			xep_try {
+				libsock_l_message(a_sock,
+				    LIBSOCK_MSG_UNREGISTER);
 			}
+			xep_catch(_CW_XEPV_OOM) {
+				mtx_unlock(&a_sock->lock);
+			}
+			xep_end();
 			cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
 		} else
 			mtx_unlock(&a_sock->state_lock);
@@ -1195,6 +1252,5 @@ sock_p_disconnect(cw_sock_t *a_sock)
 	} else
 		retval = TRUE;
 
-	RETURN:
 	return retval;
 }

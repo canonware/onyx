@@ -11,6 +11,15 @@
  *
  ******************************************************************************/
 
+/* Message type. */
+typedef enum {
+	LIBSOCK_MSG_REGISTER,
+	LIBSOCK_MSG_UNREGISTER,
+	LIBSOCK_MSG_OUT_NOTIFY,
+	LIBSOCK_MSG_IN_SPACE,
+	LIBSOCK_MSG_IN_NOTIFY
+} cw_libsock_msg_type_t;
+
 /******************************************************************************
  *
  * <<< Input(s) >>>
@@ -35,73 +44,33 @@ void		libsock_l_wakeup(void);
  *
  * a_sock : Pointer to a sock.
  *
- * <<< Output(s) >>>
- *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Register a_sock with the I/O thread.
- *
- ******************************************************************************/
-cw_bool_t	libsock_l_sock_register(cw_sock_t *a_sock);
-
-/******************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_sockfd : A file descriptor number.
+ * a_msg : Type of message:
+ *         LIBSOCK_MSG_REGISTER   : Register a_sock with the I/O thread.
+ *         LIBSOCK_MSG_UNREGISTER : Unregister the sock corresponding to
+ *                                  a_sockfd with the I/O thread.
+ *         LIBSOCK_MSG_OUT_NOTIFY : Tell the I/O thread that the sock
+ *                                  corresponding to a_sockfd has queued
+ *                                  outgoing data.
+ *         LIBSOCK_MSG_IN_SPACE   : Tell the I/O thread that the sock
+ *                                  corresponding to a_sockfd has space
+ *                                  available for incoming data.
+ *         LIBSOCK_MSG_IN_NOTIFY  : Not used with this function.
  *
  * <<< Output(s) >>>
  *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
+ * None.
+ *
+ * <<< Exception(s) >>>
+ *
+ * _CW_XEPV_OOM.
  *
  * <<< Description >>>
  *
- * Unregister the sock corresponding to a_sockfd with the I/O thread.
+ * Send a message to the I/O thread.
  *
  ******************************************************************************/
-cw_bool_t	libsock_l_sock_unregister(cw_uint32_t a_sockfd);
-
-/******************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_sockfd : A file descriptor number.
- *
- * <<< Output(s) >>>
- *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Tell the I/O thread that the sock corresponding to a_sockfd has queued
- * outgoing data.
- *
- ******************************************************************************/
-cw_bool_t	libsock_l_out_notify(cw_uint32_t a_sockfd);
-
-/******************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_sockfd : A file descriptor number.
- *
- * <<< Output(s) >>>
- *
- * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Tell the I/O thread that the sock corresponding to a_sockfd has space
- * available for incoming data.
- *
- ******************************************************************************/
-cw_bool_t	libsock_l_in_space(cw_uint32_t a_sockfd);
+void		libsock_l_message(cw_sock_t *a_sock, cw_libsock_msg_type_t
+    a_msg);
 
 /******************************************************************************
  *

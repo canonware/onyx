@@ -23,7 +23,7 @@ cc -pg
 .I file
 -lsock_p -lstash_p -lpthread
 
-.I cw_bool_t
+.I void
 .br
 .B libsock_init
 .RI ( "cw_uint32_t a_max_fds" ", " "cw_uint32_t a_bufc_size" ", "
@@ -39,7 +39,7 @@ cc -pg
 .B libsock_spare_bufc_get
 .RI ( "void" )
 
-.I cw_bool_t
+.I void
 .br
 .B libsock_in_notify
 .RI ( "cw_mq_t *a_mq" ", " "int a_sockfd" )
@@ -102,7 +102,7 @@ main()
 }
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B libsock_init
 .RI ( "cw_uint32_t a_max_fds" ", " "cw_uint32_t a_bufc_size" ", "
@@ -128,12 +128,11 @@ until \fBlibsock_shutdown\fR() is called.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -173,10 +172,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a \fBbufc\fR instance.
-.br
-NULL: Memory allocation error.
+Pointer to a \fBbufc\fR instance.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -186,7 +187,7 @@ be of the size specified by the a_bufc_size parameter passed to
 .RE
 .RE
 
-.I cw_bool_t
+.I void
 .br
 .B libsock_in_notify
 .RI ( "cw_mq_t *a_mq" ", " "int a_sockfd" )
@@ -204,12 +205,11 @@ A socket desccriptor number.
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-FALSE: Success.
-.br
-TRUE: Memory allocation error.
+None.
 .RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

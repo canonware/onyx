@@ -34,12 +34,9 @@ struct cw_libsock_msg_s {
 #ifdef _LIBSOCK_DBG
 	cw_uint32_t	magic;
 #endif
-	enum {
-		REGISTER, UNREGISTER, OUT_NOTIFY, IN_SPACE, IN_NOTIFY
-	}	type;
+	cw_libsock_msg_type_t type;
 	union {
 		cw_sock_t	*sock;
-		cw_uint32_t	sockfd;
 		struct {
 			int	sockfd;
 			cw_mq_t	*mq;
@@ -108,143 +105,156 @@ static void	*libsock_p_entry_func(void *a_arg);
 /* Global. */
 cw_libsock_t	*g_libsock = NULL;
 
-cw_bool_t
+void
 libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
     a_max_spare_bufcs)
 {
-	struct cw_libsock_entry_s *arg;
-	int		filedes[2];
-	int		val;
+	volatile struct cw_libsock_entry_s	*arg;
+	int					filedes[2], val;
+	volatile cw_uint32_t			try_stage = 0;
 
 	_cw_assert(a_bufc_size > 0);
 
-	arg = (struct cw_libsock_entry_s *)_cw_malloc(sizeof(struct
-	    cw_libsock_entry_s));
+	xep_begin();
+	xep_try {
+		arg = (struct cw_libsock_entry_s *)_cw_malloc(sizeof(struct
+		    cw_libsock_entry_s));
+		try_stage = 1;
 
-	if (arg == NULL)
-		goto OOM_1;
-	arg->max_fds = a_max_fds;
-	arg->regs = (struct cw_libsock_reg_s *)_cw_calloc(a_max_fds,
-	    sizeof(struct cw_libsock_reg_s));
+		arg->max_fds = a_max_fds;
+		arg->regs = (struct cw_libsock_reg_s *)_cw_calloc(a_max_fds,
+		    sizeof(struct cw_libsock_reg_s));
+		memset(arg->regs, 0, a_max_fds * sizeof(struct
+		    cw_libsock_reg_s));
+		try_stage = 2;
 
-	if (arg->regs == NULL)
-		goto OOM_2;
-	memset(arg->regs, 0, a_max_fds * sizeof(struct cw_libsock_reg_s));
+		arg->fds = (struct pollfd *)_cw_calloc(a_max_fds, sizeof(struct
+		    pollfd));
+		memset(arg->fds, 0, a_max_fds * sizeof(struct pollfd));
+		try_stage = 3;
+		
+		if (g_libsock == NULL) {
+			g_libsock = (cw_libsock_t
+			    *)_cw_malloc(sizeof(cw_libsock_t));
+			memset(g_libsock, 0, sizeof(cw_libsock_t));
+			try_stage = 4;
 
-	arg->fds = (struct pollfd *)_cw_calloc(a_max_fds, sizeof(struct
-	    pollfd));
+			/*
+			 * Ignore SIGPIPE, so that writing to a closed socket
+			 * won't crash the program.
+			 */
+			signal(SIGPIPE, SIG_IGN);
 
-	if (arg->fds == NULL)
-		goto OOM_3;
-	memset(arg->fds, 0, a_max_fds * sizeof(struct pollfd));
+			/*
+			 * Create a pipe that will be used in conjunction with
+			 * the message queues to make the back end thread return
+			 * from the poll() call.
+			 */
 
-	if (g_libsock == NULL) {
-		g_libsock = (cw_libsock_t *)_cw_malloc(sizeof(cw_libsock_t));
-		if (g_libsock == NULL)
-			goto OOM_4;
-		memset(g_libsock, 0, sizeof(cw_libsock_t));
+			if (pipe(filedes) == -1) {
+				_cw_out_put_e("Fatal error in pipe(): [s]\n",
+				    strerror(errno));
+				abort();
+			}
+			g_libsock->pipe_out = filedes[0];
+			g_libsock->pipe_in = filedes[1];
 
-		/*
-		 * Ignore SIGPIPE, so that writing to a closed socket won't
-		 * crash the program.
-		 */
-		signal(SIGPIPE, SIG_IGN);
+			/* Set g_libsock->pipe_in to non-blocking. */
+			val = fcntl(g_libsock->pipe_in, F_GETFL, 0);
+			if (val == -1) {
+				_cw_out_put_e("Fatal error for F_GETFL in "
+				    "fcntl(): [s]\n", strerror(errno));
+				abort();
+			}
+			if (fcntl(g_libsock->pipe_in, F_SETFL, val |
+			    O_NONBLOCK)) {
+				_cw_out_put_e("Fatal error for F_SETFL in "
+				    "fcntl(): [s]\n", strerror(errno));
+				abort();
+			}
 
-		/*
-		 * Create a pipe that will be used in conjunction with the
-		 * message queues to make the back end thread return from the
-		 * poll() call.
-		 */
+			val = fcntl(g_libsock->pipe_out, F_GETFL, 0);
+			if (val == -1) {
+				_cw_out_put_e("Fatal error for F_GETFL in "
+				    "fcntl(): [s]\n", strerror(errno));
+				abort();
+			}
+			if (fcntl(g_libsock->pipe_in, F_SETFL, val |
+			    O_NONBLOCK)) {
+				_cw_out_put_e("Fatal error for F_SETFL in "
+				    "fcntl(): [s]\n", strerror(errno));
+				abort();
+			}
 
-		if (pipe(filedes) == -1) {
-			_cw_out_put_e("Fatal error in pipe(): [s]\n",
-			    strerror(errno));
-			abort();
+			g_libsock->should_quit = FALSE;
+
+			/*
+			 * Create the semaphore used for determining whether
+			 * data should be written to the pipe in order to force
+			 * a return from poll().
+			 */
+			sema_new(&g_libsock->pipe_sema, 1);
+
+			/*
+			 * Create the spare bufc pool and initialize associated
+			 * variables.
+			 */
+			pezz_new(&g_libsock->bufc_pool, cw_g_mem,
+			    sizeof(cw_bufc_t), (a_max_spare_bufcs)?
+			    a_max_spare_bufcs : 1);
+			try_stage = 5;
+
+			pezz_new(&g_libsock->buffer_pool, cw_g_mem, a_bufc_size,
+			    (a_max_spare_bufcs) ? a_max_spare_bufcs : 1);
+			try_stage = 6;
+
+			/* Create the message queues. */
+			pezz_new(&g_libsock->messages_pezz, cw_g_mem,
+			    sizeof(struct cw_libsock_msg_s), 8);
+			try_stage = 7;
+
+			mq_new(&g_libsock->messages, cw_g_mem, sizeof(struct
+			    cw_libsock_msg_s *));
+			try_stage = 8;
+
+			/*
+			 * Create the lock used for protecting
+			 * gethostbyname().
+			 */
+			mtx_new(&g_libsock->get_ip_addr_lock);
+
+			/*
+			 * Create a new thread to handle all of the back end
+			 * socket foo.
+			 */
+			thd_new(&g_libsock->thread, libsock_p_entry_func, (void
+			    *)arg);
 		}
-		g_libsock->pipe_out = filedes[0];
-		g_libsock->pipe_in = filedes[1];
-
-		/* Set g_libsock->pipe_in to non-blocking. */
-		val = fcntl(g_libsock->pipe_in, F_GETFL, 0);
-		if (val == -1) {
-			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): "
-			    "[s]\n", strerror(errno));
-			abort();
-		}
-		if (fcntl(g_libsock->pipe_in, F_SETFL, val | O_NONBLOCK)) {
-			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): "
-			    "[s]\n", strerror(errno));
-			abort();
-		}
-
-		val = fcntl(g_libsock->pipe_out, F_GETFL, 0);
-		if (val == -1) {
-			_cw_out_put_e("Fatal error for F_GETFL in fcntl(): "
-			    "[s]\n", strerror(errno));
-			abort();
-		}
-		if (fcntl(g_libsock->pipe_in, F_SETFL, val | O_NONBLOCK)) {
-			_cw_out_put_e("Fatal error for F_SETFL in fcntl(): "
-			    "[s]\n", strerror(errno));
-			abort();
-		}
-
-		g_libsock->should_quit = FALSE;
-
-		/*
-		 * Create the semaphore used for determining whether data should
-		 * be written to the pipe in order to force a return from
-		 * poll().
-		 */
-		sema_new(&g_libsock->pipe_sema, 1);
-
-		/*
-		 * Create the spare bufc pool and initialize associated
-		 * variables.
-		 */
-		if (pezz_new(&g_libsock->bufc_pool, cw_g_mem, sizeof(cw_bufc_t),
-		    (a_max_spare_bufcs)? a_max_spare_bufcs : 1) == NULL)
-			goto OOM_5;
-		if (pezz_new(&g_libsock->buffer_pool, cw_g_mem, a_bufc_size,
-		    (a_max_spare_bufcs) ? a_max_spare_bufcs : 1) == NULL)
-			goto OOM_6;
-		/* Create the message queues. */
-		if (pezz_new(&g_libsock->messages_pezz, cw_g_mem, sizeof(struct
-		    cw_libsock_msg_s), 8) == NULL)
-			goto OOM_7;
-		if (mq_new(&g_libsock->messages, cw_g_mem, sizeof(struct
-		    cw_libsock_msg_s *)) == NULL)
-			goto OOM_8;
-
-		/* Create the lock used for protecting gethostbyname(). */
-		mtx_new(&g_libsock->get_ip_addr_lock);
-
-		/*
-		 * Create a new thread to handle all of the back end socket
-		 * foo.
-		 */
-		thd_new(&g_libsock->thread, libsock_p_entry_func, (void *)arg);
 	}
-
-	return FALSE;
-
-	OOM_8:
-	pezz_delete(&g_libsock->messages_pezz);
-	OOM_7:
-	pezz_delete(&g_libsock->buffer_pool);
-	OOM_6:
-	pezz_delete(&g_libsock->bufc_pool);
-	OOM_5:
-	_cw_free(g_libsock);
-	g_libsock = NULL;
-	OOM_4:
-	_cw_free(arg->fds);
-	OOM_3:
-	_cw_free(arg->regs);
-	OOM_2:
-	_cw_free(arg);
-	OOM_1:
-	return TRUE;
+	xep_catch(_CW_XEPV_OOM) {
+		switch (try_stage) {
+		case 7:
+			pezz_delete(&g_libsock->messages_pezz);
+		case 6:
+			pezz_delete(&g_libsock->buffer_pool);
+		case 5:
+			pezz_delete(&g_libsock->bufc_pool);
+		case 4:
+			_cw_free(g_libsock);
+			g_libsock = NULL;
+		case 3:
+			_cw_free(arg->fds);
+		case 2:
+			_cw_free(arg->regs);
+		case 1:
+			_cw_free((struct cw_libsock_entry_s *)arg);
+		case 0:
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
 }
 
 void
@@ -283,31 +293,30 @@ libsock_spare_bufc_get(void)
 	retval = bufc_new((cw_bufc_t *)pezz_get(&g_libsock->bufc_pool),
 	    cw_g_mem, (cw_opaque_dealloc_t *)pezz_put_e, (void
 	    *)&g_libsock->bufc_pool);
-	if (retval == NULL) {
-		retval = NULL;
-		goto RETURN;
+
+	xep_begin();
+	xep_try {
+		buffer = pezz_get(&g_libsock->buffer_pool);
 	}
-	buffer = pezz_get(&g_libsock->buffer_pool);
-	if (buffer == NULL) {
+	xep_catch(_CW_XEPV_OOM) {
 		bufc_delete(retval);
-		retval = NULL;
-		goto RETURN;
 	}
+	xep_end();
+
 	bufc_buffer_set(retval,
 	    buffer, pezz_buffer_size_get(&g_libsock->buffer_pool), TRUE,
 	    (cw_opaque_dealloc_t *)pezz_put_e, (void *)&g_libsock->buffer_pool);
 
-	RETURN:
 	return retval;
 }
 
-cw_bool_t
+void
 libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 {
-	cw_bool_t	retval;
-	struct cw_libsock_msg_s *message;
-	cw_mtx_t	mtx;
-	cw_cnd_t	cnd;
+	struct cw_libsock_msg_s	*message;
+	cw_mtx_t		mtx;
+	cw_cnd_t		cnd;
+	volatile cw_uint32_t	try_stage = 0;
 
 	_cw_check_ptr(g_libsock);
 	_cw_assert(a_sockfd >= 0);
@@ -315,39 +324,46 @@ libsock_in_notify(cw_mq_t *a_mq, int a_sockfd)
 	mtx_new(&mtx);
 	cnd_new(&cnd);
 
-	message = (struct cw_libsock_msg_s
-	    *)pezz_get(&g_libsock->messages_pezz);
+	xep_begin();
+	xep_try {
+		message = (struct cw_libsock_msg_s
+		    *)pezz_get(&g_libsock->messages_pezz);
+		try_stage = 1;
 
-	if (message == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
 #ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_MSG_MAGIC;
+		message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
-	message->type = IN_NOTIFY;
-	message->data.in_notify.sockfd = a_sockfd;
-	message->data.in_notify.mq = a_mq;
-	message->data.in_notify.mtx = &mtx;
-	message->data.in_notify.cnd = &cnd;
+		message->type = LIBSOCK_MSG_IN_NOTIFY;
+		message->data.in_notify.sockfd = a_sockfd;
+		message->data.in_notify.mq = a_mq;
+		message->data.in_notify.mtx = &mtx;
+		message->data.in_notify.cnd = &cnd;
 
-	mtx_lock(&mtx);
-	if (mq_put(&g_libsock->messages, message) != 0) {
-		pezz_put(&g_libsock->messages_pezz, (void *)message);
-		retval = TRUE;
-		goto RETURN;
+		mtx_lock(&mtx);
+		mq_put(&g_libsock->messages, message);
+		try_stage = 2;
 	}
+	xep_catch(_CW_XEPV_OOM) {
+		switch(try_stage) {
+		case 1:
+			pezz_put(&g_libsock->messages_pezz, (void *)message);
+		case 0:
+			mtx_delete(&mtx);
+			cnd_delete(&cnd);
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+	xep_end();
+
 	libsock_l_wakeup();
 
 	cnd_wait(&cnd, &mtx);
 	mtx_unlock(&mtx);
 
-	retval = FALSE;
-
-	RETURN:
 	mtx_delete(&mtx);
 	cnd_delete(&cnd);
-	return retval;
 }
 
 void
@@ -363,10 +379,9 @@ libsock_l_wakeup(void)
 	}
 }
 
-cw_bool_t
-libsock_l_sock_register(cw_sock_t *a_sock)
+void
+libsock_l_message(cw_sock_t *a_sock, cw_libsock_msg_type_t a_msg)
 {
-	cw_bool_t		retval;
 	struct cw_libsock_msg_s	*message;
 
 	_cw_check_ptr(a_sock);
@@ -375,121 +390,21 @@ libsock_l_sock_register(cw_sock_t *a_sock)
 
 	message = (struct cw_libsock_msg_s
 	    *)pezz_get(&g_libsock->messages_pezz);
-	if (message == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
 #ifdef _LIBSOCK_DBG
 	message->magic = _LIBSOCK_MSG_MAGIC;
 #endif
-	message->type = REGISTER;
+	message->type = a_msg;
 	message->data.sock = a_sock;
-	if (mq_put(&g_libsock->messages, message) != 0) {
+	xep_begin();
+	xep_try {
+		mq_put(&g_libsock->messages, message);
+	}
+	xep_catch(_CW_XEPV_OOM) {
 		pezz_put(&g_libsock->messages_pezz, (void *)message);
-		retval = TRUE;
-		goto RETURN;
 	}
+	xep_end();
+
 	libsock_l_wakeup();
-
-	retval = FALSE;
-
-	RETURN:
-	return retval;
-}
-
-cw_bool_t
-libsock_l_sock_unregister(cw_uint32_t a_sockfd)
-{
-	cw_bool_t		retval;
-	struct cw_libsock_msg_s	*message;
-
-	_cw_check_ptr(g_libsock);
-
-	message = (struct cw_libsock_msg_s
-	    *)pezz_get(&g_libsock->messages_pezz);
-	if (message == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
-#ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_MSG_MAGIC;
-#endif
-	message->type = UNREGISTER;
-	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_libsock->messages, message) != 0) {
-		pezz_put(&g_libsock->messages_pezz, (void *)message);
-		retval = TRUE;
-		goto RETURN;
-	}
-	libsock_l_wakeup();
-
-	retval = FALSE;
-	RETURN:
-	return retval;
-}
-
-cw_bool_t
-libsock_l_out_notify(cw_uint32_t a_sockfd)
-{
-	cw_bool_t		retval;
-	struct cw_libsock_msg_s	*message;
-
-	_cw_check_ptr(g_libsock);
-
-	message = (struct cw_libsock_msg_s
-	    *)pezz_get(&g_libsock->messages_pezz);
-
-	if (NULL == message) {
-		retval = TRUE;
-		goto RETURN;
-	}
-#ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_MSG_MAGIC;
-#endif
-	message->type = OUT_NOTIFY;
-	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_libsock->messages, message) != 0) {
-		pezz_put(&g_libsock->messages_pezz, (void *)message);
-		retval = TRUE;
-		goto RETURN;
-	}
-	libsock_l_wakeup();
-
-	retval = FALSE;
-	RETURN:
-	return retval;
-}
-
-cw_bool_t
-libsock_l_in_space(cw_uint32_t a_sockfd)
-{
-	cw_bool_t retval;
-	struct cw_libsock_msg_s *message;
-
-	_cw_check_ptr(g_libsock);
-
-	message = (struct cw_libsock_msg_s
-	    *)pezz_get(&g_libsock->messages_pezz);
-
-	if (message == NULL) {
-		retval = TRUE;
-		goto RETURN;
-	}
-#ifdef _LIBSOCK_DBG
-	message->magic = _LIBSOCK_MSG_MAGIC;
-#endif
-	message->type = IN_SPACE;
-	message->data.sockfd = a_sockfd;
-	if (mq_put(&g_libsock->messages, message) != 0) {
-		pezz_put(&g_libsock->messages_pezz, (void *)message);
-		retval = TRUE;
-		goto RETURN;
-	}
-	libsock_l_wakeup();
-
-	retval = FALSE;
-	RETURN:
-	return retval;
 }
 
 cw_bool_t
@@ -597,7 +512,6 @@ libsock_p_notify(cw_mq_t *a_mq, int a_sockfd)
 #ifdef _LIBSOCK_CONFESS
 	_cw_out_put("n");
 #endif
-
 	RETURN:
 	return retval;
 }
@@ -640,7 +554,7 @@ libsock_p_entry_func(void *a_arg)
 		while (mq_tryget(&g_libsock->messages, &message) == FALSE) {
 			_cw_check_ptr(message);
 			switch (message->type) {
-			case REGISTER:
+			case LIBSOCK_MSG_REGISTER:
 				sock = message->data.sock;
 
 				sockfd = sock_fd_get(sock);
@@ -702,8 +616,8 @@ libsock_p_entry_func(void *a_arg)
 				}
 
 				break;
-			case UNREGISTER:
-				sockfd = message->data.sockfd;
+			case LIBSOCK_MSG_UNREGISTER:
+				sockfd = message->data.sock->sockfd;
 
 				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
@@ -752,8 +666,8 @@ libsock_p_entry_func(void *a_arg)
 				    FALSE);
 				regs[sockfd].sock = NULL;
 				break;
-			case OUT_NOTIFY:
-				sockfd = message->data.sockfd;
+			case LIBSOCK_MSG_OUT_NOTIFY:
+				sockfd = message->data.sock->sockfd;
 
 				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
@@ -772,8 +686,8 @@ libsock_p_entry_func(void *a_arg)
 				}
 #endif
 				break;
-			case IN_SPACE:
-				sockfd = message->data.sockfd;
+			case LIBSOCK_MSG_IN_SPACE:
+				sockfd = message->data.sock->sockfd;
 
 				if (regs[sockfd].pollfd_pos != -1) {
 #ifdef _LIBSOCK_CONFESS
@@ -792,7 +706,7 @@ libsock_p_entry_func(void *a_arg)
 				}
 #endif
 				break;
-			case IN_NOTIFY:
+			case LIBSOCK_MSG_IN_NOTIFY:
 				sockfd = message->data.in_notify.sockfd;
 
 				if (regs[sockfd].pollfd_pos != -1) {

@@ -13,7 +13,7 @@ sock - Asynchronous TCP/IP socket I/O.
 .SH SYNOPSIS
 \fB#include <libsock/libsock.h>\fR
 
-.I cw_sock_t
+.I cw_sock_t *
 .br
 .B sock_new
 .RI ( "cw_sock_t *a_sock" ", " "cw_uint32_t a_in_max_buf_size" )
@@ -89,7 +89,7 @@ Diagnostic information regarding sockets.
 allows completely asynchronous socket I/O.
 
 .SH USAGE
-.I cw_sock_t
+.I cw_sock_t *
 .br
 .B sock_new
 .RI ( "cw_sock_t *a_sock" ", " "cw_uint32_t a_in_max_buf_size" )
@@ -108,12 +108,15 @@ the I/O thread from ever trying to read from the discriptor.
 .RE
 Output(s):
 .RS
+None.
 .IR retval :
 .RS
-non-NULL: Pointer to a sock.
-.br
-NULL: Memory allocation error.
+Pointer to a sock.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS
@@ -359,14 +362,16 @@ Output(s):
 .RS
 .IR retval :
 .RS
--2: Error.  This should only happen if the socket has been closed.
-.br
--1: Memory allocation error.
+-1: Error.  This should only happen if the socket has been closed.
 .br
 0: Timeout.
 .br
 >0: Number of bytes of data read.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

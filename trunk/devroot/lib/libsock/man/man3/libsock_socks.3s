@@ -61,10 +61,12 @@ Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a socks.
-.br
-NULL: Memory allocation error.
+Pointer to a socks.
 .RE
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
 .RE
 Description:
 .RS

@@ -1,3 +1,11 @@
+2000-11-28  Jason Evans  <jasone@canonware.com>
+
+	* : Update OOM handling to use exceptions.
+
+	* src/socks.c (socks_listen): Zero the sockaddr_in structure
+	before setting it so that when the kernel searches for an
+	interface, it doesn't get confused by any garbage in the pad.
+
 2000-06-28  Jason Evans  <jasone@canonware.com>
 
 	* : Complete man pages.
