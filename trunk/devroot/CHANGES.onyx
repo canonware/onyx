@@ -971,7 +971,7 @@
 	* configure.in : Do not specify CFLAGS unless none were passed in the
 	environment.
 
-	Add the --disable-onyx and --disable-slate flags.
+	Add the --disable-onyx flag.
 
 2001-11-13 : Jason Evans <jasone@canonware.com>
 

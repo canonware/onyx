@@ -468,24 +468,6 @@ if test "x$enable_onyx" = "x1" ; then
   AC_DEFINE(CW_USE_ONYX)
 fi
 
-dnl Build slate by default.
-AC_ARG_ENABLE(slate, [  --disable-slate         Do not build slate],
-if test "x$enable_slate" = "xno" ; then
-  enable_slate="0"
-else
-  enable_slate="1"
-fi
-,
-enable_slate="1"
-)
-
-if echo "<Version = slate>" | grep Version >/dev/null ; then
-  slate_version=devel
-else
-  slate_version="<Version = slate>"
-fi
-AC_SUBST(slate_version)
-
 dnl Disable rules that do automatic regeneration of configure output by default.
 AC_ARG_ENABLE(autogen, [  --enable-autogen        Automatically regenerate configure output],
 if test "x$enable_autogen" = "xno" ; then
@@ -620,117 +602,16 @@ if test "x$enable_modules" = "x1" ; then
   if test "x$enable_modprompt" = "x0" ; then
     AC_MSG_RESULT(Missing features or configuration options necessary for modprompt)
   fi
-
-  dnl modpane.
-  if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" \
-     -a "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" \
-     -a "x$enable_handle" = "x1" -a "x$enable_oop" = "x1" ; then
-    enable_modpane="1"
-
-    dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
-    TEMP_CPPFLAGS="$CPPFLAGS"
-    TEMP_LDFLAGS="$LDFLAGS"
-    if test "x$MODPANE_CPPFLAGS" = "x" ; then
-      MODPANE_CPPFLAGS=
-    else
-      CPPFLAGS="$MODPANE_CPPFLAGS $CPPFLAGS"
-    fi
-    if test "x$MODPANE_LDFLAGS" = "x" ; then
-      MODPANE_LDFLAGS=
-    else
-      LDFLAGS="$MODPANE_LDFLAGS $LDFLAGS"
-    fi
-
-    dnl Check for pty-related functionality.
-    AC_CHECK_HEADERS(termios.h, , enable_modpane="0")
-    AC_CHECK_FUNCS(tcgetattr, , enable_modpane="0")
-    AC_CHECK_FUNCS(cfmakeraw, , enable_modpane="0")
-    AC_CHECK_FUNCS(tcsetattr, , enable_modpane="0")
-
-    dnl Check if modpane is in the source tree.
-    if test "x$enable_modpane" = "x1" ; then
-      CW_BUILD_MOD(modpane, enable_modpane)
-    fi
-    if test "x$enable_modpane" = "x1" ; then
-      AC_DEFINE(CW_USE_MODPANE)
-      AC_SUBST(MODPANE_CPPFLAGS)
-      AC_SUBST(MODPANE_LDFLAGS)
-      cfgoutputs="$cfgoutputs bin/ti2nx/src/ti2nx.nx.in"
-    fi
-
-    dnl Restore CPPFLAGS and LDFLAGS.
-    CPPFLAGS="$TEMP_CPPFLAGS"
-    LDFLAGS="$TEMP_LDFLAGS"
-  else
-    enable_modpane="0"
-  fi
-  if test "x$enable_modpane" = "x0" ; then
-    AC_MSG_RESULT(Missing features or configuration options necessary for modpane)
-  fi
-
-  dnl modslate
-  if test "x$enable_slate" = "x1" -a "x$enable_threads" = "x1" \
-     -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
-     -a "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" \
-     -a "x$enable_modpane" = "x1" -a "x$enable_oop" = "x1" \
-     -a "x$enable_handle" = "x1" ; then
-    dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
-    TEMP_CPPFLAGS="$CPPFLAGS"
-    TEMP_LDFLAGS="$LDFLAGS"
-    if test "x$MODSLATE_CPPFLAGS" = "x" ; then
-      MODSLATE_CPPFLAGS=
-    else
-      CPPFLAGS="$MODSLATE_CPPFLAGS $CPPFLAGS"
-    fi
-    if test "x$MODSLATE_LDFLAGS" = "x" ; then
-      MODSLATE_LDFLAGS=
-    else
-      LDFLAGS="$MODSLATE_LDFLAGS $LDFLAGS"
-    fi
-
-    dnl Check for functionality needed by modslate.
-    dnl ...
-
-    if test "x$enable_slate" = "x1" ; then
-      dnl Check if slate is in the source tree.
-      CW_BUILD_MOD(modslate, enable_slate)
-    fi
-    if test "x$enable_slate" = "x1" ; then
-      cfgoutputs="$cfgoutputs bin/slate/src/slate.nx.in"
-      AC_DEFINE(CW_USE_SLATE)
-      AC_SUBST(MODSLATE_CPPFLAGS)
-      AC_SUBST(MODSLATE_LDFLAGS)
-    fi
-
-    dnl Restore CPPFLAGS and LDFLAGS.
-    CPPFLAGS="$TEMP_CPPFLAGS"
-    LDFLAGS="$TEMP_LDFLAGS"
-  else
-    enable_slate="0"
-  fi
-  if test "x$enable_slate" = "x0" ; then
-    AC_MSG_RESULT(Missing features or configuration options necessary for slate)
-  fi
 else
   AC_MSG_RESULT(Modules disabled; not doing module configuration)
   enable_modprompt="0"
-  enable_modpane="0"
-  enable_slate="0"
 fi
 AC_SUBST(enable_modprompt)
-AC_SUBST(enable_modpane)
-AC_SUBST(enable_slate)
 
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
   CW_BUILD_BIN(onyx, bin_onyx)
   CW_BUILD_BIN(onyx_config, bin_onyx_config)
-fi
-if test "x$enable_slate" = "x1" ; then
-  CW_BUILD_BIN(slate, bin_slate)
-fi
-if test "x$enable_modpane" = "x1" ; then
-  CW_BUILD_BIN(ti2nx, bin_ti2nx)
 fi
 
 AC_SUBST(bins)
@@ -777,7 +658,6 @@ CW_BUILD_DOC(onyx, doc_onyx)
 if test "x$doc_onyx" = "x1" ; then
   cfgoutputs="$cfgoutputs doc/latex/onyx/lang.tex"
 fi
-CW_BUILD_DOC(slate, doc_slate)
 
 VERIFY="$objroot/test/verify"
 AC_SUBST(VERIFY)
@@ -968,30 +848,6 @@ if test "x$bin_onyx" = "x1" ; then
   AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
 fi
 
-dnl 
-dnl slate configuration.
-dnl 
-if test "x$bin_slate" = "x1" ; then
-  AC_DEFINE_UNQUOTED(CW_TSLATE_SLATE, "$abs_objroot/bin/slate/bin/slate")
-
-  slate_rpath_post="\`$DATADIR/slate-$slate_version/nx'"
-  slate_mpath_post="\`$DATADIR/slate-$slate_version/nxm'"
-  AC_SUBST(slate_rpath_post)
-  AC_SUBST(slate_mpath_post)
-
-  tmpath=ONYX_MPATH=
-  trpath=ONYX_RPATH=
-  for i in $mods ; do
-    tmpath=$tmpath:$abs_objroot/mod/$i/nxm
-    trpath=$trpath:$abs_objroot/mod/$i/nx
-  done
-  dnl Remove leading ':'.
-  tmpath=`echo $tmpath | sed s/://`
-  trpath=`echo $trpath | sed s/://`
-  AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")
-  AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
-fi
-
 dnl Process .in files.
 AC_SUBST(cfghdrs)
 AC_CONFIG_HEADER($cfghdrs)
@@ -1009,9 +865,6 @@ dnl
 AC_MSG_RESULT(===============================================================================)
 if test "x$bin_onyx" = "x1" ; then
 AC_MSG_RESULT(Onyx version  : $onyx_version)
-fi
-if test "x$bin_slate" = "x1" ; then
-AC_MSG_RESULT(Slate version : $slate_version)
 fi
 AC_MSG_RESULT()
 AC_MSG_RESULT(HCC           : ${HCC})

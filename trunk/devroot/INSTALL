@@ -201,9 +201,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 --disable-onyx
 	Use an installed copy of onyx rather than building it.
 
---disable-slate
-	Do not build slate.
-
 --enable-autogen
 	Include dependency rules in the build system to automatically regenerate
 	files created by configure when their sources are newer.  This is
