@@ -243,6 +243,8 @@ typedef enum
     NXN_ENTRY(get),
     NXN_ENTRY(getinterval),
 #ifdef CW_POSIX
+    NXN_ENTRY(getpgid),
+    NXN_ENTRY(getsid),
     NXN_ENTRY(gid),
 #endif
     NXN_ENTRY(globaldict),
@@ -657,6 +659,10 @@ typedef enum
 #ifdef CW_PTHREADS
     NXN_ENTRY(setperiod),
 #endif
+#ifdef CW_POSIX
+    NXN_ENTRY(setpgid),
+    NXN_ENTRY(setsid),
+#endif
 #ifdef CW_SOCKET
     NXN_ENTRY(setsockopt),
 #endif
@@ -678,6 +684,15 @@ typedef enum
     NXN_ENTRY(sidup),
 #ifdef CW_THREADS
     NXN_ENTRY(signal),
+#endif
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+    NXN_ENTRY(signalthread),
+#endif
+#ifdef CW_POSIX
+    NXN_ENTRY(sigpending),
+    NXN_ENTRY(sigprocmask),
+    NXN_ENTRY(sigsuspend),
+    NXN_ENTRY(sigwait),
 #endif
 #ifdef CW_REAL
     NXN_ENTRY(sin),

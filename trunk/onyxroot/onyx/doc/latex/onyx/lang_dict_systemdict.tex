@@ -5668,6 +5668,50 @@ onyx:0> `abcd' 1 2 getinterval 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:getpgid}
+\index{getpgid@\onyxop{}{getpgid}{}}
+\item[{\onyxop{OPARGS}{getpgid}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:getsid}
+\index{getsid@\onyxop{}{getsid}{}}
+\item[{\onyxop{OPARGS}{getsid}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:gid}
 \index{gid@\onyxop{}{gid}{}}
 \item[{\onyxop{--}{gid}{gid}}: ]
@@ -6439,34 +6483,34 @@ onyx:0>
 		\item[sig: ]
 			An integer, or one of the following names:
 			\begin{itemize}
-			\item{SIGABRT}
-			\item{SIGALRM}
-			\item{SIGBUS}
-			\item{SIGCHLD}
-			\item{SIGCONT}
-			\item{SIGFPE}
-			\item{SIGHUP}
-			\item{SIGILL}
-			\item{SIGINT}
-			\item{SIGKILL}
-			\item{SIGPIPE}
-			\item{SIGQUIT}
-			\item{SIGSEGV}
-			\item{SIGSTOP}
-			\item{SIGTERM}
-			\item{SIGTSTP}
-			\item{SIGTTIN}
-			\item{SIGTTOU}
-			\item{SIGUSR1}
-			\item{SIGUSR2}
-			\item{SIGPOLL (may not be present)}
-			\item{SIGPROF}
-			\item{SIGSYS}
-			\item{SIGTRAP}
-			\item{SIGURG}
-			\item{SIGVTALRM (may not be present)}
-			\item{SIGXCPU}
-			\item{SIGXFSZ}
+ 			\item{\$SIGABRT}
+ 			\item{\$SIGALRM}
+ 			\item{\$SIGBUS}
+ 			\item{\$SIGCHLD}
+ 			\item{\$SIGCONT}
+ 			\item{\$SIGFPE}
+ 			\item{\$SIGHUP}
+ 			\item{\$SIGILL}
+ 			\item{\$SIGINT}
+ 			\item{\$SIGKILL}
+ 			\item{\$SIGPIPE}
+ 			\item{\$SIGQUIT}
+ 			\item{\$SIGSEGV}
+ 			\item{\$SIGSTOP}
+ 			\item{\$SIGTERM}
+ 			\item{\$SIGTSTP}
+ 			\item{\$SIGTTIN}
+ 			\item{\$SIGTTOU}
+ 			\item{\$SIGUSR1}
+ 			\item{\$SIGUSR2}
+ 			\item{\$SIGPOLL (may not be present)}
+ 			\item{\$SIGPROF}
+ 			\item{\$SIGSYS}
+ 			\item{\$SIGTRAP}
+ 			\item{\$SIGURG}
+ 			\item{\$SIGVTALRM (may not be present)}
+ 			\item{\$SIGXCPU}
+ 			\item{\$SIGXFSZ}
 			\end{itemize}
 		\end{description}
 	\item[Output(s): ] None.
@@ -10306,6 +10350,50 @@ true
 onyx:1>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setpgid}
+\index{setpgid@\onyxop{}{setpgid}{}}
+\item[{\onyxop{OPARGS}{setpgid}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setsid}
+\index{setsid@\onyxop{}{setsid}{}}
+\item[{\onyxop{OPARGS}{setsid}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setsockopt}
 \index{setsockopt@\onyxop{}{setsockopt}{}}
 \item[{\onyxop{sock level optname optval}{setsockopt}{--}}: ]
@@ -10737,6 +10825,174 @@ onyx:4> thread 3 1 roll
 onyx:3> dup 3 1 roll
 onyx:4> wait unlock join
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:signalthread}
+\index{signalthread@\onyxop{}{signalthread}{}}
+\item[{\onyxop{OPARGS}{signalthread}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sigpending}
+\index{sigpending@\onyxop{}{sigpending}{}}
+\item[{\onyxop{OPARGS}{sigpending}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sigprocmask}
+\index{sigprocmask@\onyxop{}{sigprocmask}{}}
+\item[{\onyxop{\$SIG\_GETMASK oset}{sigprocmask}{oset}}: ]
+\item[{\onyxop{how set}{sigprocmask}{--}}: ]
+\item[{\onyxop{how set oset}{sigprocmask}{oset}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[\$SIG\_GETMASK: ]
+			A name object that tells the operator to take no action,
+			except to return the signal mask.
+		\item[how: ] A name object:
+			\begin{description}\item[]
+			\item[\$SIG\_BLOCK: ]
+				Mask the union of the old mask set and the
+				signals in \oparg{set} whose values are set to
+				true.
+			\item[\$SIG\_UNBLOCK: ]
+				Unmask the signals in \oparg{set} whose values
+				are set to true.
+			\item[\$SIG\_SETMASK: ]
+				Set the signal mask to the signals in
+				\oparg{set} whose values are set to true.
+			\end{description}
+		\item[set: ]
+			A dictionary of signal name and/or integers keys, with
+			associated true/false values.  A value of true indicates
+			set membership.  The recognized names are:
+			\begin{itemize}
+			\item{\$SIGABRT}
+			\item{\$SIGALRM}
+			\item{\$SIGBUS}
+			\item{\$SIGCHLD}
+			\item{\$SIGCONT}
+			\item{\$SIGFPE}
+			\item{\$SIGHUP}
+			\item{\$SIGILL}
+			\item{\$SIGINT}
+			\item{\$SIGKILL}
+			\item{\$SIGPIPE}
+			\item{\$SIGQUIT}
+			\item{\$SIGSEGV}
+			\item{\$SIGSTOP}
+			\item{\$SIGTERM}
+			\item{\$SIGTSTP}
+			\item{\$SIGTTIN}
+			\item{\$SIGTTOU}
+			\item{\$SIGUSR1}
+			\item{\$SIGUSR2}
+			\item{\$SIGPOLL (may not be present)}
+			\item{\$SIGPROF}
+			\item{\$SIGSYS}
+			\item{\$SIGTRAP}
+			\item{\$SIGURG}
+			\item{\$SIGVTALRM (may not be present)}
+			\item{\$SIGXCPU}
+			\item{\$SIGXFSZ}
+			\end{itemize}
+		\item[oset: ]
+			A dictionary of signal name keys, with associated
+			true/false values.  This dictionary contains the signal
+			mask as it was prior to execution of this operator.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[oset: ]
+			The same dictionary as was passed in as \oparg{oset}.
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+                XXX
+		\end{description}
+	\item[Description: ]
+		Get or set the current signal mask.
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sigsuspend}
+\index{sigsuspend@\onyxop{}{sigsuspend}{}}
+\item[{\onyxop{OPARGS}{sigsuspend}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:sigwait}
+\index{sigwait@\onyxop{}{sigwait}{}}
+\item[{\onyxop{OPARGS}{sigwait}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sin}

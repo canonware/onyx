@@ -269,6 +269,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(get),
     ENTRY(getinterval),
 #ifdef CW_POSIX
+    ENTRY(getpgid),
+    ENTRY(getsid),
     ENTRY(gid),
 #endif
 #ifdef CW_THREADS
@@ -488,6 +490,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(setmethods),
 #endif
     ENTRY(setnonblocking),
+#ifdef CW_POSIX
+    ENTRY(setpgid),
+    ENTRY(setsid),
+#endif
 #ifdef CW_SOCKET
     ENTRY(setsockopt),
 #endif
@@ -508,6 +514,15 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sidup),
 #ifdef CW_THREADS
     ENTRY(signal),
+#endif
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+    ENTRY(signalthread),
+#endif
+#ifdef CW_POSIX
+    ENTRY(sigpending),
+    ENTRY(sigprocmask),
+    ENTRY(sigsuspend),
+    ENTRY(sigwait),
 #endif
 #ifdef CW_REAL
     ENTRY(sin),
@@ -5326,6 +5341,22 @@ systemdict_getinterval(cw_nxo_t *a_thread)
     nxo_stack_roll(ostack, 3, 1);
     nxo_stack_npop(ostack, 2);
 }
+
+#ifdef CW_POSIX
+void
+systemdict_getpgid(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_getsid(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
 
 #ifdef CW_POSIX
 void
@@ -10841,6 +10872,22 @@ systemdict_setnonblocking(cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
+#ifdef CW_POSIX
+void
+systemdict_setpgid(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_setsid(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
 #ifdef CW_SOCKET
 static const struct cw_systemdict_name_arg sock_opt[] =
 {
@@ -11490,6 +11537,46 @@ systemdict_signal(cw_nxo_t *a_thread)
     nxo_condition_signal(condition);
 
     nxo_stack_pop(ostack);
+}
+#endif
+
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+void
+systemdict_signalthread(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigpending(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigprocmask(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigsuspend(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigwait(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
 }
 #endif
 

@@ -383,6 +383,16 @@ systemdict_getinterval(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void
+systemdict_getpgid(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_getsid(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
 systemdict_gid(cw_nxo_t *a_thread);
 #endif
 
@@ -895,6 +905,16 @@ systemdict_setmethods(cw_nxo_t *a_thread);
 void
 systemdict_setnonblocking(cw_nxo_t *a_thread);
 
+#ifdef CW_POSIX
+void
+systemdict_setpgid(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_setsid(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_SOCKET
 void
 systemdict_setsockopt(cw_nxo_t *a_thread);
@@ -940,6 +960,31 @@ systemdict_sidup(cw_nxo_t *a_thread);
 #ifdef CW_THREADS
 void
 systemdict_signal(cw_nxo_t *a_thread);
+#endif
+
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+void
+systemdict_signalthread(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigpending(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigprocmask(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigsuspend(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_sigwait(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_REAL
