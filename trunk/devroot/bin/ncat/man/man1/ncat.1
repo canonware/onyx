@@ -54,24 +54,23 @@ can log the data stream in three formats.
 Which format to use (if any) should be chosen according to the nature of the
 data being streamed.
 .SS Command line flags:
-.IP \-h
-Display usage information and exit.
-.PP
 .B \-f
 .RB { p | h | a }
 .RS
 Specify format of log output:
 .RS
-.B p :
+.BR p :
 pretty
 .br
-.B h :
+.BR h :
 hexadecimal
 .br
-.B a :
+.BR a :
 ascii
 .RE
 .RE
+.IP \-h
+Display usage information and exit.
 .PP
 .B \-p
 .I <port>
@@ -115,7 +114,6 @@ This flag can be specified twice for extra verbosity.
 This flag is incompatible with the
 .B \-q
 flag.
-.RE
 
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
