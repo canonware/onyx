@@ -13,7 +13,7 @@
 `Test begin\n' print flush
 
 [
-    argv 2 get `/' cat `b_argv_b.nx' cat
+    argv 2 get `/' catenate `b_argv_b.nx' catenate
     `-e'
     `1 2 3 pstack'
 ] system
