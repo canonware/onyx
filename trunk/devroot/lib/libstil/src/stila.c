@@ -132,10 +132,8 @@ stilat_gc_register(cw_stilat_t *a_stilat, cw_stiloe_t *a_stiloe)
 	if (a_stilat->global == FALSE) {
 		stila_p_gc_register(&a_stilat->stila, a_stilat->stilt,
 		    a_stiloe);
-	} else {
-		stilag_gc_register(a_stilat->stilag, a_stilat->stilt,
-		    a_stiloe);
-	}
+	} else
+		stilag_gc_register(a_stilat->stilag, a_stilat->stilt, a_stiloe);
 }
 
 void
