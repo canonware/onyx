@@ -1,5 +1,8 @@
 2003-10-22 : Jason Evans <jasone@canonware.com>
 
+	* bin/onyx/src/interactive.nx.in : Modify the resume procedure to clear
+	  the error snapshot state in currenterror.
+
 	* Add the path operator.
 
 	* lib/libonyx/src/systemdict.c:systemdict_forkexec() : Add the optional

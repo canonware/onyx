@@ -44,7 +44,7 @@ def
 # Define and initialize currenterror.
 $currenterror <
     $newerror	false
-    $errorname	`'
+    $errorname	null
     $estack	stack
     $istack	stack
     $ostack	stack

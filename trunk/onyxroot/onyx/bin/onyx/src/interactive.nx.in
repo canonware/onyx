@@ -42,10 +42,22 @@ $promptstring {
 } bind def
 end
 
-# Define resume in threaddict to continue after an error.
+# Define resume in threaddict to continue after an error, and clear the state
+# snapshot in currenterror.
 threaddict begin
-$resume $stop load def
-end
+$resume {
+    currenterror begin
+    $newerror false def
+    $errorname null def
+    !estack dup scount snpop pop
+    !istack dup scount snpop pop
+    !ostack dup scount snpop pop
+    !dstack dup scount snpop pop
+    end # currenterror
+
+    stop
+} bind def
+end # threaddict
 
 # Do not stop on error.  Instead, recursively evaluate stdin.  File bufferring
 # can cause strange behavior, but at least the error will get handled first.
