@@ -1023,7 +1023,6 @@ dup <
 > setdata
 <
     # This is a singleton class, so do not allow new to be called.
-    # Subclasses should call l_new instead when instantiating a singleton.
     #
     #class:
     #- new #instance
