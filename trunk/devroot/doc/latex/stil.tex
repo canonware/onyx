@@ -44,13 +44,11 @@ Operations are done using various stacks, so stil operations are coded in
 postfix notation.}
 \item{Threaded.  Stil's threading uses the native POSIX threads implementation
 of the operating system.}
-\item{Interpreted.  Stil code is never compiled, but is rather interpreted as it
-is encountered.}
+\item{Interpreted.  Stil code is never compiled, but is instead interpreted as
+it is encountered.}
 \item{Garbage-collected.  There is no need to manually track memory allocation,
 since the interpreter has an integrated automatic mark and sweep garbage
 collector.}
-\item{Statically typed.  A pre-defined set of types are available in stil, and
-no mechanism for extending the type system is provided.}
 \end{itemize}
 
 \section{Objects}
@@ -76,7 +74,9 @@ mark	& dict		\\
 name	& file		\\
 null	& hook		\\
 operator & mutex	\\
-	& string	\\
+	& stack		\\
+        & string	\\
+	& thread	\\
 \hline
 \end{tabular}
 \label{simple-composite}
@@ -152,9 +152,16 @@ for equality.  Names are typically used as keys in dictionaries.
 \item[operator: ] An operator is an operation that is built in to the
 interpreter.
 
+\item[stack: ] Stacks are the basis for stil.  An application can create, then
+manipulate stacks in much the same way that the operand stack can be
+manipulated.
+
 \item[string: ] A string is an ordered sequence of 8 bit characters.  References
 to substrings within an existing string can be created in the same way that
 subarrays can be created.
+
+\item[thread: ] Thread objects serve as handles for operations such as detaching
+and joining.
 
 \end{description}
 
@@ -166,12 +173,12 @@ switch statements with a couple of auxiliary variables), which should give the
 reader an idea of the simplicity of the language syntax.
 
 CRLF (carriage return, linefeed) pairs are in all important cases converted to
-newline during scanning.
+linefeed during scanning.
 
-The characters \%, /, [, ], \{, \}, (, ), `, ', ", {\lt}, and {\gt} are special.
-Any of the special characters and whitespace (space, tab, newline, form feed,
-null) terminate any preceding token.  All other characters including
-non-printing characters are considered regular characters.
+The characters \%, /, [, ], \{, \}, (, ), `, ', {\lt}, and {\gt} are special.
+In most cases, any of the special characters and whitespace (space, tab,
+newline, form feed, null) terminate any preceding token.  All other characters
+including non-printing characters are considered regular characters.
 
 A comment starts with a \% character outside of a string context and extends to
 the next newline, linefeed or formfeed.
@@ -218,9 +225,35 @@ foo     % executable
 //biz   % immediately evaluated
 \end{verbatim}
 
-\item[{\lt}string{\gt} ::= ] {\lt}paren\_string{\gt} {\pipe}
-{\lt}tick\_string{\gt} {\pipe} {\lt}hex\_string{\gt} {\pipe}
-{\lt}base64\_string{\gt}
+\item[{\lt}string{\gt} ::= ] `'-delimited string.  Ticks may
+be embedded in the string without escaping them, as long as the ticks are
+matched.  The following sequences have special meaning when escaped by a
+``{\bs}'' character:
+	\begin{description}
+	\item[` ] ` character.
+	\item[' ] ' character.
+	\item[{\bs} ] {\bs} character.
+	\item[n ] New line.
+	\item[r ] Carriage return.
+	\item[t ] Tab.
+	\item[b ] Backspace.
+	\item[f ] Form feed.
+	\item[xDD ] DD is hex encoding for a byte.
+	\item[{\bs}n (newline) ] Ignore.
+	\item[{\bs}r{\bs}n (carriage return, newline) ] Ignore.
+	\end{description}
+Examples include:
+\begin{verbatim}
+`'
+`A string.'
+`Balanced ` and ' are allowed.'
+`An embedded \n newline.'
+`Another embedded 
+newline.'
+`An ignored \
+newline.'
+`Manually escaped \` tick.'
+\end{verbatim}
 
 \item[{\lt}dec\_integer{\gt} : ] Signed integer in the range $-2^{63}$ to
 $2^{63} - 1$.  The sign is optional.  Examples include:
@@ -242,85 +275,31 @@ decimal numbers and lower case letters.  Examples include:
 35#7r3x
 \end{verbatim}
 
-\item[{\lt}paren\_string{\gt} : ] ()-delimited string.  Parens may
-be embedded in the string without escaping them, as long as the parens are
-matched.  The following sequences have special meaning when escaped by a
-``{\bs}'' character:
-	\begin{description}
-	\item[( ] ``('' character.
-	\item[) ] ``)'' character.
-	\item[{\bs} ] ``{\bs}'' character.
-	\item[n ] New line.
-	\item[r ] Carriage return.
-	\item[t ] Tab.
-	\item[b ] Backspace.
-	\item[f ] Form feed.
-	\item[xDD ] DD is hex encoding for a byte.
-	\item[{\bs}n (newline) ] Ignore.
-	\item[{\bs}r{\bs}n (carriage return, newline) ] Ignore.
-	\end{description}
-Examples include:
-\begin{verbatim}
-()
-(A string.)
-(Balanced ( and ) are allowed.)
-(An embedded \n newline.)
-(Another embedded 
-newline.)
-(An ignored \
-newline.)
-(Manually escaped \( paren.)
-\end{verbatim}
-
-\item[{\lt}tick\_string{\gt} ::= ] `'-delimited string.  All characters
-are interpreted literally, except that two consecutive ' characters are
-interpreted as a single '.  Examples include:
-\begin{verbatim}
-`'
-`A string.'
-`A string with an embedded '' tick.'
-`An extended regular expression without double escapes: \([A-Z0-9]{1,3}|foo\)'
-\end{verbatim}
-
-\item[{\lt}hex\_string{\gt} : ] {\lt}{\gt}-delimited hex encoding for a string.
-Bytes are encoded by hexadecimal digit pairs (0 to 9 and lower case a through
-f).  Whitespace is ignored.  Examples include:
-\begin{verbatim}
-<>
-<0a>
-<00 01ac
- 4f >
-\end{verbatim}
-
-\item[{\lt}base64\_string{\gt} : ] {\lt}{\twid}{\twid}{\gt}-delimited base 64
-encoding for a string.  See RFC 8045 (XXX Add bibliography entry) for base 64
-encoding details.  Examples include:
-\begin{verbatim}
-<~~>          % `'
-<~YQ==~>      % `a'
-<~YWI=~>      % `ab'
-<~YWJj~>      % `abc'
-<~YWJj
-ZA==~>        % `abcd'
-\end{verbatim}
 \end{description}
 
 Arrays do not have explicit syntactic support, but the [ and ] operators support
 their construction.  Examples of array construction include:
 \begin{verbatim}
 []
-[0 (A string) `Another string.' true]
+[0 `A string' `Another string.' true]
 [5
 42
 false]
 \end{verbatim}
 
-Dictionaries do not have explicit syntactic support, but the {\lt}{\lt} and
-{\gt}{\gt} operators support their construction.  Examples of dictionary
+Dictionaries do not have explicit syntactic support, but the {\lt} and
+{\gt} operators support their construction.  Examples of dictionary
 construction include:
 \begin{verbatim}
-<<>>
-<</answer 42 /question (Who knows) /translate {babelfish} >>
+<>
+</answer 42 /question `Who knows' /translate {babelfish} >
+\end{verbatim}
+
+Stacks do not have explicit syntactic support, but the ( and ) operators support
+their construction.  Examples of stack contstruction include:
+\begin{verbatim}
+()
+(1 2 mark `a')
 \end{verbatim}
 
 \section{Stacks}
@@ -351,6 +330,9 @@ Each stil thread has three program-visible stacks associated with it:
 	accessible, mainly for debugging purposes.
 \end{description}
 
+The application can also create additional stacks and manipulate them in much
+the same way as the operand stack can be manipulated.
+
 \section{Execution}
 
 During stil interpreter initialization, an object file object corresponding to
@@ -360,7 +342,7 @@ different file than stdin or an executable string.  The interpreter loop can be
 recursively invoked.  For example, if the following code is executed, the eval
 operator recursively invokes the interpreter loop to interpret the string.
 \begin{verbatim}
-(2 2 add) cvx eval
+`2 2 add' cvx eval
 \end{verbatim}
 
 The depth of the execution stack directly corresponds to the recursion depth of
@@ -378,8 +360,8 @@ execution caused the error onto the operand stack.}
 \item{Execute the error handler.}
 \end{enumerate}
 
-The standard error handlers all execute errordict's stop operator as the last
-step of handling the error.
+All the standard error handlers except those for interrupt and timeout execute
+errordict's stop operator as the last step of handling the error.
 
 \section{Threads}
 \subsection{Implicit synchronization}
@@ -393,7 +375,7 @@ step of handling the error.
 \subsection{Operator summary}
 
 All operators built in to stil have corresponding names that are composed
-intirely of lower case letters.  In order to avoid any possibility of namespace
+entirely of lower case letters.  In order to avoid any possibility of namespace
 collisions in future versions of stil, use at least one character that is not a
 lower case letter in names (for example, capital letters, numbers, underscore,
 etc.).
