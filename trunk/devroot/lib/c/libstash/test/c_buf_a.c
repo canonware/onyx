@@ -779,10 +779,10 @@ main()
 /*      buf_dump(&buf_b, "buf_b "); */
 /*      buf_dump(&buf_c, "buf_c "); */
     
-    buf_release_head_data(&buf_a, 10);
+    _cw_assert(FALSE == buf_release_head_data(&buf_a, 10));
     _cw_assert(38 == buf_get_size(&buf_a));
     
-    buf_release_tail_data(&buf_a, 10);
+    _cw_assert(FALSE == buf_release_tail_data(&buf_a, 10));
     _cw_assert(28 == buf_get_size(&buf_a));
 
     buf_catenate_buf(&buf_b, &buf_a, TRUE);
@@ -793,10 +793,10 @@ main()
     _cw_assert(56 == buf_get_size(&buf_b));
 
 
-    buf_release_tail_data(&buf_c, 10);
+    _cw_assert(FALSE == buf_release_tail_data(&buf_c, 10));
     _cw_assert(38 == buf_get_size(&buf_c));
     
-    buf_release_head_data(&buf_c, 10);
+    _cw_assert(FALSE == buf_release_head_data(&buf_c, 10));
     _cw_assert(28 == buf_get_size(&buf_c));
 
     buf_catenate_buf(&buf_a, &buf_c, TRUE);

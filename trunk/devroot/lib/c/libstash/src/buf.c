@@ -592,8 +592,21 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
     a_b->is_cumulative_valid = FALSE;
     a_b->size -= a_offset;
 
-    /* XXX Maybe shrink a_b. */
-  
+    if (a_b->array_num_valid == 0)
+    {
+      /* Shrink the array back down. */
+      a_b->array = (cw_bufel_array_el_t *)
+	_cw_realloc(a_b->array, 2 * sizeof(cw_bufel_array_el_t));
+      a_b->iov = (struct iovec *)
+	_cw_realloc(a_b->iov, 2 * sizeof(struct iovec));
+
+#ifdef _LIBSTASH_DBG
+      bzero(a_b->array, 2 * sizeof(cw_bufel_array_el_t));
+      bzero(a_b->iov, 2 * sizeof(struct iovec));
+#endif
+      
+      a_b->array_size = 2;
+    }
   }
   else if ((a_offset > 0) && (a_offset == a_b->size))
   {
@@ -761,7 +774,7 @@ cw_bool_t
 buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
 {
   cw_bool_t retval;
-  cw_uint32_t array_index, bufel_valid_data, i;
+  cw_uint32_t array_index, bufel_valid_data, i, amount_left;
   
   _cw_check_ptr(a_buf);
   _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
@@ -782,8 +795,8 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
   else
   {
-    for (i = 0;
-	 (a_amount > 0) && (i < a_buf->array_num_valid);
+    for (i = 0, amount_left = a_amount;
+	 amount_left > 0;
 	 i++)
     {
       array_index = (i + a_buf->array_start) % a_buf->array_size;
@@ -791,25 +804,31 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
       bufel_valid_data
 	= bufel_get_valid_data_size(&a_buf->array[array_index].bufel);
 
-      if (bufel_valid_data <= a_amount)
+      if (bufel_valid_data <= amount_left)
       {
 	/* Need to get rid of the bufel. */
-	a_amount -= bufel_valid_data;
+	amount_left -= bufel_valid_data;
 	bufel_delete(&a_buf->array[array_index].bufel);
       }
-      else if (bufel_valid_data > a_amount)
+      else if (bufel_valid_data > amount_left)
       {
 	/* This will finish things up. */
 	bufel_set_beg_offset(&a_buf->array[array_index].bufel,
 			     (bufel_get_beg_offset(
-			       &a_buf->array[array_index].bufel) + a_amount));
-	a_amount = 0;
+			       &a_buf->array[array_index].bufel)
+			      + amount_left));
+	amount_left = 0;
       }
     }
     
     /* Adjust the array variables. */
-    a_buf->array_start = (a_buf->array_start + i) % a_buf->array_size;
-    a_buf->array_num_valid -= i;
+    a_buf->size -= a_amount;
+/*      a_buf->array_start = ((a_buf->array_start + i + a_buf->array_size - 1) */
+/*  			  % a_buf->array_size); */
+    a_buf->array_start = ((array_index + a_buf->array_size)
+			  % a_buf->array_size);
+    a_buf->array_num_valid -= (i - 1);
+    
     if (a_buf->array_num_valid == 0)
     {
       /* Shrink the array back down. */
@@ -844,7 +863,7 @@ cw_bool_t
 buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
 {
   cw_bool_t retval;
-  cw_uint32_t array_index, bufel_valid_data, i;
+  cw_uint32_t array_index, bufel_valid_data, i, amount_left;
   
   _cw_check_ptr(a_buf);
   _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
@@ -865,34 +884,38 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   }
   else
   {
-    for (i = 0; (a_amount > 0) && (i < a_buf->array_num_valid); i++)
+    for (i = 0, amount_left = a_amount;
+	 (amount_left > 0);
+	 i++)
     {
       array_index = ((a_buf->array_size + a_buf->array_end - 1 - i)
 		     % a_buf->array_size);
       bufel_valid_data
 	= bufel_get_valid_data_size(&a_buf->array[array_index].bufel);
 
-      if (bufel_valid_data <= a_amount)
+      if (bufel_valid_data <= amount_left)
       {
 	/* Need to get rid of the bufel. */
-	a_amount -= bufel_valid_data;
+	amount_left -= bufel_valid_data;
 	bufel_delete(&a_buf->array[array_index].bufel);
       }
-      else if (bufel_valid_data > a_amount)
+      else if (bufel_valid_data > amount_left)
       {
 	/* This will finish things up. */
 	bufel_set_end_offset(&a_buf->array[array_index].bufel,
 			     (bufel_get_end_offset(
-			       &a_buf->array[array_index].bufel) - a_amount));
-	a_buf->array[array_index].cumulative_size -= a_amount;
-	a_amount = 0;
+			       &a_buf->array[array_index].bufel)
+			      - amount_left));
+	a_buf->array[array_index].cumulative_size -= amount_left;
+	amount_left = 0;
       }
     }
     
     /* Adjust the array variables. */
-    a_buf->array_end = ((a_buf->array_end + a_buf->array_size - i)
+    a_buf->size -= a_amount;
+    a_buf->array_end = ((array_index + a_buf->array_size - 1)
 			% a_buf->array_size);
-    a_buf->array_num_valid -= i;
+    a_buf->array_num_valid -= (i - 1);
     if (a_buf->array_num_valid == 0)
     {
       /* Shrink the array back down. */
