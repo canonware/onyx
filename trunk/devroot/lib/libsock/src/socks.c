@@ -145,8 +145,8 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
     *r_port = ntohs(server_addr.sin_port);
   }
   
-  /* Now listen.  -1 causes the OS to use the maximum backlog. */
-  if (-1 == listen(a_socks->sockfd, INT_MAX))
+  /* Now listen. */
+  if (-1 == listen(a_socks->sockfd, 511))
   {
     if (dbg_is_registered(cw_g_dbg, "socks_error"))
     {
