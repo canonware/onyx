@@ -26,12 +26,11 @@
 /* Solaris needs this for sigwait(). */
 #undef _POSIX_PTHREAD_SEMANTICS
 
-/* Largest iovec compatible with readv()/writev(). */
-#undef _CW_MAX_IOV
-
 #undef WORDS_BIGENDIAN
 
 #undef _CW_THREADS
+
+#undef _CW_POSIX
 
 /*
  * If using gcc and inlines weren't disabled by configure, use inline functions.
