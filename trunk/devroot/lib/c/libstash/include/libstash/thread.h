@@ -92,7 +92,7 @@ struct cw_tsd_s
  * <<< Output(s) >>>
  *
  * retval : Pointer to a thd, or NULL.
- *          NULL : Memory allocation error.
+ *          NULL : Memory allocation error.  Can only occur if (NULL == a_thd).
  *
  * <<< Description >>>
  *

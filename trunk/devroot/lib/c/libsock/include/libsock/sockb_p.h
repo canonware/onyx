@@ -57,7 +57,7 @@ struct cw_sockb_s
   cw_mtx_t get_ip_addr_lock;
 };
 
-static void
+static cw_bool_t
 sockb_p_notify(cw_mq_t * a_mq, int a_sockfd);
 
 /****************************************************************************

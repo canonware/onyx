@@ -551,21 +551,35 @@ sockb_l_get_spare_fd(void)
   return retval;
 }
 
-static void
+static cw_bool_t
 sockb_p_notify(cw_mq_t * a_mq, int a_sockfd)
 {
+  cw_bool_t retval;
+  cw_sint32_t error;
+  
   _cw_check_ptr(a_mq);
 
-  while (-1 == mq_put(a_mq, (void *) a_sockfd))
+  while (-1 == (error = mq_put(a_mq, (void *) a_sockfd)))
   {
     /* We can't afford to lose the message, since it could end up causing
      * deadlock. */
     thd_yield();
   }
   
+  if (1 == error)
+  {
+    /* The mq is in the stop state.  We might as well stop notifying. */
+    retval = TRUE;
+    goto RETURN;
+  }
+
+  retval = FALSE;
+
+  RETURN:
 #ifdef _LIBSTASH_SOCKB_CONFESS
   log_printf(cw_g_log, "n");
 #endif
+  return retval;
 }
 
 static void *
@@ -783,13 +797,19 @@ sockb_p_entry_func(void * a_arg)
 
 	    if (NULL != notify_vec[i])
 	    {
-	      sockb_p_notify(notify_vec[i], i);
+	      if (TRUE == sockb_p_notify(notify_vec[i], i))
+	      {
+		notify_vec[i] = NULL;
+	      }
 	    }
 	  }
 	  else if ((0 < in_size) &&
 		   (NULL != notify_vec[i]))
 	  {
-	    sockb_p_notify(notify_vec[i], i);
+	    if (TRUE == sockb_p_notify(notify_vec[i], i))
+	    {
+	      notify_vec[i] = NULL;
+	    }
 	  }
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	  else
@@ -1002,7 +1022,10 @@ sockb_p_entry_func(void * a_arg)
 	  {
 	    if (NULL != notify_vec[i])
 	    {
-	      sockb_p_notify(notify_vec[i], i);
+	      if (TRUE == sockb_p_notify(notify_vec[i], i))
+	      {
+		notify_vec[i] = NULL;
+	      }
 	    }
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 
@@ -1055,7 +1078,10 @@ sockb_p_entry_func(void * a_arg)
 	    
 	    if (NULL != notify_vec[i])
 	    {
-	      sockb_p_notify(notify_vec[i], i);
+	      if (TRUE == sockb_p_notify(notify_vec[i], i))
+	      {
+		notify_vec[i] = NULL;
+	      }
 	    }
 
 	    /* Make sure not to try to handle outgoing data on this socket,
@@ -1169,7 +1195,10 @@ sockb_p_entry_func(void * a_arg)
 	    
 	    if (NULL != notify_vec[i])
 	    {
-	      sockb_p_notify(notify_vec[i], i);
+	      if (TRUE == sockb_p_notify(notify_vec[i], i))
+	      {
+		notify_vec[i] = NULL;
+	      }
 	    }
 	  }
 	  _cw_assert(buf_get_size(&tmp_buf) == 0);

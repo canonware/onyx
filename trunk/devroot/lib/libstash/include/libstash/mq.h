@@ -44,7 +44,7 @@ struct cw_mq_s
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
- *          TRUE : Memory allocation error.
+ *          TRUE : Memory allocation error.  Can only occur if (NULL == a_mq).
  *
  * <<< Description >>>
  *
