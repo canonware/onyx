@@ -39,6 +39,7 @@ typedef enum {
 	STILN_booleantype,
 	STILN_broadcast,
 	STILN_bytesavailable,
+	STILN_catenate,
 	STILN_chmod,
 	STILN_chown,
 	STILN_clear,

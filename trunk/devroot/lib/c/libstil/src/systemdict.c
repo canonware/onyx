@@ -47,6 +47,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(bind),
 	ENTRY(broadcast),
 	ENTRY(bytesavailable),
+	ENTRY(catenate),
 	ENTRY(chmod),
 	ENTRY(chown),
 	ENTRY(clear),
@@ -608,6 +609,98 @@ systemdict_bytesavailable(cw_stilo_t *a_thread)
 
 	bytes = stilo_file_buffer_count(file);
 	stilo_integer_new(file, bytes);
+}
+
+void
+systemdict_catenate(cw_stilo_t *a_thread)
+{
+	cw_stilo_t	*ostack, *a, *b, *r;
+	cw_uint32_t	i, len_a, len_b;
+
+	ostack = stilo_thread_ostack_get(a_thread);
+
+	STILO_STACK_GET(b, ostack, a_thread);
+	STILO_STACK_DOWN_GET(a, ostack, a_thread, b);
+	if (stilo_type_get(a) != stilo_type_get(b) || (stilo_type_get(a) !=
+	    STILOT_ARRAY && stilo_type_get(a) != STILOT_STACK &&
+	    stilo_type_get(a) != STILOT_STRING)) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+
+	r = stilo_stack_under_push(ostack, a);
+
+	switch (stilo_type_get(a)) {
+	case STILOT_ARRAY: {
+		cw_stilo_t	*tstack, *tstilo;
+		
+		tstack = stilo_thread_tstack_get(a_thread);
+		tstilo = stilo_stack_push(tstack);
+
+		len_a = stilo_array_len_get(a);
+		len_b = stilo_array_len_get(b);
+
+		stilo_array_new(r, stilo_thread_stil_get(a_thread),
+		    stilo_thread_currentlocking(a_thread), len_a + len_b);
+
+		for (i = 0; i < len_a; i++) {
+			stilo_array_el_get(a, i, tstilo);
+			stilo_array_el_set(r, tstilo, i);
+		}
+		for (i = 0; i < len_b; i++) {
+			stilo_array_el_get(b, i, tstilo);
+			stilo_array_el_set(r, tstilo, i + len_a);
+		}
+
+		stilo_stack_pop(tstack);
+
+		break;
+	}
+	case STILOT_STACK: {
+		cw_stilo_t	*fr, *to;
+
+		len_a = stilo_stack_count(a);
+		len_b = stilo_stack_count(b);
+
+		stilo_stack_new(r, stilo_thread_stil_get(a_thread),
+		    stilo_thread_currentlocking(a_thread));
+
+		for (i = 0, fr = to = NULL; i < len_b; i++) {
+			fr = stilo_stack_down_get(b, fr);
+			to = stilo_stack_under_push(r, to);
+			stilo_dup(to, fr);
+		}
+		for (i = 0, fr = NULL; i < len_a; i++) {
+			fr = stilo_stack_down_get(a, fr);
+			to = stilo_stack_under_push(r, to);
+			stilo_dup(to, fr);
+		}
+
+		break;
+	}
+	case STILOT_STRING:
+		len_a = stilo_string_len_get(a);
+		len_b = stilo_string_len_get(b);
+
+		stilo_string_new(r, stilo_thread_stil_get(a_thread),
+		    stilo_thread_currentlocking(a_thread), len_a + len_b);
+
+		stilo_string_lock(r);
+		stilo_string_lock(a);
+		stilo_string_set(r, 0, stilo_string_get(a), len_a);
+		stilo_string_unlock(a);
+
+		stilo_string_lock(b);
+		stilo_string_set(r, len_a, stilo_string_get(b), len_b);
+		stilo_string_unlock(b);
+		stilo_string_unlock(r);
+
+		break;
+	default:
+		_cw_not_reached();
+	}
+
+	stilo_stack_npop(ostack, 2);
 }
 
 void

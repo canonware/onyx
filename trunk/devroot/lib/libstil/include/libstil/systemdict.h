@@ -19,6 +19,7 @@ void	systemdict_begin(cw_stilo_t *a_thread);
 void	systemdict_bind(cw_stilo_t *a_thread);
 void	systemdict_broadcast(cw_stilo_t *a_thread);
 void	systemdict_bytesavailable(cw_stilo_t *a_thread);
+void	systemdict_catenate(cw_stilo_t *a_thread);
 void	systemdict_chmod(cw_stilo_t *a_thread);
 void	systemdict_chown(cw_stilo_t *a_thread);
 void	systemdict_clear(cw_stilo_t *a_thread);
