@@ -958,7 +958,7 @@ stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	}
 
 	/* Make sure destination is large enough. */
-	_cw_assert(len_fr >= len_to);
+	_cw_assert(len_fr <= len_to);
 
 	/*
 	 * Iteratively copy elements.  Only copy one level deep (not
@@ -3830,7 +3830,7 @@ stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	}
 
 	/* Make sure destination is large enough. */
-	_cw_assert(len_fr >= len_to);
+	_cw_assert(len_fr <= len_to);
 
 	/*
 	 * Iteratively copy elements.  Only copy one level deep (not
