@@ -25,6 +25,8 @@
 
 struct nx_arg_s {
 	cw_bool_t	quit;
+	cw_bool_t	want_data;
+	cw_bool_t	have_data;
 
 	cw_mtx_t	mtx;
 	cw_cnd_t	cl_cnd;
@@ -167,6 +169,8 @@ stdin cvx
 	 * thread and the interpreter thread.
 	 */
 	arg.quit = FALSE;
+	arg.want_data = FALSE;
+	arg.have_data = FALSE;
 	mtx_new(&arg.mtx);
 	cnd_new(&arg.cl_cnd);
 	cnd_new(&arg.nx_cnd);
@@ -297,7 +301,9 @@ cl_read(struct nx_arg_s *a_arg)
 
 	for (;;) {
 		/* Wait for the interpreter thread to request data. */
-		cnd_wait(&a_arg->cl_cnd, &a_arg->mtx);
+		a_arg->want_data = FALSE;
+		while (a_arg->want_data == FALSE && arg->quit == FALSE)
+			cnd_wait(&a_arg->cl_cnd, &a_arg->mtx);
 		if (a_arg->quit)
 			break;
 
@@ -357,6 +363,7 @@ cl_read(struct nx_arg_s *a_arg)
 		arg->buffer_count = count;
 
 		/* Tell the interpreter thread that there are data available. */
+		a_arg->have_data = TRUE;
 		cnd_signal(&a_arg->nx_cnd);
 	}
 
@@ -398,8 +405,11 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 		/*
 		 * Tell the main thread to read more data, then wait for it.
 		 */
+		arg->want_data = TRUE;
 		cnd_signal(&arg->cl_cnd);
-		cnd_wait(&arg->nx_cnd, &arg->mtx);
+		arg->have_data = FALSE;
+		while (arg->have_data == FALSE)
+			cnd_wait(&arg->nx_cnd, &arg->mtx);
 	}
 	_cw_assert(arg->buffer_count > 0);
 
