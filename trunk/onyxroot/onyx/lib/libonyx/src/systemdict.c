@@ -9412,7 +9412,13 @@ systemdict_recv(cw_nxo_t *a_thread)
 	for (i = 0, count = nxo_array_len_get(nxo); i < count; i++)
 	{
 	    nxo_array_el_get(nxo, i, el);
-	    argind = systemdict_p_name_arg(nxo, send_recv_flag, argcnt);
+	    if (nxo_type_get(el) != NXOT_NAME)
+	    {
+		nxo_stack_pop(tstack);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+	    argind = systemdict_p_name_arg(el, send_recv_flag, argcnt);
 	    if (argind == argcnt)
 	    {
 		nxo_stack_pop(tstack);
@@ -10285,7 +10291,13 @@ systemdict_send(cw_nxo_t *a_thread)
 	for (i = 0, count = nxo_array_len_get(nxo); i < count; i++)
 	{
 	    nxo_array_el_get(nxo, i, el);
-	    argind = systemdict_p_name_arg(nxo, send_recv_flag, argcnt);
+	    if (nxo_type_get(el) != NXOT_NAME)
+	    {
+		nxo_stack_pop(tstack);
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+	    argind = systemdict_p_name_arg(el, send_recv_flag, argcnt);
 	    if (argind == argcnt)
 	    {
 		nxo_stack_pop(tstack);

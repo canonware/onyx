@@ -1,3 +1,8 @@
+2003-12-31  Jason Evans  <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{send,recv}() : Fix
+	  handling of the flags array.
+
 2003-12-30  Jason Evans  <jasone@canonware.com>
 
 	* configure.in : Add EXTRA_CFLAGS.
