@@ -247,6 +247,7 @@ AC_SUBST(enable_socket)
 if test "x$enable_socket" = "x1" ; then
   AC_DEFINE(CW_SOCKET)
   AC_CHECK_TYPE(socklen_t, AC_DEFINE(CW_HAVE_SOCKLEN_T), , [
+#include <sys/types.h>
 #include <sys/socket.h>
 ])
 fi
