@@ -174,15 +174,25 @@ ONYX_OTESTS =
               listen_a.nx.in listen_b.nx.in listen_c.nx.in listen_d.nx.in
               listen_e.nx.in listen_f.nx.in listen_g.nx.in peername_a.nx.in
               peername_b.nx.in peername_c.nx.in peername_d.nx.in
-              peername_e.nx.in serviceport_a.nx.in serviceport_b.nx.in
-              serviceport_c.nx.in socket_a.nx.in socket_b.nx.in socket_c.nx.in
+              peername_e.nx.in recv_a.nx.in recv_b.nx.in recv_c.nx.in
+              recv_d.nx.in recv_e.nx.in recv_f.nx.in send_a.nx.in send_b.nx.in
+              send_c.nx.in send_d.nx.in send_e.nx.in send_f.nx.in send_g.nx.in
+              send_h.nx.in serviceport_a.nx.in serviceport_b.nx.in
+              serviceport_c.nx.in setsockopt_a.nx.in setsockopt_b.nx.in
+              setsockopt_c.nx.in setsockopt_d.nx.in setsockopt_e.nx.in
+              setsockopt_f.nx.in setsockopt_g.nx.in setsockopt_h.nx.in
+              setsockopt_i.nx.in setsockopt_j.nx.in setsockopt_k.nx.in
+              setsockopt_l.nx.in setsockopt_m.nx.in setsockopt_n.nx.in
+              setsockopt_o.nx.in socket_a.nx.in socket_b.nx.in socket_c.nx.in
               socket_d.nx.in socket_e.nx.in socket_f.nx.in socket_g.nx.in
               socket_h.nx.in socket_i.nx.in socket_j.nx.in socketpair_a.nx.in
               socketpair_b.nx.in socketpair_c.nx.in socketpair_d.nx.in
               socketpair_e.nx.in socketpair_f.nx.in socketpair_g.nx.in
               socketpair_h.nx.in socketpair_i.nx.in socketpair_j.nx.in
               sockname_a.nx.in sockname_b.nx.in sockname_c.nx.in
-              sockname_d.nx.in sockname_e.nx.in
+              sockname_d.nx.in sockname_e.nx.in sockopt_a.nx.in sockopt_b.nx.in
+              sockopt_c.nx.in sockopt_d.nx.in sockopt_e.nx.in sockopt_f.nx.in
+              sockopt_g.nx.in sockopt_h.nx.in sockopt_i.nx.in sockopt_j.nx.in
 
 #endif
 
