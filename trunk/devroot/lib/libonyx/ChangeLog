@@ -1,3 +1,11 @@
+2001-11-10  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode.nx: Print errors to stderr rather than stdout in
+	systemdict's throw.
+
+	* src/nxo_thread_nxcode.nx: Print errors to stderr rather than
+	stdout in errordict's handleerror.
+
 2001-11-04  Jason Evans  <jasone@canonware.com>
 
 	* src/nxa.c: Rename nxa_new() and nxa_delete() to nxa_l_new() and

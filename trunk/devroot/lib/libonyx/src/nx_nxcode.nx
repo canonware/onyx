@@ -635,22 +635,23 @@ systemdict begin
 		{/currenterror where {pop true}{false} ifelse}
 	}{
 		eval not {
-			`Onyx: Missing errordict or currenterror defs\n' print
+			stderr `Onyx: Missing errordict or currenterror defs\n'
+			write
 
 			% Print stack dumps.
-			`ostack: ' print
-			ostack 2 sprint
+			stderr `ostack: ' write
+			ostack 2 sprints stderr exch write
 
-			`dstack: ' print
-			dstack 2 sprint
+			stderr `\ndstack: ' write
+			stderr dstack 2 sprints write
 
-			`estack: ' print
-			estack 2 sprint
+			stderr `\nestack: ' write
+			stderr estack 2 sprints write
 
-			`istack: ' print
-			istack 2 sprint
+			stderr `\nistack: ' write
+			stderr istack 2 sprints write
 
-			`Onyx: dieing\n' print flush
+			stderr `\nOnyx: dieing\n' write
 			1 die
 		} if
 	} foreach
