@@ -129,7 +129,7 @@ if ($opt_subdir =~ /\//)
 }
 else
 {
-    $dirpath = "./";
+    $dirpath = ".";
     $subdir = $opt_subdir;
 }
 
