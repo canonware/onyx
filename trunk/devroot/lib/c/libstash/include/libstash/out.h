@@ -151,6 +151,9 @@ typedef char *
 cw_out_render_t(const char * a_format, cw_uint32_t a_format_len,
 		const void * a_arg, char * r_str);
 
+/* Maximum type string length, including NULL termination. */
+#define _LIBSTASH_OUT_MAX_TYPE 16
+
 /* Pseudo-opaque types. */
 typedef struct cw_out_s cw_out_t;
 typedef struct cw_out_ent_s cw_out_ent_t;
@@ -174,7 +177,7 @@ struct cw_out_s
 
 struct cw_out_ent_s
 {
-  char * type;
+  char type[_LIBSTASH_OUT_MAX_TYPE];
   cw_uint32_t len;
   cw_uint32_t size;
   cw_out_metric_t * metric_func;
@@ -225,10 +228,11 @@ out_delete(cw_out_t * a_out);
  * a_out : Pointer to an out, or NULL.
  *
  * a_type : Pointer to a NULL-terminated string that represents a data type
- *          specifier.
+ *          specifier.  The string length (not including the NULL terminator)
+ *          must be _LIBSTASH_OUT_MAX_TYPE bytes or less.
  *
  * a_size : sizeof(<data type>).  In almost all cases this will be
- *          sizeof(void *).  a_size must be 1, 2, 4, or 8.
+ *          sizeof(<data type> *).  a_size must be 1, 2, 4, or 8.
  *
  * a_metric_func : Pointer to a metric function.
  *

@@ -64,15 +64,9 @@ out_new(cw_out_t * a_out)
 void
 out_delete(cw_out_t * a_out)
 {
-  cw_uint32_t i;
-  
   _cw_check_ptr(a_out);
   _cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
 
-  for (i = 0; i < a_out->nextensions; i++)
-  {
-    _cw_free(a_out->extensions[i].type);
-  }
   if (NULL != a_out->extensions)
   {
     _cw_free(a_out->extensions);
@@ -106,6 +100,7 @@ out_register(cw_out_t * a_out,
   _cw_check_ptr(a_out);
   _cw_assert(_LIBSTASH_OUT_MAGIC == a_out->magic);
   _cw_check_ptr(a_type);
+  _cw_assert(_LIBSTASH_OUT_MAX_TYPE >= strlen(a_type));
   _cw_assert((1 == a_size) || (2 == a_size) || (4 == a_size) || (8 == a_size)
 	     || (12 == a_size) || (16 == a_size));
   _cw_check_ptr(a_metric_func);
@@ -135,15 +130,7 @@ out_register(cw_out_t * a_out,
     a_out->extensions = t_ptr;
   }
 
-  /* XXX This has the potential to cause all sorts of cache thrashing. */
-  a_out->extensions[a_out->nextensions].type
-    = (char *) _cw_malloc(strlen(a_type) + 1);
-  if (NULL == a_out->extensions[a_out->nextensions].type)
-  {
-    retval = TRUE;
-    goto RETURN;
-  }
-  strcpy(a_out->extensions[a_out->nextensions].type, a_type);
+  memcpy(a_out->extensions[a_out->nextensions].type, a_type, strlen(a_type));
   a_out->extensions[a_out->nextensions].len = strlen(a_type);
   a_out->extensions[a_out->nextensions].size = a_size;
   a_out->extensions[a_out->nextensions].metric_func = a_metric_func;
@@ -204,22 +191,9 @@ out_merge(cw_out_t * a_a, cw_out_t * a_b)
     /* Make copies of the type strings. */
     for (i = 0; i < a_b->nextensions; i++)
     {
-      /* XXX This has the potential to cause all sorts of cache thrashing. */
-      a_a->extensions[i + a_a->nextensions].type
-	= (char *) _cw_malloc(a_b->extensions[i].len + 1);
-      if (NULL == a_a->extensions[i + a_a->nextensions].type)
-      {
-	/* Back out all the typ string allocations we just did. */
-	for (i--; i >= 0; i--)
-	{
-	  _cw_free(a_a->extensions[i + a_a->nextensions].type);
-	}
-	retval = TRUE;
-	goto RETURN;
-      }
       memcpy(a_b->extensions[i].type,
 	     a_a->extensions[i + a_a->nextensions].type,
-	     strlen(a_b->extensions[i].type) + 1);
+	     _LIBSTASH_OUT_MAX_TYPE);
     }
     
     a_a->nextensions += a_b->nextensions;
@@ -1130,29 +1104,40 @@ out_p_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	      arg = (void *) &va_arg(a_p, cw_uint64_t);
 	      break;
 	    }
-/*  	  case 12: */
-/*  	  { */
-/*  	    arg = (void *) va_arg(a_p, s_12); */
-/*  	    break; */
-/*  	  } */
-/*  	  case 16: */
-/*  	  { */
-/*  	    arg = (void *) va_arg(a_p, s_16); */
-/*  	    break; */
-/*  	  } */
+#ifdef _TYPE_FP96_DEFINED
+	    case 12:
+	    {
+	      arg = (void *) &va_arg(a_p, cw_fp96_t);
+	      break;
+	    }
+#endif
+#ifdef _TYPE_FP128_DEFINED
+	    case 16:
+	    {
+	      arg = (void *) &va_arg(a_p, cw_fp128_t);
+	      break;
+	    }
+#endif
 	    default:
 	    {
 	      _cw_error("Programming error");
 	    }
 	  }
 
-	  metric = ent->metric_func(&a_format[i], spec_len, arg);
-	  if (0 > metric)
+	  if (_LIBSTASH_OUT_ENT_CACHE > enti)
 	  {
-	    retval = metric;
-	    goto RETURN;
+	    metric = a_key->ents[enti].metric;
 	  }
-	
+	  else
+	  {
+	    metric = ent->metric_func(&a_format[i], spec_len, arg);
+	    if (0 > metric)
+	    {
+	      retval = metric;
+	      goto RETURN;
+	    }
+	  }
+	  
 	  if (j + metric <= size)
 	  {
 	    /* The printout of this item will fit in the output string. */
@@ -1344,13 +1329,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format,
 	    retval = -2;
 	    goto RETURN;
 	  }
-
-	  if (_LIBSTASH_OUT_ENT_CACHE > next_ent)
-	  {
-	    a_key->ents[next_ent].spec_len = spec_len;
-	    a_key->ents[next_ent].ent = ent;
-	    next_ent++;
-	  }
 	  
 	  {
 	    void * arg;
@@ -1369,16 +1347,20 @@ out_p_metric(cw_out_t * a_out, const char * a_format,
 		arg = (void *) &va_arg(a_p, cw_uint64_t);
 		break;
 	      }
-/*  	      case 12: */
-/*  	      { */
-/*  		arg = (void *) va_arg(a_p, s_12); */
-/*  		break; */
-/*  	      } */
-/*  	      case 16: */
-/*  	      { */
-/*  		arg = (void *) va_arg(a_p, s_16); */
-/*  		break; */
-/*  	      } */
+#ifdef _TYPE_FP96_DEFINED
+	      case 12:
+	      {
+		arg = (void *) &va_arg(a_p, cw_fp96_t);
+		break;
+	      }
+#endif
+#ifdef _TYPE_FP128_DEFINED
+	      case 16:
+	      {
+		arg = (void *) &va_arg(a_p, cw_fp128_t);
+		break;
+	      }
+#endif
 	      default:
 	      {
 		retval = -2;
@@ -1393,7 +1375,16 @@ out_p_metric(cw_out_t * a_out, const char * a_format,
 	      retval = spec_metric;
 	      goto RETURN;
 	    }
+	    
 	    metric += spec_metric;
+	  }
+	  
+	  if (_LIBSTASH_OUT_ENT_CACHE > next_ent)
+	  {
+	    a_key->ents[next_ent].metric = spec_metric;
+	    a_key->ents[next_ent].spec_len = spec_len;
+	    a_key->ents[next_ent].ent = ent;
+	    next_ent++;
 	  }
 	}
 	else

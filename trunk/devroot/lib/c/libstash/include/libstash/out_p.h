@@ -44,8 +44,11 @@
 #  define _LIBSTASH_OUT_ENT_CACHE 8
 #endif
 
+/* The following two structures are used for caching the results from
+ * out_p_metric() in order to avoid recalculating it later on. */
 typedef struct
 {
+  cw_sint32_t metric;
   cw_sint32_t spec_len;
   cw_out_ent_t * ent;
 } cw_out_ent_el_t;
@@ -149,9 +152,17 @@ static cw_out_ent_t cw_g_out_builtins[] =
   {"p",    1, sizeof(void *),       out_p_metric_pointer, out_p_render_pointer},
   {"c",    1, sizeof(cw_uint8_t),   out_p_metric_char,    out_p_render_char},
   {"q",    1, sizeof(cw_uint64_t),  out_p_metric_int64,   out_p_render_int64},
-  
-  {"f32",  3, 4,                    NULL,                 NULL},
-  {"f64",  3, 8,                    NULL,                 NULL},
-  {"f96",  3, 12,                   NULL,                 NULL},
-  {"f128", 4, 16,                   NULL,                 NULL}
+
+#ifdef _TYPE_FP32_DEFINED
+  {"f32",  3, sizeof(cw_fp32_t),    NULL,                 NULL},
+#endif
+#ifdef _TYPE_FP64_DEFINED
+  {"f64",  3, sizeof(cw_fp64_t),    NULL,                 NULL},
+#endif
+#ifdef _TYPE_FP96_DEFINED
+  {"f96",  3, sizeof(cw_fp96_t),    NULL,                 NULL},
+#endif
+#ifdef _TYPE_FP128_DEFINED
+  {"f128", 4, sizeof(cw_fp128_t),   NULL,                 NULL}
+#endif
 };
