@@ -75,15 +75,7 @@ $run =
     . " -f autogen.sh -f acinclude.m4"
     . " -f config.guess -f config.sub -f config.stamp.in -f configure.in"
     . " -f install-sh"
-    . " -f test -f examples -f mod -f lib"
-    . " -f doc/.cvsignore -f doc/Cookfile.inc.in -f doc/Cookfile"
-    . " -f doc/latex/.cvsignore -f doc/latex/Cookfile -f doc/latex/ltx2e"
-    . " -f doc/latex/onyx"
-    . " -f bin/.cvsignore -f bin/Cookfile.inc.in -f bin/Cookfile -f bin/onyx"
-    . " -f bin/slate"
-    . " -f mod/.cvsignore -f mod/Cookfile.inc.in -f mod/Cookfile"
-    . " -f mod/modgtk -f mod/modpcre -f mod/modprompt"
-    . " -f mod/modslate"
+    . " -f bin -f doc -f examples -f mod -f lib -f test"
     ;
 if (defined($opt_verbose))
 {
