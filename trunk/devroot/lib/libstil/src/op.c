@@ -52,7 +52,6 @@ static struct cw_stil_op_dict_entry systemdict_ops[] = {
 	DENTRY(currentglobal),
 	DENTRY(currentmstate),
 	DENTRY(currentobjectformat),
-	DENTRY(currentpacking),
 	DENTRY(currentpoint),
 	DENTRY(cvlit),
 	DENTRY(cvm),
@@ -123,7 +122,6 @@ static struct cw_stil_op_dict_entry systemdict_ops[] = {
 	DENTRY(notify),
 	DENTRY(null),
 	DENTRY(or),
-	DENTRY(packedarray),
 	DENTRY(pop),
 	DENTRY(print),
 	DENTRY(printobject),
@@ -157,7 +155,6 @@ static struct cw_stil_op_dict_entry systemdict_ops[] = {
 	DENTRY(setglobal),
 	DENTRY(setmstate),
 	DENTRY(setobjectformat),
-	DENTRY(setpacking),
 	DENTRY(setpoint),
 	DENTRY(shift),
 	DENTRY(sqrt),
@@ -173,9 +170,9 @@ static struct cw_stil_op_dict_entry systemdict_ops[] = {
 	{"=",	op_sym_eq},
 	{"==",	op_sym_eq_eq},
 	{">>",	op_sym_gt_gt},
-	{"[",	op_sym_lb},
-	{"<<",	op_sym_lt_lt},
-	{"]",	op_sym_rb},
+	{"[",	op_mark},
+	{"<<",	op_mark},
+	{"]",	op_array},
 	DENTRY(timedwait),
 	DENTRY(token),
 	DENTRY(true),
@@ -212,6 +209,7 @@ stil_op_systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 		stilo_name_new(&name, a_stilt, systemdict_ops[i].name,
 		    strlen(systemdict_ops[i].name), TRUE);
 		stilo_operator_new(&operator, systemdict_ops[i].op_f);
+		stilo_attrs_set(&operator, STILOA_EXECUTABLE);
 
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
 	}
@@ -252,6 +250,44 @@ op_and(cw_stilt_t *a_stilt)
 void
 op_array(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	t_stilo, *stilo, *arr;
+	cw_uint32_t	nelements, i;
+
+	stack = stilt_data_stack_get(a_stilt);
+	/* Find the mark. */
+	for (i = 0, stilo = stils_get(stack, 0);
+	     stilo != NULL && stilo_type_get(stilo) != STILOT_MARK;
+	     i++, stilo = stils_get_down(stack, stilo));
+
+	_cw_assert(stilo != NULL);
+
+	/*
+	 * i is the index of the mark, and stilo points to the mark.  Set
+	 * nelements accordingly.  When we pop the stilo's off the stack, we'll
+	 * have to pop (nelements + 1) stilo's.
+	 */
+	nelements = i;
+
+	stilo_array_new(&t_stilo, a_stilt, nelements);
+	arr = stilo_array_get(&t_stilo);
+
+	/*
+	 * Traverse up the stack, moving stilo's to the array.
+	 */
+	for (i = 0, stilo = stils_get_up(stack, stilo); i <
+	    nelements; i++, stilo = stils_get_up(stack, stilo))
+		stilo_move(&arr[i], stilo);
+
+	/* Pop the stilo's off the stack now. */
+	stils_pop(stack, a_stilt, nelements + 1);
+
+	/* Push the array onto the stack. */
+	stilo = stils_push(stack);
+	stilo_move(stilo, &t_stilo);
+
+	/* Clean up. */
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -366,11 +402,6 @@ op_currentmstate(cw_stilt_t *a_stilt)
 
 void
 op_currentobjectformat(cw_stilt_t *a_stilt)
-{
-}
-
-void
-op_currentpacking(cw_stilt_t *a_stilt)
 {
 }
 
@@ -729,6 +760,12 @@ op_notify(cw_stilt_t *a_stilt)
 void
 op_null(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_push(stack);
+	stilo_null_new(stilo);
 }
 
 void
@@ -737,13 +774,14 @@ op_or(cw_stilt_t *a_stilt)
 }
 
 void
-op_packedarray(cw_stilt_t *a_stilt)
-{
-}
-
-void
 op_pop(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	/* XXX Check for underflow. */
+	stils_pop(stack, a_stilt, 1);
 }
 
 void
@@ -759,6 +797,7 @@ op_print(cw_stilt_t *a_stilt)
 	stilo = stils_get(stack, 0);
 	/* XXX Make sure stilo is a string. */
 	stilo_print(stilo, fd, FALSE, FALSE);
+	stils_pop(stack, a_stilt, 1);
 }
 
 void
@@ -769,16 +808,48 @@ op_printobject(cw_stilt_t *a_stilt)
 void
 op_product(cw_stilt_t *a_stilt)
 {
+	cw_stilts_t	stilts;
+	cw_uint8_t	code[] = "`Canonware stil'";
+
+	stilts_new(&stilts, a_stilt);
+	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilts_delete(&stilts, a_stilt);
 }
 
 void
 op_prompt(cw_stilt_t *a_stilt)
 {
+	cw_stilts_t	stilts;
+	cw_uint8_t	code[] = "`stil> ' print flush";
+
+	stilts_new(&stilts, a_stilt);
+	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilts_delete(&stilts, a_stilt);
 }
 
 void
 op_pstack(cw_stilt_t *a_stilt)
 {
+	/*
+	 * XXX The correct implementation depends on stilo_p_*_copy() working.
+	 */
+#if (0)
+	cw_stilts_t	stilts;
+	cw_stils_t	*stack;
+	cw_uint32_t	i, count;
+	cw_uint8_t	code[] = "==\n";
+
+	stilts_new(&stilts, a_stilt);
+	stack = stilt_data_stack_get(a_stilt);
+	count = stils_count(stack);
+
+	for (i = 0; i < count; i++) {
+		stils_dup(stack, a_stilt);
+		stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+		stils_roll(stack, count, 1);
+	}
+	stilts_delete(&stilts, a_stilt);
+#else
 	cw_stils_t	*stack;
 	cw_stilo_t	*stilo;
 	cw_sint32_t	fd;
@@ -789,6 +860,7 @@ op_pstack(cw_stilt_t *a_stilt)
 	for (stilo = stils_get(stack, 0); stilo != NULL; stilo =
 		 stils_get_down(stack, stilo))
 		stilo_print(stilo, fd, TRUE, TRUE);
+#endif
 }
 
 void
@@ -934,11 +1006,6 @@ op_setobjectformat(cw_stilt_t *a_stilt)
 }
 
 void
-op_setpacking(cw_stilt_t *a_stilt)
-{
-}
-
-void
 op_setpoint(cw_stilt_t *a_stilt)
 {
 }
@@ -961,16 +1028,21 @@ op_srand(cw_stilt_t *a_stilt)
 void
 op_stack(cw_stilt_t *a_stilt)
 {
+	cw_stilts_t	stilts;
 	cw_stils_t	*stack;
-	cw_stilo_t	*stilo;
-	cw_sint32_t	fd;
+	cw_uint32_t	i, count;
+	cw_uint8_t	code[] = "=\n";
 
+	stilts_new(&stilts, a_stilt);
 	stack = stilt_data_stack_get(a_stilt);
-	fd = stilt_stdout_get(a_stilt);
+	count = stils_count(stack);
 
-	for (stilo = stils_get(stack, 0); stilo != NULL; stilo =
-		 stils_get_down(stack, stilo))
-		stilo_print(stilo, fd, FALSE, TRUE);
+	for (i = 0; i < count; i++) {
+		stils_dup(stack, a_stilt);
+		stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+		stils_roll(stack, count, 1);
+	}
+	stilts_delete(&stilts, a_stilt);
 }
 
 void
@@ -1008,87 +1080,42 @@ op_sub(cw_stilt_t *a_stilt)
 {
 }
 
+/* = */
 void
 op_sym_eq(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_sint32_t	fd;
+
+	stack = stilt_data_stack_get(a_stilt);
+	fd = stilt_stdout_get(a_stilt);
+
+	stilo = stils_get(stack, 0);
+	stilo_print(stilo, fd, FALSE, TRUE);
+	stils_pop(stack, a_stilt, 1);
 }
 
+/* == */
 void
 op_sym_eq_eq(cw_stilt_t *a_stilt)
 {
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_sint32_t	fd;
+
+	stack = stilt_data_stack_get(a_stilt);
+	fd = stilt_stdout_get(a_stilt);
+
+	stilo = stils_get(stack, 0);
+	stilo_print(stilo, fd, TRUE, TRUE);
+	stils_pop(stack, a_stilt, 1);
 }
 
+/* >> */
 void
 op_sym_gt_gt(cw_stilt_t *a_stilt)
 {
-}
-
-/* [ */
-void
-op_sym_lb(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*stack;
-	cw_stilo_t	*stilo;
-
-	stack = stilt_data_stack_get(a_stilt);
-	stilo = stils_push(stack);
-	stilo_mark_new(stilo);
-}
-
-/* << */
-void
-op_sym_lt_lt(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*stack;
-	cw_stilo_t	*stilo;
-
-	stack = stilt_data_stack_get(a_stilt);
-	stilo = stils_push(stack);
-	stilo_mark_new(stilo);
-}
-
-/* ] */
-void
-op_sym_rb(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*stack;
-	cw_stilo_t	t_stilo, *stilo, *arr;
-	cw_uint32_t	nelements, i;
-
-	stack = stilt_data_stack_get(a_stilt);
-	/* Find the mark. */
-	for (i = 0, stilo = stils_get(stack, 0);
-	     stilo != NULL && stilo_type_get(stilo) != _CW_STILOT_MARKTYPE;
-	     i++, stilo = stils_get_down(stack, stilo));
-
-	_cw_assert(stilo != NULL);
-
-	/*
-	 * i is the index of the mark, and stilo points to the mark.  Set
-	 * nelements accordingly.  When we pop the stilo's off the stack, we'll
-	 * have to pop (nelements + 1) stilo's.
-	 */
-	nelements = i;
-
-	stilo_array_new(&t_stilo, a_stilt, nelements);
-	arr = stilo_array_get(&t_stilo);
-
-	/*
-	 * Traverse up the stack, moving stilo's to the array.
-	 */
-	for (i = 0, stilo = stils_get_up(stack, stilo); i <
-	    nelements; i++, stilo = stils_get_up(stack, stilo))
-		stilo_move(&arr[i], stilo);
-
-	/* Pop the stilo's off the stack now. */
-	stils_pop(stack, a_stilt, nelements + 1);
-
-	/* Push the array onto the stack. */
-	stilo = stils_push(stack);
-	stilo_move(stilo, &t_stilo);
-
-	/* Clean up. */
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -1145,6 +1172,12 @@ op_usertime(cw_stilt_t *a_stilt)
 void
 op_version(cw_stilt_t *a_stilt)
 {
+	cw_stilts_t	stilts;
+	cw_uint8_t	code[] = "`" _LIBSTIL_VERSION "'";
+
+	stilts_new(&stilts, a_stilt);
+	stilt_interp_str(a_stilt, &stilts, code, sizeof(code) - 1);
+	stilts_delete(&stilts, a_stilt);
 }
 
 void

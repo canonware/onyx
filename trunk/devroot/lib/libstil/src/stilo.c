@@ -413,105 +413,105 @@ struct  cw_stilot_vtable_s {
  * so that a segfault will occur if such a non-existent function is called.
  */
 static cw_stilot_vtable_t stilot_vtable[] = {
-	/* _CW_STILOT_NOTYPE */
+	/* STILOT_NO */
 	{NULL,
 	 NULL,
 	 NULL,
 	 NULL,
 	 stilo_p_no_print},	/* XXX Debugging only. */
 
-	/* _CW_STILOT_ARRAYTYPE */
+	/* STILOT_ARRAY */
 	{stilo_p_array_delete,
 	 stiloe_p_array_ref_iterate,
 	 stilo_p_array_cast,
 	 stilo_p_array_copy,
 	 stilo_p_array_print},
 
-	/* _CW_STILOT_BOOLEANTYPE */
+	/* STILOT_BOOLEAN */
 	{NULL,
 	 NULL,
 	 stilo_p_boolean_cast,
 	 NULL,
 	 stilo_p_boolean_print},
 
-	/* _CW_STILOT_CONDITIONTYPE */
+	/* STILOT_CONDITION */
 	{stilo_p_condition_delete,
 	 stiloe_p_condition_ref_iterate,
 	 stilo_p_condition_cast,
 	 NULL,
 	 stilo_p_condition_print},
 	
-	/* _CW_STILOT_DICTTYPE */
+	/* STILOT_DICT */
 	{stilo_p_dict_delete,
 	 stiloe_p_dict_ref_iterate,
 	 stilo_p_dict_cast,
 	 stilo_p_dict_copy,
 	 stilo_p_dict_print},
 
-	/* _CW_STILOT_FILETYPE */
+	/* STILOT_FILE */
 	{stilo_p_file_delete,
 	 stiloe_p_file_ref_iterate,
 	 stilo_p_file_cast,
 	 stilo_p_file_copy,
 	 stilo_p_file_print},
 
-	/* _CW_STILOT_HOOKTYPE */
+	/* STILOT_HOOK */
 	{stilo_p_hook_delete,
 	 stiloe_p_hook_ref_iterate,
 	 stilo_p_hook_cast,
 	 stilo_p_hook_copy,
 	 stilo_p_hook_print},
 
-	/* _CW_STILOT_LOCKTYPE */
+	/* STILOT_LOCK */
 	{stilo_p_lock_delete,
 	 stiloe_p_lock_ref_iterate,
 	 stilo_p_lock_cast,
 	 NULL,
 	 stilo_p_lock_print},
 
-	/* _CW_STILOT_MARKTYPE */
+	/* STILOT_MARK */
 	{NULL,
 	 NULL,
 	 stilo_p_mark_cast,
 	 NULL,
 	 stilo_p_mark_print},
 
-	/* _CW_STILOT_MSTATETYPE */
+	/* STILOT_MSTATE */
 	{stilo_p_mstate_delete,
 	 stiloe_p_mstate_ref_iterate,
 	 stilo_p_mstate_cast,
 	 stilo_p_mstate_copy,
 	 stilo_p_mstate_print},
 
-	/* _CW_STILOT_NAMETYPE */
+	/* STILOT_NAME */
 	{stilo_p_name_delete,
 	 stiloe_p_name_ref_iterate,
 	 stilo_p_name_cast,
 	 stilo_p_name_copy,
 	 stilo_p_name_print},
 
-	/* _CW_STILOT_NULLTYPE */
+	/* STILOT_NULL */
 	{NULL,
 	 NULL,
 	 stilo_p_null_cast,
 	 NULL,
 	 stilo_p_null_print},
 
-	/* _CW_STILOT_NUMBERTYPE */
+	/* STILOT_NUMBER */
 	{stilo_p_number_delete,
 	 stiloe_p_number_ref_iterate,
 	 stilo_p_number_cast,
 	 stilo_p_number_copy,	/* XXX Same as dup. */
 	 stilo_p_number_print},
 
-	/* _CW_STILOT_OPERATORTYPE */
+	/* STILOT_OPERATOR */
 	{NULL,
 	 NULL,
 	 stilo_p_operator_cast,
 	 NULL,
 	 stilo_p_operator_print},
 
-	/* _CW_STILOT_STRINGTYPE */
+	/* STILOT_STRING */
 	{stilo_p_string_delete,
 	 stiloe_p_string_ref_iterate,
 	 stilo_p_string_cast,
@@ -552,40 +552,40 @@ stilo_type_get(cw_stilo_t *a_stilo)
 	return a_stilo->type;
 }
 
-cw_bool_t
-stilo_executable_get(cw_stilo_t *a_stilo)
+cw_stiloa_t
+stilo_attrs_get(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	return a_stilo->executable;
+	return a_stilo->attrs;
 }
 
 void
-stilo_executable_set(cw_stilo_t *a_stilo, cw_bool_t a_executable)
+stilo_attrs_set(cw_stilo_t *a_stilo, cw_stiloa_t a_attrs)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	a_stilo->executable = a_executable;
+	a_stilo->attrs = a_attrs;
 }
 
-cw_bool_t
-stilo_literal_get(cw_stilo_t *a_stilo)
+cw_stilop_t
+stilo_perms_get(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	return a_stilo->literal;
+	return a_stilo->perms;
 }
 
 void
-stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal)
+stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	a_stilo->literal = a_literal;
+	a_stilo->perms = a_perms;
 }
 
 void
@@ -602,7 +602,7 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 {
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_to->type == _CW_STILOT_NOTYPE);
+	_cw_assert(a_to->type == STILOT_NO);
 	_cw_check_ptr(a_from);
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
 
@@ -624,13 +624,13 @@ stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from)
 
 	/* Mark the stilo as invalid. */
 	type = a_from->type;
-	a_from->type = _CW_STILOT_NOTYPE;
+	a_from->type = STILOT_NO;
 
 	/* Copy. */
 	memcpy(a_to, a_from, sizeof(cw_stilo_t));
 
 	/* Numbers are not composite, so handle them specially. */
-	if ((type == _CW_STILOT_NUMBERTYPE) && (a_from->extended)) {
+	if ((type == STILOT_NUMBER) && (a_from->extended)) {
 		/* XXX Create a duplicate stiloe. */
 	}
 
@@ -678,13 +678,13 @@ stilo_l_stiloe_get(cw_stilo_t *a_stilo)
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
 	switch (a_stilo->type) {
-	case _CW_STILOT_ARRAYTYPE:
-	case _CW_STILOT_CONDITIONTYPE:
-	case _CW_STILOT_DICTTYPE:
-	case _CW_STILOT_HOOKTYPE:
-	case _CW_STILOT_LOCKTYPE:
-	case _CW_STILOT_MSTATETYPE:
-	case _CW_STILOT_STRINGTYPE:
+	case STILOT_ARRAY:
+	case STILOT_CONDITION:
+	case STILOT_DICT:
+	case STILOT_HOOK:
+	case STILOT_LOCK:
+	case STILOT_MSTATE:
+	case STILOT_STRING:
 		retval = a_stilo->o.stiloe;
 		break;
 	default:
@@ -718,12 +718,13 @@ stilo_p_hash(const void *a_key)
 	_cw_check_ptr(key);
 	_cw_assert(key->magic == _CW_STILO_MAGIC);
 
-	if (key->type == _CW_STILOT_NAMETYPE) {
+	if (key->type == STILOT_NAME) {
 		cw_stiloe_name_t	*name;
 
 		name = (cw_stiloe_name_t *)key->o.stiloe;
+		retval = ch_direct_hash((void *)name->val);
 		/* XXX Assumes 32 bit architecture. */
-		retval = (cw_uint32_t)name->val;
+/*  		retval = (cw_uint32_t)name->val; */
 	} else {
 		/* XXX Implement. */
 		_cw_error("Unimplemented");
@@ -745,8 +746,8 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 	_cw_check_ptr(k2);
 	_cw_assert(k2->magic == _CW_STILO_MAGIC);
 
-	if ((k1->type == _CW_STILOT_NAMETYPE) && (k1->type ==
-	    _CW_STILOT_NAMETYPE)) {
+	if ((k1->type == STILOT_NAME) && (k1->type ==
+	    STILOT_NAME)) {
 		cw_stiloe_name_t	*n1, *n2;
 		
 		/* Chase down the names. */
@@ -808,7 +809,7 @@ stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 void
 stilo_no_new(cw_stilo_t *a_stilo)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_NOTYPE);
+	stilo_p_new(a_stilo, STILOT_NO);
 }
 
 static void
@@ -832,7 +833,7 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 	cw_stiloe_array_t	*array;
 	cw_uint32_t		i;
 
-	stilo_p_new(a_stilo, _CW_STILOT_ARRAYTYPE);
+	stilo_p_new(a_stilo, STILOT_ARRAY);
 
 	array = (cw_stiloe_array_t *)_cw_stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_array_t));
@@ -847,7 +848,7 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 	}
 	a_stilo->o.stiloe = (cw_stiloe_t *)array;
 
-	stiloe_p_new(a_stilo->o.stiloe, _CW_STILOT_ARRAYTYPE);
+	stiloe_p_new(a_stilo->o.stiloe, STILOT_ARRAY);
 }
 
 static void
@@ -920,14 +921,12 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	cw_stilo_t	*arr;
 	cw_uint32_t	nelms, i;
-	cw_bool_t	executable;
 
-	executable = stilo_executable_get(a_stilo);
 	arr = stilo_array_get(a_stilo);
 	nelms = stilo_array_len_get(a_stilo);
 
 	if (a_syntactic) {
-		if (executable)
+		if (a_stilo->attrs == STILOA_EXECUTABLE)
 			_cw_out_put_f(a_fd, "{");
 		else
 			_cw_out_put_f(a_fd, "[[");
@@ -936,7 +935,7 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 			if (i < nelms - 1)
 				_cw_out_put_f(a_fd, " ");
 		}
-		if (executable)
+		if (a_stilo->attrs == STILOA_EXECUTABLE)
 			_cw_out_put_f(a_fd, "}[c]", newline);
 		else
 			_cw_out_put_f(a_fd, "][c]", newline);
@@ -955,7 +954,7 @@ stilo_array_len_get(cw_stilo_t *a_stilo)
 
 	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(array->stiloe.type == _CW_STILOT_ARRAYTYPE);
+	_cw_assert(array->stiloe.type == STILOT_ARRAY);
 
 	if (array->stiloe.indirect == FALSE)
 		retval = array->e.a.len;
@@ -973,7 +972,7 @@ stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset)
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_ARRAYTYPE);
+	_cw_assert(a_stilo->type == STILOT_ARRAY);
 
 	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
@@ -997,7 +996,7 @@ stilo_array_get(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_ARRAYTYPE);
+	_cw_assert(a_stilo->type == STILOT_ARRAY);
 
 	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
@@ -1022,7 +1021,7 @@ stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, cw_stilo_t *a_arr,
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_ARRAYTYPE);
+	_cw_assert(a_stilo->type == STILOT_ARRAY);
 
 	array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
 	_cw_assert(array->stiloe.magic == _CW_STILOE_MAGIC);
@@ -1048,7 +1047,7 @@ stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, cw_stilo_t *a_arr,
 void
 stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_BOOLEANTYPE);
+	stilo_p_new(a_stilo, STILOT_BOOLEAN);
 	a_stilo->o.boolean.val = a_val;
 }
 
@@ -1075,7 +1074,7 @@ stilo_boolean_get(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_BOOLEANTYPE);
+	_cw_assert(a_stilo->type == STILOT_BOOLEAN);
 
 	return a_stilo->o.boolean.val;
 }
@@ -1085,7 +1084,7 @@ stilo_boolean_set(cw_stilo_t *a_stilo, cw_bool_t a_val)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_BOOLEANTYPE);
+	_cw_assert(a_stilo->type == STILOT_BOOLEAN);
 
 	a_stilo->o.boolean.val = a_val;
 }
@@ -1096,7 +1095,7 @@ stilo_boolean_set(cw_stilo_t *a_stilo, cw_bool_t a_val)
 void
 stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_CONDITIONTYPE);
+	stilo_p_new(a_stilo, STILOT_CONDITION);
 }
 
 static void
@@ -1137,7 +1136,7 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 {
 	cw_stiloe_dict_t	*dict;
 
-	stilo_p_new(a_stilo, _CW_STILOT_DICTTYPE);
+	stilo_p_new(a_stilo, STILOT_DICT);
 
 	dict = (cw_stiloe_dict_t *)_cw_stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_dict_t));
@@ -1167,13 +1166,18 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 
 	a_stilo->o.stiloe = (cw_stiloe_t *)dict;
 
-	stiloe_p_new(a_stilo->o.stiloe, _CW_STILOT_DICTTYPE);
+	stiloe_p_new(a_stilo->o.stiloe, STILOT_DICT);
 }
 
 static void
 stilo_p_dict_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
 	cw_stiloe_dict_t	*dict;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+
+	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
 	_cw_check_ptr(dict);
 	_cw_assert(dict->stiloe.magic == _CW_STILOE_MAGIC);
@@ -1301,7 +1305,7 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_DICTTYPE);
+	_cw_assert(a_stilo->type == STILOT_DICT);
 	/* XXX Make sure setglobal is correct. */
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
@@ -1351,7 +1355,7 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_DICTTYPE);
+	_cw_assert(a_stilo->type == STILOT_DICT);
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
@@ -1382,7 +1386,7 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_DICTTYPE);
+	_cw_assert(a_stilo->type == STILOT_DICT);
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
@@ -1414,7 +1418,7 @@ stilo_dict_count(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_DICTTYPE);
+	_cw_assert(a_stilo->type == STILOT_DICT);
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
@@ -1438,7 +1442,7 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_DICTTYPE);
+	_cw_assert(a_stilo->type == STILOT_DICT);
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
@@ -1462,7 +1466,7 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 void
 stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_FILETYPE);
+	stilo_p_new(a_stilo, STILOT_FILE);
 }
 
 static void
@@ -1504,7 +1508,7 @@ stilo_p_file_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 void
 stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_HOOKTYPE);
+	stilo_p_new(a_stilo, STILOT_HOOK);
 }
 
 static void
@@ -1546,7 +1550,7 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 void
 stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_LOCKTYPE);
+	stilo_p_new(a_stilo, STILOT_LOCK);
 }
 
 static void
@@ -1583,7 +1587,7 @@ stilo_p_lock_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 void
 stilo_mark_new(cw_stilo_t *a_stilo)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_MARKTYPE);
+	stilo_p_new(a_stilo, STILOT_MARK);
 }
 
 static void
@@ -1609,7 +1613,7 @@ stilo_p_mark_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 void
 stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_MSTATETYPE);
+	stilo_p_new(a_stilo, STILOT_MSTATE);
 }
 
 static void
@@ -1710,7 +1714,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 {
 	cw_stiloe_name_t	*name, key;
 
-	stilo_p_new(a_stilo, _CW_STILOT_NAMETYPE);
+	stilo_p_new(a_stilo, STILOT_NAME);
 
 	/* Fake up a key so that we can search the hash tables. */
 	key.e.n.name = a_name;
@@ -1738,10 +1742,10 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 			name->val = gname;
 
 			/* stilo-internal initialization. */
-			stilo_p_new(&name->e.i.stilo, _CW_STILOT_NAMETYPE);
+			stilo_p_new(&name->e.i.stilo, STILOT_NAME);
 			name->e.i.stilo.o.stiloe = (cw_stiloe_t *)gname;
 
-			stiloe_p_new(&name->stiloe, _CW_STILOT_NAMETYPE);
+			stiloe_p_new(&name->stiloe, STILOT_NAME);
 			name->stiloe.indirect = TRUE;
 
 			/*
@@ -1814,10 +1818,9 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	name = name->val;
 	_cw_assert(name == name->val);
 	
-	if (a_syntactic)
+	if ((a_syntactic) && (a_stilo->attrs == STILOA_LITERAL))
 		_cw_out_put_f(a_fd, "/");
 
-/*  	_cw_out_put_f(a_fd, "0x[p], len [i]\n", name->e.n.name, name->e.n.len); */
 	_cw_out_put_fn(a_fd, name->e.n.len, "[s]", name->e.n.name);
 
 	if (a_newline)
@@ -1878,7 +1881,7 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 		} else
 			retval->e.n.name = a_str;
 
-		stiloe_p_new(&retval->stiloe, _CW_STILOT_NAMETYPE);
+		stiloe_p_new(&retval->stiloe, STILOT_NAME);
 
 		dch_insert(&stilng->hash, (void *)retval, (void
 		    **)retval, _cw_stilt_chi_get(a_stilt));
@@ -1985,7 +1988,7 @@ stilo_p_name_kref_remove(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 void
 stilo_null_new(cw_stilo_t *a_stilo)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_NULLTYPE);
+	stilo_p_new(a_stilo, STILOT_NULL);
 }
 
 static void
@@ -2011,7 +2014,7 @@ stilo_p_null_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
 void
 stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_NUMBERTYPE);
+	stilo_p_new(a_stilo, STILOT_NUMBER);
 }
 
 static void
@@ -2054,7 +2057,7 @@ stilo_p_number_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 void
 stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op)
 {
-	stilo_p_new(a_stilo, _CW_STILOT_OPERATORTYPE);
+	stilo_p_new(a_stilo, STILOT_OPERATOR);
 	a_stilo->o.operator.f = a_op;
 }
 
@@ -2083,7 +2086,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 {
 	cw_stiloe_string_t	*string;
 
-	stilo_p_new(a_stilo, _CW_STILOT_STRINGTYPE);
+	stilo_p_new(a_stilo, STILOT_STRING);
 
 	string = (cw_stiloe_string_t *)_cw_stilt_malloc(a_stilt,
 	    sizeof(cw_stiloe_string_t));
@@ -2099,7 +2102,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len)
 
 	a_stilo->o.stiloe = (cw_stiloe_t *)string;
 
-	stiloe_p_new(a_stilo->o.stiloe, _CW_STILOT_STRINGTYPE);
+	stiloe_p_new(a_stilo->o.stiloe, STILOT_STRING);
 }
 
 static void
@@ -2214,7 +2217,7 @@ stilo_string_len_get(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_STRINGTYPE);
+	_cw_assert(a_stilo->type == STILOT_STRING);
 
 	string = (cw_stiloe_string_t *)a_stilo->o.stiloe;
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
@@ -2235,7 +2238,7 @@ stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset)
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_STRINGTYPE);
+	_cw_assert(a_stilo->type == STILOT_STRING);
 
 	string = (cw_stiloe_string_t *)a_stilo->o.stiloe;
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
@@ -2259,7 +2262,7 @@ stilo_string_get(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_STRINGTYPE);
+	_cw_assert(a_stilo->type == STILOT_STRING);
 
 	string = (cw_stiloe_string_t *)a_stilo->o.stiloe;
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
@@ -2283,7 +2286,7 @@ stilo_string_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, const cw_uint8_t
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_STRINGTYPE);
+	_cw_assert(a_stilo->type == STILOT_STRING);
 
 	string = (cw_stiloe_string_t *)a_stilo->o.stiloe;
 	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);

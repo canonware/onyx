@@ -17,29 +17,36 @@ typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 typedef void cw_op_t(cw_stilt_t *);
 
 typedef enum {
-	_CW_STILOT_NOTYPE = 0,
-	_CW_STILOT_ARRAYTYPE = 1,
-	_CW_STILOT_BOOLEANTYPE = 2,
-	_CW_STILOT_CONDITIONTYPE = 3,
-	_CW_STILOT_DICTTYPE = 4,
-	_CW_STILOT_FILETYPE = 5,
-	_CW_STILOT_HOOKTYPE = 6,
-	_CW_STILOT_LOCKTYPE = 7,
-	_CW_STILOT_MARKTYPE = 8,
-	_CW_STILOT_MSTATETYPE = 9,
-	_CW_STILOT_NAMETYPE = 10,
-	_CW_STILOT_NULLTYPE = 11,
-	_CW_STILOT_NUMBERTYPE = 12,
-	_CW_STILOT_OPERATORTYPE = 13,
-	_CW_STILOT_STRINGTYPE = 14
+	STILOT_NO		=  0,
+	STILOT_ARRAY		=  1,
+	STILOT_BOOLEAN		=  2,
+	STILOT_CONDITION	=  3,
+	STILOT_DICT		=  4,
+	STILOT_FILE		=  5,
+	STILOT_HOOK		=  6,
+	STILOT_LOCK		=  7,
+	STILOT_MARK		=  8,
+	STILOT_MSTATE		=  9,
+	STILOT_NAME		= 10,
+	STILOT_NULL		= 11,
+	STILOT_NUMBER		= 12,
+	STILOT_OPERATOR		= 13,
+	STILOT_STRING		= 14
 }	cw_stilot_t;
 
+/* Attributes. */
 typedef enum {
-	_CW_STILOA_NONE = 0,
-	_CW_STILOA_EXECUTEONLY = 1,
-	_CW_STILOA_READONLY = 2,
-	_CW_STILOA_UNLIMITED = 3
+	STILOA_LITERAL		=  0,
+	STILOA_EXECUTABLE	=  1
 }	cw_stiloa_t;
+
+/* Permissions. */
+typedef enum {
+	STILOP_NONE		=  0,
+	STILOP_EXECUTEONLY	=  1,
+	STILOP_READONLY		=  2,
+	STILOP_UNLIMITED	=  3
+}	cw_stilop_t;
 
 /*
  * Main object structure.
@@ -51,22 +58,16 @@ struct cw_stilo_s {
 
 	/*
 	 * Type.
-	 *
-	 * The type _CW_STILOT_NOTYPE can be used to protect modifications to a
-	 * stiloe pointer.  Since a thread can be suspended at any time, it is
-	 * critical to mark the pointer invalid while modifying it so that the
-	 * collector knows not to try using a possibly corrupt pointer.
 	 */
 	cw_stilot_t	type:4;
-	cw_stiloa_t	access:2;
 	/*
-	 * Every object is either literal (FALSE) or executable (TRUE).
+	 * Attributes.  A stilo is either LITERAL or EXECUTABLE.
 	 */
-	cw_bool_t	executable:1;
+	cw_stiloa_t	attrs:1;
 	/*
-	 * A literal object if TRUE.
+	 * Permissions.  A stilo has read and write permissions.
 	 */
-	cw_bool_t	literal:1;
+	cw_stilop_t	perms:2;
 	/*
 	 * If TRUE, this is an extended (not the same as composite) object.
 	 * This only pertains to number stilo's, which can switch between simple
@@ -114,44 +115,16 @@ struct cw_stiloe_dicto_s {
 	cw_stilo_t	val;
 };
 
-/*
- * The ... arg is used for array, dict, name, operator, and string construction.
- */
-/*  void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t */
-/*      a_type, ...); */
-/*  void		stilo_new_v(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, */
-/*      cw_stilot_t a_type, va_list a_p); */
-void		stilo_no_new(cw_stilo_t *a_stilo);
-void		stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    cw_uint32_t a_len);
-void		stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val);
-void		stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    cw_uint32_t a_dict_size);
-void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_mark_new(cw_stilo_t *a_stilo);
-void		stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
-    cw_uint8_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
-void		stilo_null_new(cw_stilo_t *a_stilo);
-void		stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
-void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op);
-void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    cw_uint32_t a_len);
-
 void		stilo_clobber(cw_stilo_t *a_stilo);
 void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
 
-cw_bool_t	stilo_executable_get(cw_stilo_t *a_stilo);
-void		stilo_executable_set(cw_stilo_t *a_stilo, cw_bool_t
-    a_executable);
+cw_stiloa_t	stilo_attrs_get(cw_stilo_t *a_stilo);
+void		stilo_attrs_set(cw_stilo_t *a_stilo, cw_stiloa_t a_attrs);
 
-cw_bool_t	stilo_literal_get(cw_stilo_t *a_stilo);
-void		stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal);
+cw_stilop_t	stilo_perms_get(cw_stilo_t *a_stilo);
+void		stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms);
 
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
@@ -167,8 +140,15 @@ cw_stiloe_t	*stilo_l_stiloe_get(cw_stilo_t *a_stilo);
 cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 
 /*
+ * no.
+ */
+void		stilo_no_new(cw_stilo_t *a_stilo);
+
+/*
  * array.
  */
+void		stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_len);
 cw_sint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
 cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
@@ -178,13 +158,21 @@ void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
 /*
  * boolean.
  */
+void		stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val);
 cw_bool_t	stilo_boolean_get(cw_stilo_t *a_stilo);
 void		stilo_boolean_set(cw_stilo_t *a_stilo, cw_bool_t a_val);
 
 /*
+ * condition.
+ */
+void		stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+
+/*
  * dict.
  */
-/* Destroys a_key and a_val. */
+void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_dict_size);
+/* XXX Destroys a_key and a_val. */
 void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
 void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
@@ -196,14 +184,59 @@ cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *r_stilo);
 
 /*
+ * file.
+ */
+void		stilo_file_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+
+/*
+ * hook.
+ */
+void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+
+/*
+ * lock.
+ */
+void		stilo_lock_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+
+/*
+ * mark.
+ */
+void		stilo_mark_new(cw_stilo_t *a_stilo);
+
+/*
+ * mstate.
+ */
+void		stilo_mstate_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+
+
+/*
  * name.
  */
+void		stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_uint8_t *a_name, cw_uint32_t a_len, cw_bool_t a_is_static);
 cw_uint32_t	stilo_name_hash(const void *a_key);
 cw_bool_t	stilo_name_key_comp(const void *a_k1, const void *a_k2);
 
 /*
+ * null.
+ */
+void		stilo_null_new(cw_stilo_t *a_stilo);
+
+/*
+ * number.
+ */
+void		stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+
+/*
+ * operator.
+ */
+void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op);
+
+/*
  * string.
  */
+void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_len);
 cw_sint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
 cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);
