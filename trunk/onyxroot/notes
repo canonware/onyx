@@ -21,3 +21,7 @@ To do a bugfix release of onyx:
 To re-create a release of onyx using an existing tag:
 
 	./onyx_release -c -b ONYX_3_0_1 -t 3.0.1 -V onyx=3.0.1
+
+To create a snapshot of HEAD:
+
+	./onyx_release -cv -t 4.0a16.0 -V onyx=4.0a16.0
