@@ -202,7 +202,7 @@ pop
 
 # Create worker threads.
 1 1 nworker_threads {
-    (over) {$$worker_entry} thread
+    (over) {~worker_entry} thread
 } for
 
 # Join on worker threads.
