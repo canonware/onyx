@@ -201,7 +201,7 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
 #ifdef CW_PTH
     if (pth_cond_await(&a_cnd->condition, &a_mtx->mutex, NULL) == false)
     {
-	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_wait: %s\n",
+	fprintf(stderr, "%s:%d:%s(): Error in pth_cond_wait(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
@@ -210,7 +210,7 @@ cnd_wait(cw_cnd_t *a_cnd, cw_mtx_t *a_mtx)
     error = pthread_cond_wait(&a_cnd->condition, &a_mtx->mutex);
     if (error)
     {
-	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_wait: %s\n",
+	fprintf(stderr, "%s:%d:%s(): Error in pthread_cond_wait(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }

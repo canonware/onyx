@@ -27,7 +27,7 @@ mtx_new(cw_mtx_t *a_mtx)
 #ifdef CW_PTH
     if (pth_mutex_init(&a_mtx->mutex) == false)
     {
-	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_init: %s\n",
+	fprintf(stderr, "%s:%d:%s(): Error in pth_mutex_init(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
 	abort();
     }
@@ -36,7 +36,7 @@ mtx_new(cw_mtx_t *a_mtx)
     error = pthread_mutex_init(&a_mtx->mutex, NULL);
     if (error)
     {
-	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_init: %s\n",
+	fprintf(stderr, "%s:%d:%s(): Error in pthread_mutex_init(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
