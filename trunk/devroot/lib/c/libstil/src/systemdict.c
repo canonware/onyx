@@ -258,7 +258,20 @@ systemdict_add(cw_stilt_t *a_stilt)
 void
 systemdict_aload(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*array, *stilo;
+	cw_uint32_t	i, len;
+
+	ostack = stilt_ostack_get(a_stilt);
+
+	array = stils_get(ostack, a_stilt);
+	if (stilo_type_get(array) != STILOT_ARRAY)
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+
+	for (i = 0, len = stilo_array_len_get(array); i < len; i++) {
+		stilo = stils_under_push(ostack, a_stilt, array);
+		stilo_dup(stilo, stilo_array_el_get(array, a_stilt, i));
+	}
 }
 
 void
@@ -295,7 +308,37 @@ systemdict_array(cw_stilt_t *a_stilt)
 void
 systemdict_astore(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *tstack;
+	cw_stilo_t	*array, *stilo;
+	cw_sint32_t	i, len;
+
+	ostack = stilt_ostack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	array = stils_get(ostack, a_stilt);
+	if (stilo_type_get(array) != STILOT_ARRAY)
+		stilt_error(a_stilt, STILTE_TYPECHECK);
+	/* Make sure there will be enough objects to fill the array. */
+	len = stilo_array_len_get(array);
+	if (len > stils_count(ostack) - 1)
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+
+	stilo = stils_push(tstack, a_stilt);
+	stilo_dup(stilo, array);
+	stils_pop(ostack, a_stilt);
+	array = stilo;
+
+	/* Move ostack objects to the array. */
+	for (i = len - 1; i >= 0; i--) {
+		stilo_array_el_set(array, a_stilt, stils_get(ostack, a_stilt),
+		    i);
+		stils_pop(ostack, a_stilt);
+	}
+
+	/* Push the array back onto ostack. */
+	stilo = stils_push(ostack, a_stilt);
+	stilo_dup(stilo, array);
+	stils_pop(tstack, a_stilt);
 }
 
 void
@@ -1040,7 +1083,125 @@ systemdict_for(cw_stilt_t *a_stilt)
 void
 systemdict_forall(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack, *tstack;
+	cw_stilo_t	*stilo, *what, *proc;
+	cw_sint64_t	i, count;
+
+	ostack = stilt_ostack_get(a_stilt);
+	estack = stilt_estack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	proc = stils_get(ostack, a_stilt);
+	what = stils_down_get(ostack, a_stilt, proc);
+
+	xep_begin();
+	xep_try {
+		switch (stilo_type_get(what)) {
+		case STILOT_ARRAY: {
+			cw_stilo_t	*el;
+
+			/* Move proc and array to tstack. */
+			stilo = stils_push(tstack, a_stilt);
+			stilo_dup(stilo, proc);
+			proc = stilo;
+
+			stilo = stils_push(tstack, a_stilt);
+			stilo_dup(stilo, what);
+			what = stilo;
+
+			stils_npop(ostack, a_stilt, 2);
+
+			/*
+			 * Iterate through the array, push each element onto
+			 * ostack, and execute proc.
+			 */
+			for (i = 0, count = stilo_array_len_get(what); i <
+				 count; i++) {
+				el = stilo_array_el_get(what, a_stilt, i);
+				stilo = stils_push(ostack, a_stilt);
+				stilo_dup(stilo, el);
+
+				stilo = stils_push(estack, a_stilt);
+				stilo_dup(stilo, proc);
+				stilt_loop(a_stilt);
+			}
+			break;
+		}
+		case STILOT_DICT: {
+			cw_stilo_t	*key, *val;
+
+			/* Move proc and array to tstack. */
+			stilo = stils_push(tstack, a_stilt);
+			stilo_dup(stilo, proc);
+			proc = stilo;
+
+			stilo = stils_push(tstack, a_stilt);
+			stilo_dup(stilo, what);
+			what = stilo;
+
+			stils_npop(ostack, a_stilt, 2);
+
+			for (i = 0, count = stilo_dict_count(what); i <
+				 count; i++) {
+				/* Push key and val onto ostack. */
+				key = stils_push(ostack, a_stilt);
+				val = stils_push(ostack, a_stilt);
+
+				/* Get next key. */
+				stilo_dict_iterate(what, a_stilt, key);
+
+				/* Use key to get val. */
+				stilo_dict_lookup(what, a_stilt, key, val);
+
+				/* Push proc onto estack and execute it. */
+				stilo = stils_push(estack, a_stilt);
+				stilo_dup(stilo, proc);
+				stilt_loop(a_stilt);
+			}
+			break;
+		}
+		case STILOT_STRING: {
+			cw_uint8_t	el;
+
+			/* Move proc and array to tstack. */
+			stilo = stils_push(tstack, a_stilt);
+			stilo_dup(stilo, proc);
+			proc = stilo;
+
+			stilo = stils_push(tstack, a_stilt);
+			stilo_dup(stilo, what);
+			what = stilo;
+
+			stils_npop(ostack, a_stilt, 2);
+
+			/*
+			 * Iterate through the string, push each element onto
+			 * ostack, and execute proc.
+			 */
+			for (i = 0, count = stilo_array_len_get(what); i <
+				 count; i++) {
+				el = *stilo_string_el_get(what, a_stilt, i);
+				stilo = stils_push(ostack, a_stilt);
+				stilo_integer_new(stilo, (cw_sint64_t)el);
+
+				stilo = stils_push(estack, a_stilt);
+				stilo_dup(stilo, proc);
+				stilt_loop(a_stilt);
+			}
+			break;
+		}
+
+		default:
+			stilt_error(a_stilt, STILTE_TYPECHECK);
+		}
+	}
+	xep_catch(_CW_STILX_EXIT) {
+		xep_handled();
+
+		/* Clean up tstack. */
+		stils_npop(tstack, a_stilt, 2);
+	}
+	xep_end();
 }
 
 void
