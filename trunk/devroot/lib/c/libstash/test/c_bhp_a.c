@@ -23,6 +23,7 @@
 int
 main()
 {
+  char buf[21];
   cw_bhpi_t * bhpi;
   cw_bhp_t * h;
   cw_sint32_t i, * a, * b, nums[100] = 
@@ -63,8 +64,8 @@ main()
   for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
   {
     _cw_assert(FALSE == bhp_del_min(h, (void **) &a, (void **) &b));
-    log_printf(cw_g_log, "i == %d, size == %d: %d, %d\n",
-	       i, bhp_get_size(h), *a, *b);
+    log_printf(cw_g_log, "i == %d, size == %s: %d, %d\n",
+	       i, log_print_uint64(bhp_get_size(h), 10, buf), *a, *b);
   }
 
   bhp_delete(h);
