@@ -14,6 +14,8 @@ void	nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 void	nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t
     *a_nx, cw_uint32_t a_offset, cw_uint32_t a_len);
 void	nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from);
+void	nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t
+    *a_thread);
 cw_uint32_t nxo_string_len_get(cw_nxo_t *a_nxo);
 void	nxo_string_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_uint8_t
     *r_el);

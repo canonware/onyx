@@ -17,6 +17,10 @@
 \index{nxo_string@\classname{nxo\_string}{}}
 
 The \classname{nxo\_string} class is a subclass of the \classname{nxo} class.
+Strings are not `{\bs}0'-terminated, mainly since substrings are references to
+other strings, and the termination character wouldn't be consistently useful.
+\cfunc{nxo\_string\_cstring}{} is useful for creating `{\bs}0'-terminated copies
+of strings for situations where other C functions expect terminated strings.
 
 \subsubsection{API}
 \begin{capi}
@@ -87,6 +91,30 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 	\item[Description: ]
 		Copy the contents of \cvar{a\_from} to \cvar{a\_to}.  The length
 		of \cvar{a\_to} must be at least that of \cvar{a\_from}.
+	\end{capilist}
+\label{nxo_string_cstring}
+\index{nxo_string_cstring@\cfunc{nxo\_string\_cstring}{}}
+\citem{\cfunc[void]{nxo\_string\_cstring}{cw\_nxo\_t *a\_to, cw\_nxo\_t
+*a\_from, cw\_nxo\_t *a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_to: ]
+			Pointer to an \classname{nxo}.
+		\item[a\_from: ]
+			Pointer to a string \classname{nxo}.
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Create a copy of \cvar{a\_from}, but append a `{\bs}0' character
+		to make it usable in calls to typical C functions that expect a
+		terminated string.
 	\end{capilist}
 \label{nxo_string_len_get}
 \index{nxo_string_len_get@\cfunc{nxo\_string\_len\_get}{}}

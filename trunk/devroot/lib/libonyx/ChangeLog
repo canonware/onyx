@@ -1,3 +1,7 @@
+2001-09-16  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_string.c (nxo_string_cstring): Add.
+
 2001-09-15  Jason Evans  <jasone@canonware.com>
 
 	* src/nxo_thread.c (nxo_threade_nxn): Remove.

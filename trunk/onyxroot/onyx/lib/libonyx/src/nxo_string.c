@@ -215,6 +215,23 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 #endif
 }
 
+void
+nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
+{
+	cw_uint32_t	from_len;
+
+	/*
+	 * Create a copy of a_from, but with a trailing '\0' so that it can be
+	 * used in calls to standard C functions.
+	 */
+	from_len = nxo_string_len_get(a_from);
+	nxo_string_new(a_to, nxo_thread_nx_get(a_thread), FALSE, from_len + 1);
+	nxo_string_lock(a_from);
+	nxo_string_set(a_to, 0, nxo_string_get(a_from), from_len);
+	nxo_string_el_set(a_to, '\0', from_len);
+	nxo_string_unlock(a_from);
+}
+
 cw_uint32_t
 nxo_string_len_get(cw_nxo_t *a_nxo)
 {
