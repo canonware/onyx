@@ -746,7 +746,7 @@ sockb_p_entry_func(void * a_arg)
     /* Copy the master sets of descriptors we care about to the sets that are
      * passed into select(). */
 #ifndef FD_COPY
-#  define FD_COPY(a, b) bcopy((a)a, (b), sizeof(*(a)))
+#  define FD_COPY(a, b) bcopy((a), (b), sizeof(*(a)))
 #endif
     
 /*  #ifdef _CW_OS_FREEBSD */
