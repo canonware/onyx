@@ -104,8 +104,6 @@ main(int argc, char **argv)
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
-
 	/* Create a buf with a known pattern of data in it. */
 	buf_a = buf_new_r(NULL, cw_g_mem);
 

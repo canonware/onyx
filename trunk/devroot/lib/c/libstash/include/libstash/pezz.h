@@ -11,6 +11,7 @@
 
 #ifdef _LIBSTASH_DBG
 #define	_LIBSTASH_PEZZ_DBG
+/*  #define	_LIBSTASH_PEZZ_VERBOSE */
 #endif
 
 /* Pseudo-opaque type. */

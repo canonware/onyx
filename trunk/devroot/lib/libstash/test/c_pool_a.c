@@ -19,10 +19,6 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-
-	dbg_register(cw_g_dbg, "pool_error");
-/*  	dbg_register(cw_g_dbg, "pool_verbose"); */
-
 	/* pool_new(), pool_delete(), pool_buffer_size_get(). */
 	{
 		cw_pool_t	pool, *pool_p;

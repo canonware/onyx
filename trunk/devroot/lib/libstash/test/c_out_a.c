@@ -17,10 +17,7 @@ int
 main()
 {
 	libstash_init();
-	dbg_unregister(cw_g_dbg, "mem_error");
 	_cw_out_put("Test begin\n");
-
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 
 	/* out_new(), out_delete(). */
 	_cw_out_put("out_new(), out_delete()\n");

@@ -72,8 +72,6 @@ sizes:
 \libname{libstash} defines the following global variables, which can be used by
 the application:
 \begin{description}
-\item[cw\_g\_dbg: ] \classname{dbg} instance, used to control run-time aspects
-of various classes.
 \item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
 \item[cw\_g\_out: ] \classname{out} instance, default output context.
 \end{description}
@@ -110,8 +108,8 @@ defines the following exceptions:
 		\end{description}
 	\item[Description: ]
 		Initialize various global variables.  In particular, initialize
-		\cvar{cw\_g\_mem}, \cvar{cw\_g\_dbg}, and \cvar{cw\_g\_out}
-		(default output to file descriptor 1).
+		\cvar{cw\_g\_mem} and \cvar{cw\_g\_out} (default output to file
+                descriptor 1).
 	\end{description}
 \label{libstash_shutdown}
 \index{\cfunc{libstash\_shutdown}{}}
@@ -234,7 +232,6 @@ defines the following exceptions:
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/buf}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/ch}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/cnd}
-\input{@abs_srcdir@/lib/c/libstash/doc/latex/dbg}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/dch}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/mem}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/mq}

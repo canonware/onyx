@@ -1,5 +1,8 @@
 2001-02-27  Jason Evans  <jasone@canonware.com>
 
+	* : Remove the dbg class.  Convert
+	"{mem,pezz,pool}_{error,verbose}" flags to cpp definitions.
+
 	* src/thd.c (thd_l_init): Restart system calls interrupted by the
 	suspend/resume signal.
 

@@ -21,7 +21,6 @@ void	xep_l_init(void);
 void	xep_l_shutdown(void);
 
 /* Globals. */
-cw_dbg_t	*cw_g_dbg = NULL;
 cw_mem_t	*cw_g_mem = NULL;
 cw_out_t	*cw_g_out = NULL;
 #ifdef _LIBSTASH_MEM_DBG
@@ -39,40 +38,30 @@ libstash_init(void)
 
 	xep_begin();
 	xep_try {
-		cw_g_dbg = dbg_new(cw_g_mem);
-		try_stage = 1;
-#ifdef _LIBSTASH_DBG
-		dbg_register(cw_g_dbg, "mem_error");
-		dbg_register(cw_g_dbg, "pezz_error");
-		dbg_register(cw_g_dbg, "pool_error");
-#endif
 #ifdef _LIBSTASH_MEM_DBG
 		cw_g_mem_mem = mem_new(NULL, NULL);
-		try_stage = 2;
+		try_stage = 1;
 
 		cw_g_mem = mem_new(NULL, cw_g_mem_mem);
-		try_stage = 3;
+		try_stage = 2;
 #else
 		cw_g_mem = mem_new(NULL, NULL);
-		try_stage = 3;
+		try_stage = 2;
 #endif
 		cw_g_out = out_new(NULL, cw_g_mem);
 		out_default_fd_set(cw_g_out, 1);
-		try_stage = 4;
+		try_stage = 3;
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
-		case 3:
+		case 2:
 			mem_delete(cw_g_mem);
 			cw_g_mem = NULL;
-		case 2:
+		case 1:
 #ifdef _LIBSTASH_MEM_DBG
 			mem_delete(cw_g_mem_mem);
 			cw_g_mem_mem = NULL;
 #endif
-		case 1:
-			dbg_delete(cw_g_dbg);
-			cw_g_dbg = NULL;
 		case 0:
 			break;
 		default:
@@ -96,9 +85,6 @@ libstash_shutdown(void)
 	mem_delete(cw_g_mem_mem);
 	cw_g_mem_mem = NULL;
 #endif
-
-	dbg_delete(cw_g_dbg);
-	cw_g_dbg = NULL;
 
 	xep_l_shutdown();
 	thd_l_shutdown();

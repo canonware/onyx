@@ -19,9 +19,6 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-	dbg_register(cw_g_dbg, "pezz_error");
-/*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
-
 	/* pezz_new(), pezz_delete(), pezz_buffer_size_get(). */
 	{
 		cw_pezz_t	pezz, *pezz_p;

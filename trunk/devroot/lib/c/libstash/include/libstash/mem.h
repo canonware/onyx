@@ -11,6 +11,7 @@
 
 #ifdef _LIBSTASH_DBG
 #define	_LIBSTASH_MEM_DBG
+/*  #define	_LIBSTASH_MEM_VERBOSE */
 #endif
 
 struct cw_mem_s {

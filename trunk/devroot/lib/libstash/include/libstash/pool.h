@@ -11,6 +11,7 @@
 
 #ifdef _LIBSTASH_DBG
 #define	_LIBSTASH_POOL_DBG
+/*  #define	_LIBSTASH_POOL_VERBOSE */
 #endif
 
 /* Pseudo-opaque type. */

@@ -59,12 +59,12 @@ socks_delete(cw_socks_t *a_socks)
 
 		/* Shut the port down. */
 		error = close(a_socks->sockfd);
+#ifdef _LIBSOCK_CONFESS
 		if (error) {
-			if (dbg_is_registered(cw_g_dbg, "socks_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in close(): [s]\n", strerror(error));
-			}
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in close(): [s]\n", strerror(error));
 		}
+#endif
 	}
 #ifdef _LIBSOCK_DBG
 	a_socks->magic = 0;
@@ -88,10 +88,10 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	/* Open a TCP socket stream. */
 	a_socks->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (a_socks->sockfd < 0) {
-		if (dbg_is_registered(cw_g_dbg, "socks_error")) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error in socket(): [s]\n", strerror(errno));
-		}
+#ifdef _LIBSOCK_CONFESS
+		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Error in socket(): [s]\n", strerror(errno));
+#endif
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -107,7 +107,8 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	}
 
 	/* Bind the socket's local address. */
-	if (dbg_is_registered(cw_g_dbg, "socks_verbose")) {
+#ifdef _LIBSOCK_CONFESS
+	{
 		cw_uint32_t	t_host_ip = ntohl(a_mask);
 
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
@@ -115,6 +116,7 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 		    (t_host_ip >> 16) & 0xff, (t_host_ip >> 8) & 0xff, t_host_ip
 		    & 0xff);
 	}
+#endif
 
 	memset(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -123,10 +125,10 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 
 	if (bind(a_socks->sockfd, (struct sockaddr *)&server_addr,
 	    sizeof(server_addr)) == -1) {
-		if (dbg_is_registered(cw_g_dbg, "socks_error")) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error in bind(): [s]\n", strerror(errno));
-		}
+#ifdef _LIBSOCK_CONFESS
+		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Error in bind(): [s]\n", strerror(errno));
+#endif
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -137,11 +139,10 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 		/* What port number did the OS choose? */
 		if (getsockname(a_socks->sockfd, (struct sockaddr
 		    *)&server_addr, &server_addr_size)) {
-			if (dbg_is_registered(cw_g_dbg, "socks_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in getsockname(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in getsockname(): [s]\n", strerror(errno));
+#endif
 			retval = TRUE;
 			goto RETURN;
 		}
@@ -152,10 +153,10 @@ socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int *r_port)
 	 * bits are heeded.
 	 */
 	if (listen(a_socks->sockfd, 511) == -1) {
-		if (dbg_is_registered(cw_g_dbg, "socks_error")) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error in listen(): [s]\n", strerror(errno));
-		}
+#ifdef _LIBSOCK_CONFESS
+		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Error in listen(): [s]\n", strerror(errno));
+#endif
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -201,10 +202,10 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 
 	nready = poll(&pfd, 1, timeout);
 	if (nready == -1) {
-		if (dbg_is_registered(cw_g_dbg, "socks_error")) {
+#ifdef _LIBSOCK_CONFESS
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "Error in poll(): [s]\n", strerror(errno));
-		}
+#endif
 		retval = NULL;
 		goto RETURN;
 	}
@@ -219,11 +220,10 @@ socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout, cw_sock_t
 		    *)&client_addr, &sockaddr_struct_size);
 
 		if (sockfd < 0) {
-			if (dbg_is_registered(cw_g_dbg, "socks_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in accept(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in accept(): [s]\n", strerror(errno));
+#endif
 			retval = NULL;
 			goto RETURN;
 		}

@@ -32,30 +32,19 @@ do_mem(void)
 	_cw_free(p);
 }
 
-void
-do_dbg(void)
-{
-	dbg_register(cw_g_dbg, "foo");
-	dbg_unregister(cw_g_dbg, "foo");
-	dbg_is_registered(cw_g_dbg, "foo");
-}
-
 int
 main()
 {
 	_cw_out_put("Test begin\n");
 	do_mem();
-	do_dbg();
 
 	_cw_out_put("libstash_init()\n");
 	libstash_init();
 	do_mem();
-	do_dbg();
 
 	_cw_out_put("libstash_shutdown()\n");
 	libstash_shutdown();
 	do_mem();
-	do_dbg();
 
 	_cw_out_put("Test end\n");
 	return 0;

@@ -412,11 +412,6 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 		} else
 			c = a_res->str[i];
 
-		if (dbg_is_registered(cw_g_dbg, "res_state")) {
-			_cw_out_put("res_parse_res(): State == [i], "
-			    "Input == \'[c]\'\n",
-			    state, c);
-		}
 		switch (state) {
 			/* Starting state. */
 		case _LIBSTASH_RES_STATE_START:
@@ -1062,10 +1057,6 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 
 	strcpy(temp_val, a_val);
 
-	if (dbg_is_registered(cw_g_dbg, "res_state")) {
-		_cw_out_put("res_res_merge(): Merging name == :[s]:, "
-		    "value == :[s]:\n", a_name, a_val);
-	}
 	/* Insert the resource into the hash table. */
 	if (dch_search(&a_res->hash, (void *)temp_name, NULL) == FALSE) {
 		char	*old_name, *old_val;

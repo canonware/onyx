@@ -7,8 +7,7 @@
  *
  * Version: <Version>
  *
- * Simple program that pipes input from stdin to a TCP socket, and pipes the
- * result to stdout.
+ * Like cat, but either stdin or stdout is instead a TCP socket.
  *
  ******************************************************************************/
 
@@ -45,6 +44,7 @@ const char	*basename(const char *a_str);
 
 /* Global. */
 const char	*g_progname;
+cw_uint32_t	g_verbosity = 1; /* 0: silent, 1: error, 2: verbose */
 cw_out_t	*log_out = NULL;
 
 int
@@ -72,8 +72,6 @@ main(int argc, char **argv)
 
 	g_progname = basename(argv[0]);
 
-	dbg_register(cw_g_dbg, "ncat_error");
-
 	while ((c = getopt(argc, argv, "hVvql:f:r:p:i:t:")) != -1) {
 		switch (c) {
 		case 'h':
@@ -83,21 +81,13 @@ main(int argc, char **argv)
 			version();
 			goto RETURN;
 		case 'v':
-			if (opt_verbose) {
-				dbg_register(cw_g_dbg, "libsock_verbose");
-				dbg_register(cw_g_dbg, "socks_verbose");
-				dbg_register(cw_g_dbg, "libsock_error");
-				dbg_register(cw_g_dbg, "socks_error");
-				dbg_register(cw_g_dbg, "sock_error");
-			} else {
-				opt_verbose = TRUE;
-				dbg_register(cw_g_dbg, "ncat_verbose");
-			}
+			opt_verbose = TRUE;
+			g_verbosity = 2;
 
 			break;
 		case 'q':
 			opt_quiet = TRUE;
-			dbg_unregister(cw_g_dbg, "ncat_error");
+			g_verbosity = 0;
 
 			break;
 		case 'l':
@@ -238,7 +228,7 @@ main(int argc, char **argv)
 		fd = open(opt_log, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
 		if (fd == -1) {
-			if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
+			if (g_verbosity == 2) {
 				_cw_out_put("[s]: Unable to open log file"
 				    " \"[s]\"\n", g_progname, opt_log);
 			}
@@ -247,7 +237,7 @@ main(int argc, char **argv)
 		}
 		out_default_fd_set(log_out, fd);
 	}
-	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
+	if (g_verbosity == 2)
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
 	libsock_init(16, 4096, 4);
 
@@ -260,7 +250,7 @@ main(int argc, char **argv)
 	}
 
 	if (sock == NULL) {
-		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
+		if (g_verbosity > 0) {
 			if (opt_client) {
 				_cw_out_put("[s]: Connection failure or "
 				    "timeout\n", g_progname);
@@ -434,7 +424,7 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 
         error = sock_connect(retval, a_rhost, a_rport, a_timeout);
 	if (error == -1) {
-		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
+		if (g_verbosity > 0) {
 			_cw_out_put("[s]: Error connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
 		}
@@ -442,14 +432,14 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 
 		retval = NULL;
 	} else if (error == 1) {
-		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
+		if (g_verbosity > 0) {
 			_cw_out_put("[s]: Timeout connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
 		}
 		sock_delete(retval);
 		retval = NULL;
 	}
-	if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
+	if (g_verbosity == 2) {
 		_cw_out_put("[s]: Connected to [s]:[i]\n", g_progname, a_rhost,
 		    a_rport);
 	}
@@ -476,7 +466,7 @@ server_setup(int a_port, cw_uint32_t a_ip, struct timespec *a_timeout)
 		 * port we got, since without this info, running in server mode
 		 * is rather useless.
 		 */
-		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
+		if (g_verbosity > 0) {
 			_cw_out_put("[s]: Listening on port [i]\n", g_progname,
 			    port);
 		}
@@ -488,7 +478,7 @@ server_setup(int a_port, cw_uint32_t a_ip, struct timespec *a_timeout)
 		retval = NULL;
 		goto RETURN;
 	}
-	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
+	if (g_verbosity == 2)
 		_cw_out_put("[s]: Connection established\n", g_progname);
 	RETURN:
 	socks_delete(socks);
@@ -746,8 +736,8 @@ usage(void)
 	_cw_out_put("[s]: Usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
-	    "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -r [[<rhost>:]<rport>\n"
-	    "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] [[-i <ip>] -p <port>\n"
+	    "    [s] [[-v | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -r [[<rhost>:]<rport>\n"
+	    "    [s] [[-v | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] [[-i <ip>] -p <port>\n"
 	    "\n"
 	    "    Option               | Description\n"
 	    "    ---------------------+-----------------------------------------------------\n"

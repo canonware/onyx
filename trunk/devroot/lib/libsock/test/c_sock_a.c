@@ -55,8 +55,6 @@ main()
 	cw_uint32_t	i;
 
 	libstash_init();
-/*  	dbg_register(cw_g_dbg, "sock_error"); */
-/*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
 	out_put(cw_g_out, "Test begin\n");
 	libsock_init(1024,	/* a_max_fds */
 	    4096,		/* a_bufc_size */
@@ -67,8 +65,7 @@ main()
 
 	socks = socks_new();
 	_cw_check_ptr(socks);
-/*  	if (socks_listen(socks, INADDR_LOOPBACK, &port)) */
-	if (socks_listen(socks, INADDR_ANY, &port)) {
+	if (socks_listen(socks, htonl(INADDR_LOOPBACK), &port)) {
 		out_put(cw_g_out, "Error listening on port [i]\n", port);
 		goto RETURN;
 	}

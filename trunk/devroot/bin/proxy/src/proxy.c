@@ -59,6 +59,7 @@ typedef struct {
 
 cw_bool_t	should_quit = FALSE;
 const char	*g_progname;
+cw_uint32_t	g_verbosity = 1; /* 0: silent, 1: errors, 2: verbose. */
 
 /* Function prototypes. */
 void	*sig_handler(void *a_arg);
@@ -99,13 +100,6 @@ main(int argc, char **argv)
 
 	libstash_init();
 	g_progname = basename(argv[0]);
-	dbg_register(cw_g_dbg, "prog_error");
-	dbg_register(cw_g_dbg, "libsock_error");
-	dbg_register(cw_g_dbg, "socks_error");
-	dbg_register(cw_g_dbg, "sock_error");
-/*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
-/*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
 
 	/* Parse command line. */
 	while ((c = getopt(argc, argv, "hVvqi:p:r:lf:d:"
@@ -122,20 +116,11 @@ main(int argc, char **argv)
 			break;
 		case 'v':
 			opt_verbose = TRUE;
-			dbg_register(cw_g_dbg, "prog_verbose");
-/*  			dbg_register(cw_g_dbg, "mem_verbose"); */
-			dbg_register(cw_g_dbg, "libsock_verbose");
-			dbg_register(cw_g_dbg, "socks_verbose");
-/*  			dbg_register(cw_g_dbg, "sock_sockopt"); */
+			g_verbosity = 2;
 			break;
 		case 'q':
 			opt_quiet = TRUE;
-			dbg_unregister(cw_g_dbg, "prog_error");
-			dbg_unregister(cw_g_dbg, "mem_error");
-			dbg_unregister(cw_g_dbg, "pezz_error");
-			dbg_unregister(cw_g_dbg, "libsock_error");
-			dbg_unregister(cw_g_dbg, "socks_error");
-			dbg_unregister(cw_g_dbg, "sock_error");
+			g_verbosity = 0;
 			break;
 		case 'i':
 			if (strcmp(optarg, "ANY") == 0) {
@@ -287,7 +272,7 @@ main(int argc, char **argv)
 		fd = (cw_sint32_t)open(logfile, O_RDWR | O_CREAT | O_TRUNC,
 		    0644);
 		if (fd == -1) {
-			if (dbg_is_registered(cw_g_dbg, "prog_error")) {
+			if (g_verbosity > 0) {
 				_cw_out_put_e("[s]: Error opening \"[s]\": "
 				    "[s]\n", g_progname, logfile,
 				    strerror(errno));
@@ -295,13 +280,13 @@ main(int argc, char **argv)
 		}
 		out_default_fd_set(cw_g_out, fd);
 	}
-	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
+	if (g_verbosity == 2)
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
 	libsock_init(1024, 2048, 4096);
 	socks = socks_new();
 	if (socks_listen(socks, opt_ip, &opt_port))
 		exit(1);
-	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
+	if (g_verbosity == 2) {
 		_cw_out_put_l("[s]: Listening on port [i]\n", g_progname,
 		    opt_port);
 	}
@@ -334,8 +319,7 @@ main(int argc, char **argv)
 				fd = (cw_sint32_t)open(logfile, O_RDWR | O_CREAT
 				    | O_TRUNC, 0644);
 				if (fd == -1) {
-					if (dbg_is_registered(cw_g_dbg,
-					    "prog_error")) {
+					if (g_verbosity > 0) {
 						_cw_out_put_e("[s]: Error "
 						    "opening \"[s]\": [s]\n",
 						    g_progname, logfile,
@@ -388,7 +372,7 @@ sig_handler(void *a_arg)
 	error = sigwait(&arg->hupset, &sig);
 	if (error || (sig != SIGHUP && sig != SIGINT))
 		_cw_error("sigwait() error");
-	if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
+	if (g_verbosity == 2)
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		    "[s]: Caught signal\n", g_progname);
 	should_quit = TRUE;
@@ -838,7 +822,7 @@ ipnat_set_connect(connection_t *conn)
 	natl.nl_inport = here.sin_port;
 	natl.nl_flags = IPN_TCP;
 	natlp = &natl;
-	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
+	if (g_verbosity == 2) {
 		_cw_out_put("[s]: natlookup  out: [s],[i]\n", g_progname,
 		    inet_ntoa(natl.nl_outip), ntohs(natl.nl_outport));
 		_cw_out_put("[s]: natlookup   in: [s],[i]\n", g_progname,
@@ -853,7 +837,7 @@ ipnat_set_connect(connection_t *conn)
 		goto RETURN;
 	}
 	close(fd);
-	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
+	if (g_verbosity == 2) {
 		_cw_out_put("[s]: natlookup real: [s],[i]\n", g_progname,
 		    inet_ntoa(natl.nl_realip), ntohs(natl.nl_realport));
 	}

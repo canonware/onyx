@@ -69,14 +69,6 @@ main(int argc, char **argv, char **envp)
 	    "product print (, version ) print version print (.\n) print flush";
 
 	libstash_init();
-#ifdef _LIBSTIL_CONFESS
-	/*
-	 * Don't print memory leakage information, since objects are not
-	 * necessarily freed in order to make post-mortem debugging simpler.
-	 */
-	dbg_unregister(cw_g_dbg, "mem_error");
-	dbg_unregister(cw_g_dbg, "pool_error");
-#endif
 #ifdef _STIL_SIGHANDLER
 	/*
 	 * Set the per-thread signal masks such that only one thread will catch

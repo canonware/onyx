@@ -49,12 +49,6 @@ main(int argc, char **argv)
 	memset(sock_vec, 0, _LIBSOCK_SUCK_MAX_CONNS * sizeof(cw_sock_t *));
 
 	libstash_init();
-	dbg_register(cw_g_dbg, "mem_error");
-	dbg_register(cw_g_dbg, "prog_error");
-	dbg_register(cw_g_dbg, "libsock_error");
-/*  	dbg_register(cw_g_dbg, "libsock_verbose"); */
-	dbg_register(cw_g_dbg, "socks_error");
-	dbg_register(cw_g_dbg, "sock_error");
 
 	/* Parse command line. */
 	while ((c = getopt(argc, argv, "hVb:p:")) != -1) {

@@ -20,8 +20,6 @@ main(int argc, char **argv)
 	char		*res_file, *dump_file;
 
 	libstash_init();
-	dbg_register(cw_g_dbg, "res_error");
-/*    dbg_register(cw_g_dbg, "res_state"); */
 
 	_cw_assert(argc == 3);
 	res_file = argv[1];

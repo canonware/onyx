@@ -152,7 +152,6 @@ void	libstash_shutdown(void);
  * Global variables.
  */
 extern cw_mem_t	*cw_g_mem;
-extern cw_dbg_t	*cw_g_dbg;
 extern cw_out_t	*cw_g_out;
 
 /*

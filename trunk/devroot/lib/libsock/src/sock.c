@@ -217,11 +217,10 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	if (a_sock->in_progress == FALSE) {
 		a_sock->sockfd = socket(AF_INET, SOCK_STREAM, 0);
 		if (a_sock->sockfd < 0) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in socket(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in socket(): [s]\n", strerror(errno));
+#endif
 			retval = -1;
 			goto RETURN;
 		}
@@ -233,12 +232,10 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 		/* Figure out the server's IP address. */
 		if (libsock_l_host_ip_get(a_server_host, &server_ip)) {
 			if (close(a_sock->sockfd)) {
-				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-					out_put_e(cw_g_out, NULL, 0,
-					    __FUNCTION__,
-					    "Error in close(): [s]\n",
-					    strerror(errno));
-				}
+#ifdef _LIBSOCK_CONFESS
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "Error in close(): [s]\n", strerror(errno));
+#endif
 			}
 			a_sock->sockfd = -1;
 			retval = -1;
@@ -277,12 +274,10 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 			}
 
 			if (poll(&pfd, 1, timeout) < 0) {
-				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-					out_put_e(cw_g_out, NULL, 0,
-					    __FUNCTION__,
-					    "Error in poll(): [s]\n",
-					    strerror(errno));
-				}
+#ifdef _LIBSOCK_CONFESS
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "Error in poll(): [s]\n", strerror(errno));
+#endif
 				a_sock->sockfd = -1;
 				retval = -1;
 				goto RETURN;
@@ -300,31 +295,23 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 					    SOL_SOCKET, SO_ERROR, (void
 					    *)&error, &len);
 					if (error < 0) {
-						if (dbg_is_registered(cw_g_dbg,
-						    "sock_error")) {
-							out_put_e(cw_g_out,
-							    NULL, 0,
-							    __FUNCTION__,
-							    "Error in "
-							    "getsockopt():"
-							    " [s]\n",
-							    strerror(errno));
-						}
+#ifdef _LIBSOCK_CONFESS
+						out_put_e(cw_g_out, NULL, 0,
+						    __FUNCTION__, "Error in "
+						    "getsockopt(): [s]\n",
+						    strerror(errno));
+#endif
 						a_sock->sockfd = -1;
 						retval = -1;
 						goto RETURN;
 					} else if (error > 0) {
-						if (dbg_is_registered(cw_g_dbg,
-						    "sock_error")) {
-							out_put_e(cw_g_out,
-							    NULL, 0,
-							    __FUNCTION__,
-							    "Error in "
-							    "getsockopt() due "
-							    "to connect(): "
-							    "[s]\n",
-							    strerror(error));
-						}
+#ifdef _LIBSOCK_CONFESS
+						out_put_e(cw_g_out, NULL, 0,
+						    __FUNCTION__, "Error in "
+						    "getsockopt() due to "
+						    "connect(): [s]\n",
+						    strerror(error));
+#endif
 						a_sock->sockfd = -1;
 						retval = -1;
 						goto RETURN;
@@ -332,29 +319,24 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 				}
 			} else {
 				/* Timed out. */
-				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-					out_put_e(cw_g_out, NULL, 0,
-					    __FUNCTION__,
-					    "poll() timeout.  Connection "
-					    "failed\n");
-				}
+#ifdef _LIBSOCK_CONFESS
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "poll() timeout.  Connection failed\n");
+#endif
 				a_sock->in_progress = TRUE;
 				retval = 1;
 				goto RETURN;
 			}
 		} else {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in connect(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in connect(): [s]\n", strerror(errno));
+#endif
 			if (close(a_sock->sockfd) == -1) {
-				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-					out_put_e(cw_g_out, NULL, 0,
-					    __FUNCTION__,
-					    "Error in close(): [s]\n",
-					    strerror(errno));
-				}
+#ifdef _LIBSOCK_CONFESS
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "Error in close(): [s]\n",strerror(errno));
+#endif
 			}
 			a_sock->sockfd = -1;
 			retval = -1;
@@ -369,11 +351,10 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 		name_size = sizeof(name);
 		if (getsockname(a_sock->sockfd, (struct sockaddr *)&name,
 		    &name_size) < 0) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in getsockname(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in getsockname(): [s]\n", strerror(errno));
+#endif
 			retval = -1;
 			goto RETURN;
 		} else
@@ -444,12 +425,11 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 			name_size = sizeof(name);
 			if (getsockname(a_sock->sockfd, (struct sockaddr
 			    *)&name, &name_size) < 0) {
-				if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-					out_put_e(cw_g_out, NULL, 0,
-					    __FUNCTION__,
-					    "Error in getsockname(): [s]\n",
-					    strerror(errno));
-				}
+#ifdef _LIBSOCK_CONFESS
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "Error in getsockname(): [s]\n",
+				    strerror(errno));
+#endif
 				retval = TRUE;
 				goto RETURN;
 			} else {
@@ -870,9 +850,9 @@ sock_l_out_data_put_back(cw_sock_t *a_sock, cw_buf_t *a_buf)
 			buf_buf_catenate(a_buf, &a_sock->out_buf, FALSE);
 		}
 		xep_catch(_CW_STASHX_OOM) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error"))
-				_cw_out_put_e("Memory allocation error; "
-				    "yielding\n");
+#ifdef _LIBSOCK_CONFESS
+			_cw_out_put_e("Memory allocation error; yielding\n");
+#endif
 			thd_yield();
 			xep_retry();
 		}
@@ -883,8 +863,9 @@ sock_l_out_data_put_back(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		buf_buf_catenate(&a_sock->out_buf, a_buf, FALSE);
 	}
 	xep_catch(_CW_STASHX_OOM) {
-		if (dbg_is_registered(cw_g_dbg, "sock_error"))
-			_cw_out_put_e("Memory allocation error; yielding\n");
+#ifdef _LIBSOCK_CONFESS
+		_cw_out_put_e("Memory allocation error; yielding\n");
+#endif
 		thd_yield();
 		xep_retry();
 	}
@@ -919,8 +900,9 @@ sock_l_in_data_put(cw_sock_t *a_sock, cw_buf_t *a_buf)
 		buf_buf_catenate(&a_sock->in_buf, a_buf, FALSE);
 	}
 	xep_catch(_CW_STASHX_OOM) {
-		if (dbg_is_registered(cw_g_dbg, "sock_error"))
-			_cw_out_put_e("Memory allocation error; yielding\n");
+#ifdef _LIBSOCK_CONFESS
+		_cw_out_put_e("Memory allocation error; yielding\n");
+#endif
 		thd_yield();
 		xep_retry();
 	}
@@ -997,19 +979,19 @@ static cw_bool_t
 sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 {
 	cw_bool_t	retval;
-	int		val, len;
+	int		val;
 	struct linger	linger_struct;
 
 	if (a_init) {
 		/* Print out all kinds of socket info. */
-		if (dbg_is_registered(cw_g_dbg, "sock_sockopt")) {
-			/*
-			 * Define a macro to do the drudgery of getting an
-			 * option and printing it, since we're doing this quite
-			 * a few times.
-			 */
+#ifdef _LIBSOCK_CONFESS
+		/*
+		 * Define a macro to do the drudgery of getting an option and
+		 * printing it, since we're doing this quite a few times.
+		 */
 #define _CW_SOCK_GETSOCKOPT(a)						\
 	do {								\
+		int	len;						\
 		len = sizeof(val);					\
 		if (getsockopt(a_sock->sockfd, SOL_SOCKET, (a), (void	\
 		    *) &val, &len)) {					\
@@ -1024,29 +1006,29 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 		}							\
 	} while (0)
 
-			_CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
+		_CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
 #ifdef SO_REUSEPORT
-			_CW_SOCK_GETSOCKOPT(SO_REUSEPORT);
+		_CW_SOCK_GETSOCKOPT(SO_REUSEPORT);
 #endif
-			_CW_SOCK_GETSOCKOPT(SO_KEEPALIVE);
-			_CW_SOCK_GETSOCKOPT(SO_OOBINLINE);
-			_CW_SOCK_GETSOCKOPT(SO_SNDBUF);
-			_CW_SOCK_GETSOCKOPT(SO_RCVBUF);
+		_CW_SOCK_GETSOCKOPT(SO_KEEPALIVE);
+		_CW_SOCK_GETSOCKOPT(SO_OOBINLINE);
+		_CW_SOCK_GETSOCKOPT(SO_SNDBUF);
+		_CW_SOCK_GETSOCKOPT(SO_RCVBUF);
 #ifdef SO_SNDLOWAIT
-			_CW_SOCK_GETSOCKOPT(SO_SNDLOWAT);
+		_CW_SOCK_GETSOCKOPT(SO_SNDLOWAT);
 #endif
 #ifdef SO_RCVLOWAIT
-			_CW_SOCK_GETSOCKOPT(SO_RCVLOWAT);
+		_CW_SOCK_GETSOCKOPT(SO_RCVLOWAT);
 #endif
 #ifdef SO_SNDTIMEO
-			_CW_SOCK_GETSOCKOPT(SO_SNDTIMEO);
+		_CW_SOCK_GETSOCKOPT(SO_SNDTIMEO);
 #endif
 #ifdef SO_RCVTIMEO
-			_CW_SOCK_GETSOCKOPT(SO_RCVTIMEO);
+		_CW_SOCK_GETSOCKOPT(SO_RCVTIMEO);
 #endif
 
 #undef _CW_SOCK_GETSOCKOPT
-		}
+#endif
 		/*
 		 * Tell the socket to wait and try to flush buffered data before
 		 * closing at the end.
@@ -1057,20 +1039,23 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 		linger_struct.l_linger = 10;
 		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER, (void
 		    *)&linger_struct, sizeof(linger_struct))) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error for SO_LINGER in setsockopt(): "
-				    "[s]\n", strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error for SO_LINGER in setsockopt(): [s]\n",
+			    strerror(errno));
+#endif
 			retval = TRUE;
 			goto RETURN;
-		} else if (dbg_is_registered(cw_g_dbg, "sock_sockopt")) {
+		}
+#ifdef _LIBSOCK_CONFESS
+		else {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "SO_LINGER: [s], [i] second[s]\n",
 			    linger_struct.l_onoff ? "on" : "off",
 			    linger_struct.l_linger, linger_struct.l_linger != 1
 			    ? "s" : "");
 		}
+#endif
 #ifdef SO_SNDLOWAIT
 		/*
 		 * Set the socket to not buffer outgoing data without trying to
@@ -1079,26 +1064,31 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 		val = 1;
 		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT, (void
 		    *)&val, sizeof(val))) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error for SO_SNDLOWAT in setsockopt(): "
-				    "[s]\n", strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error for SO_SNDLOWAT in setsockopt(): [s]\n",
+			    strerror(errno));
+#endif
 			retval = TRUE;
 			goto RETURN;
-		} else if (dbg_is_registered(cw_g_dbg, "sock_sockopt")) {
+		}
+#ifdef _LIBSOCK_CONFESS
+		else {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "SO_SNDLOWAT: [d]\n", val);
 		}
+#endif
 #endif
 
 		/* Re-use the socket. */
 		val = 1;
 		if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_REUSEADDR, (void
 		    *)&val, sizeof(val)) < 0) {
+#ifdef _LIBSOCK_CONFESS
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "Error for SO_REUSEADDR in setsockopt(): [s]\n",
 			    strerror(errno));
+#endif
 			retval = TRUE;
 			goto RETURN;
 		}
@@ -1140,20 +1130,18 @@ sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init)
 	 */
 	val = fcntl(a_sock->sockfd, F_GETFL, 0);
 	if (val == -1) {
-		if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error for F_GETFL in fcntl(): [s]\n",
-			    strerror(errno));
-		}
+#ifdef _LIBSOCK_CONFESS
+		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Error for F_GETFL in fcntl(): [s]\n", strerror(errno));
+#endif
 		retval = TRUE;
 		goto RETURN;
 	}
 	if (fcntl(a_sock->sockfd, F_SETFL, val | O_NONBLOCK)) {
-		if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Error for F_SETFL in fcntl(): [s]\n",
-			    strerror(errno));
-		}
+#ifdef _LIBSOCK_CONFESS
+		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		    "Error for F_SETFL in fcntl(): [s]\n", strerror(errno));
+#endif
 		retval = TRUE;
 		goto RETURN;
 	}
@@ -1227,24 +1215,24 @@ sock_p_disconnect(cw_sock_t *a_sock)
 		 */
 		val = fcntl(a_sock->sockfd, F_GETFL, 0);
 		if (val == -1) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error for F_GETFL in fcntl(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error for F_GETFL in fcntl(): [s]\n",
+			    strerror(errno));
+#endif
 			retval = TRUE;
 		} else if (fcntl(a_sock->sockfd, F_SETFL, val & ~O_NONBLOCK)) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error for F_SETFL in fcntl(): [s]\n",
-				    strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error for F_SETFL in fcntl(): [s]\n",
+			    strerror(errno));
+#endif
 			retval = TRUE;
 		} else if (close(a_sock->sockfd)) {
-			if (dbg_is_registered(cw_g_dbg, "sock_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Error in close(): [s]\n", strerror(errno));
-			}
+#ifdef _LIBSOCK_CONFESS
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Error in close(): [s]\n", strerror(errno));
+#endif
 			retval = TRUE;
 		} else {
 			a_sock->is_connected = FALSE;

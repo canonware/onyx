@@ -87,9 +87,7 @@ pool_delete(cw_pool_t *a_pool)
 
 		num_addrs = dch_count(&a_pool->addr_hash);
 
-		if (dbg_is_registered(cw_g_dbg, "pool_verbose") ||
-		    (dbg_is_registered(cw_g_dbg, "pool_error") && (0 <
-		    num_addrs))) {
+		if (0 < num_addrs) {
 			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 			    "[i] leaked buffer[s] (buffer size [i] bytes)\n",
 			    num_addrs, num_addrs != 1 ? "s" : "",
@@ -98,14 +96,10 @@ pool_delete(cw_pool_t *a_pool)
 		for (i = 0; i < num_addrs; i++) {
 			dch_remove_iterate(&a_pool->addr_hash, &addr,
 			    (void **)&allocation, NULL);
-			if (dbg_is_registered(cw_g_dbg, "pool_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "0x[p] never freed (allocated at [s],"
-				    " line [i])\n", addr, ((NULL ==
-				    allocation->filename) ? "<?>" :
-				    allocation->filename),
-				    allocation->line_num);
-			}
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "0x[p] never freed (allocated at [s], line [i])\n",
+			    addr, ((NULL == allocation->filename) ? "<?>" :
+			    allocation->filename), allocation->line_num);
 			mem_free(a_pool->mem, allocation);
 		}
 		dch_delete(&a_pool->addr_hash);
@@ -179,28 +173,19 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 	}
 
 #ifdef _LIBSTASH_POOL_DBG
-	if (a_filename == NULL)
-		a_filename = "<?>";
-	if (retval == NULL) {
-		if (dbg_is_registered(cw_g_dbg, "pool_error")) {
-			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-			    "Memory allocation failed at [s], line [i]\n",
-			    a_filename, a_line_num);
-		}
-	} else {
+	{
 		cw_pool_item_t	*old_allocation;
+
+		if (a_filename == NULL)
+			a_filename = "<?>";
 
 		if (dch_search(&a_pool->addr_hash, retval, (void
 		    **)&old_allocation) == FALSE) {
-			if (dbg_is_registered(cw_g_dbg, "pool_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "0x[p] multiply-allocated "
-				    "(was at [s], line [i];"
-				    " now at [s], line [i])\n",
-				    retval, old_allocation->filename,
-				    old_allocation->line_num, a_filename,
-				    a_line_num);
-			}
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "0x[p] multiply-allocated (was at [s], line [i]; "
+			    "now at [s], line [i])\n", retval,
+			    old_allocation->filename, old_allocation->line_num,
+			    a_filename, a_line_num);
 		} else {
 			cw_pool_item_t		*allocation;
 			volatile cw_uint32_t	try_stage = 0;
@@ -217,15 +202,12 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 				allocation->filename = a_filename;
 				allocation->line_num = a_line_num;
 
-				if (dbg_is_registered(cw_g_dbg,
-				    "pool_verbose")) {
-					out_put_e(cw_g_out, NULL, 0,
-					    __FUNCTION__,
-					    "0x[p] ([i] B) <-- pool_get() at"
-					    " [s], line [i]\n", retval,
-					    a_pool->buffer_size, a_filename,
-					    a_line_num);
-				}
+#ifdef _LIBSTASH_POOL_VERBOSE
+				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+				    "0x[p] ([i] B) <-- pool_get() at [s], line "
+				    "[i]\n", retval, a_pool->buffer_size,
+				    a_filename, a_line_num);
+#endif
 
 				dch_insert(&a_pool->addr_hash, retval,
 				    allocation, NULL);
@@ -262,32 +244,29 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 	mtx_lock(&a_pool->lock);
 
 #ifdef _LIBSTASH_POOL_DBG
-	if (a_filename == NULL)
-		a_filename = "<?>";
 	{
 		cw_pool_item_t	*allocation;
 
+		if (a_filename == NULL)
+			a_filename = "<?>";
+
 		if (dch_remove(&a_pool->addr_hash, a_buffer, NULL, (void
 		    **)&allocation, NULL)) {
-			if (dbg_is_registered(cw_g_dbg, "pool_error")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "0x[p] not allocated, "
-				    "attempted to free at [s], line [i]\n",
-				    a_buffer, a_filename, a_line_num);
-			}
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "0x[p] not "
+			    "allocated, attempted to free at [s], line [i]\n",
+			    a_buffer, a_filename, a_line_num);
 			/*
 			 * Don't put the non-allocated object on the spares
 			 * stack.
 			 */
 			goto RETURN;
 		} else {
-			if (dbg_is_registered(cw_g_dbg, "pool_verbose")) {
-				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-				    "Freeing 0x[p] at [s], line [i], "
-				    "allocated at [s], line [i]\n",
-				    a_buffer, a_filename, a_line_num,
-				    allocation->filename, allocation->line_num);
-			}
+#ifdef _LIBSTASH_POOL_VERBOSE
+			out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+			    "Freeing 0x[p] at [s], line [i], allocated at [s], "
+			    "line [i]\n", a_buffer, a_filename, a_line_num,
+			    allocation->filename, allocation->line_num);
+#endif
 			memset(a_buffer, 0x5a, a_pool->buffer_size);
 			mem_free(a_pool->mem, allocation);
 		}

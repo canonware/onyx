@@ -30,8 +30,6 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
-
 	/* bufc_new(), bufc_delete(), bufc_buffer_set(), bufc_size_get(). */
 	{
 		cw_bufc_t	bufc_a, *bufc_b;

@@ -49,12 +49,6 @@ main(int argc, char **argv)
 	char		*opt_rhost = NULL;
 
 	libstash_init();
-	dbg_register(cw_g_dbg, "mem_error");
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
-	dbg_register(cw_g_dbg, "prog_error");
-/*  	dbg_register(cw_g_dbg, "libsock_verbose"); */
-	dbg_register(cw_g_dbg, "libsock_error");
-	dbg_register(cw_g_dbg, "sock_error");
 
 	/* Parse command line. */
 	while ((c = getopt(argc, argv, "hVn:b:c:r:")) != -1) {

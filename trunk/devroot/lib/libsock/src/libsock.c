@@ -372,11 +372,10 @@ libsock_l_wakeup(void)
 	if (sema_trywait(&g_libsock->pipe_sema) == FALSE) {
 		while (write(g_libsock->pipe_in, "X", 1) == -1) {
 			if (errno != EINTR) {
-				if (dbg_is_registered(cw_g_dbg,
-				    "libsock_error")) {
-					_cw_out_put_e("Error in write(): [s]\n",
-					    strerror(errno));
-				}
+#ifdef _LIBSOCK_CONFESS
+				_cw_out_put_e("Error in write(): [s]\n",
+				    strerror(errno));
+#endif
 				break;
 			}
 		}
@@ -438,7 +437,7 @@ libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 
 		host_entry = gethostbyname(a_host_str);
 		if (host_entry == NULL) {
-			if (dbg_is_registered(cw_g_dbg, "libsock_error")) {
+#ifdef _LIBSOCK_CONFESS
 #ifdef _CW_OS_SOLARIS
 				_cw_out_put_e("Error in gethostbyname(): [i]\n",
 				    h_errno);
@@ -448,7 +447,7 @@ libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 #endif
 				_cw_out_put_e("Host \"[s]\" isn't an IP address"
 				    " or a hostname\n", a_host_str);
-			}
+#endif
 			retval = TRUE;
 		} else {
 			struct in_addr	*addr_ptr;
@@ -472,13 +471,15 @@ libsock_l_host_ip_get(const char *a_host_str, cw_uint32_t *r_host_ip)
 		retval = FALSE;
 	}
 
-	if (dbg_is_registered(cw_g_dbg, "libsock_verbose")) {
+#ifdef _LIBSOCK_CONFESS
+	{
 		cw_uint32_t	t_host_ip = ntohl(*r_host_ip);
 
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		    "IP address: [i].[i].[i].[i]\n", t_host_ip >> 24, (t_host_ip
 		    >> 16) & 0xff, (t_host_ip >> 8) & 0xff, t_host_ip & 0xff);
 	}
+#endif
 	return retval;
 }
 
@@ -855,13 +856,8 @@ libsock_p_entry_func(void *a_arg)
 					if (errno != EINTR)
 						break;
 				}
-				if (bytes_read == -1) {
-					if (dbg_is_registered(cw_g_dbg,
-					    "libsock_error")) {
-						_cw_out_put_e("Error in read(): [s]\n",
-						    strerror(errno));
-					}
-				} else if (bytes_read > 0) {
+				_cw_assert(bytes_read == 0 || bytes_read == 1);
+				if (bytes_read > 0) {
 					/*
 					 * Set the semaphore to one.  This will
 					 * cause one, and only one byte to be
@@ -881,7 +877,6 @@ libsock_p_entry_func(void *a_arg)
 					 */
 					sema_post(&g_libsock->pipe_sema);
 				}
-				_cw_assert(bytes_read <= 1);
 			}
 			for (i = 1, j = 0; (j < num_ready) && (i < nfds); i++) {
 				sockfd = fds[i].fd;
@@ -1077,11 +1072,11 @@ libsock_p_entry_func(void *a_arg)
 						    == 0);
 					} else if (bytes_read == 0) {
 						/* readv() error. */
-						if (dbg_is_registered(cw_g_dbg,
-						    "libsock_verbose")) {
-							_cw_out_put_e("EOF in readv().  Closing sockfd [i]\n",
-							    sockfd);
-						}
+#ifdef _LIBSOCK_CONFESS
+						_cw_out_put_e("EOF in readv(). "
+						    " Closing sockfd [i]\n",
+						    sockfd);
+#endif
 						/*
 						 * Fill this hole, decrement i,
 						 * continue.
@@ -1120,11 +1115,11 @@ libsock_p_entry_func(void *a_arg)
 						continue;
 					} else {/* if (bytes_read == -1) */
 						/* readv() error. */
-						if (dbg_is_registered(cw_g_dbg,
-						    "libsock_error")) {
-							_cw_out_put_e("Error in readv(): [s]\n",
-							    strerror(errno));
-						}
+#ifdef _LIBSOCK_CONFESS
+						_cw_out_put_e("Error in "
+						    "readv(): [s]\n",
+						    strerror(errno));
+#endif
 					}
 				} else if (fds[i].revents & POLLHUP) {
 					const struct iovec	*iov;
@@ -1230,11 +1225,10 @@ libsock_p_entry_func(void *a_arg)
 					_cw_out_put("c");
 #endif
 
-					if (dbg_is_registered(cw_g_dbg,
-					    "libsock_verbose")) {
-						_cw_out_put_e("POLLHUP.  Closing sockfd [i]\n",
-						    sockfd);
-					}
+#ifdef _LIBSOCK_CONFESS
+					_cw_out_put_e("POLLHUP.  Closing sockfd"
+					    " [i]\n", sockfd);
+#endif
 					/*
 					 * Fill this hole, decrement i,
 					 * continue.
@@ -1337,13 +1331,13 @@ libsock_p_entry_func(void *a_arg)
 						buf_head_data_release(&tmp_buf,
 						    buf_size_get(&tmp_buf));
 
-						if (dbg_is_registered(cw_g_dbg,
-						    "libsock_verbose")) {
-							_cw_out_put_e("Error in writev(): [s]\n",
-							    strerror(errno));
-							_cw_out_put_e("Closing sockfd [i]\n",
-							    sockfd);
-						}
+#ifdef _LIBSOCK_CONFESS
+						_cw_out_put_e("Error in "
+						    "writev(): [s]\n",
+						    strerror(errno));
+						_cw_out_put_e("Closing sockfd "
+						    "[i]\n", sockfd);
+#endif
 						/*
 						 * Fill this hole, decrement i.
 						 */

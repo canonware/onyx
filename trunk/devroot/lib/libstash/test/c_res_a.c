@@ -48,8 +48,6 @@ main()
 	libstash_init();
 	_cw_out_put("Test begin\n");
 
-/*  	dbg_register(cw_g_dbg, "res_state"); */
-
 	res_new(&res, cw_g_mem);
 
 	_cw_out_put("Merging in a list...\n");

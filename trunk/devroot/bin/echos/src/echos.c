@@ -73,14 +73,6 @@ main(int argc, char **argv)
 	libstash_init();
 	libsock_init(64, 512, 0);
 
-	dbg_register(cw_g_dbg, "libsock_verbose");
-	dbg_register(cw_g_dbg, "libsock_error");
-	dbg_register(cw_g_dbg, "socks_verbose");
-	dbg_register(cw_g_dbg, "socks_error");
-	dbg_register(cw_g_dbg, "sock_verbose");
-	dbg_register(cw_g_dbg, "sock_error");
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
-
 	socks = socks_new();
 	if (socks_listen(socks, INADDR_ANY, &port)) {
 		_cw_out_put("[s]: Error listening on port [i]\n", argv[0],
