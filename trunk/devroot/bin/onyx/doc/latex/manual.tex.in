@@ -45,7 +45,7 @@ bindings.  Use this variable to explicitly set the key bindings to either
 \section{Language differences}
 If \binname{onyx} is being run interactively:
 \begin{itemize}
-\item{The stop operator in currenterror is redefined to recursively execute the
+\item{The name ``stop'' in currenterror is redefined to recursively execute the
 stdin file in a stopped context in order to keep the interpreter from exiting on
 error.  It is possible (though generally unlikely) for buffering of stdin to
 cause strange things to occur; any additional program execution after an error
@@ -54,9 +54,15 @@ is a result of this.}
 alias to the stop operator.  Thus, when an error occurs, when the user is ready
 to continue running after addressing any issues the error caused, resume can be
 called as a more intuitive name for resuming.}
-\item{The estackoverflow operator in errordict is redefined to call the quit
+\item{The name ``estackoverflow'' in errordict is redefined to call the quit
 operator in order to avoid infinite recursion in the error handling machinery.
 The need for this is a result of not exiting on error.}
 \item{The name ``promptstring'' is defined in systemdict; it takes no arguments
 and returns a string.  The return string is used as the interactive prompt.}
+\end{itemize}
+
+If \binname{onyx} is being run non-interactively:
+\begin{itemize}
+\item{The name ``stop'' in currenterror is redefined to call the die operator
+with an argument of 1.}
 \end{itemize}

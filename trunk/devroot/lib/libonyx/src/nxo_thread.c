@@ -93,7 +93,7 @@ static cw_uint32_t nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread,
 static void	nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     cw_nxo_threadp_t *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
-    cw_uint8_t *a_suffix, cw_uint8_t a_c);
+    cw_uint8_t *a_suffix, cw_sint32_t a_c);
 static void	nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
@@ -130,13 +130,41 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-	if (thread->state != THREADTS_START) {
-		/*
-		 * It's possible that the last token seen hasn't been accepted
-		 * yet.  Reset the internal state so that this won't screw
-		 * things up later.
-		 */
+	switch (thread->state) {
+	case THREADTS_START:
+		/* No problem. */
+		break;
+	case THREADTS_COMMENT:
+		/* No problem. */
 		nxoe_p_thread_reset(thread);
+		break;
+	case THREADTS_SLASH_CONT:
+	case THREADTS_STRING:
+	case THREADTS_STRING_NEWLINE_CONT:
+	case THREADTS_STRING_PROT_CONT:
+	case THREADTS_STRING_CRLF_CONT:
+	case THREADTS_STRING_HEX_CONT:
+	case THREADTS_STRING_HEX_FINISH: {
+		cw_nxoe_thread_t	*thread;
+
+		_cw_check_ptr(a_thread);
+		_cw_assert(a_thread->magic == _CW_NXO_MAGIC);
+
+		thread = (cw_nxoe_thread_t *)a_thread->o.nxoe;
+		_cw_assert(thread->nxoe.magic == _CW_NXOE_MAGIC);
+		_cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+		nxoe_p_thread_syntax_error(thread, a_threadp, 0, "`", "", -1);
+		break;
+	}
+	case THREADTS_INTEGER:
+	case THREADTS_INTEGER_RADIX:
+	case THREADTS_NAME:
+		/* Accept the name or integer. */
+		nxo_thread_flush(a_thread, a_threadp);
+		break;
+	default:
+		_cw_not_reached();
 	}
 
 #ifdef _CW_DBG
@@ -846,7 +874,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				nxo_thread_interpret(a_nxo, &threadp, buffer,
 				    nread);
 			}
-			nxo_thread_flush(a_nxo, &threadp);
+			/* Do not flush, so that syntax errors get caught. */
 			nxo_threadp_delete(&threadp, a_nxo);
 
 			nxo_stack_pop(&thread->estack);
@@ -1796,11 +1824,14 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
  * push it onto ostack.  This means that syntax errors cause two objects to be
  * pushed onto ostack rather than just the standard one, but if we don't do
  * this, the invalid code gets lost forever.
+ *
+ * If a_c is -1, no current character is inserted into the error string.  This
+ * is necessary for syntax errors at EOF.
  */
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
     *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix, cw_uint8_t
-    *a_suffix, cw_uint8_t a_c)
+    *a_suffix, cw_sint32_t a_c)
 {
 	cw_nxo_t	*nxo, *currenterror, *key, *val;
 	cw_uint32_t	line, column;
@@ -1808,7 +1839,7 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 	nxo = nxo_stack_push(&a_thread->ostack);
 
 	nxo_string_new(nxo, a_thread->nx, a_thread->locking, strlen(a_prefix) +
-	    a_thread->index + strlen(a_suffix) + 1);
+	    a_thread->index + strlen(a_suffix) + ((a_c >= 0) ? 1 : 0));
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
 	/* Prefix. */
@@ -1822,9 +1853,13 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 	nxo_string_set(nxo, strlen(a_prefix) + a_thread->index, a_suffix,
 	    strlen(a_suffix));
 
-	/* Current character. */
-	nxo_string_set(nxo, strlen(a_prefix) + a_thread->index +
-	    strlen(a_suffix), &a_c, 1);
+	/* Current character, if any. */
+	if (a_c >= 0) {
+		cw_uint8_t	c = (cw_uint8_t)a_c;
+
+		nxo_string_set(nxo, strlen(a_prefix) + a_thread->index +
+		    strlen(a_suffix), &c, 1);
+	}
 
 	nxoe_p_thread_reset(a_thread);
 
