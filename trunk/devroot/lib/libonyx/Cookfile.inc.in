@@ -127,13 +127,13 @@ libonyx_libs_tests : [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
 
 libonyx_libs_check : libonyx_libs_tests
 {
-  [VERIFY] -s [srcdir] -o [objdir]
+  @VERIFY@ -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
 }
 
 libonyx_libs_check_update : libonyx_libs_tests
 {
-  [VERIFY] -u -s [srcdir] -o [objdir]
+  @VERIFY@ -u -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.c [objdir]/%0% [LIBONYX_CTESTS]];
 }
 

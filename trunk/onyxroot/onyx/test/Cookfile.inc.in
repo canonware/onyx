@@ -11,10 +11,6 @@
  *
  ******************************************************************************/
 
-/* Paths to programs. */
-DIFF = @DIFF@;
-VERIFY = @VERIFY@;
-
 /*
  * Targets.
  */
@@ -40,11 +36,11 @@ tests_distclean :
        [objdir]/%0test/%1.o_a
 #if [matches elf [abi]]
        [split " "
-              [prepost [prepost [RPATH] "/lib/" [abs_objdir]]
+              [prepost [prepost @RPATH@ "/lib/" [abs_objdir]]
                        "/lib"
                        @libs@]]
 #endif
-       [LDFLAGS] [subst lib -l [filter_out libedit @libs@]] [EXTRALIBS];
+       [LDFLAGS] [subst lib -l [filter_out libedit @libs@]] @EXTRALIBS@;
 }
 
 [objdir]/%0test/%1.o_a : [srcdir]/%0test/%1.c

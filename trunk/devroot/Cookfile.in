@@ -48,7 +48,6 @@ S_CFLAGS = [CFLAGS] -fPIC -DPIC
 if [not [defined LDFLAGS]] then
   LDFLAGS = [split " " [strip "@LDFLAGS@"]];
 EXTRALIBS = @LIBS@;
-RPATH = @RPATH@;
 
 /* Documentation. */
 #include-cooked [objdir]/doc/Cookfile.inc

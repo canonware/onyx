@@ -72,11 +72,11 @@ slate_bins_install : [SLATE]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
 #if [matches elf [abi]]
-       [RPATH][PREFIX]/lib
+       @RPATH@[PREFIX]/lib
 #endif
 #endif
        [LDFLAGS] -lonyx
-       [EXTRALIBS];
+       @EXTRALIBS@;
   chmod 0755 [PREFIX]/bin/slate;
 
   @INSTALL@ -d [PREFIX]/man/man1;
@@ -121,9 +121,9 @@ slate_bins_distclean :
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
 #if @enable_libonyx@
 #if [matches elf [abi]]
-       [RPATH][abs_objdir]/lib/libonyx/lib
+       @RPATH@[abs_objdir]/lib/libonyx/lib
 #endif
 #endif
        [LDFLAGS] -lonyx
-       [EXTRALIBS];
+       @EXTRALIBS@;
 }

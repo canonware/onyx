@@ -183,7 +183,7 @@ onyx_bins_tests : [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [ONYX_OTESTS]];
 onyx_bins_check : onyx_bins_tests
 {
 #if [count [ONYX_OTESTS]]
-  [VERIFY] -s [srcdir] -o [objdir]
+  @VERIFY@ -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [ONYX_OTESTS]];
 #endif
 }
@@ -191,7 +191,7 @@ onyx_bins_check : onyx_bins_tests
 onyx_bins_check_update : onyx_bins_tests
 {
 #if [count [ONYX_OTESTS]]
-  [VERIFY] -u -s [srcdir] -o [objdir]
+  @VERIFY@ -u -s [srcdir] -o [objdir]
            [fromto [srcdir]/%0%.nx.in [objdir]/%0%.nx [ONYX_OTESTS]];
 #endif
 }
@@ -210,11 +210,11 @@ onyx_bins_install : [ONYX]
 #endif
 #if @enable_libonyx@
 #if [matches elf [abi]]
-       [RPATH][PREFIX]/lib
+       @RPATH@[PREFIX]/lib
 #endif
 #endif
        [LDFLAGS] -lonyx
-       [EXTRALIBS];
+       @EXTRALIBS@;
   chmod 0755 [PREFIX]/bin/onyx;
 
   @INSTALL@ -d [PREFIX]/man/man1;
@@ -271,9 +271,9 @@ onyx_bins_distclean :
 #endif
 #if @enable_libonyx@
 #if [matches elf [abi]]
-       [RPATH][abs_objdir]/lib/libonyx/lib
+       @RPATH@[abs_objdir]/lib/libonyx/lib
 #endif
 #endif
        [LDFLAGS] -lonyx
-       [EXTRALIBS];
+       @EXTRALIBS@;
 }
