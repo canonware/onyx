@@ -36,4 +36,4 @@ struct cw_stiloe_number_s {
 
 cw_stiloe_number_t *stiloe_number_new(cw_stiloe_number_t *a_stiloe_number);
 
-void    stiloe_number_delete(cw_stiloe_number_t *a_stiloe_number);
+void	stiloe_number_delete(cw_stiloe_number_t *a_stiloe_number);

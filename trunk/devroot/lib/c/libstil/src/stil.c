@@ -49,34 +49,34 @@ stil_new(cw_stil_t *a_stil)
 {
 	cw_stil_t *retval;
 
-	if (NULL != a_stil) {
+	if (a_stil != NULL) {
 		retval = a_stil;
 		bzero(retval, sizeof(cw_stil_t));
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_stil_t *)_cw_malloc(sizeof(cw_stil_t));
-		if (NULL == retval)
+		if (retval == NULL)
 			goto OOM_1;
 		bzero(retval, sizeof(cw_stil_t));
 		retval->is_malloced = TRUE;
 	}
 
-	if (NULL == pezz_new(&retval->stil_bufc_pezz, sizeof(cw_stil_bufc_t),
-	    _CW_STIL_BUFC_CHUNK_COUNT))
+	if (pezz_new(&retval->stil_bufc_pezz, sizeof(cw_stil_bufc_t),
+	    _CW_STIL_BUFC_CHUNK_COUNT) == NULL)
 		goto OOM_2;
-	if (NULL == pezz_new(&retval->chi_pezz, sizeof(cw_chi_t),
-	    _CW_STIL_STILN_BASE_GROW / 4))
+	if (pezz_new(&retval->chi_pezz, sizeof(cw_chi_t),
+	    _CW_STIL_STILN_BASE_GROW / 4) == NULL)
 		goto OOM_3;
-	if (NULL == pezz_new(&retval->stiln_pezz, sizeof(cw_stiln_t),
-	    _CW_STIL_STILN_BASE_GROW / 4))
+	if (pezz_new(&retval->stiln_pezz, sizeof(cw_stiln_t),
+	    _CW_STIL_STILN_BASE_GROW / 4) == NULL)
 		goto OOM_4;
-	if (NULL == dch_new(&retval->stiln_dch, _CW_STIL_STILN_BASE_TABLE,
+	if (dch_new(&retval->stiln_dch, _CW_STIL_STILN_BASE_TABLE,
 	    _CW_STIL_STILN_BASE_GROW, _CW_STIL_STILN_BASE_SHRINK,
-	    &retval->chi_pezz, stilnk_p_hash, stilnk_p_key_comp))
+	    &retval->chi_pezz, stilnk_p_hash, stilnk_p_key_comp) == NULL)
 		goto OOM_5;
-	if (NULL == dch_new(&retval->roots_dch, _CW_STIL_ROOTS_BASE_TABLE,
+	if (dch_new(&retval->roots_dch, _CW_STIL_ROOTS_BASE_TABLE,
 	    _CW_STIL_ROOTS_BASE_GROW, _CW_STIL_ROOTS_BASE_SHRINK,
-	    &retval->chi_pezz, ch_hash_direct, ch_key_comp_direct))
+	    &retval->chi_pezz, ch_hash_direct, ch_key_comp_direct) == NULL)
 		goto OOM_6;
 	mtx_new(&retval->lock);
 
@@ -95,7 +95,7 @@ OOM_4:
 OOM_3:
 	pezz_delete(&retval->stil_bufc_pezz);
 OOM_2:
-	if (TRUE == retval->is_malloced)
+	if (retval->is_malloced)
 		_cw_free(retval);
 OOM_1:
 	return NULL;
@@ -108,19 +108,19 @@ stil_delete(cw_stil_t *a_stil)
 	cw_stiln_t *data;
 
 	_cw_check_ptr(a_stil);
-	_cw_assert(_CW_STIL_MAGIC == a_stil->magic);
+	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 
 	/* This table should be empty by now. */
 #ifdef _LIBSTIL_DBG
-	if (0 != dch_count(&a_stil->roots_dch)) {
+	if (dch_count(&a_stil->roots_dch) != 0) {
 		_cw_out_put_e("roots_dch has [i] references (should be 0)\n",
 		    dch_count(&a_stil->roots_dch));
 	}
 #endif
 	dch_delete(&a_stil->roots_dch);
 
-	while (FALSE == dch_remove_iterate(&a_stil->stiln_dch, (void **)&key,
-	    (void **)&data)) {
+	while (dch_remove_iterate(&a_stil->stiln_dch, (void **)&key,
+	    (void **)&data) == FALSE) {
 		stil_p_stiln_delete(a_stil, data);
 	}
 	dch_delete(&a_stil->stiln_dch);
@@ -130,7 +130,7 @@ stil_delete(cw_stil_t *a_stil)
 
 	mtx_delete(&a_stil->lock);
 
-	if (TRUE == a_stil->is_malloced)
+	if (a_stil->is_malloced)
 		_cw_free(a_stil);
 #ifdef _LIBSTIL_DBG
 	else
@@ -144,10 +144,10 @@ stil_get_stil_bufc(cw_stil_t *a_stil)
 	cw_stil_bufc_t *retval;
 
 	_cw_check_ptr(a_stil);
-	_cw_assert(_CW_STIL_MAGIC == a_stil->magic);
+	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 
 	retval = (cw_stil_bufc_t *) _cw_pezz_get(&a_stil->stil_bufc_pezz);
-	if (NULL == retval)
+	if (retval == NULL)
 		goto RETURN;
 	bufc_new(&retval->bufc, pezz_put, &a_stil->stil_bufc_pezz);
 	bzero(retval->buffer, sizeof(retval->buffer));
@@ -168,9 +168,9 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 	cw_uint8_t *name;
 
 	_cw_check_ptr(a_stil);
-	_cw_assert(_CW_STIL_MAGIC == a_stil->magic);
+	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 	_cw_check_ptr(a_name);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 
 	/* Fake up a key. */
 	stilnk_init(&search_key.key, a_name, a_len);
@@ -178,13 +178,13 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 	mtx_lock(&a_stil->lock);
 
 	/* Find the name. */
-	if (FALSE == dch_search(&a_stil->stiln_dch, &search_key, (void
-	    **)&data)) {
+	if (dch_search(&a_stil->stiln_dch, &search_key, (void **)&data) ==
+	    FALSE) {
 		/* Add a keyed reference if necessary. */
-		if (NULL != a_key) {
+		if (a_key != NULL) {
 			mtx_lock(&data->lock);
-			if (TRUE == stil_p_stiln_kref(a_stil, data, a_key,
-			    a_data)) {
+			if (stil_p_stiln_kref(a_stil, data, a_key,
+			    a_data) == TRUE) {
 				mtx_unlock(&data->lock);
 				goto OOM_1;
 			}
@@ -192,15 +192,15 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 		}
 		data->ref_count++;
 		retval = data;
-	} else if (TRUE == a_force) {
+	} else if (a_force) {
 		/* The name doesn't exist, and the caller wants it created. */
 		data = stil_p_stiln_new(a_stil);
-		if (NULL == data)
+		if (data == NULL)
 			goto OOM_1;
-		if (FALSE == a_is_static) {
+		if (a_is_static == FALSE) {
 			/* Copy the name string. */
 			name = _cw_malloc(sizeof(cw_uint8_t) * a_len);
-			if (NULL == name)
+			if (name == NULL)
 				goto OOM_2;
 			memcpy(name, a_name, a_len);
 		} else {
@@ -223,13 +223,12 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 		 * lock the stiln, because it hasn't been inserted into the
 		 * hash table yet, so no other threads can get to it.
 		 */
-		if (NULL != a_key) {
-			if (TRUE == stil_p_stiln_kref(a_stil, data, a_key,
-			a_data))
+		if (a_key != NULL) {
+			if (stil_p_stiln_kref(a_stil, data, a_key, a_data))
 				goto OOM_3;
 		}
 		/* Finally, insert the stiln into the hash table. */
-		if (TRUE == dch_insert(&a_stil->stiln_dch, (void *)&data->key,
+		if (dch_insert(&a_stil->stiln_dch, (void *)&data->key,
 		    (void *)data))
 			goto OOM_4;
 		retval = data;
@@ -240,10 +239,10 @@ stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name, cw_uint32_t a_len,
 	return retval;
 
 OOM_4:
-	if (NULL != data->keyed_refs)
+	if (data->keyed_refs != NULL)
 		dch_delete(data->keyed_refs);
 OOM_3:
-	if (FALSE == a_is_static)
+	if (a_is_static == FALSE)
 		_cw_free(name);
 OOM_2:
 	stil_p_stiln_delete(a_stil, data);
@@ -259,30 +258,30 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln,
 	cw_stiln_t *stiln = (cw_stiln_t *)a_stiln;
 
 	_cw_check_ptr(a_stil);
-	_cw_assert(_CW_STIL_MAGIC == a_stil->magic);
+	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
 	_cw_check_ptr(a_stiln);
-	_cw_assert(_CW_STILN_MAGIC == a_stiln->magic);
+	_cw_assert(a_stiln->magic == _CW_STILN_MAGIC);
 
 	mtx_lock(&a_stil->lock);
 	mtx_lock(&stiln->lock);
 
 	/* Remove a keyed reference if necessary. */
-	if (NULL != a_key) {
+	if (a_key != NULL) {
 		_cw_check_ptr(stiln->keyed_refs);
 
-		if (TRUE == dch_remove(stiln->keyed_refs, a_key, NULL, NULL)) {
+		if (dch_remove(stiln->keyed_refs, a_key, NULL, NULL)) {
 #ifdef _LIBSTIL_DBG
 			_cw_error("Trying to remove a non-existent keyed ref");
 #endif
 		}
-		if (0 == dch_count(stiln->keyed_refs)) {
+		if (dch_count(stiln->keyed_refs) == 0) {
 			dch_delete(stiln->keyed_refs);
 			stiln->keyed_refs = NULL;
 		}
 	}
 	stiln->ref_count--;
 
-	if (0 != stiln->ref_count)
+	if (stiln->ref_count != 0)
 		mtx_unlock(&stiln->lock);
 	else {
 		mtx_unlock(&stiln->lock);
@@ -297,7 +296,7 @@ const cw_stilnk_t *
 stiln_get_stilnk(const cw_stiln_t *a_stiln)
 {
 	_cw_check_ptr(a_stiln);
-	_cw_assert(_CW_STILN_MAGIC == a_stiln->magic);
+	_cw_assert(a_stiln->magic == _CW_STILN_MAGIC);
 
 	return &a_stiln->key;
 }
@@ -344,7 +343,7 @@ stil_p_stiln_new(cw_stil_t *a_stil)
 	cw_stiln_t *retval;
 
 	retval = _cw_pezz_get(&a_stil->stiln_pezz);
-	if (NULL == retval)
+	if (retval == NULL)
 		goto RETURN;
 	bzero(retval, sizeof(cw_stiln_t));
 
@@ -361,15 +360,15 @@ void
 stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 {
 	_cw_check_ptr(a_stiln);
-	_cw_assert(_CW_STILN_MAGIC == a_stiln->magic);
+	_cw_assert(a_stiln->magic == _CW_STILN_MAGIC);
 #ifdef _LIBSTIL_DBG
-	if (FALSE == a_stiln->is_static_name) {
+	if (a_stiln->is_static_name == FALSE) {
 		_cw_out_put_e("Non-static name \"");
 		_cw_out_put_n(a_stiln->key.len, "[s]", a_stiln->key.name);
 		_cw_out_put("\" still exists with [i] reference[s]\n",
-		    a_stiln->ref_count, (1 == a_stiln->ref_count) ? "" : "s");
+		    a_stiln->ref_count, (a_stiln->ref_count == 1) ? "" : "s");
 	}
-	if (NULL != a_stiln->keyed_refs) {
+	if (a_stiln->keyed_refs != NULL) {
 		cw_uint32_t i;
 		void   *key;
 
@@ -377,7 +376,7 @@ stil_p_stiln_delete(cw_stil_t *a_stil, cw_stiln_t *a_stiln)
 		_cw_out_put_n(a_stiln->key.len, "[s]", a_stiln->key.name);
 		_cw_out_put("\" still exists with [i] keyed reference[s]:",
 		    dch_count(&a_stil->stiln_dch),
-		    (1 == dch_count(&a_stil->stiln_dch)) ? "" : "s");
+		    (dch_count(&a_stil->stiln_dch) == 1) ? "" : "s");
 		for (i = 0; i < dch_count(&a_stil->stiln_dch); i++) {
 			dch_get_iterate(&a_stil->stiln_dch, &key, NULL);
 			_cw_out_put(" 0x[p]", key);
@@ -401,19 +400,19 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 	 * to it.
 	 */
 
-	if (NULL == a_stiln->keyed_refs) {
+	if (a_stiln->keyed_refs == NULL) {
 		is_new_dch = TRUE;
 
 		/* XXX Magic numbers here. */
 		a_stiln->keyed_refs = dch_new(NULL, 4, 3, 1, &a_stil->chi_pezz,
 		    ch_hash_direct, ch_key_comp_direct);
-		if (NULL == a_stiln->keyed_refs) {
+		if (a_stiln->keyed_refs == NULL) {
 			retval = TRUE;
 			goto RETURN;
 		}
 	}
-	if (TRUE == dch_insert(a_stiln->keyed_refs, a_key, a_data)) {
-		if (TRUE == is_new_dch) {
+	if (dch_insert(a_stiln->keyed_refs, a_key, a_data)) {
+		if (is_new_dch) {
 			dch_delete(a_stiln->keyed_refs);
 			a_stiln->keyed_refs = NULL;
 		}

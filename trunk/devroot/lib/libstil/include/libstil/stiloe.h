@@ -48,6 +48,6 @@ struct cw_stiloe_s {
 	cw_bool_t immutable:1;
 };
 
-void    stiloe_new(cw_stiloe_t *a_stiloe);
+void	stiloe_new(cw_stiloe_t *a_stiloe);
 
-void    stiloe_delete(cw_stiloe_t *a_stiloe);
+void	stiloe_delete(cw_stiloe_t *a_stiloe);

@@ -23,12 +23,12 @@
 int
 main(int argc, char **argv)
 {
-	cw_stil_t stil;
-	cw_stilt_t stilt;
-	char    input[_BUF_SIZE];
-	ssize_t bytes_read;
-	cw_out_t out;
-	cw_bool_t is_tty;
+	cw_stil_t	stil;
+	cw_stilt_t	stilt;
+	char		input[_BUF_SIZE];
+	ssize_t		bytes_read;
+	cw_out_t	out;
+	cw_bool_t	is_tty;
 
 	libstash_init();
 /*    dbg_register(cw_g_dbg, "pezz_verbose"); */
@@ -40,7 +40,7 @@ main(int argc, char **argv)
 	out_new(&out);
 	out_set_default_fd(&out, 1);
 
-	if (TRUE == is_tty) {
+	if (is_tty) {
 		out_put(&out, "stil, version [s].\n", _LIBSTIL_VERSION);
 		out_put(&out,
 		    "See http://www.canonware.com/software/stil/ for"
@@ -106,11 +106,11 @@ main(int argc, char **argv)
 #endif
 
 	while (1) {
-		if (TRUE == is_tty)
+		if (is_tty)
 			out_put(&out, "stil> ");
 		/* Read input. */
 		bytes_read = read(0, input, _BUF_SIZE - 1);
-		if (0 >= bytes_read)
+		if (bytes_read <= 0)
 			break;
 		stilt_interp_str(&stilt, input, (cw_uint32_t)bytes_read);
 	}

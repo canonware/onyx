@@ -101,11 +101,10 @@ struct cw_stiln_s {
 };
 
 /* stil. */
-cw_stil_t *stil_new(cw_stil_t *a_stil);
+cw_stil_t	*stil_new(cw_stil_t *a_stil);
+void		stil_delete(cw_stil_t *a_stil);
 
-void    stil_delete(cw_stil_t *a_stil);
-
-cw_stil_bufc_t *stil_get_stil_bufc(cw_stil_t *a_stil);
+cw_stil_bufc_t	*stil_get_stil_bufc(cw_stil_t *a_stil);
 
 #define stilt_get_chi_pezz(a_stil) (&a_stil->chi_pezz)
 
@@ -113,18 +112,18 @@ const cw_stiln_t *stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name,
     cw_uint32_t a_len, cw_bool_t a_force, cw_bool_t a_is_static, const void
     *a_key, const void *a_data);
 
-void    stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const
-    void *a_key);
+void		stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln,
+    const void *a_key);
 
 /* stiln. */
 const cw_stilnk_t *stiln_get_stilnk(const cw_stiln_t *a_stiln);
 
 /* stilnk. */
-void    stilnk_init(cw_stilnk_t *a_stilnk, const cw_uint8_t *a_name,
+void		stilnk_init(cw_stilnk_t *a_stilnk, const cw_uint8_t *a_name,
     cw_uint32_t a_len);
 
-void    stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from);
+void		stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from);
 
 const cw_uint8_t *stilnk_get_val(cw_stilnk_t *a_stilnk);
 
-cw_uint32_t stilnk_get_len(cw_stilnk_t *a_stilnk);
+cw_uint32_t	stilnk_get_len(cw_stilnk_t *a_stilnk);

@@ -16,13 +16,14 @@
 #define _CW_STILSC_MAGIC 0x543e2aff
 #endif
 
-cw_stilso_t	*stils_p_alloc_stilso(cw_stils_t *a_stils);
-cw_stilsc_t	*stilsc_p_new(cw_pezz_t *a_stilsc_pezz);
-void		 stilso_p_new(cw_stilso_t *a_stilso);
-void		 stilsc_p_delete(cw_stilsc_t *a_stilsc);
-cw_uint32_t	 stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc);
-cw_stilso_t	*stilsc_p_get_stilso(cw_stilsc_t *a_stilsc, cw_uint32_t a_index);
-void		 stilso_p_new(cw_stilso_t *a_stilso);
+static cw_stilso_t	*stils_p_alloc_stilso(cw_stils_t *a_stils);
+static cw_stilsc_t	*stilsc_p_new(cw_pezz_t *a_stilsc_pezz);
+static void		 stilso_p_new(cw_stilso_t *a_stilso);
+static void		 stilsc_p_delete(cw_stilsc_t *a_stilsc);
+static cw_uint32_t	 stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc);
+static cw_stilso_t	*stilsc_p_get_stilso(cw_stilsc_t *a_stilsc, cw_uint32_t
+    a_index);
+static void		 stilso_p_new(cw_stilso_t *a_stilso);
 
 cw_stils_t *
 stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
@@ -53,7 +54,7 @@ stils_delete(cw_stils_t *a_stils)
 	cw_stilsc_t	*stilsc;
 
 	_cw_check_ptr(a_stils);
-	_cw_assert(_CW_STILS_MAGIC == a_stils->magic);
+	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	/*
 	 * Pop objects off the stack and delete them.  Then delete all the
@@ -84,7 +85,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	SLIST_HEAD(, cw_stilsc_s) old_chunks;
 
 	_cw_check_ptr(a_stils);
-	_cw_assert(_CW_STILS_MAGIC == a_stils->magic);
+	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	/*
 	 * Move the old stack, spares, and stilsc's out of the way so that we
@@ -397,7 +398,7 @@ stils_get_index(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	return i;
 }
 
-cw_stilso_t *
+static cw_stilso_t *
 stils_p_alloc_stilso(cw_stils_t *a_stils)
 {
 	cw_stilso_t	*retval;
@@ -427,7 +428,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 /*
  * Initialize all embedded stilso's and link them into a ring.
  */
-cw_stilsc_t *
+static cw_stilsc_t *
 stilsc_p_new(cw_pezz_t *a_stilsc_pezz)
 {
 	cw_stilsc_t	*retval;
@@ -452,7 +453,7 @@ stilsc_p_new(cw_pezz_t *a_stilsc_pezz)
 	return retval;
 }
 
-void
+static void
 stilsc_p_delete(cw_stilsc_t *a_stilsc)
 {
 	_cw_check_ptr(a_stilsc);
@@ -461,7 +462,7 @@ stilsc_p_delete(cw_stilsc_t *a_stilsc)
 	_cw_pezz_put(a_stilsc->allocator, a_stilsc);
 }
 
-cw_uint32_t
+static cw_uint32_t
 stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc)
 {
 	_cw_check_ptr(a_stilsc);
@@ -470,7 +471,7 @@ stilsc_p_get_nstilso(cw_stilsc_t *a_stilsc)
 	return _CW_STILSC_SIZEOF2O(pezz_get_buffer_size(a_stilsc->allocator));
 }
 
-cw_stilso_t *
+static cw_stilso_t *
 stilsc_p_get_stilso(cw_stilsc_t *a_stilsc, cw_uint32_t a_index)
 {
 	_cw_check_ptr(a_stilsc);
@@ -480,7 +481,7 @@ stilsc_p_get_stilso(cw_stilsc_t *a_stilsc, cw_uint32_t a_index)
 	return &a_stilsc->objects[a_index];
 }
 
-void
+static void
 stilso_p_new(cw_stilso_t *a_stilso)
 {
 	stilo_new(&a_stilso->stilo);

@@ -24,6 +24,6 @@ struct cw_stiloe_condition_s {
 cw_stiloe_condition_t *stiloe_condition_new(cw_stiloe_condition_t
     *a_stiloe_condition);
 
-void    stiloe_condition_ref(cw_stiloe_condition_t *a_stiloe_condition);
+void	stiloe_condition_ref(cw_stiloe_condition_t *a_stiloe_condition);
 
-void    stiloe_condition_unref(cw_stiloe_condition_t *a_stiloe_condition);
+void	stiloe_condition_unref(cw_stiloe_condition_t *a_stiloe_condition);

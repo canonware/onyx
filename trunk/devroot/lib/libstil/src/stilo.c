@@ -31,7 +31,7 @@ void
 stilo_delete(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
-	_cw_assert(_CW_STILO_MAGIC == a_stilo->magic);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
 	switch (a_stilo->type) {
 	case _CW_STILOT_NOTYPE:
@@ -53,13 +53,13 @@ stilo_delete(cw_stilo_t *a_stilo)
 	case _CW_STILOT_LOCKTYPE:
 		break;
 	case _CW_STILOT_MSTATETYPE:
-		if (FALSE != a_stilo->extended)
+		if (a_stilo->extended)
 			;/* XXX */
 		break;
 	case _CW_STILOT_NAMETYPE:
 		break;
 	case _CW_STILOT_NUMBERTYPE:
-		if (FALSE != a_stilo->extended)
+		if (a_stilo->extended)
 			;/* XXX */
 		break;
 	case _CW_STILOT_PACKEDARRAYTYPE:
@@ -79,7 +79,7 @@ cw_stilot_t
 stilo_type(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
-	_cw_assert(_CW_STILO_MAGIC == a_stilo->magic);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
 	return a_stilo->type;
 }
@@ -88,16 +88,16 @@ void
 stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
 	_cw_check_ptr(a_to);
-	_cw_assert(_CW_STILO_MAGIC == a_to->magic);
+	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
 	_cw_check_ptr(a_from);
-	_cw_assert(_CW_STILO_MAGIC == a_from->magic);
+	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
 }
 
 cw_bool_t
 stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot)
 {
 	_cw_check_ptr(a_stilo);
-	_cw_assert(_CW_STILO_MAGIC == a_stilo->magic);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
 	return TRUE;		/* XXX */
 }

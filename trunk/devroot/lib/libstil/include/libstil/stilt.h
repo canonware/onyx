@@ -13,7 +13,6 @@
 /* Defined in stilo.h to resolve a circular dependency. */
 #if (0)
 typedef struct cw_stilt_s cw_stilt_t;
-
 #endif
 typedef struct cw_stiltn_s cw_stiltn_t;
 
@@ -114,21 +113,21 @@ struct cw_stiltn_s {
 	cw_stilnk_t key;
 };
 
-cw_stilt_t *stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
+cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 
-void    stilt_delete(cw_stilt_t *a_stilt);
+void		stilt_delete(cw_stilt_t *a_stilt);
 
-cw_bool_t stilt_interp_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t
-    a_len);
+cw_bool_t	stilt_interp_str(cw_stilt_t *a_stilt, const char *a_str,
+    cw_uint32_t a_len);
 
-cw_bool_t stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
+cw_bool_t	stilt_interp_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 
-cw_bool_t stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t
-    a_len);
+cw_bool_t	stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str,
+    cw_uint32_t a_len);
 
-cw_bool_t stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
+cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 
-const cw_stiln_t *stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t *a_name,
-    cw_uint32_t a_len, cw_bool_t a_force);
+const cw_stiln_t	*stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t
+    *a_name, cw_uint32_t a_len, cw_bool_t a_force);
 
-void    stiltn_unref(cw_stilt_t *a_stilt, const cw_stiln_t *a_stiln);
+void		stiltn_unref(cw_stilt_t *a_stilt, const cw_stiln_t *a_stiln);

@@ -10,14 +10,13 @@
  *
  ****************************************************************************/
 
-#define _CW_STILOE_DICT_ENTS2SIZEOF(e)        \
-  (sizeof(cw_stiloe_dict_t) - sizeof(cw_ch_t) \
-   + _CW_CH_TABLE2SIZEOF(5 / 4 * (e)))
+#define _CW_STILOE_DICT_ENTS2SIZEOF(e)					\
+	(sizeof(cw_stiloe_dict_t) - sizeof(cw_ch_t) +			\
+	_CW_CH_TABLE2SIZEOF(5 / 4 * (e)))
 
 /* Defined in stilo.h to resolve a circular dependency. */
 #if (0)
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
-
 #endif
 typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 
@@ -53,19 +52,20 @@ struct cw_stiloe_dicto_s {
 cw_stiloe_dict_t *stiloe_dict_new(cw_stiloe_dict_t *a_stiloe_dict, cw_pezz_t
     *stiloe_dicto_pezz);
 
-void    stiloe_dict_delete(cw_stiloe_dict_t *a_stiloe_dict);
+void		stiloe_dict_delete(cw_stiloe_dict_t *a_stiloe_dict);
 
-cw_bool_t stiloe_dict_def(cw_stiloe_dict_t *a_stiloe_dict, cw_stilo_t *a_name,
-    cw_stilo_t *a_val);
+cw_bool_t	stiloe_dict_def(cw_stiloe_dict_t *a_stiloe_dict, cw_stilo_t
+    *a_name, cw_stilo_t *a_val);
 
-cw_bool_t stiloe_dict_undef(cw_stiloe_dict_t *a_stiloe_dict, cw_stilo_t
+cw_bool_t	stiloe_dict_undef(cw_stiloe_dict_t *a_stiloe_dict, cw_stilo_t
     *a_name);
 
-cw_stilo_t *stiloe_dict_lookup(cw_stiloe_dict_t *a_stiloe_dict, cw_stilo_t
+cw_stilo_t	*stiloe_dict_lookup(cw_stiloe_dict_t *a_stiloe_dict, cw_stilo_t
     *a_name);
 
-cw_bool_t stiloe_dict_copy(cw_stiloe_dict_t *a_from, cw_stiloe_dict_t *a_to);
+cw_bool_t	stiloe_dict_copy(cw_stiloe_dict_t *a_from, cw_stiloe_dict_t
+    *a_to);
 
-cw_uint32_t stiloe_dict_count(cw_stiloe_dict_t *a_stiloe_dict);
+cw_uint32_t	stiloe_dict_count(cw_stiloe_dict_t *a_stiloe_dict);
 
-cw_stilo_t *stiloe_dict_iterate(cw_stiloe_dict_t *a_stiloe_dict);
+cw_stilo_t	*stiloe_dict_iterate(cw_stiloe_dict_t *a_stiloe_dict);
