@@ -30,7 +30,7 @@ struct cw_ch_s
   /* Counters used to get an idea of performance. */
   cw_uint32_t num_collisions;
   cw_uint32_t num_inserts;
-  cw_uint32_t num_deletes;
+  cw_uint32_t num_removes;
 #endif
 
   cw_bool_t is_malloced;

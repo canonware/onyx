@@ -77,7 +77,7 @@ ch_delete(cw_ch_t * a_ch)
       {
 	t_ring = a_ch->chi_ring;
 	a_ch->chi_ring = ring_cut(t_ring);
-	chi = ring_get_data(t_ring);
+	chi = (cw_chi_t *) ring_get_data(t_ring);
 	_cw_pezz_put(a_ch->chi_pezz, chi);
       } while (a_ch->chi_ring != t_ring);
     }
@@ -147,7 +147,7 @@ ch_insert(cw_ch_t * a_ch, const void * a_key, const void * a_data)
   slot = a_ch->hash(a_key) % a_ch->table_size;
   chi->slot = slot;
 
-  /* Hook into ch-wide ring.. */
+  /* Hook into ch-wide ring. */
   if (NULL != a_ch->chi_ring)
   {
     ring_meld(a_ch->chi_ring, &chi->ch_link);
@@ -250,7 +250,7 @@ ch_remove(cw_ch_t * a_ch, const void * a_search_key, void ** r_key,
 
       a_ch->count--;
 #ifdef _LIBSTASH_DBG
-      a_ch->num_deletes++;
+      a_ch->num_removes++;
 #endif
       retval = FALSE;
       goto RETURN;
@@ -398,7 +398,7 @@ ch_remove_iterate(cw_ch_t * a_ch, void ** r_key, void ** r_data)
 
   a_ch->count--;
 #ifdef _LIBSTASH_DBG
-  a_ch->num_deletes++;
+  a_ch->num_removes++;
 #endif
 
   retval = FALSE;
@@ -418,9 +418,9 @@ ch_dump(cw_ch_t * a_ch, const char * a_prefix)
   _cw_check_ptr(a_prefix);
 
 #ifdef _LIBSTASH_DBG
-  _cw_out_put("[s]: num_collisions: [i], num_inserts: [i], num_deletes: [i]\n",
+  _cw_out_put("[s]: num_collisions: [i], num_inserts: [i], num_removes: [i]\n",
 	      a_prefix, a_ch->num_collisions, a_ch->num_inserts,
-	      a_ch->num_deletes);
+	      a_ch->num_removes);
 #endif
 
   _cw_out_put("[s]: is_malloced: [s]\n",
