@@ -82,7 +82,6 @@ static void		stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t
 #endif
 static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
     cw_uint8_t a_c);
-static cw_sint32_t	stilt_p_exec(cw_stilt_t *a_stilt);
 static void		*stilt_p_entry(void *a_arg);
 static void		stilt_p_special_accept(cw_stilt_t *a_stilt, const
     cw_uint8_t *a_token, cw_uint32_t a_len);
@@ -295,6 +294,72 @@ stilt_delete(cw_stilt_t *a_stilt)
 	else
 		memset(a_stilt, 0x5a, sizeof(cw_stilt_t));
 #endif
+}
+
+void
+stilt_exec(cw_stilt_t *a_stilt)
+{
+	cw_stilo_t	*stilo, *tstilo;
+	cw_uint32_t	sdepth;
+
+	for (sdepth = stils_count(&a_stilt->exec_stils);
+	     stils_count(&a_stilt->exec_stils) >= sdepth;) {
+		stilo = stils_get(&a_stilt->exec_stils, 0);
+		if (stilo_attrs_get(stilo) == STILOA_LITERAL) {
+			/* Always push the object onto the data stack. */
+			tstilo = stils_push(&a_stilt->data_stils);
+			stilo_dup(tstilo, stilo, a_stilt);
+			stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+		} else {
+			switch (stilo_type_get(stilo)) {
+			case STILOT_BOOLEAN:
+			case STILOT_CONDITION:
+			case STILOT_DICT:
+			case STILOT_INTEGER:
+			case STILOT_MARK:
+			case STILOT_REAL:
+			case STILOT_STRING:
+				/* Push onto the dictionary stack. */
+				tstilo = stils_push(&a_stilt->data_stils);
+				stilo_dup(tstilo, stilo, a_stilt);
+				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+				break;
+			case STILOT_NULL:
+				/* Do nothing. */
+				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+				break;
+			case STILOT_ARRAY: {
+				cw_uint32_t	i;
+				cw_stilo_t	*array;
+
+				for (i = 0; i < stilo_array_len_get(stilo) - 1;
+				     i++) {
+					tstilo =
+					    stils_push(&a_stilt->exec_stils);
+					stilo_dup(tstilo, &array[i], a_stilt);
+					stilt_exec(a_stilt);
+				}
+				/* Make tail recursion safe. */
+				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+				tstilo = stils_push(&a_stilt->exec_stils);
+				stilo_dup(tstilo, &array[i], a_stilt);
+
+				break;
+			}
+			case STILOT_FILE:
+			case STILOT_HOOK:
+			case STILOT_LOCK:
+			case STILOT_NAME:
+				_cw_not_reached();	/* XXX */
+			case STILOT_OPERATOR:
+				stilo->o.operator.f(a_stilt);
+				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+				break;
+			default:
+				_cw_not_reached();
+			}
+		}
+	}
 }
 
 cw_bool_t
@@ -1575,19 +1640,6 @@ stilt_p_reset(cw_stilt_t *a_stilt)
 	a_stilt->index = 0;
 }
 
-static cw_sint32_t
-stilt_p_exec(cw_stilt_t *a_stilt)
-{
-	cw_stilo_t	*stilo;
-
-	/* XXX It's harder than this. */
-	stilo = stils_get(&a_stilt->exec_stils, 0);
-	stilo->o.operator.f(a_stilt);
-	stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-
-	return 0;	/* XXX */
-}
-
 static void *
 stilt_p_entry(void *a_arg)
 {
@@ -1618,7 +1670,7 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 	}
 
 	stilo_delete(&key, a_stilt);
-	stilt_p_exec(a_stilt);
+	stilt_exec(a_stilt);
 }
 
 static void
@@ -1689,7 +1741,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 			stilt_p_reset(a_stilt);
-			stilt_p_exec(a_stilt);
+			stilt_exec(a_stilt);
 		} else {
 			/* Push the name object onto the data stack. */
 			stilo = stils_push(&a_stilt->data_stils);

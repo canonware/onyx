@@ -576,7 +576,18 @@ systemdict_exch(cw_stilt_t *a_stilt)
 void
 systemdict_exec(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*dstack, *estack;
+	cw_stilo_t	*orig, *new;
+
+	dstack = stilt_data_stack_get(a_stilt);
+	estack = stilt_exec_stack_get(a_stilt);
+
+	orig = stils_get(dstack, 0);
+	new = stils_push(estack);
+	stilo_dup(new, orig, a_stilt);
+	stils_pop(dstack, a_stilt, 1);
+
+	stilt_exec(a_stilt);
 }
 
 void

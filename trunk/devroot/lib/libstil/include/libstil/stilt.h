@@ -190,6 +190,8 @@ void		stilt_delete(cw_stilt_t *a_stilt);
 #define		stilt_state(a_stilt) (a_stilt)->state
 #define		stilt_deferred(a_stilt) ((a_stilt)->defer_count ? TRUE : FALSE)
 
+void		stilt_exec(cw_stilt_t *a_stilt);
+
 cw_bool_t	stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
 void		stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
@@ -202,6 +204,7 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define		stilt_name_hash_get(a_stilt) &(a_stilt)->name_hash
 #define		stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
 #define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
+#define		stilt_exec_stack_get(a_stilt) (&((a_stilt)->exec_stils))
 
 /*
  * If TRUE, allocation for the stilt is global.  Otherwise, allocation is
