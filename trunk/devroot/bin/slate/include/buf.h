@@ -20,16 +20,16 @@ typedef enum {
 	BUFW_END	/* Offset from EOB, must be negative. */
 } cw_bufw_t;
 
-/* Buffer history record types. */
+/* Buffer history record types and history state machine states. */
 typedef enum {
-	BUFH_NONE,
-	BUFH_B,
-	BUFH_E,
-	BUFH_P,
-	BUFH_I,
-	BUFH_Y,
-	BUFH_R,
-	BUFH_K
+	BUFH_NONE,	/* Start state. */
+	BUFH_B,		/* Begin group. */
+	BUFH_E,		/* End group. */
+	BUFH_P,		/* Change buffer position. */
+	BUFH_I,		/* Insert before. */
+	BUFH_Y,		/* Insert after (yank). */
+	BUFH_R,		/* Remove before. */
+	BUFH_K		/* Remove after (kill). */
 } cw_bufh_t;
 
 struct cw_bufm_s {
@@ -63,7 +63,7 @@ struct cw_buf_s {
 	cw_opaque_alloc_t *alloc;
 	cw_opaque_realloc_t *realloc;
 	cw_opaque_dealloc_t *dealloc;
-	const void	*arg;
+	void		*arg;
 
 	cw_msgq_t	*msgq;		/* Notify of buffer changes. */
 
@@ -81,9 +81,10 @@ struct cw_buf_s {
 
 	/* History (undo/redo) state. */
 	cw_buf_t	*h;		/* History buffer, if non-NULL. */
-	cw_bufm_t	*hend;		/* Marker at end of h. */
-	cw_bufm_t	*hcur;		/* Marker at current position in h. */
+	cw_bufm_t	hend;		/* Marker at end of h. */
+	cw_bufm_t	hcur;		/* Marker at current position in h. */
 	cw_bufh_t	hstate;		/* Current history state. */
+	cw_uint64_t	hbpos;		/* Current history bpos. */
 	cw_uint32_t	ucount;		/* # of undo chars in current record. */
 	cw_uint32_t	rcount;		/* # of redo chars in current record. */
 };
@@ -135,8 +136,8 @@ cw_uint8_t *bufm_after_get(cw_bufm_t *a_bufm);
 cw_uint8_t *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end);
 
 void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
-    cw_uint64_t a_count);
+    cw_uint64_t a_len);
 void	bufm_after_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
-    cw_uint64_t a_count);
+    cw_uint64_t a_len);
 
 void	bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);

@@ -39,7 +39,7 @@ MSRCS = [MSRCS] [MODSLATE_MSRCS];
  * output.
  */
 {
-  local otests = ;
+  local otests = buffer_a.nx.in;
   otests = [fromto % [srcdir]/mod/modslate/test/% [otests]];
 
   OTESTS = [OTESTS] [otests];
