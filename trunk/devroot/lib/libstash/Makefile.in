@@ -21,7 +21,7 @@
 INCS := libstash.h stash_incs.h bhp.h buf.h dbg.h lex.h list.h log.h matrix.h \
 	mem.h oh.h res.h treen.h
 
-INS_R := libstash_r.h locks.h thread.h
+INCS_R := libstash_r.h locks.h thread.h
 
 # Include files that are _not_ installed.
 PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h log_priv.h mem_priv.h oh_priv.h \
@@ -324,17 +324,17 @@ install_r : install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
 
 install_common : 
 	$(SHELL) -c \
-	'@INSTALL@ -d @prefix@/lib; \
+	'@INSTALL@ -d @prefix@/include/libstash; \
 	@INSTALL@ -d @prefix@/include/libstash; \
 	for i in $(INCS); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
+	@INSTALL@ -d @prefix@/lib; \
 	done; \
 	'
 
-install_common_r : 
+install_common_r : install_common
 	$(SHELL) -c \
-	'@INSTALL@ -d @prefix@/include/libstash; \
-	for i in $(INCS_R); do \
+	'for i in $(INCS_R); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
 	done; \
 	'
