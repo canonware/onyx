@@ -140,7 +140,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	    }
 	    else
 	    {
-		retval = 2;
+		retval = 1;
 	    }
 	    break;
 	}
@@ -164,7 +164,7 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	    }
 	    else
 	    {
-		retval = 2;
+		retval = 1;
 	    }
 	    break;
 	}

@@ -3035,7 +3035,6 @@ systemdict_ge(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo_a, *nxo_b;
-    cw_nxot_t type_a, type_b;
     cw_sint32_t result;
     cw_bool_t ge;
 
@@ -3044,18 +3043,46 @@ systemdict_ge(cw_nxo_t *a_thread)
     NXO_STACK_GET(nxo_b, ostack, a_thread);
     NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
 
-    type_a = nxo_type_get(nxo_a);
-    type_b = nxo_type_get(nxo_b);
-    if (type_a != type_b
-	|| (type_a != NXOT_INTEGER && type_a != NXOT_STRING)
-	|| (type_b != NXOT_INTEGER && type_b != NXOT_STRING))
+    switch (nxo_type_get(nxo_a))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    result = nxo_compare(nxo_a, nxo_b);
+    if (result == 2)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-
-    result = nxo_compare(nxo_a, nxo_b);
-    if (result >= 0)
+    else if (result >= 0)
     {
 	ge = TRUE;
     }
@@ -3228,7 +3255,6 @@ systemdict_gt(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo_a, *nxo_b;
-    cw_nxot_t type_a, type_b;
     cw_sint32_t result;
     cw_bool_t gt;
 
@@ -3237,18 +3263,46 @@ systemdict_gt(cw_nxo_t *a_thread)
     NXO_STACK_GET(nxo_b, ostack, a_thread);
     NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
 
-    type_a = nxo_type_get(nxo_a);
-    type_b = nxo_type_get(nxo_b);
-    if (type_a != type_b
-	|| (type_a != NXOT_INTEGER && type_a != NXOT_STRING)
-	|| (type_b != NXOT_INTEGER && type_b != NXOT_STRING))
+    switch (nxo_type_get(nxo_a))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    result = nxo_compare(nxo_a, nxo_b);
+    if (result == 2)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-
-    result = nxo_compare(nxo_a, nxo_b);
-    if (result == 1)
+    else if (result == 1)
     {
 	gt = TRUE;
     }
@@ -3509,7 +3563,6 @@ systemdict_le(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo_a, *nxo_b;
-    cw_nxot_t type_a, type_b;
     cw_sint32_t result;
     cw_bool_t le;
 
@@ -3518,18 +3571,46 @@ systemdict_le(cw_nxo_t *a_thread)
     NXO_STACK_GET(nxo_b, ostack, a_thread);
     NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
 
-    type_a = nxo_type_get(nxo_a);
-    type_b = nxo_type_get(nxo_b);
-    if (type_a != type_b
-	|| (type_a != NXOT_INTEGER && type_a != NXOT_STRING)
-	|| (type_b != NXOT_INTEGER && type_b != NXOT_STRING))
+    switch (nxo_type_get(nxo_a))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    result = nxo_compare(nxo_a, nxo_b);
+    if (result == 2)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-
-    result = nxo_compare(nxo_a, nxo_b);
-    if (result <= 0)
+    else if (result <= 0)
     {
 	le = TRUE;
     }
@@ -3816,7 +3897,6 @@ systemdict_lt(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
     cw_nxo_t *nxo_a, *nxo_b;
-    cw_nxot_t type_a, type_b;
     cw_sint32_t result;
     cw_bool_t lt;
 
@@ -3825,18 +3905,46 @@ systemdict_lt(cw_nxo_t *a_thread)
     NXO_STACK_GET(nxo_b, ostack, a_thread);
     NXO_STACK_DOWN_GET(nxo_a, ostack, a_thread, nxo_b);
 
-    type_a = nxo_type_get(nxo_a);
-    type_b = nxo_type_get(nxo_b);
-    if (type_a != type_b
-	|| (type_a != NXOT_INTEGER && type_a != NXOT_STRING)
-	|| (type_b != NXOT_INTEGER && type_b != NXOT_STRING))
+    switch (nxo_type_get(nxo_a))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    switch (nxo_type_get(nxo_b))
+    {
+	case NXOT_INTEGER:
+#ifdef CW_REAL
+	case NXOT_REAL:
+#endif
+	case NXOT_STRING:
+	{
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    result = nxo_compare(nxo_a, nxo_b);
+    if (result == 2)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
     }
-
-    result = nxo_compare(nxo_a, nxo_b);
-    if (result == -1)
+    else if (result == -1)
     {
 	lt = TRUE;
     }
