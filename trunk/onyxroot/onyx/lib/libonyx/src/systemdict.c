@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <sys/time.h> /* For realtime operator. */
+#include <time.h> /* For nanosleep(). */
 #include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
