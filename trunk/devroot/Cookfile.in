@@ -20,7 +20,8 @@ srcdir = @top_srcdir@;
 abs_srcdir = @abs_srcdir@;
 objdir = @objdir@;
 abs_objdir = @abs_objdir@;
-PREFIX = @prefix@;
+if [not [defined PREFIX]] then
+  PREFIX = [split " " [strip "@prefix@"]];
 
 /* Executable format. */
 abi = @abi@;

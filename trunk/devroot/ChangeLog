@@ -4,6 +4,8 @@
 	CPPFLAGS, CFLAGS, and LDFLAGS in order to avoid argument splitting
 	confusion.
 
+	Make PREFIX over-ridable.
+
 2001-12-15  Jason Evans  <jasone@canonware.com>
 
 	* doc/latex/onyx_lang.tex: Document search.
