@@ -20,7 +20,7 @@
 
 /* Include files (not installed). */
 {
-  local incs = modcanonyx.h;
+  local incs = modcanonyx.h buffer.h;
   incs = [fromto % [srcdir]/mod/modcanonyx/include/% [incs]];
   incs = [incs] [objdir]/mod/modcanonyx/include/modcanonyx_defs.h;
 
@@ -29,7 +29,7 @@
 }
 
 /* Source files. */
-MODCANONYX_MSRCS = canonyx.c;
+MODCANONYX_MSRCS = canonyx.c buffer.c;
 
 MSRCS = [MSRCS] [fromto % [srcdir]/mod/modcanonyx/src/% [MODCANONYX_MSRCS]];
 
