@@ -136,9 +136,10 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 }
 
 cw_stilo_t *
-stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilot_t a_type)
+stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilot_t a_type, ...)
 {
 	cw_stilso_t	*stilso;
+	va_list		ap;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
@@ -150,7 +151,9 @@ stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilot_t a_type)
 	a_stils->stack = stilso;
 	a_stils->count++;
 
-	stilo_new(&stilso->stilo, a_stilt, a_type);
+	va_start(ap, a_type);
+	stilo_new_v(&stilso->stilo, a_stilt, a_type, ap);
+	va_end(ap);
 
 	return &stilso->stilo;
 }

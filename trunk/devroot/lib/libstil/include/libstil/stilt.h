@@ -9,10 +9,6 @@
  *
  ****************************************************************************/
 
-/* Defined in stilo.h to resolve a circular dependency. */
-#if (0)
-typedef struct cw_stilt_s cw_stilt_t;
-#endif
 typedef struct cw_stiltn_s cw_stiltn_t;
 
 struct cw_stilt_s {
@@ -188,11 +184,9 @@ void		stilt_free(cw_stilt_t *a_stilt, void *a_ptr, const char
 #endif
 
 #define stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
-
 #define stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 
 /* stiltn. */
 const cw_stiln_t	*stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t
     *a_name, cw_uint32_t a_len, cw_bool_t a_force);
-
 void		stiltn_unref(cw_stilt_t *a_stilt, const cw_stiln_t *a_stiln);

@@ -481,6 +481,15 @@ stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t a_type, ...)
 {
 	va_list	ap;
 
+	va_start(ap, a_type);
+	stilo_new_v(a_stilo, a_stilt, a_type, ap);
+	va_end(ap);
+}
+
+void
+stilo_new_v(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t a_type,
+    va_list a_p)
+{
 	_cw_check_ptr(a_stilo);
 	_cw_assert((a_stilt != NULL) || (stilot_vtable[a_type].new_f == NULL));
 
@@ -488,11 +497,8 @@ stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t a_type, ...)
 	a_stilo->type = a_type;
 
 	/* Only composite types require additional initialization. */
-	if (stilot_vtable[a_type].new_f != NULL) {
-		va_start(ap, a_type);
-		stilot_vtable[a_type].new_f(a_stilo, a_stilt, ap);
-		va_end(ap);
-	}
+	if (stilot_vtable[a_type].new_f != NULL)
+		stilot_vtable[a_type].new_f(a_stilo, a_stilt, a_p);
 
 #ifdef _LIBSTIL_DBG
 	a_stilo->magic = _CW_STILO_MAGIC;
@@ -1526,10 +1532,36 @@ stilo_p_mstate_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 
 /*
  * name.
+ *
+ * If this is a local (per thread) name, the arguments contained in a_p are:
+ *
+ *   const cw_uint8_t *name, cw_uint32_t len, cw_bool_t is_global
+ *
+ * If this is a global (in a global dictionary) name, the arguments contained in
+ * a_p are:
+ *
+ *   const cw_uint8_t *name, cw_uint32_t len, cw_bool_t is_global,
+ *   cw_bool_t is_static
  */
 static void
 stilo_p_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 {
+	const cw_uint8_t	*name = (const cw_uint8_t *)va_arg(a_p, const
+	    cw_uint8_t *);
+	cw_uint32_t		len = (cw_uint32_t)va_arg(a_p, cw_uint32_t);
+	cw_bool_t		is_global = (cw_bool_t)va_arg(a_p, cw_bool_t);
+
+	if (is_global == FALSE) {
+		a_stilo->indirect_name = TRUE;
+		a_stilo->stilt = a_stilt;
+		a_stilo->name.stiln = stiltn_ref(a_stilt, name, len, TRUE);
+	} else {
+		cw_bool_t	is_static = (cw_bool_t)va_arg(a_p, cw_uint32_t);
+
+		a_stilo->indirect_name = FALSE;
+		a_stilo->name.stiln = stil_stiln_ref(stilt_stil_get(a_stilt),
+		    name, len, TRUE, is_static, NULL, NULL);
+	}
 }
 
 static void
@@ -1538,8 +1570,9 @@ stilo_p_name_delete(cw_stilo_t *a_stilo)
 	if (a_stilo->indirect_name)
 		stiltn_unref(a_stilo->o.name.s.stilt, a_stilo->o.name.stiln);
 	else {
-		stil_stiln_unref(stilt_get_stil(a_stilo->o.name.s.stilt),
-		    a_stilo->o.name.stiln, a_stilo->o.name.s.key);
+		/* XXX Bad union usage. */
+		stil_stiln_unref(stilt_get_stil(a_stilo->o.name.stilt),
+		    a_stilo->o.name.stiln, NULL);
 	}
 }
 
@@ -1652,8 +1685,13 @@ stilo_p_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 	    sizeof(cw_stiloe_string_t));
 
 	string->iterations = 0;
-	string->e.s.str = NULL;
-	string->e.s.len = -1;
+	string->e.s.len = (cw_uint32_t)va_arg(a_p, cw_uint32_t);
+
+	if (string->e.s.len > 0) {
+		string->e.s.str = (cw_uint8_t
+		    *)_cw_stilt_malloc(string->stiloe.stilt, string->e.s.len);
+	} else
+		string->e.s.str = NULL;
 
 	a_stilo->o.stiloe = (cw_stiloe_t *)string;
 
@@ -1748,27 +1786,6 @@ stilo_string_len_get(cw_stilo_t *a_stilo)
 		retval = string->e.i.len;
 
 	return retval;
-}
-
-void
-stilo_string_len_set(cw_stilo_t *a_stilo, cw_uint32_t a_len)
-{
-	cw_stiloe_string_t	*string;
-
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == _CW_STILOT_STRINGTYPE);
-
-	string = (cw_stiloe_string_t *)a_stilo->o.stiloe;
-	_cw_assert(string->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(string->stiloe.indirect == FALSE);
-	_cw_assert(string->e.s.len == -1);
-
-	if (a_len > 0) {
-		string->e.s.str = (cw_uint8_t
-		    *)_cw_stilt_malloc(string->stiloe.stilt, a_len);
-	}
-	string->e.s.len = a_len;
 }
 
 cw_uint8_t *

@@ -80,7 +80,12 @@ struct cw_stiln_s {
 
 	cw_mtx_t	lock;
 
-	/* Number of references to this object, including keyed references. */
+	/*
+	 * Number of direct references to this object, including keyed
+	 * references.  There should be at most one reference per thread, plus
+	 * zero or more references for global dictionaries, since each thread
+	 * caches stiln references.
+	 */
 	cw_uint32_t	ref_count;
 	/*
 	 * If non-NULL, a hash of keyed references to this object.  Keyed
@@ -113,7 +118,6 @@ cw_stil_bufc_t	*stil_stil_bufc_get(cw_stil_t *a_stil);
 const cw_stiln_t *stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name,
     cw_uint32_t a_len, cw_bool_t a_force, cw_bool_t a_is_static, const void
     *a_key, const void *a_data);
-
 void		stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln,
     const void *a_key);
 
@@ -123,9 +127,6 @@ const cw_stilnk_t *stiln_stilnk_get(const cw_stiln_t *a_stiln);
 /* stilnk. */
 void		stilnk_init(cw_stilnk_t *a_stilnk, const cw_uint8_t *a_name,
     cw_uint32_t a_len);
-
-void		stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from);
-
+/*  void		stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from); */
 const cw_uint8_t *stilnk_val_get(cw_stilnk_t *a_stilnk);
-
 cw_uint32_t	stilnk_len_get(cw_stilnk_t *a_stilnk);

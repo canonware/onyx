@@ -748,8 +748,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					stilt_p_print_token(a_stilt,
 					    a_stilt->index, "string");
 					stilo = stils_push(&a_stilt->data_stils,
-					    a_stilt, _CW_STILOT_STRINGTYPE);
-					stilo_string_len_set(stilo,
+					    a_stilt, _CW_STILOT_STRINGTYPE,
 					    a_stilt->index);
 					if (a_stilt->index <=
 					    _CW_STIL_BUFC_SIZE) {

@@ -81,7 +81,7 @@ void		stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
     (void *add_root_arg, cw_stilo_t *root), void *a_add_root_arg);
 
 cw_stilo_t	*stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt,
-    cw_stilot_t a_type);
+    cw_stilot_t a_type, ...);
 
 cw_bool_t	stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count);
 

@@ -321,6 +321,8 @@ stilnk_init(cw_stilnk_t *a_stilnk, const cw_uint8_t *a_name,
 	a_stilnk->len = a_len;
 }
 
+/* XXX This looks dangerous. */
+#if (0)
 void
 stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from)
 {
@@ -330,6 +332,7 @@ stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from)
 	a_to->name = a_from->name;
 	a_to->len = a_from->len;
 }
+#endif
 
 const cw_uint8_t *
 stilnk_val_get(cw_stilnk_t *a_stilnk)
@@ -355,7 +358,7 @@ stil_p_stiln_new(cw_stil_t *a_stil)
 	retval = (cw_stiln_t *)_cw_pool_get(&a_stil->stiln_pool);
 	if (retval == NULL)
 		goto RETURN;
-	bzero(retval, sizeof(cw_stiln_t));
+	memset(retval, 0, sizeof(cw_stiln_t));
 
 	mtx_new(&retval->lock);
 #ifdef _LIBSTIL_DBG

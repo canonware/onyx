@@ -117,14 +117,11 @@ struct cw_stilo_s {
 			cw_sint32_t	fd;
 		}	file;
 		struct {
-			union {
-				const void	*key; /*
-						       * Key used for global
-						       * names.
-						       */
-				cw_stilt_t	*stilt;
-			}	s;
 			cw_stiln_t	*stiln;
+			cw_stilt_t	*stilt;	/*
+						 * Only used for locally
+						 * allocated names.
+						 */
 		}	name;
 		struct {
 			cw_sint32_t	s32;
@@ -141,6 +138,9 @@ struct cw_stilo_s {
  */
 void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
     a_type, ...);
+void		stilo_new_v(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_stilot_t a_type, va_list a_p);
+
 void		stilo_delete(cw_stilo_t *a_stilo);
 
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
@@ -189,7 +189,6 @@ const cw_stilo_t *stilo_dict_iterate(cw_stilo_t *a_stilo);
  * string.
  */
 cw_sint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
-void		stilo_string_len_set(cw_stilo_t *a_stilo, cw_uint32_t a_len);
 cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);
 void		stilo_string_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
