@@ -33,7 +33,6 @@
 #  endif
 #endif
 
-
 cw_bufpool_t *
 bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
 	    cw_uint32_t a_max_spare_buffers)
@@ -655,7 +654,6 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
 	}
       }
     }
-
 
     if (num_bufels_to_move > 0)
     {
