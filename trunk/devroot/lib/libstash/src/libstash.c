@@ -44,6 +44,7 @@ libstash_init(void)
 #ifdef _LIBSTASH_DBG
 		dbg_register(cw_g_dbg, "mem_error");
 		dbg_register(cw_g_dbg, "pezz_error");
+		dbg_register(cw_g_dbg, "pool_error");
 #endif
 #ifdef _LIBSTASH_MEM_DBG
 		cw_g_mem_mem = mem_new(NULL, NULL);
