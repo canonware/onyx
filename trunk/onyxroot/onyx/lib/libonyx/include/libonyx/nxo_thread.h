@@ -224,7 +224,7 @@ cw_nxo_t *nxo_thread_currenterror_get(cw_nxo_t *a_nxo);
 cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
 void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 
-#if (defined(_CW_USE_INLINES) || defined(_THREAD_C_))
+#if (defined(_CW_USE_INLINES) || defined(_NXO_THREAD_C_))
 _CW_INLINE cw_nx_t *
 nxo_thread_nx_get(cw_nxo_t *a_nxo)
 {
@@ -299,4 +299,4 @@ nxo_thread_tstack_get(cw_nxo_t *a_nxo)
 
 	return &thread->tstack;
 }
-#endif	/* (defined(_CW_USE_INLINES) || defined(_THREAD_C_)) */
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_THREAD_C_)) */

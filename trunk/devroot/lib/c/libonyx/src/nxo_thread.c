@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#define _THREAD_C_
+#define _NXO_THREAD_C_
 
 #include "../include/libonyx/libonyx.h"
 

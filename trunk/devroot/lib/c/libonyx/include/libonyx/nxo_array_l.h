@@ -84,7 +84,7 @@ nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 	}
 	nxoe_p_array_unlock(array);
 }
-#endif
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_ARRAY_C_)) */
 
 cw_nxo_t *nxo_l_array_get(cw_nxo_t *a_nxo);
 

@@ -82,7 +82,7 @@ void	nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
 		mtx_unlock(&(a_nxoe)->lock);				\
 } while (0)
 
-#if (defined(_CW_USE_INLINES) || defined(_STACK_C_))
+#if (defined(_CW_USE_INLINES) || defined(_NXO_STACK_C_))
 _CW_INLINE cw_nxo_t *
 nxo_stack_push(cw_nxo_t *a_nxo)
 {
@@ -422,7 +422,7 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 
 	RETURN:
 }
-#endif	/* (defined(_CW_USE_INLINES) || defined(_STACK_C_)) */
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_STACK_C_)) */
 
 /*
  * Convenience wrapper macros for use where errors should cause an error and

@@ -10,7 +10,7 @@
  ******************************************************************************/
 
 /* Compile non-inlined functions if not using inlines. */
-#define	_ARRAY_C_
+#define	_NXO_ARRAY_C_
 
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxo_l.h"
