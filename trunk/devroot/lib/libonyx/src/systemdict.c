@@ -4975,9 +4975,9 @@ systemdict_rand(cw_nxo_t *a_thread)
     num = nxo_stack_push(ostack);
     /* random() returns 31 bits. */
     nxo_integer_new(num,
-		    ((cw_nxoi_t) random())
-		    + (((cw_nxoi_t) random()) << 31)
-		    + (((cw_nxoi_t) random()) << 62));
+		    ((cw_nxoi_t) (random() & 1))
+		    | (((cw_nxoi_t) random()) << 1)
+		    | (((cw_nxoi_t) random()) << 32));
 }
 
 void

@@ -1,3 +1,9 @@
+2002-03-22 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_rand() : Fix the way random()
+          is used and really generate 63 bits of randomness for the rand
+          operator.
+
 2002-03-17 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_name.c : Re-register name objects that are already
