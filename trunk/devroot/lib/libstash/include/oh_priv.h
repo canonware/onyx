@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 35 $
- * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 36 $
+ * $Date: 1998-04-19 21:27:40 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -72,7 +72,7 @@
 typedef struct
 {
   cw_bool_t is_valid;
-  cw_uint32_t key;
+  void * key;
   void * data;
 } cw_oh_item_t;
 
@@ -121,8 +121,8 @@ cw_uint32_t oh_h1_priv(oh_t * arg_oh_obj, void * arg_key);
 cw_bool_t oh_item_insert_priv(oh_t * arg_oh_obj,
 			      cw_oh_item_t * arg_item);
 cw_bool_t oh_item_search_priv(oh_t * arg_oh_obj,
-				 cw_uint32_t arg_key,
-				 cw_uint32_t * arg_slot);
+			      void * arg_key,
+			      cw_uint32_t * arg_slot);
 cw_bool_t oh_rehash_priv(oh_t * arg_oh_obj, cw_bool_t arg_force);
 
 

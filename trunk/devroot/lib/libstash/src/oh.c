@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 35 $
- * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 36 $
+ * $Date: 1998-04-19 21:27:40 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -345,7 +345,7 @@ oh_set_base_rehash_point(oh_t * arg_oh_obj,
 }
 
 cw_bool_t
-oh_item_insert(oh_t * arg_oh_obj, cw_uint32_t arg_key,
+oh_item_insert(oh_t * arg_oh_obj, void * arg_key,
 	       void * arg_data_addr)
 {
   cw_oh_item_t * item;
@@ -383,7 +383,8 @@ oh_item_insert(oh_t * arg_oh_obj, cw_uint32_t arg_key,
 
 cw_bool_t
 oh_item_delete(oh_t * arg_oh_obj,
-	       cw_uint32_t arg_key, void ** arg_data)
+	       void * arg_key,
+	       void ** arg_data)
 {
   cw_uint32_t slot;
   cw_bool_t error, retval = FALSE;
@@ -417,7 +418,7 @@ oh_item_delete(oh_t * arg_oh_obj,
 
 cw_bool_t
 oh_item_search(oh_t * arg_oh_obj,
-	       cw_uint32_t arg_key,
+	       void * arg_key,
 	       void ** arg_data)
 {
   cw_uint32_t slot;
@@ -849,7 +850,8 @@ oh_item_insert_priv(oh_t * arg_oh_obj,
 }
 
 cw_bool_t
-oh_item_search_priv(oh_t * arg_oh_obj, cw_uint32_t arg_key,
+oh_item_search_priv(oh_t * arg_oh_obj,
+		    void * arg_key,
 		    cw_uint32_t * arg_slot)
 {
   cw_uint32_t slot, i;

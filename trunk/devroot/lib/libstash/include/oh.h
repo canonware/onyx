@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 35 $
- * $Date: 1998-04-19 14:08:14 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 36 $
+ * $Date: 1998-04-19 21:27:40 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -105,11 +105,11 @@ cw_bool_t oh_set_base_grow_point(oh_t * arg_oh_obj,
 cw_bool_t oh_set_base_rehash_point(oh_t * arg_oh_obj,
 				cw_sint32_t arg_rehash_point);
 
-cw_bool_t oh_item_insert(oh_t * arg_oh_obj, cw_uint32_t arg_key,
+cw_bool_t oh_item_insert(oh_t * arg_oh_obj, void * arg_key,
 		      void * arg_data_addr);
-cw_bool_t oh_item_delete(oh_t * arg_oh_obj, cw_uint32_t arg_key,
+cw_bool_t oh_item_delete(oh_t * arg_oh_obj, void * arg_key,
 		      void ** arg_data);
-cw_bool_t oh_item_search(oh_t * arg_oh_obj, cw_uint32_t arg_key,
+cw_bool_t oh_item_search(oh_t * arg_oh_obj, void * arg_key,
 		      void ** arg_data);
 
 void oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all);
