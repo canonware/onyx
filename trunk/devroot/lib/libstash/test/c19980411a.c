@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 66 $
- * $Date: 1998-05-02 02:06:52 -0700 (Sat, 02 May 1998) $
+ * $Revision: 72 $
+ * $Date: 1998-05-02 02:15:22 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -42,8 +42,7 @@
 #define _INC_GLOB_H_
 #include <config.h>
 
-/* #define NUM_STRINGS 2000 */
-#define NUM_STRINGS 250
+#define NUM_STRINGS 2000
 
 int
 main()
