@@ -18,6 +18,28 @@
 set time-adjust;
 
 /*
+ * Given [CPPFLAGS], filter out all -D flags.  This is typically used in
+ * preparation for calling c_incl, which doesn't recognize the -D flag.
+ */
+function filter_cppdefs =
+{
+  local cppflags = [arg];
+
+  cppflags = [unsplit " " [cppflags]];
+  cppflags = [subst " -D " " -D" [cppflags]];
+  cppflags = [split " " [cppflags]];
+  cppflags = [filter_out -D% [cppflags]];
+
+  return [cppflags];
+}
+
+/* 
+ * Make sure file timestamps are at least 1 second apart for all adjacent
+ * dependency nodes.
+ */
+set time-adjust;
+
+/*
  * Standard definitions.
  */
 
@@ -71,7 +93,6 @@ if [not [defined TCC]] then
 /* Build parameters. */
 if [not [defined CPPFLAGS]] then
   CPPFLAGS = [split " " [strip "@CPPFLAGS@"]];
-CPPDEFS = -D_REENTRANT;
 
 if [not [defined CFLAGS]] then
   CFLAGS = [split " " [strip "@CFLAGS@"]];
@@ -187,6 +208,12 @@ dataend
 
 distclean : clean [addsuffix _distclean tests bins mods libs]
 {
+  {
+    local cachedir = [glob @objroot@/autom4te"*".cache];
+
+    if [count [cachedir]] then
+      rm -rf [cachedir];
+  }
   rm -f @objroot@/config.log;
   rm -f @objroot@/config.status;
   rm -f @objroot@/config.stamp;
