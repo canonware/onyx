@@ -450,31 +450,6 @@ result.
 .RE
 .RE
 
-.I <return type>
-.br
-.B <func>
-.RI ( <args> )
-.RS
-Input(s):
-.RS
-.IR <input> :
-.RS
-<input description>
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
-<retval description>
-.RE
-.RE
-Description:
-.RS
-<description>
-.RE
-.RE
-
 \"  .SH RETURN VALUES
 \"  .SH EXIT STATUS
 \"  .SH FILES
