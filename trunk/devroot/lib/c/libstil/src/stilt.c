@@ -852,7 +852,6 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 {
 	cw_stilo_t	*stilo, *errordict, *key, *handler;
 	cw_stiln_t	stiln;
-	cw_bool_t	ostack_push = TRUE;
 	cw_uint32_t	defer_count;
 
 	_cw_check_ptr(a_stilt);
@@ -886,7 +885,11 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 * Push the object being executed onto ostack unless this is an
 	 * interrupt or timeout.
 	 */
-	if (ostack_push) {
+	switch (a_error) {
+	case STILTE_INTERRUPT:
+	case STILTE_TIMEOUT:
+		break;
+	default:
 		stilo = stils_push(&a_stilt->ostack);
 		stilo_dup(stilo, stils_get(&a_stilt->estack));
 	}
@@ -2130,13 +2133,19 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 	}
 }
 
+/*
+ * Create a string that represents the code that caused the syntax error and
+ * push it onto ostack.  This means that syntax errors cause two objects to be
+ * pushed onto ostack rather than just the standard one, but if we don't do
+ * this, the invalid code gets lost forever.
+ */
 static void
 stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t *a_prefix, cw_uint8_t
     *a_suffix, cw_uint8_t a_c)
 {
 	cw_stilo_t	*stilo;
 
-	stilo = stils_push(&a_stilt->estack);
+	stilo = stils_push(&a_stilt->ostack);
 
 	stilo_string_new(stilo, a_stilt->stil, a_stilt->locking,
 	    strlen(a_prefix) + a_stilt->index + strlen(a_suffix) + 1);

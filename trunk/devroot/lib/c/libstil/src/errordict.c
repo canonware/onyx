@@ -246,7 +246,7 @@ end
 void
 errordict_interrupt(cw_stilt_t *a_stilt)
 {
-	errordict_p_generic(a_stilt, STILTE_INTERRUPT, FALSE);
+	/* Do nothing. */
 }
 
 void
@@ -306,7 +306,7 @@ errordict_syntaxerror(cw_stilt_t *a_stilt)
 void
 errordict_timeout(cw_stilt_t *a_stilt)
 {
-	errordict_p_generic(a_stilt, STILTE_TIMEOUT, FALSE);
+	/* Do nothing. */
 }
 
 void
