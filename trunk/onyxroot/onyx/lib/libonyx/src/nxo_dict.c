@@ -250,13 +250,16 @@ nxoe_p_dict_lookup(cw_nxoe_dict_t *a_dict, const cw_nxo_t *a_key)
     }
     else
     {
-	cw_uint32_t i;
+	cw_uint32_t key_hash, i;
+
+	key_hash = nxo_p_dict_hash(a_key);
 
 	retval = NULL;
 	for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
 	{
 	    if (nxo_type_get(&a_dict->data.a.array[i].key) != NXOT_NO
-		&& nxo_compare(&a_dict->data.a.array[i].key, a_key) == 0)
+		&& nxo_p_dict_hash(&a_dict->data.a.array[i].key) == key_hash
+		&& nxo_p_dict_key_comp(&a_dict->data.a.array[i].key, a_key))
 	    {
 		retval = &a_dict->data.a.array[i].val;
 		break;
