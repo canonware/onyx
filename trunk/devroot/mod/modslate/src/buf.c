@@ -920,10 +920,10 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	}
 	case BUFW_REL:
 	{
-	    buf_p_bufp_cache_validate(a_mkr->bufp->buf, a_mkr->bufp);
 	    if (a_offset > 0)
 	    {
 		/* Make sure not to go out of buf bounds. */
+		buf_p_bufp_cache_validate(a_mkr->bufp->buf, a_mkr->bufp);
 		if (mkr_p_line(a_mkr) + a_offset > a_mkr->bufp->buf->nlines)
 		{
 		    /* Attempt to move to or after EOB.  Move to EOB. */
@@ -944,6 +944,7 @@ mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    else if (a_offset < 0)
 	    {
 		/* Make sure not to go out of buf bounds. */
+		buf_p_bufp_cache_validate(a_mkr->bufp->buf, a_mkr->bufp);
 		if (-a_offset >= mkr_p_line(a_mkr))
 		{
 		    /* Attempt to move to or before BOB.  Move to BOB. */
