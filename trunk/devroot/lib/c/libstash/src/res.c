@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 182 $
- * Last modified: $Date: 1998-08-29 21:03:04 -0700 (Sat, 29 Aug 1998) $
+ * Current revision: $Revision: 192 $
+ * Last modified: $Date: 1998-09-01 18:15:41 -0700 (Tue, 01 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -148,6 +148,96 @@ res_delete(cw_res_t * a_res_o)
   {
     _cw_marker("Exit res_delete()");
   }
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Clears out all resources.
+ *
+ ****************************************************************************/
+void
+res_clear(cw_res_t * a_res_o)
+{
+  char * key, * val;
+  
+  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
+  {
+    _cw_marker("Enter res_clear()");
+  }
+  _cw_check_ptr(a_res_o);
+  rwl_wlock(&a_res_o->rw_lock);
+
+  while (FALSE == oh_item_delete_iterate(&a_res_o->hash_o, &key, &val))
+  {
+    _cw_free(key);
+    _cw_free(val);
+  }
+  
+  rwl_wunlock(&a_res_o->rw_lock);
+  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
+  {
+    _cw_marker("Exit res_clear()");
+  }
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ *
+ *
+ ****************************************************************************/
+cw_bool_t
+res_is_equal(cw_res_t * a_res_o, cw_res_t * a_other)
+{
+  cw_bool_t retval;
+
+  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
+  {
+    _cw_marker("Enter res_is_equal()");
+  }
+  _cw_check_ptr(a_res_o);
+  _cw_check_ptr(a_other);
+  rwl_wlock(&a_res_o->rw_lock);
+  rwl_rlock(&other->rw_lock);
+
+  if (a_res_o == a_other)
+  {
+    /* Two pointers to the same instance. */
+    retval = TRUE;
+  }
+  else if (oh_get_num_items(&a_res_o->hash_o)
+	   != oh_get_num_items(&a_other->hash_o))
+  {
+    retval = FALSE;
+  }
+  else
+  {
+    cw_uint32_t i, num_resources;
+    char * key, * val;
+
+    num_resources = oh_get_num_items(&a_res_o->hash_o);
+    
+    for (i = 0, retval = FALSE; (i < num_resources) && (retval == FALSE); i++)
+    {
+      oh_item_delete_iterate(&a_res_o->hash_o, &key, &val);
+
+      if (NULL == res_get_res_val(a_other, key))
+      {
+	retval = TRUE;
+      }
+
+      oh_item_insert(&a_res_o->hash_o, key, val);
+    }
+  }
+  
+  rwl_runlock(&a_other->rw_lock);
+  rwl_wunlock(&a_res_o->rw_lock);
+  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
+  {
+    _cw_marker("Exit res_is_equal()");
+  }
+  return retval;
 }
 
 /****************************************************************************
@@ -292,12 +382,43 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
   }
   return retval;
 }
-		
+
 /****************************************************************************
  * <<< Description >>>
  *
- * Dumps the resource database.  If a_filename is non-NULL, attempts to
- * open the specified file and write to it.  Otherwise, uses g_log_o.
+ * Find a resource name/value pair, remove it from the resource database,
+ * and set *a_res_name and *a_res_val to point it.  If the resource isn't
+ * found, return TRUE.
+ *
+ ****************************************************************************/
+cw_bool_t
+res_extract_res(cw_res_t * a_res_o, char * a_res_key,
+		char ** a_res_name, char ** a_res_val)
+{
+  cw_bool_t retval;
+
+  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
+  {
+    _cw_marker("Enter res_extract_res()");
+  }
+  _cw_check_ptr(a_res_o);
+  rwl_wlock(&a_res_o->rw_lock);
+
+  retval = oh_item_delete(&a_res_o->hash_o, a_res_key, a_res_name, a_res_val);
+
+  rwl_wunlock(&a_res_o->rw_lock);
+  if (_cw_pmatch(_STASH_DBG_R_RES_FUNC))
+  {
+    _cw_marker("Exit res_extract_res()");
+  }
+  return retval;
+}
+
+/****************************************************************************
+ * <<< Description >>>
+ *
+ * Dump the resource database.  If a_filename is non-NULL, attempt to open
+ * the specified file and write to it.  Otherwise, use g_log_o.
  *
  ****************************************************************************/
 cw_bool_t
