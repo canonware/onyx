@@ -90,7 +90,7 @@ xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
 		/* Execute the handler. */
 		xep->value = a_value;
 		xep->state = CW_XEPS_CATCH;
-		longjmp(xep->context, (int)a_value);
+		longjmp(xep->context, (int) a_value);
 		cw_not_reached();
 	    }
 	    case CW_XEPS_CATCH:
@@ -138,7 +138,7 @@ xep_p_retry(cw_xep_t *a_xep)
     a_xep->value = CW_XEPV_NONE;
     a_xep->state = CW_XEPS_TRY;
     a_xep->is_handled = true;
-    longjmp(a_xep->context, (int)CW_XEPV_CODE);
+    longjmp(a_xep->context, (int) CW_XEPV_CODE);
     cw_not_reached();
 }
 

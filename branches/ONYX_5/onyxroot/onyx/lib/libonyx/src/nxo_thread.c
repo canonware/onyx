@@ -437,7 +437,7 @@ nxo_p_thread_entry(void *a_arg)
     /* Run. */
     nxo_thread_start(&thread->self);
 
-    /* Wait to be joined or detated, if not already so. */
+    /* Wait to be joined or detached, if not already so. */
     mtx_lock(&thread->lock);
     thread->done = true;
     while (thread->detached == false && thread->joined == false)
