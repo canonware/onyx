@@ -1,3 +1,8 @@
+2001-03-04  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c : Change the default padding character for [p] from 
+	' ' to '0'.
+
 2001-02-28  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c : Use dch rather than ch for memory allocation

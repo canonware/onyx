@@ -98,11 +98,12 @@ static void	out_p_el_accept(cw_out_t *a_out, const char *a_format,
 static cw_out_ent_t	*out_p_ent_get(cw_out_t *a_out, const char *a_format,
     cw_uint32_t a_len);
 static void		out_p_common_render(const char *a_format, cw_uint32_t
-    a_len, cw_uint32_t a_max_len, cw_uint32_t a_rlen, cw_uint8_t *r_buf,
-    cw_uint32_t *r_width, cw_uint32_t *r_owidth, cw_uint32_t *r_offset);
+    a_len, cw_uint32_t a_max_len, cw_uint8_t a_default_pad, cw_uint32_t
+    a_rlen, cw_uint8_t *r_buf, cw_uint32_t *r_width, cw_uint32_t *r_owidth,
+    cw_uint32_t *r_offset);
 static cw_uint32_t	out_p_int_render(const char *a_format, cw_uint32_t
-    a_len, cw_uint64_t a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf,
-    cw_uint32_t a_nbits, cw_uint32_t a_default_base);
+    a_len, cw_uint64_t a_arg, cw_uint32_t a_max_len, cw_uint8_t a_default_pad,
+    cw_uint8_t *r_buf, cw_uint32_t a_nbits, cw_uint32_t a_default_base);
 static cw_uint32_t	out_p_int32_render(const char *a_format, cw_uint32_t
     a_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_buf);
 static cw_uint32_t	out_p_int64_render(const char *a_format, cw_uint32_t
@@ -1203,8 +1204,8 @@ out_p_ent_get(cw_out_t *a_out, const char *a_format, cw_uint32_t a_len)
 
 static void
 out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
-    a_max_len, cw_uint32_t a_rlen, cw_uint8_t *r_buf, cw_uint32_t *r_width,
-    cw_uint32_t *r_owidth, cw_uint32_t *r_offset)
+    a_max_len, cw_uint8_t a_default_pad, cw_uint32_t a_rlen, cw_uint8_t *r_buf,
+    cw_uint32_t *r_width, cw_uint32_t *r_owidth, cw_uint32_t *r_offset)
 {
 	cw_uint32_t	width, owidth, offset;
 	cw_sint32_t	val_len;
@@ -1245,7 +1246,7 @@ out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
 		    -1)
 			pad = val[0];
 		else
-			pad = ' ';
+			pad = a_default_pad;
 
 		memset(r_buf, pad, owidth);
 
@@ -1278,8 +1279,8 @@ out_p_common_render(const char *a_format, cw_uint32_t a_len, cw_uint32_t
 
 static cw_uint32_t
 out_p_int_render(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
-    cw_uint32_t a_max_len, cw_uint8_t *r_buf, cw_uint32_t a_nbits, cw_uint32_t
-    a_default_base)
+    cw_uint32_t a_max_len, cw_uint8_t a_default_pad, cw_uint8_t *r_buf,
+    cw_uint32_t a_nbits, cw_uint32_t a_default_base)
 {
 	cw_uint32_t	base, olen, rlen, owidth, width, offset, i;
 	cw_sint32_t	val_len;
@@ -1377,8 +1378,8 @@ out_p_int_render(const char *a_format, cw_uint32_t a_len, cw_uint64_t a_arg,
 	rlen = &s_result[65] - result;
 	_cw_assert(rlen <= 65);
 
-	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
-	    &owidth, &offset);
+	out_p_common_render(a_format, a_len, a_max_len, a_default_pad, rlen,
+	    r_buf, &width, &owidth, &offset);
 
 	if (offset < owidth) {
 		if (offset + rlen <= owidth)
@@ -1404,8 +1405,8 @@ out_p_int32_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	arg = (cw_uint64_t)*(const cw_uint32_t *)a_arg;
 
-	retval = out_p_int_render(a_format, a_len, arg, a_max_len, r_buf, 32,
-	    10);
+	retval = out_p_int_render(a_format, a_len, arg, a_max_len, ' ', r_buf,
+	    32, 10);
 
 	return retval;
 }
@@ -1424,8 +1425,8 @@ out_p_int64_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	arg = *(const cw_uint64_t *)a_arg;
 
-	retval = out_p_int_render(a_format, a_len, arg, a_max_len, r_buf, 64,
-	    10);
+	retval = out_p_int_render(a_format, a_len, arg, a_max_len, ' ', r_buf,
+	    64, 10);
 
 	return retval;
 }
@@ -1446,8 +1447,8 @@ out_p_char_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 
 	rlen = 1;
 
-	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
-	    &owidth, &offset);
+	out_p_common_render(a_format, a_len, a_max_len, ' ', rlen, r_buf,
+	    &width, &owidth, &offset);
 
 	if (offset < owidth)
 		r_buf[offset] = c;
@@ -1486,8 +1487,8 @@ out_p_string_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 	} else
 		width = rlen;
 
-	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
-	    &owidth, &offset);
+	out_p_common_render(a_format, a_len, a_max_len, ' ', rlen, r_buf,
+	    &width, &owidth, &offset);
 
 	if (offset < owidth) {
 		if (offset + rlen <= owidth)
@@ -1516,7 +1517,7 @@ out_p_pointer_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 		cw_uint64_t	arg;
 		arg = (cw_uint64_t)(cw_uint32_t)*(const void **)a_arg;
 
-		retval = out_p_int_render(a_format, a_len, arg, a_max_len,
+		retval = out_p_int_render(a_format, a_len, arg, a_max_len, '0',
 		    r_buf, 32, 16);
 	}
 #elif (SIZEOF_INT_P == 8)
@@ -1524,7 +1525,7 @@ out_p_pointer_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 		cw_uint64_t	arg;
 		arg = (cw_uint64_t)*(const void **)a_arg;
 
-		retval = out_p_int_render(a_format, a_len, arg, a_max_len,
+		retval = out_p_int_render(a_format, a_len, arg, a_max_len, '0',
 		    r_buf, 64, 16);
 	}
 #else
@@ -1568,8 +1569,8 @@ out_p_buf_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 	} else
 		width = rlen;
 
-	out_p_common_render(a_format, a_len, a_max_len, rlen, r_buf, &width,
-	    &owidth, &offset);
+	out_p_common_render(a_format, a_len, a_max_len, ' ', rlen, r_buf,
+	    &width, &owidth, &offset);
 
 	if (offset < owidth) {
 		/*

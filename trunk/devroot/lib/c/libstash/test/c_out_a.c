@@ -646,6 +646,12 @@ main()
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 
 		memcpy(buf, ibuf, 81);
+		_cw_assert(out_put_sn(out_p, str, 8, "[p|w:8]", (void *)0x42) >=
+		    0);
+		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
+
+		/* Overflow. */
+		memcpy(buf, ibuf, 81);
 		_cw_assert(out_put_sn(out_p, str, 3, "won't fit") >= 0);
 		_cw_assert(out_put(out_p, "[s]\n", buf) == 81);
 

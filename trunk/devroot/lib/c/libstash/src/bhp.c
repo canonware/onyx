@@ -459,7 +459,7 @@ bhp_p_dump(cw_bhpi_t *a_bhpi, cw_uint32_t a_depth, cw_bhpi_t *a_last_printed)
 		for (i = 0; i < (a_depth * 38); i++)
 			out_put(out_err, " ");
 	}
-	out_put(out_err, "[[deg:[i] pri:0x[p|w:8|p:0] dat:0x[p|w:8|p:0]]",
+	out_put(out_err, "[[deg:[i] pri:0x[p|w:8] dat:0x[p|w:8]]",
 	    a_bhpi->degree, a_bhpi->priority, a_bhpi->data);
 	a_last_printed = a_bhpi;
 
