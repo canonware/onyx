@@ -50,7 +50,7 @@ main()
     }
     for (i = 0; i < NENTRIES; i++)
     {
-	fprintf(stderr, "  qr_foreach_reverse(%c):", entries[i].id);
+	fprintf(stderr, "  qr_reverse_foreach(%c):", entries[i].id);
 	qr_reverse_foreach(t, &entries[i], link)
 	{
 	    fprintf(stderr, " %c", t->id);
