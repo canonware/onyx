@@ -1,3 +1,17 @@
+1999-03-04  Jason Evans  <jasone@canonware.com>
+
+	* src/buf.c (buf_p_catenate_buf): Fix an off-by-one bug that
+	corrupted the array of a_a if bufel merging was successful.
+
+	* include/libstash/libstash.h: Remove namespace mangling, since it
+	serves little purpose, other than obfuscation and complexity.
+
+	* src/buf.c (buf_p_copy_array): Add.  When copying parts of a
+	buf's internal array, do one to three memcpy()'s, depending on
+	position of the source and destination.  The previous
+	implementation naively iterated through the array elements to
+	copy, with one memcpy() per element.
+
 1999-03-01  Jason Evans  <jasone@canonware.com>
 
 	* src/mem.c : Add sophisticated logging and checking to the mem class.

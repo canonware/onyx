@@ -36,7 +36,7 @@ SRCS := libstash.c bhp.c buf.c dbg.c lex.c list.c log.c matrix.c mem.c oh.c \
 SRCS_R := locks.c thread.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
-CTESTS := c_buf_a.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
+CTESTS := c_buf_a.c c_buf_b.c c_jtl_a.c c_list_a.c c_log_a.c c_matrix_a.c \
 	c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c c_res_a.c c_rwl_a.c c_sem_a.c \
 	c_thd_a.c c_treen_a.c
 

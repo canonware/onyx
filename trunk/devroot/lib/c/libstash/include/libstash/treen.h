@@ -34,7 +34,6 @@ struct cw_treen_s
  * treen constructor.
  *
  ****************************************************************************/
-#define treen_new _CW_NS_LIBSTASH(treen_new)
 cw_treen_t *
 treen_new(cw_bool_t a_is_thread_safe);
 
@@ -43,7 +42,6 @@ treen_new(cw_bool_t a_is_thread_safe);
  * treen destructor.  Also deletes all subtrees.
  *
  ****************************************************************************/
-#define treen_delete _CW_NS_LIBSTASH(treen_delete)
 void
 treen_delete(cw_treen_t * a_treen);
 
@@ -52,7 +50,6 @@ treen_delete(cw_treen_t * a_treen);
  * Returns the number of children of a_treen.
  *
  ****************************************************************************/
-#define treen_get_num_children _CW_NS_LIBSTASH(treen_get_num_children)
 cw_uint32_t
 treen_get_num_children(cw_treen_t * a_treen);
 
@@ -63,7 +60,6 @@ treen_get_num_children(cw_treen_t * a_treen);
  * pointer.
  *
  ****************************************************************************/
-#define treen_link_child _CW_NS_LIBSTASH(tree_ins_child)
 cw_bool_t
 treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
 		 cw_uint32_t a_position);
@@ -75,7 +71,6 @@ treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
  * return TRUE.
  *
  ****************************************************************************/
-#define treen_unlink_child _CW_NS_LIBSTASH(tree_del_child)
 cw_bool_t
 treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
 		   cw_treen_t ** a_child);
@@ -87,7 +82,6 @@ treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
  * returns TRUE.
  *
  ****************************************************************************/
-#define treen_get_child_ptr _CW_NS_LIBSTASH(treen_get_child_ptr)
 cw_bool_t
 treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
 		    cw_treen_t ** a_child);
@@ -97,7 +91,6 @@ treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
  * Returns a pointer to the data for a_treen.
  *
  ****************************************************************************/
-#define treen_get_data_ptr _CW_NS_LIBSTASH(tree_get_data_ptr)
 void *
 treen_get_data_ptr(cw_treen_t * a_treen);
 
@@ -106,6 +99,5 @@ treen_get_data_ptr(cw_treen_t * a_treen);
  * Sets the pointer for data for a_treen.
  *
  ****************************************************************************/
-#define treen_set_data_ptr _CW_NS_LIBSTASH(tree_set_data_ptr)
 void *
 treen_set_data_ptr(cw_treen_t * a_treen, void * a_data);

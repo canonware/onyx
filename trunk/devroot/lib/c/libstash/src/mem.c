@@ -72,7 +72,7 @@ mem_delete(cw_mem_t * a_mem)
       if (dbg_is_registered(cw_g_dbg, "mem_error"))
       {
 	log_eprintf(cw_g_log, NULL, 0, __FUNCTION__,
-		    "%p, size %u never freed (allocated at %s, line %d\n",
+		    "%p, size %u never freed (allocated at %s, line %d)\n",
 		    addr, allocation->size,
 		    ((NULL == allocation->filename)
 		     ? "<?>" : allocation->filename),
@@ -365,8 +365,6 @@ void
 mem_free(cw_mem_t * a_mem, void * a_ptr)
 #endif
 {
-/*    _cw_check_ptr(a_ptr); */
-
 #ifdef _LIBSTASH_DBG
   if (NULL != a_mem)
   {

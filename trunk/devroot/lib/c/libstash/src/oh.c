@@ -560,7 +560,6 @@ oh_item_delete(cw_oh_t * a_oh,
     *a_key = (void *) a_oh->items[slot]->key;
     *a_data = (void *) a_oh->items[slot]->data;
     list_remove(&a_oh->items_list, a_oh->items[slot]->list_item);
-    /* XXX Potentially a good place for an assertion. */
 
     /* Put the item on the spares list. */
     list_hpush(&a_oh->spares_list, (void *) a_oh->items[slot]);
@@ -907,6 +906,8 @@ oh_p_h1(cw_oh_t * a_oh, const void * a_key)
 {
   cw_uint64_t retval;
   char * str;
+
+  _cw_check_ptr(a_key);
 
   for (str = (char *) a_key, retval = 0; *str != 0; str++)
   {

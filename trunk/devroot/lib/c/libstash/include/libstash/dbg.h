@@ -29,9 +29,8 @@ struct cw_dbg_s
  * dbg constructor.
  *
  ****************************************************************************/
-#define dbg_new _CW_NS_LIBSTASH(dbg_new)
 cw_dbg_t *
-dbg_new();
+dbg_new(void);
 
 /****************************************************************************
  * <<< Description >>>
@@ -39,7 +38,6 @@ dbg_new();
  * dbg destructor.
  *
  ****************************************************************************/
-#define dbg_delete _CW_NS_LIBSTASH(dbg_delete)
 void
 dbg_delete(cw_dbg_t * a_dbg);
 
@@ -49,7 +47,6 @@ dbg_delete(cw_dbg_t * a_dbg);
  * Register a debug flag string (turn it on).
  *
  ****************************************************************************/
-#define dbg_register _CW_NS_LIBSTASH(dbg_register)
 void
 dbg_register(cw_dbg_t * a_dbg, const char * a_flag);
 
@@ -59,7 +56,6 @@ dbg_register(cw_dbg_t * a_dbg, const char * a_flag);
  * Unregister a flag (turn it off) if it is registered.
  *
  ****************************************************************************/
-#define dbg_unregister _CW_NS_LIBSTASH(dbg_unregister)
 void
 dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag);
 
@@ -70,7 +66,6 @@ dbg_unregister(cw_dbg_t * a_dbg, const char * a_flag);
  *
  ****************************************************************************/
 #ifdef _LIBSTASH_DBG
-#  define dbg_is_registered _CW_NS_LIBSTASH(dbg_is_registered)
 cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg, const char * a_flag);
 #else

@@ -132,18 +132,6 @@ typedef enum
 #  endif
   
 /*
- * Namespace setup.
- */
-
-#  define _CW_LIBSTASH_PREFIX _libstash_
-
-#  define _cw_ns_glue(x,y,z) x##y##z
-#  define _cw_ns_xglue(x,y,z) _cw_ns_glue(x,y,z)
-
-/* Create one of these for each namespace. */
-#  define _CW_NS_LIBSTASH(x) _cw_ns_xglue(_CW_LIBSTASH_PREFIX,,x)
-
-/*
  * Project headers to always be included.
  */
 
@@ -161,24 +149,17 @@ typedef enum
 /*
  * libstash initialization and shutdown function prototypes.
  */
-#  define libstash_init _CW_NS_LIBSTASH(libstash_init)
 void
 libstash_init(void);
   
-#  define libstash_shutdown _CW_NS_LIBSTASH(libstash_shutdown)
 void
 libstash_shutdown(void);
   
 /*
  * Global variables.
  */
-#define cw_g_mem _CW_NS_LIBSTASH(cw_g_mem)
 extern cw_mem_t * cw_g_mem;
-
-#define cw_g_dbg _CW_NS_LIBSTASH(cw_g_dbg)
 extern cw_dbg_t * cw_g_dbg;
-
-#define cw_g_log _CW_NS_LIBSTASH(cw_g_log)
 extern cw_log_t * cw_g_log;
 
 /*

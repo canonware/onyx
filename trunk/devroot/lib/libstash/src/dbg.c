@@ -19,7 +19,7 @@
 #include "libstash/mem_l.h"
 
 cw_dbg_t *
-dbg_new()
+dbg_new(void)
 {
   cw_dbg_t * retval;
 
