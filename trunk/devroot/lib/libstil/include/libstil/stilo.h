@@ -13,6 +13,7 @@ typedef struct cw_stilo_s cw_stilo_t;
 
 /* Defined here to resolve circular dependencies. */
 typedef struct cw_stiloe_s cw_stiloe_t;
+typedef struct cw_stiloei_s cw_stiloei_t;
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
@@ -20,7 +21,6 @@ typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
 typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
 typedef struct cw_stiloe_number_s cw_stiloe_number_t;
-typedef struct cw_stiloe_packedarray_s cw_stiloe_packedarray_t;
 typedef struct cw_stiloe_string_s cw_stiloe_string_t;
 typedef struct cw_stiln_s cw_stiln_t;
 typedef struct cw_stilt_s cw_stilt_t;
@@ -40,8 +40,7 @@ typedef enum {
 	_CW_STILOT_NULLTYPE = 11,
 	_CW_STILOT_NUMBERTYPE = 12,
 	_CW_STILOT_OPERATORTYPE = 13,
-	_CW_STILOT_PACKEDARRAYTYPE = 14,
-	_CW_STILOT_STRINGTYPE = 15
+	_CW_STILOT_STRINGTYPE = 14
 }	cw_stilot_t;
 
 /*
@@ -166,9 +165,6 @@ struct cw_stilo_s {
 			void	(*f)(cw_stilt_t *);
 		}	operator;
 		struct {
-			cw_stiloe_packedarray_t *stiloe;
-		}	packedarray;
-		struct {
 			cw_stiloe_string_t *stiloe;
 		}	string;
 	}	o;
@@ -184,4 +180,5 @@ cw_stiloe_t	*stilo_get_extended(cw_stilo_t *a_stilo);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
-cw_bool_t	stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
+cw_bool_t	stilo_cast(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
+    a_stilot);

@@ -11,8 +11,8 @@
 
 #if (0)
 typedef struct cw_stiloe_s cw_stiloe_t;
+typedef struct cw_stiloei_s cw_stiloei_t;
 #endif
-typedef struct cw_stiloer_s cw_stiloer_t;
 
 typedef enum {
 	_CW_STILOEA_NONE = 0,
@@ -20,6 +20,22 @@ typedef enum {
 	_CW_STILOEA_READONLY = 2,
 	_CW_STILOEA_EXECUTEONLY = 3
 }	cw_stiloea_t;
+
+/*
+ * Operations on of type array and string can cause subranges of the objects to
+ * be referred to by newly created objects.  These objects actually share the
+ * data, rather than having their own copy.  The stiloei class contains the
+ * information necessary to refer to a stiloe.
+ */
+struct cw_stiloei_s {
+#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
+	cw_uint32_t	magic;
+#endif
+
+	cw_stiloe_t	*stiloe;
+	cw_uint32_t	beg_offset;
+	cw_uint32_t	end_offset;
+};
 
 /*
  * All extended type objects contain a stiloe.  This provides a poor man's
@@ -46,8 +62,14 @@ struct cw_stiloe_s {
 	 * locked, even if global.
 	 */
 	cw_bool_t	immutable:1;
+	/*
+	 * If TRUE, this object is an indirect reference to a subrange of
+	 * another object (array or string).
+	 */
+	cw_bool_t	indirect:1;
 };
 
 void	stiloe_new(cw_stiloe_t *a_stiloe);
-
 void	stiloe_delete(cw_stiloe_t *a_stiloe);
+
+#define	stiloe_is_indirect(a_stiloe) (a_stiloe)->indirect

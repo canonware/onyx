@@ -19,6 +19,9 @@
 /* Number of stil_bufc structures to allocate at a time via the pezz code. */
 #define _CW_STIL_BUFC_CHUNK_COUNT	 16
 
+/* Number of stack elements per memory chunk. */
+#define _CW_STIL_STILSC_COUNT		 16
+
 /*
  * Size and fullness control of initial name cache hash table.  We know for sure
  * that there will be about 175 names referenced by systemdict and threaddict to
@@ -70,14 +73,17 @@ stil_new(cw_stil_t *a_stil)
 	if (pezz_new(&retval->stiln_pezz, sizeof(cw_stiln_t),
 	    _CW_STIL_STILN_BASE_GROW / 4) == NULL)
 		goto OOM_4;
+	if (pezz_new(&retval->stilsc_pezz, sizeof(cw_stilsc_t),
+	    _CW_STIL_STILSC_COUNT) == NULL)
+		goto OOM_5;
 	if (dch_new(&retval->stiln_dch, _CW_STIL_STILN_BASE_TABLE,
 	    _CW_STIL_STILN_BASE_GROW, _CW_STIL_STILN_BASE_SHRINK, stilnk_p_hash,
 	    stilnk_p_key_comp) == NULL)
-		goto OOM_5;
+		goto OOM_6;
 	if (dch_new(&retval->roots_dch, _CW_STIL_ROOTS_BASE_TABLE,
 	    _CW_STIL_ROOTS_BASE_GROW, _CW_STIL_ROOTS_BASE_SHRINK,
 	    ch_hash_direct, ch_key_comp_direct) == NULL)
-		goto OOM_6;
+		goto OOM_7;
 	mtx_new(&retval->lock);
 
 #ifdef _LIBSTIL_DBG
@@ -86,8 +92,10 @@ stil_new(cw_stil_t *a_stil)
 
 	return retval;
 
-	OOM_6:
+	OOM_7:
 	dch_delete(&retval->stiln_dch);
+	OOM_6:
+	pezz_delete(&retval->stilsc_pezz);
 	OOM_5:
 	pezz_delete(&retval->stiln_pezz);
 	OOM_4:
@@ -126,6 +134,7 @@ stil_delete(cw_stil_t *a_stil)
 		_cw_pezz_put(&a_stil->chi_pezz, chi);
 	}
 	dch_delete(&a_stil->stiln_dch);
+	pezz_delete(&a_stil->stilsc_pezz);
 	pezz_delete(&a_stil->stiln_pezz);
 	
 	pezz_delete(&a_stil->chi_pezz);

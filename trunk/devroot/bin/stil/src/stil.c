@@ -71,8 +71,6 @@ main(int argc, char **argv)
 	    sizeof(cw_stiloe_mstate_t));
 	_cw_out_put("sizeof(cw_stiloe_number_t): [i]\n",
 	    sizeof(cw_stiloe_number_t));
-	_cw_out_put("sizeof(cw_stiloe_packedarray_t): [i]\n",
-	    sizeof(cw_stiloe_packedarray_t));
 	_cw_out_put("sizeof(cw_stiloe_string_t): [i]\n",
 	    sizeof(cw_stiloe_string_t));
 	_cw_out_put("\n");

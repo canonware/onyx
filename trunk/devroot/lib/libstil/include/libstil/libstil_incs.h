@@ -35,7 +35,6 @@
 #include "stiloe_lock.h"
 #include "stiloe_mstate.h"
 #include "stiloe_number.h"
-#include "stiloe_packedarray.h"
 #include "stiloe_string.h"
 #include "stil.h"
 #include "stils.h"

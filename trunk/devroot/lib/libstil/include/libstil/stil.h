@@ -35,6 +35,9 @@ struct cw_stil_s {
 	/* pezz from which stiln's are allocated for the names hash. */
 	cw_pezz_t	stiln_pezz;
 
+	/* pezz from which stilsc's are allocated for stacks. */
+	cw_pezz_t	stilsc_pezz;
+
 	/*
 	 * Hash of names ((cw_stilnk_t *) string is hashed) to (cw_stiln_t ).
 	 * *This hash table keeps track of *all* name "values" in the * virtual
@@ -106,7 +109,8 @@ void		stil_delete(cw_stil_t *a_stil);
 
 cw_stil_bufc_t	*stil_get_stil_bufc(cw_stil_t *a_stil);
 
-#define stilt_get_chi_pezz(a_stil) (&a_stil->chi_pezz)
+#define stil_get_chi_pezz(a_stil) (&(a_stil)->chi_pezz)
+#define stil_get_stilsc_pezz(a_stil) (&(a_stil)->stilsc_pezz)
 
 const cw_stiln_t *stil_stiln_ref(cw_stil_t *a_stil, const cw_uint8_t *a_name,
     cw_uint32_t a_len, cw_bool_t a_force, cw_bool_t a_is_static, const void

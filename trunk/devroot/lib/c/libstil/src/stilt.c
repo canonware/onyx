@@ -131,6 +131,9 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	    ch_hash_direct, ch_key_comp_direct) ==
 	    NULL)
 		goto OOM_3;
+	stils_new(&retval->exec_stils, stil_get_stilsc_pezz(a_stil));
+	stils_new(&retval->data_stils, stil_get_stilsc_pezz(a_stil));
+	stils_new(&retval->dict_stils, stil_get_stilsc_pezz(a_stil));
 	retval->stil = a_stil;
 	retval->state = _CW_STILT_STATE_START;
 	retval->line = 1;
@@ -155,6 +158,9 @@ stilt_delete(cw_stilt_t *a_stilt)
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
+	stils_delete(&a_stilt->dict_stils);
+	stils_delete(&a_stilt->data_stils);
+	stils_delete(&a_stilt->exec_stils);
 	dch_delete(&a_stilt->roots_dch);
 	dch_delete(&a_stilt->stiln_dch);
 	if (a_stilt->is_malloced)
@@ -270,6 +276,13 @@ stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf)
 	_cw_free(entry_arg);
 	OOM_1:
 	return TRUE;
+}
+
+void *
+stilt_malloc(cw_stilt_t *a_stilt, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num)
+{
+	return mem_malloc(cw_g_mem, a_size, a_filename, a_line_num);
 }
 
 const cw_stiln_t *
@@ -700,6 +713,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case ')':
 				a_stilt->meta.string.paren_depth--;
 				if (a_stilt->meta.string.paren_depth == 0) {
+					cw_stilo_t	*stilo;
+					cw_stiloe_string_t *stiloe;
+
 					/*
 					 * Matched opening paren; not part of
 					 * the string.
@@ -707,6 +723,21 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					a_stilt->state = _CW_STILT_STATE_START;
 					stilt_p_print_token(a_stilt,
 					    a_stilt->index, "string");
+					stilo =
+					    stils_push(&a_stilt->data_stils);
+					stilo_cast(stilo, a_stilt,
+					    _CW_STILOT_STRINGTYPE);
+					stiloe = (cw_stiloe_string_t
+					    *)stilo_get_extended(stilo);
+					stiloe_string_len_set(stiloe, a_stilt,
+					    a_stilt->index);
+					if (a_stilt->index <=
+					    _CW_STIL_BUFC_SIZE) {
+						stiloe_string_set(stiloe, 0,
+						    a_stilt->tok_buffer.str,
+						    a_stilt->index);
+					} else
+						_cw_error("XXX Unimplemented");
 					stilt_p_reset_tok_buffer(a_stilt);
 				} else
 					_CW_STILT_PUTC(c);

@@ -39,6 +39,7 @@ stils_new(cw_stils_t *a_stils, cw_pezz_t *a_stilsc_pezz)
 	retval->spares = NULL;
 	retval->nspares = 0;
 	retval->stilsc_pezz = a_stilsc_pezz;
+	_cw_out_put_e("a_stilsc_pezz: 0x[p]\n", retval->stilsc_pezz);
 	qq_init(&retval->chunks);
 
 #ifdef _LIBSTIL_DBG
@@ -116,7 +117,6 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 		case _CW_STILOT_LOCKTYPE:
 		case _CW_STILOT_MSTATETYPE:
 		case _CW_STILOT_NUMBERTYPE:
-		case _CW_STILOT_PACKEDARRAYTYPE:
 		case _CW_STILOT_STRINGTYPE:
 			a_add_root_func(a_add_root_arg, new_stilo);
 			break;
@@ -146,9 +146,12 @@ stils_push(cw_stils_t *a_stils)
 
 	/* Get an unused stilso and link it into the stack. */
 	stilso = stils_p_alloc_stilso(a_stils);
-	qr_meld(stilso, a_stils->stack, link);
+	if (a_stils->stack != NULL) 
+		qr_meld(stilso, a_stils->stack, link);
 	a_stils->stack = stilso;
 	a_stils->count++;
+
+	stilo_new(&stilso->stilo);
 
 	return &stilso->stilo;
 }
@@ -406,7 +409,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 	 * If there are no spares, create a new stilsc, add it to the stilsc
 	 * slist, and add its stilso's to the spares ring.
 	 */
-	 if (a_stils->nspares == 0) {
+	if (a_stils->nspares == 0) {
 		cw_stilsc_t	*stilsc;
 
 		stilsc = stilsc_p_new(a_stils->stilsc_pezz);
@@ -414,7 +417,7 @@ stils_p_alloc_stilso(cw_stils_t *a_stils)
 		qq_insert_head(&a_stils->chunks, stilsc, link);
 		a_stils->spares = stilsc_p_get_stilso(stilsc, 0);
 		a_stils->nspares = stilsc_p_get_nstilso(stilsc);
-	 }
+	}
 
 	retval = a_stils->spares;
 	a_stils->spares = qr_next(retval, link);
