@@ -894,10 +894,11 @@ void
 usage(void)
 {
 	_cw_out_put("[s] usage:\n"
-	    "    [s] -h\n"
-	    "    [s] -V\n"
-	    "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>]"
-	    " [[-p <port>]", g_progname, g_progname, g_progname, g_progname);
+	    "  [s] -h\n"
+	    "  [s] -V\n"
+	    "  [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>]"
+	    " [[-i <ip>] [[-p <port>]", g_progname, g_progname, g_progname,
+	    g_progname);
 #ifdef _CW_IPFILTER
 	_cw_out_put(" [[-r [[<rhost>:]<rport> | -t]\n");
 #else
@@ -905,26 +906,26 @@ usage(void)
 #endif
 	_cw_out_put(
 	    "\n"
-	    "    Option               | Description\n"
-	    "    ---------------------+------------------------------------------\n"
-	    "    -h                   | Print usage and exit.\n"
-	    "    -V                   | Print version information and exit.\n"
-	    "    -v                   | Verbose.\n"
-	    "    -q                   | Quiet.\n"
-	    "    -l                   | Write logs to stderr.\n"
-	    "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
-	    "    -f <format>          | Data logging format.\n"
-	    "                         |   p : Pretty (default).\n"
-	    "                         |   h : Hex.\n"
-	    "                         |   a : Ascii.\n"
-	    "    -i <ip>              | Bind to interface with address <ip>.\n"
-	    "                         | (Default \"ANY\".)\n"
-	    "    -p <port>            | Listen on port <port>.\n"
-	    "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
-	    "                         | port <rport>.\n");
+	    "  Option               | Description\n"
+	    "  ---------------------+------------------------------------------\n"
+	    "  -h                   | Print usage and exit.\n"
+	    "  -V                   | Print version information and exit.\n"
+	    "  -v                   | Verbose.\n"
+	    "  -q                   | Quiet.\n"
+	    "  -l                   | Write logs to stderr.\n"
+	    "  -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
+	    "  -f <format>          | Data logging format.\n"
+	    "                       |   p : Pretty (default).\n"
+	    "                       |   h : Hex.\n"
+	    "                       |   a : Ascii.\n"
+	    "  -i <ip>              | Bind to interface with address <ip>.\n"
+	    "                       | (Default \"ANY\".)\n"
+	    "  -p <port>            | Listen on port <port>.\n"
+	    "  -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
+	    "                       | port <rport>.\n");
 #ifdef _CW_IPFILTER
 	_cw_out_put(
-	    "    -t                   | Use ipfilter via /dev/ipnat.\n");
+	    "  -t                   | Use ipfilter via /dev/ipnat.\n");
 #endif
 }
 
