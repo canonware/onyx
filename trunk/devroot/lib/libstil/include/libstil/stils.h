@@ -22,7 +22,7 @@ typedef struct cw_stilso_s cw_stilso_t;
 
 struct cw_stilso_s {
 	cw_stilo_t		stilo;	/* Payload.  Must be first field. */
-	qs_elm(cw_stilso_t)	link;	/* Stack/spares linkage. */
+	ql_elm(cw_stilso_t)	link;	/* Stack/spares linkage. */
 };
 
 struct cw_stilsc_s {
@@ -42,12 +42,11 @@ struct cw_stilsc_s {
 
 struct cw_stils_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	cw_uint32_t	magic;
+	cw_uint32_t		magic;
 #endif
-	qs_head(cw_stilso_t)	stack;	/* Stack. */
+	ql_head(cw_stilso_t)	stack;	/* Stack. */
 	cw_uint32_t		count;	/* Number of stack elements. */
-
-	qs_head(cw_stilso_t)	spares;	/* Stack of spare slots. */
+	cw_stilso_t		under;	/* Not used, just under stack bottom. */
 
 	cw_pool_t		*stilsc_pool; /* Allocator for stilsc's. */
 

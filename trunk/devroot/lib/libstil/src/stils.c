@@ -39,11 +39,17 @@ stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 	_cw_check_ptr(a_stils);
 	_cw_check_ptr(a_stilsc_pool);
 
-	qs_new(&a_stils->stack);
-	a_stils->count = 0;
-	qs_new(&a_stils->spares);
+	ql_new(&a_stils->stack);
 	a_stils->stilsc_pool = a_stilsc_pool;
 	qs_new(&a_stils->chunks);
+
+	a_stils->count = 0;
+
+	ql_elm_new(&a_stils->under, link);
+	ql_first(&a_stils->stack) = &a_stils->under;
+	/* Fill spares. */
+	stils_p_spares_create(a_stils);
+	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
 
 #ifdef _LIBSTIL_DBG
 	a_stils->magic = _CW_STILS_MAGIC;
@@ -93,11 +99,16 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 * Move the old stack, spares, and stilsc's out of the way so that we
 	 * can start fresh.
 	 */
-	old_stilso = qs_top(&a_stils->stack);
+	old_stilso = ql_first(&a_stils->stack);
 	old_count = a_stils->count;
-	qs_top(&a_stils->stack) = NULL;
 	a_stils->count = 0;
-	qs_top(&a_stils->spares) = NULL;
+
+	qr_remove(&a_stils->under, link);
+	ql_first(&a_stils->stack) = &a_stils->under;
+	/* Fill spares. */
+	stils_p_spares_create(a_stils);
+	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
+	
 	memcpy(&old_chunks, &a_stils->chunks, sizeof(old_chunks));
 	qs_new(&a_stils->chunks);
 
@@ -105,7 +116,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 * Iterate through the entire stack, moving stilso's to the new stack.
 	 * Along the way, report any extended objects to the GC.
 	 */
-	for (i = 0; i < old_count; old_stilso = qs_down(old_stilso, link),
+	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link),
 		 i++) {
 		new_stilo = stils_push(a_stils);
 		stilo_move(new_stilo, &old_stilso->stilo);
@@ -141,18 +152,16 @@ stils_push(cw_stils_t *a_stils)
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
+	_cw_assert(ql_first(&a_stils->stack) != &a_stils->under);
 
 	/* Get an unused stilso.  If there are no spares, create some first. */
-	if (qs_top(&a_stils->spares) == NULL)
+	if (qr_prev(ql_first(&a_stils->stack), link) == &a_stils->under)
 		stils_p_spares_create(a_stils);
-	stilso = qs_top(&a_stils->spares);
-	qs_pop(&a_stils->spares, link);
+	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
+	stilso = ql_first(&a_stils->stack);
+	a_stils->count++;
 
 	stilo_no_new(&stilso->stilo);
-
-	/* Link the stilso into the stack. */
-	qs_push(&a_stils->stack, stilso, link);
-	a_stils->count++;
 
 	return &stilso->stilo;
 }
@@ -167,16 +176,14 @@ stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	_cw_check_ptr(a_stilo);
 
 	/* Get an unused stilso.  If there are no spares, create some first. */
-	if (qs_top(&a_stils->spares) == NULL)
+	if (qr_prev(ql_first(&a_stils->stack), link) == &a_stils->under)
 		stils_p_spares_create(a_stils);
-	stilso = qs_top(&a_stils->spares);
-	qs_pop(&a_stils->spares, link);
+	stilso = qr_prev(ql_first(&a_stils->stack), link);
+	qr_remove(stilso, link);
+	qr_after_insert((cw_stilso_t *)stilso, stilso, link);
+	a_stils->count++;
 
 	stilo_no_new(&stilso->stilo);
-
-	/* Link the stilso into the stack. */
-	qs_under_push((cw_stilso_t *)a_stilo, stilso, link);
-	a_stils->count++;
 
 	return &stilso->stilo;
 }
@@ -192,16 +199,15 @@ stils_pop(cw_stils_t *a_stils)
 	if (a_stils->count == 0)
 		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
-	stilso = qs_top(&a_stils->stack);
-	qs_pop(&a_stils->stack, link);
-	qs_push(&a_stils->spares, stilso, link);
+	stilso = ql_first(&a_stils->stack);
+	ql_first(&a_stils->stack) = qr_next(ql_first(&a_stils->stack), link);
 	a_stils->count--;
 }
 
 void
 stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 {
-	cw_stilso_t	*bottom, *top;
+	cw_stilso_t	*top;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
@@ -212,45 +218,17 @@ stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	/* Get a pointer to what will be the new stack top. */
-	for (i = 0, bottom = qs_top(&a_stils->stack); i < a_count - 1; i++)
-		bottom = qs_down(bottom, link);
-	top = qs_down(bottom, link);
+	for (i = 0, top = ql_first(&a_stils->stack); i < a_count; i++)
+		top = qr_next(top, link);
 
-	/*
-	 * We now have:
-	 *
-	 * qs_top(&a_stils->stack) --> /----------\
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                  bottom --> \----------/
-	 *                     top --> /----------\
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             \----------/
-	 *
-	 * 1) Link qs_top(&a_stils->spares) under bottom.
-	 *
-	 * 2) Move qs_top(&a_stils->stack) to qs_top(&a_stils->spares).
-	 *
-	 * 3) Set qs_top(&a_stils->stack) to top.
-	 */
-	qs_down(bottom, link) = qs_top(&a_stils->spares);
-	qs_top(&a_stils->spares) = qs_top(&a_stils->stack);
-	qs_top(&a_stils->stack) = top;
-	
+	ql_first(&a_stils->stack) = top;
 	a_stils->count -= a_count;
 }
 
 void
 stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 {
-	cw_stilso_t	*stilso, *top, *bottom, *noroll;
+	cw_stilso_t	*top, *noroll;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
@@ -290,53 +268,44 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	}
 
 	/*
-	 * Get a pointer to the new top of the stack, and save a pointer to the
-	 * element just above it.  Then continue on to find the end of the roll
-	 * region.
+	 * Get a pointer to the new top of the stack.  Then continue on to find
+	 * the end of the roll region.
 	 */
-	for (i = 0, bottom = qs_top(&a_stils->stack); i < a_amount - 1; i++)
-		bottom = qs_down(bottom, link);
-	stilso = qs_down(bottom, link);
-	top = stilso;
+	for (i = 0, top = ql_first(&a_stils->stack); i < a_amount; i++)
+		top = qr_next(top, link);
+	noroll = top;
 
-	for (i = 0; i < a_count - a_amount - 1; i++)
-		stilso = qs_down(stilso, link);
-	noroll = qs_down(stilso, link);
+	for (i = 0; i < a_count - a_amount; i++)
+		noroll = qr_next(noroll, link);
 
 	/*
 	 * We now have:
 	 *
-	 * qs_top(&a_stils->stack) --> /----------\ \  \
-	 *                             |          | |  |
-	 *                             |          | |   \
-	 *                             |          | |   / a_amount
-	 *                             |          | |  |
-	 *                             |          | |  /
-	 *                  bottom --> \----------/  \
-	 *                     top --> /----------\  / a_count
-	 *                             |          | |
-	 *                             |          | |
-	 *                             |          | |
-	 *                             |          | |
-	 *                             |          | |
-	 *                  stilso --> \----------/ /
-	 *                  noroll --> /----------\
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             |          |
-	 *                             \----------/
-	 *
-	 * 1) Link qs_top(&a_stils->stack) under stilso.
-	 *
-	 * 2) Link noroll under bottom.
-	 *
-	 * 3) Set a_stils->stack to top.
+	 * ql_first(&a_stils->stack) --> /----------\ \  \
+	 *                               |          | |  |
+	 *                               |          | |   \
+	 *                               |          | |   / a_amount
+	 *                               |          | |  |
+	 *                               |          | |  /
+	 *                               \----------/  \
+	 *                       top --> /----------\  / a_count
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               |          | |
+	 *                               \----------/ /
+	 *                    noroll --> /----------\
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               |          |
+	 *                               \----------/
 	 */
-	qs_down(stilso, link) = qs_top(&a_stils->stack);
-	qs_down(bottom, link) = noroll;
-	qs_top(&a_stils->stack) = top;
+	qr_split(ql_first(&a_stils->stack), noroll, link);
+	qr_meld(top, noroll, link);
+	ql_first(&a_stils->stack) = top;
 
 	RETURN:
 }
@@ -352,7 +321,7 @@ stils_get(cw_stils_t *a_stils)
 	if (a_stils->count == 0)
 		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
-	stilso = qs_top(&a_stils->stack);
+	stilso = ql_first(&a_stils->stack);
 
 	return &stilso->stilo;
 }
@@ -369,8 +338,8 @@ stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
 	if (a_index >= a_stils->count)
 		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
-	for (i = 0, stilso = qs_top(&a_stils->stack); i < a_index; i++)
-		stilso = qs_down(stilso, link);
+	for (i = 0, stilso = ql_first(&a_stils->stack); i < a_index; i++)
+		stilso = qr_next(stilso, link);
 
 	return &stilso->stilo;
 }
@@ -387,8 +356,8 @@ stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	stilso = (cw_stilso_t *)a_stilo;
-	stilso = qs_down(stilso, link);
-	if (stilso == NULL)
+	stilso = qr_next(stilso, link);
+	if (stilso == &a_stils->under)
 		xep_throw(_CW_STILX_STACKUNDERFLOW);
 
 	return &stilso->stilo;
@@ -403,8 +372,8 @@ stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	for (i = 0, stilso = qs_top(&a_stils->stack); (stilso != (cw_stilso_t
-	    *)a_stilo) && (i < a_stils->count); stilso = qs_down(stilso, link),
+	for (i = 0, stilso = ql_first(&a_stils->stack); (stilso != (cw_stilso_t
+	    *)a_stilo) && (i < a_stils->count); stilso = qr_next(stilso, link),
 	     i++);
 	_cw_assert(i < a_stils->count);
 
@@ -419,7 +388,7 @@ stils_p_spares_create(cw_stils_t *a_stils)
 
 	/*
 	 * create a new stilsc, add it to the stilsc qs, and add its stilso's to
-	 * the spares qs.
+	 * the stack.
 	 */
 	stilsc = (cw_stilsc_t *)pool_get(a_stils->stilsc_pool);
 
@@ -429,15 +398,15 @@ stils_p_spares_create(cw_stils_t *a_stils)
 	stilsc->stilsc_pool = a_stils->stilsc_pool;
 	qs_elm_new(stilsc, link);
 
-	qs_elm_new(&stilsc->objects[0], link);
+	qr_new(&stilsc->objects[0], link);
 	for (i = 1, nstilso =
 		 _CW_STILSC_SIZEOF2O(pool_buffer_size_get(stilsc->stilsc_pool));
 	     i < nstilso; i++) {
-		qs_elm_new(&stilsc->objects[i], link);
-		qs_under_push(&stilsc->objects[i],
+		qr_new(&stilsc->objects[i], link);
+		qr_after_insert(&stilsc->objects[i],
 		    &stilsc->objects[i - 1], link);
 	}
 
 	qs_push(&a_stils->chunks, stilsc, link);
-	qs_top(&a_stils->spares) = &stilsc->objects[0];
+	qr_meld(ql_first(&a_stils->stack), &stilsc->objects[0], link);
 }
