@@ -11,7 +11,7 @@
 
 #module
 
-$clopt class systemdict 3 idup :def
+$clopt class currentdict 3 idup :mdef
 clopt vclass setsuper
 clopt $clopt setclassname
 clopt <
@@ -19,9 +19,10 @@ clopt <
 clopt <
     # Constructor.
     #
-    #class :new #instance
+    #class:
+    #- new #instance
     $new {
-	:rnew
+	;rnew
 	#instance
 
 	<
@@ -39,41 +40,26 @@ clopt <
 
     # Get the packing mode for single character options.
     #
-    #instance :packing_get #packing?
+    #instance:
+    #- packing_get #packing?
     $packing_get {
-	data $packing get
+	,packing
     } bind
 
     # Set the packing mode for single character options.
     #
-    #packing? #instance :packing_set -
+    #instance:
+    #packing? packing_set -
     $packing_set {
-	data $packing dn put
-    } bind
-
-    # Add an option handler.
-    #
-    #opt #arg? #handler #instance :handler_add -
-    $handler_add {
-	data $handlers get 4 nup
-	#handlers #opt #arg? #handler
-	[ up ]
-	#handlers #opt [#arg? #handler]
-	put
-    } bind
-
-    # Remove an option handler.
-    #
-    #opt #instance :handler_remove -
-    $handler_remove {
-	data $handlers get exch
+	$packing exch ;def
     } bind
 
     # Print an error.
     #
-    #errstr #instance :error_print -
+    #instance:;
+    #errstr error_print -
     $error_print {
-	data $argv get 0 get
+	,argv 0 get
 	`/' split
 	dup length dec get
 
@@ -86,23 +72,25 @@ clopt <
 
     # Handle an error, and unwind to :parse.
     #
-    #errstr #instance :p_error
+    #instance;
+    #errstr p_error
     $p_error {
-	:error_print
-	
+	;error_print
+
 	# Unwind to :parse.
 	true escape
     }
 
     # Parse #argv, and clean up from errors.
     #
-    #argv #instance :parse #remainder false
-    #argv #instance :parse true
+    #instance:
+    #argv parse #remainder false
+    #argv parse true
     $parse {
 	{
-	    :p_parse
+	    ;p_parse
 	} trapped {
-	    nip nip
+	    nip
 	}{
 	    false
 	} ifelse
@@ -110,125 +98,125 @@ clopt <
 
     # Parse #argv.
     #
-    #argv #instance :p_parse #remainder
+    #instance;
+    #argv p_parse #remainder
     $p_parse {
 	# Store a reference to #argv.
-	dup data $argv 3 idup put
+	$argv over ;def
 
 	# Clear the error flag.
-	dup data $error false put
+	$error false ;def
 
 	# Iterate over #argv (skip element 0).
-	1 {dup 3 idup length lt}{
-	    #argv #instance #i
+	1 {over under length lt}{
+	    #argv #i
 
 	    # Set index.
-	    over data $index 2 idup put
+	    $index over ;def
 
 	    # Reset arg.
-	    over data $arg null put
+	    $arg null ;def
 
-	    2 idup over get
-	    #argv #instance #i #elm
+	    2 ndup get
+	    #argv #i #elm
 
 	    dup `^(--[^=]+)=?(.+)?' match {
 		# Long format option.
 		pop
-		#argv #instance #i
+		#argv #i
 		1 submatch
 		2 submatch
-		3 idup
-		#argv #instance #i #opt #arg #instance
-		:p_longopt_dispatch
-		#argv #instance #i
+		#argv #i #opt #arg
+		;p_longopt_dispatch
+		#argv #i
 	    }{
 	    dup `^-..*' match {
 		# Short format option.
-		#argv #instance #i #elm
-		3 idup up 3 idup
-		#argv #instance #argv #i #elm #instance
-		:p_shortopt_dispatch
-		#argv #instance #i
+		#argv #i #elm
+		2 idup up
+		#argv #argv #i #elm
+		;p_shortopt_dispatch
+		#argv #i
 	    }{
 		# Not an option.
 		pop
-		#argv #instance #i
+		#argv #i
 		exit
 	    } ifelse
 	    } ifelse
-	    #argv #instance #i
+	    #argv #i
 
 	    # Increment index.
 	    inc
 	} while
-	#argv #instance #i
-	2 idup length over sub
-	#argv #instance #i #remlen
-	2 ipop
+	#argv #i
+	over length over sub
+	#argv #i #remlen
 	getinterval
 	#remainder
     } bind
 
     # Dispatch a long format option.
     #
-    #opt #arg #instance :p_longopt_dispatch -
+    #instance;
+    #opt #arg p_longopt_dispatch -
     $p_longopt_dispatch {
-	dup isa
-	#opt #arg #instance #class
-	dup 4 idup cvn implements {
+	this isa
+	#opt #arg #class
+	dup 3 idup implements {
 	    # Handler found for option with no argument.
 
 	    # Was an argument specified?
-	    2 idup null ne {
-		`Argument ("' 3 idup cat
+	    over null ne {
+		`Argument ("' 2 idup cat
 		`") unexpected for option ' cat
-		4 idup cat
-		#opt #arg #instance #class #errstr
-		2 idup :p_error
+		3 idup cat
+		#opt #arg #class #errstr
+		;p_error
 	    } if
 
 	    # Get the handler.
-	    3 idup cvn method
+	    2 idup method
 	}{
-	dup 4 idup `?' cat cvn implements {
+	dup 3 idup `?' cat implements {
 	    # Handler found for option with optional argument.
 
 	    # Get the handler.
-	    3 idup `?' cat cvn method
+	    2 idup `?' cat method
 	}{
-	dup 4 idup `=' cat cvn implements {
+	dup 3 idup `=' cat implements {
 	    # Handler found for option with mandatory argument.
 
 	    # Is argument missing?
-	    2 idup null eq {
-		`Argument missing for option ' 4 idup cat
-		#opt #arg #instance #class #errstr
-		2 idup :p_error
+	    over null eq {
+		`Argument missing for option ' 3 idup cat
+		#opt #arg #class #errstr
+		;p_error
 	    } if
 
 	    # Get the handler.
-	    3 idup `=' cat cvn method
+	    2 idup `=' cat method
 	}{
 	    # No handler found.
 	    pop
-	    #opt #arg #instance
+	    #opt #arg
 	    
 	    `Error interpreting option '
-	    4 ndn cat
-	    dn dup null ne {
+	    dn cat
+	    exch dup null ne {
 		`=' exch 3 ncat
 	    }{
 		pop
 	    } ifelse
-	    #instance #errstr
-	    exch :p_error
+	    #errstr
+	    ;p_error
 	} ifelse
 	} ifelse
 	} ifelse
-	#opt #arg #instance #handler
+	#opt #arg #handler
     
 	# Store the argument.
-	over data $arg 4 idup put
+	$arg 2 idup ;def
 
 	# Call the handler.
 	eval
@@ -240,32 +228,36 @@ clopt <
 
     # Dispatch a short format option.
     #
-    #argv #i #elm #instance :p_shortopt_dispatch #i
+    #instance;
+    #argv #i #elm p_shortopt_dispatch #i
     $p_shortopt_dispatch {
-	dup data $packing get {
-	    :p_packed_shortopt_dispatch
+	,packing {
+	    ;p_packed_shortopt_dispatch
 	}{
-	    :p_unpacked_shortopt_dispatch
+	    ;p_unpacked_shortopt_dispatch
 	} ifelse
     } bind
 
     # Dispatch a short format option in packed mode.
     #
-    #argv #i #elm #instance :p_packed_shortopt_dispatch #i
+    #argv #i #elm :p_packed_shortopt_dispatch #i
     $p_packed_shortopt_dispatch {
+	`XXX Not implemented' 1 sprint
+	1 die
 	# XXX
     } bind
 
     # Dispatch a short format option in unpacked mode.
     #
-    #argv #i #elm #instance :p_unpacked_shortopt_dispatch #i
+    #instance;
+    #argv #i #elm p_unpacked_shortopt_dispatch #i
     $p_unpacked_shortopt_dispatch {
-	dup isa
-	#argv #i #elm #instance #class
+	this isa
+	#argv #i #elm #class
 
-	2 idup `^(-.)(.+)?' match pop
+	over `^(-.)(.+)?' match pop
 
-	dup 1 submatch cvn implements {
+	dup 1 submatch implements {
 	    # Handler found for option with no argument.
 
 	    # Was an argument specified?
@@ -273,14 +265,14 @@ clopt <
 		`Argument ("' 2 submatch cat
 		`") unexpected for option ' cat
 		1 submatch cat
-		#argv #i #elm #instance #class #errstr
-		2 idup :p_error
+		#argv #i #elm #class #errstr
+		;p_error
 	    } if
 
 	    # Get the handler.
-	    1 submatch cvn method
+	    1 submatch method
 	}{
-	dup 1 submatch `=' cat cvn implements {
+	dup 1 submatch `:' cat implements {
 	    # Handler found for option with mandatory argument.
 
 	    # Is argument missing?
@@ -288,41 +280,41 @@ clopt <
 		# The argument isn't in the same argv element.  If argv has
 		# remaining elements, get the next element and treat it as the
 		# argument.
-		3 idup inc 5 idup length lt {
-		    #argv #i #elm #instance #class
+		2 idup inc 4 idup length lt {
+		    #argv #i #elm #class
 		    # Get next argv element.
-		    4 idup 5 ndn inc dup 6 nup
-		    #argv #i #elm #instance #class #argv #i
+		    3 idup 4 ndn inc dup 5 nup
+		    #argv #i #elm #class #argv #i
 		    get
-		    #argv #i #elm #instance #class #arg
+		    #argv #i #elm #class #arg
 
 		    # Set argument.
-		    2 idup data $arg dn put
+		    $arg exch ;def
 		}{
 		    # No argument specified.
 		    `Argument missing for option ' 1 submatch cat
 		    #argv #i #elm #instance #class #errstr
-		    2 idup :p_error
+		    ;p_error
 		} ifelse
 	    }{
 		# Set argument.
-		over data $arg 2 submatch put
+		$arg 2 submatch ;def
 	    } ifelse
-	    #argv #i #elm #instance #class
+	    #argv #i #elm #class
 
 	    # Get handler.
-	    1 submatch `=' cat cvn method
+	    1 submatch `:' cat method
 	}{
 	    # No handler found.
 	    pop
 	    #argv #i #elm #instance
 	    `Error interpreting option '
 	    0 submatch cat
-	    #argv #i #elm #instance #errstr
-	    exch :p_error
+	    #argv #i #elm #errstr
+	    ;p_error
 	} ifelse
 	} ifelse
-	#argv #i #elm #instance #handler
+	#argv #i #elm #handler
 
 	# Call the handler.
 	eval
@@ -334,23 +326,26 @@ clopt <
 
     # Return argv.  This is provided to aid option handlers.
     #
-    #instance :argv_get #argv
+    #instance:
+    #- argv_get #argv
     $argv_get {
-	data $argv get
+	,argv
     } bind
 
     # Return the current argv index.  This is provided to aid option handlers.
     #
-    #instance :index_get #index
+    #instance:
+    #- index_get #index
     $index_get {
-	data $index get
+	,index
     } bind
 
     # Return the current option argument.  This is provided to aid option
     # handlers.
     #
-    #instance :arg_get #arg
+    #instance:
+    #- arg_get #arg
     $arg_get {
-	data $arg get
+	,arg
     } bind
 > setmethods

@@ -103,6 +103,11 @@ struct cw_nxoe_thread_s
     /* Dictionary stack. */
     cw_nxo_t dstack;
 
+#ifdef CW_OOP
+    /* Context stack. */
+    cw_nxo_t cstack;
+#endif
+
     /* Temp stack. */
     cw_nxo_t tstack;
 
@@ -212,6 +217,8 @@ struct cw_nxoe_thread_s
 		ACTION_EVALUATE = NXOA_EVALUABLE,
 #ifdef CW_OOP
 		ACTION_CALL = NXOA_CALLABLE,
+		ACTION_INVOKE = NXOA_INVOKABLE,
+		ACTION_FETCH = NXOA_FETCHABLE,
 #endif
 		ACTION_IMMEDIATE
 	    } action;
@@ -327,6 +334,11 @@ nxo_thread_tailopt_get(cw_nxo_t *a_nxo);
 cw_nxo_t *
 nxo_thread_ostack_get(cw_nxo_t *a_nxo);
 
+#ifdef CW_OOP
+cw_nxo_t *
+nxo_thread_cstack_get(cw_nxo_t *a_nxo);
+#endif
+
 cw_nxo_t *
 nxo_thread_dstack_get(cw_nxo_t *a_nxo);
 
@@ -419,6 +431,23 @@ nxo_thread_ostack_get(cw_nxo_t *a_nxo)
 
     return &thread->ostack;
 }
+
+#ifdef CW_OOP
+CW_INLINE cw_nxo_t *
+nxo_thread_cstack_get(cw_nxo_t *a_nxo)
+{
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    return &thread->cstack;
+}
+#endif
 
 CW_INLINE cw_nxo_t *
 nxo_thread_dstack_get(cw_nxo_t *a_nxo)

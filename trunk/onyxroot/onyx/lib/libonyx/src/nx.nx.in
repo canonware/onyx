@@ -223,7 +223,7 @@ $sprintsdict <
     ' cat
 } if
 # Note code duplication.
-@enable_oop@ 1 eq {
+@enable_oop@ 1 eq opt_bootstrap or {
     `
     $nametype {
 	#name #depth
@@ -240,39 +240,24 @@ $sprintsdict <
 	    pop
 	    `!' exch cat
 	}{
-	ccheck {
+	dup xcheck {
+	    # Executable.
+	    pop
+	}{
+	dup ccheck {
 	    # Callable.
+	    pop
 	    `:' exch cat
-	} if
+	}{
+	icheck {
+	    # Invokable.
+	    `;' exch cat
+	}{
+	    # Fetchable.
+	    `,' exch cat
 	} ifelse
 	} ifelse
-    }
-    ' cat
-}{
-opt_boostrap {
-    # This code should work correctly, regardless of whether oop is enabled.
-    # That way, regardless of configuration, the bootstrap interpreter prints
-    # names correctly (if a bit more slowly).
-    `
-    $nametype {
-	#name #depth
-	pop
-	dup cvs exch
-	#str #name
-	dup lcheck {
-	    # Literal.
-	    pop
-	    `$' exch cat
-	}{
-	dup echeck {
-	    # Evaluable.
-	    pop
-	    `!' exch cat
-	}{
-	xcheck not {
-	    # Callable.
-	    `:' exch cat
-	} if
+	} ifelse
 	} ifelse
 	} ifelse
     }
@@ -296,7 +281,6 @@ opt_boostrap {
 	} ifelse
     }
     ' cat
-} ifelse
 } ifelse
 `
     $nulltype {
@@ -862,34 +846,47 @@ $mrequire {
 } if
 @enable_oop@ 1 eq opt_bootstrap not and {
     `
+# XXX Make this an operator?
+#name #super #data #methods cdef -
+$cdef {
+    class
+    dup dn setmethods
+    dup dn setdata
+    dup dn setsuper
+    2 ndup exch setclassname
+    def
+} def
+
 # Define vclass, which is provided as the top level base class.
 $vclass class dup up def
 dup $vclass setclassname
 dup <
 > setdata
 <
-    #class :new #instance
+    #class:
+    #- new #instance
     $new {
 	# Create instance.
-	instance dup dn setisa
+	instance dup this setisa
 
 	dup dict setdata
     }
 
-    # Typically called at the beginning of :new in subclasses.  Recursively
-    # invokes :new, and sets isa.
+    # Typically called at the beginning of new in subclasses.  Recursively
+    # invokes new, and sets isa.
     #
-    #class :rnew #instance
+    #- ;rnew #instance
     $rnew {
-	dup super
+	this super
 	dup type $classtype eq {
 	    dup methods
 	    dup type $dicttype eq {
 		dup $new known {
 		    # Call super:new.
-		    $new get eval
+		    pop
+		    :new
 		}{
-		    # :new not defined.
+		    # new not defined.
 		    pop
 		    instance
 		} ifelse
@@ -903,73 +900,113 @@ dup <
 	    pop
 	    instance
 	} ifelse
-	#class #instance
+	#instance
 
-	dup dn setisa
+	dup this setisa
     }
 
-    #name #class :implementor #class
+    #class/instance;
+    #key #val def -
+    $def {
+	this data up put
+    }
+
+    #class/instance;
+    #key undef -
+    $undef {
+	this data exch undef
+    }
+
+    #class:
+    #name implementor #class
     $implementor {
-	exch implementor
+	this exch implementor
     }
 
-    #name #class :method #boolean
+    #class:
+    #name implements #boolean
     $implements {
-	exch implements
+	this exch implements
     }
 
-    #name #class :method #method
+    #class:
+    #name method #method
     $method {
-	exch method
+	this exch method
     }
 
-    #class :classname #name/null
-    $classname $classname load
+    #class:
+    #- classname #name/null
+    $classname {
+	this classname
+    }
 
-    #name/null #class :setclassname -
+    #class:
+    #name/null setclassname -
     $setclassname {
-	exch setclassname
+	this exch setclassname
     }
 
-    #class :super #super/null
-    $super $super load
+    #class:
+    #- super #super/null
+    $super {
+	this super
+    }
 
-    #super/null #class :setsuper -
+    #class:
+    #super/null setsuper -
     $setsuper {
-	exch setsuper
+	this exch setsuper
     }
 
-    #class :methods #methods/null
-    $methods $methods load
+    #class:
+    #- methods #methods/null
+    $methods {
+	this methods
+    }
 
-    #methods/null #class :setmethods -
+    #class:
+    #methods/null setmethods -
     $setmethods {
-	exch setmethods
+	this exch setmethods
     }
 
-    #class/instance :data #data/null
-    $data $data load
+    #
+    # Class/instance-related methods.
+    #
 
-    #data/null #class/instance :setdata -
+    #class/instance:
+    #- data #data/null
+    $data {
+	this data
+    }
+
+    #class/instance:
+    #data/null setdata -
     $setdata {
-	exch setdata
+	this exch setdata
     }
 
     #
     # Instance-related methods.
     #
 
-    #instance :isa #class/null
-    $isa $isa load
-
-    #class/null #instance :setisa -
-    $setisa {
-	exch setisa
+    #instance:
+    #- isa #class/null
+    $isa {
+	this isa
     }
 
-    #class #instance :kind #boolean
+    #instance:
+    #class/null setisa -
+    $setisa {
+	this exch setisa
+    }
+
+    #instance:
+    #class kind #boolean
     $kind {
-	exch kind
+	this exch kind
     }
 > setmethods
     ' cat
@@ -985,17 +1022,19 @@ dup <
     $singletons dict
 > setdata
 <
-    # This is a singleton class, so do not allow :new to be called.
-    # Subclasses should call :l_new instead when instantiating a singleton.
+    # This is a singleton class, so do not allow new to be called.
+    # Subclasses should call l_new instead when instantiating a singleton.
     #
-    #class :new #instance
+    #class:
+    #- new #instance
     $new {
 	$invalidaccess throw
     }
 
-    #class :p_new #instance
+    #class;
+    #- p_new #instance
     $p_new {
-	:rnew
+	;rnew
 	#instance
 
 	<
@@ -1003,18 +1042,19 @@ dup <
 	> over data copy pop
     }
 
-    #class :singleton #instance
+    #class:
+    #- singleton #instance
     $singleton {
-	dup data $singletons get
-	#class #singletons
-	over classname
-	#class #singletons #classname
+	,singletons
+	#singletons
+	this classname
+	#singletons #classname
 	2 ndup known {
 	    # Already instantiated.  Retrieve the singleton.
-	    get nip
+	    get
 	}{
 	    # Not instantiated.  Instantiate and record a reference.
-	    dn :p_new
+	    ;p_new
 	    #singletons #classname #instance
 	    dup 4 nup
 	    #instance #singletons #classname #instance
@@ -1022,33 +1062,35 @@ dup <
 	} ifelse
     }
 
-    #modname #instance :load #module
+    #instance:
+    #modname load -
     $load {
-	dup data $modules get
-	#modname #instance #modules
-	dup 3 idup known {
+	,modules
+	#modname #modules
+	over under known {
 	    # Already loaded.
-	    nip exch get
+	    2 npop
 	}{
-	    up under
-	    #modules #modname #modname #instance
+	    exch dup this
+	    #modules #modname #modname #this
 	    module:new
 	    #modules #modname #module
-	    dup 4 nup put
-	    #module
+	    put
 	} ifelse
     }
 
     # Called by module:unload.
     #
-    #modname #instance :unload_notify -
+    #instance:
+    #modname unload_notify -
     $unload_notify {
-	data $modules get exch undef
+	,modules exch undef
     }
 
-    #instance :modules #<modules>
+    #instance:
+    #- modules #<modules>
     $modules {
-	data $modules get
+	,modules
     }
 > setmethods
 
@@ -1060,78 +1102,79 @@ dup vclass setsuper
 dup <
 > setdata
 <
-    #modname #mclass_singleton #class :new #instance
+    #class:
+    #modname #mclass_singleton new #instance
     $new {
-	:rnew
+	;rnew
 	#modname #mclass_singleton #instance
 
 	# Define instance data.
 	<
-	    #modname #mclass_singleton #instance #data #<
-	    $name 5 idup
-	    $mclass_singleton 6 idup
-	    $defs dict
+	    #modname #mclass_singleton #instance #<
+	    $name 4 idup
+	    $mclass_singleton 5 idup
+	    $mdefs dict
 	    $deps dict
 	    $pre_unload_hook null cvx
 	    $post_unload_hook null cvx
 	    $version 0
 	> over data copy pop
 
-	# Define $mclass_singleton as instance data before loading the module,
-	# so that it is available to the module initialization code.
-	dup data dup $mclass_singleton 4 idup put
-	#modname #mclass_singleton #instance #data
-
-	# Define $name.
-	$name 4 idup put
-	#modname #mclass_singleton #instance
-
 	# Load the module.
-	`modX/modX.nx' `X' 4 idup cvx cvs <$g true> subst pop
+	`X/X.nx' `X' 4 idup cvx cvs <$g true> subst pop
 	#modname #mclass_singleton #instance `mod#modname/#modname.nx'
 	require
 	#modname #mclass_singleton #instance
 
-	nip nip
+	# Associate the module with its name in currentdict, in order to make
+	# later module access easier.
+	dn over currentdict over :mdef
+	#mclass_singleton #instance
+	nip
 	#instance
     }
 
-    #instance :version_get #version
+    #instance:
+    #- version_get #version
     $version_get {
-	data $version get
+	,version
     }
 
-    #version #instance :version_set -
+    #instance:
+    #version version_set -
     $version_set {
-	data $version dn put
+	this data $version dn put
     }
 
-    #instance :deps_get #<deps>
+    #instance:
+    #- deps_get #<deps>
     $deps_get {
-	data $deps get
+	,deps
     }
 
-    #instance :defs_get #<defs>
-    $defs_get {
-	data $defs get
+    #instance:
+    #- mdefs_get #<mdefs>
+    $mdefs_get {
+	,mdefs
     }
 
     # Define #defname as #defval in #defdict.  Make a record of the definition
-    # in the $defs dictionary, with a format of:
+    # in the $mdefs dictionary, with a format of:
     #
     #   [#defname #defval] --> #defdict
     #
-    #defname #defval #defdict #instance :def -
-    $def {
-	# Record the existence of the definition in $defs.
-	data $defs get
-	#defname #defval #defdict #defs
+    #instance:
+    #defname #defval #defdict mdef -
+    $mdef {
+	# Record the existence of the definition in $mdefs.
+	,mdefs
+	#defname #defval #defdict #mdefs
 	[
 	    4 idup
 	    4 idup
 	]
 	2 idup
-	#defname #defval #defdict #defs [#defname #defval] #defdict
+	#defname #defval #defdict #mdefs [#defname #defval] #defdict
 	put
 	#defname #defval #defdict
 
@@ -1141,56 +1184,53 @@ dup <
 
     # Load a module that this one depends on, and record the dependency.
     #
-    #depname #instance :dep_load -
+    #instance:
+    #depname dep_load -
     $dep_load {
-	dup data
-	#depname #instance #data
-	dup $mclass_singleton get
-	#depname #instance #data #mclass_singleton
-	3 idup exch :load
-	#depname #instance #data #depmod
-	4 ndn exch put
-	#instance
-	pop
+	,mclass_singleton
+	#depname #mclass_singleton
+	under :load
+	#depname #depmod#XXX
+	this data up put
     }
 
     # Store a reference to #hook, and evaluate it at the beginning of :unload.
     #
-    #hook #instance :pre_unload_hook_set -
+    #instance:
+    #hook pre_unload_hook_set -
     $pre_unload_hook_set {
-	data $pre_unload_hook dn put
+	this data $pre_unload_hook dn put
     }
 
     # Store a reference to #hook, and evaluate it at the end of :unload.
     #
-    #hook #instance :post_unload_hook_set -
+    #instance:
+    #hook post_unload_hook_set -
     $post_unload_hook_set {
-	data $post_unload_hook dn put
+	this data $post_unload_hook dn put
     }
 
     # Unload the module.
     #
-    #instance :unload -
+    #instance:
+    #- unload -
     $unload {
 	# Evaluate the pre-unload hook.
-	dup data $pre_unload_hook get eval
+	,pre_unload_hook eval
 
-	# Iteratively undefine the modules definitions, as recorded in the defs
+	# Iteratively undefine the module definitions, as recorded in the mdefs
 	# dict.
-	dup data $defs get {
+	,mdefs {
 	    exch 0 get
-	    #instance #defdict #defname
+	    #defdict #defname
 	    undef
 	} foreach
-	#instance
 
 	# Evaluate the post-unload hook.
-	dup data $post_unload_hook get eval
+	,post_unload_hook eval
 
 	# Notify mclass_singleton of the unload.
-	data
-	dup $name get
-	exch $mclass_singleton get :unload_notify
+	,name ,mclass_singleton:unload_notify
     }
 > setmethods
     ' cat
@@ -1207,7 +1247,7 @@ $throw {
 	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
-	    `Onyx: Missing errordict or currenterror defs\n'
+	    `Onyx: Missing errordict or currenterror definitions\n'
 	    {stderr exch write}{} until
 
 	    # Print stack dumps.
@@ -1217,6 +1257,14 @@ $throw {
 	    `\ndstack: ' {stderr exch write}{} until
 	    dstack 2 sprints {stderr exch write}{} until
 
+' cat
+@enable_oop@ 1 eq opt_bootstrap not and {
+    `
+	    `\ncstack: ' {stderr exch write}{} until
+	    cstack 2 sprints {stderr exch write}{} until
+    ' cat
+} if
+`
 	    `\nestack: ' {stderr exch write}{} until
 	    estack 2 sprints {stderr exch write}{} until
 
@@ -1251,6 +1299,14 @@ $throw {
     # currenterror that we pushed.
     $dstack dstack dup spop pop def
 
+' cat
+@enable_oop@ 1 eq opt_bootstrap not and {
+    `
+    # cstack.
+    $cstack cstack def
+    ' cat
+} if
+`
     # estack.  Remove this procedure from the snapshot.
     $estack estack dup tailopt 1 2 ifelse snpop pop def
 

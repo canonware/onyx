@@ -198,6 +198,11 @@ systemdict_countestack(cw_nxo_t *a_thread);
 void
 systemdict_counttomark(cw_nxo_t *a_thread);
 
+#ifdef CW_OOP
+void
+systemdict_cstack(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_currentdict(cw_nxo_t *a_thread);
 
@@ -222,6 +227,16 @@ systemdict_cve(cw_nxo_t *a_thread);
 #ifdef CW_REAL
 void
 systemdict_cves(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_cvf(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_cvi(cw_nxo_t *a_thread);
 #endif
 
 void
@@ -324,6 +339,11 @@ void
 systemdict_exp(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_OOP
+void
+systemdict_fcheck(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_REAL
 void
 systemdict_floor(cw_nxo_t *a_thread);
@@ -398,6 +418,11 @@ systemdict_ibdup(cw_nxo_t *a_thread);
 
 void
 systemdict_ibpop(cw_nxo_t *a_thread);
+
+#ifdef CW_OOP
+void
+systemdict_icheck(cw_nxo_t *a_thread);
+#endif
 
 void
 systemdict_idiv(cw_nxo_t *a_thread);
@@ -1077,9 +1102,19 @@ void
 systemdict_test(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_OOP
+void
+systemdict_this(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_THREADS
 void
 systemdict_thread(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_threadcstack(cw_nxo_t *a_thread);
 #endif
 
 void

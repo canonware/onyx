@@ -18,8 +18,8 @@
 #define nxo_p_operator_nxn_set(a_nxo, a_nxn)				\
     do									\
     {									\
-	(a_nxo)->flags = ((a_nxo)->flags & 0xfffc00ff) |		\
-	                 ((a_nxn) << 8);				\
+	(a_nxo)->flags = ((a_nxo)->flags & 0xfff801ff) |		\
+	                 ((a_nxn) << 9);				\
     } while (0)
 
 void

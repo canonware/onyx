@@ -57,7 +57,7 @@ end
 ' cat
 @enable_modprompt@ 1 eq {
     `
-    $prompt mclass:singleton:load pop
+    $modprompt mclass:singleton:load
     ' cat
 } if
 

@@ -135,6 +135,9 @@ typedef enum
     NXN_ENTRY(countdstack),
     NXN_ENTRY(countestack),
     NXN_ENTRY(counttomark),
+#ifdef CW_OOP
+    NXN_ENTRY(cstack),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(ctime),
 #endif
@@ -151,6 +154,10 @@ typedef enum
     NXN_ENTRY(cve),
 #ifdef CW_REAL
     NXN_ENTRY(cves),
+#endif
+#ifdef CW_OOP
+    NXN_ENTRY(cvf),
+    NXN_ENTRY(cvi),
 #endif
     NXN_ENTRY(cvl),
     NXN_ENTRY(cvn),
@@ -208,6 +215,9 @@ typedef enum
     NXN_ENTRY(false),
 #ifdef CW_POSIX
     NXN_ENTRY(family),
+#endif
+#ifdef CW_OOP
+    NXN_ENTRY(fcheck),
 #endif
     NXN_ENTRY(filetype),
     NXN_ENTRY(finotype),
@@ -285,6 +295,9 @@ typedef enum
 #endif
     NXN_ENTRY(ibdup),
     NXN_ENTRY(ibpop),
+#ifdef CW_OOP
+    NXN_ENTRY(icheck),
+#endif
     NXN_ENTRY(idiv),
     NXN_ENTRY(idup),
     NXN_ENTRY(if),
@@ -733,8 +746,14 @@ typedef enum
 #ifdef CW_POSIX
     NXN_ENTRY(test),
 #endif
+#ifdef CW_OOP
+    NXN_ENTRY(this),
+#endif
 #ifdef CW_THREADS
     NXN_ENTRY(thread),
+#endif
+#ifdef CW_OOP
+    NXN_ENTRY(threadcstack),
 #endif
     NXN_ENTRY(threaddstack),
     NXN_ENTRY(threadestack),

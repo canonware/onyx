@@ -16,5 +16,5 @@
 void
 interactive_nxcode(cw_nxo_t *a_thread)
 {
-    cw_onyx_code(a_thread, "{systemdict begin $promptstring {count cvs `onyx:' exch `> ' 3 ncat} bind def end threaddict begin $resume $stop load def end errordict begin $stop {stdin cvx stopped pop} bind def end `modprompt/modprompt.nx' require}bind eval");
+    cw_onyx_code(a_thread, "{systemdict begin $promptstring {count cvs `onyx:' exch `> ' 3 ncat} bind def end threaddict begin $resume $stop load def end errordict begin $stop {stdin cvx stopped pop} bind def end $prompt mclass :singleton :load pop}bind eval");
 }

@@ -131,33 +131,43 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 		retval = nxo_nxoe_get(&thread->dstack);
 		break;
 	    }
+#ifdef CW_OOP
+#define CW_REF_ITER_CSTACK 1
 	    case 4:
+	    {
+		retval = nxo_nxoe_get(&thread->cstack);
+		break;
+	    }
+#else
+#define CW_REF_ITER_CSTACK 0
+#endif
+	    case (4 + CW_REF_ITER_CSTACK):
 	    {
 		retval = nxo_nxoe_get(&thread->tstack);
 		break;
 	    }
-	    case 5:
+	    case (5 + CW_REF_ITER_CSTACK):
 	    {
 		retval = nxo_nxoe_get(&thread->stdin_nxo);
 		break;
 	    }
-	    case 6:
+	    case (6 + CW_REF_ITER_CSTACK):
 	    {
 		retval = nxo_nxoe_get(&thread->stdout_nxo);
 		break;
 	    }
-	    case 7:
+	    case (7 + CW_REF_ITER_CSTACK):
 	    {
 		retval = nxo_nxoe_get(&thread->stderr_nxo);
 		break;
 	    }
-	    case 8:
+	    case (8 + CW_REF_ITER_CSTACK):
 	    {
 		retval = nxo_nxoe_get(&thread->trapped_arg);
 		break;
 	    }
 #ifdef CW_REGEX
-	    case 9:
+	    case (9 + CW_REF_ITER_CSTACK):
 	    {
 		retval = nxo_l_regex_cache_ref_iter(&thread->regex_cache, TRUE);
 		if (retval == NULL)
@@ -168,6 +178,7 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 		break;
 	    }
 #endif
+#undef CW_REF_ITER_CSTACK
 	    default:
 	    {
 #ifdef CW_REGEX

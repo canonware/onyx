@@ -49,6 +49,13 @@ $currenterror <
     $istack	stack
     $ostack	stack
     $dstack	stack
+' cat
+@enable_oop@ 1 eq opt_bootstrap not and {
+    `
+    $cstack	stack
+    ' cat
+} if
+`
     $line	1
     $column	0
 > def
@@ -74,11 +81,21 @@ $errordict <
 	`Error ' {stderr exch write}{} until
 	!errorname 1 sprints {stderr exch write}{} until
 
-	# Print ostack and dstack using sprint.
+	# Print ostack using sprint.
 	`\nostack: ' {stderr exch write}{} until
 	!ostack 1 sprints {stderr exch write}{} until
+	# Print dstack using sprint.
 	`\ndstack: ' {stderr exch write}{} until
 	!dstack 1 sprints {stderr exch write}{} until
+' cat
+@enable_oop@ 1 eq opt_bootstrap not and {
+    `
+	# Print cstack using sprint.
+	`\ncstack: ' {stderr exch write}{} until
+	!cstack 1 sprints {stderr exch write}{} until
+    ' cat
+} if
+`
 	`\n' {stderr exch write}{} until
 
 	# Print a stack trace that depicts the currently executing element of

@@ -185,6 +185,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(countdstack),
     ENTRY(countestack),
     ENTRY(counttomark),
+#ifdef CW_OOP
+    ENTRY(cstack),
+#endif
     ENTRY(currentdict),
 #ifdef CW_THREADS
     ENTRY(currentlocking),
@@ -198,6 +201,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(cve),
 #ifdef CW_REAL
     ENTRY(cves),
+#endif
+#ifdef CW_OOP
+    ENTRY(cvf),
+    ENTRY(cvi),
 #endif
     ENTRY(cvl),
     ENTRY(cvn),
@@ -242,6 +249,11 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(exit),
 #ifdef CW_REAL
     ENTRY(exp),
+#endif
+#ifdef CW_OOP
+    ENTRY(fcheck),
+#endif
+#ifdef CW_REAL
     ENTRY(floor),
 #endif
     ENTRY(flush),
@@ -272,6 +284,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
     ENTRY(ibdup),
     ENTRY(ibpop),
+#ifdef CW_OOP
+    ENTRY(icheck),
+#endif
     ENTRY(idiv),
     ENTRY(idup),
     ENTRY(if),
@@ -557,8 +572,14 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(test),
 #endif
+#ifdef CW_OOP
+    ENTRY(this),
+#endif
 #ifdef CW_THREADS
     ENTRY(thread),
+#endif
+#ifdef CW_OOP
+    ENTRY(threadcstack),
 #endif
     ENTRY(threaddstack),
     ENTRY(threadestack),
@@ -687,17 +708,17 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue,
 		 TRUE);
     nxo_dict_def(a_dict, a_tname, a_dict);
 
-    /* gcdict. */
-    nxo_name_new(a_tname, nxn_str(NXN_gcdict), nxn_len(NXN_gcdict), TRUE);
-    nxo_dup(a_tvalue, nx_gcdict_get(a_nx));
-    nxo_dict_def(a_dict, a_tname, a_tvalue);
-
 #ifdef CW_POSIX
     /* envdict. */
     nxo_name_new(a_tname, nxn_str(NXN_envdict), nxn_len(NXN_envdict), TRUE);
     nxo_dup(a_tvalue, libonyx_envdict_get());
     nxo_dict_def(a_dict, a_tname, a_tvalue);
 #endif
+
+    /* gcdict. */
+    nxo_name_new(a_tname, nxn_str(NXN_gcdict), nxn_len(NXN_gcdict), TRUE);
+    nxo_dup(a_tvalue, libonyx_gcdict_get());
+    nxo_dict_def(a_dict, a_tname, a_tvalue);
 
     /* onyxdict. */
     nxo_name_new(a_tname, nxn_str(NXN_onyxdict), nxn_len(NXN_onyxdict), TRUE);
@@ -1471,9 +1492,9 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	    }
 	    case NXOT_NAME:
 	    {
-		if (attr == NXOA_EVALUABLE || attr == NXOA_CALLABLE)
+		if (attr != NXOA_EXECUTABLE)
 		{
-		    /* Do not bind evaluable or callable names. */
+		    /* Only bind executable names. */
 		    continue;
 		}
 
@@ -2710,6 +2731,22 @@ systemdict_counttomark(cw_nxo_t *a_thread)
     nxo_integer_new(nxo, i);
 }
 
+#ifdef CW_OOP
+void
+systemdict_cstack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *cstack, *stack;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    cstack = nxo_thread_cstack_get(a_thread);
+
+    stack = nxo_stack_push(ostack);
+    nxo_stack_new(stack, nxo_thread_currentlocking(a_thread),
+		  nxo_stack_count(cstack));
+    nxo_stack_copy(stack, cstack);
+}
+#endif
+
 void
 systemdict_currentdict(cw_nxo_t *a_thread)
 {
@@ -2835,6 +2872,30 @@ systemdict_cves(cw_nxo_t *a_thread)
     free(result);
 
     nxo_stack_pop(ostack);
+}
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_cvf(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    nxo_attr_set(nxo, NXOA_FETCHABLE);
+}
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_cvi(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    nxo_attr_set(nxo, NXOA_INVOKABLE);
 }
 #endif
 
@@ -3457,13 +3518,19 @@ void
 systemdict_dirforeach(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *nxo, *tnxo, *path, *proc, *entry;
     cw_bool_t currentlocking, dot;
     DIR *dir;
     cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
     struct dirent *entp;
 #ifndef CW_HAVE_DIRENT_NAMLEN
-	size_t namlen;
+    size_t namlen;
 #endif
 #ifdef HAVE_READDIR_R
     struct dirent ent;
@@ -3474,8 +3541,14 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
     currentlocking = nxo_thread_currentlocking(a_thread);
 
     NXO_STACK_GET(tnxo, ostack, a_thread);
@@ -3584,17 +3657,23 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
     }
     xep_catch(CW_ONYXX_CONTINUE)
     {
-	/* Clean up estack and istack. */
+	/* Clean up stacks. */
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_retry();
     }
     xep_catch(CW_ONYXX_EXIT)
     {
-	/* Clean up estack and istack. */
+	/* Clean up stacks. */
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_handled();
     }
@@ -4116,6 +4195,27 @@ systemdict_exp(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_OOP
+void
+systemdict_fcheck(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+
+    if (nxo_attr_get(nxo) == NXOA_FETCHABLE)
+    {
+	nxo_boolean_new(nxo, TRUE);
+    }
+    else
+    {
+	nxo_boolean_new(nxo, FALSE);
+    }
+}
+#endif
+
 #ifdef CW_REAL
 void
 systemdict_floor(cw_nxo_t *a_thread)
@@ -4188,14 +4288,24 @@ void
 systemdict_for(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *exec, *onxo, *enxo, *tnxo;
-    cw_nxoi_t inc, limit, edepth, tdepth;
+    cw_nxoi_t inc, limit;
+    cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
     volatile cw_nxoi_t i;
 
     ostack = nxo_thread_ostack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
 
@@ -4231,6 +4341,9 @@ systemdict_for(cw_nxo_t *a_thread)
     /* Record stack depths so that we can clean up if necessary. */
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
 
     /* Catch an exit exception, if thrown, but do not continue executing the
      * loop. */
@@ -4274,6 +4387,9 @@ systemdict_for(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	/* Increment, since the exception skipped that part of the for loop. */
 	i += inc;
@@ -4286,6 +4402,9 @@ systemdict_for(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_handled();
     }
@@ -4300,14 +4419,23 @@ void
 systemdict_foreach(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *nxo, *what, *proc;
     cw_uint32_t e_edepth, e_tdepth;
+#ifdef CW_OOP
+    cw_uint32_t e_cdepth;
+#endif
     cw_nxoi_t count;
 
     ostack = nxo_thread_ostack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(proc, ostack, a_thread);
     NXO_STACK_NGET(what, ostack, a_thread, 1);
@@ -4331,12 +4459,18 @@ systemdict_foreach(cw_nxo_t *a_thread)
      * well as clean up tstack at the end. */
     e_edepth = nxo_stack_count(estack);
     e_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    e_cdepth = nxo_stack_count(cstack);
+#endif
 
     switch (nxo_type_get(what))
     {
 	case NXOT_ARRAY:
 	{
 	    cw_uint32_t c_edepth, c_tdepth;
+#ifdef CW_OOP
+	    cw_uint32_t c_cdepth;
+#endif
 	    cw_nxo_t *el;
 	    volatile cw_nxoi_t i;
 
@@ -4354,6 +4488,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	    /* Record stack depths so that we can continue if necessary. */
 	    c_edepth = nxo_stack_count(estack);
 	    c_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+	    c_cdepth = nxo_stack_count(cstack);
+#endif
 
 	    nxo_stack_npop(ostack, 2);
 
@@ -4382,16 +4519,22 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		nxo_stack_npop(estack, nxo_stack_count(estack) - c_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - c_edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - c_tdepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - c_cdepth);
+#endif
 
 		i++;
 		xep_retry();
 	    }
 	    xep_catch(CW_ONYXX_EXIT)
 	    {
-		/* Clean up estack and istack.  tstack is handled later, so
-		 * don't bother cleaning it up here. */
+		/* Clean up stacks.  tstack is handled later, so don't bother
+		 * cleaning it up here. */
 		nxo_stack_npop(estack, nxo_stack_count(estack) - e_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - e_edepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - e_cdepth);
+#endif
 
 		xep_handled();
 	    }
@@ -4402,6 +4545,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	case NXOT_DICT:
 	{
 	    cw_uint32_t c_edepth, c_tdepth;
+#ifdef CW_OOP
+	    cw_uint32_t c_cdepth;
+#endif
 	    cw_nxo_t *key, *val;
 	    volatile cw_nxoi_t i;
 
@@ -4417,6 +4563,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	    /* Record stack depths so that we can continue if necessary. */
 	    c_edepth = nxo_stack_count(estack);
 	    c_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+	    c_cdepth = nxo_stack_count(cstack);
+#endif
 
 	    nxo_stack_npop(ostack, 2);
 
@@ -4450,6 +4599,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		nxo_stack_npop(estack, nxo_stack_count(estack) - c_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - c_edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - c_tdepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - c_cdepth);
+#endif
 
 		i++;
 		xep_retry();
@@ -4460,6 +4612,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		 * don't bother cleaning it up here. */
 		nxo_stack_npop(estack, nxo_stack_count(estack) - e_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - e_edepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - e_cdepth);
+#endif
 
 		xep_handled();
 	    }
@@ -4470,6 +4625,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	case NXOT_STACK:
 	{
 	    cw_uint32_t c_edepth;
+#ifdef CW_OOP
+	    cw_uint32_t c_cdepth;
+#endif
 	    volatile cw_uint32_t c_tdepth;
 	    cw_nxo_t *el;
 
@@ -4484,6 +4642,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	    /* Record stack depths so that we can continue if necessary. */
 	    c_edepth = nxo_stack_count(estack);
 	    c_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+	    c_cdepth = nxo_stack_count(cstack);
+#endif
 
 	    nxo_stack_npop(ostack, 2);
 
@@ -4512,6 +4673,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		nxo_stack_npop(estack, nxo_stack_count(estack) - c_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - c_edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - c_tdepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - c_cdepth);
+#endif
 
 		xep_retry();
 	    }
@@ -4521,6 +4685,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		 * don't bother cleaning it up here. */
 		nxo_stack_npop(estack, nxo_stack_count(estack) - e_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - e_edepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - e_cdepth);
+#endif
 
 		xep_handled();
 	    }
@@ -4531,6 +4698,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	case NXOT_STRING:
 	{
 	    cw_uint32_t c_edepth, c_tdepth;
+#ifdef CW_OOP
+	    cw_uint32_t c_cdepth;
+#endif
 	    cw_uint8_t el;
 	    volatile cw_nxoi_t i;
 
@@ -4546,6 +4716,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	    /* Record stack depths so that we can continue if necessary. */
 	    c_edepth = nxo_stack_count(estack);
 	    c_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+	    c_cdepth = nxo_stack_count(cstack);
+#endif
 
 	    nxo_stack_npop(ostack, 2);
 
@@ -4574,6 +4747,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		nxo_stack_npop(estack, nxo_stack_count(estack) - c_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - c_edepth);
 		nxo_stack_npop(tstack, nxo_stack_count(tstack) - c_tdepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - c_cdepth);
+#endif
 
 		i++;
 		xep_retry();
@@ -4584,6 +4760,9 @@ systemdict_foreach(cw_nxo_t *a_thread)
 		 * don't bother cleaning it up here. */
 		nxo_stack_npop(estack, nxo_stack_count(estack) - e_edepth);
 		nxo_stack_npop(istack, nxo_stack_count(istack) - e_edepth);
+#ifdef CW_OOP
+		nxo_stack_npop(cstack, nxo_stack_count(cstack) - e_cdepth);
+#endif
 
 		xep_handled();
 	    }
@@ -5071,6 +5250,27 @@ systemdict_ibpop(cw_nxo_t *a_thread)
     nxo_stack_roll(ostack, count - index, -1);
     nxo_stack_npop(ostack, 2);
 }
+
+#ifdef CW_OOP
+void
+systemdict_icheck(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+
+    if (nxo_attr_get(nxo) == NXOA_INVOKABLE)
+    {
+	nxo_boolean_new(nxo, TRUE);
+    }
+    else
+    {
+	nxo_boolean_new(nxo, FALSE);
+    }
+}
+#endif
 
 void
 systemdict_idiv(cw_nxo_t *a_thread)
@@ -6114,19 +6314,31 @@ void
 systemdict_loop(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *exec, *nxo, *tnxo;
     cw_uint32_t e_edepth, e_tdepth, c_edepth, c_tdepth;
+#ifdef CW_OOP
+    cw_uint32_t e_cdepth, c_cdepth;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
 
     /* Record stack depths so that we can clean up after exit. */
     e_edepth = nxo_stack_count(estack);
     e_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    e_cdepth = nxo_stack_count(cstack);
+#endif
 
     /* Move the object to be executed to tstack. */
     tnxo = nxo_stack_push(tstack);
@@ -6136,6 +6348,9 @@ systemdict_loop(cw_nxo_t *a_thread)
     /* Record stack depths so that we can clean up after continue. */
     c_edepth = nxo_stack_count(estack);
     c_tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    c_cdepth = nxo_stack_count(cstack);
+#endif
 
     /* Catch an exit exception, if thrown, but do not continue executing the
      * loop. */
@@ -6155,6 +6370,9 @@ systemdict_loop(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - c_edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - c_edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - c_tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - c_cdepth);
+#endif
 
 	xep_retry();
     }
@@ -6164,6 +6382,9 @@ systemdict_loop(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - e_edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - e_edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - e_tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - e_cdepth);
+#endif
 
 	xep_handled();
     }
@@ -9035,15 +9256,24 @@ void
 systemdict_repeat(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *count, *exec, *nxo, *tnxo;
     cw_nxoi_t cnt;
     volatile cw_nxoi_t i;
     cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
     NXO_STACK_NGET(count, ostack, a_thread, 1);
@@ -9068,6 +9298,9 @@ systemdict_repeat(cw_nxo_t *a_thread)
     /* Record stack depths so that we can clean up if necessary. */
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
 
     i = 0;
 
@@ -9087,6 +9320,9 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	i++;
 	xep_retry();
@@ -9097,6 +9333,9 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_handled();
     }
@@ -11676,17 +11915,29 @@ void
 systemdict_start(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *onxo, *enxo;
     cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     /* Record stack depths so that we can clean up later. */
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
 
     NXO_STACK_GET(onxo, ostack, a_thread);
     enxo = nxo_stack_push(estack);
@@ -11708,11 +11959,14 @@ systemdict_start(cw_nxo_t *a_thread)
     }
     xep_end();
 
-    /* Pop all objects off estack, istack, and tstack that weren't there before
-     * entering this function. */
+    /* Pop all objects off estack, istack, tstack, and cstack that weren't there
+     * before entering this function. */
     nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
     nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
     nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+    nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 }
 
 #ifdef CW_POSIX
@@ -11928,19 +12182,31 @@ void
 systemdict_stopped(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *exec, *nxo;
     cw_bool_t result = FALSE;
     cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
 
     ostack = nxo_thread_ostack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
 
     /* Record stack depths so that we can clean up if necessary. */
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
 
     nxo = nxo_stack_push(estack);
     nxo_dup(nxo, exec);
@@ -11963,6 +12229,9 @@ systemdict_stopped(cw_nxo_t *a_thread)
 	istack = nxo_thread_istack_get(a_thread);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_handled();
     }
@@ -12929,6 +13198,21 @@ systemdict_test(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_OOP
+void
+systemdict_this(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *cstack, *cnxo, *this_;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    cstack = nxo_thread_cstack_get(a_thread);
+
+    NXO_STACK_GET(cnxo, cstack, a_thread);
+    this_ = nxo_stack_push(ostack);
+    nxo_dup(this_, nxo_stack_get(cstack));
+}
+#endif
+
 #ifdef CW_THREADS
 void
 systemdict_thread(cw_nxo_t *a_thread)
@@ -12962,6 +13246,28 @@ systemdict_thread(cw_nxo_t *a_thread)
 
     /* Start the thread. */
     nxo_thread_thread(thread);
+}
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_threadcstack(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *thread, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(thread, ostack, a_thread);
+    if (nxo_type_get(thread) != NXOT_THREAD)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nxo_thread_cstack_get(thread));
+
+    nxo_stack_exch(ostack);
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -13280,8 +13586,14 @@ void
 systemdict_trapped(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *dstack, *estack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *exec, *nxo;
     cw_nxo_t *t_ostack, *t_dstack;
+#ifdef CW_OOP
+    cw_nxo_t *t_cstack;
+#endif
     cw_bool_t result = FALSE;
     cw_uint32_t edepth, tdepth;
 
@@ -13289,6 +13601,9 @@ systemdict_trapped(cw_nxo_t *a_thread)
     dstack = nxo_thread_dstack_get(a_thread);
     estack = nxo_thread_estack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
 
@@ -13310,6 +13625,13 @@ systemdict_trapped(cw_nxo_t *a_thread)
     t_dstack = nxo_stack_push(tstack);
     nxo_stack_new(t_dstack, FALSE, nxo_stack_count(dstack));
     nxo_stack_copy(t_dstack, dstack);
+
+#ifdef CW_OOP
+    /* Snapshot cstack. */
+    t_cstack = nxo_stack_push(tstack);
+    nxo_stack_new(t_cstack, FALSE, nxo_stack_count(cstack));
+    nxo_stack_copy(t_cstack, cstack);
+#endif
 
     /* Catch an escape exception, if thrown. */
     xep_begin();
@@ -13349,7 +13671,7 @@ systemdict_trapped(cw_nxo_t *a_thread)
     }
     xep_end();
 
-    /* Restore ostack and dstack, if an escape was trapped. */
+    /* If an escape was trapped, restore ostack, dstack, and cstack. */
     if (result)
     {
 	cw_nxo_t *istack, *trapped_arg;
@@ -13371,6 +13693,12 @@ systemdict_trapped(cw_nxo_t *a_thread)
 	nxo_stack_npop(dstack, nxo_stack_count(dstack));
 	nxo_stack_copy(dstack, t_dstack);
 
+#ifdef CW_OOP
+	/* Restore cstack. */
+	nxo_stack_npop(cstack, nxo_stack_count(cstack));
+	nxo_stack_copy(cstack, t_cstack);
+#endif
+
 	/* Clean up other stacks. */
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	istack = nxo_thread_istack_get(a_thread);
@@ -13379,7 +13707,12 @@ systemdict_trapped(cw_nxo_t *a_thread)
     }
     else
     {
-	nxo_stack_npop(tstack, 2);
+	nxo_stack_npop(tstack,
+		       2
+#ifdef CW_OOP
+		       + 1
+#endif
+		       );
     }
 
     /* Push result onto ostack. */
@@ -13788,8 +14121,14 @@ void
 systemdict_until(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *nxo, *exec, *cond;
     cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
     cw_bool_t do_exec;
     cw_nxn_t nerror;
 
@@ -13797,6 +14136,9 @@ systemdict_until(cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(cond, ostack, a_thread);
     NXO_STACK_NGET(exec, ostack, a_thread, 1);
@@ -13815,6 +14157,9 @@ systemdict_until(cw_nxo_t *a_thread)
     /* Record stack depths so that we can clean up if necessary. */
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
 
     /* Catch an exit exception, if thrown, but do not continue executing the
      * loop. */
@@ -13876,6 +14221,9 @@ systemdict_until(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_retry();
     }
@@ -13885,6 +14233,9 @@ systemdict_until(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_handled();
     }
@@ -14007,8 +14358,14 @@ void
 systemdict_while(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *estack, *istack, *tstack;
+#ifdef CW_OOP
+    cw_nxo_t *cstack;
+#endif
     cw_nxo_t *nxo, *exec, *cond;
     cw_uint32_t edepth, tdepth;
+#ifdef CW_OOP
+    cw_uint32_t cdepth;
+#endif
     cw_bool_t do_exec;
     cw_nxn_t nerror;
 
@@ -14016,6 +14373,9 @@ systemdict_while(cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     istack = nxo_thread_istack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
+#ifdef CW_OOP
+    cstack = nxo_thread_cstack_get(a_thread);
+#endif
 
     NXO_STACK_GET(exec, ostack, a_thread);
     NXO_STACK_NGET(cond, ostack, a_thread, 1);
@@ -14034,6 +14394,9 @@ systemdict_while(cw_nxo_t *a_thread)
     /* Record stack depths so that we can clean up if necessary. */
     edepth = nxo_stack_count(estack);
     tdepth = nxo_stack_count(tstack);
+#ifdef CW_OOP
+    cdepth = nxo_stack_count(cstack);
+#endif
 
     /* Catch an exit exception, if thrown, but do not continue executing the
      * loop. */
@@ -14095,6 +14458,9 @@ systemdict_while(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_retry();
     }
@@ -14104,6 +14470,9 @@ systemdict_while(cw_nxo_t *a_thread)
 	nxo_stack_npop(estack, nxo_stack_count(estack) - edepth);
 	nxo_stack_npop(istack, nxo_stack_count(istack) - edepth);
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
+#ifdef CW_OOP
+	nxo_stack_npop(cstack, nxo_stack_count(cstack) - cdepth);
+#endif
 
 	xep_handled();
     }

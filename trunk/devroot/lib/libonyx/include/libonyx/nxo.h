@@ -68,7 +68,9 @@ typedef enum
     NXOA_EVALUABLE
 #ifdef CW_OOP
     ,
-    NXOA_CALLABLE
+    NXOA_CALLABLE,
+    NXOA_INVOKABLE,
+    NXOA_FETCHABLE
 #endif
 } cw_nxoa_t;
 
@@ -94,15 +96,15 @@ struct cw_nxo_s
      *     op code corresponds to the name of this operator.  This can be used
      *     to print the operator name.
      *
-     * A : Attribute.  An nxo is LITERAL, EXECUTABLE, or EVALUABLE.
+     * A : Attribute (cw_nxoa_t).
      *
      * B : Array bound.  TRUE if the bind operator has processed this array.
      *     This is used to avoid infinite recursion in the bind operator
      *     when binding recursive procedures.
      *
-     * T : Type.
+     * T : Type (cw_nxot_t).
      *
-     * ........ ......CC CCCCCCCC AABTTTTT
+     * ........ .....CCC CCCCCCCA AABTTTTT
      * */
     cw_uint32_t flags;
 
@@ -231,7 +233,7 @@ nxo_attr_get(const cw_nxo_t *a_nxo)
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
-    return ((cw_nxoa_t) (((a_nxo)->flags >> 6) & 3));
+    return ((cw_nxoa_t) (((a_nxo)->flags >> 6) & 7));
 }
 
 CW_INLINE void
@@ -240,7 +242,7 @@ nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr)
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
-    a_nxo->flags = (a_nxo->flags & 0xffffff3f) | (a_attr << 6);
+    a_nxo->flags = (a_nxo->flags & 0xfffffe3f) | (a_attr << 6);
 }
 
 /* Private, but various object constructor macros need its definition. */

@@ -667,7 +667,8 @@ distilled down to the following simple rules:
 \item{Use the \htmlref{\onyxop{}{bind}{}}{systemdict:bind} operator for
   procedure definitions whenever possible, in order to reduce dstack lookups.}
 \item{Avoid the \htmlref{\onyxop{}{exit}{}}{systemdict:exit},
-  \htmlref{\onyxop{}{stop}{}}{systemdict:stop}, and
+  \htmlref{\onyxop{}{stop}{}}{systemdict:stop},
+  \htmlref{\onyxop{}{escape}{}}{systemdict:escape}, and
   \htmlref{\onyxop{}{quit}{}}{systemdict:quit} operators when possible, since
   they are implemented via \cfunc{longjmp}{}.}
 \end{itemize}
