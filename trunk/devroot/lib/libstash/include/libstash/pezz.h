@@ -10,9 +10,9 @@
  *
  * <<< Description >>>
  *
- * Public interface for the pezz class.  pezz is similar to the bufpool class,
- * but differs in that it does incremental block allocation, then carves buffers
- * from those blocks.  No memory is freed until pezz_delete() is called.
+ * Public interface for the pezz class.  pezz provides cached allocation for
+ * many equal-size buffers.  It does incremental block allocation, then carves
+ * buffers from those blocks.  No memory is freed until pezz_delete() is called.
  *
  ****************************************************************************/
 

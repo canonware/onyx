@@ -22,33 +22,13 @@
  *   valid data range) within buf's.
  * - Easy ability to use with readv() and writev().
  *
- * The bufpool class provides a simple implementation of cached buffers of the
- * same size, where the number of buffers to cache is dynamically settable.
- * bufpool is useful where large numbers of bufel's, bufc's, and memory buffers
- * are being allocated and deallocated.
- *
  ****************************************************************************/
 
 /* Pseudo-opaque typedefs. */
-typedef struct cw_bufpool_s cw_bufpool_t;
 typedef struct cw_buf_s cw_buf_t;
 typedef struct cw_bufel_s cw_bufel_t;
 
 /* The following data types should be considered opaque. */
-struct cw_bufpool_s
-{
-  cw_bool_t is_malloced;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t magic;
-#endif
-#ifdef _CW_REENTRANT
-  cw_mtx_t lock;
-#endif
-  cw_uint32_t buffer_size;
-  cw_uint32_t max_spare_buffers;
-  cw_list_t spare_buffers;
-};
-
 typedef struct
 {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
@@ -105,144 +85,6 @@ struct cw_buf_s
   cw_uint32_t * cumulative_index;
   struct iovec * iov;
 };
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to space for a bufpool, or NULL.
- *
- * a_buffer_size : Size of buffers to use.
- *
- * a_max_spare_buffers : Maximum number of buffers to cache.
- *
- * <<< Output(s) >>>
- *
- * retval : Pointer to a bufpool, or NULL.
- *          NULL : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Constructor.
- *
- ****************************************************************************/
-cw_bufpool_t *
-bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
-	    cw_uint32_t a_max_spare_buffers);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to a bufpool.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Destructor.
- *
- ****************************************************************************/
-void
-bufpool_delete(cw_bufpool_t * a_bufpool);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to a bufpool.
- *
- * <<< Output(s) >>>
- *
- * retval : Size of buffers that a_bufpool is using.
- *
- * <<< Description >>>
- *
- * Return the size of the buffers that a_bufpool is using.
- *
- ****************************************************************************/
-cw_uint32_t
-bufpool_get_buffer_size(cw_bufpool_t * a_bufpool);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to a bufpool.
- *
- * <<< Output(s) >>>
- *
- * retval : Maximum number of spare buffers that will be cached.
- *
- * <<< Description >>>
- *
- * Return the maximum number of spare buffers that will be cached.
- *
- ****************************************************************************/
-cw_uint32_t
-bufpool_get_max_spare_buffers(cw_bufpool_t * a_bufpool);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to a bufpool.
- *
- * a_max_spare_buffers : Maximum number of spare buffers to cache.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Set the maximum number of spare buffers to cache to a_max_spare_buffers.
- *
- ****************************************************************************/
-void
-bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
-			      cw_uint32_t a_max_spare_buffers);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to a bufpool.
- *
- * <<< Output(s) >>>
- *
- * retval : Pointer to a buffer, or NULL.
- *          NULL : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Return a buffer of size bufpool_get_buffer_size(a_bufpool).
- *
- ****************************************************************************/
-void *
-bufpool_get_buffer(cw_bufpool_t * a_bufpool);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_bufpool : Pointer to a bufpool.
- *
- * a_buffer : Pointer to a buffer (of size bufpool_get_buffer_size(a_bufpool)).
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Release a_buffer and let a_bufpool deal with it.
- *
- ****************************************************************************/
-void
-bufpool_put_buffer(void * a_bufpool, void * a_buffer);
 
 /****************************************************************************
  *

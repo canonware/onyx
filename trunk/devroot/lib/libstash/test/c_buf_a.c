@@ -34,117 +34,6 @@ main()
 
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
-  /* bufpool_new(), bufpool_delete(). */
-  {
-    cw_bufpool_t bufpool, * bufpool_p;
-
-    _cw_assert(&bufpool == bufpool_new(&bufpool, 123, 7));
-    bufpool_delete(&bufpool);
-
-    bufpool_p = bufpool_new(NULL, 234, 11);
-    _cw_check_ptr(bufpool_p);
-    bufpool_delete(bufpool_p);
-  }
-
-  /* bufpool_get_buffer_size(). */
-  {
-    cw_bufpool_t bufpool;
-
-    bufpool_new(&bufpool, 123, 7);
-    _cw_assert(123 == bufpool_get_buffer_size(&bufpool));
-    bufpool_delete(&bufpool);
-    
-    bufpool_new(&bufpool, 123, 10);
-    _cw_assert(123 == bufpool_get_buffer_size(&bufpool));
-    bufpool_delete(&bufpool);
-    
-    bufpool_new(&bufpool, 4096, 1024);
-    _cw_assert(4096 == bufpool_get_buffer_size(&bufpool));
-    bufpool_delete(&bufpool);
-  }
-  
-  /* bufpool_get_max_spare_buffers(), bufpool_set_max_spare_buffers(),
-   * bufpool_get_buffer(), bufpool_put_buffer(). */
-  {
-    cw_bufpool_t bufpool;
-    void * pointers[100];
-    cw_uint32_t i;
-
-    bufpool_new(&bufpool, 4096, 10);
-    _cw_assert(10 == bufpool_get_max_spare_buffers(&bufpool));
-    for (i = 0; i < 100; i++)
-    {
-      pointers[i] = bufpool_get_buffer(&bufpool);
-      _cw_check_ptr(pointers[i]);
-    }
-    for (i = 0; i < 100; i++)
-    {
-      bufpool_put_buffer(&bufpool, pointers[i]);
-      pointers[i] = NULL;
-    }
-    for (i = 0; i < 100; i++)
-    {
-      pointers[i] = bufpool_get_buffer(&bufpool);
-      _cw_check_ptr(pointers[i]);
-    }
-    
-    bufpool_set_max_spare_buffers(&bufpool, 500);
-    _cw_assert(500 == bufpool_get_max_spare_buffers(&bufpool));
-    for (i = 0; i < 100; i++)
-    {
-      bufpool_put_buffer(&bufpool, pointers[i]);
-      pointers[i] = NULL;
-    }
-    for (i = 0; i < 100; i++)
-    {
-      pointers[i] = bufpool_get_buffer(&bufpool);
-      _cw_check_ptr(pointers[i]);
-    }
-    for (i = 0; i < 100; i++)
-    {
-      bufpool_put_buffer(&bufpool, pointers[i]);
-      pointers[i] = NULL;
-    }
-    
-    bufpool_set_max_spare_buffers(&bufpool, 0);
-    _cw_assert(0 == bufpool_get_max_spare_buffers(&bufpool));
-    for (i = 0; i < 100; i++)
-    {
-      pointers[i] = bufpool_get_buffer(&bufpool);
-      _cw_check_ptr(pointers[i]);
-    }
-    for (i = 0; i < 100; i++)
-    {
-      bufpool_put_buffer(&bufpool, pointers[i]);
-      pointers[i] = NULL;
-    }
-    for (i = 0; i < 100; i++)
-    {
-      pointers[i] = bufpool_get_buffer(&bufpool);
-      _cw_check_ptr(pointers[i]);
-    }
-    
-    bufpool_set_max_spare_buffers(&bufpool, 49);
-    _cw_assert(49 == bufpool_get_max_spare_buffers(&bufpool));
-    for (i = 0; i < 100; i++)
-    {
-      bufpool_put_buffer(&bufpool, pointers[i]);
-      pointers[i] = NULL;
-    }
-    for (i = 0; i < 100; i++)
-    {
-      pointers[i] = bufpool_get_buffer(&bufpool);
-      _cw_check_ptr(pointers[i]);
-    }
-    for (i = 0; i < 100; i++)
-    {
-      bufpool_put_buffer(&bufpool, pointers[i]);
-      pointers[i] = NULL;
-    }
-    
-    bufpool_delete(&bufpool);
-  }
-  
   /* bufc_new(), bufc_delete(), bufc_set_buffer(). */
   {
     cw_bufc_t bufc_a, * bufc_b;
@@ -188,23 +77,20 @@ main()
   /* bufel_get_size(), bufel_set_data_ptr(). */
   {
     cw_bufel_t * bufel_p;
-    cw_bufpool_t bufpool;
     void * buffer;
     cw_bufc_t bufc;
-    
-    bufpool_new(&bufpool, 4096, 10);
     
     bufel_p = bufel_new(NULL, NULL, NULL);
     _cw_assert(0 == bufel_get_size(bufel_p));
 
     bufc_new(&bufc, NULL, NULL);
-    buffer = bufpool_get_buffer(&bufpool);
+    buffer = _cw_malloc(4096);
     bufc_set_buffer(&bufc,
 		    buffer,
-		    bufpool_get_buffer_size(&bufpool),
+		    4096,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
 
     bufel_set_bufc(bufel_p, &bufc);
     _cw_assert(4096 == bufel_get_size(bufel_p));
@@ -215,7 +101,6 @@ main()
     _cw_assert(TRUE == bufel_set_end_offset(bufel_p, 4097));
     
     bufel_delete(bufel_p);
-    bufpool_delete(&bufpool);
   }
 
   /* bufel_get_beg_offset(), bufel_set_beg_offset(),
@@ -223,22 +108,19 @@ main()
    * bufel_get_valid_data_size(). */
   {
     cw_bufel_t * bufel_p;
-    cw_bufpool_t bufpool;
     void * buffer;
     cw_bufc_t * bufc_p;
-
-    bufpool_new(&bufpool, 4096, 10);
 
     bufel_p = bufel_new(NULL, NULL, NULL);
 
     bufc_p = bufc_new(NULL, NULL, NULL);
-    buffer = bufpool_get_buffer(&bufpool);
+    buffer = _cw_malloc(4096);
     bufc_set_buffer(bufc_p,
 		    buffer,
-		    bufpool_get_buffer_size(&bufpool),
+		    4096,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
 
     bufel_set_bufc(bufel_p, bufc_p);
     
@@ -278,7 +160,6 @@ main()
     _cw_assert(0 == bufel_get_valid_data_size(bufel_p));
     
     bufel_delete(bufel_p);
-    bufpool_delete(&bufpool);
   }
   
   /* bufel_get_data_ptr(), bufel_set_data_ptr(). */
@@ -286,13 +167,10 @@ main()
     cw_bufel_t * bufel_p;
     cw_bufc_t * bufc_p;
     char * string;
-    cw_bufpool_t bufpool;
-
-    bufpool_new(&bufpool, 50, 10);
 
     bufel_p = bufel_new(NULL, NULL, NULL);
 
-    string = (char *) bufpool_get_buffer(&bufpool);
+    string = (char *) _cw_malloc(50);
     strcpy(string, "Hi ho hum.");
     
     _cw_assert(NULL == bufel_get_data_ptr(bufel_p));
@@ -301,10 +179,10 @@ main()
     bufc_new(bufc_p, mem_dealloc, cw_g_mem);
     bufc_set_buffer(bufc_p,
 		    string,
-		    bufpool_get_buffer_size(&bufpool),
+		    50,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p, bufc_p);
     
     _cw_assert((void *) string == bufel_get_data_ptr(bufel_p));
@@ -313,7 +191,6 @@ main()
     _cw_assert(50 == bufel_get_valid_data_size(bufel_p));
     
     bufel_delete(bufel_p);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_new(), buf_delete(). */
@@ -341,26 +218,23 @@ main()
     cw_bufc_t bufc;
     cw_buf_t * buf_p;
     cw_uint32_t i, j;
-    cw_bufpool_t bufpool;
     char * buffer;
     cw_uint32_t * buffer_cast;
     char buf[17];
 
-    bufpool_new(&bufpool, 512, 10);
-
     bufel_p = bufel_new(NULL, NULL, NULL);
     buf_p = buf_new(NULL, TRUE);
 
-    buffer = (char *) bufpool_get_buffer(&bufpool);
+    buffer = (char *) _cw_malloc(512);
     buffer_cast = (cw_uint32_t *) buffer;
 
     bufc_new(&bufc, NULL, NULL);
     bufc_set_buffer(&bufc,
 		    buffer,
-		    bufpool_get_buffer_size(&bufpool),
+		    512,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
 
     bufel_set_bufc(bufel_p, &bufc);
     
@@ -429,13 +303,11 @@ main()
     
     buf_delete(buf_p);
     bufel_delete(bufel_p);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_get_uint32(), buf_get_uint64(),
    * buf_get_iovec(). */
   {
-    cw_bufpool_t bufpool;
     cw_buf_t buf;
     cw_bufel_t bufel;
     cw_bufc_t * bufc_p;
@@ -453,7 +325,6 @@ main()
      * f 42, 15, 16, 17, 18, 19, 20, 21, 22, 23, 42
      */
 
-    bufpool_new(&bufpool, 5, 10);
     buf_new(&buf, TRUE);
 
     a = (cw_uint8_t *) _cw_malloc(1);
@@ -501,7 +372,7 @@ main()
     _cw_assert(4 == buf_get_num_bufels(&buf));
     bufel_delete(&bufel);
 
-    e = bufpool_get_buffer(&bufpool);
+    e = _cw_malloc(5);
     e[0] = 10;
     e[1] = 11;
     e[2] = 12;
@@ -509,7 +380,7 @@ main()
     e[4] = 14;
     bufel_new(&bufel, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
-    bufc_set_buffer(bufc_p, (void *) e, 5, FALSE, bufpool_put_buffer, &bufpool);
+    bufc_set_buffer(bufc_p, (void *) e, 5, FALSE, mem_dealloc, cw_g_mem);
     bufel_set_bufc(&bufel, bufc_p);
     buf_append_bufel(&buf, &bufel);
     _cw_assert(5 == buf_get_num_bufels(&buf));
@@ -618,12 +489,10 @@ main()
     }
 
     buf_delete(&buf);
-    bufpool_delete(&bufpool);
   }
   
   /* buf_set_uint8(). */
   {
-    cw_bufpool_t bufpool;
     cw_buf_t buf;
     cw_bufel_t bufel;
     cw_bufc_t * bufc_p;
@@ -638,7 +507,6 @@ main()
      * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
      */
 
-    bufpool_new(&bufpool, 5, 10);
     buf_new(&buf, TRUE);
 
     a = (cw_uint8_t *) _cw_malloc(1);
@@ -690,7 +558,7 @@ main()
     bufel_delete(&bufel);
     _cw_assert(10 == buf_get_size(&buf));
 
-    e = bufpool_get_buffer(&bufpool);
+    e = _cw_malloc(5);
     e[0] = 10;
     e[1] = 11;
     e[2] = 12;
@@ -698,7 +566,7 @@ main()
     e[4] = 14;
     bufel_new(&bufel, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
-    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, bufpool_put_buffer, &bufpool);
+    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, mem_dealloc, cw_g_mem);
     bufel_set_bufc(&bufel, bufc_p);
     buf_append_bufel(&buf, &bufel);
     _cw_assert(5 == buf_get_num_bufels(&buf));
@@ -776,12 +644,10 @@ main()
     }
     
     buf_delete(&buf);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_set_uint32(). */
   {
-    cw_bufpool_t bufpool;
     cw_buf_t buf;
     cw_bufel_t bufel;
     cw_bufc_t * bufc_p;
@@ -797,7 +663,6 @@ main()
      * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
      */
 
-    bufpool_new(&bufpool, 5, 10);
     buf_new(&buf, TRUE);
 
     a = (cw_uint8_t *) _cw_malloc(1);
@@ -849,7 +714,7 @@ main()
     bufel_delete(&bufel);
     _cw_assert(10 == buf_get_size(&buf));
 
-    e = bufpool_get_buffer(&bufpool);
+    e = _cw_malloc(5);
     e[0] = 10;
     e[1] = 11;
     e[2] = 12;
@@ -857,7 +722,7 @@ main()
     e[4] = 14;
     bufel_new(&bufel, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
-    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, bufpool_put_buffer, &bufpool);
+    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, mem_dealloc, cw_g_mem);
     bufel_set_bufc(&bufel, bufc_p);
     buf_append_bufel(&buf, &bufel);
     _cw_assert(5 == buf_get_num_bufels(&buf));
@@ -937,12 +802,10 @@ main()
     }
     
     buf_delete(&buf);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_set_uint64(). */
   {
-    cw_bufpool_t bufpool;
     cw_buf_t buf;
     cw_bufel_t bufel;
     cw_bufc_t * bufc_p;
@@ -958,7 +821,6 @@ main()
      * r- f (42), 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, (42)
      */
 
-    bufpool_new(&bufpool, 5, 10);
     buf_new(&buf, TRUE);
 
     a = (cw_uint8_t *) _cw_malloc(1);
@@ -1010,7 +872,7 @@ main()
     bufel_delete(&bufel);
     _cw_assert(10 == buf_get_size(&buf));
 
-    e = bufpool_get_buffer(&bufpool);
+    e = _cw_malloc(5);
     e[0] = 10;
     e[1] = 11;
     e[2] = 12;
@@ -1018,7 +880,7 @@ main()
     e[4] = 14;
     bufel_new(&bufel, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
-    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, bufpool_put_buffer, &bufpool);
+    bufc_set_buffer(bufc_p, (void *) e, 5, TRUE, mem_dealloc, cw_g_mem);
     bufel_set_bufc(&bufel, bufc_p);
     buf_append_bufel(&buf, &bufel);
     _cw_assert(5 == buf_get_num_bufels(&buf));
@@ -1098,7 +960,6 @@ main()
     }
     
     buf_delete(&buf);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_set_range(). */
@@ -1134,17 +995,14 @@ main()
     cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c, * bufel_p_d;
     cw_bufc_t * bufc_p;
     char * str_a, * str_b, * str_c;
-    cw_bufpool_t bufpool;
 
-    bufpool_new(&bufpool, 1, 2);
-
-    str_a = (char *) bufpool_get_buffer(&bufpool);
+    str_a = (char *) _cw_malloc(1);
     str_a[0] = 'A';
     
-    str_b = (char *) bufpool_get_buffer(&bufpool);
+    str_b = (char *) _cw_malloc(1);
     str_b[0] = 'B';
     
-    str_c = (char *) bufpool_get_buffer(&bufpool);
+    str_c = (char *) _cw_malloc(1);
     str_c[0] = 'C';
 
     buf_p = buf_new(NULL, TRUE);
@@ -1154,30 +1012,30 @@ main()
     bufc_p = bufc_new(NULL, NULL, NULL);
     bufc_set_buffer(bufc_p,
 		    (void *) str_a,
-		    bufpool_get_buffer_size(&bufpool),
+		    1,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p_a, bufc_p);
     
     bufel_p_b = bufel_new(NULL, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
     bufc_set_buffer(bufc_p, 
 		    (void *) str_b,
-		    bufpool_get_buffer_size(&bufpool),
+		    1,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p_b, bufc_p);
     
     bufel_p_c = bufel_new(NULL, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
     bufc_set_buffer(bufc_p,
 		    (void *) str_c,
-		    bufpool_get_buffer_size(&bufpool),
+		    1,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p_c, bufc_p);
 
     buf_append_bufel(buf_p, bufel_p_a);
@@ -1212,7 +1070,6 @@ main()
     bufel_delete(bufel_p_b);
     bufel_delete(bufel_p_c);
     buf_delete(buf_p);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_catenate_buf(),
@@ -1222,21 +1079,18 @@ main()
     cw_bufel_t * bufel_p_a, * bufel_p_b, * bufel_p_c;
     cw_bufc_t * bufc_p;
     char * str_a, * str_b, * str_c;
-    cw_bufpool_t bufpool;
 
-    bufpool_new(&bufpool, 1, 2);
-
-    str_a = (char *) bufpool_get_buffer(&bufpool);
+    str_a = (char *) _cw_malloc(1);
     str_a[0] = 'A';
     
-    str_b = (char *) bufpool_get_buffer(&bufpool);
+    str_b = (char *) _cw_malloc(1);
     str_b[0] = 'B';
     
-    str_c = (char *) bufpool_get_buffer(&bufpool);
+    str_c = (char *) _cw_malloc(1);
     str_c[0] = 'C';
 
     buf_p_a = buf_new(NULL, TRUE);
-    buf_p_b = buf_new(NULL, FALSE); /* XXX */
+    buf_p_b = buf_new(NULL, FALSE);
     _cw_assert(0 == buf_get_size(buf_p_a));
     _cw_assert(0 == buf_get_size(buf_p_b));
 
@@ -1244,30 +1098,30 @@ main()
     bufc_p = bufc_new(NULL, NULL, NULL);
     bufc_set_buffer(bufc_p,
 		    (void *) str_a,
-		    bufpool_get_buffer_size(&bufpool),
+		    1,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p_a, bufc_p);
     
     bufel_p_b = bufel_new(NULL, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
     bufc_set_buffer(bufc_p,
 		    (void *) str_b,
-		    bufpool_get_buffer_size(&bufpool),
+		    1,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p_b, bufc_p);
     
     bufel_p_c = bufel_new(NULL, NULL, NULL);
     bufc_p = bufc_new(NULL, NULL, NULL);
     bufc_set_buffer(bufc_p,
 		    (void *) str_c,
-		    bufpool_get_buffer_size(&bufpool),
+		    1,
 		    FALSE,
-		    bufpool_put_buffer,
-		    (void *) &bufpool);
+		    mem_dealloc,
+		    (void *) cw_g_mem);
     bufel_set_bufc(bufel_p_c, bufc_p);
     
     buf_append_bufel(buf_p_a, bufel_p_a);
@@ -1290,18 +1144,14 @@ main()
     bufel_delete(bufel_p_c);
     buf_delete(buf_p_a);
     buf_delete(buf_p_b);
-    bufpool_delete(&bufpool);
   }
 
   /* buf_catenate_buf(). */
   {
-    cw_bufpool_t bufpool;
     cw_buf_t buf_a, buf_b, buf_c;
     cw_bufel_t bufel;
     cw_bufc_t * bufc_p;
     cw_uint32_t i;
-
-    bufpool_new(&bufpool, 8, 10);
 
     buf_new(&buf_a, TRUE);
     buf_new(&buf_b, FALSE);
@@ -1312,11 +1162,11 @@ main()
       bufel_new(&bufel, NULL, NULL);
       bufc_p = bufc_new(NULL, NULL, NULL);
       bufc_set_buffer(bufc_p,
-		      bufpool_get_buffer(&bufpool),
-		      bufpool_get_buffer_size(&bufpool),
+		      _cw_malloc(8),
+		      8,
 		      FALSE,
-		      bufpool_put_buffer,
-		      (void *) &bufpool);
+		      mem_dealloc,
+		      (void *) cw_g_mem);
       bufel_set_bufc(&bufel, bufc_p);
       buf_append_bufel(&buf_a, &bufel);
       buf_catenate_buf(&buf_c, &buf_b, FALSE);
@@ -1354,19 +1204,15 @@ main()
     buf_delete(&buf_a);
     buf_delete(&buf_b);
     buf_delete(&buf_c);
-    bufpool_delete(&bufpool);
   }
   
   /* buf_split(). */
   /* buf_release_head_data(), buf_release_tail_data(). */
   {
-    cw_bufpool_t bufpool;
     cw_buf_t buf_a, buf_b, buf_c;
     cw_bufel_t bufel;
     cw_bufc_t * bufc_p;
     cw_uint32_t i;
-
-    bufpool_new(&bufpool, 8, 10);
 
     buf_new(&buf_a, TRUE);
     buf_new(&buf_b, FALSE);
@@ -1376,12 +1222,12 @@ main()
     {
       bufel_new(&bufel, NULL, NULL);
       bufc_p = bufc_new(NULL, NULL, NULL);
-      bufc_set_buffer(bufc_p, 
-		      bufpool_get_buffer(&bufpool),
-		      bufpool_get_buffer_size(&bufpool),
+      bufc_set_buffer(bufc_p,
+		      _cw_malloc(8),
+		      8,
 		      FALSE,
-		      bufpool_put_buffer,
-		      (void *) &bufpool);
+		      mem_dealloc,
+		      (void *) cw_g_mem);
       bufel_set_bufc(&bufel, bufc_p);
       buf_append_bufel(&buf_a, &bufel);
       buf_append_bufel(&buf_b, &bufel);
@@ -1465,7 +1311,6 @@ main()
 
     _cw_assert(56 == buf_get_size(&buf_c));
 
-
     _cw_assert(FALSE == buf_release_tail_data(&buf_c, 10));
     _cw_assert(46 == buf_get_size(&buf_c));
     
@@ -1515,7 +1360,6 @@ main()
     buf_delete(&buf_a);
     buf_delete(&buf_b);
     buf_delete(&buf_c);
-    bufpool_delete(&bufpool);
   }
 
   log_printf(cw_g_log, "Test end\n");

@@ -1,3 +1,9 @@
+1999-05-18  J. Owen Evans  <jasone@canonware.com>
+
+	* include/libstash/buf.h : Remove bufpool.  pezz provides similar
+	functionality, and has generally more desireable runtime
+	characteristics.
+
 1999-05-17  J. Owen Evans  <jasone@canonware.com>
 
 	* src/pezz.c: Completely re-write the pezz class, such that all
