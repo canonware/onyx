@@ -1,3 +1,11 @@
+2000-07-18  Jason Evans  <jasone@canonware.com>
+
+	* src/out.c: Restructure the internals of the out class so that
+	two passes of the arguments aren't necessary, except in some
+	corner cases.
+
+	* src/mem.c: Do not try to acquire/release mutexes recursively.
+
 2000-07-16  Jason Evans  <jasone@canonware.com>
 
 	* src/ring.c: Remove.  The qs, qr, and ql macros obsolete the ring

@@ -185,53 +185,13 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 		mtx_unlock(&a_buf->lock);
 }
 
-cw_sint32_t
-buf_out_metric(const char *a_format, cw_uint32_t a_len, const void *a_arg)
+cw_uint32_t
+buf_out_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
+    cw_uint32_t a_max_len, cw_uint8_t *r_buf)
 {
-	cw_sint32_t	retval, val_len;
-	cw_uint32_t	len, width;
-	const char	*val;
-	cw_buf_t	*buf;
-
-	_cw_check_ptr(a_format);
-	_cw_assert(a_len > 0);
-	_cw_check_ptr(a_arg);
-
-	buf = *(cw_buf_t **)a_arg;
-	_cw_check_ptr(buf);
-	_cw_assert(buf->magic_a == _CW_BUF_MAGIC);
-	_cw_assert(buf->size_of == sizeof(cw_buf_t));
-	_cw_assert(buf->magic_b == _CW_BUF_MAGIC);
-
-	len = buf_get_size(buf);
-
-	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
-		/* Width specified. */
-		/*
-		 * The next character after val is either `|' or `]', so we
-		 * don't have to worry about terminating the string that val
-		 * points to.
-		 */
-		width = strtoul(val, NULL, 10);
-		if (width > len) {
-			retval = width;
-			goto RETURN;
-		}
-	}
-	retval = len;
-
-	RETURN:
-	return retval;
-}
-
-char   *
-buf_out_render(const char *a_format, cw_uint32_t a_len, const void *a_arg, char
-    *r_buf)
-{
-	char		*retval, *pos, pad;
 	cw_sint32_t	val_len;
-	const char	*val;
-	cw_uint32_t	len, width;
+	const cw_uint8_t *val;
+	cw_uint32_t	olen, rlen, owidth, width, offset;
 	cw_buf_t	*buf;
 	const struct iovec *iov;
 	int		iov_cnt, i;
@@ -247,11 +207,32 @@ buf_out_render(const char *a_format, cw_uint32_t a_len, const void *a_arg, char
 	_cw_assert(buf->size_of == sizeof(cw_buf_t));
 	_cw_assert(buf->magic_b == _CW_BUF_MAGIC);
 
-	len = buf_get_size(buf);
+	rlen = buf_get_size(buf);
 
-	width = buf_out_metric(a_format, a_len, a_arg);
+	if ((val_len = spec_get_val(a_format, a_len, "w", 1, &val)) != -1) {
+		/* Width specified. */
+		/*
+		 * The next character after val is either `|' or `]', so we
+		 * don't have to worry about terminating the string that val
+		 * points to.
+		 */
+		width = strtoul(val, NULL, 10);
+		if (width < rlen)
+			width = rlen;
+	} else
+		width = rlen;
 
-	if (width > len) {
+	/*
+	 * Determine the number of bytes to actually output.
+	 */
+	if (width <= a_max_len)
+		owidth = width;
+	else
+		owidth = a_max_len;
+
+	if (width > rlen) {
+		cw_uint8_t	pad, justify;
+
 		/* Padding character. */
 		if ((val_len = spec_get_val(a_format, a_len, "p", 1, &val)) !=
 		    -1)
@@ -259,44 +240,49 @@ buf_out_render(const char *a_format, cw_uint32_t a_len, const void *a_arg, char
 		else
 			pad = ' ';
 
-		memset(r_buf, pad, width);
+		memset(r_buf, pad, owidth);
 
 		/* Justification. */
 		if ((val_len = spec_get_val(a_format, a_len, "j", 1, &val)) !=
-		    -1) {
-			switch (val[0]) {
-			case 'r':
-				pos = &r_buf[width - len];
-				break;
-			case 'l':
-				pos = &r_buf[0];
-				break;
-			case 'c':
-				pos = &r_buf[(width - len) / 2];
-				break;
-			default:
-				_cw_error("Unknown justification");
-			}
-		} else {
-			/* Default to right justification. */
-			pos = &r_buf[width - len];
+		    -1)
+			justify = val[0];
+		else
+			justify = 'r';
+
+		switch (justify) {
+		case 'r':
+			offset = width - rlen;
+			break;
+		case 'l':
+			offset = 0;
+			break;
+		case 'c':
+			offset = (width - rlen) / 2;
+			break;
+		default:
+			_cw_error("Unknown justification");
 		}
 	} else
-		pos = &r_buf[0];
+		offset = 0;
 
-	/*
-	 * Copy bytes from the buf to the output string.  Use the buf's iovec
-	 * and memcpy for efficiency.
-	 */
-	iov = buf_get_iovec(buf, buf_get_size(buf), FALSE, &iov_cnt);
-	for (i = 0; i < iov_cnt; i++) {
-		memcpy(pos, iov[i].iov_base, iov[i].iov_len);
-		pos += iov[i].iov_len;
+	if (offset < owidth) {
+		/*
+		 * Copy bytes from the buf to the output string.  Use the buf's
+		 * iovec and memcpy for efficiency.
+		 */
+		if (offset + rlen <= owidth)
+			olen = rlen;
+		else
+			olen = owidth - offset;
+		iov = buf_get_iovec(buf, olen, FALSE, &iov_cnt);
+		r_buf += offset;
+		for (i = 0; i < iov_cnt; i++) {
+			memcpy(r_buf, iov[i].iov_base, iov[i].iov_len);
+			r_buf += iov[i].iov_len;
+		}
 	}
 
-	retval = r_buf;
-
-	return retval;
+	return width;
 }
 
 cw_uint32_t

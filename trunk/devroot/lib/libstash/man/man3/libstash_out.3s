@@ -15,17 +15,11 @@ helpers.
 \fB#include <libstash/libstash.h>\fR
 
 .SS Type definitions
-.I typedef cw_sint32_t
-.br
-.B cw_out_metric_t
-.RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", "
-.IR "const void *a_arg" )
-
 .I typedef char *
 .br
 .B cw_out_render_t
 .RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", "
-.IR "const void *a_arg" ", " "char *r_str" )
+.IR "const void *a_arg" ", " "cw_uint32_t a_max_len" ", " "char *r_str" )
 
 .SS General
 .I cw_out_t *
@@ -42,8 +36,7 @@ helpers.
 .br
 .B out_register
 .RI ( "cw_out_t *a_out" ", " "const char *a_type" ", " "cw_uint32_t a_size"
-.RI ", " "cw_out_metric_t *a_metric_func" ", "
-.IR "cw_out_render_t *a_render_func" )
+.RI ", " "cw_out_render_t *a_render_func" )
 
 .I cw_bool_t
 .br
@@ -353,46 +346,6 @@ _
 .TE
 
 .SH USAGE
-.I typedef cw_sint32_t
-.br
-.B cw_out_metric_t
-.RI ( "const char *a_format" ", " "cw_uint32_t a_format_len" ", " 
-.IR "const void *a_arg" )
-.RS
-Input(s):
-.RS
-.IR a_format :
-.RS
-Pointer to a format specifier.
-.RE
-.IR a_format_len :
-.RS
-Length in bytes of a_format.
-.RE
-.IR a_arg :
-.RS
-Pointer to object to be output.
-.RE
-.RE
-Output(s):
-.RS
-.IR retval :
-.RS
->= 0: Number of bytes of output space that the corresponding rendering function
-needs.
-.br
--1: Memory allocation error.
-.br
--2: Other error.
-.RE
-.RE
-Description:
-.RS
-Return the number of bytes needed to output a_arg, given the specification
-pointed to by a_format.
-.RE
-.RE
-
 .I typedef char *
 .br
 .B cw_out_render_t
@@ -412,6 +365,10 @@ Length in bytes of a_format.
 .IR a_arg :
 .RS
 Pointer to object to be output.
+.RE
+.IR a_max_len :
+.RS
+Maximum number of bytes to output.
 .RE
 .IR r_str :
 .RS
@@ -493,8 +450,7 @@ Destructor.
 .br
 .B out_register
 .RI ( "cw_out_t *a_out" ", " "const char *a_type" ", " "cw_uint32_t a_size"
-.RI ", " "cw_out_metric_t *a_metric_func" ", "
-.IR "cw_out_render_t *a_render_func" )
+.RI ", " "cw_out_render_t *a_render_func" )
 .RS
 Input(s):
 .RS
@@ -512,10 +468,6 @@ bytes or less.
 .RS
 sizeof(<data type>).  In almost all cases this will be sizeof(<data type> *).
 a_size must be 1, 2, 4, or 8.
-.RE
-.IR a_metric_func :
-.RS
-Pointer to a metric function.
 .RE
 .IR a_render_func :
 .RS

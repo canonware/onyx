@@ -19,6 +19,7 @@ int
 main()
 {
 	libstash_init();
+	dbg_unregister(cw_g_dbg, "mem_error");
 	_cw_out_put("Test begin\n");
 
 /*  	dbg_register(cw_g_dbg, "mem_verbose"); */
@@ -45,7 +46,7 @@ main()
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_register(out_p, "buf", sizeof(cw_buf_t *),
-		    buf_out_metric, buf_out_render) == FALSE);
+		    buf_out_render) == FALSE);
 
 		_cw_assert(out_merge(out_p, cw_g_out) == FALSE);
 
@@ -138,14 +139,18 @@ main()
 	_cw_out_put("out_put_n()\n");
 	{
 		cw_out_t	*out_p;
-		char		buf[81] =
+		char		buf[71] =
 		    "0123456789012345678901234567890123456789"
-		    "0123456789012345678901234567890123456789";
+		    "012345678901234567890123456789";
 
 		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_n(out_p, 60, "[s]", buf) == 60);
+		_cw_assert(out_put_n(out_p, 2, ":[s]", "\n:") == 2);
+		_cw_assert(out_put_n(out_p, 70, "[s]", buf) == 70);
+		_cw_assert(out_put_n(out_p, 2, ":[s]", "\n:") == 2);
+		_cw_assert(out_put_n(out_p, 71, "[s]", buf) == 70);
 		_cw_assert(out_put_n(out_p, 2, ":[s]", "\n:") == 2);
 		_cw_assert(out_put_n(out_p, 80, "") == 0);
 
@@ -225,14 +230,18 @@ main()
 	_cw_out_put("out_put_fn()\n");
 	{
 		cw_out_t	*out_p;
-		char		buf[81] =
+		char		buf[71] =
 		    "0123456789012345678901234567890123456789"
-		    "0123456789012345678901234567890123456789";
+		    "012345678901234567890123456789";
 
 		out_p = out_new(NULL, cw_g_mem);
 		_cw_check_ptr(out_p);
 
 		_cw_assert(out_put_fn(out_p, 2, 60, "[s]", buf) == 60);
+		_cw_assert(out_put_fn(out_p, 2, 2, ":[s]", "\n:") == 2);
+		_cw_assert(out_put_fn(out_p, 2, 70, "[s]", buf) == 70);
+		_cw_assert(out_put_fn(out_p, 2, 2, ":[s]", "\n:") == 2);
+		_cw_assert(out_put_fn(out_p, 2, 71, "[s]", buf) == 70);
 		_cw_assert(out_put_fn(out_p, 2, 2, ":[s]", "\n:") == 2);
 		_cw_assert(out_put_fn(out_p, 2, 80, "") == 0);
 

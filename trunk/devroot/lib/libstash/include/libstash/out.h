@@ -12,14 +12,12 @@
 /*
  * Typedef's to allow easy function pointer passing.
  */
-typedef cw_sint32_t cw_out_metric_t(const char *a_format, cw_uint32_t
-    a_format_len, const void *a_arg);
 
-typedef char *cw_out_render_t(const char *a_format, cw_uint32_t a_format_len,
-    const void *a_arg, char *r_str);
+typedef cw_uint32_t cw_out_render_t(const char *a_format, cw_uint32_t
+    a_format_len, const void *a_arg, cw_uint32_t a_max_len, cw_uint8_t *r_str);
 
 /* Maximum type string length, including NULL termination. */
-#define _LIBSTASH_OUT_MAX_TYPE 16
+#define _CW_OUT_MAX_TYPE 16
 
 /* Pseudo-opaque types. */
 typedef struct cw_out_s cw_out_t;
@@ -43,10 +41,9 @@ struct cw_out_s {
 };
 
 struct cw_out_ent_s {
-	char		type[_LIBSTASH_OUT_MAX_TYPE];
+	cw_uint8_t	type[_CW_OUT_MAX_TYPE];
 	cw_uint32_t	len;
 	cw_uint32_t	size;
-	cw_out_metric_t	*metric_func;
 	cw_out_render_t	*render_func;
 };
 
@@ -55,7 +52,7 @@ cw_out_t	*out_new(cw_out_t *a_out, cw_mem_t *a_mem);
 void		out_delete(cw_out_t *a_out);
 
 cw_bool_t	out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t
-    a_size, cw_out_metric_t * a_metric_func, cw_out_render_t * a_render_func);
+    a_size, cw_out_render_t * a_render_func);
 
 cw_bool_t	out_merge(cw_out_t *a_a, cw_out_t *a_b);
 
@@ -138,4 +135,4 @@ cw_sint32_t	spec_get_type(const char *a_spec, cw_uint32_t a_spec_len, const
     char **r_val);
 
 cw_sint32_t	spec_get_val(const char *a_spec, cw_uint32_t a_spec_len, const
-    char *a_name, cw_uint32_t a_name_len, const char **r_val);
+    char *a_name, cw_uint32_t a_name_len, const cw_uint8_t **r_val);
