@@ -31,8 +31,8 @@
 #
 # $Source$
 # $Author: jasone $
-# $Revision: 124 $
-# $Date: 1998-07-02 16:26:56 -0700 (Thu, 02 Jul 1998) $
+# $Revision: 126 $
+# $Date: 1998-07-02 18:29:51 -0700 (Thu, 02 Jul 1998) $
 #
 # <<< Description >>>
 #
@@ -194,7 +194,7 @@ sub expand_copyright
 
 	while (<$ifh>)
 	  {
-	    if (/^(.*)\<Copyright([ \t]*=[ \t]*\"([A-Za-z0-9]+)\")?\>.*\n/)
+	    if (/^(.*)\<Copyright([ \t]*=[ \t]*\"([A-Za-z0-9]+)\")?\>(.*)\n/)
 	      {
 		$did_subst = 1;
 		if (defined($COPYRIGHT{$3}))
@@ -203,15 +203,15 @@ sub expand_copyright
 		  }
 		else
 		  {
-		    print $ofh "$1$COPYRIGHT{\"jasone\"}\n";
+		    print $ofh "$1$COPYRIGHT{\"jasone\"}$4\n";
 		  }
 	      }
-	    elsif (/^(.*)\<License\>.*\n/)
+	    elsif (/^(.*)\<License\>(.*)\n/)
 	      {
 		$did_subst = 1;
 		foreach (@LICENSE)
 		  {
-		    print $ofh "$1$_\n";
+		    print $ofh "$1$_$2\n";
 		  }
 	      }
 	    else
