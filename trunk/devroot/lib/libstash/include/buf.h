@@ -43,6 +43,7 @@ struct cw_bufel_s
 #define buf_prepend_buf _CW_NS_STASH(buf_prepend_buf)
 #define buf_append_buf _CW_NS_STASH(buf_append_buf)
 #define buf_rm_head_bufel _CW_NS_STASH(buf_rm_head_bufel)
+#define buf_prepend_bufel _CW_NS_STASH(buf_prepend_bufel)
 #define buf_append_bufel _CW_NS_STASH(buf_append_bufel)
 
 #define bufel_new _CW_NS_STASH(bufel_new)
@@ -72,6 +73,7 @@ void buf_prepend_buf(cw_buf_t * a_a, cw_buf_t * a_b);
 void buf_append_buf(cw_buf_t * a_a, cw_buf_t * a_b);
 
 cw_bufel_t * buf_rm_head_bufel(cw_buf_t * a_buf_o);
+void buf_prepend_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o);
 void buf_append_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o);
 
 cw_bufel_t * bufel_new(cw_bufel_t * a_bufel_o);

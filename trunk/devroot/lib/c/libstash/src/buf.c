@@ -234,6 +234,34 @@ buf_rm_head_bufel(cw_buf_t * a_buf_o)
 
 /****************************************************************************
  *
+ * Prepends a bufel to a_buf_o.
+ *
+ ****************************************************************************/
+void
+buf_prepend_bufel(cw_buf_t * a_buf_o, cw_bufel_t * a_bufel_o)
+{
+  _cw_check_ptr(a_buf_o);
+  _cw_check_ptr(a_bufel_o);
+#ifdef _CW_REENTRANT
+  if (a_buf_o->is_threadsafe == TRUE)
+  {
+    mtx_lock(&a_buf_o->lock);
+  }
+#endif
+
+  list_hpush(&a_buf_o->bufels, a_bufel_o);
+  a_buf_o->size += (a_bufel_o->end_offset - a_bufel_o->beg_offset);
+  
+#ifdef _CW_REENTRANT
+  if (a_buf_o->is_threadsafe == TRUE)
+  {
+    mtx_unlock(&a_buf_o->lock);
+  }
+#endif
+}
+
+/****************************************************************************
+ *
  * Appends a bufel to a_buf_o.
  *
  ****************************************************************************/
@@ -443,7 +471,9 @@ bufel_get_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   _cw_assert(a_offset < a_bufel_o->buf_size);
 
   t = a_bufel_o->buf[a_offset >> 2];
+#ifndef WORDS_BIGENDIAN
   t = ntohl(t);
+#endif
   t >>= (8 * (a_offset & 0x3));
   t &= 0xff;
   retval = t;
@@ -477,7 +507,9 @@ bufel_set_uint8(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
   t_b <<= (8 * (a_offset & 0x3));
 
   t_a |= t_b;
+#ifndef WORDS_BIGENDIAN
   t_a = ntohl(t_a);
+#endif
   a_bufel_o->buf[a_offset >> 2] = t_a;
 }
 
@@ -496,7 +528,9 @@ bufel_get_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset)
   _cw_assert (a_offset < a_bufel_o->buf_size);
 
   retval = a_bufel_o->buf[a_offset >> 2];
+#ifndef WORDS_BIGENDIAN
   retval = htonl(retval);
+#endif
   
   return retval;
 }
@@ -514,5 +548,9 @@ bufel_set_uint32(cw_bufel_t * a_bufel_o, cw_uint32_t a_offset,
   _cw_assert((a_offset & 0x3) == 0);
   _cw_assert (a_offset < a_bufel_o->buf_size);
 
+#ifdef WORDS_BIGENDIAN
+  a_bufel_o->buf[a_offset >> 2] = a_val;
+#else
   a_bufel_o->buf[a_offset >> 2] = ntohl(a_val);
+#endif
 }

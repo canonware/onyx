@@ -23,7 +23,7 @@ typedef struct cw_log_s cw_log_t;
 #define log_set_logfile _CW_NS_STASH(log_set_logfile)
 #define log_printf _CW_NS_STASH(log_printf)
 #define log_eprintf _CW_NS_STASH(log_eprintf)
-#define log_lprintf _CW_NS_STASH(log_eprintf)
+#define log_lprintf _CW_NS_STASH(log_lprintf)
 #define log_leprintf _CW_NS_STASH(log_leprintf)
 #define log_print_uint64 _CW_NS_STASH(log_print_uint64)
 

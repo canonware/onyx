@@ -73,6 +73,8 @@ dbg_register(cw_dbg_t * a_dbg_o, char * a_flag)
   /* Ignore the return value, since we don't care if the flag is already
    * registered.  Pass a NULL data pointer since we don't need any additional
    * info stored with the flag. */
+  
+  _cw_marker("Got here");
   oh_item_insert(&a_dbg_o->flag_hash, (void *) a_flag, NULL);
 }
 
@@ -105,9 +107,15 @@ cw_bool_t
 dbg_is_registered(cw_dbg_t * a_dbg_o, char * a_flag)
 {
   char ** junk = NULL;
+  cw_bool_t retval;
 
   _cw_check_ptr(a_dbg_o);
+  _cw_check_ptr(a_flag);
+  _cw_marker("Got here");
 
   /* Pass dummy variable junk, since we don't care about the data pointer. */
-  return ! oh_item_search(&a_dbg_o->flag_hash, a_flag, (void **) junk);
+  retval = ! oh_item_search(&a_dbg_o->flag_hash, a_flag, (void **) junk);
+  log_eprintf(g_log_o, NULL, 0, "dbg_is_registered",
+		"%d\n", retval);
+  return retval;
 }
