@@ -30,10 +30,6 @@ is used internally for allocation.
 
 Multiple entries with the same key are allowed and are stored in LIFO order.
 
-Calling \cfunc{ch\_remove\_iterate}{} and \cfunc{ch\_get\_iterate}{} are
-guaranteed to operate on the oldest item in the hash table, which means that the
-hash code has an integrated FIFO queue.
-
 The \classname{ch} class is meant to be small and simple without compromising
 performance.  Note that it is not well suited for situations where the number of
 items can vary wildly; the \htmlref{\classname{dch}}{dch} class is designed for
@@ -198,6 +194,23 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 		\cvar{*r\_key} and \cvar{*r\_data} to point to the key, data,
 		and externally allocated \classname{chi}, respectively.
 	\end{capilist}
+\label{ch_chi_remove}
+\index{ch_chi_remove@\cfunc{ch\_chi\_remove}{}}
+\citem{\cfunc[void]{ch\_chi\_remove}{cw\_ch\_t *a\_ch, cw\_chi\_t *a\_chi}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_ch: ]
+			Pointer to a \classname{ch}.
+		\item[a\_chi: ]
+			Pointer to a \classname{chi}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove the item from \cvar{a\_ch} that was inserted using
+		\cvar{a\_chi}.
+	\end{capilist}
 \label{ch_search}
 \index{ch_search@\cfunc{ch\_search}{}}
 \citem{\cfunc[cw\_bool\_t]{ch\_search}{cw\_ch\_t *a\_ch, const void *a\_key,
@@ -231,85 +244,6 @@ void **r\_data}}
 		Search for the most recently inserted item with key
 		\cvar{a\_key}.  If found, \cvar{*r\_data} to point to the
 		associated data.
-	\end{capilist}
-\label{ch_get_iterate}
-\index{ch_get_iterate@\cfunc{ch\_get\_iterate}{}}
-\citem{\cfunc[cw\_bool\_t]{ch\_get\_iterate}{cw\_ch\_t *a\_ch,  void **r\_key,
-void **r\_data}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_ch: ]
-			Pointer to a \classname{ch}.
-		\item[r\_key: ]
-			Pointer to a key pointer, or NULL.
-		\item[r\_data: ]
-			Pointer to a data pointer, or NULL.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			\begin{description}\item[]
-			\item[FALSE: ]
-				Success.
-			\item[TRUE: ]
-				\cvar{a\_ch} is empty.
-			\end{description}
-		\item[*r\_key: ]
-			If (\cvar{r\_key} != NULL) and (retval == FALSE),
-			pointer to a key.  Otherwise, undefined.
-		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
-			pointer to data.  Otherwise, undefined.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
-		item in \cvar{a\_ch}.  Promote the item so that it is the newest
-		item in \cvar{a\_ch}.
-	\end{capilist}
-\label{ch_remove_iterate}
-\index{ch_remove_iterate@\cfunc{ch\_remove\_iterate}{}}
-\citem{\cfunc[cw\_bool\_t]{ch\_remove\_iterate}{cw\_ch\_t *a\_ch,  void
-**r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_ch: ]
-			Pointer to a \classname{ch}.
-		\item[r\_key: ]
-			Pointer to a key pointer, or NULL.
-		\item[r\_data: ]
-			Pointer to a data pointer, or NULL.
-		\item[r\_chi: ]
-			Pointer to a \classname{chi} pointer, or NULL.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			\begin{description}\item[]
-			\item[FALSE: ]
-				Success.
-			\item[TRUE: ]
-				\cvar{a\_ch} is empty.
-			\end{description}
-		\item[*r\_key: ]
-			If (\cvar{r\_key} != NULL) and (retval == FALSE),
-			pointer to a key.  Otherwise, undefined.
-		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
-			pointer to data.  Otherwise, undefined.
-		\item[*r\_chi: ]
-			If (\cvar{r\_chi} != NULL) and (retval == FALSE),
-			pointer to a \classname{chi}, or NULL.  Otherwise,
-			undefined.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
-		item in \cvar{a\_ch}, set \cvar{*r\_chi} to point to the item's
-		container, if externally allocated, and remove the item from
-		\cvar{a\_ch}.
 	\end{capilist}
 \label{ch_string_hash}
 \index{ch_string_hash@\cfunc{ch\_string\_hash}{}}

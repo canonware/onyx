@@ -61,6 +61,7 @@ void
 ch_delete(cw_ch_t *a_ch)
 {
     cw_chi_t *chi;
+    cw_uint32_t i;
 
     cw_check_ptr(a_ch);
     cw_dassert(a_ch->magic == CW_CH_MAGIC);
@@ -73,23 +74,25 @@ ch_delete(cw_ch_t *a_ch)
 	    a_ch->num_removes, a_ch->num_searches);
 #endif
 
-    while (ql_first(&a_ch->chi_ql) != NULL)
+    for (i = 0; i < a_ch->table_size; i++)
     {
-	chi = ql_first(&a_ch->chi_ql);
-	cw_check_ptr(chi);
-	cw_dassert(chi->magic == CW_CHI_MAGIC);
-	ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
-	if (chi->is_malloced)
+	while ((chi = ql_first(&a_ch->table[i])) != NULL)
 	{
-	    cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
-			      mema_arg_get(a_ch->mema), chi, sizeof(cw_chi_t));
-	}
+	    cw_dassert(chi->magic == CW_CHI_MAGIC);
+	    ql_head_remove(&a_ch->table[i], cw_chi_t, slot_link);
+	    if (chi->is_malloced)
+	    {
+		cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
+				  mema_arg_get(a_ch->mema), chi,
+				  sizeof(cw_chi_t));
+	    }
 #ifdef CW_DBG
-	else
-	{
-	    memset(chi, 0x5a, sizeof(cw_chi_t));
-	}
+	    else
+	    {
+		memset(chi, 0x5a, sizeof(cw_chi_t));
+	    }
 #endif
+	}
     }
 
     if (a_ch->is_malloced)
@@ -140,16 +143,12 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
     }
     chi->key = a_key;
     chi->data = a_data;
-    ql_elm_new(chi, ch_link);
     ql_elm_new(chi, slot_link);
     slot = a_ch->hash(a_key) % a_ch->table_size;
     chi->slot = slot;
 #ifdef CW_DBG
     chi->magic = CW_CHI_MAGIC;
 #endif
-
-    /* Hook into ch-wide list. */
-    ql_tail_insert(&a_ch->chi_ql, chi, ch_link);
 
     /* Hook into the slot list. */
 #ifdef CW_CH_COUNT
@@ -189,9 +188,6 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	/* Is this the chi we want? */
 	if (a_ch->key_comp(a_search_key, chi->key))
 	{
-	    /* Detach from ch-wide list. */
-	    ql_remove(&a_ch->chi_ql, chi, ch_link);
-			
 	    /* Detach from the slot list. */
 	    ql_remove(&a_ch->table[slot], chi, slot_link);
 
@@ -212,7 +208,7 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	    else if (r_chi != NULL)
 	    {
 #ifdef CW_DBG
-		chi->magic = 0;
+		memset(chi, 0x5a, sizeof(cw_chi_t));
 #endif
 		*r_chi = chi;
 	    }
@@ -229,6 +225,36 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
     retval = TRUE;
     RETURN:
     return retval;
+}
+
+void
+ch_chi_remove(cw_ch_t *a_ch, cw_chi_t *a_chi)
+{
+    cw_check_ptr(a_ch);
+    cw_dassert(a_ch->magic == CW_CH_MAGIC);
+    cw_check_ptr(a_chi);
+    cw_dassert(a_chi->magic == CW_CHI_MAGIC);
+
+    /* Detach from the slot list. */
+    ql_remove(&a_ch->table[a_chi->slot], a_chi, slot_link);
+
+    if (a_chi->is_malloced)
+    {
+	cw_opaque_dealloc(mema_dealloc_get(a_ch->mema),
+			  mema_arg_get(a_ch->mema), a_chi,
+			  sizeof(cw_chi_t));
+    }
+#ifdef CW_DBG
+    else
+    {
+	memset(a_chi, 0x5a, sizeof(cw_chi_t));
+    }
+#endif
+
+    a_ch->count--;
+#ifdef CW_CH_COUNT
+    a_ch->num_removes++;
+#endif
 }
 
 cw_bool_t
@@ -270,6 +296,7 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
     return retval;
 }
 
+#if (0) /* XXX */
 cw_bool_t
 ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 {
@@ -358,6 +385,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
     RETURN:
     return retval;
 }
+#endif
 
 cw_uint32_t
 ch_string_hash(const void *a_key)

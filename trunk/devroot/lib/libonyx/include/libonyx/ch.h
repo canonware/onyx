@@ -40,9 +40,6 @@ struct cw_chi_s
     /* Data. */
     const void *data;
 
-    /* Link into the ch-wide list of chi's. */
-    ql_elm(cw_chi_t) ch_link;
-
     /* Link into the slot's list of chi's. */
     ql_elm(cw_chi_t) slot_link;
 
@@ -69,9 +66,6 @@ struct cw_ch_s
 
     /* TRUE if we malloced this structure internally. */
     cw_bool_t is_malloced;
-
-    /* Head of the list of chi's. */
-    ql_head(cw_chi_t) chi_ql;
 
     /* Total number of items. */
     cw_uint32_t count;
@@ -115,14 +109,11 @@ cw_bool_t
 ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	  cw_chi_t **r_chi);
 
+void
+ch_chi_remove(cw_ch_t *a_ch, cw_chi_t *a_chi);
+
 cw_bool_t
 ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data);
-
-cw_bool_t
-ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data);
-
-cw_bool_t
-ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi);
 
 cw_uint32_t
 ch_string_hash(const void *a_key);

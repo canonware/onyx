@@ -115,22 +115,23 @@ main()
 	ch_delete(ch);
     }
 
-    /* ch_search(). */
+    /* ch_search(), ch_chi_remove(). */
     {
-	cw_ch_t*ch;
+	cw_ch_t *ch;
 	char *a = "a string";
 	char *b = "A string";
 	char *c = "two of these";
 	char *d = "two of these\0foo";
 	char *v;
+	cw_chi_t chi_a, chi_b, chi_c, chi_d;
 
 	ch = ch_new(NULL, cw_g_mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(ch);
 
-	ch_insert(ch, a, a, NULL);
-	ch_insert(ch, b, b, NULL);
-	ch_insert(ch, c, c, NULL);
-	ch_insert(ch, d, d, NULL);
+	ch_insert(ch, a, a, &chi_a);
+	ch_insert(ch, b, b, &chi_b);
+	ch_insert(ch, c, c, &chi_c);
+	ch_insert(ch, d, d, &chi_d);
 
 	cw_assert(ch_search(ch, "foo", (void **) &v));
 
@@ -146,110 +147,17 @@ main()
 	cw_assert(ch_search(ch, d, (void **) &v) == FALSE);
 	cw_assert(v == d);
 
-	while (ch_remove_iterate(ch, NULL, NULL, NULL) == FALSE)
-	{
-	}
-		
-	ch_delete(ch);
-    }
+	ch_chi_remove(ch, &chi_b);
+	cw_assert(ch_count(ch) == 3);
 
-    /* ch_get_iterate(), ch_remove_iterate(). */
-    {
-	cw_ch_t *ch;
-	char *a = "a string";
-	char *b = "A string";
-	char *c = "two of these";
-	char *d = "two of these\0foo";
-	char *k, *v;
+	ch_chi_remove(ch, &chi_d);
+	cw_assert(ch_count(ch) == 2);
 
-	ch = ch_new(NULL, cw_g_mema, 4, ch_string_hash, ch_string_key_comp);
-	cw_check_ptr(ch);
+	ch_chi_remove(ch, &chi_a);
+	cw_assert(ch_count(ch) == 1);
 
-	/* Iterate with 0 items. */
-	/* Round 1. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == TRUE);
-	/* Round 2. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == TRUE);
-
-	ch_insert(ch, a, a, NULL);
-	/* Iterate with 1 item. */
-	/* Round 1. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == a);
-	cw_assert(v == a);
-
-	/* Round 2. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == a);
-	cw_assert(v == a);
-
-	ch_insert(ch, b, b, NULL);
-	ch_insert(ch, c, c, NULL);
-	ch_insert(ch, d, d, NULL);
-
-	/* Iterate with 4 items. */
-	/* Round 1. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == a);
-	cw_assert(v == a);
-
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == b);
-	cw_assert(v == b);
-
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == c);
-	cw_assert(v == c);
-
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == d);
-	cw_assert(v == d);
-
-	/* Round 2. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == a);
-	cw_assert(v == a);
-
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == b);
-	cw_assert(v == b);
-
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == c);
-	cw_assert(v == c);
-
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == d);
-	cw_assert(v == d);
-
-	/* Start round 3. */
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v) == FALSE);
-	cw_assert(k == a);
-	cw_assert(v == a);
-
-	/* Remove. */
-	cw_assert(ch_remove_iterate(ch, (void **) &k, (void **) &v, NULL)
-		  == FALSE);
-	cw_assert(k == b);
-	cw_assert(v == b);
-
-	cw_assert(ch_remove_iterate(ch, (void **) &k, (void **) &v, NULL)
-		  == FALSE);
-	cw_assert(k == c);
-	cw_assert(v == c);
-
-	cw_assert(ch_remove_iterate(ch, (void **) &k, (void **) &v, NULL)
-		  == FALSE);
-	cw_assert(k == d);
-	cw_assert(v == d);
-
-	cw_assert(ch_remove_iterate(ch, (void **) &k, (void **) &v, NULL)
-		  == FALSE);
-	cw_assert(k == a);
-	cw_assert(v == a);
-
-	cw_assert(ch_remove_iterate(ch, (void **) &k, (void **) &v, NULL));
-	cw_assert(ch_get_iterate(ch, (void **) &k, (void **) &v));
+	ch_chi_remove(ch, &chi_c);
+	cw_assert(ch_count(ch) == 0);
 
 	ch_delete(ch);
     }

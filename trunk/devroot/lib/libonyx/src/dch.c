@@ -28,9 +28,6 @@ dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
     slot = a_ch->hash(a_chi->key) % a_ch->table_size;
     a_chi->slot = slot;
 
-    /* Hook into ch-wide list. */
-    ql_tail_insert(&a_ch->chi_ql, a_chi, ch_link);
-
     /* Hook into the slot list. */
 #ifdef CW_DCH_COUNT
     if (ql_first(&a_ch->table[slot]) != NULL)
@@ -52,24 +49,27 @@ dch_p_insert(cw_ch_t *a_ch, cw_chi_t *a_chi)
 CW_P_INLINE void
 dch_p_grow(cw_dch_t *a_dch)
 {
-    cw_ch_t *t_ch;
-    cw_chi_t *chi;
-    cw_uint32_t count, i;
-
-    count = ch_count(a_dch->ch);
-
-    if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow))
+    if ((ch_count(a_dch->ch) + 1) > (a_dch->grow_factor * a_dch->base_grow))
     {
+	cw_ch_t *t_ch;
+	cw_chi_t *chi;
+	cw_uint32_t i;
+
 	/* Too small.  Create a new ch twice as large and populate it. */
 	t_ch = ch_new(NULL, a_dch->mema,
 		      a_dch->base_table * a_dch->grow_factor * 2,
 		      a_dch->hash, a_dch->key_comp);
-	for (i = 0; i < count; i++)
+
+	for (i = 0; i < a_dch->ch->table_size; i++)
 	{
-	    chi = ql_first(&a_dch->ch->chi_ql);
-	    ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
-	    ql_elm_new(chi, slot_link);
-	    dch_p_insert(t_ch, chi);
+	    /* Use ql_last() to preserve chain order (LIFO). */
+	    while ((chi = ql_last(&a_dch->ch->table[i], slot_link)) != NULL)
+	    {
+		ql_tail_remove(&a_dch->ch->table[i], cw_chi_t, slot_link);
+		dch_p_insert(t_ch, chi);
+	    }
+	    /* Set to NULL to keep ch_delete from deleting this chain. */
+	    ql_first(&a_dch->ch->table[i]) = NULL;
 	}
 
 	a_dch->grow_factor *= 2;
@@ -80,8 +80,6 @@ dch_p_grow(cw_dch_t *a_dch)
 	t_ch->num_removes += a_dch->ch->num_removes;
 	t_ch->num_searches += a_dch->ch->num_searches;
 #endif
-	/* Set to NULL to keep ch_delete() from deleting all the items. */
-	ql_first(&a_dch->ch->chi_ql) = NULL;
 	ch_delete(a_dch->ch);
 	a_dch->ch = t_ch;
     }
@@ -91,7 +89,7 @@ dch_p_grow(cw_dch_t *a_dch)
  * contents of one ch to another.  Therefore, this function mucks with ch
  * internals. */
 CW_P_INLINE void
-dch_p_shrink(cw_dch_t *a_dch)
+dch_p_shrink(cw_dch_t *a_dch, const void *a_search_key)
 {
     cw_ch_t *t_ch;
     cw_chi_t *chi;
@@ -100,7 +98,8 @@ dch_p_shrink(cw_dch_t *a_dch)
     count = ch_count(a_dch->ch);
 
     if ((count - 1 < a_dch->base_shrink * a_dch->grow_factor)
-	&& (a_dch->grow_factor > 1))
+	&& (a_dch->grow_factor > 1)
+	&& ch_search(a_dch->ch, a_search_key, NULL) == FALSE)
     {
 	cw_uint32_t new_factor;
 
@@ -118,12 +117,17 @@ dch_p_shrink(cw_dch_t *a_dch)
 	t_ch = ch_new(NULL, a_dch->mema,
 		      a_dch->base_table * new_factor, a_dch->hash,
 		      a_dch->key_comp);
-	for (i = 0; i < count; i++)
+
+	for (i = 0; i < a_dch->ch->table_size; i++)
 	{
-	    chi = ql_first(&a_dch->ch->chi_ql);
-	    ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
-	    ql_elm_new(chi, slot_link);
-	    dch_p_insert(t_ch, chi);
+	    /* Use ql_last() to preserve chain order (LIFO). */
+	    while ((chi = ql_last(&a_dch->ch->table[i], slot_link)) != NULL)
+	    {
+		ql_tail_remove(&a_dch->ch->table[i], cw_chi_t, slot_link);
+		dch_p_insert(t_ch, chi);
+	    }
+	    /* Set to NULL to keep ch_delete from deleting this chain. */
+	    ql_first(&a_dch->ch->table[i]) = NULL;
 	}
 
 	a_dch->grow_factor = new_factor;
@@ -134,8 +138,6 @@ dch_p_shrink(cw_dch_t *a_dch)
 	t_ch->num_removes += a_dch->ch->num_removes;
 	t_ch->num_searches += a_dch->ch->num_searches;
 #endif
-	/* Set to NULL to keep ch_delete() from deleting all the items. */
-	ql_first(&a_dch->ch->chi_ql) = NULL;
 	ch_delete(a_dch->ch);
 	a_dch->ch = t_ch;
     }
@@ -287,7 +289,7 @@ dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key,
 
     if (a_dch->shrinkable)
     {
-	dch_p_shrink(a_dch);
+	dch_p_shrink(a_dch, a_search_key);
     }
     if (ch_remove(a_dch->ch, a_search_key, r_key, r_data, r_chi))
     {
@@ -299,6 +301,19 @@ dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key,
     return retval;
 }
 
+void
+dch_chi_remove(cw_dch_t *a_dch, cw_chi_t *a_chi)
+{
+    cw_check_ptr(a_dch);
+    cw_dassert(a_dch->magic == CW_DCH_MAGIC);
+
+    if (a_dch->shrinkable)
+    {
+	dch_p_shrink(a_dch, a_chi->key);
+    }
+    ch_chi_remove(a_dch->ch, a_chi);
+}
+
 cw_bool_t
 dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data)
 {
@@ -308,6 +323,7 @@ dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data)
     return ch_search(a_dch->ch, a_key, r_data);
 }
 
+#if (0) /* XXX */
 cw_bool_t
 dch_get_iterate(cw_dch_t *a_dch, void **r_key, void **r_data)
 {
@@ -339,3 +355,4 @@ dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data,
     RETURN:
     return retval;
 }
+#endif

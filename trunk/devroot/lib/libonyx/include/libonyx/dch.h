@@ -83,12 +83,8 @@ cw_bool_t
 dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key,
 	   void **r_data, cw_chi_t **r_chi);
 
+void
+dch_chi_remove(cw_dch_t *a_dch, cw_chi_t *a_chi);
+
 cw_bool_t
 dch_search(cw_dch_t *a_dch, const void *a_key, void **r_data);
-
-cw_bool_t
-dch_get_iterate(cw_dch_t *a_dch, void **r_key, void **r_data);
-
-cw_bool_t
-dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data,
-		   cw_chi_t **r_chi);

@@ -219,6 +219,24 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 		\cvar{*r\_key} and \cvar{*r\_data} to point to the key, data,
 		and externally allocated \classname{chi}, respectively.
 	\end{capilist}
+\label{dch_chi_remove}
+\index{dch_chi_remove@\cfunc{dch\_chi\_remove}{}}
+\citem{\cfunc[cw\_bool\_t]{dch\_chi\_remove}{cw\_dch\_t *a\_dch, cw\_chi\_t
+*a\_chi}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[a\_chi: ]
+			Pointer to a \classname{chi}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove the item from \cvar{a\_dch} that was inserted using
+		\cvar{a\_chi}.
+	\end{capilist}
 \label{dch_search}
 \index{dch_search@\cfunc{dch\_search}{}}
 \citem{\cfunc[cw\_bool\_t]{dch\_search}{cw\_dch\_t *a\_dch, const void *a\_key,
@@ -252,84 +270,5 @@ void **r\_data}}
 		Search for the most recently inserted item with key
 		\cvar{a\_key}.  If found, \cvar{*r\_data} to point to the
 		associated data.
-	\end{capilist}
-\label{dch_get_iterate}
-\index{dch_get_iterate@\cfunc{dch\_get\_iterate}{}}
-\citem{\cfunc[cw\_bool\_t]{dch\_get\_iterate}{cw\_dch\_t *a\_dch, void **r\_key,
-void **r\_data}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_dch: ]
-			Pointer to a \classname{dch}.
-		\item[r\_key: ]
-			Pointer to a key pointer, or NULL.
-		\item[r\_data: ]
-			Pointer to a data pointer, or NULL.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			\begin{description}\item[]
-			\item[FALSE: ]
-				Success.
-			\item[TRUE: ]
-				\cvar{a\_dch} is empty.
-			\end{description}
-		\item[*r\_key: ]
-			If (\cvar{r\_key} != NULL) and (retval == FALSE),
-			pointer to a key.  Otherwise, undefined.
-		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
-			pointer to data.  Otherwise, undefined.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
-		item in \cvar{a\_dch}.  Promote the item so that it is the
-		newest item in \cvar{a\_dch}.
-	\end{capilist}
-\label{dch_remove_iterate}
-\index{dch_remove_iterate@\cfunc{dch\_remove\_iterate}{}}
-\citem{\cfunc[cw\_bool\_t]{dch\_remove\_iterate}{cw\_dch\_t *a\_dch,  void
-**r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_dch: ]
-			Pointer to a \classname{dch}.
-		\item[r\_key: ]
-			Pointer to a key pointer, or NULL.
-		\item[r\_data: ]
-			Pointer to a data pointer, or NULL.
-		\item[r\_chi: ]
-			Pointer to a \classname{chi} pointer, or NULL.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			\begin{description}\item[]
-			\item[FALSE: ]
-				Success.
-			\item[TRUE: ]
-				\cvar{a\_dch} is empty.
-			\end{description}
-		\item[*r\_key: ]
-			If (\cvar{r\_key} != NULL) and (retval == FALSE),
-			pointer to a key.  Otherwise, undefined.
-		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
-			pointer to data.  Otherwise, undefined.
-		\item[*r\_chi: ]
-			If (\cvar{r\_chi} != NULL) and (retval == FALSE),
-			pointer to a \classname{chi}, or NULL.  Otherwise,
-			undefined.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
-		item in \cvar{a\_dch}, set \cvar{*r\_chi} to point to the item's
-		container, if externally allocated, and remove the item from
-		\cvar{a\_dch}.
 	\end{capilist}
 \end{capi}
