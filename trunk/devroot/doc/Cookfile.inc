@@ -153,4 +153,16 @@ docs_relclean :
     -dir [abs_objdir]/%0html -split 3 -toc_depth 4
     -footnode -noinfo -auto_link -transparent -image_type png
     [abs_objdir]/%0latex/%.tex;
+  /* Fix up [, ], and \ characters. */
+  [SHELL] -e;
+data
+  for i in `find [objdir]/%0html/ -type f |grep "\.html$"` ; do
+    mv $i $i.tmp
+    cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
+      | sed -e s/YYYlbZZZ/\[/g \\
+      | sed -e s/YYYrbZZZ/\]/g \\
+      > $i
+    rm $i.tmp
+  done
+dataend
 }

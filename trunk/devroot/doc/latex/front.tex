@@ -90,11 +90,19 @@
 \newcommand{\gt}{$>$}
 \newcommand{\pipe}{$|$}
 \newcommand{\twid}{$\sim$}
+\newcommand{\lb}{[}
+\newcommand{\rb}{]}
+
+% The build system does substitution of the YYY..ZZZ strings after the html
+% is generated.
 \begin{htmlonly}
+\newcommand{\bs}{YYYbsZZZ}
 \newcommand{\lt}{<}
 \newcommand{\gt}{>}
 \newcommand{\pipe}{|}
 %\newcommand{\twid}{~}
+\newcommand{\lb}{YYYlbZZZ}
+\newcommand{\rb}{YYYrbZZZ}
 \end{htmlonly}
 
 % Generate an index.

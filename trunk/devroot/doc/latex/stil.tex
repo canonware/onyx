@@ -175,10 +175,10 @@ reader an idea of the simplicity of the language syntax.
 CRLF (carriage return, linefeed) pairs are in all important cases converted to
 linefeed during scanning.
 
-The characters \%, /, [, ], \{, \}, (, ), `, ', {\lt}, and {\gt} are special.
-In most cases, any of the special characters and whitespace (space, tab,
-newline, form feed, null) terminate any preceding token.  All other characters
-including non-printing characters are considered regular characters.
+The characters \%, /, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
+special.  In most cases, any of the special characters and whitespace (space,
+tab, newline, form feed, null) terminate any preceding token.  All other
+characters including non-printing characters are considered regular characters.
 
 A comment starts with a \% character outside of a string context and extends to
 the next newline, linefeed or formfeed.
@@ -196,8 +196,6 @@ A partial grammar specification, using BNF notation (where convenient) is as
 follows:
 
 \begin{description}
-%\item[{\lt}{\gt} ::= ]
-
 \item[{\lt}program{\gt} ::= ] {\lt}statement{\gt}
 
 \item[{\lt}statement{\gt} ::= ] {\lt}procedure{\gt} {\lt}statement{\gt} {\pipe}
@@ -253,6 +251,8 @@ newline.'
 `An ignored \
 newline.'
 `Manually escaped \` tick.'
+`An actual \\ backslash.'
+`Another actual \ backslash.'
 \end{verbatim}
 
 \item[{\lt}dec\_integer{\gt} : ] Signed integer in the range $-2^{63}$ to
