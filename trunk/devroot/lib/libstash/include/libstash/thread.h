@@ -150,6 +150,8 @@ thd_join(cw_thd_t * a_thd);
  ****************************************************************************/
 #ifdef _CW_OS_SOLARIS
 #  define thd_yield() sched_yield()
+#elsif _CW_OS_LINUX
+#  define thd_yield()
 #else
 #  define thd_yield() pthread_yield()
 #endif
