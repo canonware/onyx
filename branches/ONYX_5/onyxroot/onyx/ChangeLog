@@ -1,3 +1,14 @@
+2004-03-16 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix the ordering
+	  of code that sets a key/value pair in an array-based dict.  This
+	  fixes a small race condition window, wherein the GC could end up
+	  looking at a bogus val.
+
+2004-03-07 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.0 released.
+
 2004-02-29 : Jason Evans <jasone@canonware.com>
 
 	* configure.in : Check for pthread_np.h independently of checking
