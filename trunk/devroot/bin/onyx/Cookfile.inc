@@ -50,20 +50,22 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
 #endif
 #if [enable_real]
 
-                 ceiling_a.nx.in ceiling_b.nx.in ceiling_c.nx.in div_a.nx.in
-                 div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in exp_e.nx.in
-                 floor_a.nx.in floor_b.nx.in floor_c.nx.in round_a.nx.in
-                 round_b.nx.in round_c.nx.in trunc_a.nx.in trunc_b.nx.in
-                 trunc_c.nx.in
+                 ceiling_a.nx.in ceiling_b.nx.in ceiling_c.nx.in cvs_c.nx.in
+                 div_a.nx.in div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in
+                 exp_e.nx.in floor_a.nx.in floor_b.nx.in floor_c.nx.in
+                 round_a.nx.in round_b.nx.in round_c.nx.in trunc_a.nx.in
+                 trunc_b.nx.in trunc_c.nx.in
 
 #endif
 #if [enable_posix]
+
                  nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in
                  rand_a.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
                  srand_a.nx.in srand_b.nx.in srand_c.nx.in srand_d.nx.in
                  unsetenv_a.nx.in unsetenv_b.nx.in truncate_a.nx.in
                  truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
                  truncate_e.nx.in
+
 #endif
 
                  abs_a.nx.in abs_b.nx.in abs_c.nx.in add_a.nx.in add_b.nx.in
