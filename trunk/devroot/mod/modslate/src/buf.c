@@ -2236,6 +2236,8 @@ buf_validate(cw_buf_t *a_buf)
     cw_uint32_t nbufps;
     cw_uint64_t len, nlines;
     cw_bufp_t *bufp, *tbufp;
+    cw_uint64_t nfexts, nrexts;
+    cw_ext_t *ext, *text;
 
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
@@ -2322,28 +2324,74 @@ buf_validate(cw_buf_t *a_buf)
 		  == FALSE);
     }
 
-    /* Iterate through ext's in f-order.
-     *
-     * 1) Validate consistent ordering of ftree and flist.
-     *
-     * 2) Validate increasing order.
-     *
-     * 3) Count number of ext's, for later comparison with number in r-order.
-     */
-    /* XXX */
+    /* Iterate through ext's in f-order. */
+    nfexts = 0;
+    ql_foreach(ext, &a_buf->flist, flink)
+    {
+	/* Count number of ext's, for later comparison with number in r-order.
+	 * */
+	nfexts++;
 
-    /* Iterate through ext's in f-order.
-     *
-     * 1) Validate consistent ordering of rtree and rlist.
-     *
-     * 2) Validate increasing order.
-     *
-     * 3) Validate ext's, via ext_validate().
-     */
-    /* XXX */
+	/* Validate extent. */
+	ext_validate(ext);
+
+	/* Validate consistent ordering of ftree and flist. */
+	rb_prev(&a_buf->ftree, ext, cw_ext_t, fnode, text);
+	if (text == rb_tree_nil(&a_buf->ftree))
+	{
+	    text = NULL;
+	}
+	cw_assert(ql_prev(&a_buf->flist, ext, flink) == text);
+
+	rb_next(&a_buf->ftree, ext, cw_ext_t, fnode, text);
+	if (text == rb_tree_nil(&a_buf->ftree))
+	{
+	    text = NULL;
+	}
+	cw_assert(ql_next(&a_buf->flist, ext, flink) == text);
+
+	/* Validate increasing order. */
+	if (text != NULL)
+	{
+	    cw_assert(ext_p_fcomp(ext, text) == -1);
+	}
+    }
+
+    /* Iterate through ext's in r-order. */
+    nrexts = 0;
+    ql_foreach(ext, &a_buf->rlist, rlink)
+    {
+	/* Count number of ext's, for later comparison with number in f-order.
+	 * */
+	nrexts++;
+
+	/* Validate extent. */
+	ext_validate(ext);
+
+	/* Validate consistent ordering of rtree and rlist. */
+	rb_prev(&a_buf->rtree, ext, cw_ext_t, rnode, text);
+	if (text == rb_tree_nil(&a_buf->rtree))
+	{
+	    text = NULL;
+	}
+	cw_assert(ql_prev(&a_buf->rlist, ext, rlink) == text);
+
+	rb_next(&a_buf->rtree, ext, cw_ext_t, rnode, text);
+	if (text == rb_tree_nil(&a_buf->rtree))
+	{
+	    text = NULL;
+	}
+	cw_assert(ql_next(&a_buf->rlist, ext, rlink) == text);
+
+	/* Validate increasing order. */
+	if (text != NULL)
+	{
+	    cw_assert(ext_p_rcomp(ext, text) == -1);
+	}
+    }
 
     /* Validate equal number of ext's in f-order and r-order. */
-    /* XXX */
+    cw_assert(nfexts == nrexts);
 
     /* Validate hist, via hist_validate(). */
     if (a_buf->hist != NULL)
