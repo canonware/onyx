@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = "jasone">
  * <License>
@@ -16,6 +15,7 @@ typedef struct cw_stilo_s cw_stilo_t;
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
+typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
 typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
 typedef struct cw_stiloe_number_s cw_stiloe_number_t;
@@ -31,15 +31,16 @@ typedef enum {
 	_CW_STILOT_CONDITIONTYPE = 3,
 	_CW_STILOT_DICTTYPE = 4,
 	_CW_STILOT_FILETYPE = 5,
-	_CW_STILOT_LOCKTYPE = 6,
-	_CW_STILOT_MARKTYPE = 7,
-	_CW_STILOT_MSTATETYPE = 8,
-	_CW_STILOT_NAMETYPE = 9,
-	_CW_STILOT_NULLTYPE = 10,
-	_CW_STILOT_NUMBERTYPE = 11,
-	_CW_STILOT_OPERATORTYPE = 12,
-	_CW_STILOT_PACKEDARRAYTYPE = 13,
-	_CW_STILOT_STRINGTYPE = 14
+	_CW_STILOT_HOOKTYPE = 6,
+	_CW_STILOT_LOCKTYPE = 7,
+	_CW_STILOT_MARKTYPE = 8,
+	_CW_STILOT_MSTATETYPE = 9,
+	_CW_STILOT_NAMETYPE = 10,
+	_CW_STILOT_NULLTYPE = 11,
+	_CW_STILOT_NUMBERTYPE = 12,
+	_CW_STILOT_OPERATORTYPE = 13,
+	_CW_STILOT_PACKEDARRAYTYPE = 14,
+	_CW_STILOT_STRINGTYPE = 15
 } cw_stilot_t;
 
 /*
@@ -115,6 +116,9 @@ struct cw_stilo_s {
 		struct {
 			cw_sint32_t fd;
 		}       file;
+		struct {
+			cw_stiloe_hook_t *stiloe;
+		}	hook;
 		struct {
 			cw_stiloe_lock_t *stiloe;
 		}       lock;

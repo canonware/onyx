@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = jasone>
  * <License>
@@ -33,6 +32,7 @@
 #include "stiloe_array.h"
 #include "stiloe_condition.h"
 #include "stiloe_dict.h"
+#include "stiloe_hook.h"
 #include "stiloe_lock.h"
 #include "stiloe_mstate.h"
 #include "stiloe_number.h"

@@ -11,17 +11,19 @@
 
 /* Defined in stilo.h to resolve a circular dependency. */
 #if (0)
-typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
+typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 
 #endif
 
-struct cw_stiloe_mstate_s {
-	cw_stiloe_t stiloe;
-	cw_uint32_t accuracy;
-	cw_uint32_t point;
-	cw_uint32_t base;
+struct cw_stiloe_hook_s {
+	cw_stiloe_t	stiloe;
+	void		*data;
+	void		(*dealloc_func) (void *);
+	cw_stilo_t	*(*ref_iterator) (void *);
 };
 
-cw_stiloe_mstate_t *stiloe_mstate_new(cw_stiloe_mstate_t *a_stiloe_mstate);
+cw_stiloe_hook_t *stiloe_hook_new(cw_stiloe_hook_t *a_stiloe_hook);
 
-void	stiloe_mstate_delete(cw_stiloe_mstate_t *a_stiloe_mstate);
+void	stiloe_hook_ref(cw_stiloe_hook_t *a_stiloe_hook);
+
+void	stiloe_hook_unref(cw_stiloe_hook_t *a_stiloe_hook);

@@ -1,5 +1,4 @@
-/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
- ****************************************************************************
+/****************************************************************************
  *
  * <Copyright = "jasone">
  * <License>
@@ -49,6 +48,9 @@ stilo_delete(cw_stilo_t *a_stilo)
 		stiloe_condition_unref(a_stilo->o.condition.stiloe);
 		break;
 	case _CW_STILOT_DICTTYPE:
+		break;
+	case _CW_STILOT_HOOKTYPE:
+		stiloe_hook_unref(a_stilo->o.hook.stiloe);
 		break;
 	case _CW_STILOT_LOCKTYPE:
 		break;
