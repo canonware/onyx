@@ -240,7 +240,18 @@ typedef unsigned int cw_bool_t;
 #include <machine/endian.h> /* For htonl() and ntohl() on Darwin. */
 #endif
 #ifdef CW_PTH
+/* In Pth 2.0.0, pth.h sometimes defines _XOPEN_SOURCE, which can cause problems
+ * elsewhere.  Take care to undo the damage. */
+#ifndef _XOPEN_SOURCE
+#define CW_UNDEF_XOPEN_SOURCE
+#endif
 #include <pth.h>
+#ifdef CW_UNDEF_XOPEN_SOURCE
+#ifdef _XOPEN_SOURCE
+#undef _XOPEN_SOURCE
+#endif
+#undef CW_UNDEF_XOPEN_SOURCE
+#endif
 #endif
 #ifdef CW_PTHREADS
 #include <pthread.h>
