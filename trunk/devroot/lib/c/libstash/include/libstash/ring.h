@@ -23,10 +23,6 @@
 /* Pseudo-opaque types. */
 typedef struct cw_ring_s cw_ring_t;
 
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-#  define _CW_RING_MAGIC 0x410ff014
-#endif
-
 struct cw_ring_s
 {
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))

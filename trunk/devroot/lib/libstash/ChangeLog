@@ -1,5 +1,7 @@
 1999-04-09  Jason Evans  <jasone@canonware.com>
 
+	* src/pezz.c: Add the pezz class.
+
 	* src/oh.c (oh_item_delete): Deal with NULL pointer for a_key
 	and/or a_data.
 	(oh_item_search): Deal with NULL pointer for a_data.

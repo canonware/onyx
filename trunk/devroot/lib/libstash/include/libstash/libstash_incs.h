@@ -119,6 +119,12 @@
 #  endif
 #endif
 
+#ifdef _LIBSTASH_USE_PEZZ
+#  ifndef _LIBSTASH_USE_RING
+#    define _LIBSTASH_USE_RING
+#  endif
+#endif
+
 /*
  * Include files.  These must be listed in reverse dependency order (for
  * example, list.h must come before oh.h
@@ -174,21 +180,28 @@
 #    define _LOG_H_
 #  endif
 #endif
- 
+
 #ifdef _LIBSTASH_USE_MEM
 #  ifndef _MEM_H_
 #    include "mem.h"
 #    define _MEM_H_
 #  endif
 #endif
- 
+
 #ifdef _LIBSTASH_USE_RING
 #  ifndef _RING_H_
 #    include "ring.h"
 #    define _RING_H_
 #  endif
 #endif
- 
+
+#ifdef _LIBSTASH_USE_PEZZ
+#  ifndef _PEZZ_H_
+#    include "pezz.h"
+#    define _PEZZ_H_
+#  endif
+#endif
+
 #ifdef _LIBSTASH_USE_LEX
 #  ifndef _LEX_H_
 #    include "lex.h"
@@ -200,13 +213,6 @@
 #  ifndef _BHP_H_
 #    include "bhp.h"
 #    define _BHP_H_
-#  endif
-#endif
- 
-#ifdef _LIBSTASH_USE_GLOB
-#  ifndef _GLOB_H_
-#    include "glob.h"
-#    define _GLOB_H_
 #  endif
 #endif
  

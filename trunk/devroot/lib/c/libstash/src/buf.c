@@ -22,6 +22,13 @@
 #include <netinet/in.h>
 #include <sys/param.h>
 
+#ifdef _LIBSTASH_DBG
+#  define _CW_BUF_MAGIC 0xb00f0001
+#  define _CW_BUFEL_MAGIC 0xb00f0002
+#  define _CW_BUFC_MAGIC 0xb00f0003
+#  define _CW_BUFPOOL_MAGIC 0xb00f0004
+#endif
+
 cw_bufpool_t *
 bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
 	    cw_uint32_t a_max_spare_buffers)

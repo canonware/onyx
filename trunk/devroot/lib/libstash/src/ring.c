@@ -17,6 +17,10 @@
 #define _LIBSTASH_USE_RING
 #include "libstash/libstash.h"
 
+#ifdef _LIBSTASH_DBG
+#  define _CW_RING_MAGIC 0x410ff014
+#endif
+
 cw_ring_t *
 ring_new(cw_ring_t * a_ring,
 	 void (*a_dealloc_func)(void * dealloc_arg, void * ring),

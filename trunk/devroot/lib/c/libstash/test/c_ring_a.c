@@ -20,7 +20,6 @@
 int
 main()
 {
-  
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
 

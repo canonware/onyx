@@ -29,13 +29,6 @@
  *
  ****************************************************************************/
 
-#ifdef _LIBSTASH_DBG
-#  define _CW_BUF_MAGIC 0xb00f0001
-#  define _CW_BUFEL_MAGIC 0xb00f0002
-#  define _CW_BUFC_MAGIC 0xb00f0003
-#  define _CW_BUFPOOL_MAGIC 0xb00f0004
-#endif
-
 /* Pseudo-opaque typedefs. */
 typedef struct cw_bufpool_s cw_bufpool_t;
 typedef struct cw_buf_s cw_buf_t;
