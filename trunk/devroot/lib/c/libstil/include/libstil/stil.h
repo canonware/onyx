@@ -17,8 +17,15 @@ struct cw_stil_s {
 	cw_bool_t	is_malloced;
 	cw_mtx_t	lock;
 
-	/* List of all stilt's. */
+	/*
+	 * List of all stilt's.
+	 */
 	ql_head(cw_stilt_t) stilt_head;
+
+	/*
+	 * Used for remembering the current state of reference iteration.
+	 */
+	ql_head(cw_stilt_t) ref_iter;
 
 	/* Memory allocator. */
 	cw_stila_t	stila;
@@ -37,11 +44,15 @@ struct cw_stil_s {
 	cw_mtx_t	name_lock;
 	cw_dch_t	name_hash;
 
-	/* Dictionaries. */
+	/*
+	 * Dictionaries.
+	 */
 	cw_stilo_t	systemdict;
 	cw_stilo_t	globaldict;
 
-	/* Files. */
+	/*
+	 * Files.
+	 */
 	cw_stilo_t	stdin_internal;
 	cw_stilo_t	stdin_stilo;
 	cw_stilo_t	stdout_stilo;

@@ -203,6 +203,30 @@ stil_delete(cw_stil_t *a_stil)
 #endif
 }
 
+cw_stilt_t *
+stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
+{
+	cw_stilt_t	*retval;
+
+	_cw_check_ptr(a_stil);
+	_cw_assert(a_stil->magic == _CW_STIL_MAGIC);
+
+	if (a_reset)
+		ql_first(&a_stil->ref_iter) = ql_first(&a_stil->stilt_head);
+
+	/*
+	 * Iterate through the stilt's.
+	 */
+	retval = ql_first(&a_stil->ref_iter);
+
+	if (retval != NULL) {
+		ql_first(&a_stil->ref_iter) = ql_next(&a_stil->stilt_head,
+		    retval, link);
+	}
+
+	return retval;
+}
+
 cw_sint32_t
 stil_p_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt, cw_uint32_t
     a_len, cw_uint8_t *r_str)

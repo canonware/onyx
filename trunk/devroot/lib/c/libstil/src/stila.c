@@ -12,6 +12,7 @@
 #include "../include/libstil/libstil.h"
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stils_l.h"
 #include "../include/libstil/stilt_l.h"
 
 /* Number of stack elements per memory chunk. */

@@ -33,7 +33,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = stilo_l.h stilt_l.h;
+  local priv_incs = stilo_l.h stils_l.h stilt_l.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstil/include/libstil/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];

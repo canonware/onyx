@@ -44,6 +44,13 @@ struct cw_stiloe_s {
 	 */
 	cw_bool_t	dict_locked:1;
 	/*
+	 * It is critical to not delete names until all keyed references have
+	 * been removed.  If there are still keyed references when the name is
+	 * deleted, set this variable, so that when the last keyed reference is
+	 * removed, the name will be deleted.
+	 */
+	cw_bool_t	name_delete:1;
+	/*
 	 * If TRUE, there is a watchpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode. Note that setting a watchpoint on an extended type

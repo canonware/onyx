@@ -9,6 +9,4 @@
  *
  ******************************************************************************/
 
-cw_stils_t *stilt_l_ref_iter(cw_stilt_t *a_stilt, cw_bool_t a_reset);
-
-#define	stilt_l_name_hash_get(a_stilt) &(a_stilt)->name_hash
+cw_stiloe_t *stils_l_ref_iter(cw_stils_t *a_stils, cw_bool_t a_reset);

@@ -75,67 +75,78 @@ stils_delete(cw_stils_t *a_stils)
 #endif
 }
 
-void
-stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
-    (void *add_root_arg, cw_stilo_t *root), void *a_add_root_arg)
+cw_stiloe_t *
+stils_l_ref_iter(cw_stils_t *a_stils, cw_bool_t a_reset)
 {
-	cw_stilsc_t	*stilsc;
-	cw_stilso_t	*old_stilso;
+	cw_stiloe_t	*retval;
 	cw_stilo_t	*new_stilo;
-	cw_uint32_t	old_count, i;
-	qs_head(cw_stilsc_t) old_chunks;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	/*
-	 * Move the old stack, spares, and stilsc's out of the way so that we
-	 * can start fresh.
-	 */
-	old_stilso = ql_first(&a_stils->stack);
-	old_count = a_stils->count;
-	a_stils->count = 0;
+	if (a_reset) {
+		/*
+		 * Move the old stack, spares, and stilsc's out of the way so
+		 * that we can start fresh.
+		 */
+		a_stils->old_stilso = ql_first(&a_stils->stack);
+		a_stils->old_count = a_stils->count;
+		a_stils->count = 0;
 
-	qr_remove(&a_stils->under, link);
-	ql_first(&a_stils->stack) = &a_stils->under;
-	/* Fill spares. */
-	stils_p_spares_create(a_stils);
-	ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack), link);
+		qr_remove(&a_stils->under, link);
+		ql_first(&a_stils->stack) = &a_stils->under;
+		/* Fill spares. */
+		stils_p_spares_create(a_stils);
+		ql_first(&a_stils->stack) = qr_prev(ql_first(&a_stils->stack),
+		    link);
 	
-	memcpy(&old_chunks, &a_stils->chunks, sizeof(old_chunks));
-	qs_new(&a_stils->chunks);
+		memcpy(&a_stils->old_chunks, &a_stils->chunks,
+		    sizeof(a_stils->old_chunks));
+		qs_new(&a_stils->chunks);
+
+		a_stils->ref_iter = 0;
+	}
 
 	/*
 	 * Iterate through the entire stack, moving stilso's to the new stack.
 	 * Along the way, report any extended objects to the GC.
 	 */
-	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link),
-		 i++) {
+	for (retval = NULL; retval == NULL && a_stils->ref_iter <
+	    a_stils->old_count; a_stils->old_stilso =
+	    qr_next(a_stils->old_stilso, link), a_stils->ref_iter++) {
 		new_stilo = stils_push(a_stils);
-		stilo_dup(new_stilo, &old_stilso->stilo);
+		stilo_dup(new_stilo, &a_stils->old_stilso->stilo);
 
 		switch (stilo_type_get(new_stilo)) {
 		case STILOT_ARRAY:
 		case STILOT_CONDITION:
 		case STILOT_DICT:
+		case STILOT_FILE:
+		case STILOT_HOOK:
 		case STILOT_MUTEX:
+		case STILOT_NAME:
 		case STILOT_STRING:
-			a_add_root_func(a_add_root_arg, new_stilo);
+			retval = stilo_stiloe_get(new_stilo);
 			break;
 		default:
 			break;
 		}
 	}
 
-	/*
-	 * Now delete the old stilsc's.  We've moved everything important to new
-	 * storage, so nothing more than deletion is necessary.
-	 */
-	while (qs_top(&old_chunks) != NULL) {
-		stilsc = qs_top(&old_chunks);
-		qs_pop(&old_chunks, link);
-		pool_put(a_stils->stilsc_pool, stilsc);
+	if (retval == NULL) {
+		cw_stilsc_t	*stilsc;
+		/*
+		 * Delete the old stilsc's.  We've moved everything important to
+		 * new storage, so nothing more than deletion is necessary.
+		 */
+		while (qs_top(&a_stils->old_chunks) != NULL) {
+			stilsc = qs_top(&a_stils->old_chunks);
+			qs_pop(&a_stils->old_chunks, link);
+			pool_put(a_stils->stilsc_pool, stilsc);
+		}
 	}
+
+	return retval;
 }
 
 cw_uint32_t

@@ -876,6 +876,35 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	return retval;
 }
 
+cw_stils_t *
+stilt_l_ref_iter(cw_stilt_t *a_stilt, cw_bool_t a_reset)
+{
+	cw_stils_t	*retval;
+
+	if (a_reset)
+		a_stilt->ref_iter = 0;
+
+	switch (a_stilt->ref_iter) {
+	case 0:
+		retval = &a_stilt->estack;
+		break;
+	case 1:
+		retval = &a_stilt->ostack;
+		break;
+	case 2:
+		retval = &a_stilt->dstack;
+		break;
+	case 3:
+		retval = &a_stilt->tstack;
+		break;
+	default:
+		retval = NULL;
+	}
+	a_stilt->ref_iter++;
+
+	return retval;
+}
+
 static cw_uint32_t
 stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
     const cw_uint8_t *a_str, cw_uint32_t a_len)

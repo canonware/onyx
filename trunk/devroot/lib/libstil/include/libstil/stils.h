@@ -51,6 +51,15 @@ struct cw_stils_s {
 	cw_uint32_t		count;	/* Number of stack elements. */
 	cw_stilso_t		under;	/* Not used, just under stack bottom. */
 
+	/*
+	 * Used for remembering the current state of reference iteration.
+	 */
+	cw_stilso_t		*old_stilso;
+	cw_uint32_t		old_count;
+	cw_uint32_t		ref_iter;
+	qs_head(cw_stilsc_t)	old_chunks;
+	
+
 	cw_pool_t		*stilsc_pool; /* Allocator for stilsc's. */
 
 	qs_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
@@ -58,8 +67,6 @@ struct cw_stils_s {
 
 void		stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
 void		stils_delete(cw_stils_t *a_stils);
-void		stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void
-    *add_root_arg, cw_stilo_t *root), void *a_add_root_arg);
 #define		stils_count(a_stils) (a_stils)->count
 cw_uint32_t	stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
 void		stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t

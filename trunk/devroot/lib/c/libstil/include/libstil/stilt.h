@@ -63,11 +63,20 @@ struct cw_stilt_s {
 
 	cw_bool_t	is_malloced;
 
-	/* stil this stilt is part of. */
+	/*
+	 * stil this stilt is part of.
+	 */
 	cw_stil_t	*stil;
 
-	/* Linkage for list of stilt's. */
+	/*
+	 * Linkage for list of stilt's.
+	 */
 	ql_elm(cw_stilt_t) link;
+
+	/*
+	 * Used for remembering the current state of reference iteration.
+	 */
+	cw_uint32_t	ref_iter;
 
 	/*
 	 * TRUE  : Global allocation mode.
