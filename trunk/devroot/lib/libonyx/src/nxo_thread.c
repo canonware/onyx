@@ -730,17 +730,17 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 			    break;
 			}
-#ifdef CW_HOOK
-			case NXOT_HOOK:
+#ifdef CW_HANDLE
+			case NXOT_HANDLE:
 			{
-			    cw_nxo_t *hook;
+			    cw_nxo_t *handle;
 
-			    hook = nxo_stack_push(&thread->tstack);
-			    nxo_dup(hook, el);
+			    handle = nxo_stack_push(&thread->tstack);
+			    nxo_dup(handle, el);
 #ifdef CW_THREADS
 			    nxo_l_array_unlock(nxo);
 #endif
-			    nxo_hook_eval(hook, a_nxo);
+			    nxo_handle_eval(handle, a_nxo);
 			    nxo_stack_pop(&thread->tstack);
 #ifdef CW_THREADS
 			    nxo_l_array_lock(nxo);
@@ -905,10 +905,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		nxo_stack_pop(&thread->estack);
 		break;
 	    }
-#ifdef CW_HOOK
-	    case NXOT_HOOK:
+#ifdef CW_HANDLE
+	    case NXOT_HANDLE:
 	    {
-		nxo_hook_eval(nxo, a_nxo);
+		nxo_handle_eval(nxo, a_nxo);
 
 		nxo_stack_pop(&thread->estack);
 		break;

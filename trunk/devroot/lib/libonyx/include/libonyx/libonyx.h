@@ -392,8 +392,8 @@ typedef struct cw_mema_s cw_mema_t;
 #include "nxo_dict.h"
 #include "nxo_file.h"
 #include "nxo_fino.h"
-#ifdef CW_HOOK
-#include "nxo_hook.h"
+#ifdef CW_HANDLE
+#include "nxo_handle.h"
 #endif
 #include "nxo_integer.h"
 #include "nxo_mark.h"

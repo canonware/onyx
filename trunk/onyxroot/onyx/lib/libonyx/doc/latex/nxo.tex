@@ -27,7 +27,7 @@ The \classname{nxo} class is the basis for the Onyx type system.
 \item[NXOT\_DICT: ] \htmlref{\classname{nxo\_dict}}{nxo_dict}
 \item[NXOT\_FILE: ] \htmlref{\classname{nxo\_file}}{nxo_file}
 \item[NXOT\_FINO: ] \htmlref{\classname{nxo\_fino}}{nxo_fino}
-\item[NXOT\_HOOK: ] \htmlref{\classname{nxo\_hook}}{nxo_hook}
+\item[NXOT\_HANDLE: ] \htmlref{\classname{nxo\_handle}}{nxo_handle}
 \item[NXOT\_INTEGER: ] \htmlref{\classname{nxo\_integer}}{nxo_integer}
 \item[NXOT\_MARK: ] \htmlref{\classname{nxo\_mark}}{nxo_mark}
 \item[NXOT\_MUTEX: ] \htmlref{\classname{nxo\_mutex}}{nxo_mutex}
@@ -49,8 +49,8 @@ will result in undefined behaviour (including crashes).
 
 Composite objects contain a reference to an \classname{nxoe} object.  For the
 most part, the application does not need to be aware of this.  The only
-exception is when writing extensions with the hook type.  Hook objects need to
-be able to iterate over the objects they reference internally, and return
+exception is when writing extensions with the handle type.  Handle objects need
+to be able to iterate over the objects they reference internally, and return
 \classname{nxoe} references to the garbage collector.
 
 The following functions are applicable to all types of \classname{nxo} objects.
@@ -142,9 +142,9 @@ cw\_nxo\_t *a\_b}}
 				\item[NXOT\_FINO: ]
 					\htmlref{\classname{nxo\_fino}}
 					{nxo_fino}
-				\item[NXOT\_HOOK: ]
-					\htmlref{\classname{nxo\_hook}}
-					{nxo_hook}
+				\item[NXOT\_HANDLE: ]
+					\htmlref{\classname{nxo\_handle}}
+					{nxo_handle}
 				\item[NXOT\_INTEGER: ]
 					\htmlref{\classname{nxo\_integer}}
 					{nxo_integer}

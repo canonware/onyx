@@ -168,11 +168,11 @@ $sprintsdict <
 	`-fino-'
     }
 ' cat
-@enable_hook@ 1 eq {
+@enable_handle@ 1 eq {
     `
-    $hooktype {
-	#hook #depth
-	exch hooktag
+    $handletype {
+	#handle #depth
+	exch handletag
 	#depth #tag
 	dup type $nulltype ne {
 	    exch 1 sub
@@ -183,7 +183,7 @@ $sprintsdict <
 	    `=' cat
 	}{
 	    pop pop
-	    `-hook-'
+	    `-handle-'
 	} ifelse
     }
     ' cat
@@ -556,7 +556,7 @@ $outputsdict <
 ' cat
 @enable_threads@ 1 eq {
     `
-	$hooktype
+	$handletype
     ' cat
 } if
 `

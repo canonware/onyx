@@ -87,8 +87,8 @@
 #endif
 #include "../include/libonyx/nxo_dict_l.h"
 #include "../include/libonyx/nxo_file_l.h"
-#ifdef CW_HOOK
-#include "../include/libonyx/nxo_hook_l.h"
+#ifdef CW_HANDLE
+#include "../include/libonyx/nxo_handle_l.h"
 #endif
 #ifdef CW_THREADS
 #include "../include/libonyx/nxo_mutex_l.h"
@@ -260,10 +260,10 @@ nxa_p_sweep(void)
 		    notyet = nxoe_l_file_delete(nxoe, s_iter);
 		    break;
 		}
-#ifdef CW_HOOK
-		case NXOT_HOOK:
+#ifdef CW_HANDLE
+		case NXOT_HANDLE:
 		{
-		    notyet = nxoe_l_hook_delete(nxoe, s_iter);
+		    notyet = nxoe_l_handle_delete(nxoe, s_iter);
 		    break;
 		}
 #endif
@@ -932,10 +932,10 @@ nxa_p_mark(void)
 		    nxoe = nxoe_l_file_ref_iter(gray, reset);
 		    break;
 		}
-#ifdef CW_HOOK
-		case NXOT_HOOK:
+#ifdef CW_HANDLE
+		case NXOT_HANDLE:
 		{
-		    nxoe = nxoe_l_hook_ref_iter(gray, reset);
+		    nxoe = nxoe_l_handle_ref_iter(gray, reset);
 		    break;
 		}
 #endif

@@ -10,43 +10,43 @@
  *
  ******************************************************************************/
 
-typedef struct cw_nxoe_hook_s cw_nxoe_hook_t;
+typedef struct cw_nxoe_handle_s cw_nxoe_handle_t;
 
-struct cw_nxoe_hook_s
+struct cw_nxoe_handle_s
 {
     cw_nxoe_t nxoe;
 
     cw_nxo_t tag;
     void *data;
-    cw_nxo_hook_eval_t *eval_f;
-    cw_nxo_hook_ref_iter_t *ref_iter_f;
-    cw_nxo_hook_delete_t *delete_f;
+    cw_nxo_handle_eval_t *eval_f;
+    cw_nxo_handle_ref_iter_t *ref_iter_f;
+    cw_nxo_handle_delete_t *delete_f;
 };
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
+nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
-nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(CW_NXO_HOOK_C_))
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_HANDLE_C_))
 CW_INLINE cw_bool_t
-nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
+nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_bool_t retval;
-    cw_nxoe_hook_t *hook;
+    cw_nxoe_handle_t *handle;
 
-    hook = (cw_nxoe_hook_t *) a_nxoe;
+    handle = (cw_nxoe_handle_t *) a_nxoe;
 
-    cw_check_ptr(hook);
-    cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(hook->nxoe.type == NXOT_HOOK);
+    cw_check_ptr(handle);
+    cw_dassert(handle->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(handle->nxoe.type == NXOT_HANDLE);
 
-    if (hook->delete_f != NULL)
+    if (handle->delete_f != NULL)
     {
-	retval = hook->delete_f(hook->data, a_iter);
+	retval = handle->delete_f(handle->data, a_iter);
     }
     else
     {
@@ -55,23 +55,23 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     if (retval == FALSE)
     {
-	nxa_free(hook, sizeof(cw_nxoe_hook_t));
+	nxa_free(handle, sizeof(cw_nxoe_handle_t));
     }
 
     return retval;
 }
 
 CW_INLINE cw_nxoe_t *
-nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
-    cw_nxoe_hook_t *hook;
+    cw_nxoe_handle_t *handle;
     /* Used for remembering the current state of reference iteration.  This
      * function is only called by the garbage collector, so using a static
      * variable works fine. */
     static cw_uint32_t ref_stage;
 
-    hook = (cw_nxoe_hook_t *) a_nxoe;
+    handle = (cw_nxoe_handle_t *) a_nxoe;
 
     if (a_reset)
     {
@@ -83,7 +83,7 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	case 0:
 	{
 	    ref_stage++;
-	    retval = nxo_nxoe_get(&hook->tag);
+	    retval = nxo_nxoe_get(&handle->tag);
 	    if (retval != NULL)
 	    {
 		break;
@@ -92,9 +92,9 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	case 1:
 	{
 	    ref_stage++;
-	    if (hook->ref_iter_f != NULL)
+	    if (handle->ref_iter_f != NULL)
 	    {
-		retval = hook->ref_iter_f(hook->data, TRUE);
+		retval = handle->ref_iter_f(handle->data, TRUE);
 	    }
 	    else
 	    {
@@ -104,7 +104,7 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	}
 	case 2:
 	{
-	    retval = hook->ref_iter_f(hook->data, FALSE);
+	    retval = handle->ref_iter_f(handle->data, FALSE);
 	    break;
 	}
 	default:
@@ -115,4 +115,4 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 
     return retval;
 }
-#endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_HOOK_C_)) */
+#endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_HANDLE_C_)) */

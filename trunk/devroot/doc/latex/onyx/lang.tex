@@ -78,7 +78,7 @@ boolean	& array		\\
 fino	& condition	\\
 integer	& dict		\\
 mark	& file		\\
-name	& hook		\\
+name	& handle	\\
 null	& mutex		\\
 operator & regex	\\
 pmark	& regsub	\\
@@ -140,7 +140,7 @@ file		& data	& code	& code	\\
 \hline
 fino		& data	& data	& data	\\
 \hline
-hook		& data	& code	& code	\\
+handle		& data	& code	& code	\\
 \hline
 integer		& data	& data	& data	\\
 \hline
@@ -194,7 +194,7 @@ file		& data	& code	& code	\\
 \hline
 fino		& data	& data	& data	\\
 \hline
-hook		& data	& code	& code	\\
+handle		& data	& code	& code	\\
 \hline
 integer		& data	& data	& data	\\
 \hline
@@ -269,14 +269,14 @@ reached.
 \item[fino: ] A fino (first in, never out) is used as a stack marker when
 constructing stacks.
 
-\item[hook: ] The hook type is not used by the core Onyx language.  It can be
-used by applications that extend the interpreter as a container object.  Hooks
-can be executed, but the results are application dependent.
+\item[handle: ] The handle type is not used by the core Onyx language.  It can
+be used by applications that extend the interpreter as a container object.
+Handles can be executed, but the results are application dependent.
 
-Each hook has a tag associated with it that can used by C extension code as a
+Each handle has a tag associated with it that can used by C extension code as a
 form of type checking.  By default, the tag is a null object.  In most cases, an
-application that extends the interpreter using hook objects will set hook tags
-to be name objects.
+application that extends the interpreter using handle objects will set handle
+tags to be name objects.
 
 \item[integer: ] An integer is a signed integer in the range $-2^{63}$ to
 $2^{63} - 1$.
@@ -773,7 +773,7 @@ protected, but element reads are not protected.
 \item[dict: ] All dict operations are protected.
 \item[file: ] All file operations are protected.  There are no potential
 deadlocks due to implicit file locking.
-\item[hook: ] No implicit locking is done for hooks.
+\item[handle: ] No implicit locking is done for handles.
 \item[mutex: ] No implicit locking is done for mutexes.
 \item[regex: ] No implicit locking is done for regexes.
 \item[regsub: ] No implicit locking is done for regsubs.
@@ -1986,10 +1986,10 @@ The following additional flags are supported for reals:
 	{Create formatted string from fino.}
 \hline
 \optableent
-	{hook flags}
-	{{\bf \htmlref{hooktype}{outputsdict:hooktype}}}
+	{handle flags}
+	{{\bf \htmlref{handletype}{outputsdict:handletype}}}
 	{string}
-	{Create formatted string from hook.}
+	{Create formatted string from handle.}
 \hline
 \optableent
 	{integer flags}
@@ -2266,21 +2266,21 @@ onyx:1> <$w 30 $p `.' $j $c> finotype print `\n' print flush
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{outputsdict:hooktype}
-\index{hooktype@\onyxop{}{hooktype}{}}
-\item[{\onyxop{hook flags}{hooktype}{string}}: ]
+\label{outputsdict:handletype}
+\index{handletype@\onyxop{}{handletype}{}}
+\item[{\onyxop{handle flags}{handletype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[hook: ]
-			A hook object.
+		\item[handle: ]
+			A handle object.
 		\item[flags: ]
 			Formatting flags.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			Formatted string representation of \oparg{hook}.
+			Formatted string representation of \oparg{handle}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -2288,17 +2288,17 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a formatted string representation of \oparg{hook}.
+		Create a formatted string representation of \oparg{handle}.
 	\item[Example(s): ]
 		The following example is a bit contrived, since there is no way
-		to create a hook object with a stock onyx interpreter.
-		Therefore, imagine that an operator named taggedhook exists that
-		creates a hook with a tag that is the name ``tagged''.
+		to create a handle object with a stock onyx interpreter.
+		Therefore, imagine that an operator named taggedhandle exists
+		that creates a handle with a tag that is the name ``tagged''.
 		\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> taggedhook
-onyx:1> <$w 30 $p `.' $j $l hooktype print `\n' print flush
+onyx:0> taggedhandle
+onyx:1> <$w 30 $p `.' $j $l handletype print `\n' print flush
 =tagged=......................
 onyx:0>
 		\end{verbatim}
@@ -2830,10 +2830,10 @@ $sprints {
 	{Create syntactical string from fino.}
 \hline
 \optableent
-	{hook depth}
-	{{\bf \htmlref{hooktype}{sprintsdict:hooktype}}}
+	{handle depth}
+	{{\bf \htmlref{handletype}{sprintsdict:handletype}}}
 	{string}
-	{Create syntactical string from hook.}
+	{Create syntactical string from handle.}
 \hline
 \optableent
 	{integer depth}
@@ -3121,21 +3121,21 @@ onyx:1> dup 1 finotype print `\n' print flush
 onyx:1>
 		\end{verbatim}
 	\end{description}
-\label{sprintsdict:hooktype}
-\index{hooktype@\onyxop{}{hooktype}{}}
-\item[{\onyxop{hook depth}{hooktype}{string}}: ]
+\label{sprintsdict:handletype}
+\index{handletype@\onyxop{}{handletype}{}}
+\item[{\onyxop{handle depth}{handletype}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[hook: ]
-			A hook object.
+		\item[handle: ]
+			A handle object.
 		\item[depth: ]
 			Recursion depth.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			Syntactical string representation of \oparg{hook}.
+			Syntactical string representation of \oparg{handle}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -3143,27 +3143,27 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a syntactical string representation of \oparg{hook}.
+		Create a syntactical string representation of \oparg{handle}.
 	\item[Example(s): ]
 		The following example is a bit contrived, since there is no way
-		to create a hook object with a stock onyx interpreter.
-		Therefore, imagine that an operator named taggedhook exists that
-		creates a hook with a tag that is the name ``tagged'', and that
-		an operator named untaggedhook exists that creates an untagged
-		hook.
+		to create a handle object with a stock onyx interpreter.
+		Therefore, imagine that an operator named taggedhandle exists
+		that creates a handle with a tag that is the name ``tagged'',
+		and that an operator named untaggedhandle exists that creates an
+		untagged handle.
 		\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> taggedhook
-onyx:1> dup 0 hooktype print `\n' print flush
+onyx:0> taggedhandle
+onyx:1> dup 0 handletype print `\n' print flush
 =tagged=
-onyx:1> 1 hooktype print `\n' print flush
+onyx:1> 1 handletype print `\n' print flush
 =tagged=
-onyx:0> untaggedhook
-onyx:1> dup 0 hooktype print `\n' print flush
--hook-
-onyx:1> 1 hooktype print `\n' print flush
--hook-
+onyx:0> untaggedhandle
+onyx:1> dup 0 handletype print `\n' print flush
+-handle-
+onyx:1> 1 handletype print `\n' print flush
+-handle-
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -5525,10 +5525,10 @@ attribute operators} \\
 	{Convert real to exponential string.}
 \hline
 \optableent
-	{hook}
-	{{\bf \htmlref{hooktag}{systemdict:hooktag}}}
+	{handle}
+	{{\bf \htmlref{handletag}{systemdict:handletag}}}
 	{tag}
-	{Get hook tag.}
+	{Get handle tag.}
 \hline \hline
 \multicolumn{2}{|l|}{\label{subsec:systemdict:thread}Threading and
 synchronization operators} \\
@@ -6527,7 +6527,7 @@ onyx:0>
 		\begin{itemize}
 		\item{The value is a literal object.}
 		\item{The value is an executable or evaluable operator.}
-		\item{The value is an executable or evaluable hook.}
+		\item{The value is an executable or evaluable handle.}
 		\item{The value is an executable or evaluable array.}
 		\end{itemize}
 
@@ -8037,7 +8037,7 @@ onyx:0>
 		Compare two objects for equality.  Equality has the following
 		meaning, depending on the types of \oparg{a} and \oparg{b}:
 		\begin{description}
-		\item[array, condition, dict, file, hook, mutex, stack,
+		\item[array, condition, dict, file, handle, mutex, stack,
 		thread: ] \oparg{a} and \oparg{b} are equal iff they refer to
 		the same memory.
 		\item[operator: ] \oparg{a} and \oparg{b} are equal iff they
@@ -8814,19 +8814,19 @@ true
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:hooktag}
-\index{hooktag@\onyxop{}{hooktag}{}}
-\item[{\onyxop{hook}{hooktag}{tag}}: ]
+\label{systemdict:handletag}
+\index{handletag@\onyxop{}{handletag}{}}
+\item[{\onyxop{handle}{handletag}{tag}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[hook: ]
-			A hook object.
+		\item[handle: ]
+			A handle object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[tag: ]
-			The tag associated with \oparg{hook}.
+			The tag associated with \oparg{handle}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -8834,7 +8834,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Get the tag associated with \oparg{hook}.
+		Get the tag associated with \oparg{handle}.
 	\item[Example(s): ]\begin{verbatim}
 
 		\end{verbatim}
@@ -9912,16 +9912,17 @@ onyx:3>
 		\item[\htmlref{undefined}{undefined}.]
 		\end{description}
 	\item[Description: ]
-		Dynamically load a module, create a hook object that
-		encapsulates the handle returned by dlopen(3) (hook data
-		pointer) and the module initialization function (hook evaluation
-		function), and evaluate the hook.
+		Dynamically load a module, create a handle object that
+		encapsulates the handle returned by dlopen(3) (handle data
+		pointer) and the module initialization function (handle
+		evaluation function), and evaluate the handle.
 
 		All objects that refer to code and/or data that are part of the
 		module must directly and/or indirectly maintain a reference to
-		the hook that is evaluated by this operator, since failing to do
-		so would allow the garbage collector to unload the module, which
-		could result in dangling pointers to unmapped memory regions.
+		the handle that is evaluated by this operator, since failing to
+		do so would allow the garbage collector to unload the module,
+		which could result in dangling pointers to unmapped memory
+		regions.
 
 		Loadable modules present a problem for the garbage collector
 		during the sweep phase.  All objects that refer to memory that
@@ -9930,11 +9931,11 @@ onyx:3>
 		show up in other situations as well, but in the case of loadable
 		modules, there is no reasonable solution except to explicitly
 		order the destruction of objects.  Therefore, by default, the
-		hook that is evaluated by modload is destroyed during the second
-		sweep pass (count starts at 0).  It is possible for a module to
-		override what sweep pass the hook is destroyed on, in cases
-		where there are additional ordering constraints for the objects
-		created by a module.  This isn't important from the Onyx
+		handle that is evaluated by modload is destroyed during the
+		second sweep pass (count starts at 0).  It is possible for a
+		module to override what sweep pass the handle is destroyed on,
+		in cases where there are additional ordering constraints for the
+		objects created by a module.  This isn't important from the Onyx
 		language perspective, but is important to understand when
 		implementing modules.
 	\item[Example(s): ]\begin{verbatim}
@@ -10246,7 +10247,7 @@ onyx:5>
 		following meaning, depending on the types of \oparg{a} and
 		\oparg{b}:
 		\begin{description}
-		\item[array, condition, dict, file, hook, mutex, stack,
+		\item[array, condition, dict, file, handle, mutex, stack,
 		thread: ] \oparg{a} and \oparg{b} are not equal unless they
 		refer to the same memory.
 		\item[operator: ] \oparg{a} and \oparg{b} are not equal unless
@@ -15174,7 +15175,7 @@ onyx:4>
 			\item[dict: ] dicttype.
 			\item[file: ] filetype.
 			\item[fino: ] finotype.
-			\item[hook: ] hooktype.
+			\item[handle: ] handletype.
 			\item[integer: ] integertype.
 			\item[mark: ] marktype.
 			\item[mutex: ] mutextype.

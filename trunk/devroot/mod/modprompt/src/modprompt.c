@@ -24,7 +24,7 @@ struct cw_modprompt_synth_s {
 #define CW_MODPROMPT_SYNTH_MAGIC 0x32ad81a5
     cw_uint32_t magic;
 #endif
-    cw_nxo_t modload_hook;
+    cw_nxo_t modload_handle;
     cw_nxo_t *thread;
     cw_nxo_threadp_t threadp;
     cw_bool_t continuation;
@@ -104,13 +104,13 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
 		       modprompt_synth_delete, synth);
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
-    /* The interpreter is currently executing a hook that holds a reference to
+    /* The interpreter is currently executing a handle that holds a reference to
      * the dynamically loaded module.  Keep a reference to it, so that this
      * module will not be unloaded until after the synthetic file object has
      * been destroyed. */
     estack = nxo_thread_estack_get(a_thread);
-    nxo_no_new(&synth->modload_hook);
-    nxo_dup(&synth->modload_hook, nxo_stack_get(estack));
+    nxo_no_new(&synth->modload_handle);
+    nxo_dup(&synth->modload_handle, nxo_stack_get(estack));
 
     /* Finish initializing synth. */
     synth->thread = a_thread;
@@ -189,7 +189,7 @@ modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset)
 
     if (a_reset)
     {
-	retval = nxo_nxoe_get(&synth->modload_hook);
+	retval = nxo_nxoe_get(&synth->modload_handle);
     }
     else
     {

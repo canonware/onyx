@@ -16,7 +16,7 @@ currentlocking true setlocking
 # Define slatedict in globaldict, and push it onto dstack.
 globaldict $slatedict dict dup begin put
 
-# Initialize hooks.
+# Initialize handles.
 `modslate.nxm' `modslate_init' mrequire
 
 `modslate/modslate_defs.nx' require

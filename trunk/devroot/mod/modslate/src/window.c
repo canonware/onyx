@@ -18,7 +18,7 @@ struct cw_window
     cw_uint32_t	iter;
 
     /* Reference to =window=, prevents module unload. */
-    cw_nxo_t hook;
+    cw_nxo_t handle;
 
     /* Auxiliary data for display_aux_[gs]et. */
     cw_nxo_t aux;
@@ -62,7 +62,7 @@ struct cw_window
     cw_nxo_t point_marker;
 };
 
-static const struct cw_modslate_entry modslate_window_hooks[] = {
+static const struct cw_modslate_entry modslate_window_handles[] = {
     MODSLATE_ENTRY(window),
     {"window?", modslate_window_p},
 //    MODSLATE_ENTRY(window_container_p),
@@ -83,9 +83,9 @@ window_p_delete(void *a_data, cw_uint32_t a_iter);
 void
 modslate_window_init(cw_nxo_t *a_thread)
 {
-    modslate_hooks_init(a_thread, modslate_window_hooks,
-			(sizeof(modslate_window_hooks)
-			 / sizeof(struct cw_modslate_entry)));
+    modslate_handles_init(a_thread, modslate_window_handles,
+			  (sizeof(modslate_window_handles)
+			   / sizeof(struct cw_modslate_entry)));
 }
 
 static cw_nxoe_t *
@@ -105,7 +105,7 @@ window_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	{
 	    case 0:
 	    {
-		retval = nxo_nxoe_get(&window->hook);
+		retval = nxo_nxoe_get(&window->handle);
 		break;
 	    }
 	    case 1:
@@ -168,11 +168,11 @@ window_p_ref_iter(void *a_data, cw_bool_t a_reset)
 static cw_bool_t
 window_p_delete(void *a_data, cw_uint32_t a_iter)
 {
-	struct cw_window	*window = (struct cw_window *)a_data;
+    struct cw_window	*window = (struct cw_window *)a_data;
 
-	nxa_free(window, sizeof(struct cw_window));
+    nxa_free(window, sizeof(struct cw_window));
 
-	return FALSE;
+    return FALSE;
 }
 
 /* #=frame= window #=window= */
@@ -189,7 +189,7 @@ modslate_window(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(parent, ostack, a_thread);
-    if ((error = modslate_hook_type(parent, "window")) != NXN_ZERO)
+    if ((error = modslate_handle_type(parent, "window")) != NXN_ZERO)
     {
 	frame = parent;
 	parent = NULL;
@@ -198,14 +198,14 @@ modslate_window(void *a_data, cw_nxo_t *a_thread)
     {
 	NXO_STACK_DOWN_GET(frame, ostack, a_thread, parent);
     }
-    if ((error = modslate_hook_type(frame, "frame")) != NXN_ZERO)
+    if ((error = modslate_handle_type(frame, "frame")) != NXN_ZERO)
     {
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
 
-    if ((error = modslate_hook_type(parent, "frame")) != NXN_ZERO
-	&& (error = modslate_hook_type(parent, "window")) != NXN_ZERO)
+    if ((error = modslate_handle_type(parent, "frame")) != NXN_ZERO
+	&& (error = modslate_handle_type(parent, "window")) != NXN_ZERO)
     {
 	nxo_thread_nerror(a_thread, error);
 	return;
@@ -214,8 +214,8 @@ modslate_window(void *a_data, cw_nxo_t *a_thread)
 
     /* Create a reference to this operator in order to prevent the module from
      * being prematurely unloaded. */
-    nxo_no_new(&window->hook);
-    nxo_dup(&window->hook, nxo_stack_get(estack));
+    nxo_no_new(&window->handle);
+    nxo_dup(&window->handle, nxo_stack_get(estack));
 
     /* Initialize position and size. */
     window->xstart = 0;
@@ -252,10 +252,10 @@ modslate_window(void *a_data, cw_nxo_t *a_thread)
     /* Create a reference to the window, now that the internals are
      * initialized. */
     tnxo = nxo_stack_push(tstack);
-    nxo_hook_new(tnxo, window, NULL, window_p_ref_iter, window_p_delete);
+    nxo_handle_new(tnxo, window, NULL, window_p_ref_iter, window_p_delete);
 
-    /* Set the hook tag. */
-    tag = nxo_hook_tag_get(tnxo);
+    /* Set the handle tag. */
+    tag = nxo_handle_tag_get(tnxo);
     nxo_name_new(tag, "window", sizeof("window") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 
@@ -268,7 +268,7 @@ modslate_window(void *a_data, cw_nxo_t *a_thread)
 void
 modslate_window_p(void *a_data, cw_nxo_t *a_thread)
 {
-    modslate_hook_p(a_data, a_thread, "window");
+    modslate_handle_p(a_data, a_thread, "window");
 }
 
 void
@@ -281,13 +281,13 @@ modslate_window_aux_get(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    error = modslate_hook_type(nxo, "window");
+    error = modslate_handle_type(nxo, "window");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    window = (struct cw_window *) nxo_hook_data_get(nxo);
+    window = (struct cw_window *) nxo_handle_data_get(nxo);
 
     /* Avoid a GC race by using tnxo to store a reachable ref to the window. */
     tnxo = nxo_stack_push(tstack);
@@ -306,13 +306,13 @@ modslate_window_aux_set(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     NXO_STACK_GET(aux, ostack, a_thread);
     NXO_STACK_DOWN_GET(nxo, ostack, a_thread, aux);
-    error = modslate_hook_type(nxo, "window");
+    error = modslate_handle_type(nxo, "window");
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    window = (struct cw_window *) nxo_hook_data_get(nxo);
+    window = (struct cw_window *) nxo_handle_data_get(nxo);
 
     nxo_dup(&window->aux, aux);
     nxo_stack_npop(ostack, 2);

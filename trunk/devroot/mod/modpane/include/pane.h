@@ -19,7 +19,7 @@ modpane_pane_init(cw_nxo_t *a_thread);
 cw_nxn_t
 pane_type(cw_nxo_t *a_nxo);
 
-/* Hooks. */
+/* Handles. */
 
 /* pane. */
 void

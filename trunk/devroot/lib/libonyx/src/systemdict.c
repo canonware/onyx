@@ -248,8 +248,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(gstdout),
 #endif
     ENTRY(gt),
-#ifdef CW_HOOK
-    ENTRY(hooktag),
+#ifdef CW_HANDLE
+    ENTRY(handletag),
 #endif
     ENTRY(ibdup),
     ENTRY(ibpop),
@@ -1423,13 +1423,13 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 		     *
 		     * 2) Operator.
 		     *
-		     * 3) Hook.
+		     * 3) Handle.
 		     *
 		     * 4) Array.  (Set attribute to evaluable.) */
 		    if (nxo_attr_get(val) == NXOA_LITERAL
 			|| type == NXOT_OPERATOR
-#ifdef CW_HOOK
-			|| type == NXOT_HOOK
+#ifdef CW_HANDLE
+			|| type == NXOT_HANDLE
 #endif
 			)
 		    {
@@ -3154,8 +3154,8 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	case NXOT_DICT:
 	case NXOT_FILE:
 	case NXOT_FINO:
-#ifdef CW_HOOK
-	case NXOT_HOOK:
+#ifdef CW_HANDLE
+	case NXOT_HANDLE:
 #endif
 	case NXOT_MARK:
 #ifdef CW_THREADS
@@ -4587,16 +4587,16 @@ systemdict_gt(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-#ifdef CW_HOOK
+#ifdef CW_HANDLE
 void
-systemdict_hooktag(cw_nxo_t *a_thread)
+systemdict_handletag(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *tstack, *nxo, *tnxo, *tag;
 	
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
-    if (nxo_type_get(nxo) != NXOT_HOOK)
+    if (nxo_type_get(nxo) != NXOT_HANDLE)
     {
 	nxo_thread_nerror(a_thread, NXN_typecheck);
 	return;
@@ -4605,7 +4605,7 @@ systemdict_hooktag(cw_nxo_t *a_thread)
     tnxo = nxo_stack_push(tstack);
     nxo_dup(tnxo, nxo);
 
-    tag = nxo_hook_tag_get(tnxo);
+    tag = nxo_handle_tag_get(tnxo);
     nxo_dup(nxo, tag);
 
     nxo_stack_pop(tstack);
@@ -4915,8 +4915,8 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	case NXOT_BOOLEAN:
 	case NXOT_CONDITION:
 	case NXOT_FINO:
-#ifdef CW_HOOK
-	case NXOT_HOOK:
+#ifdef CW_HANDLE
+	case NXOT_HANDLE:
 #endif
 	case NXOT_INTEGER:
 	case NXOT_MARK:
@@ -6034,19 +6034,19 @@ systemdict_modload(cw_nxo_t *a_thread)
 	return;
     }
 
-    /* Create a hook whose data pointer is a (cw_nxmod_t), and whose evaluation
-     * function is the symbol we just looked up. */
+    /* Create a handle whose data pointer is a (cw_nxmod_t), and whose
+     * evaluation function is the symbol we just looked up. */
     nxmod = systemdict_p_nxmod_new(handle);
     nxo = nxo_stack_push(estack);
-    nxo_hook_new(nxo, nxmod, symbol, systemdict_p_nxmod_ref_iter,
-		 systemdict_p_nxmod_delete);
-    nxo_dup(nxo_hook_tag_get(nxo), sym);
+    nxo_handle_new(nxo, nxmod, symbol, systemdict_p_nxmod_ref_iter,
+		   systemdict_p_nxmod_delete);
+    nxo_dup(nxo_handle_tag_get(nxo), sym);
     nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
     /* Pop the arguments before recursing. */
     nxo_stack_npop(ostack, 2);
 
-    /* Recurse on the hook. */
+    /* Recurse on the handle. */
     nxo_thread_loop(a_thread);
 }
 #endif
@@ -12329,8 +12329,8 @@ systemdict_type(cw_nxo_t *a_thread)
 	NXN_dicttype,
 	NXN_filetype,
 	NXN_finotype,
-#ifdef CW_HOOK
-	NXN_hooktype,
+#ifdef CW_HANDLE
+	NXN_handletype,
 #endif
 	NXN_integertype,
 	NXN_marktype,

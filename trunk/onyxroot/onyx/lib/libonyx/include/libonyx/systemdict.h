@@ -335,8 +335,10 @@ systemdict_gstdout(cw_nxo_t *a_thread);
 void
 systemdict_gt(cw_nxo_t *a_thread);
 
+#ifdef CW_HANDLE
 void
-systemdict_hooktag(cw_nxo_t *a_thread);
+systemdict_handletag(cw_nxo_t *a_thread);
+#endif
 
 void
 systemdict_ibdup(cw_nxo_t *a_thread);

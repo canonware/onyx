@@ -14,7 +14,7 @@
 void
 modslate_frame_init(cw_nxo_t *a_thread);
 
-/* Hooks. */
+/* Handles. */
 void
 modslate_frame(void *a_data, cw_nxo_t *a_thread);
 

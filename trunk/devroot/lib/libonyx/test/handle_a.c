@@ -12,21 +12,21 @@
 
 #include "../include/libonyx/libonyx.h"
 
-#define NAME_anon_hook "anon_hook"
-#define NAME_mark_hook "mark_hook"
+#define NAME_anon_handle "anon_handle"
+#define NAME_mark_handle "mark_handle"
 
-const cw_uint8_t *data = "hook data";
+const cw_uint8_t *data = "handle data";
 
 void
-hook_eval(void *a_data, cw_nxo_t *a_thread)
+handle_eval(void *a_data, cw_nxo_t *a_thread)
 {
     cw_assert(a_data == data);
 
-    cw_onyx_code(a_thread, "`Evaluated hook\n' print");
+    cw_onyx_code(a_thread, "`Evaluated handle\n' print");
 }
 
 cw_nxoe_t *
-hook_ref_iter(void *a_data, cw_bool_t a_reset)
+handle_ref_iter(void *a_data, cw_bool_t a_reset)
 {
     cw_assert(a_data == data);
 
@@ -34,7 +34,7 @@ hook_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 cw_bool_t
-hook_delete(void *a_data, cw_uint32_t a_iter)
+handle_delete(void *a_data, cw_uint32_t a_iter)
 {
     cw_assert(a_data == data);
 
@@ -42,26 +42,27 @@ hook_delete(void *a_data, cw_uint32_t a_iter)
 }
 
 void
-anon_hook(cw_nxo_t *a_thread)
+anon_handle(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *hook;
+    cw_nxo_t *ostack, *handle;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    hook = nxo_stack_push(ostack);
-    nxo_hook_new(hook, (void *) data, hook_eval, hook_ref_iter, hook_delete);
-    nxo_attr_set(hook, NXOA_EXECUTABLE);
+    handle = nxo_stack_push(ostack);
+    nxo_handle_new(handle, (void *) data, handle_eval, handle_ref_iter,
+		   handle_delete);
+    nxo_attr_set(handle, NXOA_EXECUTABLE);
 }
 
 void
-mark_hook(cw_nxo_t *a_thread)
+mark_handle(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *hook, *tag;
+    cw_nxo_t *ostack, *handle, *tag;
 
-    anon_hook(a_thread);
+    anon_handle(a_thread);
 
     ostack = nxo_thread_ostack_get(a_thread);
-    hook = nxo_stack_get(ostack);
-    tag = nxo_hook_tag_get(hook);
+    handle = nxo_stack_get(ostack);
+    tag = nxo_handle_tag_get(handle);
     nxo_mark_new(tag);
 }
 
@@ -77,28 +78,28 @@ main(int argc, char **argv, char **envp)
     cw_assert(nx_new(&nx, NULL, NULL) == &nx);
     nxo_thread_new(&thread, &nx);
 
-    /* Define anon_hook and mark_hook. */
+    /* Define anon_handle and mark_handle. */
     ostack = nxo_thread_ostack_get(&thread);
 
     name = nxo_stack_push(ostack);
     operator = nxo_stack_push(ostack);
-    nxo_name_new(name, NAME_anon_hook, strlen(NAME_anon_hook), FALSE);
-    nxo_operator_new(operator, anon_hook, NXN_ZERO);
+    nxo_name_new(name, NAME_anon_handle, strlen(NAME_anon_handle), FALSE);
+    nxo_operator_new(operator, anon_handle, NXN_ZERO);
     nxo_attr_set(operator, NXOA_EXECUTABLE);
     cw_onyx_code(&thread, "def");
 
     name = nxo_stack_push(ostack);
     operator = nxo_stack_push(ostack);
-    nxo_name_new(name, NAME_mark_hook, strlen(NAME_mark_hook), FALSE);
-    nxo_operator_new(operator, mark_hook, NXN_ZERO);
+    nxo_name_new(name, NAME_mark_handle, strlen(NAME_mark_handle), FALSE);
+    nxo_operator_new(operator, mark_handle, NXN_ZERO);
     nxo_attr_set(operator, NXOA_EXECUTABLE);
     cw_onyx_code(&thread, "def");
 
     cw_onyx_code(&thread, "\n\
-anon_hook 1 sprint\n\
-anon_hook eval\n\
-mark_hook 1 sprint\n\
-mark_hook eval\n\
+anon_handle 1 sprint\n\
+anon_handle eval\n\
+mark_handle 1 sprint\n\
+mark_handle eval\n\
 ");
     nx_delete(&nx);
 

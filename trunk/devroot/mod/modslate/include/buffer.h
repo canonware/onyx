@@ -14,7 +14,7 @@
 void
 modslate_buffer_init(cw_nxo_t *a_thread);
 
-/* Hooks. */
+/* Handles. */
 
 /* buffer. */
 void

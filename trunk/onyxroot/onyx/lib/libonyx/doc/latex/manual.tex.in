@@ -59,11 +59,11 @@ main(int argc, char **argv, char **envp)
 \end{verbatim}
 
 In many cases, an application will need to implement additional Onyx operators
-or hooks (and make them accessible from within the Onyx interpreter) in order to
-make the application accessible/controllable from the Onyx interpreter.  If the
-application user interface is to be interaction with the Onyx interpreter, then
-little else needs to be done.  Note that Onyx supports loadable modules, so it
-is usually possible to extend Onyx via modules, though embedding
+or handles (and make them accessible from within the Onyx interpreter) in order
+to make the application accessible/controllable from the Onyx interpreter.  If
+the application user interface is to be interaction with the Onyx interpreter,
+then little else needs to be done.  Note that Onyx supports loadable modules, so
+it is usually possible to extend Onyx via modules, though embedding
 \libname{libonyx} directly into the application also works.
 
 \section{Compilation}
@@ -708,7 +708,7 @@ void *a\_mem, void *a\_ptr, size\_t a\_size}}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_dict}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_file}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_fino}
-\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_hook}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_handle}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_integer}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_mark}
 \input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_mutex}

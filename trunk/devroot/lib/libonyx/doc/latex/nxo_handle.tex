@@ -8,21 +8,21 @@
 %
 % Version: Onyx <Version = onyx>
 %
-% nxo_hook portion of Onyx Manual.
+% nxo_handle portion of Onyx Manual.
 %              
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{nxo\_hook}
-\label{nxo_hook}
-\index{nxo_hook@\classname{nxo\_hook}{}}
+\subsection{nxo\_handle}
+\label{nxo_handle}
+\index{nxo_handle@\classname{nxo\_handle}{}}
 
-The \classname{nxo\_hook} class is a subclass of the \classname{nxo} class.
+The \classname{nxo\_handle} class is a subclass of the \classname{nxo} class.
 
 \subsubsection{API}
 \begin{capi}
-\label{cw_nxo_hook_eval_t}
-\index{cw_nxo_hook_eval_t@\cfunc{cw\_nxo\_hook\_eval\_t}{}}
-\citem{\cfunc[void]{cw\_nxo\_hook\_eval\_t}{void *a\_data,
+\label{cw_nxo_handle_eval_t}
+\index{cw_nxo_handle_eval_t@\cfunc{cw\_nxo\_handle\_eval\_t}{}}
+\citem{\cfunc[void]{cw\_nxo\_handle\_eval\_t}{void *a\_data,
 cw\_nxo\_t *a\_thread}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -33,13 +33,13 @@ cw\_nxo\_t *a\_thread}}
 			Pointer to a thread \classname{nxo}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Exception(s): ] Hook-dependent.
+	\item[Exception(s): ] Handle-dependent.
 	\item[Description: ]
 		Evaluation function typedef.
 	\end{capilist}
-\label{cw_nxo_hook_ref_iter_t}
-\index{cw_nxo_hook_ref_iter_t@\cfunc{cw\_nxo\_hook\_ref\_iter\_t}{}}
-\citem{\cfunc[cw\_nxoe\_t *]{cw\_nxo\_hook\_ref\_iter\_t}{void *a\_data,
+\label{cw_nxo_handle_ref_iter_t}
+\index{cw_nxo_handle_ref_iter_t@\cfunc{cw\_nxo\_handle\_ref\_iter\_t}{}}
+\citem{\cfunc[cw\_nxoe\_t *]{cw\_nxo\_handle\_ref\_iter\_t}{void *a\_data,
 cw\_bool\_t a\_reset}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -68,9 +68,9 @@ cw\_bool\_t a\_reset}}
 	\item[Description: ]
 		Reference iterator function typedef.
 	\end{capilist}
-\label{cw_nxo_hook_delete_t}
-\index{cw_nxo_hook_delete_t@\cfunc{cw\_nxo\_hook\_delete\_t}{}}
-\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_hook\_delete\_t}{void *a\_data,
+\label{cw_nxo_handle_delete_t}
+\index{cw_nxo_handle_delete_t@\cfunc{cw\_nxo\_handle\_delete\_t}{}}
+\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_handle\_delete\_t}{void *a\_data,
 cw\_uint32\_t a\_iter}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -95,16 +95,16 @@ cw\_uint32\_t a\_iter}}
 	\item[Description: ]
 		Destructor function typedef.
 	\end{capilist}
-\label{nxo_hook_new}
-\index{nxo_hook_new@\cfunc{nxo\_hook\_new}{}}
-\citem{\cfunc[void]{nxo\_hook\_new}{cw\_nxo\_t *a\_nxo, void *a\_data,
-cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
-*a\_ref\_iter\_f, cw\_nxo\_hook\_delete\_t *a\_delete\_f}}
+\label{nxo_handle_new}
+\index{nxo_handle_new@\cfunc{nxo\_handle\_new}{}}
+\citem{\cfunc[void]{nxo\_handle\_new}{cw\_nxo\_t *a\_nxo, void *a\_data,
+cw\_nxo\_handle\_eval\_t *a\_eval\_f, cw\_nxo\_handle\_ref\_iter\_t
+*a\_ref\_iter\_f, cw\_nxo\_handle\_delete\_t *a\_delete\_f}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
-			Pointer to a hook \classname{nxo}.
+			Pointer to a handle \classname{nxo}.
 		\item[a\_data: ]
 			Opaque data pointer to be passed to \cvar{a\_eval\_f},
 			\cvar{a\_ref\_iter\_f}, and \cvar{a\_delete\_f}.
@@ -123,14 +123,14 @@ cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
 	\item[Description: ]
 		Constructor.
 	\end{capilist}
-\label{nxo_hook_tag_get}
-\index{nxo_hook_tag_get@\cfunc{nxo\_hook\_tag\_get}{}}
-\citem{\cfunc[cw\_nxo\_t *]{nxo\_hook\_tag\_get}{const cw\_nxo\_t *a\_nxo}}
+\label{nxo_handle_tag_get}
+\index{nxo_handle_tag_get@\cfunc{nxo\_handle\_tag\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_handle\_tag\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
-			Pointer to a hook \classname{nxo}.
+			Pointer to a handle \classname{nxo}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -143,14 +143,14 @@ cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
 		\cvar{a\_nxo}.  This object pointer can safely be used for
 		modifying the tag object.
 	\end{capilist}
-\label{nxo_hook_data_get}
-\index{nxo_hook_data_get@\cfunc{nxo\_hook\_data\_get}{}}
-\citem{\cfunc[void *]{nxo\_hook\_data\_get}{const cw\_nxo\_t *a\_nxo}}
+\label{nxo_handle_data_get}
+\index{nxo_handle_data_get@\cfunc{nxo\_handle\_data\_get}{}}
+\citem{\cfunc[void *]{nxo\_handle\_data\_get}{const cw\_nxo\_t *a\_nxo}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
-			Pointer to a hook \classname{nxo}.
+			Pointer to a handle \classname{nxo}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -161,14 +161,14 @@ cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
 	\item[Description: ]
 		Return the opaque data pointer associated with \cvar{a\_nxo}.
 	\end{capilist}
-\label{nxo_hook_data_set}
-\index{nxo_hook_data_set@\cfunc{nxo\_hook\_data\_set}{}}
-\citem{\cfunc[void]{nxo\_hook\_data\_set}{cw\_nxo\_t *a\_nxo, void *a\_data}}
+\label{nxo_handle_data_set}
+\index{nxo_handle_data_set@\cfunc{nxo\_handle\_data\_set}{}}
+\citem{\cfunc[void]{nxo\_handle\_data\_set}{cw\_nxo\_t *a\_nxo, void *a\_data}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
-			Pointer to a hook \classname{nxo}.
+			Pointer to a handle \classname{nxo}.
 		\item[a\_data: ]
 			Opaque data pointer.
 		\end{description}
@@ -177,19 +177,20 @@ cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
 	\item[Description: ]
 		Set the opaque data pointer associated with \cvar{a\_nxo}.
 	\end{capilist}
-\label{nxo_hook_eval}
-\index{nxo_hook_eval@\cfunc{nxo\_hook\_eval}{}}
-\citem{\cfunc[void]{nxo\_hook\_eval}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t *a\_thread}}
+\label{nxo_handle_eval}
+\index{nxo_handle_eval@\cfunc{nxo\_handle\_eval}{}}
+\citem{\cfunc[void]{nxo\_handle\_eval}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+*a\_thread}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
-			Pointer to a hook \classname{nxo}.
+			Pointer to a handle \classname{nxo}.
 		\item[a\_thread: ]
 			Pointer to a thread \classname{nxo}.
 		\end{description}
 	\item[Output(s): ] None.
-	\item[Exception(s): ] Hook-specific.
+	\item[Exception(s): ] Handle-specific.
 	\item[Description: ]
 		Evaluate the \cvar{a\_nxo}.  If there is no evaluation function
 		associated with \cvar{a\_nxo}, it is pushed onto ostack.

@@ -31,8 +31,8 @@ nxo_compare(const cw_nxo_t *a_a, const cw_nxo_t *a_b)
 #endif
 	case NXOT_DICT:
 	case NXOT_FILE:
-#ifdef CW_HOOK
-	case NXOT_HOOK:
+#ifdef CW_HANDLE
+	case NXOT_HANDLE:
 #endif
 #ifdef CW_THREADS
 	case NXOT_MUTEX:
@@ -309,8 +309,8 @@ nxo_nxoe_get(const cw_nxo_t *a_nxo)
 #endif
 	case NXOT_DICT:
 	case NXOT_FILE:
-#ifdef CW_HOOK
-	case NXOT_HOOK:
+#ifdef CW_HANDLE
+	case NXOT_HANDLE:
 #endif
 #ifdef CW_THREADS
 	case NXOT_MUTEX:

@@ -29,8 +29,8 @@
                nxo_integer.h nxo_mark.h nxo_name.h nxo_no.h nxo_null.h
                nxo_operator.h nxo_pmark.h nxo_stack.h nxo_string.h nxo_thread.h
                ql.h qr.h qs.h systemdict.h xep.h
-#if @enable_hook@
-               nxo_hook.h
+#if @enable_handle@
+               nxo_handle.h
 #endif
 #if @enable_threads@
                cnd.h mq.h mtx.h nxo_condition.h nxo_mutex.h thd.h tsd.h
@@ -56,8 +56,8 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
                                  nxo_mark.c nxo_name.c nxo_null.c nxo_operator.c
                                  nxo_pmark.c nxo_stack.c nxo_string.c
                                  nxo_thread.c systemdict.c xep.c
-#if @enable_hook@
-                                 nxo_hook.c
+#if @enable_handle@
+                                 nxo_handle.c
 #endif
 #if @enable_threads@
                                  cnd.c mb.c mq.c mtx.c nxo_condition.c
@@ -90,8 +90,8 @@ LIBONYX_CTESTS = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
 #if @enable_threads@
                  cnd_a.c mq_a.c mtx_a.c nx_a.c thd_a.c thd_b.c thd_c.c tsd_a.c
 #endif
-#if [and @enable_hook@ @enable_posix_file@]
-                 hook_a.c
+#if [and @enable_handle@ @enable_posix_file@]
+                 handle_a.c
 #endif
                  ;
 LIBONYX_CTESTS = [addprefix @srcroot@/lib/libonyx/test/ [LIBONYX_CTESTS]];
@@ -101,7 +101,7 @@ ONYX_TEX_SRCS += [addprefix @srcroot@/lib/libonyx/doc/latex/
                             ch.tex cnd.tex dch.tex gcdict.tex mb.tex mem.tex
                             mq.tex mtx.tex nx.tex nxa.tex nxn.tex nxo.tex
                             nxo_array.tex nxo_boolean.tex nxo_dict.tex
-                            nxo_file.tex nxo_fino.tex nxo_hook.tex
+                            nxo_file.tex nxo_fino.tex nxo_handle.tex
                             nxo_integer.tex nxo_mark.tex nxo_mutex.tex
                             nxo_name.tex nxo_no.tex nxo_null.tex
                             nxo_operator.tex nxo_pmark.tex nxo_real.tex

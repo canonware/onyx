@@ -191,9 +191,9 @@ $sprintsdict <
 	pop pop
 	`-fino-'
     }
-    $hooktype {
-	#hook #depth
-	exch hooktag
+    $handletype {
+	#handle #depth
+	exch handletag
 	#depth #tag
 	dup type $nulltype ne {
 	    exch 1 sub
@@ -204,7 +204,7 @@ $sprintsdict <
 	    `=' cat
 	}{
 	    pop pop
-	    `-hook-'
+	    `-handle-'
 	} ifelse
     }
     $integertype {
@@ -550,7 +550,7 @@ $outputsdict <
 	$dicttype
 	$filetype
 	$finotype
-	$hooktype
+	$handletype
 	$marktype
 ' cat
 1 1 eq {

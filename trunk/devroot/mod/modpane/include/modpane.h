@@ -31,18 +31,19 @@
 struct cw_modpane_entry
 {
     const cw_uint8_t *name;
-    cw_nxo_hook_eval_t *eval_f;
+    cw_nxo_handle_eval_t *eval_f;
 };
 
 void
-modpane_hooks_init(cw_nxo_t *a_thread, const struct cw_modpane_entry *a_entries,
-		   cw_uint32_t a_nentries);
+modpane_handles_init(cw_nxo_t *a_thread,
+		     const struct cw_modpane_entry *a_entries,
+		     cw_uint32_t a_nentries);
 
 cw_nxn_t
-modpane_hook_type(cw_nxo_t *a_hook, const cw_uint8_t *a_type);
+modpane_handle_type(cw_nxo_t *a_handle, const cw_uint8_t *a_type);
 
 void
-modpane_hook_p(void *a_data, cw_nxo_t *a_thread, const cw_uint8_t *a_type);
+modpane_handle_p(void *a_data, cw_nxo_t *a_thread, const cw_uint8_t *a_type);
 
 void
 modpane_init(void *a_arg, cw_nxo_t *a_thread);

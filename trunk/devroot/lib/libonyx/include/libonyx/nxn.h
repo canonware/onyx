@@ -225,9 +225,9 @@ typedef enum
     NXN_ENTRY(gstdout),
 #endif
     NXN_ENTRY(gt),
-#ifdef CW_HOOK
-    NXN_ENTRY(hooktag),
-    NXN_ENTRY(hooktype),
+#ifdef CW_HANDLE
+    NXN_ENTRY(handletag),
+    NXN_ENTRY(handletype),
 #endif
 #ifdef CW_POSIX
     NXN_ENTRY(hour),

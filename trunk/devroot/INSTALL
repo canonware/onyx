@@ -131,8 +131,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 		make
 		make install
 
---disable-hook
-	Do not include the "hook" Onyx type, which is used by extensions
+--disable-handle
+	Do not include the "handle" Onyx type, which is used by extensions
 	implemented as loadable modules.  This option is incompatible with the
 	modules option, so implies --disable-modules.  The documentation does
 	not mention the effects of this option -- UTSL.

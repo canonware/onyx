@@ -24,13 +24,13 @@ struct cw_pane
     cw_mtx_t mtx;
 
     /* Reference to =pane=, prevents premature module unload. */
-    cw_nxo_t hook;
+    cw_nxo_t handle;
 
     /* Auxiliary data for pane_aux_[gs]et. */
     cw_nxo_t aux;
 };
 
-static const struct cw_modpane_entry modpane_pane_hooks[] = {
+static const struct cw_modpane_entry modpane_pane_handles[] = {
     /* pane. */
     MODPANE_ENTRY(pane),
     {"pane?", modpane_pane_p},
@@ -49,9 +49,9 @@ pane_p_delete(void *a_data, cw_uint32_t a_iter);
 void
 modpane_pane_init(cw_nxo_t *a_thread)
 {
-    modpane_hooks_init(a_thread, modpane_pane_hooks,
-		       (sizeof(modpane_pane_hooks)
-			/ sizeof(struct cw_modpane_entry)));
+    modpane_handles_init(a_thread, modpane_pane_handles,
+			 (sizeof(modpane_pane_handles)
+			  / sizeof(struct cw_modpane_entry)));
 }
 
 CW_P_INLINE void
@@ -81,7 +81,7 @@ pane_p_ref_iter(void *a_data, cw_bool_t a_reset)
     {
 	case 0:
 	{
-	    retval = nxo_nxoe_get(&pane->hook);
+	    retval = nxo_nxoe_get(&pane->handle);
 	    cw_check_ptr(retval);
 	    break;
 	}
@@ -123,13 +123,13 @@ pane_type(cw_nxo_t *a_nxo)
     cw_uint32_t name_len;
     const cw_uint8_t *name;
 
-    if (nxo_type_get(a_nxo) != NXOT_HOOK)
+    if (nxo_type_get(a_nxo) != NXOT_HANDLE)
     {
 	retval = NXN_typecheck;
 	goto RETURN;
     }
 
-    tag = nxo_hook_tag_get(a_nxo);
+    tag = nxo_handle_tag_get(a_nxo);
     if (nxo_type_get(tag) != NXOT_NAME)
     {
 	retval = NXN_typecheck;
@@ -160,10 +160,10 @@ modpane_pane(void *a_data, cw_nxo_t *a_thread)
 
     pane = (struct cw_pane *) nxa_malloc(sizeof(struct cw_pane));
 
-    /* Create a reference to this hook in order to prevent the module from being
-     * prematurely unloaded. */
-    nxo_no_new(&pane->hook);
-    nxo_dup(&pane->hook, nxo_stack_get(estack));
+    /* Create a reference to this handle in order to prevent the module from
+     * being prematurely unloaded. */
+    nxo_no_new(&pane->handle);
+    nxo_dup(&pane->handle, nxo_stack_get(estack));
 
     /* Initialize the ds. */
 //    pn_new(&pane->pn, XXX);
@@ -173,10 +173,10 @@ modpane_pane(void *a_data, cw_nxo_t *a_thread)
 
     /* Create a reference to the pane. */
     nxo = nxo_stack_push(ostack);
-    nxo_hook_new(nxo, pane, NULL, pane_p_ref_iter, pane_p_delete);
+    nxo_handle_new(nxo, pane, NULL, pane_p_ref_iter, pane_p_delete);
 
-    /* Set the hook tag. */
-    tag = nxo_hook_tag_get(nxo);
+    /* Set the handle tag. */
+    tag = nxo_handle_tag_get(nxo);
     nxo_name_new(tag, "pane", sizeof("pane") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 
@@ -214,7 +214,7 @@ modpane_pane_aux_get(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    pane = (struct cw_pane *) nxo_hook_data_get(nxo);
+    pane = (struct cw_pane *) nxo_handle_data_get(nxo);
 
     /* Avoid a GC race by using tnxo to store a reachable ref to the pane. */
     tnxo = nxo_stack_push(tstack);
@@ -239,7 +239,7 @@ modpane_pane_aux_set(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    pane = (struct cw_pane *) nxo_hook_data_get(nxo);
+    pane = (struct cw_pane *) nxo_handle_data_get(nxo);
 
     nxo_dup(&pane->aux, aux);
     nxo_stack_npop(ostack, 2);
@@ -261,7 +261,7 @@ modpane_pane_size(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    pane = (struct cw_pane *) nxo_hook_data_get(nxo);
+    pane = (struct cw_pane *) nxo_handle_data_get(nxo);
 
     pane_p_lock(pane);
     pn_size(&pane->pn, &x, &y);
