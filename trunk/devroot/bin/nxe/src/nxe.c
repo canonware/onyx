@@ -15,11 +15,18 @@ void
 foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
 	cw_buf_t	*buf;
+	cw_bufm_t	*bufm;
 
 	buf = buf_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
 	    (cw_opaque_realloc_t *)mem_realloc_e, (cw_opaque_dealloc_t
 	    *)mem_free_e, cw_g_mem);
 
+	bufm = bufm_new(NULL, buf, NULL);
+
+	fprintf(stderr, "line at offset %llu: %llu\n", bufm_pos(bufm),
+	    bufm_line(bufm));
+
+	bufm_delete(bufm);
 	buf_delete(buf);
 }
 

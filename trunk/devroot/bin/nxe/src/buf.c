@@ -7,6 +7,24 @@
  *
  * Version: <Version>
  *
+ * This file contains an implementation of buffers for use in the nxe text
+ * editor.  The code is broken up into the following classes:
+ *
+ * buf  : Main buffer class.
+ * bufb : Buffer block.  Internally, buf data are composed of bufb's, which
+ *        store buf data in a paged buffer gap format.
+ * bufc : Character.  Characters are merely 8 bit values.
+ * bufm : Marker.  Markers are used as handles for many buf operations.
+ * bufe : Extent.  Extents logically consist of two markers which demark a range
+ *        of buf characters.
+ * bufq : Message queue.  bufq's can be specified during bufm and bufe
+ *        construction, so that messages will be sent whenever a buf
+ *        modification affects the bufm or bufe.
+ * bufh : History.  The bufh class provides an abstract history mechanism to the
+ *        buf class and implements infinite undo and redo.
+ *
+ * 
+ * 
  ******************************************************************************/
 
 #include "nxe.h"
@@ -24,13 +42,28 @@ static void	bufb_p_split(cw_bufb_t *a_bufb, cw_bufb_t *a_after, cw_uint32_t
     a_offset);
 static void	bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_offset,
     cw_uint32_t a_count);
+static cw_uint64_t bufb_p_line_at_offset(cw_bufb_t *a_bufb, cw_uint64_t
+    a_offset);
+
+#define	bufb_p_len_get(a_bufb) (_CW_BUFB_DATA - (a_bufb)->gap_len)
+#define	bufb_p_nlines_get(a_bufb) ((cw_uint64_t)(a_bufb)->nlines)
+#define	bufb_p_eoff_get(a_bufb) (a_bufb)->eoff
+#define	bufb_p_eoff_set(a_bufb, a_eoff)					\
+	(a_bufb)->eoff = (a_eoff) + bufb_p_len_get(a_bufb)
+#define	bufb_p_eline_get(a_bufb) (a_bufb)->eline
+#define	bufb_p_eline_set(a_bufb, a_eline)				\
+	(a_bufb)->eline = (a_eline) + bufb_p_nlines_get(a_bufb)
+#define	bufb_p_gap_len_get(a_bufb) (a_bufb)->gap_len;
 
 /* bufh. */
 static void	bufh_p_new(cw_bufh_t *a_bufh);
 static void	bufh_p_delete(cw_bufh_t *a_bufh);
 
 /* buf. */
-/*  static void	buf_p_bufb_cache_update(cw_buf_t *a_buf, cw_uint64_t a_index); */
+static void	buf_p_bufm_insert(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+static void	buf_p_bufm_remove(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+static cw_uint64_t buf_p_line_at_offset(cw_buf_t *a_buf, cw_uint64_t a_offset);
+static void	buf_p_bufb_cache_update(cw_buf_t *a_buf, cw_uint64_t a_offset);
 
 /* bufb. */
 static void
@@ -43,17 +76,6 @@ bufb_p_new(cw_bufb_t *a_bufb)
 	a_bufb->gap_off = 0;
 	a_bufb->gap_len = _CW_BUFB_DATA;
 }
-
-#define	bufb_p_len_get(a_bufb) (_CW_BUFB_DATA - (a_bufb)->gap_len)
-#define	bufb_p_nlines_get(a_bufb) ((cw_uint64_t)(a_bufb)->nlines)
-#define	bufb_p_eoff_get(a_bufb) (a_bufb)->eoff
-#define	bufb_p_eoff_set(a_bufb, a_eoff)					\
-	(a_bufb)->eoff = (a_eoff) + bufb_p_len_get(a_bufb)
-#define	bufb_p_eline_get(a_bufb) (a_bufb)->eline
-#define	bufb_p_eline_set(a_bufb, a_eline)				\
-	(a_bufb)->eline = (a_eline) + bufb_p_nlines_get(a_bufb)
-
-#define	bufb_p_gap_len_get(a_bufb) (a_bufb)->gap_len;
 
 static void
 bufb_p_gap_move(cw_bufb_t *a_bufb, cw_uint32_t a_offset)
@@ -143,22 +165,6 @@ bufb_p_insert(cw_bufb_t *a_bufb, cw_uint32_t a_offset, const cw_bufc_t *a_data,
 	a_bufb->gap_off += a_count;
 }
 
-static void
-bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_offset, cw_uint32_t a_count)
-{
-	cw_uint32_t	i;
-
-	_cw_check_ptr(a_bufb);
-	_cw_assert(a_offset + a_count <= bufb_p_len_get(a_bufb));
-	
-	bufb_p_gap_move(a_bufb, a_offset);
-	for (i = 0; i < a_count; i++) {
-		if (a_bufb->data[a_bufb->gap_off + a_bufb->gap_len + i] == '\n')
-			a_bufb->nlines--;
-	}
-	a_bufb->gap_len += a_count;
-}
-
 /*
  * Split a_bufb into two bufb's at offset a_offset.  a_after starts out empty.
  */
@@ -175,6 +181,52 @@ bufb_p_split(cw_bufb_t *a_bufb, cw_bufb_t *a_after, cw_uint32_t a_offset)
 	a_bufb->gap_len = _CW_BUFB_DATA - a_bufb->gap_off;
 
 	a_bufb->nlines -= bufb_p_nlines_get(a_after);
+}
+
+static void
+bufb_p_remove(cw_bufb_t *a_bufb, cw_uint32_t a_offset, cw_uint32_t a_count)
+{
+	cw_uint32_t	i;
+
+	_cw_check_ptr(a_bufb);
+	_cw_assert(a_offset + a_count <= bufb_p_len_get(a_bufb));
+	
+	bufb_p_gap_move(a_bufb, a_offset);
+	for (i = 0; i < a_count; i++) {
+		if (a_bufb->data[a_bufb->gap_off + a_bufb->gap_len + i] == '\n')
+			a_bufb->nlines--;
+	}
+	a_bufb->gap_len += a_count;
+}
+
+static cw_uint64_t
+bufb_p_line_at_offset(cw_bufb_t *a_bufb, cw_uint64_t a_offset)
+{
+	cw_uint64_t	i, count, retval;
+
+	_cw_assert(a_offset < a_bufb->eoff);
+	_cw_assert(a_offset >= a_bufb->eoff - bufb_p_len_get(a_bufb));
+
+	/*
+	 * We can assume that eoff and eline are valid.
+	 *
+	 * Iterate upward, since it is faster on many architectures.  Avoid the
+	 * gap.
+	 */
+	retval = a_bufb->eline - a_bufb->nlines;
+	count = a_offset - a_bufb->eoff + bufb_p_len_get(a_bufb);
+
+	for (i = 0; i < count && i < a_bufb->gap_off; i++) {
+		if (a_bufb->data[i] == '\n')
+			retval++;
+	}
+
+	for (i = a_bufb->gap_off + a_bufb->gap_len; i < count; i++) {
+		if (a_bufb->data[i] == '\n')
+			retval++;
+	}
+
+	return retval;
 }
 
 /* bufh. */
@@ -231,10 +283,10 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t
 	retval->bufb_vec[0] = (cw_bufb_t *)a_alloc(a_arg, sizeof(cw_bufb_t),
 	    __FILE__, __LINE__);
 	bufb_p_new(retval->bufb_vec[0]);
-	bufb_p_eoff_set(retval->bufb_vec[0], 0);
-	bufb_p_eline_set(retval->bufb_vec[0], 1);
+/*  	bufb_p_eoff_set(retval->bufb_vec[0], 0); */
+/*  	bufb_p_eline_set(retval->bufb_vec[0], 1); */
 
-	retval->last_cached = 0;
+	retval->ncached = 0;
 
 	/* Initialize history. */
 	retval->hist_active = FALSE;
@@ -289,6 +341,9 @@ buf_delete(cw_buf_t *a_buf)
 	}
 	_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf->bufb_vec,
 	    sizeof(cw_bufb_t *) * a_buf->bufb_veclen);
+
+	/* XXX */
+/*  	bufh_p_delete(&a_buf->hist); */
 
 	if (a_buf->alloced) {
 		_cw_opaque_dealloc(a_buf->dealloc, a_buf->arg, a_buf,
@@ -397,37 +452,188 @@ buf_bufe_prev(cw_buf_t *a_buf, cw_bufe_t *a_bufe)
 	return NULL; /* XXX */
 }
 
-/* bufm. */
-void
-bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_bufq_t *a_bufq)
+static void
+buf_p_bufm_insert(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
+{
+/*  	_cw_error("XXX Not implemented"); */
+}
+
+static void
+buf_p_bufm_remove(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
 {
 	_cw_error("XXX Not implemented");
 }
 
-void
+static cw_uint64_t
+buf_p_line_at_offset(cw_buf_t *a_buf, cw_uint64_t a_offset)
+{
+	cw_uint64_t	index, first, last;
+
+	/*
+	 * XXX This breaks if asking for the offset of the end of the buffer.
+	 * This is because we aren't treating the boundary between bufb's
+	 * correctly.  Say we want to insert a character at a boundary; in this
+	 * case we should insert into the bufb before the boundary.  Say we want
+	 * to read a character at a boundary; in this case we should read from
+	 * the bufb after the boundary.
+	 *
+	 * This basically sucks.  I think emacs may solve this problem by
+	 * talking about character positions versus positions between
+	 * characters.  Blah, this is going to require some modifications.
+	 */
+
+	/*
+	 * Make sure the cache reaches far enough to be useful for the
+	 * search.
+	 */
+	buf_p_bufb_cache_update(a_buf, a_offset);
+
+	/*
+	 * Do a binary search for the correct bufb using the bufb offset cache.
+	 * "first" is the index of the first element in the range to search, and
+	 * "last" is one plus the index of the last element in the range to
+	 * search.
+	 */
+	first = 0;
+	last = a_buf->bufb_veclen;
+	if (a_offset < bufb_p_eoff_get(a_buf->bufb_vec[first]))
+		index = first;
+	else if (a_offset == a_buf->len)
+		index = last - 1;
+	else {
+		for (;;) {
+			index = (first + last) >> 1;
+
+			if (bufb_p_eoff_get(a_buf->bufb_vec[index]) <=
+			    a_offset) {
+				first = index + 1;
+			} else if (bufb_p_eoff_get(a_buf->bufb_vec[index - 1]) >
+			    a_offset) {
+				last = index;
+			} else
+				break;
+		}
+	}
+
+	return bufb_p_line_at_offset(a_buf->bufb_vec[index], a_offset);
+}
+
+static void
+buf_p_bufb_cache_update(cw_buf_t *a_buf, cw_uint64_t a_offset)
+{
+	cw_uint64_t	eoff, eline;
+
+	_cw_assert(a_offset <= a_buf->len);
+
+	/*
+	 * Update the cache so that it can be used for searches up to and
+	 * including a_offset.
+	 */
+	if (a_buf->ncached > 0) {
+		eoff = bufb_p_eoff_get(a_buf->bufb_vec[a_buf->ncached - 1]);
+		eline = bufb_p_eline_get(a_buf->bufb_vec[a_buf->ncached - 1]);
+	} else {
+		eoff = 0;
+		eline = 1;
+	}
+	for (; eoff <= a_offset && a_buf->ncached < a_buf->bufb_veclen;
+	     a_buf->ncached++) {
+		bufb_p_eoff_set(a_buf->bufb_vec[a_buf->ncached], eoff);
+		eoff = bufb_p_eoff_get(a_buf->bufb_vec[a_buf->ncached]);
+
+		bufb_p_eline_set(a_buf->bufb_vec[a_buf->ncached], eline);
+		eline = bufb_p_eline_get(a_buf->bufb_vec[a_buf->ncached]);
+	}
+}
+
+/* bufm. */
+cw_bufm_t *
+bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_bufq_t *a_bufq)
+{
+	cw_bufm_t	*retval;
+
+	_cw_check_ptr(a_buf);
+	_cw_dassert(a_buf->magic == _CW_BUF_MAGIC);
+
+	if (a_bufm == NULL) {
+		retval = (cw_bufm_t *)_cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+		    sizeof(cw_bufm_t));
+		retval->dealloc = a_buf->dealloc;
+		retval->arg = a_buf->arg;
+	} else {
+		retval = a_bufm;
+		retval->dealloc = NULL;
+		retval->arg = NULL;
+	}
+
+	ql_elm_new(retval, link);
+	retval->buf = a_buf;
+	retval->offset = 0;
+	retval->bufq = a_bufq;
+
+	buf_p_bufm_insert(a_buf, retval);
+
+	return retval;
+}
+
+cw_bufm_t *
 bufm_dup(cw_bufm_t *a_bufm, const cw_bufm_t *a_orig, cw_bufq_t *a_bufq)
 {
-	_cw_error("XXX Not implemented");
+	cw_bufm_t	*retval;
+
+	_cw_check_ptr(a_orig);
+	_cw_check_ptr(a_orig->buf);
+	_cw_dassert(a_orig->buf->magic == _CW_BUF_MAGIC);
+
+	if (a_bufm == NULL) {
+		retval = (cw_bufm_t *)_cw_opaque_alloc(a_orig->buf->alloc,
+		    a_orig->buf->arg, sizeof(cw_bufm_t));
+		retval->dealloc = a_orig->buf->dealloc;
+		retval->arg = a_orig->buf->arg;
+	} else {
+		retval = a_bufm;
+		retval->dealloc = NULL;
+		retval->arg = NULL;
+	}
+
+	ql_elm_new(retval, link);
+	retval->buf = a_orig->buf;
+	retval->offset = a_orig->offset;
+	retval->bufq = a_bufq;
+
+	buf_p_bufm_insert(a_orig->buf, retval);
+
+	return retval;
 }
 
 void
 bufm_delete(cw_bufm_t *a_bufm)
 {
-	_cw_error("XXX Not implemented");
+	_cw_check_ptr(a_bufm);
+
+	if (a_bufm->buf != NULL)
+		buf_p_bufm_remove(a_bufm->buf, a_bufm);
+
+	if (a_bufm->dealloc != NULL)
+		_cw_opaque_dealloc(a_bufm->dealloc, a_bufm->arg,
+		    sizeof(cw_bufm_t), a_bufm);
 }
 
 cw_buf_t *
 bufm_buf(cw_bufm_t *a_bufm)
 {
-	_cw_error("XXX Not implemented");
-	return NULL; /* XXX */
+	_cw_check_ptr(a_bufm);
+
+	return a_bufm->buf;
 }
 
 cw_uint64_t
 bufm_line(const cw_bufm_t *a_bufm)
 {
-	_cw_error("XXX Not implemented");
-	return 0; /* XXX */
+	_cw_check_ptr(a_bufm);
+	_cw_check_ptr(a_bufm->buf);
+
+	return buf_p_line_at_offset(a_bufm->buf, a_bufm->offset);
 }
 
 cw_uint64_t

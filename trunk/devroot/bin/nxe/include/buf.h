@@ -65,8 +65,8 @@ struct cw_bufe_s {
 	cw_opaque_dealloc_t *dealloc;
 	const void	*arg;
 
-	cw_bufm_t	beg;
-	cw_bufm_t	end;
+	cw_uint64_t	beg_offset;
+	cw_uint64_t	end_offset;
 
 	/* bufes are either open or closed at each end. */
 	cw_bool_t	beg_open:1;
@@ -165,11 +165,8 @@ struct cw_buf_s {
 	cw_uint64_t	bufb_count;
 	cw_uint64_t	bufb_veclen;
 	cw_bufb_t	**bufb_vec;
-	/*
-	 * Offset of last bufb that has a valid cached offset and line.  The
-	 * first bufb's cache is always valid.
-	 */
-	cw_uint64_t	last_cached;
+	/* Number of bufb's for which the cached offset and line are valid */
+	cw_uint64_t	ncached;
 
 	/* History. */
 	cw_bool_t	hist_active:1;
@@ -206,8 +203,9 @@ cw_bufe_t *buf_bufe_next(cw_buf_t *a_buf, cw_bufe_t *a_bufe);
 cw_bufe_t *buf_bufe_prev(cw_buf_t *a_buf, cw_bufe_t *a_bufe);
 
 /* bufm. */
-void	bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_bufq_t *a_bufq);
-void	bufm_dup(cw_bufm_t *a_bufm, const cw_bufm_t *a_orig, cw_bufq_t *a_bufq);
+cw_bufm_t *bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf, cw_bufq_t *a_bufq);
+cw_bufm_t *bufm_dup(cw_bufm_t *a_bufm, const cw_bufm_t *a_orig, cw_bufq_t
+    *a_bufq);
 void	bufm_delete(cw_bufm_t *a_bufm);
 cw_buf_t *bufm_buf(cw_bufm_t *a_bufm);
 cw_uint64_t bufm_line(const cw_bufm_t *a_bufm);
@@ -238,6 +236,7 @@ const cw_bufm_t *bufe_end(cw_bufe_t *a_bufe);
 cw_bufe_t *bufe_bufe_next(cw_bufe_t *a_bufe, cw_bufe_t *a_curr);
 cw_bufe_t *bufe_bufe_prev(cw_bufe_t *a_bufe, cw_bufe_t *a_curr);
 
+/* XXX This should be a marker operation, with two markers. */
 void	bufe_cut(cw_bufe_t *a_bufe);
 
 cw_uint32_t bufe_foreground_get(cw_bufe_t *a_bufe);
