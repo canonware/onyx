@@ -1,11 +1,20 @@
+2002-03-16 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/thd.c: Significantly rework the generic suspend/resume
+          code to use two signals (SIGUSR1 and SIGUSR2) rather than just one.
+          This allows the removal of some questionable code that may not work on
+          loosely coupled MP systems, and also removes the need for resume
+          interlocking.
+
+	  Fix lock order reversal deadlock potential in thd_suspend() and
+	  thd_trysuspend().
+
 2002-03-09 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/thd.c:thd_p_start_func(): Set the thd->pthread field
           before inserting the thd into the ring.  pthread_create() also sets
           it, but if only one place sets it, then there is a race between one
           thread setting thd->pthread and the other using it.
-
-	  Make the initial thread suspendible.
 
 2002-02-07 : Jason Evans <jasone@canonware.com>
 
