@@ -328,7 +328,8 @@ thd_single_enter(void)
 	mtx_lock(&cw_g_thd_single_lock);
 	qr_foreach(thd, &cw_g_thd, link) {
 		if (thd != self) {
-			thd_suspend(thd);
+			mtx_lock(&thd->crit_lock);
+			thd_p_suspend(thd);
 			thd->singled = TRUE;
 		}
 	}
@@ -365,7 +366,13 @@ thd_suspend(cw_thd_t *a_thd)
 
 	mtx_lock(&a_thd->crit_lock);
 
+	/*
+	 * Protect suspension so that we don't risk deadlocking with a thread
+	 * entering a single section.
+	 */
+	mtx_lock(&cw_g_thd_single_lock);
 	thd_p_suspend(a_thd);
+	mtx_unlock(&cw_g_thd_single_lock);
 }
 
 cw_bool_t
@@ -382,7 +389,9 @@ thd_trysuspend(cw_thd_t *a_thd)
 		goto RETURN;
 	}
 
+	mtx_lock(&cw_g_thd_single_lock);
 	thd_p_suspend(a_thd);
+	mtx_unlock(&cw_g_thd_single_lock);
 
 	retval = FALSE;
 	RETURN:

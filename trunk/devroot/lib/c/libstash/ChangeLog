@@ -1,3 +1,8 @@
+2001-05-30  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c (thd_{try}suspend): Avoid a potential deadlock race
+	with a thread that is entering a single section.
+
 2001-05-14  Jason Evans  <jasone@canonware.com>
 
 	* : Fix the mq and sema classes to handle spurious wakeups from
