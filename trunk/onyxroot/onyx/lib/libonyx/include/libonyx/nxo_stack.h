@@ -112,8 +112,8 @@ nxo_stack_up_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object);
 cw_bool_t
 nxo_stack_exch(cw_nxo_t *a_nxo);
 
-cw_bool_t
-nxo_stack_rot(cw_nxo_t *a_nxo, cw_uint32_t a_count);
+void
+nxo_stack_rot(cw_nxo_t *a_nxo, cw_sint32_t a_amount);
 
 cw_bool_t
 nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount);
