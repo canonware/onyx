@@ -745,16 +745,19 @@ sockb_p_entry_func(void * a_arg)
 
     /* Copy the master sets of descriptors we care about to the sets that are
      * passed into select(). */
-#ifdef _CW_OS_FREEBSD
+#ifndef FD_COPY
+#  define FD_COPY(a, b) bcopy((a)a, (b), sizeof(*(a)))
+#endif
+    
+/*  #ifdef _CW_OS_FREEBSD */
     FD_COPY(&fd_m_read_set, &fd_read_set);
     FD_COPY(&fd_m_write_set, &fd_write_set);
     FD_COPY(&fd_m_exception_set, &fd_exception_set);
-#else
-    bcopy(&fd_m_read_set, &fd_read_set, sizeof(fd_m_read_set));
-    bcopy(&fd_m_write_set, &fd_write_set, sizeof(fd_m_write_set));
-    bcopy(&fd_m_exception_set, &fd_exception_set, sizeof(fd_m_exception_set));
-#endif
-
+/*  #else */
+/*      bcopy(&fd_m_read_set, &fd_read_set, sizeof(fd_m_read_set)); */
+/*      bcopy(&fd_m_write_set, &fd_write_set, sizeof(fd_m_write_set)); */
+/*      bcopy(&fd_m_exception_set, &fd_exception_set, sizeof(fd_m_exception_set)); */
+/*  #endif */
     {
       cw_uint32_t i, in_size;
 

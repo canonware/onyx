@@ -159,7 +159,7 @@ main(int argc, char ** argv)
   {
     did_work = FALSE;
     
-    while (NULL != (sockfd = (int) mq_get(mq)))
+    while (NULL != (void *) (sockfd = (int) mq_get(mq)))
     {
       did_work = TRUE;
 

@@ -17,6 +17,8 @@
 
 #include "libsock/libsock.h"
 
+#include <sys/time.h>
+
 /* Command line defaults. */
 #define _LIBSOCK_BLOW_DEFAULT_NSOCKS 1
 #define _LIBSOCK_BLOW_DEFAULT_BSIZE 4096
