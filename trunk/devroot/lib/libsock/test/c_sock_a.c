@@ -69,8 +69,8 @@ main()
 		out_put(out_err, "Error listening on port [i]\n", port);
 		goto RETURN;
 	}
-	thd = thd_new(handle_client, (void *)socks, TRUE);
 
+	thd = thd_new(handle_client, (void *)socks, TRUE);
 	_cw_assert(sock_new(&sock, 16384) != NULL);
 	for (i = 0; i < _CW_NCONNS; i++) {
 		_cw_assert(sock_connect(&sock, "localhost", port, NULL) == 0);

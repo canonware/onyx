@@ -362,7 +362,8 @@ libsock_in_notify(cw_mq_t *a_mq, cw_sock_t *a_sock, void *a_val)
 
 	libsock_l_wakeup();
 
-	cnd_wait(&cnd, &mtx);
+	while (message->type != LIBSOCK_MSG_NONE)
+		cnd_wait(&cnd, &mtx);
 	mtx_unlock(&mtx);
 
 	mtx_delete(&mtx);
@@ -729,6 +730,7 @@ libsock_p_entry_func(void *a_arg)
 #endif
 
 					mtx_lock(message->data.in_notify.mtx);
+					message->type = LIBSOCK_MSG_NONE;
 					cnd_signal(message->data.in_notify.cnd);
 					mtx_unlock(message->data.in_notify.mtx);
 
@@ -750,6 +752,7 @@ libsock_p_entry_func(void *a_arg)
 					}
 				} else {
 					mtx_lock(message->data.in_notify.mtx);
+					message->type = LIBSOCK_MSG_NONE;
 					cnd_signal(message->data.in_notify.cnd);
 					mtx_unlock(message->data.in_notify.mtx);
 

@@ -141,8 +141,7 @@ sock_delete(cw_sock_t *a_sock)
 	_cw_check_ptr(a_sock);
 	_cw_assert(a_sock->magic == _LIBSOCK_SOCK_MAGIC);
 
-	if (a_sock->is_connected)
-		sock_p_disconnect(a_sock);
+	sock_p_disconnect(a_sock);
 	mtx_delete(&a_sock->lock);
 	cnd_delete(&a_sock->callback_cnd);
 
@@ -361,11 +360,6 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 			a_sock->port = (cw_uint32_t)ntohs(name.sin_port);
 	}
 
-	/*
-	 * This is the only path through this function that does not handle an
-	 * error, so we can unconditionally toggle a_sock->is_connected here and
-	 * only here.
-	 */
 	a_sock->is_connected = TRUE;
 	a_sock->in_progress = FALSE;
 	a_sock->error = FALSE;
@@ -380,7 +374,8 @@ sock_connect(cw_sock_t *a_sock, const char *a_server_host, int a_port, struct
 	}
 	xep_end();
 
-	cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+	for (a_sock->called_back = FALSE; a_sock->called_back == FALSE;)
+		cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
 	if (a_sock->error) {
 		mtx_unlock(&a_sock->lock);
 		retval = -1;
@@ -452,7 +447,8 @@ sock_wrap(cw_sock_t *a_sock, int a_sockfd, cw_bool_t a_init)
 		}
 		xep_end();
 
-		cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+		for (a_sock->called_back = FALSE; a_sock->called_back == FALSE;)
+			cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
 		if (a_sock->error) {
 			mtx_unlock(&a_sock->lock);
 			retval = TRUE;
@@ -547,17 +543,29 @@ sock_read(cw_sock_t *a_sock, cw_buf_t *a_spare, cw_sint32_t a_max_read, struct
 		if (buf_size_get(&a_sock->in_buf) == 0) {
 			/* There's no data available right now. */
 			a_sock->in_need_signal_count++;
-			if (a_timeout == NULL)
-				cnd_wait(&a_sock->in_cnd, &a_sock->in_lock);
-			else if ((a_timeout->tv_sec != 0) || (a_timeout->tv_nsec
-			    != 0)) {
+			if (a_timeout == NULL) {
+				while (buf_size_get(&a_sock->in_buf) == 0 &&
+				    a_sock->is_registered && a_sock->error ==
+				    FALSE) {
+					cnd_wait(&a_sock->in_cnd,
+					    &a_sock->in_lock);
+				}
+			} else if ((a_timeout->tv_sec != 0) ||
+			    (a_timeout->tv_nsec != 0)) {
+				cw_bool_t	timed_out;
+
 				/*
 				 * a_timeout is non-zero, so wait.  We could
 				 * call cnd_timedwait() unconditionally, but
 				 * there's no real need to.
 				 */
-				cnd_timedwait(&a_sock->in_cnd, &a_sock->in_lock,
-				    a_timeout);
+				for (timed_out = FALSE;
+				    buf_size_get(&a_sock->in_buf) == 0 &&
+				    a_sock->is_registered && a_sock->error ==
+				    FALSE && timed_out == FALSE;) {
+					cnd_timedwait(&a_sock->in_cnd,
+					    &a_sock->in_lock, a_timeout);
+				}
 			}
 			a_sock->in_need_signal_count--;
 		}
@@ -724,7 +732,7 @@ sock_out_flush(cw_sock_t *a_sock)
 		retval = TRUE;
 		goto RETURN;
 	}
-	if (a_sock->out_is_flushed == FALSE) {
+	while (a_sock->out_is_flushed == FALSE) {
 		/* There's still data in the pipeline somewhere. */
 		a_sock->out_need_broadcast_count++;
 		cnd_wait(&a_sock->out_cnd, &a_sock->out_lock);
@@ -939,6 +947,7 @@ sock_l_message_callback(cw_sock_t *a_sock, cw_bool_t a_error)
 
 	if (a_error)
 		a_sock->error = TRUE;
+	a_sock->called_back = TRUE;
 	cnd_signal(&a_sock->callback_cnd);
 
 	mtx_unlock(&a_sock->out_lock);
@@ -1179,7 +1188,10 @@ sock_p_disconnect(cw_sock_t *a_sock)
 				mtx_unlock(&a_sock->lock);
 			}
 			xep_end();
-			cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
+
+			for (a_sock->called_back = FALSE; a_sock->called_back ==
+			    FALSE;)
+				cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
 		} else
 			mtx_unlock(&a_sock->state_lock);
 

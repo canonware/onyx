@@ -24,6 +24,7 @@ struct cw_sock_s {
 	cw_mtx_t	state_lock;
 	int		sockfd;
 	cw_bool_t	is_connected;
+	cw_bool_t	called_back;
 	cw_bool_t	in_progress;
 	cw_bool_t	error;
 

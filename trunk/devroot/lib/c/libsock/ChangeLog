@@ -1,3 +1,7 @@
+2001-05-14  Jason Evans  <jasone@canonware.com>
+
+	* : Handle spurious wakeups from cnd_{timed}wait().
+
 2001-03-26  Jason Evans  <jasone@canonware.com>
 
 	* : Change libsock_in_notify() to take a sock pointer and an
