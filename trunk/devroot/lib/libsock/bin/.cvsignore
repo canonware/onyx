@@ -1,9 +1,12 @@
 *.[do]_*
-*.core
-core
 proxy
 ncat
 blow
 suck
 echos
+proxy.dbg
+ncat.dbg
+blow.dbg
+suck.dbg
+echos.dbg
 .cook.fp
