@@ -1,0 +1,8 @@
+Test begin
+true
+`foo'
+false
+true
+`42'
+false
+Test end

@@ -1,0 +1,3 @@
+Test begin
+Error $typecheck
+ostack: (-mark- $SOL_SOCKET $SO_LINGER)
