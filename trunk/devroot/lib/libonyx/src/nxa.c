@@ -180,6 +180,8 @@ nxa_p_sweep(void)
 {
     cw_nxoe_t *nxoe, *next;
     cw_bool_t notyet;
+    /* Sweep more than one object at a time, primarily in order to reduce the
+     * number of times that s_lock is locked/unlocked. */
 #define NSWEEP 8
     cw_uint32_t i;
 
@@ -205,6 +207,7 @@ nxa_p_sweep(void)
 	    }
 	}
 
+	/* Get the next NSWEEP objects and split them out of s_garbage. */
 	for (i = 1, nxoe = s_garbage, s_garbage = qr_next(nxoe, link);
 	     i < NSWEEP && s_garbage != nxoe;
 	     i++, s_garbage = qr_next(s_garbage, link))
