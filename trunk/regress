@@ -200,7 +200,7 @@ exch {
     exch inc exch
 
     # Create build directory name.
-    PREFIX `_' 3 idup <$w 3 $p `0'> outputs 3 ncat
+    PREFIX `_' 3 idup <$w 4 $p `0'> outputs 3 ncat
     # #iter #conf #prefix
 
     # Create array for call to system operator.
@@ -225,13 +225,13 @@ exch {
 [
     [
 	`./regress_docs'
-	PREFIX `_' adn inc dup aup <$w 3 $p `0'> outputs 3 ncat
+	PREFIX `_' adn inc dup aup <$w 4 $p `0'> outputs 3 ncat
 	SRCDIR
 	`distclean'
     ]
     [
 	`./regress_docs'
-	PREFIX `_' adn inc dup aup <$w 3 $p `0'> outputs 3 ncat
+	PREFIX `_' adn inc dup aup <$w 4 $p `0'> outputs 3 ncat
 	SRCDIR
 	`relclean'
 	`--with-docs'
