@@ -390,22 +390,54 @@ fi
 AC_SUBST(slate_version)
 
 if test "x$enable_slate" = "x1" ; then
+  dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
+  TEMP_CPPFLAGS="$CPPFLAGS"
+  if test "x$MODSLATE_CPPFLAGS" = "x" ; then
+    MODSLATE_CPPFLAGS=
+  else
+    CPPFLAGS="$MODSLATE_CPPFLAGS $CPPFLAGS"
+  fi
+  if test "x$MODSLATE_LDFLAGS" = "x" ; then
+    MODSLATE_LDFLAGS=
+  else
+    LDFLAGS="$MODSLATE_LDFLAGS $LDFLAGS"
+  fi
+
+  dnl Check for libcurses and libpanel.
+  AC_CHECK_HEADERS(curses.h, , enable_slate="0")
+  AC_CHECK_HEADERS(panel.h, , enable_slate="0")
+  AC_CHECK_LIB(ncurses, set_term, \
+    MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lncurses" , \
+    AC_CHECK_LIB(curses, set_term, \
+      MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lcurses" , \
+      enable_slate="0"))
+  AC_SEARCH_LIBS(new_panel, panel, \
+    MODSLATE_LDFLAGS="$MODSLATE_LDFLAGS -lpanel", \
+    enable_slate="0")
+
+  dnl Check if necessary features are enabled.
   if test "x$enable_threads" = "x0" -o "x$enable_real" = "x0" \
      -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" \
      -o "x$enable_modules" = "x0" ; then
+    enable_slate="0"
+  fi
+
+  if test "x$enable_slate" = "x0" ; then
     AC_MSG_RESULT(Missing features or configuration options necessary for slate)
-    enable_slate=0
   else
+    dnl Check if slate is in the source tree.
     CW_BUILD_MOD(modslate, enable_slate)
     if test "x$enable_slate" = "x1" ; then
       cfgoutputs="$cfgoutputs bin/slate/src/slate.nx.in"
       AC_DEFINE(CW_USE_SLATE)
-      MODSLATE_CPPFLAGS=
-      MODSLATE_LDFLAGS=
       AC_SUBST(MODSLATE_CPPFLAGS)
       AC_SUBST(MODSLATE_LDFLAGS)
     fi
   fi
+
+  dnl Restore CPPFLAGS and LDFLAGS.
+  CPPFLAGS="$TEMP_CPPFLAGS"
+  LDFLAGS="$TEMP_LDFLAGS"
 fi
 AC_SUBST(enable_slate)
 
@@ -607,7 +639,7 @@ dnl Define preprocessor macros.
 dnl Check for header files.
 if test "x$enable_posix_file" = "x1" ; then
   dnl Make sure that poll() and/or select() is available.
-  can_poll=0
+  can_poll="0"
   AC_CHECK_FUNCS(poll select, can_poll=1)
   if test "x$can_poll" = "x0" ; then
     AC_MSG_ERROR(Cannot build without poll() or select())

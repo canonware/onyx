@@ -159,26 +159,21 @@ static const struct cw_modslate_entry modslate_buffer_hooks[] = {
 
 static void
 buffer_p_eval(void *a_data, cw_nxo_t *a_thread);
-
 static cw_nxoe_t *
 buffer_p_ref_iter(void *a_data, cw_bool_t a_reset);
-
 static cw_bool_t
 buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
 
 static cw_nxoe_t *
 marker_p_ref_iter(void *a_data, cw_bool_t a_reset);
-
 static cw_bool_t
 marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
-
 static cw_bufw_t
 marker_p_whence(cw_nxo_t *a_whence);
 
 #ifdef NOT_YET
 static cw_nxoe_t *
 extent_p_ref_iter(void *a_data, cw_bool_t a_reset);
-
 static cw_bool_t
 extent_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
 #endif /* NOT_YET. */
@@ -224,26 +219,29 @@ buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	buffer->iter = 0;
     }
 
-    switch (buffer->iter)
+    for (retval = NULL; retval == NULL; buffer->iter++)
     {
-	case 0:
+	switch (buffer->iter)
 	{
-	    retval = nxo_nxoe_get(&buffer->hook);
-	    cw_check_ptr(retval);
-	    break;
-	}
-	case 1:
-	{
-	    retval = nxo_nxoe_get(&buffer->aux);
-	    break;
-	}
-	default:
-	{
-	    retval = NULL;
+	    case 0:
+	    {
+		retval = nxo_nxoe_get(&buffer->hook);
+		break;
+	    }
+	    case 1:
+	    {
+		retval = nxo_nxoe_get(&buffer->aux);
+		break;
+	    }
+	    default:
+	    {
+		retval = NULL;
+		goto RETURN;
+	    }
 	}
     }
-    buffer->iter++;
 
+    RETURN:
     return retval;
 }
 
@@ -254,7 +252,7 @@ buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     struct cw_buffer *buffer = (struct cw_buffer *) a_data;
 
     /* Don't delete until the second GC sweep iteration, so that associated
-     * mkr's can be deleted first. */
+     * markers can be deleted first. */
     if (a_iter != 1)
     {
 	retval = TRUE;
@@ -351,7 +349,7 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     buffer->seq = 0;
 }
 
-/* %object buffer? %boolean */
+/* #object buffer? #boolean */
 void
 modslate_buffer_p(void *a_data, cw_nxo_t *a_thread)
 {
@@ -543,7 +541,7 @@ modslate_buffer_redoable(void *a_data, cw_nxo_t *a_thread)
     nxo_boolean_new(nxo, redoable);
 }
 
-/* %=marker= %count? buffer_undo %error */
+/* #=marker= #count? buffer_undo #error */
 void
 modslate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
 {
@@ -590,7 +588,7 @@ modslate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
     }
 }
 
-/* %=marker= %count? buffer_redo %error */
+/* #=marker= #count? buffer_redo #error */
 void
 modslate_buffer_redo(void *a_data, cw_nxo_t *a_thread)
 {
@@ -884,30 +882,29 @@ marker_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	marker->iter = 0;
     }
 
-    switch(marker->iter)
+    for (retval = NULL; retval == NULL; marker->iter++)
     {
-	case 0:
+	switch(marker->iter)
 	{
-	    marker->iter++;
-	    retval = nxo_nxoe_get(&marker->hook);
-	    if (retval != NULL)
+	    case 0:
 	    {
+		retval = nxo_nxoe_get(&marker->hook);
 		break;
 	    }
-	    /* Fall through. */
-	}
-	case 1:
-	{
-	    marker->iter++;
-	    retval = nxo_nxoe_get(&marker->buffer_nxo);
-	    break;
-	}
-	default:
-	{
-	    retval = NULL;
+	    case 1:
+	    {
+		retval = nxo_nxoe_get(&marker->buffer_nxo);
+		break;
+	    }
+	    default:
+	    {
+		retval = NULL;
+		goto RETURN;
+	    }
 	}
     }
 
+    RETURN:
     return retval;
 }
 
@@ -1004,7 +1001,7 @@ marker_p_whence(cw_nxo_t *a_whence)
     return retval;
 }
 
-/* %buffer marker %marker */
+/* #buffer marker #marker */
 void
 modslate_marker(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1056,7 +1053,7 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
     marker->seq = 0;
 }
 
-/* %object marker? %boolean */
+/* #object marker? #boolean */
 void
 modslate_marker_p(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1097,7 +1094,7 @@ modslate_marker_seq(void *a_data, cw_nxo_t *a_thread)
     nxo_integer_new(nxo, seq);
 }
 
-/* %=marker= marker_copy %=marker= */
+/* #=marker= marker_copy #=marker= */
 void
 modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1153,7 +1150,7 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 }
 
-/* %=marker= marker_buffer %=buffer= */
+/* #=marker= marker_buffer #=buffer= */
 void
 modslate_marker_buffer(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1205,7 +1202,7 @@ modslate_marker_line(void *a_data, cw_nxo_t *a_thread)
     nxo_integer_new(nxo, line);
 }
 
-/* %marker %offset %whence? marker_seekline %pos */
+/* #marker #offset #whence? marker_seekline #pos */
 void
 modslate_marker_seekline(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1277,7 +1274,7 @@ modslate_marker_seekline(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, npop);
 }
 
-/* %marker marker_position %pos */
+/* #marker marker_position #pos */
 void
 modslate_marker_position(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1305,7 +1302,7 @@ modslate_marker_position(void *a_data, cw_nxo_t *a_thread)
     nxo_integer_new(nxo, position);
 }
 
-/* %=marker= %offset %whence/%=marker=? marker_seek %pos */
+/* #=marker= #offset #whence/#=marker=? marker_seek #pos */
 void
 modslate_marker_seek(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1398,7 +1395,7 @@ modslate_marker_seek(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, npop);
 }
 
-/* %=marker= marker_before_get %c */
+/* #=marker= marker_before_get #c */
 void
 modslate_marker_before_get(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1433,7 +1430,7 @@ modslate_marker_before_get(void *a_data, cw_nxo_t *a_thread)
     nxo_integer_new(nxo, (cw_nxoi_t)c);
 }
 
-/* %=marker= marker_after_get %c */
+/* #=marker= marker_after_get #c */
 void
 modslate_marker_after_get(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1468,7 +1465,7 @@ modslate_marker_after_get(void *a_data, cw_nxo_t *a_thread)
     nxo_integer_new(nxo, (cw_nxoi_t)c);
 }
 
-/* %=marker= %val marker_before_set - */
+/* #=marker= #val marker_before_set - */
 void
 modslate_marker_before_set(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1515,7 +1512,7 @@ modslate_marker_before_set(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-/* %=marker= %val marker_after_set - */
+/* #=marker= #val marker_after_set - */
 void
 modslate_marker_after_set(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1562,7 +1559,7 @@ modslate_marker_after_set(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-/* %=marker= %str marker_before_insert - */
+/* #=marker= #str marker_before_insert - */
 void
 modslate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1609,7 +1606,7 @@ modslate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-/* %=marker= %str marker_after_insert - */
+/* #=marker= #str marker_after_insert - */
 void
 modslate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1655,7 +1652,7 @@ modslate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_npop(ostack, 2);
 }
 
-/* %=marker= %=marker= marker_range_get %string */
+/* #=marker= #=marker= marker_range_get #string */
 void
 modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1724,7 +1721,7 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
-/* %=marker= %=marker= marker_range_get %string */
+/* #=marker= #=marker= marker_range_get #string */
 void
 modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
 {
@@ -1892,30 +1889,29 @@ extent_p_ref_iter(void *a_data, cw_bool_t a_reset)
 	extent->iter = 0;
     }
 
-    switch(extent->iter)
+    for (retval = NULL; retval == NULL; extent->iter++)
     {
-	case 0:
+	switch(extent->iter)
 	{
-	    extent->iter++;
-	    retval = nxo_nxoe_get(&extent->hook);
-	    if (retval != NULL)
+	    case 0:
 	    {
+		retval = nxo_nxoe_get(&extent->hook);
 		break;
 	    }
-	    /* Fall through. */
-	}
-	case 1:
-	{
-	    extent->iter++;
-	    retval = nxo_nxoe_get(&extent->buffer_nxo);
-	    break;
-	}
-	default:
-	{
-	    retval = NULL;
+	    case 1:
+	    {
+		retval = nxo_nxoe_get(&extent->buffer_nxo);
+		break;
+	    }
+	    default:
+	    {
+		retval = NULL;
+		goto RETURN;
+	    }
 	}
     }
 
+    RETURN:
     return retval;
 }
 
@@ -1974,14 +1970,14 @@ extent_type(cw_nxo_t *a_nxo)
     return retval;
 }
 
-/* %=buffer= %beg %end extent %=extent= */
+/* #=buffer= #beg #end extent #=extent= */
 void
 modslate_extent(void *a_data, cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
 
-/* %object extent? %boolean */
+/* #object extent? #boolean */
 void
 modslate_extent_p(void *a_data, cw_nxo_t *a_thread)
 {

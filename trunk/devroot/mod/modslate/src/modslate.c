@@ -89,6 +89,7 @@ modslate_init(void *a_arg, cw_nxo_t *a_thread)
 
     /* Initialize hooks. */
     modslate_buffer_init(a_thread);
+    modslate_display_init(a_thread);
 
     /* XXX Temporary hack. */
     if (tcgetattr(0, &t))

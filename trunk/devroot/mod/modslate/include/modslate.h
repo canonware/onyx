@@ -13,11 +13,17 @@
 #include <libonyx/libonyx.h>
 #include "modslate_defs.h"
 
+#include <curses.h>
+#include <panel.h>
+
 #include "rb.h"
 #include "buf.h"
 #include "hist.h"
 
 #include "buffer.h"
+#include "display.h"
+#include "frame.h"
+#include "window.h"
 
 #define MODSLATE_ENTRY(name) {#name, modslate_##name}
 

@@ -21,7 +21,8 @@
 
 /* Source files. */
 MODSLATE_SRCS = [addprefix @srcroot@/mod/modslate/src/
-                           buf.c buffer.c hist.c modslate.c
+                           buf.c buffer.c display.c frame.c hist.c modslate.c
+                           window.c
                            ];
 
 /* Generated source code (created by configure). */
