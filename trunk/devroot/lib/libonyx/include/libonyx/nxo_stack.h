@@ -33,8 +33,6 @@ struct cw_nxoe_stack_s
     cw_mtx_t lock;
 #endif
 
-    cw_nxa_t *nxa;
-
     /* Stack. */
     ql_head(cw_nxoe_stacko_t) stack;
 

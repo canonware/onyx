@@ -53,7 +53,6 @@ static cw_mema_t s_mema;
 static cw_bool_t s_mem_initialized = FALSE;
 #endif
 
-//static cw_mem_t s_mem;
 #ifdef CW_THREADS
 static cw_mtx_t s_mem_lock;
 #endif

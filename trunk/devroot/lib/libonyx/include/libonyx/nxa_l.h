@@ -22,7 +22,13 @@ typedef enum
 #endif
 
 /* Global variables. */
-extern cw_nxa_t *cw_g_nxa;
+#ifdef CW_DBG
+extern cw_bool_t cw_g_nxa_initialized;
+#endif
+#ifdef CW_THREADS
+extern cw_mtx_t cw_g_nxa_name_lock;
+#endif
+extern cw_dch_t cw_g_nxa_name_hash;
 
 void
 nxa_l_nx_insert(cw_nx_t *a_nx);
@@ -57,19 +63,17 @@ nxa_l_name_hash_get(void);
 CW_INLINE cw_mtx_t *
 nxa_l_name_lock_get(void)
 {
-    cw_check_ptr(cw_g_nxa);
-    cw_dassert(cw_g_nxa->magic == CW_NXA_MAGIC);
+    cw_assert(cw_g_nxa_initialized);
 
-    return &cw_g_nxa->name_lock;
+    return &cw_g_nxa_name_lock;
 }
 #endif
 
 CW_INLINE cw_dch_t *
 nxa_l_name_hash_get(void)
 {
-    cw_check_ptr(cw_g_nxa);
-    cw_dassert(cw_g_nxa->magic == CW_NXA_MAGIC);
+    cw_assert(cw_g_nxa_initialized);
 
-    return &cw_g_nxa->name_hash;
+    return &cw_g_nxa_name_hash;
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXA_C_)) */

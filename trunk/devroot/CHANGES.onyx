@@ -1,5 +1,7 @@
 2003-04-19 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/include/libonyx/nxa.h : Remove cw_nxa_t.
+
 	* lib/libonyx/src/mq.c:mq_new() : Use a mema object for allocation,
 	  rather than a mem object.
 

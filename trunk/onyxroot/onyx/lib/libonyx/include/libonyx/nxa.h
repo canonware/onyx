@@ -10,59 +10,6 @@
  *
  ******************************************************************************/
 
-/* Memory allocator. */
-struct cw_nxa_s
-{
-#ifdef CW_DBG
-    cw_uint32_t magic;
-#define CW_NXA_MAGIC 0x63935743
-#endif
-
-    /* Hash of names (key: {name, len}, value: (nxoe_name *)).  This hash table
-     * keeps track of *all* name "values" in the virtual machine.  When a name
-     * object is created, it actually adds a reference to a nxoe_name in this
-     * hash and uses a pointer to that nxoe_name as a unique key. */
-#ifdef CW_THREADS
-    cw_mtx_t name_lock;
-#endif
-    cw_dch_t name_hash;
-
-#ifdef CW_THREADS
-    /* Protects the gcdict_* fields, gc_pending, and nx_ql. */
-    cw_mtx_t lock;
-#endif
-
-    /* Actual state of gcdict. */
-    cw_bool_t gcdict_active;
-#ifdef CW_PTHREADS
-    cw_nxoi_t gcdict_period;
-#endif
-    cw_nxoi_t gcdict_threshold;
-    cw_nxoi_t gcdict_collections;
-    cw_nxoi_t gcdict_count;
-    cw_nxoi_t gcdict_current[3];
-    cw_nxoi_t gcdict_maximum[3];
-    cw_nxoi_t gcdict_sum[3];
-
-    /* Sequence set. */
-#ifdef CW_THREADS
-    cw_mtx_t seq_mtx;
-#endif
-    ql_head(cw_nxoe_t) seq_set;
-    cw_bool_t white; /* Current value for white (alternates). */
-
-#ifdef CW_PTHREADS
-    cw_mq_t gc_mq;
-#endif
-    cw_bool_t gc_pending;
-    cw_bool_t gc_allocated;
-
-    ql_head(cw_nx_t) nx_ql;
-#ifdef CW_PTHREADS
-    cw_thd_t *gc_thd;
-#endif
-};
-
 /* Global variables. */
 extern cw_mema_t *cw_g_nxaa;
 
