@@ -17,12 +17,9 @@
 #define _LIBSTASH_USE_BUF
 #include <libstash/libstash.h>
 
-#include <time.h>
-
 int
 main()
 {
-/*    time_t beg_time, end_time, bef_time, aft_time, secs; */
   cw_buf_t * buf_a, * buf_b, * buf_c, * buf_d;
 
   libstash_init();
@@ -171,8 +168,6 @@ main()
     }
   }
 
-  /* Takes a long time to run. */
-/*  #if (0) */
   /* Multi-stride buf_get_uint8(). */
   {
     cw_uint32_t h, i, j, k, size;
@@ -219,7 +214,6 @@ main()
       }
     }
   }
-/*  #endif */
   
   /* buf_get_uint32() inc loop for each buf. */
   {

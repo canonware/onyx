@@ -16,8 +16,6 @@
 
 #include <libstash/libstash_r.h>
 
-#include <sys/time.h>
-
 #define _LIBSTASH_TEST_NUM_THREADS 10
 
 struct cw_foo_s

@@ -12,6 +12,7 @@
 
 #include "libstash/libstash_r.h"
 
+#include <sys/time.h>
 #include <errno.h>
 
 cw_thd_t *

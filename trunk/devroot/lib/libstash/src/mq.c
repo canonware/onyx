@@ -152,7 +152,7 @@ mq_get(cw_mq_t * a_mq)
   _cw_assert(_LIBSTASH_MQ_MAGIC == a_mq->magic);
   mtx_lock(&a_mq->lock);
 
-  if (a_mq->get_stop == TRUE)
+  if (TRUE == a_mq->get_stop)
   {
     retval = NULL;
     goto RETURN;
