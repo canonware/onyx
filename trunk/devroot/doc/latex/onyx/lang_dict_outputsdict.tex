@@ -1,0 +1,961 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% outputsdict reference portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{outputsdict}
+\label{sec:outputsdict}
+\index{outputsdict@\onyxop{}{outputsdict}{}}
+
+The outputsdict dictionary is primarily used to support
+\htmlref{\onyxop{}{outputs}{}}{systemdict:outputs}, but its contents may be of
+use to an application that wishes to extend or modify formatted printing.
+
+There is an entry in outputsdict for each Onyx type.  Each entry renders objects
+that correspond to its name using optional flags stored in a dictionary.  The
+following flags are supported for all types:
+\begin{description}
+\item[{\tt \$n}: ]
+	Maximum length, in bytes.  Default: disabled.
+\item[{\tt \$w}: ]
+	Minimum length, in bytes.  Default: disabled.
+\item[{\tt \$j}: ]
+	Justification.  Legal values:
+	\begin{description}
+	\item[{\tt \$l}: ]
+		Left.
+	\item[{\tt \$c}: ]
+		Center.
+	\item[{\tt \$r}: ]
+		Right (default).
+	\end{description}
+\item[{\tt \$p}: ]
+	Padding character.  Default: {\tt ` '}.
+\item[{\tt \$r}: ]
+	Syntactic rendering recursion depth.  Default: 1.
+\end{description}
+
+The following additional flags are supported for integers:
+\begin{description}
+\item[{\tt \$b}: ]
+	Base, from 2 to 36.  Default: 10.
+\item[{\tt \$s}: ]
+	Sign.  Legal values:
+	\begin{description}
+	\item[{\tt \$-}: ]
+		Only print sign if output is negative (default).
+	\item[{\tt \$+}: ]
+		Always print sign.
+	\end{description}
+\end{description}
+
+The following additional flags are supported for reals:
+\begin{description}
+\item[{\tt \$d}: ]
+	Digits of precision past decimal point.  Default: 6.
+\item[{\tt \$e}: ]
+	Exponential notation, if true.  Default: false.
+\end{description}
+
+\begin{longtable}{\optableformat{4.10}}
+\caption{outputsdict summary}
+\\
+\hline
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline \endhead
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+\optableent
+	{array flags}
+	{{\bf \htmlref{arraytype}{outputsdict:arraytype}}}
+	{string}
+	{Create formatted string from array.}
+\hline
+\optableent
+	{boolean flags}
+	{{\bf \htmlref{booleantype}{outputsdict:booleantype}}}
+	{string}
+	{Create formatted string from boolean.}
+\hline
+\optableent
+	{class flags}
+	{{\bf \htmlref{classtype}{outputsdict:classtype}}}
+	{string}
+	{Create formatted string from class.}
+\hline
+\optableent
+	{condition flags}
+	{{\bf \htmlref{conditiontype}{outputsdict:conditiontype}}}
+	{string}
+	{Create formatted string from condition.}
+\hline
+\optableent
+	{dict flags}
+	{{\bf \htmlref{dicttype}{outputsdict:dicttype}}}
+	{string}
+	{Create formatted string from dict.}
+\hline
+\optableent
+	{file flags}
+	{{\bf \htmlref{filetype}{outputsdict:filetype}}}
+	{string}
+	{Create formatted string from file.}
+\hline
+\optableent
+	{fino flags}
+	{{\bf \htmlref{finotype}{outputsdict:finotype}}}
+	{string}
+	{Create formatted string from fino.}
+\hline
+\optableent
+	{handle flags}
+	{{\bf \htmlref{handletype}{outputsdict:handletype}}}
+	{string}
+	{Create formatted string from handle.}
+\hline
+\optableent
+	{instance flags}
+	{{\bf \htmlref{instancetype}{outputsdict:instancetype}}}
+	{string}
+	{Create formatted string from instance.}
+\hline
+\optableent
+	{integer flags}
+	{{\bf \htmlref{integertype}{outputsdict:integertype}}}
+	{string}
+	{Create formatted string from integer.}
+\hline
+\optableent
+	{mark flags}
+	{{\bf \htmlref{marktype}{outputsdict:marktype}}}
+	{string}
+	{Create formatted string from mark.}
+\hline
+\optableent
+	{mutex flags}
+	{{\bf \htmlref{mutextype}{outputsdict:mutextype}}}
+	{string}
+	{Create formatted string from mutex.}
+\hline
+\optableent
+	{name flags}
+	{{\bf \htmlref{nametype}{outputsdict:nametype}}}
+	{string}
+	{Create formatted string from name.}
+\hline
+\optableent
+	{null flags}
+	{{\bf \htmlref{nulltype}{outputsdict:nulltype}}}
+	{string}
+	{Create formatted string from null.}
+\hline
+\optableent
+	{operator flags}
+	{{\bf \htmlref{operatortype}{outputsdict:operatortype}}}
+	{string}
+	{Create formatted string from operator.}
+\hline
+\optableent
+	{pmark flags}
+	{{\bf \htmlref{pmarktype}{outputsdict:pmarktype}}}
+	{string}
+	{Create formatted string from pmark.}
+\hline
+\optableent
+	{real flags}
+	{{\bf \htmlref{realtype}{outputsdict:realtype}}}
+	{string}
+	{Create formatted string from real.}
+\hline
+\optableent
+	{regex flags}
+	{{\bf \htmlref{regextype}{outputsdict:regextype}}}
+	{string}
+	{Create formatted string from regex.}
+\hline
+\optableent
+	{regsub flags}
+	{{\bf \htmlref{regsubtype}{outputsdict:regsubtype}}}
+	{string}
+	{Create formatted string from regsub.}
+\hline
+\optableent
+	{stack flags}
+	{{\bf \htmlref{stacktype}{outputsdict:stacktype}}}
+	{string}
+	{Create formatted string from stack.}
+\hline
+\optableent
+	{string flags}
+	{{\bf \htmlref{stringtype}{outputsdict:stringtype}}}
+	{string}
+	{Create formatted string from string.}
+\hline
+\optableent
+	{thread flags}
+	{{\bf \htmlref{threadtype}{outputsdict:threadtype}}}
+	{string}
+	{Create formatted string from thread.}
+\end{longtable}
+
+\begin{description}
+\label{outputsdict:arraytype}
+\index{arraytype@\onyxop{}{arraytype}{}}
+\item[{\onyxop{array flags}{arraytype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{array}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{array}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> [1 [2 3] 4]
+onyx:1> dup <$w 9 $p `_' $r 0> arraytype print `\n' print flush
+__-array-
+onyx:1> dup <$w 9 $p `_' $r 1> arraytype print `\n' print flush
+[1 -array- 4]
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:booleantype}
+\index{booleantype@\onyxop{}{booleantype}{}}
+\item[{\onyxop{boolean flags}{booleantype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			A boolean object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{boolean}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{boolean}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> false
+onyx:1> dup <$n 3> booleantype print `\n' print flush
+fal
+onyx:1> dup <$n 7> booleantype print `\n' print flush
+false
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:classtype}
+\index{classtype@\onyxop{}{classtype}{}}
+\item[{\onyxop{class flags}{classtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[class: ]
+			A class object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{class}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{class}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> vclass
+onyx:1> <$w 30 $p `.' $j $c> classtype print `\n' print flush
+...........-class-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:conditiontype}
+\index{conditiontype@\onyxop{}{conditiontype}{}}
+\item[{\onyxop{condition flags}{conditiontype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[condition: ]
+			A condition object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{condition}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{condition}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> condition
+onyx:1> <$w 15 $p `_' $j $c> booleantype print `\n' print flush
+__-condition-__
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:dicttype}
+\index{dicttype@\onyxop{}{dicttype}{}}
+\item[{\onyxop{dict flags}{dicttype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dict object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{dict}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{dict}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> <$foo `foo'> <$w 30 $p `.' $j $r> dicttype print `\n' print flush
+..................<$foo `foo'>
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:filetype}
+\index{filetype@\onyxop{}{filetype}{}}
+\item[{\onyxop{file flags}{filetype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A file object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{file}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{file}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> stdin
+onyx:1> <$w 30 $p `.' $j $c> filetype print `\n' print flush
+............-file-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:finotype}
+\index{finotype@\onyxop{}{finotype}{}}
+\item[{\onyxop{fino flags}{finotype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[fino: ]
+			A fino object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{fino}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{fino}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> (
+onyx:1> <$w 30 $p `.' $j $c> finotype print `\n' print flush
+............-fino-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:handletype}
+\index{handletype@\onyxop{}{handletype}{}}
+\item[{\onyxop{handle flags}{handletype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[handle: ]
+			A handle object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{handle}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{handle}.
+	\item[Example(s): ]
+		The following example is a bit contrived, since there is no way
+		to create a handle object with a stock onyx interpreter.
+		Therefore, imagine that an operator named taggedhandle exists
+		that creates a handle with a tag that is the name ``tagged''.
+		\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> taggedhandle
+onyx:1> <$w 30 $p `.' $j $l handletype print `\n' print flush
+=tagged=......................
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:instancetype}
+\index{instancetype@\onyxop{}{instancetype}{}}
+\item[{\onyxop{instance flags}{instancetype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[instance: ]
+			An instance object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{instance}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{instance}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> vinstance
+onyx:1> <$w 30 $p `.' $j $c> instancetype print `\n' print flush
+..........-instance-..........
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:integertype}
+\index{integertype@\onyxop{}{integertype}{}}
+\item[{\onyxop{integer flags}{integertype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[integer: ]
+			An integer object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{integer}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{integer}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> 42 <$w 6 $p `_' $j $c $s $-> integertype print `\n' print flush
+__42__
+onyx:0> 42 <$w 6 $p `_' $j $c $s $+> integertype print `\n' print flush
+_+42__
+onyx:0> `0x' print 42 <$w 6 $p `0' $b 16> integertype print `\n' print flush
+0x00002a
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:marktype}
+\index{marktype@\onyxop{}{marktype}{}}
+\item[{\onyxop{mark flags}{marktype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[mark: ]
+			A mark object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{mark}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{mark}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> mark
+onyx:1> <$w 30 $p `.' $j $c> marktype print `\n' print flush
+............-mark-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:mutextype}
+\index{mutextype@\onyxop{}{mutextype}{}}
+\item[{\onyxop{mutex flags}{mutextype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[mutex: ]
+			A mutex object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{mutex}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{mutex}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> mutex
+onyx:1> <$w 30 $p `.' $j $c> mutextype print `\n' print flush
+...........-mutex-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:nametype}
+\index{nametype@\onyxop{}{nametype}{}}
+\item[{\onyxop{name flags}{nametype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[name: ]
+			A name object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{name}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{name}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> $foo
+onyx:1> <$w 30 $p `.' $j $c> nametype print `\n' print flush
+.............$foo.............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:nulltype}
+\index{nulltype@\onyxop{}{nulltype}{}}
+\item[{\onyxop{null flags}{nulltype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[null: ]
+			A null object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{null}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{null}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> null
+onyx:1> <$w 30 $p `.' $j $c> nulltype print `\n' print flush
+.............null.............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:operatortype}
+\index{operatortype@\onyxop{}{operatortype}{}}
+\item[{\onyxop{operator flags}{operatortype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[operator: ]
+			An operator object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{operator}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{operator}.
+	\item[Example(s): ]
+		The following example shows an operator printed out with two
+		leading and trailing dashes.  If the interpreter cannot
+		determine the name associated with an operator, as will be the
+		case for custom operators, the operator will be printed as
+		{\tt -operator-}.
+		\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> ~realtime
+onyx:1> <$w 30 $p `.' $j $c> operatortype print `\n' print flush
+.........--realtime--.........
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:pmarktype}
+\index{pmarktype@\onyxop{}{pmarktype}{}}
+\item[{\onyxop{pmark flags}{pmarktype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[pmark: ]
+			A pmark object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{pmark}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{pmark}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> { ~x
+Error $undefined
+ostack: (-pmark- $x)
+dstack: (-dict- -dict- -dict- -dict- -dict-)
+estack/istack trace (0..1):
+0:      -file-
+1:      --start--
+onyx:3> pop pop resume
+onyx:1> <$w 30 $p `.' $j $c> pmarktype print `\n' print flush
+...........-pmark-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:realtype}
+\index{realtype@\onyxop{}{realtype}{}}
+\item[{\onyxop{real flags}{realtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[real: ]
+			A real object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{real}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{real}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> 6.022e23 <$d 4> realtype print `\n' print flush
+602200000000000027262976.0000
+onyx:0> 6.022e23 <$d 4 $e true> realtype print `\n' print flush
+6.0220e+23
+onyx:0> 6.022e23 <$d 0 $e true> realtype print `\n' print flush
+6e+23
+onyx:0> 6.022e23 <$d 4 $w 40 $p `0'> realtype print `\n' print flush
+00000000000602200000000000027262976.0000
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:regextype}
+\index{regextype@\onyxop{}{regextype}{}}
+\item[{\onyxop{regex flags}{regextype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[regex: ]
+			A regex object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{regex}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{regex}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> `' regex
+onyx:1> <$w 30 $p `.' $j $c> regextype print `\n' print flush
+...........-regex-............
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:regsubtype}
+\index{regsubtype@\onyxop{}{regsubtype}{}}
+\item[{\onyxop{regsub flags}{regsubtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[regsub: ]
+			A regsub object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{regsub}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{regsub}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> `' `' regsub
+onyx:1> <$w 30 $p `.' $j $c> regsubtype print `\n' print flush
+...........-regsub-...........
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:stacktype}
+\index{stacktype@\onyxop{}{stacktype}{}}
+\item[{\onyxop{stack flags}{stacktype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			A stack object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{stack}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{stack}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> (1 (2 3) 4)
+onyx:1> dup <$w 9 $p `_' $r 0> stacktype print `\n' print flush
+__-stack-
+onyx:1> <$w 9 $p `_' $r 1> stacktype print `\n' print flush
+(1 -stack- 4)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:stringtype}
+\index{stringtype@\onyxop{}{stringtype}{}}
+\item[{\onyxop{string flags}{stringtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{string}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{string}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> `A string'
+onyx:1> <$w 30 $p `.' $j $c> stringtype print `\n' print flush
+...........A string...........
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{outputsdict:threadtype}
+\index{threadtype@\onyxop{}{threadtype}{}}
+\item[{\onyxop{thread flags}{threadtype}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[thread: ]
+			A thread object.
+		\item[flags: ]
+			Formatting flags.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			Formatted string representation of \oparg{thread}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Create a formatted string representation of \oparg{thread}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> outputsdict begin
+onyx:0> () {} thread
+onyx:1> <$w 30 $p `.' $j $c> threadtype print `\n' print flush
+...........-thread-...........
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\end{description}
