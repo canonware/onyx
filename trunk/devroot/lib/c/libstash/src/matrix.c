@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 174 $
- * $Date: 1998-08-26 16:00:21 -0700 (Wed, 26 Aug 1998) $
+ * $Revision: 176 $
+ * $Date: 1998-08-27 16:08:21 -0700 (Thu, 27 Aug 1998) $
  *
  * <<< Description >>>
  *
@@ -503,7 +503,7 @@ matrix_remove_row(cw_matrix_t * a_matrix_o, cw_uint32_t a_row)
     _cw_marker("Enter matrix_remove_row()");
   }
   _cw_check_ptr(a_matrix_o);
-  _cw_assert(a_row < matrix_get_x_size(a_matrix_o));
+  _cw_assert(a_row < matrix_get_y_size(a_matrix_o));
 
   for (j = a_row; j < (a_matrix_o->y_size - 1); j++)
   {
