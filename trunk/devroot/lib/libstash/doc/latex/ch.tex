@@ -317,26 +317,6 @@ void **r\_data}}
 		container, if externally allocated, and remove the item from
 		\cvar{a\_ch}.
 	\end{capilist}
-\label{ch_dump}
-\index{ch_dump@\cfunc{ch\_dump}{}}
-\citem{\cfunc[void]{ch\_dump}{cw\_ch\_t *a\_ch, const char *a\_prefix}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_ch: ]
-			Pointer to a \classname{ch}.
-		\item[a\_prefix: ]
-			A text string to prefix all output with.
-		\end{description}
-	\item[Output(s): ]
-		Internal state of \cvar{a\_ch} printed to \cvar{out\_err}.
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Print the internal state of \cvar{a\_ch}.
-	\end{capilist}
 \label{ch_string_hash}
 \index{ch_string_hash@\cfunc{ch\_string\_hash}{}}
 \citem{\cfunc[cw\_uint32\_t]{ch\_string\_hash}{const void *a\_key}}

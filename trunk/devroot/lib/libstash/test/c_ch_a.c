@@ -17,7 +17,7 @@ int
 main()
 {
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	/* ch_new(), ch_delete(). */
 	{
@@ -278,7 +278,7 @@ main()
 		ch_delete(ch);
 	}
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

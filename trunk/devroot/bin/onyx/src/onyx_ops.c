@@ -63,11 +63,11 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 	str = nxo_string_get(nxo);
 
 	/* Try to dlopen(). */
-/*  	_cw_out_put("dlopen(\"[s]\")\n", str); */
+/*  	fprintf(stderr, "dlopen(\"%s\")\n", str); */
 	handle = dlopen(str, RTLD_LAZY);
 	if (handle == NULL) {
 #ifdef _CW_DBG
-		_cw_out_put("dlopen() error: [s]\n", dlerror());
+		fprintf(stderr, "dlopen() error: %s\n", dlerror());
 #endif
 		nxo_stack_pop(tstack);
 		nxo_thread_error(a_thread, NXO_THREADE_INVALIDFILEACCESS);
@@ -88,7 +88,7 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 	str = nxo_string_get(nxo);
 
 	/* Look up symbol. */
-/*  	_cw_out_put("dlsym(\"[s]\")\n", str); */
+/*  	fprintf(stderr, "dlsym(\"%s\")\n", str); */
 	symbol = dlsym(handle, str);
 
 	/* Pop nxo. */
@@ -97,7 +97,7 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 	if (symbol == NULL) {
 		/* Couldn't find the symbol. */
 #ifdef _CW_DBG
-		_cw_out_put("dlsym() error: [s]\n", dlerror());
+		fprintf(stderr, "dlsym() error: %s]\n", dlerror());
 #endif
 		dlclose(handle);
 		nxo_thread_error(a_thread, NXO_THREADE_UNDEFINED);

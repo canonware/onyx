@@ -70,7 +70,7 @@ main(int argc, char **argv, char **envp)
 	cw_nxo_t	thread, *ostack, *name, *operator;
 
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	_cw_assert(nx_new(&nx, NULL, argc, argv, envp) == &nx);
 	nxo_thread_new(&thread, &nx);
@@ -102,7 +102,7 @@ mark_hook eval
 ");
 	nx_delete(&nx);
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

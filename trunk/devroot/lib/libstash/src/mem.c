@@ -103,16 +103,16 @@ mem_delete(cw_mem_t *a_mem)
 		num_addrs = dch_count(a_mem->addr_hash);
 
 		if (num_addrs > 0) {
-			out_put(NULL, "[s](0x[p]): [i] unfreed allocation[s]\n",
+			fprintf(stderr, "%s(%p): %u unfreed allocation%s\n",
 			    __FUNCTION__, a_mem, num_addrs, num_addrs != 1 ? "s"
 			    : "");
 		}
 		for (i = 0; i < num_addrs; i++) {
 			dch_remove_iterate(a_mem->addr_hash, &addr, (void
 			    **)&allocation, NULL);
-			out_put(NULL, "[s](0x[p]): 0x[p], size [i] never freed "
-			    "(allocated at [s], line [i])\n", __FUNCTION__,
-			    a_mem, addr, allocation->size, allocation->filename,
+			fprintf(stderr, "%s(%p): %p, size %u never freed "
+			    "(allocated at %s:%u)\n", __FUNCTION__, a_mem, addr,
+			    allocation->size, allocation->filename,
 			    allocation->line_num);
 			mem_free(a_mem->mem, allocation);
 		}
@@ -155,9 +155,9 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 
 		if (dch_search(a_mem->addr_hash, retval, (void
 		    **)&old_allocation) == FALSE) {
-			out_put(NULL, "[s](0x[p]): 0x[p] multiply-allocated "
-			    "(was at [s], line [i], size [i]; now at [s], line "
-			    "[i], size [i])\n", __FUNCTION__, a_mem, retval,
+			fprintf(stderr, "%s(%p): %p multiply-allocated "
+			    "(was at %s:%u, size %u; now at %s:%u, size %u)\n",
+			    __FUNCTION__, a_mem, retval,
 			    old_allocation->filename, old_allocation->line_num,
 			    old_allocation->size, a_filename, a_line_num,
 			    a_size);
@@ -173,9 +173,9 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 			allocation->line_num = a_line_num;
 
 #ifdef _CW_MEM_VERBOSE
-			out_put(NULL, "[s](0x[p]): 0x[p] <-- malloc([i]) at "
-			    "[s], line [i]\n", __FUNCTION__, a_mem, retval,
-			    a_size, a_filename, a_line_num);
+			fprintf(stderr, "%s(%p): %p <-- malloc(%u) at %s:%u\n",
+			    __FUNCTION__, a_mem, retval, a_size, a_filename,
+			    a_line_num);
 #endif
 			dch_insert(a_mem->addr_hash, retval, allocation,
 			    &allocation->chi);
@@ -217,9 +217,9 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 
 		if (dch_search(a_mem->addr_hash, retval, (void
 		    **)&old_allocation) == FALSE) {
-			out_put(NULL, "[s](0x[p]): 0x[p] multiply-allocated "
-			    "(was at [s], line [i], size [i]; now at [s], line "
-			    "[i], size [i])\n", __FUNCTION__, a_mem, retval,
+			fprintf(stderr, "%s(%p): %p multiply-allocated "
+			    "(was at %s:%u, size %u; now at %s:%u, size %u\n",
+			    __FUNCTION__, a_mem, retval,
 			    old_allocation->filename, old_allocation->line_num,
 			    old_allocation->size, a_filename, a_line_num,
 			    a_size);
@@ -238,9 +238,10 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 			allocation->line_num = a_line_num;
 
 #ifdef _CW_MEM_VERBOSE
-			out_put(NULL, "[s](0x[p]): 0x[p] <-- calloc([i], [i]) "
-			    "at [s], line [i]\n", __FUNCTION__, a_mem, retval,
-			    a_number, a_size, a_filename, a_line_num);
+			fprintf(stderr,
+			    "%s(%p): %p <-- calloc(%u, %u) at %s:%u\n",
+			    __FUNCTION__, a_mem, retval, a_number, a_size,
+			    a_filename, a_line_num);
 #endif
 			dch_insert(a_mem->addr_hash, retval, allocation,
 			    &allocation->chi);
@@ -284,7 +285,7 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 
 		if (dch_remove(a_mem->addr_hash, a_ptr, NULL, (void
 		    **)&allocation, NULL)) {
-			out_put(NULL, "[s](0x[p]): 0x[p] not allocated\n",
+			fprintf(stderr, "%s(%p): %p not allocated\n",
 			    __FUNCTION__, a_mem, a_ptr);
 		} else {
 			const char	*old_filename;
@@ -304,11 +305,11 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 				    0xa5, a_size - old_size);
 			}
 #ifdef _CW_MEM_VERBOSE
-			out_put(NULL, "[s](0x[p]): 0x[p] <-- realloc(0x[p], "
-			    "[i]) at [s], line [i] (was size [i], allocated at "
-			    "[s], line [i])\n", __FUNCTION__, a_mem, retval,
-			    a_ptr, a_size, a_filename, a_line_num, old_size,
-			    old_filename, old_line_num);
+			fprintf(stderr, "%s(%p): %p <-- realloc(%p, %u) at "
+			    "%s:%u (was size %u, allocated at %s:%u)\n",
+			    __FUNCTION__, a_mem, retval, a_ptr, a_size,
+			    a_filename, a_line_num, old_size, old_filename,
+			    old_line_num);
 #endif
 		}
 	}
@@ -338,14 +339,14 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 
 		if (dch_remove(a_mem->addr_hash, a_ptr, NULL,
 			(void **)&allocation, NULL)) {
-			out_put(NULL, "[s](0x[p]): 0x[p] not allocated, "
-			    "attempted to free at [s], line [i]\n",
-			    __FUNCTION__, a_mem, a_ptr, a_filename, a_line_num);
+			fprintf(stderr, "%s(%p): %p not allocated, attempted "
+			    "to free at %s:%u\n", __FUNCTION__, a_mem, a_ptr,
+			    a_filename, a_line_num);
 		} else {
 #ifdef _CW_MEM_VERBOSE
-			out_put(NULL, "[s](0x[p]): free(0x[p]) at [s], line [i]"
-			    " (size [i], allocated at [s], line [i])\n",
-			    __FUNCTION__, a_mem, a_ptr, a_filename, a_line_num,
+			fprintf(stderr, "%s(%p): free(%p) at %s:%u "
+			    "(size %u, allocated at %s:%u)\n", __FUNCTION__,
+			    a_mem, a_ptr, a_filename, a_line_num,
 			    allocation->size, allocation->filename,
 			    allocation->line_num);
 #endif

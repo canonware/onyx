@@ -286,9 +286,7 @@ el_getc(el, cp)
 #ifdef DEBUG_READ
     (void) fprintf(el->el_errfile, "Reading a character\n");
 #endif /* DEBUG_READ */
-/*      _cw_out_put_e("Got here\n"); */
     while ((num_read = read(el->el_infd, (char *) &tcp, 1)) == -1) {
-/*      _cw_out_put_e("Got here\n"); */
 	if (read__fixio(el->el_infd, errno) != 0) {
 	    *cp = '\0';
 	    return -1;
@@ -298,7 +296,6 @@ el_getc(el, cp)
     (void) fprintf(el->el_errfile, "Got it %c\n", tcp);
 #endif /* DEBUG_READ */
     *cp = tcp;
-/*      _cw_out_put_e("Got here `[c]' ([i])\n", *cp, num_read); */
     return num_read;
 }
 

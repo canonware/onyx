@@ -45,7 +45,7 @@ main()
 	struct timespec	tout = {0, 1000000};
 		
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	thd_crit_enter();
 	thd_crit_leave();
@@ -53,39 +53,39 @@ main()
 	thd = thd_new(thread_entry_func, NULL, TRUE);
 	nanosleep(&tout, NULL);
 
-	out_put(out_err, "thd_suspend()\n");
+	fprintf(stderr, "thd_suspend()\n");
 	for (j = 0; j < 7; j++) {
 		thd_suspend(thd);
 		count = i;
 		nanosleep(&tout, NULL);
-/*  		out_put(out_err, "count([i]) == i([i])\n", count, i); */
+/*  		fprintf(stderr, "count(%u) == i(%u)\n", count, i); */
 		_cw_assert(count == i);
 		thd_resume(thd);
 		nanosleep(&tout, NULL);
 		thd_suspend(thd);
-/*  		out_put(out_err, "count([i]) != i([i])\n", count, i); */
+/*  		fprintf(stderr, "count(%u) != i(%u)\n", count, i); */
 		_cw_assert(count != i);
 		thd_resume(thd);
 	}
 	
-	out_put(out_err, "thd_trysuspend()\n");
+	fprintf(stderr, "thd_trysuspend()\n");
 	for (j = 0; j < 7; j++) {
 		while (thd_trysuspend(thd));
 		count = i;
 		nanosleep(&tout, NULL);
-/*  		out_put(out_err, "count([i]) == i([i])\n", count, i); */
+/*  		fprintf(stderr, "count(%u) == i(%u)\n", count, i); */
 		_cw_assert(count == i);
 		thd_resume(thd);
 		nanosleep(&tout, NULL);
 		while (thd_trysuspend(thd));
-/*  		out_put(out_err, "count([i]) != i([i])\n", count, i); */
+/*  		fprintf(stderr, "count(%u) != i(%u)\n", count, i); */
 		_cw_assert(count != i);
 		thd_resume(thd);
 	}
 	done = TRUE;
 	thd_join(thd);
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

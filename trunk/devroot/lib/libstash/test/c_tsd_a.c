@@ -41,7 +41,7 @@ main()
 	cw_uint32_t	i;
 
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	tsd_new(&tsd, NULL);
 
@@ -53,7 +53,7 @@ main()
 
 	tsd_delete(&tsd);
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

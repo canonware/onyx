@@ -21,7 +21,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstash.h ch.h dch.h mem.h out.h ql.h qr.h qs.h xep.h
+  local incs = libstash.h ch.h dch.h mem.h ql.h qr.h qs.h xep.h
 #if [enable_threads]
                cnd.h mq.h mtx.h thd.h tsd.h
 #endif
@@ -43,7 +43,7 @@
 }
 
 /* Source files. */
-LIBSTASH_SRCS = libstash.c ch.c dch.c mem.c out.c xep.c
+LIBSTASH_SRCS = libstash.c ch.c dch.c mem.c xep.c
 #if [enable_threads]
                 cnd.c mq.c mtx.c thd.c tsd.c
 #endif
@@ -53,8 +53,8 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = c_ch_a.c c_dch_a.c c_libstash_a.c c_out_a.c c_ql_a.c c_qr_a.c
-                 c_qs_a.c c_xep_a.c
+  local ctests = c_ch_a.c c_dch_a.c c_libstash_a.c c_ql_a.c c_qr_a.c c_qs_a.c
+                 c_xep_a.c
 #if [enable_threads]
                  c_cnd_a.c c_mq_a.c c_mtx_a.c c_thd_a.c c_thd_b.c c_thd_c.c
                  c_tsd_a.c
@@ -102,7 +102,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* LaTeX source files. */
 {
-  local tex_srcs = ch.tex cnd.tex dch.tex mem.tex mq.tex mtx.tex out.tex
+  local tex_srcs = ch.tex cnd.tex dch.tex mem.tex mq.tex mtx.tex
                    ql.tex qr.tex qs.tex thd.tex tsd.tex xep.tex;
   tex_srcs = [fromto % [srcdir]/lib/c/libstash/doc/latex/% [tex_srcs]];
   tex_srcs = [tex_srcs] [objdir]/lib/c/libstash/doc/latex/manual.tex;

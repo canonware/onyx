@@ -17,7 +17,7 @@ int
 main()
 {
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	/* mq_new(), mq_delete(). */
 	{
@@ -632,7 +632,7 @@ main()
 		mq_delete(&mq);
 	}
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

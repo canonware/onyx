@@ -453,14 +453,7 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc, char
 	nxo_null_new(&value);
 	nxo_dict_def(a_dict, a_nx, &name, &value);
 
-#ifdef _CW_DBG
-	if (nxo_dict_count(a_dict) != NFASTOPS + NOPS + NEXTRA) {
-		_cw_out_put_e("nxo_dict_count(a_dict) != NFASTOPS + NOPS"
-		    " + NEXTRA ([i] != [i])\n", nxo_dict_count(a_dict), NOPS +
-		    NEXTRA);
-		_cw_error("Adjust NEXTRA");
-	}
-#endif
+	_cw_assert(nxo_dict_count(a_dict) == NFASTOPS + NOPS + NEXTRA);
 #undef NOPS
 #undef NFASTOPS
 #undef NEXTRA
@@ -1294,6 +1287,70 @@ systemdict_cvn(cw_nxo_t *a_thread)
 	nxo_stack_pop(tstack);
 }
 
+static cw_uint32_t
+systemdict_p_integer_render(cw_nxoi_t a_integer, cw_uint32_t a_base, cw_uint8_t
+    *r_buf)
+{
+	cw_uint32_t	retval, i;
+	cw_uint64_t	t = (cw_uint64_t)a_integer;
+	cw_bool_t	negative;
+	cw_uint8_t	*syms = "0123456789abcdefghijklmnopqrstuvwxyz";
+	/*
+	 * Since we're printing a signed integer, the most we ever need is 1
+	 * sign byte and 63 digit bytes.
+	 */
+	cw_uint8_t	*result, s_result[65] =
+	    "0000000000000000000000000000000000000000000000000000000000000000";
+
+	/* Leave space for a leading sign. */
+	result = &s_result[1];
+
+	/* Print the sign if a negative number. */
+	if ((t & (((cw_uint64_t)1) << 63)) != 0) {
+		/*
+		 * Convert two's complement to positive.  We have to use an
+		 * unsigned integer and do all this manually in case the integer
+		 * is the minimum negative value, which is not representable as
+		 * a negated (to positive) signed integer.
+		 */
+		t ^= 0xffffffffffffffffLL;
+		t++;
+
+		negative = TRUE;
+	} else
+		negative = FALSE;
+
+	/* Render. */
+	if (t == 0)
+		result += 62;
+	else {
+		if (a_base == 16) {
+			for (i = 62; t != 0; i--) {
+				result[i] = syms[t & 0xf];
+				t >>= 4;
+			}
+		} else {
+			for (i = 62; t != 0; i--) {
+				result[i] = syms[t % a_base];
+				t /= a_base;
+			}
+		}
+		result += i + 1;
+	}
+
+	/* If negative, show the sign. */
+	if (negative) {
+		result--;
+		result[0] = '-';
+	}
+
+	/* Calculate the length an copy to the return buffer. */
+	retval = &s_result[64] - result;
+	memcpy(r_buf, result, retval);
+
+	return retval;
+}
+
 void
 systemdict_cvrs(cw_nxo_t *a_thread)
 {
@@ -1302,7 +1359,6 @@ systemdict_cvrs(cw_nxo_t *a_thread)
 	cw_uint64_t	val;
 	cw_uint32_t	rlen, base;
 	cw_uint8_t	*str;
-	cw_uint8_t	format[13];  /* "[q|s:s|b:??]" */
 	cw_uint8_t	result[66]; /* Sign, 64 bits, terminator. */
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -1320,10 +1376,7 @@ systemdict_cvrs(cw_nxo_t *a_thread)
 	}
 	val = nxo_integer_get(num);
 
-	/* Create a format string with the base embedded. */
-	_cw_out_put_s(format, "[[q|s:s|b:[i]]", base);
-
-	rlen = _cw_out_put_s(result, format, val);
+	rlen = systemdict_p_integer_render(val, base, result);
 	_cw_assert(rlen <= 65);
 
 	nxo_string_new(num, nxo_thread_nx_get(a_thread),
@@ -1354,7 +1407,9 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		cw_uint8_t	result[21];
 		cw_sint32_t	len;
 
-		len = _cw_out_put_s(result, "[q|s:s]", nxo_integer_get(nxo));
+		len = systemdict_p_integer_render(nxo_integer_get(nxo), 10,
+		    result);
+
 		nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
 		    nxo_thread_currentlocking(a_thread), len);
 		nxo_string_lock(nxo);
@@ -1411,6 +1466,7 @@ systemdict_cvs(cw_nxo_t *a_thread)
 		cw_nxo_t	*tstack, *tnxo;
 		cw_uint32_t	i, j, len, newlen;
 		cw_uint8_t	*str, *newstr;
+		cw_uint8_t	syms[] = "0123456789abcdef";
 
 		/*
 		 * The source is already a string, but here we convert
@@ -1501,8 +1557,10 @@ systemdict_cvs(cw_nxo_t *a_thread)
 					newstr[j] = str[i];
 					j++;
 				} else {
-					_cw_out_put_sn(&newstr[j], 4,
-					    "\\x[i|b:16|w:2|p:0]", str[i]);
+					newstr[j] = '\\';
+					newstr[j + 1] = 'x';
+					newstr[j + 2] = syms[str[i] >> 4];
+					newstr[j + 3] = syms[str[i] & 0xf];
 					j += 4;
 				}
 				break;

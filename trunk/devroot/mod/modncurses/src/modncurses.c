@@ -14,5 +14,6 @@
 void
 _cw_modncurses_init(void *a_arg, cw_nxo_t *a_thread)
 {
-	_cw_out_put_e("Got here\n");
+	fprintf(stderr, "%s:%u:%s(): Got here\n", __FILE__, __LINE__,
+	    __FUNCTION__);
 }

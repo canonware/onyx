@@ -315,7 +315,6 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/mem}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/mq}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/mtx}
-\input{@abs_srcdir@/lib/c/libstash/doc/latex/out}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/ql}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/qr}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/qs}

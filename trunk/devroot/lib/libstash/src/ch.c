@@ -302,58 +302,6 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	return retval;
 }
 
-void
-ch_dump(cw_ch_t *a_ch, const char *a_prefix)
-{
-	cw_uint32_t	i;
-	cw_chi_t	*chi;
-
-	_cw_check_ptr(a_ch);
-	_cw_dassert(a_ch->magic == _CW_CH_MAGIC);
-	_cw_check_ptr(a_prefix);
-
-#ifdef _CW_DBG
-	out_put(out_err, "[s]: num_collisions: [i], num_inserts: [i],"
-	    " num_removes: [i]\n",
-	    a_prefix, a_ch->num_collisions, a_ch->num_inserts,
-	    a_ch->num_removes);
-#endif
-
-	out_put(out_err, "[s]: is_malloced: [s]\n",
-	    a_prefix, (a_ch->is_malloced) ? "TRUE" : "FALSE");
-	out_put(out_err, "[s]: ql_first(chi_ql): 0x[p]\n",
-	    a_prefix, ql_first(&a_ch->chi_ql));
-	out_put(out_err, "[s]: count: [i], table_size: [i]\n",
-	    a_prefix, a_ch->count, a_ch->table_size);
-
-	/* Table. */
-	out_put(out_err, "[s]: table --------------------------------------"
-	    "----------------------\n", a_prefix);
-
-	for (i = 0; i < a_ch->table_size; i++) {
-		if (ql_first(&a_ch->table[i]) != NULL) {
-			ql_foreach(chi, &a_ch->chi_ql, ch_link) {
-				out_put(out_err, "[s]: key: 0x[p], data: 0x[p],"
-				    " slot: [i]\n", a_prefix, chi->key,
-				    chi->data, chi->slot);
-			}
-		} else
-			out_put(out_err, "[s]: [i]: NULL\n", a_prefix, i);
-	}
-
-	/* chi list. */
-	out_put(out_err, "[s]: chi_list -----------------------------------"
-	    "----------------------\n", a_prefix);
-	if (ql_first(&a_ch->chi_ql) != NULL) {
-		ql_foreach(chi, &a_ch->chi_ql, ch_link) {
-			out_put(out_err,
-			    "[s]: key: 0x[p], data: 0x[p], slot: [i]\n",
-			    a_prefix, chi->key, chi->data, chi->slot);
-		}
-	} else
-		out_put(out_err, "[s]: Empty\n", a_prefix);
-}
-
 cw_uint32_t
 ch_string_hash(const void *a_key)
 {

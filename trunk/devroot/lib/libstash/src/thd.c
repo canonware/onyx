@@ -118,8 +118,8 @@ thd_l_init(void)
 	sigemptyset(&action.sa_mask);
 	error = sigaction(_CW_THD_SIGSR, &action, NULL);
 	if (error == -1) {
-		_cw_out_put_e("Error in sigaction(): [s]\n",
-		    strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in sigaction(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 
@@ -147,8 +147,8 @@ thd_l_init(void)
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_init(&cw_g_thd.sem, 0, 0);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in sem_init(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif
@@ -182,8 +182,8 @@ thd_l_shutdown(void)
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_destroy(&cw_g_thd.sem);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in sem_destroy(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 
@@ -212,8 +212,8 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_init(&retval->sem, 0, 0);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in sem_init(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in sem_init(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif
@@ -228,8 +228,8 @@ thd_new(void *(*a_start_func)(void *), void *a_arg, cw_bool_t a_suspendible)
 	error = pthread_create(&retval->thread, &cw_g_thd_attr,
 	    thd_p_start_func, (void *)retval);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_create(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in pthread_create(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 
@@ -247,8 +247,8 @@ thd_delete(cw_thd_t *a_thd)
 
 	error = pthread_detach(a_thd->thread);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_detach(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in pthread_detach(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 
@@ -267,8 +267,8 @@ thd_join(cw_thd_t *a_thd)
 
 	error = pthread_join(a_thd->thread, &retval);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_join(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in pthread_join(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 
@@ -276,8 +276,8 @@ thd_join(cw_thd_t *a_thd)
 #ifdef _CW_THD_GENERIC_SR
 	error = sem_destroy(&a_thd->sem);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in sem_destroy(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in sem_destroy(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif
@@ -467,8 +467,9 @@ thd_p_delete(cw_thd_t *a_thd)
 #ifdef _CW_THD_GENERIC_SR
 		error = sem_destroy(&a_thd->sem);
 		if (error) {
-			out_put_e(NULL, NULL, 0, __FUNCTION__,
-			    "Error in sem_destroy(): [s]\n", strerror(error));
+			fprintf(stderr,
+			    "%s:%u:%s(): Error in sem_destroy(): %s\n",
+			    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 			abort();
 		}
 #endif
@@ -526,12 +527,13 @@ thd_p_suspend(cw_thd_t *a_thd)
 
 	error = pthread_kill(a_thd->thread, _CW_THD_SIGSR);
 	if (error != 0) {
-		_cw_out_put_e("Error in pthread_kill(): [s]\n",
-		    strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in pthread_kill(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 	if (sem_wait(&a_thd->sem) != 0) {
-		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(errno));
+		fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(errno));
 		abort();
 	}
 #endif
@@ -539,8 +541,9 @@ thd_p_suspend(cw_thd_t *a_thd)
 	a_thd->suspended = TRUE;
 	error = pthread_suspend_np(a_thd->thread);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_suspend_np(): [s]\n", strerror(error));
+		fprintf(stderr,
+		    "%s:%u:%s(): Error in pthread_suspend_np(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif
@@ -548,8 +551,8 @@ thd_p_suspend(cw_thd_t *a_thd)
 	a_thd->suspended = TRUE;
 	error = thr_suspend(a_thd->thread);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in thr_suspend(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in thr_suspend(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif
@@ -575,28 +578,30 @@ thd_p_resume(cw_thd_t *a_thd)
 
 	error = pthread_kill(a_thd->thread, _CW_THD_SIGSR);
 	if (error != 0) {
-		_cw_out_put_e("Error in pthread_kill(): [s]\n",
-		    strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in pthread_kill(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 	if (sem_wait(&a_thd->sem) != 0) {
-		_cw_out_put_e("Error in sem_wait(): [s]\n", strerror(errno));
+		fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(errno));
 		abort();
 	}
 #endif
 #ifdef _CW_THD_FREEBSD_SR
 	error = pthread_resume_np(a_thd->thread);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_resume_np(): [s]\n", strerror(error));
+		fprintf(stderr,
+		    "%s:%u:%s(): Error in pthread_resume_np(): %s\n", __FILE__,
+		    __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif
 #ifdef _CW_THD_SOLARIS_SR
 	error = thr_continue(a_thd->thread);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in thr_continue(): [s]\n", strerror(error));
+		fprintf(stderr, "%s:%u:%s(): Error in thr_continue(): %s\n",
+		    __FILE__, __LINE__, __FUNCTION__, strerror(error));
 		abort();
 	}
 #endif

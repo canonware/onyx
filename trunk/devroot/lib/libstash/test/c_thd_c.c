@@ -39,7 +39,7 @@ main()
 	cw_uint32_t	i;
 
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	/* Create threads that can be suspended. */
 	for (i = 0; i < NSUSPENDIBLE; i++)
@@ -56,7 +56,7 @@ main()
 
 	_cw_assert(count == (NTHREADS + 1) * NITERATIONS);
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }

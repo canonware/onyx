@@ -90,7 +90,6 @@ cw_bool_t	ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data);
 cw_bool_t	ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data);
 cw_bool_t	ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data,
     cw_chi_t **r_chi);
-void		ch_dump(cw_ch_t *a_ch, const char *a_prefix);
 
 cw_uint32_t	ch_string_hash(const void *a_key);
 cw_uint32_t	ch_direct_hash(const void *a_key);

@@ -23,8 +23,8 @@ mtx_new(cw_mtx_t *a_mtx)
 
 	error = pthread_mutex_init(&a_mtx->mutex, NULL);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_mutex_init: [s]\n", strerror(error));
+		fprintf(stderr, "%s(): Error in pthread_mutex_init: %s\n",
+		    __FUNCTION__, strerror(error));
 		abort();
 	}
 }
@@ -38,8 +38,8 @@ mtx_delete(cw_mtx_t *a_mtx)
 
 	error = pthread_mutex_destroy(&a_mtx->mutex);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_mutex_destroy(): [s]\n", strerror(error));
+		fprintf(stderr, "%s(): Error in pthread_mutex_destroy(): %s\n",
+		    __FUNCTION__, strerror(error));
 		abort();
 	}
 }
@@ -53,8 +53,8 @@ mtx_lock(cw_mtx_t *a_mtx)
 
 	error = pthread_mutex_lock(&a_mtx->mutex);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_mutex_lock(): [s]\n", strerror(error));
+		fprintf(stderr, "%s(): Error in pthread_mutex_lock(): %s\n",
+		    __FUNCTION__, strerror(error));
 		abort();
 	}
 }
@@ -73,8 +73,8 @@ mtx_trylock(cw_mtx_t *a_mtx)
 	else if (error == EBUSY)
 		retval = TRUE;
 	else {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_mutex_trylock(): [s]\n", strerror(error));
+		fprintf(stderr, "%s(): Error in pthread_mutex_trylock(): %s\n",
+		    __FUNCTION__, strerror(error));
 		abort();
 	}
 
@@ -90,8 +90,8 @@ mtx_unlock(cw_mtx_t *a_mtx)
 
 	error = pthread_mutex_unlock(&a_mtx->mutex);
 	if (error) {
-		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "Error in pthread_mutex_unlock(): [s]\n", strerror(error));
+		fprintf(stderr, "%s(): Error in pthread_mutex_unlock(): %s\n",
+		    __FUNCTION__, strerror(error));
 		abort();
 	}
 }

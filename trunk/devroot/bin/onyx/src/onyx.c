@@ -108,7 +108,7 @@ interactive_run(int argc, char **argv, char **envp)
 	sigemptyset(&action.sa_mask);
 #define	_HANDLER_INSTALL(a_signal)					\
 	if (sigaction((a_signal), &action, NULL) == -1) {		\
-		_cw_out_put_e("Error in sigaction([s], ...): [s]\n",	\
+		fprintf(stderr, "Error in sigaction(%s, ...): %s\n",	\
 		    #a_signal, strerror(errno));			\
 		abort();						\
 	}
@@ -451,7 +451,7 @@ signal_handle(int a_signal)
 	case SIGTERM:
 		exit(0);
 	default:
-		_cw_out_put_e("Unexpected signal [i]\n", a_signal);
+		fprintf(stderr, "Unexpected signal %d\n", a_signal);
 		abort();
 	}
 }
@@ -625,8 +625,8 @@ batch_run(int argc, char **argv, char **envp)
 		break;
 	case 'e': {
 		if (argc != 3) {
-			out_put(out_err, "[s]: Incorrect number of "
-			    "arguments\n", basename(argv[0]));
+			fprintf(stderr, "%s: Incorrect number of arguments\n",
+			    basename(argv[0]));
 			usage(basename(argv[0]));
 			retval = 1;
 			goto CLERROR;
@@ -638,7 +638,7 @@ batch_run(int argc, char **argv, char **envp)
 	case -1:
 		break;
 	default:
-		out_put(out_err, "[s]: Unrecognized option\n",
+		fprintf(stderr,  "%s: Unrecognized option\n",
 		    basename(argv[0]));
 		usage(basename(argv[0]));
 		retval = 1;
@@ -650,7 +650,7 @@ batch_run(int argc, char **argv, char **envp)
 	 */
 	if ((optind < argc && (opt_expression != NULL || opt_version))
 	    || (opt_version && opt_expression != NULL)) {
-		out_put(out_err, "[s]: Incorrect number of arguments\n",
+		fprintf(stderr, "%s: Incorrect number of arguments\n",
 		    basename(argv[0]));
 		usage(basename(argv[0]));
 		retval = 1;
@@ -718,8 +718,8 @@ batch_run(int argc, char **argv, char **envp)
 		 */
 		src_fd = open(argv[optind], O_RDONLY);
 		if (src_fd == -1) {
-			out_put(out_err, "[s]: Error in open(\"[s]\","
-			    " O_RDONLY): [s]\n", basename(argv[0]),
+			fprintf(stderr, "%s: Error in open(\"%s\","
+			    " O_RDONLY): %s\n", basename(argv[0]),
 			    argv[optind], strerror(errno));
 			retval = 1;
 			goto RETURN;
@@ -756,12 +756,12 @@ batch_run(int argc, char **argv, char **envp)
 void
 usage(const char *a_progname)
 {
-	_cw_out_put("[s] usage:\n"
-	    "    [s]\n"
-	    "    [s] -h\n"
-	    "    [s] -V\n"
-	    "    [s] -e <expr>\n"
-	    "    [s] <file> [[<args>]\n"
+	printf("%s usage:\n"
+	    "    %s\n"
+	    "    %s -h\n"
+	    "    %s -V\n"
+	    "    %s -e <expr>\n"
+	    "    %s <file> [<args>]\n"
 	    "\n"
 	    "    Option    | Description\n"
 	    "    ----------+------------------------------------\n"

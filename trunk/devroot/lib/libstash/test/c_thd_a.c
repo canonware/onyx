@@ -20,12 +20,12 @@ thread_entry_func(void *a_arg)
 {
 	char	*arg_str = (char *)a_arg;
 
-	out_put_e(out_err, NULL, 0, "thread_entry_func",
-	    "Argument string: \"[s]\"\n", arg_str);
+	fprintf(stderr, "%s(): Argument string: \"%s\"\n", __FUNCTION__,
+	    arg_str);
 
-	out_put_e(out_err, NULL, 0, "thread_entry_func",
-	    "thd_self() returns [s]\n", (thd_self() == thread_a) ? "thread_a" :
-	    (thd_self() == thread_b) ? "thread_b" : "<error>");
+	fprintf(stderr, "%s(): thd_self() returns %s\n", __FUNCTION__,
+	    (thd_self() == thread_a) ? "thread_a" : (thd_self() == thread_b) ?
+	    "thread_b" : "<error>");
 
 	return NULL;
 }
@@ -34,7 +34,7 @@ int
 main()
 {
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	thread_b = NULL;
 	thread_a = thd_new(thread_entry_func, (void *)"Thread A argument",
@@ -46,7 +46,7 @@ main()
 	    TRUE);
 	_cw_assert(thd_join(thread_b) == NULL);
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 
 	return 0;

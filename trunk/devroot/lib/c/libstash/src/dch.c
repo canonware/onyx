@@ -169,29 +169,6 @@ dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data, cw_chi_t
 	return retval;
 }
 
-void
-dch_dump(cw_dch_t *a_dch, const char *a_prefix)
-{
-	_cw_check_ptr(a_dch);
-	_cw_dassert(a_dch->magic == _CW_DCH_MAGIC);
-	_cw_check_ptr(a_prefix);
-
-#ifdef _CW_DBG
-	out_put(out_err, "[s]: num_grows: [i], num_shrinks: [i]\n",
-	    a_prefix, a_dch->num_grows, a_dch->num_shrinks);
-#endif
-	out_put(out_err, "[s]: is_malloced: [s]\n",
-	    a_prefix, (a_dch->is_malloced) ? "TRUE" : "FALSE");
-	out_put(out_err,
-	    "[s]: base_table: [i], base_grow: [i], base_shrink: [i]\n",
-	    a_prefix, a_dch->base_table, a_dch->base_grow,
-	    a_dch->base_shrink);
-	out_put(out_err, "[s]: grow_factor: [i]\n",
-	    a_prefix, a_dch->grow_factor);
-
-	ch_dump(a_dch->ch, a_prefix);
-}
-
 /* Given the ch API, there is no way to both safely and efficiently transfer the
  * contents of one ch to another.  Therefore, this function mucks with ch
  * internals. */

@@ -260,24 +260,4 @@ cw\_uint32\_t a\_msg\_size}}
 		Change the put operation to the stop state
 		(\cfunc{mq\_put}{} will return TRUE).
 	\end{capilist}
-\label{mq_dump}
-\index{mq_dump@\cfunc{mq\_dump}{}}
-\citem{\cfunc[void]{mq\_dump}{cw\_mq\_t *a\_mq, const char *a\_prefix}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_mq: ]
-			Pointer to a \classname{mq}.
-		\item[a\_prefix: ]
-			Pointer to a string to prefix to all lines of output
-		\end{description}
-	\item[Output(s): ]
-		Output printed to \cvar{out\_err}.
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Print the internal state of \cvar{a\_mq} to \cvar{out\_err}.
-	\end{capilist}
 \end{capi}

@@ -168,7 +168,6 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
  * Exception numbers.  libstash reserves 0 through 127.
  */
 #define	_CW_STASHX_OOM		3
-#define _CW_STASHX_OUT_PARSE	4
 
 /*
  * libstash include files.  These must be listed in reverse dependency order
@@ -187,7 +186,6 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 #endif
 #include "ch.h"
 #include "dch.h"
-#include "out.h"
 #include "mem.h"
 #ifdef _CW_THREADS
 #include "mq.h"
@@ -203,8 +201,6 @@ void	libstash_shutdown(void);
  * Global variables.
  */
 extern cw_mem_t	*cw_g_mem;
-extern cw_out_t	*out_std;
-extern cw_out_t	*out_err;
 
 /*
  * Global macros we use everywhere.
@@ -245,25 +241,26 @@ extern cw_out_t	*out_err;
  */
 #define _cw_error(a)							\
 	do {								\
-		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\
-		    "Error: [s]\n", a);					\
+		fprintf(stderr, "%s:%u%s(): Error: %s\n", __FILE__,	\
+		    __LINE__, __FUNCTION__, a);				\
 		abort();						\
 	} while (0)
 
 #ifdef _CW_ASSERT
 #define _cw_not_reached()						\
 	do {								\
-		out_put_e(NULL, __FILE__, __LINE__, __FUNCTION__,	\
-		    "Unreachable code reached\n");			\
+		fprintf(stderr,						\
+		    "%s:%u:%s(): Unreachable code reached\n", __FILE__,	\
+		    __LINE__, __FUNCTION__);				\
 		abort();						\
 	} while (0)
 
 #define _cw_assert(a)							\
 	do {								\
 		if (!(a)) {						\
-			out_put_e(NULL, __FILE__, __LINE__,		\
-			    __FUNCTION__, "Failed assertion: \"[s]\"\n", \
-			    #a);					\
+			fprintf(stderr,					\
+			    "%s:%u:%s(): Failed assertion: \"%s\"\n",	\
+			    __FILE__, __LINE__, __FUNCTION__, #a);	\
 			abort();					\
 		}							\
 	} while (0)
@@ -273,9 +270,9 @@ extern cw_out_t	*out_err;
 	do {								\
 		if (((x) == NULL) || ((x) == (void *) 0xa5a5a5a5) ||	\
 		    ((x) == (void *) 0x5a5a5a5a)) {			\
-			out_put_e(NULL, __FILE__, __LINE__,		\
-			    __FUNCTION__,				\
-			    "[s] (0x[p]) is an invalid pointer\n", #x, (x)); \
+			fprintf(stderr,					\
+			    "%s:%u:%s(): Invalid pointer: %s (%p)\n",	\
+			    __FILE__, __LINE__, __FUNCTION__, #x, (x));	\
 			abort();					\
 		}							\
 	} while (0)
@@ -294,9 +291,9 @@ extern cw_out_t	*out_err;
 #define _cw_dassert(a)							\
 	do {								\
 		if (!(a)) {						\
-			out_put_e(NULL, __FILE__, __LINE__,		\
-			    __FUNCTION__, "Failed assertion: \"[s]\"\n", \
-			    #a);					\
+			fprintf(stderr,					\
+			    "%s:%u:%s(): Failed assertion: \"%s\"\n",	\
+			    __FILE__, __LINE__, __FUNCTION__, #a);	\
 			abort();					\
 		}							\
 	} while (0)

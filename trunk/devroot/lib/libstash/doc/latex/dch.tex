@@ -288,24 +288,4 @@ void **r\_data}}
 		container, if externally allocated, and remove the item from
 		\cvar{a\_dch}.
 	\end{capilist}
-\label{dch_dump}
-\index{dch_dump@\cfunc{dch\_dump}{}}
-\citem{\cfunc[void]{dch\_dump}{cw\_dch\_t *a\_dch, const char *a\_prefix}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_dch: ]
-			Pointer to a \classname{dch}.
-		\item[a\_prefix: ]
-			A text string to prefix all output with.
-		\end{description}
-	\item[Output(s): ]
-		Internal state of \cvar{a\_dch} printed to \cvar{out\_err}.
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Print the internal state of \cvar{a\_dch}.
-	\end{capilist}
 \end{capi}

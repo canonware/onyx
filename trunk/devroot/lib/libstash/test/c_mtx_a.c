@@ -42,7 +42,7 @@ main()
 	cw_mtx_t	mutex_a, mutex_b;
 
 	libstash_init();
-	out_put(out_err, "Test begin\n");
+	fprintf(stderr, "Test begin\n");
 
 	mtx_new(&mutex_a);
 	/* Unlocked. */
@@ -80,9 +80,9 @@ main()
 	thd_join(thread_b);
 	mtx_delete(&mutex_a);
 
-	out_put(out_err, "g_count: [i]\n", g_count);
+	fprintf(stderr, "g_count: %u\n", g_count);
 
-	out_put(out_err, "Test end\n");
+	fprintf(stderr, "Test end\n");
 	libstash_shutdown();
 	return 0;
 }
