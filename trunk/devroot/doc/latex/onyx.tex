@@ -165,7 +165,10 @@ $2^{63} - 1$.
 
 \item[mark: ] A mark is used as a stack marker for various stack operations.
 
-\item[mutex: ] A mutex is a mutual exclusion lock.
+\item[mutex: ] A mutex is a mutual exclusion lock.  Mutexes cannot be acquired
+recursively, and the application must take care to unlock mutexes before
+allowing them to be garbage collected (whether during normal program execution
+or at program termination).
 
 \item[name: ] A name is a key that uniquely identifies a sequence of characters.
 Two name objects that correspond to the same sequence of characters can be
@@ -2507,43 +2510,50 @@ to radix string. \\
 \hline \hline
 \multicolumn{4}{|l|}{Threading and synchronization operators} \\
 \hline \hline
-& {\bf \htmlref{wait}{systemdict:wait}} & & \\
+stack entry & {\bf \htmlref{thread}{systemdict:thread}} & thread & Create and
+run a thread. \\
 \hline
-& {\bf \htmlref{thread}{systemdict:thread}} & & \\
+-- & {\bf \htmlref{self}{systemdict:self}} & thread & Get a thread object for
+the running thread. \\
 \hline
-& {\bf \htmlref{timedwait}{systemdict:timedwait}} & & \\
+thread & {\bf \htmlref{join}{systemdict:join}} & -- & Wait for thread to
+exit. \\
 \hline
-& {\bf \htmlref{unlock}{systemdict:unlock}} & & \\
+thread & {\bf \htmlref{detach}{systemdict:detach}} & -- & Detach thread. \\
 \hline
-& {\bf \htmlref{yield}{systemdict:yield}} & & \\
+-- & {\bf \htmlref{yield}{systemdict:yield}} & -- & Voluntarily yield the
+processor. \\
 \hline
-& {\bf \htmlref{trylock}{systemdict:trylock}} & & \\
-\hline
-& {\bf \htmlref{signal}{systemdict:signal}} & & \\
-\hline
-& {\bf \htmlref{self}{systemdict:self}} & & \\
-\hline
-& {\bf \htmlref{setlocking}{systemdict:setlocking}} & & \\
-\hline
-& {\bf \htmlref{mutex}{systemdict:mutex}} & & \\
+-- & {\bf \htmlref{mutex}{systemdict:mutex}} & mutex & Create a mutex. \\
 \hline
 mutex proc & {\bf \htmlref{monitor}{systemdict:mutex}} & -- & Evaluate an object
 under the protection of a mutex. \\
 \hline
-& {\bf \htmlref{lock}{systemdict:lock}} & & \\
+mutex & {\bf \htmlref{lock}{systemdict:lock}} & -- & Acquire mutex. \\
 \hline
-& {\bf \htmlref{join}{systemdict:join}} & & \\
+mutex & {\bf \htmlref{trylock}{systemdict:trylock}} & boolean & Try to acquire
+mutex. \\
 \hline
-& {\bf \htmlref{detach}{systemdict:detach}} & & \\
+mutex & {\bf \htmlref{unlock}{systemdict:unlock}} & -- & Release mutex. \\
+\hline
+-- & {\bf \htmlref{condition}{systemdict:condition}} & condition & Create a
+condition variable. \\
+\hline
+condition mutex & {\bf \htmlref{wait}{systemdict:wait}} & -- & Wait on
+condition. \\
+\hline
+& {\bf \htmlref{timedwait}{systemdict:timedwait}} & & \\
+\hline
+& {\bf \htmlref{signal}{systemdict:signal}} & & \\
+\hline
+& {\bf \htmlref{broadcast}{systemdict:broadcast}} & & \\
+\hline
+& {\bf \htmlref{setlocking}{systemdict:setlocking}} & & \\
 \hline
 object & {\bf \htmlref{lcheck}{systemdict:lcheck}} & boolean & Implicitly
 locked? \\
 \hline
 & {\bf \htmlref{currentlocking}{systemdict:currentlocking}} & & \\
-\hline
-& {\bf \htmlref{broadcast}{systemdict:broadcast}} & & \\
-\hline
-& {\bf \htmlref{condition}{systemdict:condition}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Miscellaneous operators} \\
 \hline \hline
@@ -3263,23 +3273,22 @@ onyx:1>
 	\end{description}
 \label{systemdict:condition}
 \index{condition@\onyxop{}{condition}{}}
-\item[{\onyxop{--}{condition}{--}}: ]
+\item[{\onyxop{--}{condition}{condition}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[condition: ]
+			A condition object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Create a condition object.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> condition 1 sprint
+-condition-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:copy}
@@ -3667,23 +3676,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:detach}
 \index{detach@\onyxop{}{detach}{}}
-\item[{\onyxop{--}{detach}{--}}: ]
+\item[{\onyxop{thread}{detach}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[thread: ]
+			A thread object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Detach \oparg{thread} so that its resources will be
+		automatically reclaimed after it exits.  A thread may only be
+		detached or joined once; any attempt to do so more than once
+		results in undefined behavior (likely crash).
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2) {add 1 sprint self detach} thread
+3
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:dict}
@@ -4610,23 +4625,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:join}
 \index{join@\onyxop{}{join}{}}
-\item[{\onyxop{--}{join}{--}}: ]
+\item[{\onyxop{thread}{join}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[thread: ]
+			A thread object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Wait for \oparg{thread} to exit.  A thread may only be detached
+		or joined once; any attempt to do so more than once results in
+		undefined behavior (likely crash).
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2) {add 1 sprint} thread join `Done\n' print flush
+3
+Done
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:known}
@@ -4811,23 +4832,27 @@ onyx:1>
 	\end{description}
 \label{systemdict:lock}
 \index{lock@\onyxop{}{lock}{}}
-\item[{\onyxop{--}{lock}{--}}: ]
+\item[{\onyxop{mutex}{lock}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mutex: ]
+			A mutex object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Acquire \oparg{mutex}, waiting if necessary.  Attempting to
+		acquire \oparg{mutex} recursively will result in undefined
+		behavior (likely deadlock or crash).
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mutex dup lock unlock
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:loop}
@@ -5036,23 +5061,22 @@ onyx:0>
 	\end{description}
 \label{systemdict:mutex}
 \index{mutex@\onyxop{}{mutex}{}}
-\item[{\onyxop{--}{mutex}{--}}: ]
+\item[{\onyxop{--}{mutex}{mutex}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mutex: ]
+			A mutex object.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Create a mutex.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mutex 1 sprint
+-mutex-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ne}
@@ -5860,23 +5884,22 @@ onyx:1>
 	\end{description}
 \label{systemdict:self}
 \index{self@\onyxop{}{self}{}}
-\item[{\onyxop{--}{self}{--}}: ]
+\item[{\onyxop{--}{self}{thread}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[thread: ]
+			A thread object that corresponds to the running thread.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a thread object for the running thread.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> self 1 sprint
+-thread-
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setlocking}
@@ -6583,23 +6606,34 @@ onyx:0>
 	\end{description}
 \label{systemdict:thread}
 \index{thread@\onyxop{}{thread}{}}
-\item[{\onyxop{--}{thread}{--}}: ]
+\item[{\onyxop{stack entry}{thread}{thread}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A stack that contains the contents for the new thread's
+			ostack.
+		\item[entry: ]
+			An initial object to execute in the new thread.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[thread: ]
+			A thread object that corresponds to the new thread.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Create and run a new thread.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> (1 2) {add 1 sprint} thread join `Done\n' print flush
+3
+Done
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:throw}
@@ -6775,23 +6809,35 @@ onyx:0>
 	\end{description}
 \label{systemdict:trylock}
 \index{trylock@\onyxop{}{trylock}{}}
-\item[{\onyxop{--}{trylock}{--}}: ]
+\item[{\onyxop{mutex}{trylock}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mutex: ]
+			A mutex object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			If false, \oparg{mutex} was successfully acquired.
+			Otherwise the mutex acquisition failed.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Try to acquire \oparg{mutex}, but return a failure immediately
+		if \oparg{mutex} cannot be acquired, rather than blocking.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mutex dup 
+onyx:2> trylock 1 sprint
+false
+onyx:1> trylock 1 sprint
+true
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:type}
@@ -6891,23 +6937,26 @@ onyx:0>
 	\end{description}
 \label{systemdict:unlock}
 \index{unlock@\onyxop{}{unlock}{}}
-\item[{\onyxop{--}{unlock}{--}}: ]
+\item[{\onyxop{mutex}{unlock}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mutex: ]
+			A mutex object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Unlock \oparg{mutex}.  Unlocking a mutex that the running thread
+		does not own will result in undefined behavior (likely crash).
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> mutex dup lock unlock
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:version}
@@ -6933,23 +6982,35 @@ onyx:1>
 	\end{description}
 \label{systemdict:wait}
 \index{wait@\onyxop{}{wait}{}}
-\item[{\onyxop{--}{wait}{--}}: ]
+\item[{\onyxop{condition mutex}{wait}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[condition: ]
+			A condition object.
+		\item[mutex: ]
+			A mutex object that this thread currently owns.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Wait on \oparg{condition}.  \oparg{mutex} is atomically released
+		when the current thread blocks, then acquired again before the
+		current thread runs again.  Using a mutex that the current
+		thread does not own will result in undefined behavior (likely
+		crash).
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> condition mutex dup lock ostack
+onyx:3> {dup lock exch signal unlock}
+onyx:4> thread 3 1 roll
+onyx:3> dup 3 1 roll
+onyx:4> wait unlock join
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:waitpid}
@@ -7117,21 +7178,17 @@ onyx:0>
 \index{yield@\onyxop{}{yield}{}}
 \item[{\onyxop{--}{yield}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Vuluntarily yield the processor, so that another thread or
+		process may be run.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 100000 {1 add yield} repeat 1 sprint
+100000
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \end{description}
