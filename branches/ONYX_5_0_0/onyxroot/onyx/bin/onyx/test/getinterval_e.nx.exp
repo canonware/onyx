@@ -1,0 +1,3 @@
+Test begin
+Error $typecheck
+ostack: (-array- 1 -mark-)
