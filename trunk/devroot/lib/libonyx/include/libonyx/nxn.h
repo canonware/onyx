@@ -40,15 +40,21 @@ typedef enum
 #ifdef CW_POSIX
     NXN_atime,
 #endif
+    NXN_bdup,
     NXN_begin,
+    NXN_bidup,
     NXN_bind,
 #ifdef CW_POSIX
     NXN_bindsocket,
+#endif
+    NXN_bipop,
+#ifdef CW_POSIX
     NXN_blksize,
     NXN_blocks,
 #endif
     NXN_booleantype,
     NXN_bpop,
+    NXN_bpush,
 #ifdef CW_THREADS
     NXN_broadcast,
 #endif
@@ -344,7 +350,11 @@ typedef enum
 #ifdef CW_REAL
     NXN_round,
 #endif
+    NXN_sbdup,
+    NXN_sbidup,
+    NXN_sbipop,
     NXN_sbpop,
+    NXN_sbpush,
     NXN_sclear,
     NXN_scleartomark,
     NXN_scount,

@@ -41,15 +41,21 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "atime",
 #endif
+    "bdup",
     "begin",
+    "bidup",
     "bind",
 #ifdef CW_POSIX
     "bindsocket",
+#endif
+    "bipop",
+#ifdef CW_POSIX
     "blksize",
     "blocks",
 #endif
     "booleantype",
     "bpop",
+    "bpush",
 #ifdef CW_THREADS
     "broadcast",
 #endif
@@ -345,7 +351,11 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_REAL
     "round",
 #endif
+    "sbdup",
+    "sbidup",
+    "sbipop",
     "sbpop",
+    "sbpush",
     "sclear",
     "scleartomark",
     "scount",

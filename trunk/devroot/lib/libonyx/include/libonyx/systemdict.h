@@ -39,7 +39,13 @@ systemdict_atan(cw_nxo_t *a_thread);
 #endif
 
 void
+systemdict_bdup(cw_nxo_t *a_thread);
+
+void
 systemdict_begin(cw_nxo_t *a_thread);
+
+void
+systemdict_bidup(cw_nxo_t *a_thread);
 
 void
 systemdict_bind(cw_nxo_t *a_thread);
@@ -50,7 +56,13 @@ systemdict_bindsocket(cw_nxo_t *a_thread);
 #endif
 
 void
+systemdict_bipop(cw_nxo_t *a_thread);
+
+void
 systemdict_bpop(cw_nxo_t *a_thread);
+
+void
+systemdict_bpush(cw_nxo_t *a_thread);
 
 #ifdef CW_THREADS
 void
@@ -560,7 +572,19 @@ systemdict_round(cw_nxo_t *a_thread);
 #endif
 
 void
+systemdict_sbdup(cw_nxo_t *a_thread);
+
+void
+systemdict_sbidup(cw_nxo_t *a_thread);
+
+void
+systemdict_sbipop(cw_nxo_t *a_thread);
+
+void
 systemdict_sbpop(cw_nxo_t *a_thread);
+
+void
+systemdict_sbpush(cw_nxo_t *a_thread);
 
 void
 systemdict_sclear(cw_nxo_t *a_thread);
