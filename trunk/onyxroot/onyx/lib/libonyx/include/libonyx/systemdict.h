@@ -53,12 +53,14 @@ systemdict_catenate(cw_nxo_t *a_thread);
 #ifdef CW_POSIX
 void
 systemdict_cd(cw_nxo_t *a_thread);
+#endif
 
 #ifdef CW_REAL
 void
 systemdict_ceiling(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_POSIX
 void
 systemdict_chmod(cw_nxo_t *a_thread);
 
