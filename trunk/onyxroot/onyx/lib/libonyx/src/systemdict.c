@@ -8256,7 +8256,7 @@ systemdict_path(cw_nxo_t *a_thread)
 	buf[len] = '\0';
 
 	/* See if an executable file exists for this path. */
-	if (eaccess(buf, X_OK) == 0)
+	if (access(buf, X_OK) == 0)
 	{
 	    /* Found. */
 	    nxo_string_new(nxo, nxo_thread_currentlocking(a_thread), len);
