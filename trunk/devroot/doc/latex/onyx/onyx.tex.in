@@ -19,7 +19,7 @@
 \input{@abs_srcroot@/doc/latex/onyx/tut}
 
 % Onyx Language Reference.
-\input{@abs_srcroot@/doc/latex/onyx/lang}
+\input{@abs_objroot@/doc/latex/onyx/lang}
 
 % The onyx program.
 \input{@abs_objroot@/bin/onyx/doc/latex/manual}
