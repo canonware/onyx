@@ -114,12 +114,19 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	Do not use inline functions.  This reduces the size of binaries at the
 	expense of performance.
 
+--disable-onyx
+	Use an installed copy of onyx and libonyx rather than building them.
+
 --disable-libedit
-	Do not use the libedit library for interactive command line editing.
-	This reduces the size of the onyx binary, at the expense of the command
-	line editing functionality.  If the onyx binary is rarely used
-	interactively, using this option may make sense.  The documentation does
-	not mention the effects of this option.
+	Do not use the libedit library for interactive onyx command line
+	editing.  This reduces the size of the onyx binary, at the expense of
+	the command line editing functionality.  If the onyx binary is rarely
+	used interactively, using this option may make sense.  The documentation
+	does not mention the effects of this option.
+
+--disable-slate
+	Do not build slate.  This option has no meaning for distributions that
+	do not include slate.
 
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the

@@ -1,3 +1,7 @@
+1970-01-01  Jason Evans  <jasone@canonware.com>
+
+	* configure.in: Add the --disable-onyx and --disable-slate flags.
+
 2001-11-09  Jason Evans  <jasone@canonware.com>
 
 	* configure.in: Add the --with-docs flag to cleanly avoid building

@@ -42,8 +42,14 @@ CW_ENABLE_POSIX
 dnl Enable inline functions by default.
 CW_ENABLE_INLINES
 
+dnl Build onyx and libonyx by default.
+CW_ENABLE_ONYX
+
 dnl Use libedit by default.
 CW_ENABLE_LIBEDIT
+
+dnl Build slate and modslate by default.
+CW_ENABLE_SLATE
 
 dnl Do not compile with debugging by default.
 CW_DISABLE_DEBUG
@@ -62,7 +68,9 @@ fi
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
 dnl works on the link line (-lonyx -ledit).
-CW_BUILD_LIB(libonyx, lib_onyx)
+if test "x$enable_onyx" = "x1" ; then
+  CW_BUILD_LIB(libonyx, lib_onyx)
+fi
 if test "x$enable_libedit" = "x1" ; then
   CW_BUILD_LIB(libedit, lib_edit)
 fi
@@ -80,11 +88,15 @@ if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
   if test "x$GTKCONFIG" != "x" ; then
     CW_BUILD_MOD(modgtk, mod_gtk)
   fi
-  CW_BUILD_MOD(modslate, mod_slate)
+  if test "x$enable_slate" = "x1" ; then
+    CW_BUILD_MOD(modslate, mod_slate)
+  fi
 fi
 
 dnl Look for binaries.
-CW_BUILD_BIN(onyx, bin_onyx)
+if test "x$enable_onyx" = "x1" ; then
+  CW_BUILD_BIN(onyx, bin_onyx)
+fi
 if test "x$build_modslate" = "xyes" ; then
   CW_BUILD_BIN(slate, bin_slate)
 fi
@@ -100,6 +112,7 @@ case "${host}" in
   *-*-darwin*)
 	AC_DEFINE(_CW_OS_DARWIN, )
 	abi="macho"
+	CFLAGS="$CFLAGS -fno-common -no-cpp-precomp"
 	;;
   *-*-freebsd*)
 	AC_DEFINE(_CW_OS_FREEBSD, )
@@ -146,11 +159,6 @@ mkdir -p $objdir/test
 AC_SUBST(VERIFY)
 
 dnl Find libraries.
-
-if test "x$enable_libedit" = "x1" -a "x$build_libedit" = "xyes" ; then
-  AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
-    AC_MSG_ERROR(Cannot find the curses library))
-fi
 
 dnl Define preprocessor macros.
 
@@ -235,6 +243,14 @@ if test "x$build_onyx" = "xyes" ; then
   done
   AC_DEFINE_UNQUOTED(_CW_TONYX_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(_CW_TONYX_MPATH, "$tmpath")
+fi
+
+if test "$build_mod_slate" = "xyes" ; then
+  if test "x$enable_libedit" != "x1" ; then
+    AC_CHECK_LIB(ncurses, tigetstr, LIBS="$LIBS", \
+      AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
+        AC_MSG_ERROR(Cannot find the curses library)))
+  fi
 fi
 
 dnl 

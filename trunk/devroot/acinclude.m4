@@ -169,6 +169,32 @@ if test "x$enable_inlines" = "x1" ; then
 fi
 ])
 
+dnl Build onyx and libonyx by default.  At a minimum, find an existing
+dnl installation.
+AC_DEFUN(CW_ENABLE_ONYX,
+[
+AC_ARG_ENABLE(onyx, [  --disable-onyx          Do not build onyx],
+if test "x$enable_onyx" = "xno" ; then
+  enable_onyx="0"
+else
+  enable_onyx="1"
+fi
+,
+enable_onyx="1"
+)
+if test "x$enable_onyx" = "x0" ; then
+  AC_CHECK_HEADERS(libonyx/libonyx.h, , \
+    AC_MSG_ERROR(Cannot find libonyx/libonyx.h))
+  AC_CHECK_LIB(onyx, libonyx_init, LIBS="$LIBS", \
+    AC_MSG_ERROR(Cannot find libonyx))
+fi
+
+AC_SUBST(enable_onyx)
+if test "x$enable_onyx" = "x1" ; then
+  AC_DEFINE(_CW_USE_ONYX)
+fi
+])
+
 dnl Use libedit by default.
 AC_DEFUN(CW_ENABLE_LIBEDIT,
 [
@@ -183,13 +209,32 @@ enable_libedit="1"
 )
 AC_CHECK_HEADERS(curses.h, , enable_libedit="0")
 AC_CHECK_HEADERS(term.h, , enable_libedit="0")
-AC_SEARCH_LIBS(tigetflag, curses, , enable_libedit="0")
-AC_SEARCH_LIBS(tigetnum, curses, , enable_libedit="0")
-AC_SEARCH_LIBS(tigetstr, curses, , enable_libedit="0")
+AC_SEARCH_LIBS(tigetflag, ncurses curses, , enable_libedit="0")
+AC_SEARCH_LIBS(tigetnum, ncursese curses, , enable_libedit="0")
+AC_SEARCH_LIBS(tigetstr, ncurses curses, , enable_libedit="0")
 
 AC_SUBST(enable_libedit)
 if test "x$enable_libedit" = "x1" ; then
   AC_DEFINE(_CW_USE_LIBEDIT)
+fi
+])
+
+dnl Build slate and modslate by default.
+AC_DEFUN(CW_ENABLE_SLATE,
+[
+AC_ARG_ENABLE(slate, [  --disable-slate         Do not build slate],
+if test "x$enable_slate" = "xno" ; then
+  enable_slate="0"
+else
+  enable_slate="1"
+fi
+,
+enable_slate="1"
+)
+
+AC_SUBST(enable_slate)
+if test "x$enable_slate" = "x1" ; then
+  AC_DEFINE(_CW_USE_SLATE)
 fi
 ])
 
