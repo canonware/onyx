@@ -126,25 +126,25 @@ main()
 	{
 		cw_ch_t		*ch;
 		cw_chi_t	*chi;
-		cw_pezz_t	*chi_pezz;
+		cw_pool_t	*chi_pool;
 		char		*a = "a string";
 		char		*b = "A string";
 		char		*c = "two of these";
 		char		*d = "two of these\0foo";
 		char		*v;
 
-		chi_pezz = pezz_new(NULL, cw_g_mem, sizeof(cw_chi_t), 10);
-		_cw_check_ptr(chi_pezz);
+		chi_pool = pool_new(NULL, cw_g_mem, sizeof(cw_chi_t));
+		_cw_check_ptr(chi_pool);
 
 		ch = ch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
 		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 4,
 		    ch_string_hash, ch_string_key_comp);
 		_cw_check_ptr(ch);
 
-		ch_insert(ch, a, a, (cw_chi_t *)pezz_get(chi_pezz));
-		ch_insert(ch, b, b, (cw_chi_t *)pezz_get(chi_pezz));
-		ch_insert(ch, c, c, (cw_chi_t *)pezz_get(chi_pezz));
-		ch_insert(ch, d, d, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, a, a, (cw_chi_t *)pool_get(chi_pool));
+		ch_insert(ch, b, b, (cw_chi_t *)pool_get(chi_pool));
+		ch_insert(ch, c, c, (cw_chi_t *)pool_get(chi_pool));
+		ch_insert(ch, d, d, (cw_chi_t *)pool_get(chi_pool));
 
 		_cw_assert(ch_search(ch, "foo", (void **)&v));
 
@@ -161,25 +161,25 @@ main()
 		_cw_assert(v == d);
 
 		while (ch_remove_iterate(ch, NULL, NULL, &chi) == FALSE)
-			pezz_put(chi_pezz, chi);
+			pool_put(chi_pool, chi);
 		
 		ch_delete(ch);
-		pezz_delete(chi_pezz);
+		pool_delete(chi_pool);
 	}
 
 	/* ch_get_iterate(), ch_remove_iterate(). */
 	{
 		cw_ch_t		*ch;
 		cw_chi_t	*chi;
-		cw_pezz_t	*chi_pezz;
+		cw_pool_t	*chi_pool;
 		char		*a = "a string";
 		char		*b = "A string";
 		char		*c = "two of these";
 		char		*d = "two of these\0foo";
 		char		*k, *v;
 
-		chi_pezz = pezz_new(NULL, cw_g_mem, sizeof(cw_chi_t), 10);
-		_cw_check_ptr(chi_pezz);
+		chi_pool = pool_new(NULL, cw_g_mem, sizeof(cw_chi_t));
+		_cw_check_ptr(chi_pool);
 
 		ch = ch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
 		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 4,
@@ -194,7 +194,7 @@ main()
 		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
 		    TRUE);
 
-		ch_insert(ch, a, a, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, a, a, (cw_chi_t *)pool_get(chi_pool));
 		/* Iterate with 1 item. */
 		/* Round 1. */
 		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
@@ -208,9 +208,9 @@ main()
 		_cw_assert(k == a);
 		_cw_assert(v == a);
 
-		ch_insert(ch, b, b, (cw_chi_t *)pezz_get(chi_pezz));
-		ch_insert(ch, c, c, (cw_chi_t *)pezz_get(chi_pezz));
-		ch_insert(ch, d, d, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, b, b, (cw_chi_t *)pool_get(chi_pool));
+		ch_insert(ch, c, c, (cw_chi_t *)pool_get(chi_pool));
+		ch_insert(ch, d, d, (cw_chi_t *)pool_get(chi_pool));
 
 		/* Iterate with 4 items. */
 		/* Round 1. */
@@ -264,25 +264,25 @@ main()
 		/* Remove. */
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		pezz_put(chi_pezz, chi);
+		pool_put(chi_pool, chi);
 		_cw_assert(k == b);
 		_cw_assert(v == b);
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		pezz_put(chi_pezz, chi);
+		pool_put(chi_pool, chi);
 		_cw_assert(k == c);
 		_cw_assert(v == c);
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		pezz_put(chi_pezz, chi);
+		pool_put(chi_pool, chi);
 		_cw_assert(k == d);
 		_cw_assert(v == d);
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		pezz_put(chi_pezz, chi);
+		pool_put(chi_pool, chi);
 		_cw_assert(k == a);
 		_cw_assert(v == a);
 
@@ -291,7 +291,7 @@ main()
 		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v));
 
 		ch_delete(ch);
-		pezz_delete(chi_pezz);
+		pool_delete(chi_pool);
 	}
 
 	out_put(out_err, "Test end\n");
