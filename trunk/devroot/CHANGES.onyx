@@ -1,3 +1,7 @@
+2003-03-21 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 4.4.1 released.
+
 2003-03-20 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_send() : Loop when short
