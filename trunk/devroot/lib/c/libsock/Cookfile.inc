@@ -31,7 +31,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = sock_p.h sockb_p.h socks_p.h;
+  local priv_incs = ;
   priv_incs = [fromto % [srcdir]/lib/c/libsock/include/libsock/% [priv_incs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs];

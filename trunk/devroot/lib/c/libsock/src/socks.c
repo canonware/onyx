@@ -15,7 +15,6 @@
  ****************************************************************************/
 
 #include "../include/libsock/libsock.h"
-#include "../include/libsock/socks_p.h"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -25,6 +24,16 @@
 #include <limits.h>
 
 #include "../include/libsock/sockb_l.h"
+
+#define _LIBSOCK_SOCKS_MAGIC 0x19730803
+
+struct cw_socks_s {
+#ifdef _LIBSOCK_DBG
+	cw_uint32_t magic;
+#endif
+	cw_bool_t is_listening;
+	int     sockfd;
+};
 
 cw_socks_t *
 socks_new(void)

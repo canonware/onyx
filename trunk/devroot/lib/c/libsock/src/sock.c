@@ -21,9 +21,53 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "../include/libsock/sock_p.h"
 #include "../include/libsock/sock_l.h"
 #include "../include/libsock/sockb_l.h"
+
+#ifdef _LIBSOCK_DBG
+#define _LIBSOCK_SOCK_MAGIC 0x12348765
+#endif
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_sock : Pointer to a sock.
+ *
+ * a_init : FALSE == use a_sockfd as is, TRUE == initialize a_sockfd.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : [gs]et_sockopt() error.
+ *               : fcntl() error.
+ *
+ * <<< Description >>>
+ *
+ * Set socket options for a_sock.
+ *
+ ****************************************************************************/
+static cw_bool_t sock_p_config_socket(cw_sock_t *a_sock, cw_bool_t a_init);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_sock : Pointer to a sock.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : fcntl() error.
+ *               : close() error.
+ *               : a_sock is not open.
+ *
+ * <<< Description >>>
+ *
+ * Disconnect a_sock.
+ *
+ ****************************************************************************/
+static cw_bool_t sock_p_disconnect(cw_sock_t *a_sock);
 
 cw_sock_t *
 sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
