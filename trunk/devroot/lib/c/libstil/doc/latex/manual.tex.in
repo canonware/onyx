@@ -87,6 +87,7 @@ defines the following exceptions:
 \end{description}
 
 \section{Integration issues}
+\subsection{Thread creation}
 \libname{libstil} relies on \libname{libstash} for a number of features.  In
 most cases, \libname{libstash} quietly does its job behind the scenes,
 regardless of whether the application directly uses its functionality.  However,
@@ -105,7 +106,14 @@ collection requires stripping significant functionality out of
 \libname{libstil}.  If you decide that you need to go this route, the author
 would be interested in hearing from you; the work involved in implementing
 synchronous garbage collection seems not worth the effort, considering the low
-likelihood of anyone ever needing to use \libname{libstil} in this mode.
+likelihood of anyone ever needing to use \libname{libstil} in such a
+configuration.
+
+\subsection{Interrupted system calls}
+As mentioned above, \libname{libstil} uses thread suspension and resumption to
+implement garbage collection.  This has the side-effect of making interrupted
+system calls a real possibility that must always be checked for in the
+application.  See \htmlref{\classname{thd}}{thd} for more details.
 
 \section{API}
 \begin{description}

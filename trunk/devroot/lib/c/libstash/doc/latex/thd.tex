@@ -16,6 +16,20 @@
 \label{thd}
 \index{\classname{thd}{}}
 
+The \classname{thd} class implements a wrapper around the system threads library
+(POSIX threads only, so far).  In most regards, this is a thin wrapper around
+the normal threads functionality provided by the system, but some extra
+information is kept in order to allow implmentation of thread
+suspension/resumption, ``critical sections'', and ``single sections''.
+
+In most cases, the additional functionality is implemented with the aid of
+signals.  In all cases, if any of the additional functionality is utilized, the
+application must be careful to detect interrupted system calls.  At least the
+following system calls can be interrupted: \cfunc{read}{}, \cfunc{write}{},
+\cfunc{sendto}{}, \cfunc{recvfrom}{}, \cfunc{sendmsg}{} and \cfunc{recvmsg}{},
+\cfunc{ioctl}{}, and \cfunc{wait}{}.  See the system documentation for
+additional information.
+
 \subsubsection{dbg symbols}
 
 \subsubsection{API}
