@@ -1,5 +1,8 @@
 2001-02-06  Jason Evans  <jasone@canonware.com>
 
+	* src/libstash.c (libstash_init): Set the default file descriptor
+	for cw_g_out to 1 (stdout).
+
 	* include/libstash/out.h: Rename out_[gs]et_default_fd() to
 	out_default_fd_[gs]et().
 
