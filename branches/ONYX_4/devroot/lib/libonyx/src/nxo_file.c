@@ -1251,15 +1251,23 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 #ifdef CW_POSIX_FILE
 	    case FILE_POSIX:
 	    {
-		while ((count = write(file->f.p.fd, a_str, a_len)) == -1)
-		{
-		    if (errno != EINTR)
+		retcount = 0;
+		do {
+		    while ((count = write(file->f.p.fd, &a_str[retcount],
+					  a_len - retcount)) == -1)
 		    {
-			retval = NXN_ioerror;
-			goto RETURN;
+			if (errno != EINTR)
+			{
+			    retval = NXN_ioerror;
+			    goto RETURN;
+			}
 		    }
-		}
-		retcount = count;
+
+		    retcount += count;
+		    /* Writing to blocking files must always succeed in full,
+		     * unless there is an ioerror. */
+		} while (retcount < a_len && file->nonblocking == FALSE);
+
 		break;
 	    }
 #endif
