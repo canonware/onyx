@@ -1051,7 +1051,6 @@ stilo_boolean_get(cw_stilo_t *a_stilo)
 {
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_BOOLEAN);
 
 	return a_stilo->o.boolean.val;
 }
@@ -1534,7 +1533,7 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t a_syntactic,
  * integer.
  */
 void
-stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_sint64_t a_val)
+stilo_integer_new(cw_stilo_t *a_stilo, cw_sint64_t a_val)
 {
 	stilo_p_new(a_stilo, STILOT_INTEGER);
 

@@ -48,6 +48,11 @@ extern  "C" {
 #define	_CW_XEPV_UNREGISTERED		-152
 #define	_CW_XEPV_VMERROR		-153
 
+/* For the exit operator. */
+#define	_CW_XEPV_EXIT			-154
+/* For the stop operator. */
+#define	_CW_XEPV_STOP			-155
+
 #include "libstil_defs.h"
 #include "libstil_incs.h"
 

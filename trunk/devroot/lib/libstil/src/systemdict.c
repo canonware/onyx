@@ -374,19 +374,39 @@ systemdict_copy(cw_stilt_t *a_stilt)
 void
 systemdict_count(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_push(stack);
+	stilo_integer_new(stilo, stils_count(stack) - 1);
 }
 
 void
 systemdict_countdictstack(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *dstack;
+	cw_stilo_t	*stilo;
+
+	dstack = stilt_dict_stack_get(a_stilt);
+	ostack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_push(ostack);
+	stilo_integer_new(stilo, stils_count(dstack));
 }
 
 void
 systemdict_countexecstack(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*stilo;
+
+	estack = stilt_exec_stack_get(a_stilt);
+	ostack = stilt_data_stack_get(a_stilt);
+
+	stilo = stils_push(ostack);
+	stilo_integer_new(stilo, stils_count(estack));
 }
 
 void
@@ -575,16 +595,16 @@ systemdict_exch(cw_stilt_t *a_stilt)
 void
 systemdict_exec(cw_stilt_t *a_stilt)
 {
-	cw_stils_t	*dstack, *estack;
+	cw_stils_t	*ostack, *estack;
 	cw_stilo_t	*orig, *new;
 
-	dstack = stilt_data_stack_get(a_stilt);
+	ostack = stilt_data_stack_get(a_stilt);
 	estack = stilt_exec_stack_get(a_stilt);
 
-	orig = stils_get(dstack, 0);
+	orig = stils_get(ostack, 0);
 	new = stils_push(estack);
 	stilo_dup(new, orig, a_stilt);
-	stils_pop(dstack, a_stilt, 1);
+	stils_pop(ostack, a_stilt, 1);
 
 	stilt_exec(a_stilt);
 }
@@ -610,7 +630,7 @@ systemdict_executive(cw_stilt_t *a_stilt)
 void
 systemdict_exit(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	xep_throw(_CW_XEPV_EXIT);
 }
 
 void
@@ -675,7 +695,99 @@ systemdict_flushfile(cw_stilt_t *a_stilt)
 void
 systemdict_for(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*exec, *stilo, *tstilo;
+	cw_sint64_t	i, inc, limit;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	estack = stilt_exec_stack_get(a_stilt);
+
+	exec = stils_get(ostack, 0);
+
+	stilo = stils_get_down(ostack, exec);
+	if (stilo == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	if (stilo_type_get(stilo) != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
+	limit = stilo_integer_get(stilo);
+
+	stilo = stils_get_down(ostack, stilo);
+	if (stilo == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	if (stilo_type_get(stilo) != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
+	inc = stilo_integer_get(stilo);
+
+	stilo = stils_get_down(ostack, stilo);
+	if (stilo == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	if (stilo_type_get(stilo) != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
+	i = stilo_integer_get(stilo);
+
+	/*
+	 * Use the execution stack for temporary storage of the stilo to be
+	 * executed, in order to be GC-safe.
+	 */
+	tstilo = stils_push(estack);
+	stilo_dup(tstilo, exec, a_stilt);
+
+	stils_pop(ostack, a_stilt, 4);
+
+	/*
+	 * Catch an exit exception, if thrown, but do not continue executing the
+	 * loop.
+	 */
+	xep_begin();
+	xep_try {
+		if (limit >= 0) {
+			for (; i <= limit; i += inc) {
+				/*
+				 * Dup the object to execute onto the execution
+				 * stack.
+				 */
+				stilo = stils_push(estack);
+				stilo_dup(stilo, tstilo, a_stilt);
+
+				/*
+				 * Push the control variable onto the data
+				 * stack.
+				 */
+				stilo = stils_push(ostack);
+				stilo_integer_new(stilo, i);
+
+				stilt_exec(a_stilt);
+			}
+		} else {
+			for (; i >= limit; i += inc) {
+				/*
+				 * Dup the object to execute onto the execution
+				 * stack.
+				 */
+				stilo = stils_push(estack);
+				stilo_dup(stilo, tstilo, a_stilt);
+
+				/*
+				 * Push the control variable onto the data
+				 * stack.
+				 */
+				stilo = stils_push(ostack);
+				stilo_integer_new(stilo, i);
+
+				stilt_exec(a_stilt);
+			}
+		}
+	}
+	xep_catch(_CW_XEPV_EXIT) {
+		xep_handled();
+
+		/* Clean up whatever mess was left on the execution stack. */
+		while (stils_get(estack, 0) != tstilo)
+			stils_pop(estack, a_stilt, 1);
+	}
+	xep_end();
+
+	stils_pop(estack, a_stilt, 1);
 }
 
 void
@@ -723,13 +835,58 @@ systemdict_gt(cw_stilt_t *a_stilt)
 void
 systemdict_if(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack;
+	cw_stilo_t	*cond, *exec;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	exec = stils_get(ostack, 0);
+	cond = stils_get_down(ostack, exec);
+	if (cond == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	if (stilo_type_get(cond) != STILOT_BOOLEAN)
+		xep_throw(_CW_XEPV_TYPECHECK);
+
+	if (stilo_boolean_get(cond)) {
+		cw_stils_t	*estack;
+		cw_stilo_t	*stilo;
+
+		estack = stilt_exec_stack_get(a_stilt);
+		stilo = stils_push(estack);
+		stilo_move(stilo, exec);
+		stils_pop(ostack, a_stilt, 2);
+		stilt_exec(a_stilt);
+	} else
+		stils_pop(ostack, a_stilt, 2);
 }
 
 void
 systemdict_ifelse(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*cond, *exec_if, *exec_else, *stilo;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	estack = stilt_exec_stack_get(a_stilt);
+
+	exec_else = stils_get(ostack, 0);
+
+	exec_if = stils_get_down(ostack, exec_else);
+	if (exec_if == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+
+	cond = stils_get_down(ostack, exec_if);
+	if (cond == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	if (stilo_type_get(cond) != STILOT_BOOLEAN)
+		xep_throw(_CW_XEPV_TYPECHECK);
+
+	stilo = stils_push(estack);
+	if (stilo_boolean_get(cond))
+		stilo_move(stilo, exec_if);
+	else
+		stilo_move(stilo, exec_else);
+	stils_pop(ostack, a_stilt, 3);
+	stilt_exec(a_stilt);
 }
 
 void
@@ -777,7 +934,45 @@ systemdict_lock(cw_stilt_t *a_stilt)
 void
 systemdict_loop(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*exec, *stilo, *tstilo;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	estack = stilt_exec_stack_get(a_stilt);
+
+	exec = stils_get(ostack, 0);
+
+	/*
+	 * Use the execution stack for temporary storage of the stilo to be
+	 * executed, in order to be GC-safe.
+	 */
+	tstilo = stils_push(estack);
+	stilo_dup(tstilo, exec, a_stilt);
+
+	stils_pop(ostack, a_stilt, 1);
+
+	/*
+	 * Catch an exit exception, if thrown, but do not continue executing the
+	 * loop.
+	 */
+	xep_begin();
+	xep_try {
+		for (;;) {
+			stilo = stils_push(estack);
+			stilo_dup(stilo, tstilo, a_stilt);
+			stilt_exec(a_stilt);
+		}
+	}
+	xep_catch(_CW_XEPV_EXIT) {
+		xep_handled();
+
+		/* Clean up whatever mess was left on the execution stack. */
+		while (stils_get(estack, 0) != tstilo)
+			stils_pop(estack, a_stilt, 1);
+	}
+	xep_end();
+
+	stils_pop(estack, a_stilt, 1);
 }
 
 void
@@ -950,7 +1145,6 @@ systemdict_prompt(cw_stilt_t *a_stilt)
 void
 systemdict_pstack(cw_stilt_t *a_stilt)
 {
-#if (0)
 	cw_stilts_t	stilts;
 	cw_stils_t	*stack;
 	cw_uint32_t	i, count;
@@ -967,18 +1161,6 @@ systemdict_pstack(cw_stilt_t *a_stilt)
 		stils_roll(stack, count, 1);
 	}
 	stilts_delete(&stilts, a_stilt);
-#else
-	cw_stils_t	*stack;
-	cw_stilo_t	*stilo;
-	cw_sint32_t	fd;
-
-	stack = stilt_data_stack_get(a_stilt);
-	fd = stilt_stdout_get(a_stilt);
-
-	for (stilo = stils_get(stack, 0); stilo != NULL; stilo =
-		 stils_get_down(stack, stilo))
-		stilo_print(stilo, fd, TRUE, TRUE);
-#endif
 }
 
 void
@@ -1063,7 +1245,52 @@ systemdict_renamefile(cw_stilt_t *a_stilt)
 void
 systemdict_repeat(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*count, *exec, *stilo, *tstilo;
+	cw_sint64_t	i, cnt;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	estack = stilt_exec_stack_get(a_stilt);
+
+	exec = stils_get(ostack, 0);
+	count = stils_get_down(ostack, exec);
+	if (count == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
+	if (stilo_type_get(count) != STILOT_INTEGER)
+		xep_throw(_CW_XEPV_TYPECHECK);
+
+	/*
+	 * Use the execution stack for temporary storage of the stilo to be
+	 * executed, in order to be GC-safe.
+	 */
+	tstilo = stils_push(estack);
+	stilo_dup(tstilo, exec, a_stilt);
+
+	cnt = stilo_integer_get(count);
+	stils_pop(ostack, a_stilt, 2);
+
+	/*
+	 * Catch an exit exception, if thrown, but do not continue executing the
+	 * loop.
+	 */
+	xep_begin();
+	xep_try {
+		for (i = 0; i < cnt; i++) {
+			stilo = stils_push(estack);
+			stilo_dup(stilo, tstilo, a_stilt);
+			stilt_exec(a_stilt);
+		}
+	}
+	xep_catch(_CW_XEPV_EXIT) {
+		xep_handled();
+
+		/* Clean up whatever mess was left on the execution stack. */
+		while (stils_get(estack, 0) != tstilo)
+			stils_pop(estack, a_stilt, 1);
+	}
+	xep_end();
+
+	stils_pop(estack, a_stilt, 1);
 }
 
 void
@@ -1195,13 +1422,50 @@ systemdict_status(cw_stilt_t *a_stilt)
 void
 systemdict_stop(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	xep_throw(_CW_XEPV_STOP);
 }
 
 void
 systemdict_stopped(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*ostack, *estack;
+	cw_stilo_t	*exec, *stilo;
+	cw_bool_t	result = FALSE;
+
+	ostack = stilt_data_stack_get(a_stilt);
+	estack = stilt_exec_stack_get(a_stilt);
+	
+	exec = stils_get(ostack, 0);
+	stilo = stils_push(estack);
+	stilo_dup(stilo, exec, a_stilt);
+	stils_pop(ostack, a_stilt, 1);
+
+	/*
+	 * Point exec to the copy on the execution stack, so that it can be used
+	 * as a marker for execution stack cleanup if the stop operator is
+	 * called.
+	 */
+	exec = stilo;
+
+	/* Catch a stop exception, if thrown. */
+	xep_begin();
+	xep_try {
+		stilt_exec(a_stilt);
+	}
+	xep_catch(_CW_XEPV_STOP) {
+		xep_handled();
+		result = TRUE;
+
+		/* Clean up whatever mess was left on the execution stack. */
+		do {
+			stilo = stils_get(estack, 0);
+			stils_pop(estack, a_stilt, 1);
+		} while (stilo != exec);
+	}
+	xep_end();
+
+	stilo = stils_push(ostack);
+	stilo_boolean_new(stilo, result);
 }
 
 void

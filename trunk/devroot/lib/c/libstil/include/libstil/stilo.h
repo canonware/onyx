@@ -205,8 +205,7 @@ void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 /*
  * integer.
  */
-void		stilo_integer_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    cw_sint64_t a_val);
+void		stilo_integer_new(cw_stilo_t *a_stilo, cw_sint64_t a_val);
 cw_sint64_t	stilo_integer_get(cw_stilo_t *a_stilo);
 void		stilo_integer_set(cw_stilo_t *a_stilo, cw_sint64_t a_val);
 void		stilo_integer_add(const cw_stilo_t *a_a, const cw_stilo_t *a_b,

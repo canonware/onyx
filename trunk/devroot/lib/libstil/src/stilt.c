@@ -205,7 +205,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 		stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil));
 		try_stage = 2;
-		
+
 		dch_new(&retval->name_hash, stilat_mem_get(&retval->stilat),
 		    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
 		    _CW_STILT_NAME_BASE_SHRINK, ch_direct_hash,
@@ -324,29 +324,38 @@ stilt_exec(cw_stilt_t *a_stilt)
 				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
 				break;
 			case STILOT_ARRAY: {
-				cw_uint32_t	i;
+				cw_uint32_t	i, len;
 				cw_stilo_t	*array;
 
-				/*
-				 * Iterate through the array and execute each
-				 * element in turn.
-				 */
-				array = stilo_array_get(stilo);
-				for (i = 0; i < stilo_array_len_get(stilo) - 1;
-				     i++) {
+				len = stilo_array_len_get(stilo);
+				if (len != 0) {
+					/*
+					 * Iterate through the array and execute
+					 * each element in turn.
+					 */
+					array = stilo_array_get(stilo);
+					for (i = 0; i < len - 1; i++) {
+						tstilo =
+						    stils_push(&a_stilt->exec_stils);
+						stilo_dup(tstilo, &array[i],
+						    a_stilt);
+						stilt_exec(a_stilt);
+					}
+					/*
+					 * Make tail recursion safe by replacing
+					 * the array with its last element
+					 * before executing the last element.
+					 */
+					stils_pop(&a_stilt->exec_stils, a_stilt,
+					    1);
 					tstilo =
 					    stils_push(&a_stilt->exec_stils);
 					stilo_dup(tstilo, &array[i], a_stilt);
-					stilt_exec(a_stilt);
+				} else {
+					stils_pop(&a_stilt->exec_stils, a_stilt,
+					    1);
 				}
-				/*
-				 * Make tail recursion safe by replacing the
-				 * array with its last element before executing
-				 * the last element.
-				 */
-				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
-				tstilo = stils_push(&a_stilt->exec_stils);
-				stilo_dup(tstilo, &array[i], a_stilt);
+				
 
 				break;
 			}
@@ -790,7 +799,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 					stilo =
 					    stils_push(&a_stilt->data_stils);
-					stilo_integer_new(stilo, a_stilt, val);
+					stilo_integer_new(stilo, val);
 
 					stilt_p_reset(a_stilt);
 				} else {
@@ -878,7 +887,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 					stilo =
 					    stils_push(&a_stilt->data_stils);
-					stilo_integer_new(stilo, a_stilt, val);
+					stilo_integer_new(stilo, val);
 
 					stilt_p_reset(a_stilt);
 				} else {
