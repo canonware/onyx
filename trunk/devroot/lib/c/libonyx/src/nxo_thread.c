@@ -83,7 +83,7 @@ static void	nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     cw_nxo_threadp_t *a_threadp, cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
     cw_uint8_t *a_suffix, cw_sint32_t a_c);
 static void	nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread);
-static void	nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread);
+static cw_bool_t nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
 static void	nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
 
@@ -1294,7 +1294,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				restart = !restart;
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
-				nxoe_p_thread_integer_accept(a_thread);
+				if (nxoe_p_thread_integer_accept(a_thread)) {
+					/*
+					 * Conversion error.  Accept as a
+					 * name.
+					 */
+					a_thread->m.m.action = ACTION_EXECUTE;
+					nxoe_p_thread_name_accept(a_thread);
+				}
 				token = TRUE;
 				if (restart)
 					goto RESTART;
@@ -1365,8 +1372,14 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				restart = !restart;
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
-				/* Integer. */
-				nxoe_p_thread_integer_accept(a_thread);
+				if (nxoe_p_thread_integer_accept(a_thread)) {
+					/*
+					 * Conversion error.  Accept as a
+					 * name.
+					 */
+					a_thread->m.m.action = ACTION_EXECUTE;
+					nxoe_p_thread_name_accept(a_thread);
+				}
 				token = TRUE;
 				if (restart)
 					goto RESTART;
@@ -1751,45 +1764,93 @@ nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread)
 	a_thread->index = 0;
 }
 
-static void
+static cw_bool_t
 nxoe_p_thread_integer_accept(cw_nxoe_thread_t *a_thread)
 {
-	if (a_thread->index > a_thread->m.n.b_off) {
+	cw_bool_t	retval;
+	cw_uint32_t	ndigits;
+
+	ndigits = a_thread->index - a_thread->m.n.b_off;
+	if (ndigits > 0) {
+		cw_nxo_t	*nxo;
 		cw_nxoi_t	val;
+		cw_uint32_t	i;
+		cw_uint64_t	base, threshold, maxlast, sum, digit;
+		cw_uint8_t	c;
 
 		/*
-		 * Convert string to integer.  Do the conversion before mucking
-		 * with the stack in case the integer has to be converted to a
-		 * name.
+		 * Determine threshold value at which overflow is a risk.  If
+		 * the threshold is exceeded, then overflow occurred.  If the
+		 * threshold value is reached and the next digit exceeds a
+		 * certain value (maxlast), overflow occurred.
 		 */
-		a_thread->tok_str[a_thread->index] = '\0';
-		errno = 0;
+		base = a_thread->m.n.base;
+		if (a_thread->m.n.sign == -1)
+			threshold = 0x8000000000000000ULL;
+		else
+			threshold = 0x7fffffffffffffffULL;
+		maxlast = threshold % base;
+		threshold /= base;
 
-		if (a_thread->m.n.sign != 0) {
-			_cw_assert(a_thread->m.n.b_off > 0);
-			a_thread->tok_str[a_thread->m.n.b_off - 1] =
-			    _CW_NXO_THREAD_GETC(0);
-			a_thread->m.n.b_off--;
+		/*
+		 * Iterate from right to left through the digits.
+		 */
+		sum = 0;
+		for (i = 0; i < ndigits; i++) {
+			c = _CW_NXO_THREAD_GETC(a_thread->m.n.b_off + i);
+			switch (c) {
+			case 'a': case 'b': case 'c': case 'd': case 'e':
+			case 'f': case 'g': case 'h': case 'i': case 'j':
+			case 'k': case 'l': case 'm': case 'n': case 'o':
+			case 'p': case 'q': case 'r': case 's': case 't':
+			case 'u': case 'v': case 'w': case 'x': case 'y':
+			case 'z':
+				digit = 10 + ((cw_uint64_t)(c - 'a'));
+				break;
+			case 'A': case 'B': case 'C': case 'D': case 'E':
+			case 'F': case 'G': case 'H': case 'I': case 'J':
+			case 'K': case 'L': case 'M': case 'N': case 'O':
+			case 'P': case 'Q': case 'R': case 'S': case 'T':
+			case 'U': case 'V': case 'W': case 'X': case 'Y':
+			case 'Z':
+				digit = 10 + ((cw_uint64_t)(c - 'A'));
+				break;
+			case '0': case '1': case '2': case '3': case '4':
+			case '5': case '6': case '7': case '8': case '9':
+				digit = (cw_uint64_t)(c - '0');
+				/* Fall through. */
+			default:
+				break;
+			}
+
+			if ((sum > threshold) || (sum == threshold && digit >
+			    maxlast)) {
+				/* Overflow. */
+				retval = TRUE;
+				goto RETURN;
+			}
+
+			sum *= base;
+			sum += digit;
 		}
 
-		val = strtoll(&a_thread->tok_str[a_thread->m.n.b_off], NULL,
-		    a_thread->m.n.base);
-		if (errno == ERANGE) {
-			/* Number too big or too small.  Accept as a name. */
-			a_thread->m.m.action = ACTION_EXECUTE;
-			nxoe_p_thread_name_accept(a_thread);
-		} else {
-			cw_nxo_t	*nxo;
+		if (a_thread->m.n.sign == -1)
+			val = -sum;
+		else
+			val = sum;
 
-			nxo = nxo_stack_push(&a_thread->ostack);
-			nxo_integer_new(nxo, val);
-			nxoe_p_thread_reset(a_thread);
-		}
+		nxo = nxo_stack_push(&a_thread->ostack);
+		nxo_integer_new(nxo, val);
+		nxoe_p_thread_reset(a_thread);
 	} else {
-		/* No number specified, so a name. */
-		a_thread->m.m.action = ACTION_EXECUTE;
-		nxoe_p_thread_name_accept(a_thread);
+		/* No number specified. */
+		retval = TRUE;
+		goto RETURN;
 	}
+
+	retval = FALSE;
+	RETURN:
+	return retval;
 }
 
 static void

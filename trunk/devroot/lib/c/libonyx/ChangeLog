@@ -2,5 +2,11 @@
 
 	* src/nxo_thread.c (nxoe_p_thread_feed): Support signed radix
 	integers.  The format is <sign><radix>#<value>.  The sign is optional.
+	
+	(nxoe_p_thread_integer_accept): Implement the equivalent of
+	strtoll().  This avoids redundant error checking, since the onyx
+	scanner already assures that all input characters are valid.  Most
+	importantly though, it gets around using Solaris's buggy strtoll()
+	implementation.
 
 	* : Add nxo_hook_data_set().
