@@ -1,3 +1,17 @@
+1999-05-20  J. Owen Evans  <jasone@canonware.com>
+
+	* src/buf.c : Eliminate the bufel class.  The bufel structure
+	still exists, but is only used internally by buf.  All operations
+	on bufel's that had methods are now inlined.
+
+	Make API changes to buf to adjust to the lack of bufel
+	(buf_{pre,ap}pend_bufel() --> buf_{pre,ap}pend_bufc()).
+
+	Require calling of bufc_delete() even after prepending or
+	appending to a buf.  This is necessary to ensure that the
+	reference count for the bufc never reaches zero before the user is
+	done using it explicitly.
+
 1999-05-18  J. Owen Evans  <jasone@canonware.com>
 
 	* include/libstash/buf.h : Remove bufpool.  pezz provides similar

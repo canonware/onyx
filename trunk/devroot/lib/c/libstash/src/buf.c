@@ -148,9 +148,6 @@ buf_delete(cw_buf_t * a_buf)
   
   _cw_check_ptr(a_buf);
 
-  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-	      "%p is_malloced: %s\n",
-	      a_buf, a_buf->is_malloced ? "TRUE" : "FALSE");
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -178,10 +175,8 @@ buf_delete(cw_buf_t * a_buf)
   _cw_free(a_buf->cumulative_index);
   _cw_free(a_buf->iov);
   
-  _cw_marker("Got here");
   if (a_buf->is_malloced)
   {
-    _cw_marker("Got here");
 #ifdef _LIBSTASH_DBG
     bzero(a_buf, sizeof(cw_buf_t));
 #endif
@@ -193,22 +188,10 @@ void
 buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 {
   cw_uint32_t i;
-  char * sub_prefix;
   
   _cw_check_ptr(a_buf);
   _cw_check_ptr(a_prefix);
 
-  sub_prefix = _cw_malloc(strlen(a_prefix) + 1 + 2);
-  if (NULL == sub_prefix)
-  {
-    sub_prefix = "";
-  }
-  else
-  {
-    strcpy(sub_prefix, a_prefix);
-    strcat(sub_prefix, "| | ");
-  }
-  
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -321,7 +304,6 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     mtx_unlock(&a_buf->lock);
   }
 #endif
-  _cw_free(sub_prefix);
 }
 
 cw_uint32_t
@@ -1545,9 +1527,9 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
     a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFEL_MAGIC;
 #endif
     a_buf->bufel_array[a_buf->array_end].beg_offset = 0;
-    a_buf->bufel_array[a_buf->array_end].end_offset = bufc_p_get_size(bufc);
+    a_buf->bufel_array[a_buf->array_end].end_offset = a_length;
     a_buf->bufel_array[a_buf->array_end].bufc = bufc;
-    bufc_p_ref_increment(bufc);
+/*      bufc_p_ref_increment(bufc); */
     
     a_buf->size += a_length;
     a_buf->array_num_valid++;

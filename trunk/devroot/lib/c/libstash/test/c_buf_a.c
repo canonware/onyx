@@ -29,7 +29,7 @@ main()
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
 
-  dbg_register(cw_g_dbg, "mem_verbose");
+/*    dbg_register(cw_g_dbg, "mem_verbose"); */
 
   /* bufc_new(), bufc_delete(), bufc_set_buffer(). */
   {
@@ -335,7 +335,6 @@ main()
 
     buf_delete(&buf);
   }
-  _cw_marker("Got here");
   /* buf_set_uint8(). */
   {
     cw_buf_t buf;
@@ -475,7 +474,6 @@ main()
     
     buf_delete(&buf);
   }
-  _cw_marker("Got here");
 
   /* buf_set_uint32(). */
   {
@@ -619,7 +617,6 @@ main()
     
     buf_delete(&buf);
   }
-  _cw_marker("Got here");
 
   /* buf_set_uint64(). */
   {
@@ -763,7 +760,6 @@ main()
     
     buf_delete(&buf);
   }
-  _cw_marker("Got here");
 
   /* buf_set_range(). */
   {
@@ -772,10 +768,6 @@ main()
     char * str_b = "And following is string B.  Mumble mumble.";
 
     buf = buf_new(NULL, TRUE);
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"buf is %p\n",
-		buf);
-    
     _cw_check_ptr(buf);
 
     _cw_assert(FALSE == buf_set_range(buf, 0, strlen(str_a) + 1,
@@ -789,22 +781,9 @@ main()
 				      str_a, TRUE));
     _cw_assert(FALSE == buf_set_range(buf, 4, strlen(str_b) + 1,
 				      str_b, TRUE));
-    
-    _cw_assert(buf_get_size(buf) == strlen(str_a) + 1);
 
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"buf is %p\n",
-		buf);
-    buf_dump(buf, "blah ");
     buf_delete(buf);
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"buf is %p\n",
-		buf);
   }
-  _cw_marker("Got here");
-    /* XXX */
-    libstash_shutdown();
-    exit(0);
 
   /* buf_prepend_bufc(), buf_append_bufc(),
    * buf_get_size(). */
@@ -882,7 +861,6 @@ main()
     bufc_delete(bufc_p_c);
     buf_delete(buf_p);
   }
-  _cw_marker("Got here");
 
   /* buf_catenate_buf(),
    * buf_get_size(). */
@@ -950,7 +928,6 @@ main()
     buf_delete(buf_p_a);
     buf_delete(buf_p_b);
   }
-  _cw_marker("Got here");
 
   /* buf_catenate_buf(). */
   {
