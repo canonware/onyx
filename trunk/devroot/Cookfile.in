@@ -129,9 +129,9 @@ check_update : tests
 release : docs;
 
 docs : docs_ps docs_pdf docs_html;
-docs_ps : [PS_MANUAL];
-docs_pdf : [PDF_MANUAL];
-docs_html : [HTML_MANUAL];
+docs_ps : [PS_ONYX];
+docs_pdf : [PDF_ONYX];
+docs_html : [HTML_ONYX];
 
 install_bins : [addsuffix _install @bins@];
 install_mods : [addsuffix _install @mods@];

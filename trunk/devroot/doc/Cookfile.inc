@@ -18,10 +18,10 @@
 TEX_SRCS = ;
 FIG_SRCS = ;
 
-T_MANUAL = [objdir]/doc/latex/manual.tex;
-PS_MANUAL = [objdir]/doc/ps/manual.ps;
-PDF_MANUAL = [objdir]/doc/pdf/manual.pdf;
-HTML_MANUAL = [objdir]/doc/html/manual.html;
+T_ONYX = [objdir]/doc/latex/onyx.tex;
+PS_ONYX = [objdir]/doc/ps/onyx.ps;
+PDF_ONYX = [objdir]/doc/pdf/onyx.pdf;
+HTML_ONYX = [objdir]/doc/html/onyx.html;
 
 /* LaTeX source files. */
 {
@@ -40,19 +40,19 @@ HTML_MANUAL = [objdir]/doc/html/manual.html;
 }
 
 install_docs : docs_install_ps docs_install_pdf docs_install_html;
-docs_install_ps : /* [PS_MANUAL] */
+docs_install_ps : /* [PS_ONYX] */
 {
   [INSTALL] -d [PREFIX]/share/onyx/doc/ps;
-  [INSTALL] -m 0444 [PS_MANUAL] [PREFIX]/share/onyx/doc/ps;
+  [INSTALL] -m 0444 [PS_ONYX] [PREFIX]/share/onyx/doc/ps;
 }
 
-docs_install_pdf : /* [PDF_MANUAL] */
+docs_install_pdf : /* [PDF_ONYX] */
 {
   [INSTALL] -d [PREFIX]/share/onyx/doc/pdf;
-  [INSTALL] -m 0444 [PDF_MANUAL] [PREFIX]/share/onyx/doc/pdf;
+  [INSTALL] -m 0444 [PDF_ONYX] [PREFIX]/share/onyx/doc/pdf;
 }
 
-docs_install_html : /* [HTML_MANUAL] */
+docs_install_html : /* [HTML_ONYX] */
 {
   [SHELL] -e;
 data
@@ -81,26 +81,26 @@ dataend
 
 docs_clean :
 {
-  rm -f [objdir]/doc/latex/manual.alg;
-  rm -f [objdir]/doc/latex/manual.aux;
-  rm -f [objdir]/doc/latex/manual.aux-prev;
-  rm -f [objdir]/doc/latex/manual.dvi;
-  rm -f [objdir]/doc/latex/manual.idx;
-  rm -f [objdir]/doc/latex/manual.idx-prev;
-  rm -f [objdir]/doc/latex/manual.ilg;
-  rm -f [objdir]/doc/latex/manual.ind;
-  rm -f [objdir]/doc/latex/manual.lof;
-  rm -f [objdir]/doc/latex/manual.log;
-  rm -f [objdir]/doc/latex/manual.lot;
-  rm -f [objdir]/doc/latex/manual.out;
-  rm -f [objdir]/doc/latex/manual.pdf;
-  rm -f [objdir]/doc/latex/manual.toc;
+  rm -f [objdir]/doc/latex/onyx.alg;
+  rm -f [objdir]/doc/latex/onyx.aux;
+  rm -f [objdir]/doc/latex/onyx.aux-prev;
+  rm -f [objdir]/doc/latex/onyx.dvi;
+  rm -f [objdir]/doc/latex/onyx.idx;
+  rm -f [objdir]/doc/latex/onyx.idx-prev;
+  rm -f [objdir]/doc/latex/onyx.ilg;
+  rm -f [objdir]/doc/latex/onyx.ind;
+  rm -f [objdir]/doc/latex/onyx.lof;
+  rm -f [objdir]/doc/latex/onyx.log;
+  rm -f [objdir]/doc/latex/onyx.lot;
+  rm -f [objdir]/doc/latex/onyx.out;
+  rm -f [objdir]/doc/latex/onyx.pdf;
+  rm -f [objdir]/doc/latex/onyx.toc;
   rm -f [objdir]/doc/latex/texput.log;
 }
 
 docs_distclean :
 {
-  rm -f [objdir]/doc/latex/manual.tex;
+  rm -f [objdir]/doc/latex/onyx.tex;
 }
 
 docs_relclean :
@@ -110,7 +110,7 @@ docs_relclean :
   rm -rf [objdir]/doc/ps;
 }
 
-[HTML_MANUAL] : [PS_MANUAL];
+[HTML_ONYX] : [PS_ONYX];
 
 [objdir]/%0%.ps : [objdir]/%0%.fig
   set mkdir

@@ -1,3 +1,7 @@
+2001-09-15  Jason Evans  <jasone@canonware.com>
+
+	* : Rename the manual from manual.{ps,pdf,html} to onyx.{ps,pdf,html}.
+
 2001-08-19  Jason Evans  <jasone@canonware.com>
 
 	* : Add the --disable-posix-file configure option.  This option

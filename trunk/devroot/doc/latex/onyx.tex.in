@@ -17,7 +17,7 @@
 
 % Onyx Language Reference.
 \clearemptydoublepage
-\input{@abs_srcdir@/doc/latex/onyx}
+\input{@abs_srcdir@/doc/latex/onyx_lang}
 
 % Programs.
 @bin_onyx_manual@\input{@abs_objdir@/bin/onyx/doc/latex/manual}

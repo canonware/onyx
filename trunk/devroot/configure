@@ -544,7 +544,7 @@ objdir=.
 abs_objdir=`pwd`
 
 
-cfgoutputs="Cookfile doc/latex/manual.tex test/verify"
+cfgoutputs="Cookfile doc/latex/onyx.tex test/verify"
 cfghdrs=
 bins=
 mods=
