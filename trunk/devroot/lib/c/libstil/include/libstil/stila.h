@@ -28,19 +28,16 @@ struct cw_stila_s {
 	 * interpreter.
 	 */
 	cw_stilo_t	gcdict;
-	/*
-	 * Pointers to the internals of gcdict.  These are accessed during every
-	 * registration,, and are somewhat costly to access via the dict API
-	 * every time they are needed.
-	 */
-	cw_stilo_t	*gcdict_collections;
-	cw_stilo_t	*gcdict_new;
-	cw_stilo_t	*gcdict_current;
-	cw_stilo_t	*gcdict_maximum;
-	cw_stilo_t	*gcdict_sum;
-	cw_stilo_t	*gcdict_active;
-	cw_stilo_t	*gcdict_period;
-	cw_stilo_t	*gcdict_threshold;
+
+	/* Actual state of gcdict. */
+	cw_bool_t	gcdict_active;
+	cw_stiloi_t	gcdict_period;
+	cw_stiloi_t	gcdict_threshold;
+	cw_stiloi_t	gcdict_collections;
+	cw_stiloi_t	gcdict_new;
+	cw_stiloi_t	gcdict_current[3];
+	cw_stiloi_t	gcdict_maximum[3];
+	cw_stiloi_t	gcdict_sum[3];
 
 	/* Sequence set. */
 	ql_head(cw_stiloe_t) seq_set;
@@ -59,10 +56,18 @@ void	stila_dump(cw_stila_t *a_stila, cw_stilt_t *a_stilt);
 
 cw_bool_t stila_active_get(cw_stila_t *a_stila);
 void	stila_active_set(cw_stila_t *a_stila, cw_bool_t a_active);
-cw_uint32_t stila_period_get(cw_stila_t *a_stila);
-void	stila_period_set(cw_stila_t *a_stila, cw_uint32_t a_period);
-cw_uint32_t stila_threshold_get(cw_stila_t *a_stila);
-void	stila_threshold_set(cw_stila_t *a_stila, cw_uint32_t a_threshold);
+cw_stiloi_t stila_period_get(cw_stila_t *a_stila);
+void	stila_period_set(cw_stila_t *a_stila, cw_stiloi_t a_period);
+cw_stiloi_t stila_threshold_get(cw_stila_t *a_stila);
+void	stila_threshold_set(cw_stila_t *a_stila, cw_stiloi_t a_threshold);
+cw_stiloi_t stila_collections_get(cw_stila_t *a_stila);
+cw_stiloi_t stila_new_get(cw_stila_t *a_stila);
+void	stila_current_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t
+    *r_mark, cw_stiloi_t *r_sweep);
+void	stila_maximum_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t
+    *r_mark, cw_stiloi_t *r_sweep);
+void	stila_sum_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t
+    *r_mark, cw_stiloi_t *r_sweep);
 
 #define	stila_gc_suspend(a_stila) thd_suspend(&(a_stila)->gc_thd)
 #define	stila_gc_resume(a_stila) thd_resume(&(a_stila)->gc_thd)

@@ -108,10 +108,6 @@ static void *stila_p_gc_entry(void *a_arg);
 void
 stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 {
-	cw_stilo_t		key, *array;
-	cw_stilo_t		t_new, t_current, t_maximum;
-	cw_stilo_t		t_active, t_threshold;
-	cw_stilo_t		sum_count;
 	sigset_t		sig_mask, old_mask;
 	volatile cw_uint32_t	try_stage = 0;
 
@@ -141,90 +137,19 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 #endif
 
 		/*
-		 * Create temporary variables for bootstrapping, since gcdict
-		 * initialization will hit them.
+		 * Initialize gcdict state.
 		 */
-		stilo_integer_new(&t_new, 0);
-		a_stila->gcdict_new = &t_new;
-
-		stilo_integer_new(&t_current, 0);
-		a_stila->gcdict_current = &t_current;
-
-		stilo_integer_new(&t_maximum, 0);
-		a_stila->gcdict_maximum = &t_maximum;
-
-		stilo_integer_new(&sum_count, 0);
-		a_stila->gcdict_sum = &sum_count;
-
-		stilo_boolean_new(&t_active, FALSE);
-		a_stila->gcdict_active = &t_active;
-
-		stilo_integer_new(&t_threshold, 0);
-		a_stila->gcdict_threshold = &t_threshold;
+		a_stila->gcdict_active = FALSE;
+		a_stila->gcdict_period = _LIBSTIL_GCDICT_PERIOD;
+		a_stila->gcdict_threshold = _LIBSTIL_GCDICT_THRESHOLD;
+		a_stila->gcdict_new = 0;
+		memset(a_stila->gcdict_current, 0, sizeof(cw_stiloi_t) * 3);
+		memset(a_stila->gcdict_maximum, 0, sizeof(cw_stiloi_t) * 3);
+		memset(a_stila->gcdict_sum, 0, sizeof(cw_stiloi_t) * 3);
 
 		/* Initialize gcdict. */
 		gcdict_l_populate(&a_stila->gcdict, a_stila);
 		try_stage = 6;
-
-		/*
-		 * Cache pointers to gcdict objects and set their initial
-		 * values.
-		 */
-		/* collections. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_collections),
-		    stiln_len(STILN_collections), TRUE);
-		a_stila->gcdict_collections =
-		    stilo_l_dict_lookup(&a_stila->gcdict, &key);
-
-		/* new. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_new),
-		    stiln_len(STILN_new), TRUE);
-		a_stila->gcdict_new = stilo_l_dict_lookup(&a_stila->gcdict,
-		    &key);
-		stilo_integer_set(a_stila->gcdict_new,
-		    stilo_integer_get(&t_new));
-
-		/* current. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_current),
-		    stiln_len(STILN_current), TRUE);
-		array = stilo_l_dict_lookup(&a_stila->gcdict, &key);
-		a_stila->gcdict_current = stilo_l_array_get(array);
-		stilo_integer_set(a_stila->gcdict_current,
-		    stilo_integer_get(&t_current));
-
-		/* maximum. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_maximum),
-		    stiln_len(STILN_maximum), TRUE);
-		array = stilo_l_dict_lookup(&a_stila->gcdict, &key);
-		a_stila->gcdict_maximum = stilo_l_array_get(array);
-		stilo_integer_set(a_stila->gcdict_maximum,
-		    stilo_integer_get(&t_maximum));
-
-		/* sum. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_sum),
-		    stiln_len(STILN_sum), TRUE);
-		array = stilo_l_dict_lookup(&a_stila->gcdict, &key);
-		a_stila->gcdict_sum = stilo_l_array_get(array);
-		stilo_integer_set(a_stila->gcdict_sum,
-		    stilo_integer_get(&sum_count));
-
-		/* active. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_active),
-		    stiln_len(STILN_active), TRUE);
-		a_stila->gcdict_active = stilo_l_dict_lookup(&a_stila->gcdict,
-		    &key);
-
-		/* period. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_period),
-		    stiln_len(STILN_period), TRUE);
-		a_stila->gcdict_period = stilo_l_dict_lookup(&a_stila->gcdict,
-		    &key);
-
-		/* threshold. */
-		stilo_name_new(&key, a_stil, stiln_str(STILN_threshold),
-		    stiln_len(STILN_threshold), TRUE);
-		a_stila->gcdict_threshold =
-		    stilo_l_dict_lookup(&a_stila->gcdict, &key);
 
 		/*
 		 * Block all signals during thread creation, so that the GC
@@ -300,38 +225,67 @@ stila_dump(cw_stila_t *a_stila, cw_stilt_t *a_stilt)
 	 * stila lock, so that we are sure of printing a consistent snapshot.
 	 */
 	mtx_lock(&a_stila->lock);
-	stilo_file_output(file, "active: [s|w:10]\n",
-	    stilo_boolean_get(a_stila->gcdict_active) ? "true" : "false");
-	stilo_file_output(file, "period: [q|w:10]\n",
-	    stilo_integer_get(a_stila->gcdict_period));
+	stilo_file_output(file, "active: [s|w:10]\n", a_stila->gcdict_active ?
+	    "true" : "false");
+#if (_CW_STILOI_SIZEOF == 8)
+	stilo_file_output(file, "period: [q|w:10]\n", a_stila->gcdict_period);
 	stilo_file_output(file, "threshold: [q|w:7]\n",
-	    stilo_integer_get(a_stila->gcdict_threshold));
+	    a_stila->gcdict_threshold);
 	stilo_file_output(file, "collections: [q|w:5]\n",
-	    stilo_integer_get(a_stila->gcdict_collections));
-	stilo_file_output(file, "new:     [q|w:9]\n",
-	    stilo_integer_get(a_stila->gcdict_new));
+	    a_stila->gcdict_collections);
+	stilo_file_output(file, "new:     [q|w:9]\n", a_stila->gcdict_new);
 	stilo_file_output(file,
 	    "current: [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
-	    stilo_integer_get(&a_stila->gcdict_current[0]),
-	    stilo_integer_get(&a_stila->gcdict_current[1]) / 1000000,
-	    stilo_integer_get(&a_stila->gcdict_current[1]) % 1000000,
-	    stilo_integer_get(&a_stila->gcdict_current[2]) / 1000000,
-	    stilo_integer_get(&a_stila->gcdict_current[2]) % 1000000);
+	    a_stila->gcdict_current[0],
+	    a_stila->gcdict_current[1] / 1000000,
+	    a_stila->gcdict_current[1] % 1000000,
+	    a_stila->gcdict_current[2] / 1000000,
+	    a_stila->gcdict_current[2] % 1000000);
 	stilo_file_output(file,
 	    "maximum: [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
-	    stilo_integer_get(&a_stila->gcdict_maximum[0]),
-	    stilo_integer_get(&a_stila->gcdict_maximum[1]) / 1000000,
-	    stilo_integer_get(&a_stila->gcdict_maximum[1]) % 1000000,
-	    stilo_integer_get(&a_stila->gcdict_maximum[2]) / 1000000,
-	    stilo_integer_get(&a_stila->gcdict_maximum[2]) % 1000000);
+	    a_stila->gcdict_maximum[0],
+	    a_stila->gcdict_maximum[1] / 1000000,
+	    a_stila->gcdict_maximum[1] % 1000000,
+	    a_stila->gcdict_maximum[2] / 1000000,
+	    a_stila->gcdict_maximum[2] % 1000000);
 	stilo_file_output(file,
 	    "sum:     [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
-	    stilo_integer_get(&a_stila->gcdict_sum[0]),
-	    stilo_integer_get(&a_stila->gcdict_sum[1]) / 1000000,
-	    stilo_integer_get(&a_stila->gcdict_sum[1]) % 1000000,
-	    stilo_integer_get(&a_stila->gcdict_sum[2]) / 1000000,
-	    stilo_integer_get(&a_stila->gcdict_sum[2]) % 1000000);
+	    a_stila->gcdict_sum[0],
+	    a_stila->gcdict_sum[1] / 1000000,
+	    a_stila->gcdict_sum[1] % 1000000,
+	    a_stila->gcdict_sum[2] / 1000000,
+	    a_stila->gcdict_sum[2] % 1000000);
 	stilo_file_buffer_flush(file);
+#else
+	stilo_file_output(file, "period: [i|w:10]\n", a_stila->gcdict_period);
+	stilo_file_output(file, "threshold: [i|w:7]\n",
+	    a_stila->gcdict_threshold);
+	stilo_file_output(file, "collections: [i|w:5]\n",
+	    a_stila->gcdict_collections);
+	stilo_file_output(file, "new:     [i|w:9]\n", a_stila->gcdict_new);
+	stilo_file_output(file,
+	    "current: [i|w:9] [i|w:5].[i|w:6|p:0] [i|w:5].[i|w:6|p:0]\n",
+	    a_stila->gcdict_current[0],
+	    a_stila->gcdict_current[1] / 1000000,
+	    a_stila->gcdict_current[1] % 1000000,
+	    a_stila->gcdict_current[2] / 1000000,
+	    a_stila->gcdict_current[2] % 1000000);
+	stilo_file_output(file,
+	    "maximum: [i|w:9] [i|w:5].[i|w:6|p:0] [i|w:5].[i|w:6|p:0]\n",
+	    a_stila->gcdict_maximum[0],
+	    a_stila->gcdict_maximum[1] / 1000000,
+	    a_stila->gcdict_maximum[1] % 1000000,
+	    a_stila->gcdict_maximum[2] / 1000000,
+	    a_stila->gcdict_maximum[2] % 1000000);
+	stilo_file_output(file,
+	    "sum:     [i|w:9] [i|w:5].[i|w:6|p:0] [i|w:5].[i|w:6|p:0]\n",
+	    a_stila->gcdict_sum[0],
+	    a_stila->gcdict_sum[1] / 1000000,
+	    a_stila->gcdict_sum[1] % 1000000,
+	    a_stila->gcdict_sum[2] / 1000000,
+	    a_stila->gcdict_sum[2] % 1000000);
+	stilo_file_buffer_flush(file);
+#endif
 	mtx_unlock(&a_stila->lock);
 }
 
@@ -344,9 +298,9 @@ stila_active_get(cw_stila_t *a_stila)
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 
 	mtx_lock(&a_stila->lock);
-	retval = stilo_boolean_get(a_stila->gcdict_active);
+	retval = a_stila->gcdict_active;
 	mtx_unlock(&a_stila->lock);
-	
+
 	return retval;
 }
 
@@ -363,31 +317,32 @@ stila_active_set(cw_stila_t *a_stila, cw_bool_t a_active)
 	 * new allocation, which would cause GC deadlock.
 	 */
 	mtx_lock(&a_stila->lock);
-	stilo_boolean_set(a_stila->gcdict_active, a_active);
+	a_stila->gcdict_active = a_active;
 	mq_put(&a_stila->gc_mq, STILAM_RECONFIGURE);
 	mtx_unlock(&a_stila->lock);
 }
 
-cw_uint32_t
+cw_stiloi_t
 stila_period_get(cw_stila_t *a_stila)
 {
-	cw_uint32_t	retval;
+	cw_stiloi_t	retval;
 
 	_cw_check_ptr(a_stila);
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 
 	mtx_lock(&a_stila->lock);
-	retval = stilo_integer_get(a_stila->gcdict_period);
+	retval = a_stila->gcdict_period;
 	mtx_unlock(&a_stila->lock);
-	
+
 	return retval;
 }
 
 void
-stila_period_set(cw_stila_t *a_stila, cw_uint32_t a_period)
+stila_period_set(cw_stila_t *a_stila, cw_stiloi_t a_period)
 {
 	_cw_check_ptr(a_stila);
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+	_cw_assert(a_period >= 0);
 
 	/*
 	 * Under normal circumstances, calling stilo_dict_def() while holding
@@ -396,31 +351,32 @@ stila_period_set(cw_stila_t *a_stila, cw_uint32_t a_period)
 	 * new allocation, which would cause GC deadlock.
 	 */
 	mtx_lock(&a_stila->lock);
-	stilo_integer_set(a_stila->gcdict_period, a_period);
+	a_stila->gcdict_period = a_period;
 	mq_put(&a_stila->gc_mq, STILAM_RECONFIGURE);
 	mtx_unlock(&a_stila->lock);
 }
 
-cw_uint32_t
+cw_stiloi_t
 stila_threshold_get(cw_stila_t *a_stila)
 {
-	cw_uint32_t	retval;
+	cw_stiloi_t	retval;
 
 	_cw_check_ptr(a_stila);
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 
 	mtx_lock(&a_stila->lock);
-	retval = stilo_integer_get(a_stila->gcdict_threshold);
+	retval = a_stila->gcdict_threshold;
 	mtx_unlock(&a_stila->lock);
-	
+
 	return retval;
 }
 
 void
-stila_threshold_set(cw_stila_t *a_stila, cw_uint32_t a_threshold)
+stila_threshold_set(cw_stila_t *a_stila, cw_stiloi_t a_threshold)
 {
 	_cw_check_ptr(a_stila);
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+	_cw_assert(a_threshold >= 0);
 
 	/*
 	 * Under normal circumstances, calling stilo_dict_def() while holding
@@ -429,11 +385,92 @@ stila_threshold_set(cw_stila_t *a_stila, cw_uint32_t a_threshold)
 	 * new allocation, which would cause GC deadlock.
 	 */
 	mtx_lock(&a_stila->lock);
-	stilo_integer_set(a_stila->gcdict_threshold, a_threshold);
-	if (a_threshold <= stilo_integer_get(a_stila->gcdict_new))
+	a_stila->gcdict_threshold = a_threshold;
+	if (a_threshold <= a_stila->gcdict_new)
 		mq_put(&a_stila->gc_mq, STILAM_COLLECT);
 	else
 		mq_put(&a_stila->gc_mq, STILAM_RECONFIGURE);
+	mtx_unlock(&a_stila->lock);
+}
+
+cw_stiloi_t
+stila_collections_get(cw_stila_t *a_stila)
+{
+	cw_stiloi_t	retval;
+
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+
+	mtx_lock(&a_stila->lock);
+	retval = a_stila->gcdict_collections;
+	mtx_unlock(&a_stila->lock);
+
+	return retval;
+}
+
+cw_stiloi_t
+stila_new_get(cw_stila_t *a_stila)
+{
+	cw_stiloi_t	retval;
+
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+
+	mtx_lock(&a_stila->lock);
+	retval = a_stila->gcdict_new;
+	mtx_unlock(&a_stila->lock);
+
+	return retval;
+}
+
+void
+stila_current_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t
+    *r_mark, cw_stiloi_t *r_sweep)
+{
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+	_cw_check_ptr(r_count);
+	_cw_check_ptr(r_mark);
+	_cw_check_ptr(r_sweep);
+	
+	mtx_lock(&a_stila->lock);
+	*r_count = a_stila->gcdict_current[0];
+	*r_mark = a_stila->gcdict_current[1];
+	*r_sweep = a_stila->gcdict_current[2];
+	mtx_unlock(&a_stila->lock);
+}
+
+void
+stila_maximum_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t
+    *r_mark, cw_stiloi_t *r_sweep)
+{
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+	_cw_check_ptr(r_count);
+	_cw_check_ptr(r_mark);
+	_cw_check_ptr(r_sweep);
+	
+	mtx_lock(&a_stila->lock);
+	*r_count = a_stila->gcdict_maximum[0];
+	*r_mark = a_stila->gcdict_maximum[1];
+	*r_sweep = a_stila->gcdict_maximum[2];
+	mtx_unlock(&a_stila->lock);
+}
+
+void
+stila_sum_get(cw_stila_t *a_stila, cw_stiloi_t *r_count, cw_stiloi_t *r_mark,
+    cw_stiloi_t *r_sweep)
+{
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+	_cw_check_ptr(r_count);
+	_cw_check_ptr(r_mark);
+	_cw_check_ptr(r_sweep);
+	
+	mtx_lock(&a_stila->lock);
+	*r_count = a_stila->gcdict_sum[0];
+	*r_mark = a_stila->gcdict_sum[1];
+	*r_sweep = a_stila->gcdict_sum[2];
 	mtx_unlock(&a_stila->lock);
 }
 
@@ -457,29 +494,21 @@ stila_l_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
 	ql_tail_insert(&a_stila->seq_set, a_stiloe, link);
 
 	/* Update new. */
-	stilo_integer_set(a_stila->gcdict_new,
-	    stilo_integer_get(a_stila->gcdict_new) + 1);
+	a_stila->gcdict_new++;
 
 	/* Update current[0]. */
-	stilo_integer_set(&a_stila->gcdict_current[0],
-	    stilo_integer_get(&a_stila->gcdict_current[0]) + 1);
+	a_stila->gcdict_current[0]++;
 
 	/* Update maximum[0]. */
-	if (stilo_integer_get(&a_stila->gcdict_maximum[0]) <
-	    stilo_integer_get(&a_stila->gcdict_current[0])) {
-		stilo_integer_set(&a_stila->gcdict_maximum[0],
-		    stilo_integer_get(&a_stila->gcdict_current[0]));
-	}
+	if (a_stila->gcdict_maximum[0] < a_stila->gcdict_current[0])
+		a_stila->gcdict_maximum[0] = a_stila->gcdict_current[0];
 
 	/* Update sum[0]. */
-	stilo_integer_set(&a_stila->gcdict_sum[0],
-	    stilo_integer_get(&a_stila->gcdict_sum[0]) + 1);
+	a_stila->gcdict_sum[0]++;
 
 	/* Trigger a collection if the threshold was reached. */
-	if (stilo_integer_get(a_stila->gcdict_new) ==
-	    stilo_integer_get(a_stila->gcdict_threshold) &&
-	    stilo_boolean_get(a_stila->gcdict_active) &&
-	    stilo_integer_get(a_stila->gcdict_threshold) != 0)
+	if (a_stila->gcdict_new == a_stila->gcdict_threshold &&
+	    a_stila->gcdict_active && a_stila->gcdict_threshold != 0)
 		mq_put(&a_stila->gc_mq, STILAM_COLLECT);
 
 	mtx_unlock(&a_stila->lock);
@@ -777,8 +806,8 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 		out_put_e(NULL, NULL, 0, __FUNCTION__, "---------> Start\n");
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "[q] registration[s] since last collection\n",
-		    stilo_integer_get(a_stila->gcdict_current),
-		    stilo_integer_get(a_stila->gcdict_current) == 1 ? "" : "s");
+		    a_stila->gcdict_current, a_stila->gcdict_current == 1 ? "" :
+		    "s");
 
 		nregistered = 0;
 		qr_foreach(p, ql_first(&a_stila->seq_set), link) {
@@ -787,8 +816,7 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "[i] object[s] registered\n", nregistered, nregistered == 1
 		    ? "" : "s");
-		_cw_assert(stilo_integer_get(a_stila->gcdict_current) <=
-		    nregistered);
+		_cw_assert(a_stila->gcdict_current <= nregistered);
 	}
 #endif
 	/* Stop the mutator threads. */
@@ -820,8 +848,8 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 	a_stila->white = !a_stila->white;
 
 	/* Update statistics counters. */
-	stilo_integer_set(a_stila->gcdict_new, 0);
-	stilo_integer_set(a_stila->gcdict_current, nroot + nreachable);
+	a_stila->gcdict_new = 0;
+	a_stila->gcdict_current[0] = nroot + nreachable;
 
 	mtx_unlock(&a_stila->lock);
 
@@ -855,22 +883,19 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 
 	/* Update timing statistics. */
 	/* mark. */
-	stilo_integer_set(&a_stila->gcdict_current[1], mark_us);
-	if (mark_us > stilo_integer_get(&a_stila->gcdict_maximum[1]))
-		stilo_integer_set(&a_stila->gcdict_maximum[1], mark_us);
-	stilo_integer_set(&a_stila->gcdict_sum[1],
-	    stilo_integer_get(&a_stila->gcdict_sum[1]) + mark_us);
+	a_stila->gcdict_current[1] = mark_us;
+	if (mark_us > a_stila->gcdict_maximum[1])
+		a_stila->gcdict_maximum[1] = mark_us;
+	a_stila->gcdict_sum[1] += mark_us;
 
 	/* sweep. */
-	stilo_integer_set(&a_stila->gcdict_current[2], sweep_us);
-	if (sweep_us > stilo_integer_get(&a_stila->gcdict_maximum[2]))
-		stilo_integer_set(&a_stila->gcdict_maximum[2], sweep_us);
-	stilo_integer_set(&a_stila->gcdict_sum[2],
-	    stilo_integer_get(&a_stila->gcdict_sum[2]) + sweep_us);
+	a_stila->gcdict_current[2] = sweep_us;
+	if (sweep_us > a_stila->gcdict_maximum[2])
+		a_stila->gcdict_maximum[2] = sweep_us;
+	a_stila->gcdict_sum[2] += sweep_us;
 
 	/* Increment the collections counter. */
-	stilo_integer_set(a_stila->gcdict_collections,
-	    stilo_integer_get(a_stila->gcdict_collections) + 1);
+	a_stila->gcdict_collections++;
 
 	mtx_unlock(&a_stila->lock);
 
@@ -891,7 +916,7 @@ stila_p_gc_entry(void *a_arg)
 	struct timespec	period;
 	cw_stilam_t	message;
 	cw_bool_t	shutdown, collect;
-	cw_uint32_t	seq_new, prev_seq_new;
+	cw_stiloi_t	seq_new, prev_seq_new;
 
 #ifdef _LIBSTIL_CONFESS
 	out_put_e(NULL, NULL, 0, __FUNCTION__, "Start collector\n");
@@ -912,7 +937,7 @@ stila_p_gc_entry(void *a_arg)
 	for (shutdown = FALSE, collect = FALSE; shutdown == FALSE; collect =
 	    FALSE) {
 		mtx_lock(&stila->lock);
-		period.tv_sec = stilo_integer_get(stila->gcdict_period);
+		period.tv_sec = stila->gcdict_period;
 		mtx_unlock(&stila->lock);
 
 		if (period.tv_sec > 0) {
@@ -924,13 +949,13 @@ stila_p_gc_entry(void *a_arg)
 		switch (message) {
 		case STILAM_NONE:
 			mtx_lock(&stila->lock);
-			if (stilo_boolean_get(stila->gcdict_active)) {
+			if (stila->gcdict_active) {
 				/*
 				 * No messages.  Check to see if there
 				 * have been any additions to the
 				 * sequence set.
 				 */
-				seq_new = stilo_integer_get(stila->gcdict_new);
+				seq_new = stila->gcdict_new;
 			}
 			mtx_unlock(&stila->lock);
 
