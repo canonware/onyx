@@ -1,0 +1,33 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% Back matter of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearemptydoublepage
+\backmatter
+%
+% Don't print the chapter number in the header for the index.
+%
+%begin{latexonly}
+\rhead[\bfseries{INDEX}]{\bfseries\thepage}
+%end{latexonly}
+
+\addcontentsline{toc}{chapter}{Index}
+\begin{theindex}
+% latex2html apparently generates and inserts its own index, so don't actually
+% include the index for the html version.
+%begin{latexonly}
+\printindex
+%end{latexonly}
+\end{theindex}
+
+\end{document}
