@@ -55,7 +55,7 @@ buf, bufc - Reference-counted extensible buffer.
 .I const struct iovec *
 .br
 .B buf_get_iovec
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_max_data" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_max_data" ", "
 .IR "cw_bool_t a_is_sys_iovec" ", " "int * r_iovec_count" )
 
 .I cw_bool_t
@@ -71,13 +71,13 @@ buf, bufc - Reference-counted extensible buffer.
 .I cw_bool_t
 .br
 .B buf_prepend_bufc
-.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 
 .I cw_bool_t
 .br
 .B buf_append_bufc
-.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 
 .I cw_bool_t
@@ -108,32 +108,32 @@ buf, bufc - Reference-counted extensible buffer.
 .I cw_bool_t
 .br
 .B buf_set_uint8
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint_t32 a_val" )
 
 .I cw_bool_t
 .br
 .B buf_set_uint32
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_val" )
 
 .I cw_bool_t
 .br
 .B buf_set_uint64
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint64_t a_val" )
 
 .I cw_bool_t
 .br
 .B buf_set_range
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
-.IR "cw_uint32_t a_length" ", " "cw_uint8_t * a_val" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
+.IR "cw_uint32_t a_length" ", " "cw_uint8_t * a_val" ", "
 .IR "cw_bool_t a_is_writeable" )
 
 .I cw_bufc_t *
 .br
 .B bufc_new
-.RI ( "cw_bufc_t * a_bufc" ", " 
+.RI ( "cw_bufc_t * a_bufc" ", "
 .IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufel)" ", "
 .IR "void * a_dealloc_arg)" )
 
@@ -145,24 +145,53 @@ buf, bufc - Reference-counted extensible buffer.
 .I void
 .br
 .B bufc_set_buffer
-.RI ( "cw_bufc_t * a_bufc" ", " "void * a_buffer" ", " "cw_uint32_t a_size" 
-.RI ", " "cw_bool_t a_is_writeable" ", " 
+.RI ( "cw_bufc_t * a_bufc" ", " "void * a_buffer" ", " "cw_uint32_t a_size"
+.RI ", " "cw_bool_t a_is_writeable" ", "
 .IR "void (*a_dealloc_func)(void * dealloc_arg, void * buffer" ", "
 .IR "void * a_dealloc_arg" )
 
 .SS Debugging (dbg) symbols
-.TP \" XXX
-\*(lq<XXX symbol>\*(rq
-<XXX Symbol description>
+None.
 
 .SH DESCRIPTION
-<XXX Description>
+The buf and bufc classes implement a buffer abstraction.  These classes are
+designed specifically to handle streaming and transparent extensible buffering
+of data for applications such as socket programs. buf's are dynamically
+extensible and contractible, as well as reference counted.  This means that data
+can be passed and internally shared among buf's without copying or worry of
+memory leaks.  Depending on the application, this also allows for very compact
+use of memory buffers.
+
+Internally, a buf consists of an array of buffer elements, bufels, that
+reference bufc's.  The bufc's are reference counted, such that each bufel
+reference to a bufc increases the bufc reference count.  In addition, the
+library user has a reference to each bufc as when it is initialized.  When data
+are passed among buf's, references are added to the affected bufc's, but no data
+are actually copied.
+
+When data are modified, they must be copied if there are multiple references, or
+if the bufc was marked as non-writeable in the \fBbufc_set_buffer\fR() call.
+Otherwise, data can be modified in place.
+
+Random access to data is O(log n), where n is the number of bufel's in the buf.
+Linear access, either forward or backward, is optimized to be fast in the
+general case.  The most recent access is cached, so if the next access is in the
+same bufel, the cost for that access is O(1).
+
+The buf code provides an iovec (see \fBreadv\fR(2)/\fBwritev\fR(2)) interface
+for accessing the internals for read-only operations.  In general, this
+interface shouldn't be needed except when using the \fBwritev\fR() function.
+
+Once a bufc has been passed to \fBbuf_{pre,ap}pend_bufc\fR(), its data must be
+treated as read-only.  That is, the bufc must be treated as opaque as soon as
+any buf has a reference to it.
 
 .SH USAGE
 .I cw_buf_t *
 .br
 .B buf_new
 .RI ( "cw_buf_t * a_buf" )
+.br
 .I cw_buf_t *
 .br
 .B buf_new
@@ -287,7 +316,7 @@ Output(s):
 .IR retval :
 .RS
 Number of bufel's (internal buffer elements) in a_buf (same as iovec count in
-buf_get_iovec()).
+\fBbuf_get_iovec\fR()).
 .RE
 .RE
 Description:
@@ -299,7 +328,7 @@ Return the number of bufel's in a_buf.
 .I const struct iovec *
 .br
 .B buf_get_iovec
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_max_data" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_max_data" ", "
 .IR "cw_bool_t a_is_sys_iovec" ", " "int * r_iovec_count" )
 .RS
 Input(s):
@@ -315,23 +344,28 @@ Maximum number of bytes of space to include in the iovec.
 .IR a_is_sys_iovec :
 .RS
 If TRUE, limit *r_iovec_count to the maximum iovec count supported by this
-system for readv()/writev().
+system for \fBreadv\fR()/\fBwritev\fR().
 .RE
-.IR <input> :
+.IR r_iovec_count :
 .RS
-<input description>
+Pointer to an int.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Pointer to an iovec array that represents the internal data buffers in a_buf.
+.RE
+.IR *r_iovec_count :
+.RS
+Number of valid iovec structures in retval.
 .RE
 .RE
 Description:
 .RS
-<description>
+Build an iovec array that represents the valid data in a_buf's internal buffers
+(up to a_max_data bytes) and return a pointer to it.
 .RE
 .RE
 
@@ -342,25 +376,33 @@ Description:
 .RS
 Input(s):
 .RS
-.IR a_buf :
+.IR a_a :
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_b :
 .RS
-<input description>
+Pointer to a buf.
+.RE
+.IR a_preserve :
+.RS
+If TRUE, preserve a_b (don't modify it).  If FALSE, release the data in a_b
+after catenating a_b to a_a.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Catenate two buf's.  a_b is left unmodifed if a_preserve is TRUE; otherwise a_b
+is emptied.
 .RE
 .RE
 
@@ -371,32 +413,39 @@ Description:
 .RS
 Input(s):
 .RS
-.IR a_buf :
+.IR a_a :
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_b :
 .RS
-<input description>
+Pointer to a buf.
+.RE
+.IR a_offset :
+.RS
+Offset at which to split a_b.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.  a_a and a_b are unmodified.
 .RE
 .RE
 Description:
 .RS
-<description>
+Split a_b at offset a_offset.  Append the data before a_offset to a_a, and leave
+the remainder in a_b.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B buf_prepend_bufc
-.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 .RS
 Input(s):
@@ -405,28 +454,38 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_bufc :
 .RS
-<input description>
+Pointer to a bufc.
+.RE
+.IR a_beg_offset :
+.RS
+Offset of first valid byte in a_bufc's memory buffer.
+.RE
+.IR a_end_offset :
+.RS
+Offset of first byte past the valid range of bytes in a_bufc's memory buffer.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.  a_buf and a_bufc are unmodified.
 .RE
 .RE
 Description:
 .RS
-<description>
+Prepend a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B buf_append_bufc
-.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_bufc_t * a_bufc" ", "
 .IR "cw_uint32_t a_beg_offset" ", " "cw_uint32_t a_end_offset" )
 .RS
 Input(s):
@@ -435,21 +494,31 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_bufc :
 .RS
-<input description>
+Pointer to a bufc.
+.RE
+.IR a_beg_offset :
+.RS
+Offset of first valid byte in a_bufc's memory buffer.
+.RE
+.IR a_end_offset :
+.RS
+Offset of first byte past the valid range of bytes in a_bufc's memory buffer.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.  a_buf and a_bufc are unmodified.
 .RE
 .RE
 Description:
 .RS
-<description>
+Append a_bufc, bytes a_beg_offset through (a_end_offset - 1) to a_buf.
 .RE
 .RE
 
@@ -464,21 +533,23 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_amount :
 .RS
-<input description>
+Number of bytes of data to release from the head of a_buf.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Error.  (a_amount > buf_get_size(a_buf)).
 .RE
 .RE
 Description:
 .RS
-<description>
+Release a_amount bytes from the head of a_buf.
 .RE
 .RE
 
@@ -493,21 +564,23 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_amount :
 .RS
-<input description>
+Number of bytes of data to release from the tail of a_buf.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Error.  (a_amount > buf_get_size(a_buf)).
 .RE
 .RE
 Description:
 .RS
-<description>
+Release a_amount bytes from the tail of a_buf.
 .RE
 .RE
 
@@ -522,21 +595,21 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of uint8 to return.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Value of the uint8 at offset a_offset in a_buf.
 .RE
 .RE
 Description:
 .RS
-<description>
+Return the uint8 at offset a_offset.
 .RE
 .RE
 
@@ -551,21 +624,21 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of uint32 to return.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Value of the uint32 at offset a_offset in a_buf.
 .RE
 .RE
 Description:
 .RS
-<description>
+Return the uint32 at offset a_offset.
 .RE
 .RE
 
@@ -580,28 +653,28 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of uint64 to return.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+Value of the uint64 at offset a_offset in a_buf.
 .RE
 .RE
 Description:
 .RS
-<description>
+Return the uint64 at offset a_offset.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B buf_set_uint8
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint_t32 a_val" )
 .RS
 Input(s):
@@ -610,28 +683,34 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+.RE
+.IR a_val :
+.RS
+Value to set data at a_offset to.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Set the uint8 at a_offset to a_val.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B buf_set_uint32
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint32_t a_val" )
 .RS
 Input(s):
@@ -640,28 +719,34 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+.RE
+.IR a_val :
+.RS
+Value to set data at a_offset to.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Set the uint32 at a_offset to a_val.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B buf_set_uint64
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
 .IR "cw_uint64_t a_val" )
 .RS
 Input(s):
@@ -670,29 +755,35 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+.RE
+.IR a_val :
+.RS
+Value to set data at a_offset to.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Set the uint64 at a_offset to a_val.
 .RE
 .RE
 
 .I cw_bool_t
 .br
 .B buf_set_range
-.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", " 
-.IR "cw_uint32_t a_length" ", " "cw_uint8_t * a_val" ", " 
+.RI ( "cw_buf_t * a_buf" ", " "cw_uint32_t a_offset" ", "
+.IR "cw_uint32_t a_length" ", " "cw_uint8_t * a_val" ", "
 .IR "cw_bool_t a_is_writeable" )
 .RS
 Input(s):
@@ -701,28 +792,44 @@ Input(s):
 .RS
 Pointer to a buf.
 .RE
-.IR <input> :
+.IR a_offset :
 .RS
-<input description>
+Offset in bytes of data to set. (a_offset <= buf_get_size(a_buf)).
+.RE
+.IR a_length :
+.RS
+Number of bytes to copy from a_val.
+.RE
+.IR a_val :
+.RS
+Value to set data at a_offset to.
+.RE
+.IR a_is_writeable :
+.RS
+FALSE: Non-writeable buffer.
+.br
+TRUE: Writeable buffer.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Copy a_offset bytes from a_val to a_buf at offset a_offset.
 .RE
 .RE
 
 .I cw_bufc_t *
 .br
 .B bufc_new
-.RI ( "cw_bufc_t * a_bufc" ", " 
+.RI ( "cw_bufc_t * a_bufc" ", "
 .IR "void (*a_dealloc_func)(void * dealloc_arg, void * bufel)" ", "
 .IR "void * a_dealloc_arg)" )
 .RS
@@ -732,21 +839,31 @@ Input(s):
 .RS
 Pointer to a bufc.
 .RE
-.IR <input> :
+.IR a_dealloc_func :
 .RS
-<input description>
+non-NULL: Pointer to a deallocation function.
+.br
+NULL: No deallocation function.
+.br
+Ignored if (NULL == a_bufc).
+.RE
+.IR a_dealloc_arg :
+.RS
+First argument to a_dealloc_func.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+non-NULL: Pointer to a bufc.
+.br
+NULL: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Constructor.
 .RE
 .RE
 
@@ -761,29 +878,22 @@ Input(s):
 .RS
 Pointer to a bufc.
 .RE
-.IR <input> :
-.RS
-<input description>
-.RE
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-<retval description>
-.RE
+None.
 .RE
 Description:
 .RS
-<description>
+Destructor.
 .RE
 .RE
 
 .I void
 .br
 .B bufc_set_buffer
-.RI ( "cw_bufc_t * a_bufc" ", " "void * a_buffer" ", " "cw_uint32_t a_size" 
-.RI ", " "cw_bool_t a_is_writeable" ", " 
+.RI ( "cw_bufc_t * a_bufc" ", " "void * a_buffer" ", " "cw_uint32_t a_size"
+.RI ", " "cw_bool_t a_is_writeable" ", "
 .IR "void (*a_dealloc_func)(void * dealloc_arg, void * buffer" ", "
 .IR "void * a_dealloc_arg" )
 .RS
@@ -793,26 +903,42 @@ Input(s):
 .RS
 Pointer to a bufc.
 .RE
-.IR <input> :
+.IR a_buffer :
 .RS
-<input description>
+Pointer to a buffer.
+.RE
+.IR a_size :
+.RS
+Size of buffer pointed to by a_buffer.
+.RE
+.IR a_dealloc_func :
+.RS
+non-NULL: Pointer to a deallocation function.
+.br
+NULL: No deallocation function.
+.RE
+.IR a_dealloc_arg :
+.RS
+First argument to a_dealloc_func.
 .RE
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-<retval description>
-.RE
+None.
 .RE
 Description:
 .RS
-<description>
+Set a_bufc's internal data buffer to a_buffer, with size a_size, and
+deallocation function a_dealloc_func(a_dealloc_arg, a_buffer).
+
+This function is not reentrant, and assumes that no other references to a_bufc
+exist (or at least they don't rely on the bufc's state).  In other words, don't
+call this function after the bufc has been inserted into one or more buf's.
 .RE
 .RE
 
 .SH SEE ALSO
-libstash(3s).
+libstash(3s), readv(2), writev(2).
 
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
