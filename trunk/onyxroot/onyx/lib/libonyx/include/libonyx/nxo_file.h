@@ -32,9 +32,6 @@ cw_nxo_threade_t nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t
     a_locking, cw_nxo_t *r_string, cw_bool_t *r_eof);
 cw_nxo_threade_t nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
-cw_nxo_threade_t nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...);
-cw_nxo_threade_t nxo_file_output_n(cw_nxo_t *a_nxo, cw_uint32_t a_size, const
-    char *a_format, ...);
 #ifdef _CW_POSIX
 cw_nxo_threade_t nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length);
 #endif

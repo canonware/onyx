@@ -1,3 +1,8 @@
+2001-08-18  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_file.c: Remove nxo_file_output() and
+	nxo_file_output_n(), which were not used anywhere.
+
 2001-07-30  Jason Evans  <jasone@canonware.com>
 
 	* src/systemdict.c: Change the API of the following operators to
