@@ -711,6 +711,19 @@ The Onyx scanner also handles immediate name evaluation errors specially, in
 that it pushes the name that could not be evaluated onto ostack before invoking
 \htmlref{\onyxop{}{throw}{}}{systemdict:throw}.
 
+In addition to the \htmlref{\onyxop{}{throw}{}}{systemdict:throw} operator,
+there are several other operators that exist specifically for the purpose of
+error handling.  The \htmlref{\onyxop{}{start}{}}{systemdict:start} operator
+silently catches any uncaught \htmlref{\onyxop{}{stop}{}}{systemdict:stop},
+\htmlref{\onyxop{}{exit}{}}{systemdict:exit}, or
+\htmlref{\onyxop{}{quit}{}}{systemdict:quit} calls.  The \onyxop{}{start}{}
+operator is the first operator called by the Onyx interpreter during startup,
+and it can also be used by applications to limit execution stack unwinding.  The
+\htmlref{\onyxop{}{stopped}{}}{systemdict:stopped} operator is useful for
+catching \htmlref{\onyxop{}{stop}{}}{systemdict:stop} calls, since it reports
+whether a \onyxop{}{stop}{} call was caught, allowing conditional error
+recovery.
+
 \section{Threads}
 
 Onyx supports multiple threads of execution by using the operating system's
