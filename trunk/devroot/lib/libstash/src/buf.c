@@ -110,8 +110,14 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	  a_prefix);
 #ifdef _LIBSTASH_DBG
   out_put(cw_g_out,
-	  "[s]|--> magic : 0x[i|b:16]\n",
-	  a_prefix, a_buf->magic);
+	  "[s]|--> magic_a : 0x[i|b:16]\n",
+	  a_prefix, a_buf->magic_a);
+  out_put(cw_g_out,
+	  "[s]|--> magic_b : 0x[i|b:16]\n",
+	  a_prefix, a_buf->magic_b);
+  out_put(cw_g_out,
+	  "[s]|--> size_of : 0x[i]\n",
+	  a_prefix, a_buf->size_of);
 #endif
   out_put(cw_g_out,
 	  "[s]|--> is_malloced : [s]\n",
@@ -161,8 +167,14 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
     /* Dump bufel. */
 #ifdef _LIBSTASH_DBG
     out_put(cw_g_out,
-	    "[s]|   |--> magic : 0x[i|b:16]\n",
-	    a_prefix, a_buf->bufel_array[i].magic);
+	    "[s]|   |--> magic_a : 0x[i|b:16]\n",
+	    a_prefix, a_buf->bufel_array[i].magic_a);
+    out_put(cw_g_out,
+	    "[s]|   |--> magic_b : 0x[i|b:16]\n",
+	    a_prefix, a_buf->bufel_array[i].magic_b);
+    out_put(cw_g_out,
+	    "[s]|   |--> size_of : 0x[i|b:16]\n",
+	    a_prefix, a_buf->bufel_array[i].size_of);
 #endif
     out_put(cw_g_out,
 	    "[s]|   |--> beg_offset : [i]\n",
@@ -172,7 +184,10 @@ buf_dump(cw_buf_t * a_buf, const char * a_prefix)
 	    a_prefix, a_buf->bufel_array[i].end_offset);
 #ifdef _LIBSTASH_DBG
     if ((NULL != a_buf->bufel_array[i].bufc)
-	&& (_CW_BUFEL_MAGIC == a_buf->bufel_array[i].magic))
+	&& (_CW_BUFEL_MAGIC == a_buf->bufel_array[i].magic_a)
+	&& (sizeof(cw_bufel_t) == a_buf->bufel_array[i].size_of)
+	&& (_CW_BUFEL_MAGIC == a_buf->bufel_array[i].magic_b)
+	)
 #else
     if (NULL != a_buf->bufel_array[i].bufc)
 #endif
@@ -226,7 +241,9 @@ buf_out_metric(const char * a_format, cw_uint32_t a_len, const void * a_arg)
 
   buf = *(cw_buf_t **) a_arg;
   _cw_check_ptr(buf);
-  _cw_assert(buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(buf->magic_b == _CW_BUF_MAGIC);
   
   len = buf_get_size(buf);
   
@@ -268,7 +285,9 @@ buf_out_render(const char * a_format, cw_uint32_t a_len, const void * a_arg,
 
   buf = *(cw_buf_t **) a_arg;
   _cw_check_ptr(buf);
-  _cw_assert(buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(buf->magic_b == _CW_BUF_MAGIC);
   
   len = buf_get_size(buf);
   
@@ -345,7 +364,9 @@ buf_get_size(cw_buf_t * a_buf)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -370,7 +391,9 @@ buf_get_num_bufels(cw_buf_t * a_buf)
   cw_uint32_t retval;
 
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -397,7 +420,9 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
   int i;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)
   {
@@ -452,9 +477,13 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve)
   cw_bool_t retval;
   
   _cw_check_ptr(a_a);
-  _cw_assert(a_a->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_a->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_a->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_a->magic_b == _CW_BUF_MAGIC);
   _cw_check_ptr(a_b);
-  _cw_assert(a_b->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_b->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_b->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_b->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_a != a_b);
   
 #ifdef _CW_REENTRANT
@@ -491,9 +520,13 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset)
   cw_uint32_t i, a_a_index, a_b_index;
 
   _cw_check_ptr(a_a);
-  _cw_assert(a_a->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_a->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_a->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_a->magic_b == _CW_BUF_MAGIC);
   _cw_check_ptr(a_b);
-  _cw_assert(a_b->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_b->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_b->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_b->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= buf_get_size(a_b));
   _cw_assert(a_a != a_b);
 
@@ -753,9 +786,13 @@ buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   cw_bool_t retval;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_assert(a_end_offset <= a_bufc->buf_size);
   _cw_assert(a_beg_offset <= a_end_offset);
 #ifdef _CW_REENTRANT
@@ -798,7 +835,9 @@ buf_prepend_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
       a_buf->array_num_valid++;
 
 #ifdef _LIBSTASH_DBG
-      a_buf->bufel_array[a_buf->array_start].magic = _CW_BUFEL_MAGIC;
+      a_buf->bufel_array[a_buf->array_start].magic_a = _CW_BUFEL_MAGIC;
+      a_buf->bufel_array[a_buf->array_start].size_of = sizeof(cw_bufel_t);
+      a_buf->bufel_array[a_buf->array_start].magic_b = _CW_BUFEL_MAGIC;
 #endif
       a_buf->bufel_array[a_buf->array_start].beg_offset = a_beg_offset;
       a_buf->bufel_array[a_buf->array_start].end_offset = a_end_offset;
@@ -831,9 +870,13 @@ buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   cw_bool_t did_bufel_merge = FALSE;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_assert(a_end_offset <= a_bufc->buf_size);
   _cw_assert(a_beg_offset <= a_end_offset);
 #ifdef _CW_REENTRANT
@@ -882,7 +925,9 @@ buf_append_bufc(cw_buf_t * a_buf, cw_bufc_t * a_bufc,
   
       /* Now append the bufel. */
 #ifdef _LIBSTASH_DBG
-      a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFEL_MAGIC;
+      a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
+      a_buf->bufel_array[a_buf->array_end].size_of = sizeof(cw_bufel_t);
+      a_buf->bufel_array[a_buf->array_end].magic_b = _CW_BUFEL_MAGIC;
 #endif
       a_buf->bufel_array[a_buf->array_end].beg_offset = a_beg_offset;
       a_buf->bufel_array[a_buf->array_end].end_offset = a_end_offset;
@@ -916,7 +961,9 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   cw_uint32_t array_index, bufel_valid_data, amount_left;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
@@ -1004,7 +1051,9 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount)
   cw_uint32_t array_index, bufel_valid_data, amount_left;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe)
   {
@@ -1091,7 +1140,9 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1120,7 +1171,9 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset)
   cw_uint32_t retval, array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 3) < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1199,7 +1252,9 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert((a_offset + 7) < a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1296,7 +1351,9 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val)
   cw_uint32_t array_element, bufel_offset;
 
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1335,7 +1392,9 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val)
   cw_uint32_t array_element, bufel_offset;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1431,7 +1490,9 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val)
   cw_uint32_t array_element, bufel_offset;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1567,7 +1628,9 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
   cw_bool_t retval;
   
   _cw_check_ptr(a_buf);
-  _cw_assert(a_buf->magic == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->magic_a == _CW_BUF_MAGIC);
+  _cw_assert(a_buf->size_of == sizeof(cw_buf_t));
+  _cw_assert(a_buf->magic_b == _CW_BUF_MAGIC);
   _cw_assert(a_offset <= a_buf->size);
 
 #ifdef _CW_REENTRANT
@@ -1602,7 +1665,9 @@ buf_set_range(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_length,
     /* Initialize bufel. */
 /*      bzero(&a_buf->bufel_array[a_buf->array_end], sizeof(cw_bufel_t)); */
 #ifdef _LIBSTASH_DBG
-    a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFEL_MAGIC;
+    a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
+    a_buf->bufel_array[a_buf->array_end].size_of = sizeof(cw_bufel_t);
+    a_buf->bufel_array[a_buf->array_end].magic_b = _CW_BUFEL_MAGIC;
 #endif
     a_buf->bufel_array[a_buf->array_end].beg_offset = 0;
     a_buf->bufel_array[a_buf->array_end].end_offset = a_length;
@@ -1685,7 +1750,9 @@ buf_p_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
   }
 
 #ifdef _LIBSTASH_DBG
-  retval->magic = _CW_BUF_MAGIC;
+  retval->magic_a = _CW_BUF_MAGIC;
+  retval->size_of = sizeof(cw_buf_t);
+  retval->magic_b = _CW_BUF_MAGIC;
 #endif
 
 #ifdef _CW_REENTRANT
@@ -2500,7 +2567,9 @@ buf_p_make_range_writeable(cw_buf_t * a_buf, cw_uint32_t a_offset,
     /* Initialize bufel. */
 /*      bzero(&a_buf->bufel_array[a_buf->array_end], sizeof(cw_bufel_t)); */
 #ifdef _LIBSTASH_DBG
-    a_buf->bufel_array[a_buf->array_end].magic = _CW_BUFEL_MAGIC;
+    a_buf->bufel_array[a_buf->array_end].magic_a = _CW_BUFEL_MAGIC;
+    a_buf->bufel_array[a_buf->array_end].size_of = sizeof(cw_bufel_t);
+    a_buf->bufel_array[a_buf->array_end].magic_b = _CW_BUFEL_MAGIC;
 #endif
     a_buf->bufel_array[a_buf->array_end].beg_offset = 0;
     a_buf->bufel_array[a_buf->array_end].end_offset = ((a_offset + a_length)
@@ -2601,7 +2670,9 @@ bufc_new(cw_bufc_t * a_bufc,
   retval->ref_count = 1;
 
 #ifdef _LIBSTASH_DBG
-  retval->magic = _CW_BUFC_MAGIC;
+  retval->magic_a = _CW_BUFC_MAGIC;
+  retval->size_of = sizeof(cw_bufc_t);
+  retval->magic_b = _CW_BUFC_MAGIC;
 #endif
 
 #ifdef _CW_REENTRANT
@@ -2620,7 +2691,9 @@ bufc_delete(cw_bufc_t * a_bufc)
 #endif
       
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
       
 #ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
@@ -2679,7 +2752,9 @@ bufc_set_buffer(cw_bufc_t * a_bufc, void * a_buffer, cw_uint32_t a_size,
 		void * a_dealloc_arg)
 {
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_check_ptr(a_buffer);
   _cw_assert(a_size > 0);
   
@@ -2696,7 +2771,9 @@ bufc_get_size(cw_bufc_t * a_bufc)
   cw_uint32_t retval;
 
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   
   retval = a_bufc->buf_size;
   
@@ -2709,7 +2786,9 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
   cw_uint32_t i;
   
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
   _cw_check_ptr(a_prefix);
 
 #ifdef _CW_REENTRANT
@@ -2721,8 +2800,14 @@ bufc_p_dump(cw_bufc_t * a_bufc, const char * a_prefix)
 	  a_prefix);
 #ifdef _LIBSTASH_DBG
   out_put(cw_g_out,
-	  "[s]|--> magic : 0x[i|b:16]\n",
-	  a_prefix, a_bufc->magic);
+	  "[s]|--> magic_a : 0x[i|b:16]\n",
+	  a_prefix, a_bufc->magic_a);
+  out_put(cw_g_out,
+	  "[s]|--> magic_b : 0x[i|b:16]\n",
+	  a_prefix, a_bufc->magic_b);
+  out_put(cw_g_out,
+	  "[s]|--> size_of : 0x[i|b:16]\n",
+	  a_prefix, a_bufc->size_of);
 #endif
   out_put(cw_g_out,
 	  "[s]|--> free_func : 0x[p]\n",
@@ -2762,7 +2847,9 @@ static cw_bool_t
 bufc_p_get_is_writeable(cw_bufc_t * a_bufc)
 {
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
 
   return a_bufc->is_writeable;
 }
@@ -2773,7 +2860,9 @@ bufc_p_get_ref_count(cw_bufc_t * a_bufc)
   cw_uint32_t retval;
   
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
       
 #ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
@@ -2791,7 +2880,9 @@ static void
 bufc_p_ref_increment(cw_bufc_t * a_bufc)
 {
   _cw_check_ptr(a_bufc);
-  _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->magic_a == _CW_BUFC_MAGIC);
+  _cw_assert(a_bufc->size_of == sizeof(cw_bufc_t));
+  _cw_assert(a_bufc->magic_b == _CW_BUFC_MAGIC);
       
 #ifdef _CW_REENTRANT
   mtx_lock(&a_bufc->lock);
