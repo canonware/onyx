@@ -288,7 +288,7 @@ bins :
 tests : $(CTESTS) $(PTESTS) $(BTESTS)
 
 check : tests
-	@$(VERIFY) -d $(CTESTS)
+	@$(VERIFY) -- -d $(CTESTS)
 
 # 	@$(SHELL) -c \
 # 	'printf "Running regression tests:\\n" ;\
@@ -394,7 +394,7 @@ distclean : clean
 	rm -f config.status
 	rm -f include/libstash/libstash_defs.h
 	rm -f TAGS
-	rm -f $(VERIFY)
+	rm -f $(VERIFY) test/*.perf
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
