@@ -91,6 +91,7 @@ doc_clean :
   rm -f [objdir]/doc/latex/manual.ind;
   rm -f [objdir]/doc/latex/manual.lof;
   rm -f [objdir]/doc/latex/manual.log;
+  rm -f [objdir]/doc/latex/manual.lot;
   rm -f [objdir]/doc/latex/manual.out;
   rm -f [objdir]/doc/latex/manual.pdf;
   rm -f [objdir]/doc/latex/manual.toc;
@@ -139,6 +140,7 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.ind;
   rm -f [objdir]/%0latex/%.lof;
   rm -f [objdir]/%0latex/%.log;
+  rm -f [objdir]/%0latex/%.lot;
   rm -f [objdir]/%0latex/%.out;
   rm -f [objdir]/%0latex/%.toc;
   rm -f [objdir]/%0latex/texput.log;
@@ -176,6 +178,7 @@ doc_relclean :
   rm -f [objdir]/%0latex/%.ind;
   rm -f [objdir]/%0latex/%.lof;
   rm -f [objdir]/%0latex/%.log;
+  rm -f [objdir]/%0latex/%.lot;
   rm -f [objdir]/%0latex/%.out;
   rm -f [objdir]/%0latex/%.toc;
   rm -f [objdir]/%0latex/texput.log;
