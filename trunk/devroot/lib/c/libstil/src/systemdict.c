@@ -1681,7 +1681,7 @@ systemdict_get(cw_stilt_t *a_stilt)
 			stilt_error(a_stilt, STILTE_RANGECHECK);
 			return;
 		}
-		stilo_array_el_set(from, with, index);
+		stilo_array_el_get(from, index, with);
 
 		stils_roll(ostack, 2, 1);
 		stils_pop(ostack);
@@ -2752,7 +2752,9 @@ systemdict_readstring(cw_stilt_t *a_stilt)
 	if (nread == 0) {
 		/* EOF. */
 		stilo_boolean_new(file, TRUE);
-		stils_pop(ostack);
+		stilo_string_new(string, stilt_stil_get(a_stilt),
+		    stilt_currentlocking(a_stilt), 0);
+		stils_roll(ostack, 2, 1);
 	} else if (nread < stilo_string_len_get(string)) {
 		cw_stilo_t	*value, *code;
 
@@ -2768,9 +2770,11 @@ systemdict_readstring(cw_stilt_t *a_stilt)
 
 		stils_npop(ostack, 2);
 	} else {
+		/*
+		 * The string is full, so doesn't need modified.
+		 */
 		stilo_boolean_new(file, FALSE);
 		stils_roll(ostack, 2, 1);
-		stils_pop(ostack);
 	}
 }
 
