@@ -244,7 +244,6 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     cw_assert(mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1);
     cw_assert(a_bpos != a_hist->hbpos);
 
-//fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
     if (a_hist->hbpos == 0)
     {
 	/* There's no need for an initial position record. */
@@ -256,10 +255,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     u.bpos = cw_htonq(a_hist->hbpos);
     bufv.data = u.str;
     bufv.len = sizeof(u.bpos);
-//    buf_dump(&a_hist->h, "wuh ", NULL, NULL);
-//    fprintf(stderr, "bufv.len: %u\n", bufv.len);
     mkr_before_insert(&a_hist->hcur, &bufv, 1);
-//    buf_dump(&a_hist->h, "uhh ", NULL, NULL);
     /* Record header. */
     hst_tag_set(hdr, HST_TAG_POS);
     bufv.data = &hdr;
@@ -270,7 +266,6 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     a_hist->hbpos = a_bpos;
 
     RETURN:
-//fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
 }
 
 cw_hist_t *
@@ -1382,9 +1377,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	    {
 		fprintf(stderr, "R%d(", hst_cnt_get(hdr));
 		mkr_dup(&ttmkr, &tmkr);
-//		fprintf(stderr, "%s:%d:%s().\n", __FILE__, __LINE__, __FUNCTION__);
-//		fprintf(stderr, "%llu, seek %d\n", mkr_pos(&tmkr),
-//			-1 - hst_cnt_get(hdr));
 		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
 		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);

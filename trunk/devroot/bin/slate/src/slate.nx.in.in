@@ -130,7 +130,7 @@ dstack saup
     `\r\n' print
     tpoint dup 0 /SEEK_BOB marker_seek pop bpoint marker_range_get
     srender flush
-    scratch `redisplay ' buffer_dump
+#    scratch `redisplay ' buffer_dump
 } def
 
 # - getc #string
@@ -143,10 +143,8 @@ dstack saup
 
 # #string self_insert_char -
 /insert_string {
-#    stderr `insert_string a\n' write
     bpoint exch marker_before_insert
-#    stderr `insert_string b\n' write
-    scratch `insert_string ' buffer_dump
+#    scratch `insert_string ' buffer_dump
 } def
 
 # Undefined characters are inserted literally.
@@ -213,13 +211,12 @@ dstack saup
 
 # #string interpc -
 /interpc {
-    stderr 1 idup cvs write stderr `\n' write
+#    stderr 1 idup cvs write stderr `\n' write
     keytable 1 idup known {
 	keytable exch get eval
     }{
 	insert_string
     } ifelse
-#    stderr `finish interpc\n' write
 } def
 
 /scratch buffer def

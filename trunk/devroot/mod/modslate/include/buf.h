@@ -56,10 +56,10 @@ struct cw_mkr_s
     cw_bufp_t *bufp;
 
     /* Gap movement can change this. */
-    cw_uint64_t ppos; /* XXX Why 64 bits? */
+    cw_uint32_t ppos;
 
     /* Line number, relative to the beginning of bufp (>= 0). */
-    cw_uint64_t pline; /* XXX Why 64 bits? */
+    cw_uint32_t pline;
 
     /* Ordered mkr tree and list linkage. */
     rb_node(cw_mkr_t) mnode;
