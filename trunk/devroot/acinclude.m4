@@ -10,15 +10,35 @@ fi
 ,
 enable_threads="1"
 )
-AC_SUBST(enable_threads)
 if test "x$enable_threads" = "x1" ; then
-  AC_DEFINE(_CW_THREADS)
-
-  AC_CHECK_HEADERS(pthread.h, , AC_MSG_ERROR(Cannot build without pthread.h))
+  AC_CHECK_HEADERS(pthread.h, , enable_threads="0")
 
   AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
     AC_CHECK_LIB(c_r, pthread_create, \
-      LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
+      LIBS="$LIBS -pthread", enable_threads="0"))
+
+  if test "x$enable_threads" = "x1" ; then
+    AC_DEFINE(_CW_THREADS)
+  fi
+fi
+AC_SUBST(enable_threads)
+])
+
+dnl Support POSIX file operations by default.
+AC_DEFUN(CW_ENABLE_POSIX_FILE,
+[
+AC_ARG_ENABLE(posix-file, [  --disable-posix-file    Disable POSIX file support],
+if test "x$enable_posix_file" = "xyes" ; then
+  enable_posix_file="1"
+else
+  enable_posix_file="0"
+fi
+,
+enable_posix_file="1"
+)
+AC_SUBST(enable_posix_file)
+if test "x$enable_posix_file" = "x1" ; then
+  AC_DEFINE(_CW_POSIX_FILE)
 fi
 ])
 
@@ -34,6 +54,11 @@ fi
 ,
 enable_posix="1"
 )
+dnl posix depends on posix-file.
+if test "x$enable_posix_file" = "x0" ; then
+  enable_posix="0"
+fi
+
 AC_SUBST(enable_posix)
 if test "x$enable_posix" = "x1" ; then
   AC_DEFINE(_CW_POSIX)
@@ -99,12 +124,13 @@ else
   enable_libedit="1"
 fi
 ,
-if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
-  enable_libedit="1"
-else
+enable_libedit="1"
+)
+dnl libedit depends on threads and posix.
+if test "x$enable_threads" = "x0" -o "x$enable_posix" = "x0" ; then
   enable_libedit="0"
 fi
-)
+
 AC_SUBST(enable_libedit)
 if test "x$enable_libedit" = "x1" ; then
   AC_DEFINE(_CW_USE_LIBEDIT)

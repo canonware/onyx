@@ -146,7 +146,7 @@ nxo_file_interactive(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 	file->position = 0;
 }
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 /*
  * NXO_THREADE_IOERROR, NXO_THREADE_LIMITCHECK,
  * NXO_THREADE_INVALIDFILEACCESS
@@ -302,7 +302,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 		file->buffer_mode = BUFFER_EMPTY;
 	}
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 	if ((file->fd >= 0) && (close(file->fd) == -1)) {
 		file->fd = -1;
 		retval = NXO_THREADE_IOERROR;
@@ -319,7 +319,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	return retval;
 }
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 cw_sint32_t
 nxo_file_fd_get(cw_nxo_t *a_nxo)
 {
@@ -414,7 +414,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			file->buffer_offset = 0;
 			file->buffer_mode = BUFFER_EMPTY;
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 			if (file->fd >= 0) {
 				struct pollfd	events;
 				struct iovec	iov[2];
@@ -515,7 +515,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			}
 		}
 	} else {
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 		if (file->fd >= 0) {
 			while ((retval = read(file->fd, r_str, a_len)) == -1) {
 				if (errno != EINTR)
@@ -622,7 +622,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 			if ((offset >= file->buffer_offset) ||
 			    (file->buffer_mode == BUFFER_EMPTY)) {
 				/* Replenish the internal buffer. */
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 				if (file->fd >= 0) {
 					while ((nread = read(file->fd,
 					    file->buffer, file->buffer_size)) ==
@@ -736,7 +736,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 				maxlen <<= 1;
 			}
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 			if (file->fd >= 0) {
 				while ((nread = read(file->fd, &line[i], 1)) ==
 				    -1) {
@@ -841,7 +841,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 			file->buffer_mode = BUFFER_WRITE;
 			file->buffer_offset += a_len;
 		}
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 		else if (file->fd >= 0) {
 			struct iovec	iov[2];
 
@@ -879,7 +879,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 			file->position += a_len;
 		}
 	} else {
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 		if (file->fd >= 0) {
 			while (write(file->fd, a_str, a_len) == -1) {
 				if (errno != EINTR) {
@@ -906,7 +906,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 	return retval;
 }
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 /* NXO_THREADE_IOERROR */
 cw_nxo_threade_t
 nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
@@ -993,7 +993,7 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 	return retval;
 }
 
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 /* NXO_THREADE_IOERROR */
 cw_nxo_threade_t
 nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
@@ -1174,7 +1174,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 	if (a_file->buffer != NULL) {
 		/* Only write if the buffered data is for writing. */
 		if (a_file->buffer_mode == BUFFER_WRITE) {
-#ifdef _CW_POSIX
+#ifdef _CW_POSIX_FILE
 			if (a_file->fd >= 0) {
 				/* Normal file descriptor. */
 				while (write(a_file->fd, a_file->buffer,

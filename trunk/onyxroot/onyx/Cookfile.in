@@ -62,6 +62,7 @@ bins = @bins@;
 
 enable_threads = @enable_threads@;
 enable_posix = @enable_posix@;
+enable_posix_file = @enable_posix_file@;
 enable_libedit = @enable_libedit@;
 
 BOOTSTRAP = ;

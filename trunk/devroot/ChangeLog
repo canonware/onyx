@@ -1,5 +1,9 @@
 2001-08-19  Jason Evans  <jasone@canonware.com>
 
+	* : Add the --disable-posix-file configure option.  This option
+	disables standard onyx file object operations, and requires that
+	all file objects be "interactive".
+
 	* : Fold libstash into libonyx.
 
 2001-08-17  Jason Evans  <jasone@canonware.com>

@@ -76,11 +76,12 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = ch_a.c dch_a.c hook_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c
-                 xep_a.c
+  local ctests = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
 #if [enable_threads]
-                 cnd_a.c mq_a.c mtx_a.c thd_a.c thd_b.c thd_c.c
-                 tsd_a.c
+                 cnd_a.c mq_a.c mtx_a.c thd_a.c thd_b.c thd_c.c tsd_a.c
+#endif
+#if [enable_posix_file]
+                 hook_a.c
 #endif
                  ;
   ctests = [fromto % [srcdir]/lib/c/libonyx/test/% [ctests]];

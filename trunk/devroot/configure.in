@@ -33,6 +33,9 @@ AC_PROG_CPP
 dnl Use threads by default.
 CW_ENABLE_THREADS
 
+dnl Support POSIX file operations by default.
+CW_ENABLE_POSIX_FILE
+
 dnl Support POSIX by default.
 CW_ENABLE_POSIX
 
@@ -72,10 +75,7 @@ if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
 fi
 
 dnl Look for binaries.
-if test "x$enable_posix" = "x1" ; then
-  CW_BUILD_BIN(onyx, bin_onyx)
-fi
-CW_BUILD_BIN(nx, bin_nx)
+CW_BUILD_BIN(onyx, bin_onyx)
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
@@ -103,7 +103,8 @@ case "${host}" in
 	fi
         ;;
   *)
-	AC_MSG_ERROR(Unsupported operating system: ${host})
+	AC_MSG_RESULT(Unsupported operating system: ${host})
+	RPATH="-Wl,-rpath,"
 	;;
 esac
 AC_SUBST(RPATH)
@@ -236,6 +237,7 @@ AC_MSG_RESULT(bins         :${bins})
 AC_MSG_RESULT()
 AC_MSG_RESULT(threads      : ${enable_threads})
 AC_MSG_RESULT(posix        : ${enable_posix})
+AC_MSG_RESULT(posix-file   : ${enable_posix_file})
 AC_MSG_RESULT(inlines      : ${enable_inlines})
 AC_MSG_RESULT(libedit      : ${enable_libedit})
 AC_MSG_RESULT(debug        : ${enable_debug})
