@@ -30,6 +30,11 @@
 #  define _STDLIB_H_
 #endif
 
+#ifndef _STDARG_H_
+#  include <stdarg.h>
+#  define _STDARG_H_
+#endif
+
 #ifndef _UNISTD_H_
 #  include <unistd.h>
 #  define _UNISTD_H_
@@ -67,6 +72,10 @@
 
 #ifndef _LIBSTASH_USE_LOG
 #  define _LIBSTASH_USE_LOG
+#endif
+
+#ifndef _LIBSTASH_USE_OUT
+#  define _LIBSTASH_USE_OUT
 #endif
 
 #ifndef _LIBSTASH_USE_MEM
@@ -177,6 +186,13 @@
 #  ifndef _LOG_H_
 #    include "log.h"
 #    define _LOG_H_
+#  endif
+#endif
+
+#ifdef _LIBSTASH_USE_OUT
+#  ifndef _OUT_H_
+#    include "out.h"
+#    define _OUT_H_
 #  endif
 #endif
 
