@@ -277,13 +277,13 @@ el_resize(el)
     sigset_t oset, nset;
     (void) sigemptyset(&nset);
     (void) sigaddset(&nset, SIGWINCH);
-    (void) sigprocmask(SIG_BLOCK, &nset, &oset);
+    (void) thd_sigmask(SIG_BLOCK, &nset, &oset);
 
     /* get the correct window size */
     if (term_get_size(el, &lins, &cols))
 	term_change_size(el, lins, cols);
 
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
+    (void) thd_sigmask(SIG_SETMASK, &oset, NULL);
 }
 
 public void
