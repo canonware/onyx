@@ -106,7 +106,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 */
 	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso,
 	    link), i++) {
-		new_stilo = stils_push(a_stils);
+		new_stilo = stils_push(a_stils, NULL, _CW_STILOT_NOTYPE);
 		stilo_move(new_stilo, &old_stilso->stilo);
 
 		switch (stilo_type_get(new_stilo)) {
@@ -136,7 +136,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 }
 
 cw_stilo_t *
-stils_push(cw_stils_t *a_stils)
+stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilot_t a_type)
 {
 	cw_stilso_t	*stilso;
 
@@ -150,7 +150,7 @@ stils_push(cw_stils_t *a_stils)
 	a_stils->stack = stilso;
 	a_stils->count++;
 
-	stilo_new(&stilso->stilo);
+	stilo_new(&stilso->stilo, a_stilt, a_type);
 
 	return &stilso->stilo;
 }
@@ -485,6 +485,6 @@ stilsc_p_get_stilso(cw_stilsc_t *a_stilsc, cw_uint32_t a_index)
 static void
 stilso_p_new(cw_stilso_t *a_stilso)
 {
-	stilo_new(&a_stilso->stilo);
+	stilo_new(&a_stilso->stilo, NULL, _CW_STILOT_NOTYPE);
 	qr_new(a_stilso, link);
 }

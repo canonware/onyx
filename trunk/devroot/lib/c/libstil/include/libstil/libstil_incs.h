@@ -27,15 +27,6 @@
  */
 
 #include "stilo.h"
-#include "stiloe.h"
-#include "stiloe_array.h"
-#include "stiloe_condition.h"
-#include "stiloe_dict.h"
-#include "stiloe_hook.h"
-#include "stiloe_lock.h"
-#include "stiloe_mstate.h"
-#include "stiloe_number.h"
-#include "stiloe_string.h"
 #include "stil.h"
 #include "stils.h"
 #include "stilt.h"

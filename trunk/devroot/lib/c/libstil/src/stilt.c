@@ -314,7 +314,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 	cw_uint32_t	i;
 	cw_uint8_t	c;
 	cw_stilo_t	*stilo;
-	cw_stiloe_t	*stiloe;
 
 	for (i = 0; i < a_len; i++, a_stilt->column++) {
 		c = a_str[i];
@@ -380,8 +379,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				break;
 			case '[':
 				stilt_p_print_token(a_stilt, 0, "[");
-				stilo = stils_push(&a_stilt->data_stils);
-				stilo_type_set(stilo, _CW_STILOT_MARKTYPE);
+				/* An operator, not the same as '{'. */
 				break;
 			case ']':
 				stilt_p_print_token(a_stilt, 0, "]");
@@ -390,7 +388,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			case '{':
 				stilt_p_print_token(a_stilt, 0, "{");
 				a_stilt->defer_count++;
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->data_stils,
+				    a_stilt, _CW_STILOT_NOTYPE);
 				/*
 				 * Leave the stilo as notype in order to
 				 * differentiate from normal marks.
@@ -748,22 +747,18 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 
 					stilt_p_print_token(a_stilt,
 					    a_stilt->index, "string");
-					stilo =
-					    stils_push(&a_stilt->data_stils);
-					stilo_type_set(stilo,
-					    _CW_STILOT_STRINGTYPE);
-					stiloe = stiloe_new(a_stilt,
-					    _CW_STILOT_STRINGTYPE);
-					stiloe_string_len_set(stiloe,
+					stilo = stils_push(&a_stilt->data_stils,
+					    a_stilt, _CW_STILOT_STRINGTYPE);
+					stilo_string_len_set(stilo,
 					    a_stilt->index);
 					if (a_stilt->index <=
 					    _CW_STIL_BUFC_SIZE) {
-						stiloe_string_set(stiloe, 0,
+						stilo_string_set(stilo, 0,
 						    a_stilt->tok_buffer.str,
 						    a_stilt->index);
 					} else
 						_cw_error("XXX Unimplemented");
-					stilo_extended_set(stilo, stiloe);
+
 					stilt_p_reset_tok_buffer(a_stilt);
 				} else
 					_CW_STILT_PUTC(c);
@@ -1161,7 +1156,6 @@ static void
 stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 {
 	cw_stilo_t	t_stilo, *stilo, *arr;
-	cw_stiloe_t	*stiloe;
 	cw_uint32_t	nelements, i;
 
 	/* Find the "mark". */
@@ -1178,13 +1172,10 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	 */
 	nelements = i;
 
-	stilo_new(&t_stilo);
-	stilo_type_set(&t_stilo, _CW_STILOT_ARRAYTYPE);
+	stilo_new(&t_stilo, a_stilt, _CW_STILOT_ARRAYTYPE);
 	stilo_executable_set(&t_stilo, TRUE);
-	stiloe = stiloe_new(a_stilt, _CW_STILOT_STRINGTYPE);
-	stiloe_array_len_set(stiloe, nelements);
-	stilo_extended_set(&t_stilo, stiloe);
-	arr = stiloe_array_get(stiloe);
+	stilo_array_len_set(&t_stilo, nelements);
+	arr = stilo_array_get(&t_stilo);
 
 	/*
 	 * Traverse up the stack, moving stilo's to the array.
@@ -1198,7 +1189,7 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	stils_pop(&a_stilt->data_stils, nelements + 1);
 
 	/* Push the array onto the stack. */
-	stilo = stils_push(&a_stilt->data_stils);
+	stilo = stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_NOTYPE);
 	stilo_move(stilo, &t_stilo);
 
 	/* Clean up. */

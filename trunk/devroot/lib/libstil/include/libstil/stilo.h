@@ -10,18 +10,9 @@
  ****************************************************************************/
 
 typedef struct cw_stilo_s cw_stilo_t;
+typedef struct cw_stiloe_s cw_stiloe_t;
 
 /* Defined here to resolve circular dependencies. */
-typedef struct cw_stiloe_s cw_stiloe_t;
-typedef struct cw_stiloec_s cw_stiloec_t;
-typedef struct cw_stiloe_array_s cw_stiloe_array_t;
-typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
-typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
-typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
-typedef struct cw_stiloe_lock_s cw_stiloe_lock_t;
-typedef struct cw_stiloe_mstate_s cw_stiloe_mstate_t;
-typedef struct cw_stiloe_number_s cw_stiloe_number_t;
-typedef struct cw_stiloe_string_s cw_stiloe_string_t;
 typedef struct cw_stiln_s cw_stiln_t;
 typedef struct cw_stilt_s cw_stilt_t;
 
@@ -43,6 +34,13 @@ typedef enum {
 	_CW_STILOT_STRINGTYPE = 14
 }	cw_stilot_t;
 
+typedef enum {
+	_CW_STILOA_NONE = 0,
+	_CW_STILOA_EXECUTEONLY = 1,
+	_CW_STILOA_READONLY = 2,
+	_CW_STILOA_UNLIMITED = 3
+}	cw_stiloa_t;
+
 /*
  * Main object structure.
  */
@@ -60,6 +58,7 @@ struct cw_stilo_s {
 	 * collector knows not to try using a possibly corrupt pointer.
 	 */
 	cw_stilot_t	type:4;
+	cw_stiloa_t	access:2;
 	/*
 	 * Every object is either literal (FALSE) or executable (TRUE).
 	 */
@@ -69,21 +68,11 @@ struct cw_stilo_s {
 	 */
 	cw_bool_t	literal:1;
 	/*
-	 * If TRUE, this is an extended object.  This has extra significance if
-	 * the object is a number or mstate.  Both number and mstate objects can
-	 * switch between simple and extended representations.
+	 * If TRUE, this is an extended (not the same as composite) object.
+	 * This only pertains to number stilo's, which can switch between simple
+	 * and extended representations.
 	 *
-	 * ---
-	 * For a mstate object, if not extended, the mstate is:
-	 *
-	 * accuracy : 32
-	 * point    : 0
-	 * base     : 10
-	 *
-	 * Otherwise, the mstate is in o.stiloe.
-	 *
-	 * ---
-	 * For a number object, if not extended, this number is representable as
+	 * For a number stilo, if not extended, this number is representable as
 	 * a 32 bit signed integer.  Otherwise o.stiloe contains the value.
 	 */
 	cw_bool_t	extended:1;
@@ -147,11 +136,11 @@ struct cw_stilo_s {
 	}	o;
 };
 
-void		stilo_new(cw_stilo_t *a_stilo);
+void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
+    a_type);
 void		stilo_delete(cw_stilo_t *a_stilo);
 
 cw_stilot_t	stilo_type_get(cw_stilo_t *a_stilo);
-void		stilo_type_set(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 
 cw_bool_t	stilo_executable_get(cw_stilo_t *a_stilo);
 void		stilo_executable_set(cw_stilo_t *a_stilo, cw_bool_t
@@ -160,19 +149,46 @@ void		stilo_executable_set(cw_stilo_t *a_stilo, cw_bool_t
 cw_bool_t	stilo_literal_get(cw_stilo_t *a_stilo);
 void		stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal);
 
-cw_stiloe_t	*stilo_extended_get(cw_stilo_t *a_stilo);
-void		stilo_extended_set(cw_stilo_t *a_stilo, cw_stiloe_t *a_stiloe);
-
+void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
+void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from);
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline);
 
+/* XXX For the GC only. */
+cw_stiloe_t	*stilo_l_stiloe_get(cw_stilo_t *a_stilo);
+cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 
+/*
+ * array.
+ */
 cw_sint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
 void		stilo_array_len_set(cw_stilo_t *a_stilo, cw_uint32_t a_len);
 cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
 void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
     cw_stilo_t *a_arr, cw_uint32_t a_len);
+
+/*
+ * dict.
+ */
+/* XXX Keys are arbitrary stilo's, not names. */
+cw_bool_t	stilo_dict_def(cw_stilo_t *a_stilo, cw_stilo_t *a_name,
+    cw_stilo_t *a_val);
+cw_bool_t	stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilo_t *a_name);
+cw_stilo_t	*stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilo_t *a_name);
+cw_bool_t	stilo_dict_copy(cw_stilo_t *a_from, cw_stilo_t *a_to);
+cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
+cw_stilo_t	*stilo_dict_iterate(cw_stilo_t *a_stilo);
+
+/*
+ * string.
+ */
+cw_sint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
+void		stilo_string_len_set(cw_stilo_t *a_stilo, cw_uint32_t a_len);
+cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
+cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);
+void		stilo_string_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
+    const cw_uint8_t *a_str, cw_uint32_t a_len);
