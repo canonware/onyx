@@ -309,6 +309,9 @@ typedef enum
     NXN_ENTRY(ndn),
     NXN_ENTRY(ndup),
     NXN_ENTRY(ne),
+#ifdef CW_POSIX
+    NXN_ENTRY(neterror),
+#endif
     NXN_ENTRY(neg),
     NXN_ENTRY(newerror),
     NXN_ENTRY(nip),

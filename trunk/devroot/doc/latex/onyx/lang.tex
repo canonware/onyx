@@ -633,6 +633,9 @@ state for where the error really happened is gone.
 \item[invalidfileaccess: ] Insufficient file permissions.
 \label{ioerror}
 \item[ioerror: ] I/O error (read(), write(), etc.).
+\label{neterror}
+\item[neterror: ] Network error (refused connection, timeout, unreachable net,
+etc.).
 \label{limitcheck}
 \item[limitcheck: ] Value outside of legal range.
 \label{rangecheck}
@@ -3838,7 +3841,11 @@ stderr. \\
 \hline \hline
 \multicolumn{4}{|l|}{Socket and networking operators} \\
 \hline \hline
-OPARGS & {\bf \htmlref{socket}{systemdict:socket}} & OPOUTS & \\
+family type & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
+socket. \\
+\hline
+family type proto & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
+socket. \\
 \hline
 OPARGS & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & OPOUTS & \\
 \hline
@@ -3846,7 +3853,11 @@ OPARGS & {\bf \htmlref{listen}{systemdict:listen}} & OPOUTS & \\
 \hline
 OPARGS & {\bf \htmlref{accept}{systemdict:accept}} & OPOUTS & \\
 \hline
-OPARGS & {\bf \htmlref{connect}{systemdict:connect}} & OPOUTS & \\
+sock addr port & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
+socket. \\
+\hline
+sock addr & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
+socket. \\
 \hline
 OPARGS & {\bf \htmlref{hostbyname}{systemdict:hostbyname}} & OPOUTS & \\
 \hline
@@ -3862,8 +3873,11 @@ OPARGS & {\bf \htmlref{send}{systemdict:send}} & OPOUTS & \\
 \hline
 OPARGS & {\bf \htmlref{recv}{systemdict:recv}} & OPOUTS & \\
 \hline
-OPARGS & {\bf \htmlref{socketpair}{systemdict:socketpair}} & OPOUTS & \\
+family type & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock sock &
+Create a socket pair. \\
 \hline
+family type proto & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock
+sock & Create a socket pair. \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
