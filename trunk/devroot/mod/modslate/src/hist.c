@@ -72,10 +72,10 @@
 
 #include "../include/modslate.h"
 #include "../include/buf_l.h"
+#ifdef CW_BUF_DUMP
 #ifndef HAVE_ASPRINTF
 #include "../../../lib/libonyx/src/asprintf.c"
 #endif
-#ifdef CW_BUF_DUMP
 #include <ctype.h>
 #endif
 
