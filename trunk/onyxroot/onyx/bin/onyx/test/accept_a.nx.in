@@ -47,6 +47,7 @@ $s exch def
 $sockpath `/tmp/accept_a_' uid cvs `_' pid cvs 4 ncat def
 
 s sockpath bindsocket
+s listen
 
 # Launch a process that will connect to sockpath.
 [
@@ -56,7 +57,6 @@ s sockpath bindsocket
 ] forkexec
 $child exch def
 
-s listen
 s accept
 $c exch def
 
