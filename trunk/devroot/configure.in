@@ -605,6 +605,7 @@ if test "x$enable_modules" = "x1" ; then
       AC_DEFINE(CW_USE_MODPANE)
       AC_SUBST(MODPANE_CPPFLAGS)
       AC_SUBST(MODPANE_LDFLAGS)
+      cfgoutputs="$cfgoutputs bin/ti2nx/src/ti2nx.nx.in"
     fi
 
     dnl Restore CPPFLAGS and LDFLAGS.
@@ -676,6 +677,9 @@ if test "x$enable_onyx" = "x1" ; then
 fi
 if test "x$enable_slate" = "x1" ; then
   CW_BUILD_BIN(slate, bin_slate)
+fi
+if test "x$enable_modpane" = "x1" ; then
+  CW_BUILD_BIN(ti2nx, bin_ti2nx)
 fi
 
 AC_SUBST(bins)

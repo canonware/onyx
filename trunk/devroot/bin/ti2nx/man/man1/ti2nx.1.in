@@ -1,0 +1,57 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: Onyx <Version = onyx>
+..
+.TH ti2nx 1 "ti2nx, version <Version = onyx>"
+.hy 1
+.SH NAME
+ti2nx - converts from terminfo source to Onyx code.
+.SH SYNOPSIS
+.B ti2nx 
+.BR [ \-h ]
+.br
+.B ti2nx 
+.BR [ \-V ]
+.br
+.B ti2nx
+.BR [ \-v ]
+.BR [ \-t
+.RB <terms> ]
+.BR [ \-i
+.RB <infile> ]
+.BR [ \-o
+.RB <outfile> | \-d
+.RB <outdir> ]
+.SH DESCRIPTION
+The
+.B ti2nx
+program is a script that converts terminfo source to Onyx code in a format that
+the modprompt Onyx module can use.
+.SS Command line flags:
+.IP \-h
+Display usage information and exit.
+.IP \-V
+Display the version number and exit.
+.IP \-v
+Print diagnostic information to stdout.
+.IP \-t <terms>
+Only output terminal descriptions for the comma-separated list of terminals.
+.IP \-i <infile>
+Read terminfo source from <infile> (defaults to stdin).
+.IP \-o <outfile>
+Output results to <outfile> (defaults to stdout).
+.IP \-d <outdir>
+Outpupt a directory tree of terminal description files, rooted at <outdir>.
+.SH FILES
+@prefix@/share/onyx/doc/html/onyx.html
+.br
+@prefix@/share/onyx/doc/ps/onyx.ps
+.br
+@prefix@/share/onyx/doc/pdf/onyx.pdf
+.SH SEE ALSO
+onyx(1)
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

@@ -1,0 +1,823 @@
+# -*- mode: onyx -*-
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+# Script that converts terminfo source to Onyx code (data).
+#
+# This program works by constructing the following data structures during
+# various passes, and eventually writing the results out.
+#
+# terms : Dictionary of name --> capability dictionary mappings.  Every name is
+#         entered here, even if it will not be output at the end (names with
+#         '+' in them are not output).  This dictionary is used for lookups
+#         based on terminal name.
+#
+# aliases : Dictionary of name array --> capability dictionary mappings.  Each
+#           capability dictionary is only pointed to by one key in this
+#           dictionary.  This dictionary is used for iterating over capability
+#           dictionaries, both when doing post-processing (replacing use=
+#           capabilities) and during final output (allows hardlinks to be used
+#           when the -d flag is specified).
+#
+# uses : Stack of triplets: {names array (key in aliases dict), uses, canceled
+#	 capabilities dict}.  According to the terminfo documentation, only
+#	 canceled capabilities that are listed before the use= capabilities are
+#	 canceled, so in theory it would be possible for capabilities to be
+#	 selectively be canceled from some use= capabilities, but not others,
+#	 even within the same terminal description.
+#
+################################################################################
+
+# Define terms and aliases dictionaries.  Do this before defining procedures so
+# that references to them in the procedures can be bound.
+$terms <> def
+$aliases <> def
+# Define uses stack.
+$uses () def
+$tuses () def
+
+# #str vwrite -
+$vwrite {
+    opt_v true eq {
+	print flush
+    }{
+	pop
+    } ifelse
+} bind def
+
+# #str owrite -
+$owrite {
+    outfile exch write pop
+} bind def
+
+# #ofile usage -
+$usage {
+    `ti2nx usage:\n'
+    `    ti2nx [-h]\n'
+    `    ti2nx [-V]\n'
+    `    ti2nx [-v] [-t <terms>] [-i <infile>] [-o <outfile> | -d <outdir>]\n'
+    4 ncat
+    under write pop flushfile
+} bind def
+
+# - $parse_opts -
+$parse_opts {
+    # Set options defaults.
+    $opt_v false def
+    $opt_t null def
+    $opt_i null def
+    $opt_o null def
+    $opt_d null def
+
+    # Command line argument handlers.
+    <
+	`-h' {
+	    pop
+	    stdout usage
+	    quit
+	}
+	`-V' {
+	    stdout `Canonware ti2nx, version ' version `.\n' 3 ncat write pop
+	    quit
+	}
+	`-v' {
+	    $opt_v true def
+	}
+	# #arg -- #(arg + 1)
+	`-t' {
+	    inc
+	    argv over get
+	    # argv elements are implicitly locked, so make a copy to avoid
+	    # deadlocks.
+	    dup length string copy
+
+	    # Iterate over split elements of the list and construct a dictionary
+	    # with the terminal names as keys.
+	    < exch
+		`,\s*' split {
+		    true
+		} foreach
+	    >
+	    $opt_t exch def
+	}
+	# #arg -- #(arg + 1)
+	`-i' {
+	    inc
+	    argv over get
+	    $opt_i exch def
+	}
+	# #arg -- #(arg + 1)
+	`-o' {
+	    inc
+	    argv over get
+	    $opt_o exch def
+	}
+	# #arg -- #(arg + 1)
+	`-d' {
+	    inc
+	    argv over get
+	    $opt_d exch def
+	}
+    >
+
+    # Iterate over command line arguments.
+    argv length 1 {2 ndup gt}{
+	# #handlers #argc #arg
+	argv over get
+	bdup over known {
+	    bdup exch get eval
+	}{
+	    # Print usage and exit.
+	    stderr argv 0 get `: Bad argument: ' 4 ndn `\n' 4 ncat write pop
+	    stderr usage
+	    1 die
+	} ifelse
+
+	# #arg++
+	inc
+    } while
+    # #handlers #argc #arg
+    3 npop
+
+    # Enforce argument incompatibility.
+    opt_o null ne opt_d null ne and {
+	stderr argv 0 get `: -o and -d are incompatible\n' 2 ncat write pop
+	stderr usage
+	1 die
+    } if
+} bind def
+
+# - setup_io -
+$setup_io {
+    # Get a file object for the input.  Use stdin if no infile was specified.
+    opt_i null ne {
+	$infile opt_i `r' open def
+    }{
+	$infile stdin def
+    } ifelse
+
+    # Get a file object for the output.  Use stdout if no outfile was specifed,
+    # and not outputting a directory tree of terminal descriptions.
+    opt_d null ne {
+	$outfile null def
+    }{ opt_o null ne {
+	$outfile opt_o `w' open def
+    }{
+	$outfile stdout def
+    } ifelse
+    } ifelse
+} bind def
+
+# - read_input -
+$read_input {
+    # Iterate over input lines.
+    [] # Initial empty names array.
+    <> # Capabilities dictionary.
+    {infile readline not}{
+	# #names #caps #line
+	dup `^#' match not # Ignore full comment lines.
+	over `\S' match # Ignore blank lines.
+	and
+	{
+	    # Do some conversion of \-protected characters, and white out
+	    # the \ with \xff.  Doing this here is particularly important for
+	    # differentiating (for example) \\' versus \\\' strings.  Whiteout
+	    # characters are filtered out later on.
+	    #
+	    #   \\ --> \
+	    #   \, --> ,
+	    #
+	    `\\\\([\\\\,])' `\xff\1' <$g true> subst pop
+
+	    dup `^\w' match {
+		# Names line.
+
+		# If the names array is non-empty, deal with it and the
+		# associated capabilities dictionary.
+		2 idup length 0 gt {
+		    # #names #caps #line
+		    up insert_aliases
+
+		    <> exch
+		}{
+		    # Get rid of initial empty names array.
+		    2 ipop
+		} ifelse
+		# #caps #line
+
+		parse_names
+		# #caps #names_arr #str_rem
+
+		# Handle trailing capabilities, if any.
+		dup length 0 gt {
+		    1 idup 3 idup dn parse_caps
+		}{
+		    pop
+		} ifelse
+		# #caps #names_arr
+
+		exch
+		# #names #caps
+	    }{
+		# Capabilities line.
+
+		# #names #caps #str
+		up 2 ndup 5 ndn
+		# #names #caps #names #caps #str
+		parse_caps
+		# #names #caps
+	    } ifelse
+	}{
+	    pop
+	} ifelse
+    } while
+    pop # Clean up last readline output.
+    # #names #caps
+
+    # If the capabilities dictionary is non-empty, deal with it and the
+    # associated names array.
+    dup length 0 gt {
+	insert_aliases
+    } if
+} bind def
+
+# #str parse_names #names_arr #str_rem
+$parse_names {
+    # Split comma-separated fields.
+    `(?<!\xff), *' 2 split
+
+    # Keep track of trailing capabilities, if any.
+    dup length 1 gt {
+	dup 1 get
+    }{
+	`'
+    } ifelse
+
+    # Get the names.
+    exch 0 get
+    # #str_rem #names_str
+
+    # Split names.
+    `(?<!\xff)\|' split
+    # #str_rem #names_arr
+
+    # Throw away description, if more than one field, and last field has
+    # whitespace in it.
+    dup length 1 gt {
+	dup dup length dec get
+	`\w' match {
+	    0 over length dec getinterval
+	} if
+    } if
+    # #str_rem #names_arr
+
+    exch
+    # #names_arr #str_rem
+} bind def
+
+# #names_arr #capdict #str parse_cap #key #val true
+# #names_arr #capdict #str parse_cap false
+$parse_cap {
+    # Remove leading whitespace.
+    `\s*(.*)' `\1' subst pop
+
+    # Only process the capability if it isn't commented out by a `.' prefix.
+    dup `^[^.]' match {
+	`=' 2 split
+	dup length 2 eq {
+	    # Handle use= capabilities specially.  There can be more than one
+	    # per terminal, so they must be handled here, rather than later.
+	    dup 0 get `use' eq {
+		# #names_arr #cap_dict [`uses' #uses]
+		# Since this is a use= capability, just make a note in the uses
+		# stack.
+		1 get
+		# #names_arr #cap_dict #uses
+
+		# Use #cap_dict to get the set of canceled capabilities.
+		< # Mark for start of array.
+		    # Iterate over capability dictionary and find all canceled
+		    # capabilities.
+		    dn {
+			type $nulltype ne {
+			    # Not a canceled capability.  Discard.
+			    pop
+			}{
+			    # Canceled capability.  Associate a null value with
+			    # it when constructing a dict below.
+			    null
+			} ifelse
+		    } foreach
+		> # Finish constructing dictionary of canceled capabilities.
+		# #names_arr #uses #canceled_dict
+
+		# Push triplet onto uses stack.
+		uses 4 ndn spush
+		uses dn spush
+		uses exch spush
+
+		false
+	    }{
+		nip nip
+		# [#key #val]
+
+		# String capability.
+		dup 0 get cvn exch 1 get
+
+		true
+	    } ifelse
+	}{
+	    # Numeric, boolean, or canceled capability.
+	    nip nip
+	    # [#str]
+
+	    0 get
+	    `#' 2 split
+	    dup length 2 eq {
+		# Numeric capability.
+		dup 0 get cvn exch 1 get cvx eval
+	    }{
+		0 get dup `@$' match {
+		    # Canceled capability.
+		    `@$' `' subst pop
+		    cvn null
+		}{
+		    # Boolean capability.
+		    cvn true
+		} ifelse
+	    } ifelse
+
+	    true
+	} ifelse
+    }{
+	# Commented out capability.
+	3 npop
+	false
+    } ifelse
+} bind def
+
+# #names_arr #capdict #str parse_caps -
+$parse_caps {
+    # Split comma-separated fields.
+    `(?<!\xff), *' split
+
+    # Iterate over the capability strings, parse them, and insert the results
+    # into the capabilities dictionary.
+    {
+	# #names_arr #capdict #cap_str
+	3 ndup pop dn
+	# #names_arr #capdict #names_arr #capdict #cap_str
+	parse_cap {
+	    2 idup up
+	    put
+	} if
+	# #names_arr #capdict
+    } foreach
+    2 npop
+} bind def
+
+# #names #caps insert_aliases -
+$insert_aliases {
+    # Define #names-->#caps entry in aliases dictionary.
+    aliases up put
+} bind def
+
+# - subst_caps -
+$subst_caps {
+    # Construct a new aliases dict, since inserting into a dict that we're
+    # iterating over at the same time has potentially unpredictable results.
+    <> aliases {
+	# #aliases #names #caps
+
+	# Construct a new dict, since inserting into a dict that we're iterating
+	# over at the same time has potentially unpredictable results.
+	<> exch {
+	    # #aliases #names #caps #key #value
+
+	    # Only do substitutions on string capabilities.
+	    dup type $stringtype eq {
+		# Do all necessary conversion of \-protected characters, and
+		# white out the \ with \xff.  Doing this here is
+		# particularly important for differentiating (for example)
+		# \\' versus \\\' strings.  Whiteout characters are filtered
+		# out during output.
+		#
+		#   \' --> '
+		#   \^ --> ^
+		#   \: --> :
+		#
+		`\\\\([\'^:])' `\xff\1' <$g true> subst pop
+		
+		#   \n --> <lf>
+		#   \r --> <cr>
+		#   \t --> <tab>
+		#   \b --> <bs>
+		#   \f --> <ff>
+		#   \s --> <sp>
+		#   \E --> <ec>
+		#   \e --> <ec>
+		#   \0 --> <nul> (actually \x80)
+		`\\\\n' `\n' <$g true> subst pop
+		`\\\\r' `\r' <$g true> subst pop
+		`\\\\t' `\t' <$g true> subst pop
+		`\\\\b' `\b' <$g true> subst pop
+		`\\\\f' `\f' <$g true> subst pop
+		`\\\\s' ` ' <$g true> subst pop
+		`\\\\[Ee]' `\e' <$g true> subst pop
+		`\\\\0' `\x80' <$g true> subst pop
+		
+		# Substitute control escapes.
+		{dup `(?<!\xff)\^[A-Z]' <$g true> match}{
+			# Subtract 64 (A --> ^A).
+			0 submatch
+			dup 1 get
+			64 sub
+			over 1 dn put
+		
+			# White out ^ character.
+			0 16@ff put
+		} while
+		
+		# Remove whiteout characters before processing octal
+		# escapes, since the whiteout characters are no longer
+		# distinguishable afterwards.
+		`\xff' `' <$g true> subst pop
+		
+		# Substitute octal escapes.  Since whiteout characters are
+		# no longer usable, split the string on octal escapes,
+		# preserving the separators, modify the separators, then
+		# catenate the results.
+		`(\\\\[0-7]{3,3})' split
+		# #arr
+		
+		1 2 2 idup length dec {
+			# #arr #ind
+			2 ndup get
+			# #arr #ind #elm
+		
+			# Calculate the value of the octal escape.
+			dup 3 get
+			over 2 get 8 mul add
+			exch 1 get 64 mul add
+			# #arr #ind #val
+		
+			# Create a string for the result.
+			`?' dup 0 4 ndn put
+			# #arr #ind #str
+		
+			# Insert result into the split array.
+			2 idup up put
+			# #arr
+		} for
+		dup length aup
+		{} foreach
+		adn ncat
+	    } if # string capability
+
+	    # Insert into new #caps.
+	    2 idup up put
+	} foreach # caps
+	# #aliases #names #caps
+
+	# Insert into new #aliases.
+	2 idup up put
+    } foreach # aliases
+    # #aliases
+
+    # Redefine aliases.
+    $aliases exch def
+} bind def
+
+# - populate_terms -
+$populate_terms {
+    aliases {
+	# #term_arr #caps
+	exch {
+	    # #caps #term
+	    over terms up put
+	} foreach
+	pop
+    } foreach
+} bind def
+
+# - process_uses -
+$process_uses {
+    # This needs to be done left to right (top to bottom as the source file is
+    # written) for the terminal descriptions, but right to left for multiple
+    # use= capabilities within each terminal description.
+    #
+    # To get the processing order right, process the uses stack bottom to top,
+    # but use a temporary stack (tuses) to re-order multiple use= capabilities
+    # and process tuses top to bottom.
+    {uses scount 0 gt}{
+	# Pop triplets off the bottom of the uses stack and push them onto a
+	# temporary stack until a triplet for a different terminal is seen, or
+	# there are no more triplets.
+	{
+	    tuses uses sbpop spush
+	    tuses uses sbpop spush
+	    tuses uses sbpop spush
+	}{uses scount 0 ne
+	  dup { # Short circuit if uses is empty.
+	      uses dup sbdup spop# dup 1 sprint
+	      tuses dup 2 sidup spop# dup 1 sprint
+	      eq
+	  }{false} ifelse
+	  and
+	} until
+
+	# If there are any triplets on the temp stack, process them.
+	tuses scount 3 idiv {
+	    tuses spop
+	    tuses spop
+	    tuses spop
+	    # #canceled #use #names
+
+	    # Get capability dictionary to merge into.
+	    aliases exch get
+	    # #canceled #use #caps
+
+	    # Get capability dictionary to merge from.
+	    terms dn get
+	    # #canceled #caps #merge
+
+	    # Iterate over the dictionary to merge from.
+	    {
+		# #canceled #caps #key #val
+
+		# Merge the capability unless it is canceled.
+		3 idup 2 idup known {
+		    # Canceled capability.
+		    2 npop
+		}{
+		    # Merge the capability into #caps.
+		    2 idup up put
+		} ifelse
+	    } foreach
+	    # #canceled #caps
+	    2 npop
+	} repeat
+    } while
+} bind def
+
+# - remove_canceled -
+$remove_canceled {
+    # Iterate over all the capability dictionaries and remove canceled
+    # capabilities.
+    aliases {
+	nip
+	# Iterate over the capabilities.
+	dup {
+	    type $nulltype eq {
+		under undef
+	    }{
+		pop
+	    } ifelse
+	} foreach
+	pop
+    } foreach
+} bind def
+
+# - remove_obsolete -
+$remove_obsolete {
+    # Iterate over all the capability dictionaries and remove obsolete
+    # capabilities.
+    aliases {
+	nip
+	# Iterate over the capabilities.
+	dup {
+	    pop
+	    dup cvs `^OT' match {
+		under undef
+	    }{
+		pop
+	    } ifelse
+	} foreach
+	pop
+    } foreach
+} bind def
+
+# #ofile #caps write_caps -
+$write_caps {
+    # Capabilities.
+    over `<\n' write pop
+    {
+	exch
+	# #ofile #val #cap
+
+	# Capability name.
+	`\t'
+	exch 1 sprints
+
+	# Cabability value.
+	`\t'
+	4 ndn 1 sprints
+	`\n'
+
+	5 ncat
+	under write pop
+	# #ofile
+    } foreach
+    `>\n' write pop
+} bind def
+
+# #name should_output #boolean
+$should_output {
+    # Only output a terminal description if it is in the list specified by
+    # the -t option, or if -t wasn't specified at all.  Additionally, only
+    # output the description if there are no infix `+' characters in the name.
+    opt_t type $nulltype eq
+    dup not {
+	opt_t 2 idup known
+    }{false} ifelse
+    or
+    exch `\+.' match not
+    and
+} bind def
+
+# #dirpath install_dir -
+$install_dir {
+    # Split path into its components, then iteratively test for existence,
+    # creating directories as necessary.
+    `/+' `/' <$g true> subst pop
+    `(?<!^)/' split
+    `' exch {
+	# #path #component
+	over length 0 gt {
+	    `/' exch 3 ncat
+	}{
+	    cat
+	} ifelse
+	# #path
+
+	dup `d' test not {
+	    # Create directory.
+	    dup mkdir
+	} if
+    } foreach
+    pop
+} bind def
+
+# - write_dir -
+$write_dir {
+    aliases {
+	exch
+	# #caps #names
+
+	# Iterate over the names.  The first time that a terminal description is
+	# written, create a file with the #caps dict contents, and replace #caps
+	# with the path of the terminal description file.  For subsequent
+	# terminal names, create a hard link, rather than writing the same
+	# capability dictionary to multiple files.
+	{
+	    # #caps/filename #name
+	    dup should_output {
+		over type $dicttype eq {
+		    # Output the capabilities to a file.
+		    dup `\n' cat vwrite
+
+		    # Create directory.
+		    opt_d
+		    `/'
+		    2 idup 0 get <$b 16> outputs
+		    3 ncat
+		    dup install_dir
+
+		    # Create filename and open the file for writing.
+		    `/'
+		    dn
+		    3 ncat
+		    dup `w' open
+		    # #caps #filename #file
+
+		    # Write the capabilities to the file, then close it to force
+		    # data flushing.
+		    dup 4 ndn write_caps
+		    # #filename #file
+		    close
+		    # #filename
+		}{
+		    # A file has already been output; create a hard link to it.
+		    dup ` --> ' 3 idup `\n' 4 ncat vwrite
+
+		    # Create directory.
+		    opt_d
+		    `/'
+		    2 idup 0 get <$b 16> outputs
+		    3 ncat
+		    dup install_dir
+
+		    # Create filename and make a hardlink for it.
+		    `/'
+		    dn
+		    3 ncat
+		    under link
+		} ifelse
+	    }{
+		# Do not output terminal description.
+		pop
+	    } ifelse
+	} foreach
+	pop
+    } foreach
+} bind def
+
+# - write_file -
+$write_file {
+    terms {
+	# #term #caps
+	over should_output {
+	    # Names.
+	    exch 1 sprints
+	    dup `\n' cat vwrite
+	    `\n' cat owrite
+
+	    # Capabilities.
+	    outfile exch write_caps
+	}{
+	    # Don't output the terminal description.
+	    2 npop
+	} ifelse
+    } foreach
+} bind def
+
+# - write_output -
+$write_output {
+    outfile null eq {
+	# Write a directory tree of terminal descriptions.
+	write_dir
+    }{
+	# Write terminal descriptions to outfile.
+	write_file
+    } ifelse
+} bind def
+
+#
+# Beginning of main execution.
+#
+
+# This program generates a lot of garbage and has a large data set, so set the
+# GC threshold higher than the default.
+1024 1024 mul 8 mul
+gcdict $setthreshold get eval
+
+# Set up an error handler for open.
+errordict $invalidfileaccess {
+    stderr `ti2nx: Invalid file access\n' write pop
+    1 die
+} put
+
+errordict $ioerror {
+    stderr `ti2nx: I/O error\n' write pop
+    1 die
+} put
+
+# Interpret command line arguments.
+parse_opts
+
+# Set up input and output files.
+setup_io
+
+# Read input.
+`Reading input...' vwrite
+read_input
+` done\n' vwrite
+
+# Do string substitutions on all string capability values.
+`Doing string substitutions on capabilities...' vwrite
+subst_caps
+` done\n' vwrite
+
+# Create terms dictionary, so that it can be used for substituting use=
+# capabilities.
+`Creating a mapping of individual terminal names to capabilities...' vwrite
+populate_terms
+` done\n' vwrite
+
+# Substitute use= capabilities.
+`Substituting use= capabilites...' vwrite
+process_uses
+` done\n' vwrite
+
+# Remove canceled (attr@) capabilities.
+`Removing canceled capabilities...' vwrite
+remove_canceled
+` done\n' vwrite
+
+# Remove obsolete termcap capabilities (`OT' prefix).
+`Removing obsolete termcap capabilities...' vwrite
+remove_obsolete
+` done\n' vwrite
+
+`Write output:\n' vwrite
+write_output
+`Done writing output.\n' vwrite
+
+pstack
+#`GC stats: ' gcdict begin stats 2 sprints `\n' 3 ncat vwrite

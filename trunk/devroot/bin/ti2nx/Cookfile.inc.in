@@ -1,0 +1,110 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ * Cookfile for ti2nx.
+ *
+ ******************************************************************************/
+
+/*
+ * File lists.
+ */
+
+/* Source file. */
+TI2NX_NSRCS = @srcroot@/bin/ti2nx/src/ti2nx.nx.in.in;
+
+/* LaTeX source files. */
+TI2NX_TEX_SRCS = ;
+TI2NX_TEX_SRCS = [addprefix @srcroot@/bin/ti2nx/doc/latex/
+                            [TI2NX_TEX_SRCS]];
+/* TI2NX_TEX_SRCS = [TI2NX_TEX_SRCS]
+                    @objroot@/bin/ti2nx/doc/latex/manual.tex; */
+
+/* Binaries. */
+TI2NX = @objroot@/bin/ti2nx/bin/ti2nx;
+
+/*
+ * User cook'ables.
+ */
+
+ti2nx : [TI2NX];
+
+ti2nx_bins_tests :
+{
+}
+
+ti2nx_bins_check :
+{
+}
+
+ti2nx_bins_check_update :
+{
+}
+
+ti2nx_bins_bootstrap :
+{
+}
+
+ti2nx_bins_install : mods_install
+#if @enable_onyx@
+                     onyx_bins_install
+#endif
+{
+  @INSTALL@ -d [BINDIR];
+
+  echo \"#!@ONYX@\" > [BINDIR]/ti2nx-@onyx_version@;
+  cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [TI2NX_NSRCS]]
+      >> [BINDIR]/ti2nx-@onyx_version@;
+  chmod 0755 [BINDIR]/ti2nx-@onyx_version@;
+
+  rm -f [BINDIR]/ti2nx;
+  ln -s ti2nx-@onyx_version@ [BINDIR]/ti2nx;
+
+  @INSTALL@ -d [MANDIR]/man1;
+  @INSTALL@ -m 0444 @objroot@/bin/ti2nx/man/man1/ti2nx.1
+            [MANDIR]/man1;
+}
+
+ti2nx_bins_uninstall :
+{
+  rm -f [BINDIR]/ti2nx-@onyx_version@;
+  rm -f [BINDIR]/ti2nx;
+  rm -f [MANDIR]/man1/ti2nx.1;
+}
+
+ti2nx_bins_clean :
+{
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a
+                [ONYX_COMMON_SRCS] [BONYX_ONLY_SRCS]];
+
+  rm -f [TI2NX];
+}
+
+ti2nx_bins_distclean :
+{
+  rm -f [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [TI2NX_NSRCS]];
+}
+
+/*
+ * Dependencies.
+ */
+
+[TI2NX] : [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in
+                  [TI2NX_NSRCS]]
+#if @enable_onyx@
+          tonyx
+#endif
+  set mkdir
+{
+  echo \"#!@TONYX@\" > [target];
+  cat [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [TI2NX_NSRCS]]
+      >> [target];
+  chmod 0755 [target];
+}
