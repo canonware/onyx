@@ -75,7 +75,14 @@ if test "x$CFLAGS" = "x" ; then
   no_CFLAGS="yes"
 fi
 if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
-	CFLAGS="-Wall -Wno-uninitialized -Wno-strict-aliasing -pipe -g3"
+  GCC_MAJ=`$CC -dumpversion | tr . " " |awk '{print $1}'`
+  GCC_MIN=`$CC -dumpversion | tr . " " |awk '{print $2}'`
+
+  if test $GCC_MAJ -gt 3 -o $GCC_MAJ -eq 3 -a $GCC_MIN -ge 3 ; then
+    CFLAGS="-Wall -Wno-uninitialized -Wno-strict-aliasing -pipe -g3"
+  else
+    CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+  fi
 fi
 AC_PROG_CPP
 
