@@ -134,57 +134,58 @@ ONYX_OTESTS =
               eval_a.nx.in eval_b.nx.in exch_a.nx.in exch_b.nx.in exch_c.nx.in
               exit_a.nx.in for_a.nx.in for_b.nx.in for_c.nx.in for_d.nx.in
               for_e.nx.in foreach_a.nx.in foreach_b.nx.in foreach_c.nx.in
-              gc_dict_finalize.nx.in ge_a.nx.in ge_b.nx.in ge_c.nx.in ge_d.nx.in
-              ge_e.nx.in ge_f.nx.in ge_g.nx.in ge_h.nx.in get_a.nx.in
-              get_b.nx.in get_c.nx.in get_d.nx.in get_e.nx.in get_f.nx.in
-              get_g.nx.in get_h.nx.in getinterval_a.nx.in getinterval_b.nx.in
-              getinterval_c.nx.in getinterval_d.nx.in getinterval_e.nx.in
-              getinterval_f.nx.in getinterval_g.nx.in getinterval_h.nx.in
-              getinterval_i.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in gt_d.nx.in
-              gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in hello.nx.in
-              ibdup_a.nx.in ibdup_b.nx.in ibdup_c.nx.in ibdup_d.nx.in
-              ibdup_e.nx.in ibdup_f.nx.in ibpop_a.nx.in ibpop_b.nx.in
-              ibpop_c.nx.in ibpop_d.nx.in ibpop_e.nx.in ibpop_f.nx.in
-              idiv_a.nx.in idiv_b.nx.in idiv_c.nx.in idiv_d.nx.in idiv_e.nx.in
-              idup_a.nx.in idup_b.nx.in idup_c.nx.in idup_d.nx.in idup_e.nx.in
-              idup_f.nx.in if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in
-              ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in
-              inc_a.nx.in inc_b.nx.in inc_d.nx.in integer.nx.in integer_a.nx.in
-              integer_b.nx.in integer_c.nx.in integer_d.nx.in ipop_a.nx.in
-              ipop_b.nx.in ipop_c.nx.in ipop_d.nx.in ipop_e.nx.in known_a.nx.in
-              known_b.nx.in known_c.nx.in le_a.nx.in le_b.nx.in le_c.nx.in
-              le_d.nx.in le_e.nx.in le_f.nx.in le_g.nx.in le_h.nx.in
-              length_a.nx.in length_b.nx.in length_c.nx.in loop_a.nx.in
-              loop_b.nx.in lt_a.nx.in lt_b.nx.in lt_c.nx.in lt_d.nx.in
-              lt_e.nx.in lt_f.nx.in lt_g.nx.in lt_h.nx.in mark_a.nx.in
-              mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in mod_e.nx.in
-              mul_a.nx.in mul_b.nx.in mul_c.nx.in mul_d.nx.in nbpop_a.nx.in
-              nbpop_b.nx.in nbpop_c.nx.in nbpop_d.nx.in nbpop_e.nx.in
-              ncat_a.nx.in ncat_b.nx.in ncat_c.nx.in ncat_d.nx.in ncat_e.nx.in
-              ncat_f.nx.in ncat_g.nx.in ncat_h.nx.in ncat_i.nx.in ncat_j.nx.in
-              ncat_k.nx.in ndn_a.nx.in ndn_b.nx.in ndn_c.nx.in ndn_d.nx.in
-              ndn_e.nx.in ndn_f.nx.in ndup_a.nx.in ndup_b.nx.in ndup_c.nx.in
-              ndup_d.nx.in ndup_e.nx.in ne_a.nx.in ne_b.nx.in neg_a.nx.in
-              neg_b.nx.in neg_c.nx.in nip_a.nx.in nip_b.nx.in not_a.nx.in
-              not_b.nx.in not_c.nx.in npop_a.nx.in npop_b.nx.in npop_c.nx.in
-              npop_d.nx.in npop_e.nx.in nup_a.nx.in nup_b.nx.in nup_c.nx.in
-              nup_d.nx.in nup_e.nx.in nup_f.nx.in or_a.nx.in or_b.nx.in
-              or_c.nx.in or_d.nx.in or_e.nx.in or_f.nx.in output_a.nx.in
-              over_a.nx.in over_b.nx.in pop_a.nx.in pop_b.nx.in pow_a.nx.in
-              pow_b.nx.in pow_c.nx.in pow_d.nx.in put_a.nx.in put_b.nx.in
-              put_c.nx.in put_d.nx.in put_e.nx.in put_f.nx.in put_g.nx.in
-              put_h.nx.in put_i.nx.in putinterval_a.nx.in putinterval_b.nx.in
-              putinterval_c.nx.in putinterval_d.nx.in putinterval_e.nx.in
-              putinterval_f.nx.in putinterval_g.nx.in putinterval_h.nx.in
-              putinterval_i.nx.in repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in
-              repeat_d.nx.in roll_a.nx.in roll_b.nx.in roll_c.nx.in roll_d.nx.in
-              roll_e.nx.in roll_f.nx.in roll_g.nx.in rot_a.nx.in rot_b.nx.in
-              rot_c.nx.in rot_d.nx.in sadn_a.nx.in sadn_b.nx.in sadn_c.nx.in
-              sadn_d.nx.in saup_a.nx.in saup_b.nx.in saup_c.nx.in saup_d.nx.in
-              sclear_a.nx.in sbdup_a.nx.in sbdup_b.nx.in sbdup_c.nx.in
-              sbdup_d.nx.in sbpop_a.nx.in sbpop_b.nx.in sbpop_c.nx.in
-              sbpop_d.nx.in sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in
-              sbpush_d.nx.in sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
+              foreach_d.nx.in gc_dict_finalize.nx.in ge_a.nx.in ge_b.nx.in
+              ge_c.nx.in ge_d.nx.in ge_e.nx.in ge_f.nx.in ge_g.nx.in ge_h.nx.in
+              get_a.nx.in get_b.nx.in get_c.nx.in get_d.nx.in get_e.nx.in
+              get_f.nx.in get_g.nx.in get_h.nx.in getinterval_a.nx.in
+              getinterval_b.nx.in getinterval_c.nx.in getinterval_d.nx.in
+              getinterval_e.nx.in getinterval_f.nx.in getinterval_g.nx.in
+              getinterval_h.nx.in getinterval_i.nx.in gt_a.nx.in gt_b.nx.in
+              gt_c.nx.in gt_d.nx.in gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in
+              hello.nx.in ibdup_a.nx.in ibdup_b.nx.in ibdup_c.nx.in
+              ibdup_d.nx.in ibdup_e.nx.in ibdup_f.nx.in ibpop_a.nx.in
+              ibpop_b.nx.in ibpop_c.nx.in ibpop_d.nx.in ibpop_e.nx.in
+              ibpop_f.nx.in idiv_a.nx.in idiv_b.nx.in idiv_c.nx.in idiv_d.nx.in
+              idiv_e.nx.in idup_a.nx.in idup_b.nx.in idup_c.nx.in idup_d.nx.in
+              idup_e.nx.in idup_f.nx.in if_a.nx.in if_b.nx.in if_c.nx.in
+              ifelse_a.nx.in ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in
+              immediate_b.nx.in inc_a.nx.in inc_b.nx.in inc_d.nx.in
+              integer.nx.in integer_a.nx.in integer_b.nx.in integer_c.nx.in
+              integer_d.nx.in ipop_a.nx.in ipop_b.nx.in ipop_c.nx.in
+              ipop_d.nx.in ipop_e.nx.in known_a.nx.in known_b.nx.in
+              known_c.nx.in le_a.nx.in le_b.nx.in le_c.nx.in le_d.nx.in
+              le_e.nx.in le_f.nx.in le_g.nx.in le_h.nx.in length_a.nx.in
+              length_b.nx.in length_c.nx.in loop_a.nx.in loop_b.nx.in lt_a.nx.in
+              lt_b.nx.in lt_c.nx.in lt_d.nx.in lt_e.nx.in lt_f.nx.in lt_g.nx.in
+              lt_h.nx.in mark_a.nx.in mod_a.nx.in mod_b.nx.in mod_c.nx.in
+              mod_d.nx.in mod_e.nx.in mul_a.nx.in mul_b.nx.in mul_c.nx.in
+              mul_d.nx.in nbpop_a.nx.in nbpop_b.nx.in nbpop_c.nx.in
+              nbpop_d.nx.in nbpop_e.nx.in ncat_a.nx.in ncat_b.nx.in ncat_c.nx.in
+              ncat_d.nx.in ncat_e.nx.in ncat_f.nx.in ncat_g.nx.in ncat_h.nx.in
+              ncat_i.nx.in ncat_j.nx.in ncat_k.nx.in ndn_a.nx.in ndn_b.nx.in
+              ndn_c.nx.in ndn_d.nx.in ndn_e.nx.in ndn_f.nx.in ndup_a.nx.in
+              ndup_b.nx.in ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in ne_a.nx.in
+              ne_b.nx.in neg_a.nx.in neg_b.nx.in neg_c.nx.in nip_a.nx.in
+              nip_b.nx.in not_a.nx.in not_b.nx.in not_c.nx.in npop_a.nx.in
+              npop_b.nx.in npop_c.nx.in npop_d.nx.in npop_e.nx.in nup_a.nx.in
+              nup_b.nx.in nup_c.nx.in nup_d.nx.in nup_e.nx.in nup_f.nx.in
+              or_a.nx.in or_b.nx.in or_c.nx.in or_d.nx.in or_e.nx.in or_f.nx.in
+              output_a.nx.in over_a.nx.in over_b.nx.in pop_a.nx.in pop_b.nx.in
+              pow_a.nx.in pow_b.nx.in pow_c.nx.in pow_d.nx.in put_a.nx.in
+              put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in put_f.nx.in
+              put_g.nx.in put_h.nx.in put_i.nx.in putinterval_a.nx.in
+              putinterval_b.nx.in putinterval_c.nx.in putinterval_d.nx.in
+              putinterval_e.nx.in putinterval_f.nx.in putinterval_g.nx.in
+              putinterval_h.nx.in putinterval_i.nx.in repeat_a.nx.in
+              repeat_b.nx.in repeat_c.nx.in repeat_d.nx.in roll_a.nx.in
+              roll_b.nx.in roll_c.nx.in roll_d.nx.in roll_e.nx.in roll_f.nx.in
+              roll_g.nx.in rot_a.nx.in rot_b.nx.in rot_c.nx.in rot_d.nx.in
+              sadn_a.nx.in sadn_b.nx.in sadn_c.nx.in sadn_d.nx.in saup_a.nx.in
+              saup_b.nx.in saup_c.nx.in saup_d.nx.in sclear_a.nx.in
+              sbdup_a.nx.in sbdup_b.nx.in sbdup_c.nx.in sbdup_d.nx.in
+              sbpop_a.nx.in sbpop_b.nx.in sbpop_c.nx.in sbpop_d.nx.in
+              sbpush_a.nx.in sbpush_b.nx.in sbpush_c.nx.in sbpush_d.nx.in
+              sclear_b.nx.in sclear_c.nx.in scleartomark_a.nx.in
               scleartomark_b.nx.in scleartomark_c.nx.in scleartomark_d.nx.in
               scount_a.nx.in scount_b.nx.in scount_c.nx.in scounttomark_a.nx.in
               scounttomark_b.nx.in scounttomark_c.nx.in sdn_a.nx.in sdn_b.nx.in

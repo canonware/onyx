@@ -4130,25 +4130,25 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	    case NXOT_STACK: {
 		cw_nxo_t *el;
 
-		/* Move proc and stack to tstack. */
+		/* Move proc to tstack. */
 		nxo = nxo_stack_push(tstack);
 		nxo_dup(nxo, proc);
 		proc = nxo;
 
-		nxo = nxo_stack_push(tstack);
-		nxo_dup(nxo, what);
-		what = nxo;
+		/* Copy the contents of stack onto tstack. */
+		nxo_stack_copy(tstack, what);
 
 		nxo_stack_npop(ostack, 2);
 
-		/* Iterate through the stack, push each element onto ostack, and
-		 * execute proc. */
-		for (el = nxo_stack_get(what);
-		     el != NULL;
-		     el = nxo_stack_down_get(what, el))
+		/* Iterate through the stack element (sitting on tstack), push
+		 * each one onto ostack, and execute proc. */
+		for (el = nxo_stack_get(tstack);
+		     el != proc;
+		     el = nxo_stack_get(tstack))
 		{
 		    nxo = nxo_stack_push(ostack);
 		    nxo_dup(nxo, el);
+		    nxo_stack_pop(tstack);
 
 		    nxo = nxo_stack_push(estack);
 		    nxo_dup(nxo, proc);
@@ -8206,10 +8206,10 @@ systemdict_repeat(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxo_stack_npop(ostack, 2);
-
     tnxo = nxo_stack_push(tstack);
     nxo_dup(tnxo, exec);
+
+    nxo_stack_npop(ostack, 2);
 
     /* Record stack depths so that we can clean up if necessary. */
     edepth = nxo_stack_count(estack);

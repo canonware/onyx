@@ -8390,6 +8390,18 @@ onyx:0>
 		\oparg{dict}, \oparg{stack}, or \oparg{string}), push the entry
 		onto ostack and execute \oparg{proc}.  This operator supports
 		the \htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
+
+		The object being iterated over can be modified during iteration,
+		with the expectation of no ill consequences, and in most cases
+		the modifications are immediately apparent.  However, there are
+		some cases in which behavior does not follow this guideline:
+		\begin{itemize}\item[]
+		\item{Objects inserted into a dictionary during iteration may or
+			may not be iterated over.}
+		\item{In the case of stack iteration, a snapshot is taken before
+			iteration begins, so any changes to the stack during
+			iteration will not affect iteration in any way.}
+		\end{itemize}
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 2] {1 sprint} foreach
