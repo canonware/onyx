@@ -514,17 +514,25 @@ nx_write(void *a_arg, cw_nxo_t *a_file, const cw_uint8_t *a_str,
 {
     cw_bool_t retval;
     struct nx_write_arg_s *arg = (struct nx_write_arg_s *) a_arg;
-    ssize_t nwritten;
+    ssize_t nwritten, cwritten;
 
-    while (((nwritten = write(arg->fd, a_str, a_len)) == -1) && errno == EINTR)
+    for (nwritten = 0;
+	 nwritten < a_len;
+	 )
     {
-	/* Interrupted system call, likely due to garbage collection. */
-    }
-    if (nwritten != a_len)
-    {
-	cw_assert(nwritten == -1);
-	retval = TRUE;
-	goto RETURN;
+	cwritten = write(arg->fd, &a_str[nwritten], a_len - nwritten);
+	if (cwritten == -1)
+	{
+	    if (errno != EINTR)
+	    {
+		retval = TRUE;
+		goto RETURN;
+	    }
+	}
+	else
+	{
+	    nwritten += cwritten;
+	}
     }
 
     retval = FALSE;

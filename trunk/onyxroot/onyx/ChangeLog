@@ -1,3 +1,8 @@
+2002-07-13 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx/src/onyx.c:nx_write() : Keep writing until all data are
+	  written, even in the face of EINTR.
+
 2002-07-12 : Jason Evans <jasone@canonware.com>
 
 	* mod/modprompt/src/modprompt.c : Implement terminal-related signal
