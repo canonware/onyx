@@ -175,7 +175,7 @@ for h in 0 1 ; do
             fi
         done
         # Non-parallelizable.
-        for j in $i\_install $i\_uninstall clean ; do
+        for j in $i\_libs_install $i\_libs_uninstall clean ; do
             echo "===> $COOK $j"
             $COOK $j
             if [ "x$?" != "x0" ] ; then
@@ -207,7 +207,7 @@ for h in 0 1 ; do
             fi
         done
         # Non-parallelizable.
-        for j in $i\_install ; do
+        for j in $i\_bins_install ; do
             echo "===> $COOK $j"
             $COOK $j
             if [ "x$?" != "x0" ] ; then
