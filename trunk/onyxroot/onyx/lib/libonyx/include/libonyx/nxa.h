@@ -17,9 +17,8 @@ struct cw_nxa_s {
 	cw_uint32_t	magic;
 #define	_CW_NXA_MAGIC	0x63935743
 #endif
+	/* Protects the gcdict_* fields and gc_pending. */
 	cw_mtx_t	lock;
-	cw_mtx_t	interlock;	/* Interlock entry into collection. */
-	cw_nxoi_t	prev_new;	/* Previous number of new objects. */
 
 	/* Various pools. */
 	cw_uint32_t	chi_sizeof;
@@ -43,15 +42,18 @@ struct cw_nxa_s {
 	cw_nxoi_t	gcdict_threshold;
 	cw_nxoi_t	gcdict_collections;
 	cw_nxoi_t	gcdict_new;
-	cw_nxoi_t	gcdict_current[3];
-	cw_nxoi_t	gcdict_maximum[3];
-	cw_nxoi_t	gcdict_sum[3];
+	cw_nxoi_t	gcdict_current[2];
+	cw_nxoi_t	gcdict_maximum[2];
+	cw_nxoi_t	gcdict_sum[2];
 
 	/* Sequence set. */
+	cw_mtx_t	seq_mtx;
 	ql_head(cw_nxoe_t) seq_set;
 	cw_bool_t	white;	/* Current value for white (alternates). */
 
 	cw_mq_t		gc_mq;
+	cw_bool_t	gc_pending;
+
 	cw_nx_t		*nx;
 	cw_thd_t	*gc_thd;
 };

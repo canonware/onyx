@@ -84,13 +84,6 @@
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
-/*
- * The following values must not be confusable with valid pointers (including
- * NULL).
- */
-#define	NXAM_RECONFIGURE	((void *)1)
-#define	NXAM_SHUTDOWN		((void *)3)
-
 static void *nxa_p_gc_entry(void *a_arg);
 
 void
@@ -104,8 +97,6 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		a_nxa->nx = a_nx;
 
 		mtx_new(&a_nxa->lock);
-		mtx_new(&a_nxa->interlock);
-		a_nxa->prev_new = 0;
 		try_stage = 1;
 
 		a_nxa->chi_sizeof = sizeof(cw_chi_t);
@@ -120,10 +111,14 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		pool_new(&a_nxa->stacko_pool, NULL, sizeof(cw_nxoe_stacko_t));
 		try_stage = 4;
 
+		mtx_new(&a_nxa->seq_mtx);
 		ql_new(&a_nxa->seq_set);
 		a_nxa->white = FALSE;
-		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxoe_t *));
 		try_stage = 5;
+
+		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
+		a_nxa->gc_pending = FALSE;
+		try_stage = 6;
 
 #ifdef _CW_DBG
 		a_nxa->magic = _CW_NXA_MAGIC;
@@ -150,13 +145,15 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, FALSE);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
-		try_stage = 6;
+		try_stage = 7;
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
+		case 7:
 		case 6:
-		case 5:
 			mq_delete(&a_nxa->gc_mq);
+		case 5:
+			mtx_delete(&a_nxa->seq_mtx);
 		case 4:
 			pool_delete(&a_nxa->stacko_pool);
 		case 3:
@@ -164,7 +161,6 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		case 2:
 			pool_delete(&a_nxa->chi_pool);
 		case 1:
-			mtx_delete(&a_nxa->interlock);
 			mtx_delete(&a_nxa->lock);
 			break;
 		default:
@@ -185,9 +181,13 @@ nxa_delete(cw_nxa_t *a_nxa)
 	thd_join(a_nxa->gc_thd);
 	mq_delete(&a_nxa->gc_mq);
 
+	mtx_delete(&a_nxa->seq_mtx);
+
 	pool_delete(&a_nxa->stacko_pool);
 	pool_delete(&a_nxa->dicto_pool);
 	pool_delete(&a_nxa->chi_pool);
+
+	mtx_delete(&a_nxa->lock);
 }
 
 void *
@@ -205,13 +205,12 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 	/* Trigger a collection if the threshold was reached. */
 	if (a_nxa->gcdict_new >= a_nxa->gcdict_threshold &&
 	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
-		mtx_lock(&a_nxa->interlock);
-		a_nxa->prev_new = 0;
-		mtx_unlock(&a_nxa->lock);
-		nxa_p_collect(a_nxa);
-		mtx_unlock(&a_nxa->interlock);
-	} else
-		mtx_unlock(&a_nxa->lock);
+		if (a_nxa->gc_pending == FALSE) {
+			a_nxa->gc_pending = TRUE;
+			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+		}
+	}
+	mtx_unlock(&a_nxa->lock);
 
 	return mem_malloc_e(cw_g_mem, a_size, a_filename, a_line_num);
 }
@@ -233,11 +232,11 @@ nxa_collect(cw_nxa_t *a_nxa)
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 	mtx_lock(&a_nxa->lock);
-	mtx_lock(&a_nxa->interlock);
-	a_nxa->prev_new = 0;
+	if (a_nxa->gc_pending == FALSE) {
+		a_nxa->gc_pending = TRUE;
+		mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+	}
 	mtx_unlock(&a_nxa->lock);
-	nxa_p_collect(a_nxa);
-	mtx_unlock(&a_nxa->interlock);
 }
 
 cw_bool_t
@@ -263,16 +262,17 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 
 	mtx_lock(&a_nxa->lock);
 	a_nxa->gcdict_active = a_active;
-	mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
 	if (a_active && a_nxa->gcdict_threshold > 0 && a_nxa->gcdict_threshold
 	    <= a_nxa->gcdict_new) {
-		mtx_lock(&a_nxa->interlock);
-		a_nxa->prev_new = 0;
-		mtx_unlock(&a_nxa->lock);
-		nxa_p_collect(a_nxa);
-		mtx_unlock(&a_nxa->interlock);
-	} else
-		mtx_unlock(&a_nxa->lock);
+		if (a_nxa->gc_pending == FALSE) {
+			a_nxa->gc_pending = TRUE;
+			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+		}
+	} else {
+		if (a_nxa->gc_pending == FALSE)
+			mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
+	}
+	mtx_unlock(&a_nxa->lock);
 }
 
 cw_nxoi_t
@@ -329,13 +329,12 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 	a_nxa->gcdict_threshold = a_threshold;
 	if (a_threshold > 0 && a_threshold <= a_nxa->gcdict_new &&
 	    a_nxa->gcdict_active) {
-		mtx_lock(&a_nxa->interlock);
-		a_nxa->prev_new = 0;
-		mtx_unlock(&a_nxa->lock);
-		nxa_p_collect(a_nxa);
-		mtx_unlock(&a_nxa->interlock);
-	} else
-		mtx_unlock(&a_nxa->lock);
+		if (a_nxa->gc_pending == FALSE) {
+			a_nxa->gc_pending = TRUE;
+			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+		}
+	}
+	mtx_unlock(&a_nxa->lock);
 }
 
 void
@@ -383,7 +382,7 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
-	mtx_lock(&a_nxa->lock);
+	mtx_lock(&a_nxa->seq_mtx);
 	_cw_assert(nxoe_l_registered_get(a_nxoe) == FALSE);
 	_cw_assert(qr_next(a_nxoe, link) == a_nxoe);
 	_cw_assert(qr_prev(a_nxoe, link) == a_nxoe);
@@ -396,22 +395,20 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	nxoe_l_registered_set(a_nxoe, TRUE);
 	ql_tail_insert(&a_nxa->seq_set, a_nxoe, link);
 
-	mtx_unlock(&a_nxa->lock);
+	mtx_unlock(&a_nxa->seq_mtx);
 }
 
 cw_bool_t
 nxa_l_white_get(cw_nxa_t *a_nxa)
 {
-	cw_bool_t	retval;
-
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
-	mtx_lock(&a_nxa->lock);
-	retval = a_nxa->white;
-	mtx_unlock(&a_nxa->lock);
-
-	return retval;
+	/*
+	 * This function is only called in nxoe_l_name_delete(), which is
+	 * executed in the context of the GC thread, so no locking is necessary.
+	 */
+	return a_nxa->white;
 }
 
 /*
@@ -464,6 +461,7 @@ nxa_p_roots(cw_nxa_t *a_nxa, cw_uint32_t *r_nroot)
 	 */
 	HAVE_ROOT:
 
+	/* XXX Is this necessary? */
 	/*
 	 * Iterate through nxoe's.
 	 */
@@ -550,54 +548,20 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
  * Clean up unreferenced objects.
  */
 _CW_INLINE void
-nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
+nxa_p_sweep(cw_nxoe_t *a_garbage, cw_nx_t *a_nx)
 {
-	struct timeval	t_tv;
-	cw_nxoi_t	start_us, sweep_us;
+	cw_nxoe_t	*nxoe;
 
-	/* Record the start time. */
-	gettimeofday(&t_tv, NULL);
-	start_us = t_tv.tv_sec;
-	start_us *= 1000000;
-	start_us += t_tv.tv_usec;
-
-	/* If there is garbage, discard it. */
-	if (a_garbage != NULL) {
-		cw_nxoe_t	*nxoe;
-
-		do {
-			nxoe = qr_next(a_garbage, link);
-			qr_remove(nxoe, link);
-			nxoe_l_delete(nxoe, a_nxa->nx);
-		} while (nxoe != a_garbage);
-	}
-
-	/* Drain the pools. */
-	pool_drain(&a_nxa->chi_pool);
-	pool_drain(&a_nxa->dicto_pool);
-	pool_drain(&a_nxa->stacko_pool);
-
-	/* Record the sweep finish time and calculate sweep_us. */
-	gettimeofday(&t_tv, NULL);
-	sweep_us = t_tv.tv_sec;
-	sweep_us *= 1000000;
-	sweep_us += t_tv.tv_usec;
-	sweep_us -= start_us;
-
-	/* Protect statistics updates. */
-	mtx_lock(&a_nxa->lock);
-
-	/* Update sweep timing statistics. */
-	a_nxa->gcdict_current[1] = sweep_us;
-	if (sweep_us > a_nxa->gcdict_maximum[1])
-		a_nxa->gcdict_maximum[1] = sweep_us;
-	a_nxa->gcdict_sum[1] += sweep_us;
-
-	mtx_unlock(&a_nxa->lock);
+	do {
+		nxoe = qr_next(a_garbage, link);
+		qr_remove(nxoe, link);
+		nxoe_l_delete(nxoe, a_nx);
+	} while (nxoe != a_garbage);
 }
 
 /*
- * Collect garbage using a Baker's Treadmill.
+ * Collect garbage using a Baker's Treadmill.  a_nxa->lock is held upon entry
+ * into this function.
  */
 void
 nxa_p_collect(cw_nxa_t *a_nxa)
@@ -605,7 +569,21 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	cw_uint32_t	nroot, nreachable;
 	cw_nxoe_t	*garbage;
 	struct timeval	t_tv;
-	cw_nxoi_t	start_us, mark_us;
+	cw_nxoi_t	start_us, mark_us, sweep_us;
+
+	/* Reset the pending flag. */
+	a_nxa->gc_pending = FALSE;
+
+	/* Update statistics counters. */
+	a_nxa->gcdict_new = 0;
+
+	/*
+	 * Release the lock before entering the single section to avoid lock
+	 * order reversal due to mutators calling nxa_malloc() within critical
+	 * sections.  We don't need the lock anyway, except to protect the GC
+	 * statistics and the gc_pending flag.
+	 */
+	mtx_unlock(&a_nxa->lock);
 
 	/* Record the start time. */
 	gettimeofday(&t_tv, NULL);
@@ -613,9 +591,10 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	start_us *= 1000000;
 	start_us += t_tv.tv_usec;
 
-	mtx_lock(&a_nxa->lock);
+	/* Prevent new registrations until after the mark phase is completed. */
+	mtx_lock(&a_nxa->seq_mtx);
 
-	/* Stop the mutator threads. */
+	/* Stop mutator threads. */
 	thd_single_enter();
 
 	/*
@@ -633,6 +612,12 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	/* Allow mutator threads to run. */
 	thd_single_leave();
 
+	/* Flip the value of white. */
+	a_nxa->white = !a_nxa->white;
+
+	/* New registrations are safe again. */
+	mtx_unlock(&a_nxa->seq_mtx);
+
 	/* Record the mark finish time and calculate mark_us. */
 	gettimeofday(&t_tv, NULL);
 	mark_us = t_tv.tv_sec;
@@ -640,16 +625,25 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	mark_us += t_tv.tv_usec;
 	mark_us -= start_us;
 
-	/* Flip the value of white. */
-	a_nxa->white = !a_nxa->white;
+	/* If there is garbage, discard it. */
+	if (garbage != NULL)
+		nxa_p_sweep(garbage, a_nxa->nx);
 
-	/* Update statistics counters. */
-	a_nxa->gcdict_new = 0;
+	/* Drain the pools. */
+	pool_drain(&a_nxa->chi_pool);
+	pool_drain(&a_nxa->dicto_pool);
+	pool_drain(&a_nxa->stacko_pool);
 
-	/*
-	 * Send a message to the GC thread to sweep.
-	 */
-	mq_put(&a_nxa->gc_mq, garbage);
+	/* Record the sweep finish time and calculate sweep_us. */
+	gettimeofday(&t_tv, NULL);
+	sweep_us = t_tv.tv_sec;
+	sweep_us *= 1000000;
+	sweep_us += t_tv.tv_usec;
+	sweep_us -= start_us;
+	sweep_us -= mark_us;
+
+	/* Protect statistics updates. */
+	mtx_lock(&a_nxa->lock);
 
 	/* Update timing statistics. */
 	/* mark. */
@@ -658,16 +652,14 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 		a_nxa->gcdict_maximum[0] = mark_us;
 	a_nxa->gcdict_sum[0] += mark_us;
 
-	/*
-	 * sweep.  Clear current sweep time so that it's zero until after the
-	 * sweep is done.
-	 */
-	a_nxa->gcdict_current[1] = 0;
+	/* sweep. */
+	a_nxa->gcdict_current[1] = sweep_us;
+	if (sweep_us > a_nxa->gcdict_maximum[1])
+		a_nxa->gcdict_maximum[1] = sweep_us;
+	a_nxa->gcdict_sum[1] += sweep_us;
 
 	/* Increment the collections counter. */
 	a_nxa->gcdict_collections++;
-
-	mtx_unlock(&a_nxa->lock);
 }
 
 static void *
@@ -675,71 +667,69 @@ nxa_p_gc_entry(void *a_arg)
 {
 	cw_nxa_t	*nxa = (cw_nxa_t *)a_arg;
 	struct timespec	period;
-	cw_nxoe_t	*message;
+	cw_nxam_t	message;
+	cw_nxoi_t	prev_new;	/* Previous number of new objects. */
 	cw_bool_t	shutdown;
 
-	/*
-	 * An asynchronous collection is done if some registrations were done,
-	 * followed by a period of no registrations for more than gcdict_period
-	 * seconds, and collection is active.
+        /*
+	 * Any of the following conditions will cause a collection:
 	 *
-	 * Explicit collection and collection due to reaching the threshold are
-	 * done synchronously in the context of the mutator thread.
+	 * 1) Enough allocation was done to trigger immediate collection.
+	 *
+	 * 2) Some registrations were done, followed by a period of no
+	 *    registrations for more than gcdict_period seconds.
+	 *
+	 * 3) Collection was explicitly requested.
 	 */
 	period.tv_nsec = 0;
+	prev_new = 0;
 	for (shutdown = FALSE; shutdown == FALSE;) {
 		mtx_lock(&nxa->lock);
 		period.tv_sec = nxa->gcdict_period;
 		mtx_unlock(&nxa->lock);
 
 		if (period.tv_sec > 0) {
-			if (mq_timedget(&nxa->gc_mq, &period, &message)) {
-				mtx_lock(&nxa->lock);
-				if (nxa->gcdict_active && nxa->gcdict_new > 0) {
-					/*
-					 * No messages.  Check to see if there
-					 * have been any allocations since the
-					 * last timeout.
-					 */
-					if (nxa->prev_new == nxa->gcdict_new) {
-						mtx_lock(&nxa->interlock);
-						nxa->prev_new = 0;
-						mtx_unlock(&nxa->lock);
-						nxa_p_collect(nxa);
-						mtx_unlock(&nxa->interlock);
-					} else {
-						nxa->prev_new = nxa->gcdict_new;
-						mtx_unlock(&nxa->lock);
-					}
-				} else
-					mtx_unlock(&nxa->lock);
-
-				continue;
-			}
+			if (mq_timedget(&nxa->gc_mq, &period, &message))
+				message = NXAM_NONE;
 		} else
 			mq_get(&nxa->gc_mq, &message);
 
-		if (message == NXAM_RECONFIGURE) {
-			/* Don't do anything here. */
-			continue;
-		}
+		switch (message) {
+		case NXAM_NONE:
+			mtx_lock(&nxa->lock);
+			if (nxa->gcdict_active && nxa->gcdict_new > 0) {
+				/*
+				 * If no additional registrations have
+				 * happened since the last mq_timedget()
+				 * timeout, collect.
+				 */
+				if (prev_new == nxa->gcdict_new) {
+					nxa_p_collect(nxa);
+					prev_new = 0;
+				} else
+					prev_new = nxa->gcdict_new;
+			}
+			mtx_unlock(&nxa->lock);
 
-		if (message == NXAM_SHUTDOWN) {
-			mtx_lock(&nxa->interlock);
+			break;
+		case NXAM_COLLECT:
+			mtx_lock(&nxa->lock);
 			nxa_p_collect(nxa);
-			mtx_unlock(&nxa->interlock);
-
-			/*
-			 * nxa_p_collect() sends a message to sweep, which we
-			 * can unconditionally get here.
-			 */
-			mq_get(&nxa->gc_mq, &message);
-
+			prev_new = 0;
+			mtx_unlock(&nxa->lock);
+			break;
+		case NXAM_RECONFIGURE:
+			/* Don't do anything here. */
+			break;
+		case NXAM_SHUTDOWN:
 			shutdown = TRUE;
+			mtx_lock(&nxa->lock);
+			nxa_p_collect(nxa);
+			mtx_unlock(&nxa->lock);
+			break;
+		default:
+			_cw_not_reached();
 		}
-
-		/* Sweep. */
-		nxa_p_sweep(nxa, message);
 	}
 
 	return NULL;

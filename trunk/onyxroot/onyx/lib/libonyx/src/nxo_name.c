@@ -22,6 +22,8 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	cw_nxoe_name_t		*name, key;
 	cw_mtx_t		*name_lock;
 	cw_dch_t		*name_hash;
+	cw_nxa_t		*nxa;
+	cw_bool_t		do_register;
 
 	/* Fake up a key so that we can search the hash tables. */
 	key.str = a_str;
@@ -37,8 +39,6 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	mtx_lock(name_lock);
 	thd_crit_enter();
 	if (dch_search(name_hash, (void *)&key, (void **)&name)) {
-		cw_nxa_t	*nxa;
-
 		/*
 		 * Not found in the name hash.  Create, initialize, and insert
 		 * a new entry.
@@ -69,13 +69,23 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 		a_nxo->o.nxoe = (cw_nxoe_t *)name;
 		nxo_p_type_set(a_nxo, NXOT_NAME);
 
-		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)name);
+		do_register = TRUE;
 	} else {
 		nxo_no_new(a_nxo);
 		a_nxo->o.nxoe = (cw_nxoe_t *)name;
 		nxo_p_type_set(a_nxo, NXOT_NAME);
+
+		do_register = FALSE;
 	}
 	thd_crit_leave();
+
+	/*
+	 * Registration must be done outside the critical region to avoid
+	 * deadlock.
+	 */
+	if (do_register)
+		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)name);
+		
 	mtx_unlock(name_lock);
 }
 
