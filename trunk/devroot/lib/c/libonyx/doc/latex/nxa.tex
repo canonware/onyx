@@ -57,6 +57,61 @@ thread context of the mutator that triggers collection.
 	\item[Description: ]
 		Destructor.
 	\end{capilist}
+\label{nxa_malloc_e}
+\index{nxa_malloc_e@\cfunc{nxa\_malloc\_e}{}}
+\citem{\cfunc[void *]{nxa\_malloc\_e}{cw\_nxa\_t *a\_nxa, size\_t a\_size, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
+\label{nxa_malloc}
+\index{nxa_malloc@\cfunc{nxa\_malloc}{}}
+\citem{\cfunc[void *]{nxa\_malloc}{cw\_nxa\_t *a\_nxa, size\_t a\_size}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		\cfunc{malloc}{} wrapper.
+	\end{capilist}
+\label{nxa_free_e}
+\index{nxa_free_e@\cfunc{nxa\_free\_e}{}}
+\citem{\cfunc[void *]{nxa\_free\_e}{cw\_nxa\_t *a\_nxa, void *a\_ptr, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
+\label{nxa_free}
+\index{nxa_free@\cfunc{nxa\_free}{}}
+\citem{\cfunc[void *]{nxa\_free}{cw\_nxa\_t *a\_nxa, void *a\_ptr}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_ptr: ]
+			Pointer to to memory range to be freed.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		\cfunc{free}{} wrapper.
+	\end{capilist}
 \label{nxa_collect}
 \index{nxa_collect@\cfunc{nxa\_collect}{}}
 \citem{\cfunc[void]{nxa\_collect}{cw\_nxa\_t *a\_nxa}}
@@ -200,14 +255,15 @@ a\_period}}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[retval: ]
-			Number of objects allocated since the last garbage
-			collection that will trigger the garbage collector to
-			run.
+			Number of bytes of memory allocated since the last
+			garbage collection that will trigger the garbage
+			collector to run.
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
-		Return the number of objects allocated since the last garbage
-		collection that will trigger the garbage collector to run.
+		Return the number of bytes of memory allocated since the last
+		garbage collection that will trigger the garbage collector to
+		run.
 	\end{capilist}
 \label{nxa_threshold_set}
 \index{nxa_threshold_set@\cfunc{nxa\_threshold\_set}{}}
@@ -219,9 +275,9 @@ a\_threshold}}
 		\item[a\_nxa: ]
 			Pointer to a \classname{nxa}.
 		\item[a\_threshold: ]
-			The number of objects allocated since the last garbage
-			collection that will trigger the garbage collector to
-			run.
+			The number of bytes of memory allocated since the last
+			garbage collection that will trigger the garbage
+			collector to run.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
@@ -229,145 +285,67 @@ a\_threshold}}
 		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
-		Set the number of objects allocated since the last garbage
-		collection that will trigger the garbage collector to run.
+		Set the number of bytes of memory allocated since the last
+		garbage collection that will trigger the garbage collector to
+		run.
 	\end{capilist}
-\label{nxa_collections_get}
-\index{nxa_collections_get@\cfunc{nxa\_collections\_get}{}}
-\citem{\cfunc[cw\_nxoi\_t]{nxa\_collections\_get}{cw\_nxa\_t *a\_nxa}}
+\label{nxa_stats_get}
+\index{nxa_stats_get@\cfunc{nxa\_stats\_get}{}}
+\citem{\cfunc[void]{nxa\_stats\_get}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
+*r\_collections, cw\_nxoi\_t *r\_new, cw\_nxoi\_t *r\_cmark, cw\_nxoi\_t
+*r\_csweep, cw\_nxoi\_t *r\_mmark, cw\_nxoi\_t *r\_msweep, cw\_nxoi\_t
+*r\_smark, cw\_nxoi\_t *r\_ssweep}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxa: ]
 			Pointer to a \classname{nxa}.
+		\item[r\_collections: ]
+			Pointer to an integer.
+		\item[r\_new: ]
+			Pointer to an integer.
+		\item[r\_cmark: ]
+			Pointer to an integer.
+		\item[r\_csweep: ]
+			Pointer to an integer.
+		\item[r\_mmark: ]
+			Pointer to an integer.
+		\item[r\_msweep: ]
+			Pointer to an integer.
+		\item[r\_smark: ]
+			Pointer to an integer.
+		\item[r\_ssweep: ]
+			Pointer to an integer.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[retval: ]
+		\item[*r\_collections: ]
 			The number of times the garbage collector has run.
+		\item[*r\_new: ]
+			The number of bytes of memory allocated since the last
+			garbage collection.
+		\item[*r\_cmark: ]
+			Number of microseconds spent in the mark phase of the
+			most recent garbage collection.
+		\item[*r\_csweep: ]
+			Number of microseconts spent in the sweep phase of the
+			most recent garbage collection.
+		\item[*r\_mmark: ]
+			Largest number of microseconds ever spent in the mark
+			phase of a garbage collection.
+		\item[*r\_msweep: ]
+			Largest number of microseconts spent in the sweep phase
+			of a garbage collection.
+		\item[*r\_smark: ]
+			Total number of microseconds spent in the mark phase of
+			all garbage collections.
+		\item[*r\_ssweep: ]
+			Total number of microseconts spent in the sweep phase of
+			all garbage collections.
 		\end{description}
 	\item[Exception(s): ] None.
 	\item[Description: ]
-		Return the number of times the garbage collector has run.
-	\end{capilist}
-\label{nxa_new_get}
-\index{nxa_new_get@\cfunc{nxa\_new\_get}{}}
-\citem{\cfunc[cw\_nxoi\_t]{nxa\_new\_get}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			The number of objects that have been allocated since the
-			last garbage collection.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return the numbber of objects that have been allocated since the
-		last garbage collection.
-	\end{capilist}
-\label{nxa_current_get}
-\index{nxa_current_get@\cfunc{nxa\_current\_get}{}}
-\citem{\cfunc[void]{nxa\_current\_get}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\item[r\_count: ]
-			Pointer to an integer.
-		\item[r\_mark: ]
-			Pointer to an integer.
-		\item[r\_sweep: ]
-			Pointer to an integer.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[*r\_count: ]
-			Number of objects.
-		\item[*r\_mark: ]
-			Number of microseconds spent in the mark phase of
-			garbage collection.
-		\item[*r\_sweep: ]
-			Number of microseconts spent in the sweep phase of
-			garbage collection.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return the current garbage collector statistics.
-		\cvar{*r\_count} is the current number of composite objects,
-		whereas \cvar{*r\_mark} and \cvar{*r\_sweep} are times for the
-		most recent garbage collection.
-	\end{capilist}
-\label{nxa_maximum_get}
-\index{nxa_maximum_get@\cfunc{nxa\_maximum\_get}{}}
-\citem{\cfunc[void]{nxa\_maximum\_get}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\item[r\_count: ]
-			Pointer to an integer.
-		\item[r\_mark: ]
-			Pointer to an integer.
-		\item[r\_sweep: ]
-			Pointer to an integer.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[*r\_count: ]
-			Number of objects.
-		\item[*r\_mark: ]
-			Number of microseconds spent in the mark phase of
-			garbage collection.
-		\item[*r\_sweep: ]
-			Number of microseconts spent in the sweep phase of
-			garbage collection.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return the maximum garbage collector statistics.
-		\cvar{*r\_count} is the maximum number of composite objects that
-		have ever existed. \cvar{*r\_mark} and \cvar{*r\_sweep} are
-		times for the longest recent garbage collection phases.
-	\end{capilist}
-\label{nxa_sum_get}
-\index{nxa_sum_get@\cfunc{nxa\_sum\_get}{}}
-\citem{\cfunc[void]{nxa\_sum\_get}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\item[r\_count: ]
-			Pointer to an integer.
-		\item[r\_mark: ]
-			Pointer to an integer.
-		\item[r\_sweep: ]
-			Pointer to an integer.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[*r\_count: ]
-			Number of objects.
-		\item[*r\_mark: ]
-			Number of microseconds spent in the mark phase of
-			garbage collection.
-		\item[*r\_sweep: ]
-			Number of microseconts spent in the sweep phase of
-			garbage collection.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return the sum garbage collector statistics.
-		\cvar{*r\_count} is the total number of composite objects that
-		have ever been created.  \cvar{*r\_mark} and \cvar{*r\_sweep}
-		are the total times spent in garbage collection.
+		Return garbage collector statistics.
 	\end{capilist}
 \label{nxa_gcdict_get}
 \index{nxa_gcdict_get@\cfunc{nxa\_gcdict\_get}{}}

@@ -37,7 +37,8 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 {
 	cw_nxoe_file_t	*file;
 
-	file = (cw_nxoe_file_t *)_cw_malloc(sizeof(cw_nxoe_file_t));
+	file = (cw_nxoe_file_t *)nxa_malloc(nx_nxa_get(a_nx),
+	    sizeof(cw_nxoe_file_t));
 
 	nxoe_l_new(&file->nxoe, NXOT_FILE, a_locking);
 	if (a_locking)
@@ -562,8 +563,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 			if (i == maxlen) {
 				if (line == s_line) {
 					/* First expansion. */
-					line = (cw_uint8_t *)_cw_malloc(maxlen
-					    << 1);
+					line = (cw_uint8_t
+					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    maxlen << 1);
 					memcpy(line, s_line, maxlen);
 				} else {
 					cw_uint8_t	*oldline;
@@ -573,8 +575,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 					 * once.
 					 */
 					oldline = line;
-					line = (cw_uint8_t *)_cw_malloc(maxlen
-					    << 1);
+					line = (cw_uint8_t
+					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    maxlen << 1);
 					memcpy(line, oldline, maxlen);
 					_cw_free(oldline);
 				}
@@ -674,8 +677,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 			if (i == maxlen) {
 				if (line == s_line) {
 					/* First expansion. */
-					line = (cw_uint8_t *)_cw_malloc(maxlen
-					    << 1);
+					line = (cw_uint8_t
+					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    maxlen << 1);
 					memcpy(line, s_line, maxlen);
 				} else {
 					cw_uint8_t	*oldline;
@@ -685,8 +689,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 					 * once.
 					 */
 					oldline = line;
-					line = (cw_uint8_t *)_cw_malloc(maxlen
-					    << 1);
+					line = (cw_uint8_t
+					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    maxlen << 1);
 					memcpy(line, oldline, maxlen);
 					_cw_free(oldline);
 				}
@@ -1219,7 +1224,7 @@ nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
 }
 
 void
-nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
+nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_uint32_t a_size)
 {
 	cw_nxoe_file_t	*file;
 
@@ -1243,7 +1248,8 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 	} else {
 		if (file->buffer != NULL)
 			_cw_free(file->buffer);
-		file->buffer = (cw_uint8_t *)_cw_malloc(a_size);
+		file->buffer = (cw_uint8_t *)nxa_malloc(nx_nxa_get(a_nx),
+		    a_size);
 		file->buffer_size = a_size;
 	}
 	file->buffer_mode = BUFFER_EMPTY;

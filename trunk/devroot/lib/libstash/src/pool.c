@@ -45,8 +45,9 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 		qs_new(&retval->spares);
 
 #ifdef _CW_POOL_ERROR
-		dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_direct_hash,
-		    ch_direct_key_comp);
+		dch_new(&retval->addr_hash, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, a_mem, 8, 6, 2,
+		    ch_direct_hash, ch_direct_key_comp);
 		try_stage = 2;
 #endif
 

@@ -22,16 +22,19 @@ nxo_array_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
     cw_uint32_t a_len)
 {
 	cw_nxoe_array_t	*array;
+	cw_nxa_t	*nxa;
 	cw_uint32_t	i;
 
-	array = (cw_nxoe_array_t *)_cw_malloc(sizeof(cw_nxoe_array_t));
+	nxa = nx_nxa_get(a_nx);
+
+	array = (cw_nxoe_array_t *)nxa_malloc(nxa, sizeof(cw_nxoe_array_t));
 
 	nxoe_l_new(&array->nxoe, NXOT_ARRAY, a_locking);
 	if (a_locking)
 		mtx_new(&array->lock);
 	array->e.a.len = a_len;
 	if (array->e.a.len > 0) {
-		array->e.a.arr = (cw_nxo_t *)_cw_malloc(sizeof(cw_nxo_t) *
+		array->e.a.arr = (cw_nxo_t *)nxa_malloc(nxa, sizeof(cw_nxo_t) *
 		    array->e.a.len);
 		for (i = 0; i < array->e.a.len; i++)
 			nxo_null_new(&array->e.a.arr[i]);
@@ -62,7 +65,8 @@ nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_nx_t *a_nx,
 	} else {
 		_cw_assert(a_offset + a_len <= orig->e.a.len);
 
-		array = (cw_nxoe_array_t *)_cw_malloc(sizeof(cw_nxoe_array_t));
+		array = (cw_nxoe_array_t *)nxa_malloc(nx_nxa_get(a_nx),
+		    sizeof(cw_nxoe_array_t));
 
 		nxoe_l_new(&array->nxoe, NXOT_ARRAY, FALSE);
 		array->nxoe.indirect = TRUE;

@@ -37,18 +37,22 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	mtx_lock(name_lock);
 	thd_crit_enter();
 	if (dch_search(name_hash, (void *)&key, (void **)&name)) {
+		cw_nxa_t	*nxa;
+
 		/*
 		 * Not found in the name hash.  Create, initialize, and insert
 		 * a new entry.
 		 */
-		name = (cw_nxoe_name_t *)_cw_malloc(sizeof(cw_nxoe_name_t));
+		nxa = nx_nxa_get(a_nx);
+		name = (cw_nxoe_name_t *)nxa_malloc(nxa,
+		    sizeof(cw_nxoe_name_t));
 
 		nxoe_l_new(&name->nxoe, NXOT_NAME, FALSE);
 		name->nxoe.name_static = a_is_static;
 		name->len = a_len;
 
 		if (a_is_static == FALSE) {
-			name->str = _cw_malloc(a_len);
+			name->str = nxa_malloc(nxa, a_len);
 			/*
 			 * Cast away the const here; it's one of two places that
 			 * the string is allowed to be modified, and this cast

@@ -1,3 +1,11 @@
+2001-07-27  Jason Evans  <jasone@canonware.com>
+
+	* src/dch.c: Use opaque allocator/deallocator pointers.
+
+	* src/ch.c: Use opaque allocator/deallocator pointers.
+
+	* include/libstash/libstash.h: Add the cw_opaque_alloc_t type.
+
 2001-07-13  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c: Use thr_suspend()/thr_continue() on Solaris.

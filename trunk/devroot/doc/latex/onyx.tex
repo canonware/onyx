@@ -555,8 +555,8 @@ There are three parameters that can be used to control garbage collection:
 \begin{enumerate}
 \item{The garbage collector can be turned off for situations where many objects
 are being created over a short period of time.}
-\item{The garbage collector runs whenever a certain number of composite objects
-have been created since the last collection.  This threshold can be changed or
+\item{The garbage collector runs whenever a certain number of bytes of memory
+have been allocated since the last collection.  This threshold can be changed or
 disabled.}
 \item{If no composite objects have been created for an extended period of time
 (seconds), the garbage collector will run if any composite objects have been
@@ -1292,7 +1292,7 @@ seconds & {\bf \htmlref{setperiod}{gcdict:setperiod}} & -- & Set the inactivity
 period before the garbage collector will run. \\
 \hline
 count & {\bf \htmlref{setthreshold}{gcdict:setthreshold}} & -- & Set the number
-of object allocations that will trigger a garbage collection. \\
+of bytes of memory allocation that will trigger a garbage collection. \\
 \hline \hline
 \multicolumn{4}{|l|}{State and statistics operators} \\
 \hline \hline
@@ -1303,7 +1303,7 @@ collector is active. \\
 befor the garbage collector will run. \\
 \hline
 -- & {\bf \htmlref{threshold}{gcdict:threshold}} & count & Get the number of
-object allocations that will trigger a garbage collection. \\
+bytes of memory allocation that will trigger a garbage collection. \\
 \hline
 -- & {\bf \htmlref{stats}{gcdict:stats}} & array & Get garbage collection
 statistics. \\
@@ -1439,9 +1439,9 @@ onyx:0>
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[count: ]
-			Number of object allocations since the last garbage
-			collection that will trigger a garbage collection.  0 is
-			treated specially to mean infinity.
+			Number of bytes of memory allocation since the last
+			garbage collection that will trigger a garbage
+			collection.  0 is treated specially to mean infinity.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Errors(s): ]
@@ -1451,10 +1451,10 @@ onyx:0>
 		\item[\htmlref{limitcheck}{limitcheck}.]
 		\end{description}
 	\item[Description: ]
-		Set the number of object allocations since the last garbage
-		collection that will trigger a garbage collection.  This setting
-		is disjoint from the inactivity period setting, and does not
-		prevent garbage collection due to the allocation inactivity
+		Set the number of bytes of memory allocation since the last
+		garbage collection that will trigger a garbage collection.  This
+		setting is disjoint from the inactivity period setting, and does
+		not prevent garbage collection due to the allocation inactivity
 		period having been exceeded.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -1470,36 +1470,29 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[array: ]
-			An array with the format {\lb}collections new
-			{\lb}ccount cmark csweep{\rb} {\lb}mcount mmark
-			msweep{\rb} {\lb}scount smark ssweep{\rb}{\rb}, where
-			the fields have the following meanings:
+			An array with the format {\lb}collections new {\lb}cmark
+			csweep{\rb} {\lb}mmark msweep{\rb} {\lb}smark
+			ssweep{\rb}{\rb}, where the fields have the following
+			meanings:
 			\begin{description}\item[]
 			\item[collections: ]
 				Total number of collections the garbage
 				collector has performed.
 			\item[new: ]
-				Number of objects created since the last garbage
-				collection.
-			\item[ccount: ]
-				Current number of objects.
+				Number of bytes of memory allocated since the
+				last garbage collection.
 			\item[cmark: ]
 				Number of microseconds taken by the most recent
 				garbage collection mark phase.
 			\item[csweep: ]
 				Number of microseconds taken by the most recent
 				garbage collection sweep phase.
-			\item[mcount: ]
-				Maximum number of objects that have ever 
-				existed.
 			\item[mmark: ]
 				Maximum number of microseconds taken by any
 				garbage collection mark phase.
 			\item[msweep: ]
 				Number of microseconds taken by any garbage
 				collection sweep phase.
-			\item[scount: ]
-				Total number of objects that have ever existed.
 			\item[smark: ]
 				Total number of microseconds taken by all
 				garbage collection mark phases.
@@ -1515,7 +1508,7 @@ onyx:0>
 
 onyx:0> gcdict begin
 onyx:0> stats 2 sprint
-[3 3 [441 700 100] [577 784 1267] [606 2174 1499]]
+[2 13156 [978 1055] [978 1055] [1533 1135]]
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -1527,21 +1520,21 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[count: ]
-			Number of objects allocations since the last garbage
-			collection that will trigger a garbage collection.  0 is
-			treated specially to mean infinity.
+			Number of bytes of memory allocation since the last
+			garbage collection that will trigger a garbage
+			collection.  0 is treated specially to mean infinity.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get the number of object allocations since the last garbage
-		collection that will trigger a garbage collection.  This setting
-		is disjoint from the inactivity period setting, and does not
-		prevent garbage collection due to the allocation inactivity
+		Get the number of bytes of memory allocation since the last
+		garbage collection that will trigger a garbage collection.  This
+		setting is disjoint from the inactivity period setting, and does
+		not prevent garbage collection due to the allocation inactivity
 		period having been exceeded.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> gcdict begin threshold end 1 sprint
-40000
+65536
 onyx:0>
 		\end{verbatim}
 	\end{description}

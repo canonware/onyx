@@ -51,10 +51,10 @@ extern  "C" {
 #define	_CW_LIBONYX_GCDICT_PERIOD	   20
 
 /*
- * Default number of sequence set additions since last collection that will
- * cause an immediate collection.
+ * Default number of bytes of allocation since last collection that will cause
+ * an immediate collection.
  */
-#define	_CW_LIBONYX_GCDICT_THRESHOLD	20000
+#define	_CW_LIBONYX_GCDICT_THRESHOLD	65536
 
 /*
  * Initial size of globaldict.  This is a bit arbitrary, and some applications
@@ -100,7 +100,37 @@ extern  "C" {
 #define	_CW_ONYXX_QUIT			  130
 
 #include "libonyx_defs.h"
-#include "libonyx_incs.h"
+
+#include <libstash/libstash.h>
+
+/*
+ * Library include files.  These must be listed in reverse dependency order.
+ */
+
+#include "nxn.h"
+#include "nxo.h"
+#include "nxo_no.h"
+#include "nxo_array.h"
+#include "nxo_boolean.h"
+#include "nxo_condition.h"
+#include "nxo_dict.h"
+#include "nxo_file.h"
+#include "nxo_fino.h"
+#include "nxo_hook.h"
+#include "nxo_integer.h"
+#include "nxo_mark.h"
+#include "nxo_mutex.h"
+#include "nxo_name.h"
+#include "nxo_null.h"
+#include "nxo_operator.h"
+#include "nxo_pmark.h"
+#include "nxo_stack.h"
+#include "nxo_string.h"
+#include "nxo_thread.h"
+#include "nxa.h"
+#include "nx.h"
+#include "systemdict.h"
+#include "gcdict.h"
 
 /* Convenience macro for static embedded onyx code. */
 #define	_cw_onyx_code(a_thread, a_code) do {				\

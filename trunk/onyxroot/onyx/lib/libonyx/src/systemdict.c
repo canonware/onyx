@@ -3252,10 +3252,12 @@ systemdict_open(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *tstack;
 	cw_nxo_t		*name, *flags, *file;
+	cw_nx_t			*nx;
 	cw_nxo_threade_t	error;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	tstack = nxo_thread_tstack_get(a_thread);
+	nx = nxo_thread_nx_get(a_thread);
 	
 	NXO_STACK_GET(flags, ostack, a_thread);
 	NXO_STACK_DOWN_GET(name, ostack, a_thread, flags);
@@ -3266,8 +3268,7 @@ systemdict_open(cw_nxo_t *a_thread)
 	}
 
 	file = nxo_stack_push(tstack);
-	nxo_file_new(file, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread));
+	nxo_file_new(file, nx, nxo_thread_currentlocking(a_thread));
 	nxo_string_lock(name);
 	error = nxo_file_open(file, nxo_string_get(name),
 	    nxo_string_len_get(name), nxo_string_get(flags),
@@ -3278,7 +3279,7 @@ systemdict_open(cw_nxo_t *a_thread)
 		return;
 	}
 
-	nxo_file_buffer_size_set(file, _CW_LIBONYX_FILE_BUFFER_SIZE);
+	nxo_file_buffer_size_set(file, nx, _CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	nxo_stack_pop(ostack);
 	nxo_dup(name, file);

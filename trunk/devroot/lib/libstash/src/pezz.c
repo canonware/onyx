@@ -88,7 +88,8 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		retval->num_blocks = 1;
 
 #ifdef _CW_PEZZ_ERROR
-		dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3,
+		dch_new(&retval->addr_hash, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, a_mem, a_num_buffers * 3,
 		    a_num_buffers * 2, 0, ch_direct_hash, ch_direct_key_comp);
 		try_stage = 4;
 #endif

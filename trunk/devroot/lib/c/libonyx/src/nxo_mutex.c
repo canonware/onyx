@@ -20,7 +20,8 @@ nxo_mutex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 {
 	cw_nxoe_mutex_t	*mutex;
 
-	mutex = (cw_nxoe_mutex_t *)_cw_malloc(sizeof(cw_nxoe_mutex_t));
+	mutex = (cw_nxoe_mutex_t *)nxa_malloc(nx_nxa_get(a_nx),
+	    sizeof(cw_nxoe_mutex_t));
 
 	nxoe_l_new(&mutex->nxoe, NXOT_MUTEX, FALSE);
 	mtx_new(&mutex->lock);

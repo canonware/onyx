@@ -120,6 +120,55 @@ defines the following exceptions:
 		Clean up the global variables that are initialized by
 		\cfunc{libstash\_init}{}.
 	\end{capilist}
+\label{cw_opaque_alloc_t}
+\index{cw_opaque_alloc_t@\cfunc{cw\_opaque\_alloc\_t}{}}
+\citem{\cfunc[void *]{cw\_opaque\_alloc\_t}{void *a\_arg, size\_t a\_size,
+const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate \cvar{a\_size} of space and return a pointer to it.
+	\end{capilist}
+\label{cw_opaque_dealloc_t}
+\index{cw_opaque_dealloc_t@\cfunc{cw\_opaque\_dealloc\_t}{}}
+\citem{\cfunc[void]{cw\_opaque\_dealloc\_t}{void *a\_mem, void *a\_ptr, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_ptr: ]
+			Pointer to to memory range to be freed.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Deallocate the memory pointed to by \cvar{a\_ptr}.
+	\end{capilist}
 \label{_cw_assert}
 \index{_cw_assert@\cppmacro{\_cw\_assert}{}}
 \citem{\cppmacro[void]{\_cw\_assert}{expression}}

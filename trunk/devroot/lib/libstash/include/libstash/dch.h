@@ -21,8 +21,10 @@ struct cw_dch_s {
 	cw_uint32_t	num_shrinks;
 #endif
 
-	/* Allocator. */
-	cw_mem_t	*mem;
+	/* Opaque allocation/deallocation pointers. */
+	cw_opaque_alloc_t *alloc;
+	cw_opaque_dealloc_t *dealloc;
+	void		*arg;
 
 	cw_bool_t	is_malloced;
 
@@ -45,9 +47,10 @@ struct cw_dch_s {
 	cw_ch_t		*ch;
 };
 
-cw_dch_t	*dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t
-    a_base_table, cw_uint32_t a_base_grow, cw_uint32_t a_base_shrink,
-    cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
+cw_dch_t	*dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc,
+    cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_uint32_t a_base_table,
+    cw_uint32_t a_base_grow, cw_uint32_t a_base_shrink, cw_ch_hash_t *a_hash,
+    cw_ch_key_comp_t *a_key_comp);
 void		dch_delete(cw_dch_t *a_dch);
 cw_uint32_t	dch_count(cw_dch_t *a_dch);
 void		dch_insert(cw_dch_t *a_dch, const void *a_key, const void

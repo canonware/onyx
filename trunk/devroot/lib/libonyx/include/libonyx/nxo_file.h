@@ -35,6 +35,7 @@ cw_nxo_threade_t nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length);
 cw_nxoi_t nxo_file_position_get(cw_nxo_t *a_nxo);
 cw_nxo_threade_t nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position);
 cw_uint32_t nxo_file_buffer_size_get(cw_nxo_t *a_nxo);
-void	nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size);
+void	nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_uint32_t
+    a_size);
 cw_nxoi_t nxo_file_buffer_count(cw_nxo_t *a_nxo);
 cw_nxo_threade_t nxo_file_buffer_flush(cw_nxo_t *a_nxo);

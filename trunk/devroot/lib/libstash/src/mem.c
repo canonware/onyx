@@ -62,9 +62,10 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 		try_stage = 1;
 
 #ifdef _CW_MEM_ERROR
-		retval->addr_hash = dch_new(NULL, a_internal,
-		    _CW_MEM_BASE_TABLE, _CW_MEM_BASE_GROW, _CW_MEM_BASE_SHRINK,
-		    ch_direct_hash, ch_direct_key_comp);
+		retval->addr_hash = dch_new(NULL, (cw_opaque_alloc_t
+		    *)mem_malloc_e, (cw_opaque_dealloc_t *)mem_free_e,
+		    a_internal, _CW_MEM_BASE_TABLE, _CW_MEM_BASE_GROW,
+		    _CW_MEM_BASE_SHRINK, ch_direct_hash, ch_direct_key_comp);
 		try_stage = 2;
 #endif
 		retval->handler_data = NULL;

@@ -124,8 +124,35 @@ typedef enum {
 #endif
 
 /*
+ * System headers to always be included.
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <unistd.h>
+#include <limits.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/types.h>
+#include <sys/uio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <setjmp.h>
+#include <sched.h>
+#include <signal.h>
+
+/*
+ * Generic typedef used for memory allocation hooks.  This typedef is compatible
+ * with functions such as mem_malloc_e().
+ */
+typedef void *cw_opaque_alloc_t (const void *, size_t, const char *,
+    cw_uint32_t);
+
+/*
  * Generic typedef used for memory deallocation hooks.  This typedef is
- * compatible with functions such as mem_free(), pezz_put() and pool_put().
+ * compatible with functions such as mem_free_e(), pezz_put_e() and
+ * pool_put_e().
  */
 typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
     cw_uint32_t);
@@ -137,10 +164,31 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 #define _CW_STASHX_OUT_PARSE	4
 
 /*
- * Project headers to always be included.
+ * libstash include files.  These must be listed in reverse dependency order
+ * (for example, qr.h must come before dch.h).
  */
 
-#include "libstash_incs.h"
+#include "qs.h"
+#include "qr.h"
+#include "ql.h"
+#include "xep.h"
+#include "mtx.h"
+#include "cnd.h"
+#include "sma.h"
+#include "tsd.h"
+#include "thd.h"
+#include "rwl.h"
+#include "ch.h"
+#include "dch.h"
+#include "out.h"
+#include "mem.h"
+#ifdef _CW_HAVE_LIBSTASH_BUF
+#include "buf.h"
+#endif
+#include "pezz.h"
+#include "pool.h"
+#include "bhp.h"
+#include "mq.h"
 
 /*
  * libstash initialization and shutdown function prototypes.
@@ -164,9 +212,13 @@ extern cw_out_t	*out_err;
  * to call functions such as mem_free(), pezz_put(), and pool_put().
  */
 #ifdef _CW_DBG
+#define	_cw_opaque_alloc(a_func, a_arg, a_size)				\
+	(a_func)((void *)(a_arg), (size_t)(a_size), __FILE__, __LINE__)
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), __FILE__, __LINE__)
 #else
+#define	_cw_opaque_alloc(a_func, a_arg, a_size)				\
+	(a_func)((void *)(a_arg), (size_t)(a_size), NULL, 0)
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr)			\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), NULL, 0)
 #endif

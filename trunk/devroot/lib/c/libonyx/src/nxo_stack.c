@@ -35,7 +35,8 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 {
 	cw_nxoe_stack_t	*stack;
 
-	stack = (cw_nxoe_stack_t *)_cw_malloc(sizeof(cw_nxoe_stack_t));
+	stack = (cw_nxoe_stack_t *)nxa_malloc(nx_nxa_get(a_nx),
+	    sizeof(cw_nxoe_stack_t));
 
 	nxoe_l_new(&stack->nxoe, NXOT_STACK, a_locking);
 	if (a_locking)

@@ -17,12 +17,17 @@
 #endif
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
-    *a_hash, cw_ch_key_comp_t *a_key_comp)
+ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc, cw_opaque_dealloc_t
+    *a_dealloc, void *a_arg, cw_uint32_t a_table_size, cw_ch_hash_t *a_hash,
+    cw_ch_key_comp_t *a_key_comp)
 {
 	cw_ch_t	*retval;
 
+	_cw_check_ptr(a_alloc);
+	_cw_check_ptr(a_dealloc);
 	_cw_assert(a_table_size > 0);
+	_cw_check_ptr(a_hash);
+	_cw_check_ptr(a_key_comp);
 
 	if (NULL != a_ch) {
 		retval = a_ch;
@@ -30,14 +35,17 @@ ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_ch_t
-		    *)mem_malloc(a_mem, _CW_CH_TABLE2SIZEOF(a_table_size));
+		    *)a_alloc(a_arg, _CW_CH_TABLE2SIZEOF(a_table_size),
+		    __FILE__, __LINE__);
 		if (NULL == retval)
 			goto RETURN;
 		memset(retval, 0, _CW_CH_TABLE2SIZEOF(a_table_size));
 		retval->is_malloced = TRUE;
 	}
 
-	retval->mem = a_mem;
+	retval->alloc = a_alloc;
+	retval->dealloc = a_dealloc;
+	retval->arg = a_arg;
 	retval->table_size = a_table_size;
 	retval->hash = a_hash;
 	retval->key_comp = a_key_comp;
@@ -64,7 +72,7 @@ ch_delete(cw_ch_t *a_ch)
 		_cw_dassert(chi->magic == _CW_CHI_MAGIC);
 		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 		if (chi->is_malloced)
-			mem_free(a_ch->mem, chi);
+			_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi);
 #ifdef _CW_DBG
 		else
 			memset(chi, 0x5a, sizeof(cw_chi_t));
@@ -72,7 +80,7 @@ ch_delete(cw_ch_t *a_ch)
 	}
 
 	if (a_ch->is_malloced)
-		mem_free(a_ch->mem, a_ch);
+		_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, a_ch);
 #ifdef _CW_DBG
 	else
 		memset(a_ch, 0x5a, _CW_CH_TABLE2SIZEOF(a_ch->table_size));
@@ -103,7 +111,8 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 		chi = a_chi;
 		chi->is_malloced = FALSE;
 	} else {
-		chi = (cw_chi_t *)mem_malloc(a_ch->mem, sizeof(cw_chi_t));
+		chi = (cw_chi_t *)_cw_opaque_alloc(a_ch->alloc, a_ch->arg,
+		    sizeof(cw_chi_t));
 		chi->is_malloced = TRUE;
 	}
 	chi->key = a_key;
@@ -162,8 +171,10 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 				*r_key = (void *)chi->key;
 			if (r_data != NULL)
 				*r_data = (void *)chi->data;
-			if (chi->is_malloced)
-				mem_free(a_ch->mem, chi);
+			if (chi->is_malloced) {
+				_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg,
+				    chi);
+			}
 			else if (r_chi != NULL) {
 #ifdef _CW_DBG
 				chi->magic = 0;
@@ -273,7 +284,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	if (r_data != NULL)
 		*r_data = (void *)chi->data;
 	if (chi->is_malloced)
-		mem_free(a_ch->mem, chi);
+		_cw_opaque_dealloc(a_ch->dealloc, a_ch->arg, chi);
 	else if (r_chi != NULL) {
 #ifdef _CW_DBG
 		chi->magic = 0;

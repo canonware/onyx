@@ -204,7 +204,8 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	cw_nxoe_thread_t	*thread;
 	cw_nxo_t		*nxo;
 
-	thread = (cw_nxoe_thread_t *)_cw_malloc(sizeof(cw_nxoe_thread_t));
+	thread = (cw_nxoe_thread_t *)nxa_malloc(nx_nxa_get(a_nx),
+	    sizeof(cw_nxoe_thread_t));
 	memset(thread, 0, sizeof(cw_nxoe_thread_t));
 
 	nxoe_l_new(&thread->nxoe, NXOT_THREAD, FALSE);
@@ -1625,8 +1626,8 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 		/*
 		 * First overflow, initial expansion needed.
 		 */
-		a_thread->tok_str = (cw_uint8_t *)_cw_malloc(a_thread->index *
-		    2);
+		a_thread->tok_str = (cw_uint8_t
+		    *)nxa_malloc(nx_nxa_get(a_thread->nx), a_thread->index * 2);
 		a_thread->buffer_len = a_thread->index * 2;
 		memcpy(a_thread->tok_str, a_thread->buffer, a_thread->index);
 	} else if (a_thread->index == a_thread->buffer_len) {
@@ -1635,7 +1636,8 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 		/*
 		 * Overflowed, and additional expansion needed.
 		 */
-		t_str = (cw_uint8_t *)_cw_malloc(a_thread->index * 2);
+		t_str = (cw_uint8_t *)nxa_malloc(nx_nxa_get(a_thread->nx),
+		    a_thread->index * 2);
 		a_thread->buffer_len = a_thread->index * 2;
 		memcpy(t_str, a_thread->tok_str, a_thread->index);
 		_cw_free(a_thread->tok_str);

@@ -21,11 +21,11 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libonyx.h libonyx_incs.h gcdict.h nx.h nxa.h nxn.h nxo.h
-               nxo_array.h nxo_boolean.h nxo_condition.h nxo_dict.h nxo_file.h
-               nxo_fino.h nxo_hook.h nxo_integer.h nxo_mark.h nxo_mutex.h
-               nxo_name.h nxo_no.h nxo_null.h nxo_operator.h nxo_pmark.h
-               nxo_stack.h nxo_string.h nxo_thread.h systemdict.h;
+  local incs = libonyx.h gcdict.h nx.h nxa.h nxn.h nxo.h nxo_array.h
+               nxo_boolean.h nxo_condition.h nxo_dict.h nxo_file.h nxo_fino.h
+               nxo_hook.h nxo_integer.h nxo_mark.h nxo_mutex.h nxo_name.h
+               nxo_no.h nxo_null.h nxo_operator.h nxo_pmark.h nxo_stack.h
+               nxo_string.h nxo_thread.h systemdict.h;
   incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [incs]];
   incs = [incs] [objdir]/lib/c/libonyx/include/libonyx/libonyx_defs.h;
 
@@ -122,7 +122,7 @@ SRCS = [SRCS] [LIBONYX_SRCS];
 }
 
 /* Libraries. */
-LIBONYX_REV = 1;
+LIBONYX_REV = 2;
 
 LIBONYX_A = [objdir]/lib/c/libonyx/lib/libonyx.a;
 LIBONYX_S = [objdir]/lib/c/libonyx/lib/libonyx.so.[LIBONYX_REV];

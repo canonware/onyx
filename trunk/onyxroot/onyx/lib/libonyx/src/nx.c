@@ -13,6 +13,7 @@
 
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/envdict_l.h"
+#include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxo_l.h"
@@ -47,54 +48,60 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		retval->magic = _CW_NX_MAGIC;
 #endif
 
-		/* Initialize the global name cache. */
-		mtx_new(&retval->name_lock);
-		dch_new(&retval->name_hash, NULL, _CW_LIBONYX_NAME_HASH,
-		    _CW_LIBONYX_NAME_HASH / 4 * 3, _CW_LIBONYX_NAME_HASH / 4,
-		    nxo_l_name_hash, nxo_l_name_key_comp);
+		/* Initialize the GC. */
+		nxa_new(&retval->nxa, retval);
 		try_stage = 2;
 
-		/* Initialize the GC (and gcdict by association). */
-		nxa_new(&retval->nxa, retval);
+		/* Initialize the global name cache. */
+		mtx_new(&retval->name_lock);
+		dch_new(&retval->name_hash, (cw_opaque_alloc_t *)nxa_malloc_e,
+		    (cw_opaque_dealloc_t *)nxa_free_e, &retval->nxa,
+		    _CW_LIBONYX_NAME_HASH, _CW_LIBONYX_NAME_HASH / 4 * 3,
+		    _CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
+		    nxo_l_name_key_comp);
 		try_stage = 3;
+
+		/* Initialize gcdict. */
+		gcdict_l_populate(nxa_gcdict_get(&retval->nxa), &retval->nxa);
+		try_stage = 4;
 
 		/* Initialize stdin. */
 		nxo_file_new(&retval->stdin_nxo, retval, TRUE);
 		nxo_file_fd_wrap(&retval->stdin_nxo, 0);
-		nxo_file_buffer_size_set(&retval->stdin_nxo,
+		nxo_file_buffer_size_set(&retval->stdin_nxo, retval,
 		    _CW_LIBONYX_FILE_BUFFER_SIZE);
-		try_stage = 4;
+		try_stage = 5;
 
 		/* Initialize stdout. */
 		nxo_file_new(&retval->stdout_nxo, retval, TRUE);
 		nxo_file_fd_wrap(&retval->stdout_nxo, 1);
-		nxo_file_buffer_size_set(&retval->stdout_nxo,
+		nxo_file_buffer_size_set(&retval->stdout_nxo, retval,
 		    _CW_LIBONYX_FILE_BUFFER_SIZE);
-		try_stage = 5;
+		try_stage = 6;
 
 		/* Initialize stderr. */
 		nxo_file_new(&retval->stderr_nxo, retval, TRUE);
 		nxo_file_fd_wrap(&retval->stderr_nxo, 2);
-		try_stage = 6;
+		try_stage = 7;
 
 		/* Initialize globaldict. */
 		nxo_dict_new(&retval->globaldict, retval, TRUE,
 		    _CW_LIBONYX_GLOBALDICT_HASH);
-		try_stage = 7;
+		try_stage = 8;
 
 		/* Initialize envdict. */
 		envdict_l_populate(&retval->envdict, retval, a_envp);
-		try_stage = 8;
+		try_stage = 9;
 
 		/* Initialize systemdict. */
 		systemdict_l_populate(&retval->systemdict, retval, a_argc,
 		    a_argv);
-		try_stage = 9;
+		try_stage = 10;
 
 		/* Initialize threadsdict. */
 		nxo_dict_new(&retval->threadsdict, retval, TRUE,
 		    _CW_LIBONYX_THREADSDICT_HASH);
-		try_stage = 10;
+		try_stage = 11;
 
 		/* Now that we have an initial thread, activate the GC. */
 		nxa_active_set(&retval->nxa, TRUE);
@@ -113,6 +120,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 	xep_catch (_CW_STASHX_OOM) {
 		retval = (cw_nx_t *)v_retval;
 		switch (try_stage) {
+		case 11:
 		case 10:
 		case 9:
 		case 8:
@@ -121,10 +129,10 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		case 5:
 		case 4:
 		case 3:
-			nxa_delete(&retval->nxa);
-		case 2:
 			dch_delete(&retval->name_hash);
 			mtx_delete(&retval->name_lock);
+		case 2:
+			nxa_delete(&retval->nxa);
 		case 1:
 #ifdef _CW_DBG
 			memset(a_nx, 0x5a, sizeof(cw_nx_t));

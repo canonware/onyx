@@ -32,8 +32,12 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
     a_dict_size)
 {
 	cw_nxoe_dict_t	*dict;
+	cw_nxa_t	*nxa;
 
-	dict = (cw_nxoe_dict_t *)_cw_malloc(sizeof(cw_nxoe_dict_t));
+	nxa = nx_nxa_get(a_nx);
+
+	dict = (cw_nxoe_dict_t *)nxa_malloc(nx_nxa_get(a_nx),
+	    sizeof(cw_nxoe_dict_t));
 
 	nxoe_l_new(&dict->nxoe, NXOT_DICT, a_locking);
 	if (a_locking)
@@ -51,8 +55,9 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	if (a_dict_size < _CW_LIBONYX_DICT_SIZE)
 		a_dict_size = _CW_LIBONYX_DICT_SIZE;
 
-	dch_new(&dict->hash, NULL, a_dict_size * 1.25, a_dict_size, a_dict_size
-	    / 4, nxo_p_dict_hash, nxo_p_dict_key_comp);
+	dch_new(&dict->hash, (cw_opaque_alloc_t *)nxa_malloc_e,
+	    (cw_opaque_dealloc_t *)nxa_free_e, nxa, a_dict_size * 1.25,
+	    a_dict_size, a_dict_size / 4, nxo_p_dict_hash, nxo_p_dict_key_comp);
 
 	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)dict;
@@ -81,6 +86,7 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		nxa_l_dicto_put(nx_nxa_get(a_nx), dicto);
 		nxa_l_chi_put(nx_nxa_get(a_nx), chi);
 	}
+	dch_delete(&dict->hash);
 
 	_CW_NXOE_FREE(dict);
 }

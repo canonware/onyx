@@ -22,8 +22,13 @@ struct cw_nxa_s {
 	cw_nxoi_t	prev_new;	/* Previous number of new objects. */
 
 	/* Various pools. */
+	cw_uint32_t	chi_sizeof;
 	cw_pool_t	chi_pool;
+
+	cw_uint32_t	dicto_sizeof;
 	cw_pool_t	dicto_pool;
+
+	cw_uint32_t	stacko_sizeof;
 	cw_pool_t	stacko_pool;
 
 	/*
@@ -54,6 +59,23 @@ struct cw_nxa_s {
 void	nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx);
 void	nxa_delete(cw_nxa_t *a_nxa);
 
+void	*nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename,
+    cw_uint32_t a_line_num);
+void	nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, const char *a_filename,
+    cw_uint32_t a_line_num);
+
+#ifdef _CW_DBG
+#define	nxa_malloc(a_nxa, a_size)					\
+	nxa_malloc_e((a_nxa), (a_size), __FILE__, __LINE__)
+#define	nxa_free(a_nxa, a_ptr)						\
+	nxa_free_e((a_nxa), (a_ptr), __FILE__, __LINE__)
+#else
+#define	nxa_malloc(a_nxa, a_size)					\
+	nxa_malloc_e((a_nxa), (a_size), NULL, 0)
+#define	nxa_free(a_nxa, a_ptr)						\
+	nxa_free_e((a_nxa), (a_ptr), NULL, 0)
+#endif
+
 void	nxa_collect(cw_nxa_t *a_nxa);
 void	nxa_dump(cw_nxa_t *a_nxa, cw_nxo_t *a_thread);
 
@@ -64,9 +86,8 @@ void	nxa_period_set(cw_nxa_t *a_nxa, cw_nxoi_t a_period);
 cw_nxoi_t nxa_threshold_get(cw_nxa_t *a_nxa);
 void	nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold);
 void	nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t
-    *r_new, cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep,
-    cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep, cw_nxoi_t
-    *r_scount, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep);
+    *r_new, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep, cw_nxoi_t *r_mmark,
+    cw_nxoi_t *r_msweep, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep);
 
 #ifndef _CW_USE_INLINES
 cw_nxo_t *nxa_gcdict_get(cw_nxa_t *a_nxa);

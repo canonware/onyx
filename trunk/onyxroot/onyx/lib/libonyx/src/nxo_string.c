@@ -32,15 +32,18 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
     a_len)
 {
 	cw_nxoe_string_t	*string;
+	cw_nxa_t		*nxa;
 
-	string = (cw_nxoe_string_t *)_cw_malloc(sizeof(cw_nxoe_string_t));
+	nxa = nx_nxa_get(a_nx);
+	string = (cw_nxoe_string_t *)nxa_malloc(nxa, sizeof(cw_nxoe_string_t));
 
 	nxoe_l_new(&string->nxoe, NXOT_STRING, a_locking);
 	if (a_locking)
 		mtx_new(&string->lock);
 	string->e.s.len = a_len;
 	if (string->e.s.len > 0) {
-		string->e.s.str = (cw_uint8_t *)_cw_malloc(string->e.s.len);
+		string->e.s.str = (cw_uint8_t *)nxa_malloc(nxa,
+		    string->e.s.len);
 		memset(string->e.s.str, 0, string->e.s.len);
 	} else
 		string->e.s.str = NULL;
@@ -71,7 +74,7 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
 		_cw_assert(a_offset + a_len <= orig->e.s.len);
 
 		string = (cw_nxoe_string_t
-		    *)_cw_malloc(sizeof(cw_nxoe_string_t));
+		    *)nxa_malloc(nx_nxa_get(a_nx), sizeof(cw_nxoe_string_t));
 
 		nxoe_l_new(&string->nxoe, NXOT_STRING, FALSE);
 		string->nxoe.indirect = TRUE;

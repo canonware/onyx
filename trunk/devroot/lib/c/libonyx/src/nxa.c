@@ -77,7 +77,6 @@
 
 #include <sys/time.h>
 
-#include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
@@ -91,7 +90,6 @@ typedef enum {
 	NXAM_SHUTDOWN
 } cw_nxam_t;
 
-static void nxa_p_collect(cw_nxa_t *a_nxa);
 static void *nxa_p_gc_entry(void *a_arg);
 
 void
@@ -109,12 +107,15 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		a_nxa->prev_new = 0;
 		try_stage = 1;
 
+		a_nxa->chi_sizeof = sizeof(cw_chi_t);
 		pool_new(&a_nxa->chi_pool, NULL, sizeof(cw_chi_t));
 		try_stage = 2;
 
+		a_nxa->dicto_sizeof = sizeof(cw_nxoe_dicto_t);
 		pool_new(&a_nxa->dicto_pool, NULL, sizeof(cw_nxoe_dicto_t));
 		try_stage = 3;
 
+		a_nxa->stacko_sizeof = sizeof(cw_nxoe_stacko_t);
 		pool_new(&a_nxa->stacko_pool, NULL, sizeof(cw_nxoe_stacko_t));
 		try_stage = 4;
 
@@ -134,13 +135,9 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		a_nxa->gcdict_period = _CW_LIBONYX_GCDICT_PERIOD;
 		a_nxa->gcdict_threshold = _CW_LIBONYX_GCDICT_THRESHOLD;
 		a_nxa->gcdict_new = 0;
-		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 3);
-		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 3);
-		memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 3);
-
-		/* Initialize gcdict. */
-		gcdict_l_populate(&a_nxa->gcdict, a_nxa);
-		try_stage = 6;
+		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 2);
+		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 2);
+		memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 2);
 
 		/*
 		 * Block all signals during thread creation, so that the GC
@@ -152,11 +149,10 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, FALSE);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
-		try_stage = 7;
+		try_stage = 6;
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
-		case 7:
 		case 6:
 		case 5:
 			mq_delete(&a_nxa->gc_mq);
@@ -191,6 +187,42 @@ nxa_delete(cw_nxa_t *a_nxa)
 	pool_delete(&a_nxa->stacko_pool);
 	pool_delete(&a_nxa->dicto_pool);
 	pool_delete(&a_nxa->chi_pool);
+}
+
+void *
+nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	_cw_check_ptr(a_nxa);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+
+	mtx_lock(&a_nxa->lock);
+
+	/* Update new. */
+	a_nxa->gcdict_new += (cw_nxoi_t)a_size;
+
+	/* Trigger a collection if the threshold was reached. */
+	if (a_nxa->gcdict_new >= a_nxa->gcdict_threshold &&
+	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
+		mtx_lock(&a_nxa->interlock);
+		a_nxa->prev_new = 0;
+		mtx_unlock(&a_nxa->lock);
+		nxa_p_collect(a_nxa);
+		mtx_unlock(&a_nxa->interlock);
+	} else
+		mtx_unlock(&a_nxa->lock);
+
+	return mem_malloc_e(cw_g_mem, a_size, a_filename, a_line_num);
+}
+
+void
+nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	_cw_check_ptr(a_nxa);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+
+	mem_free_e(cw_g_mem, a_ptr, a_filename, a_line_num);
 }
 
 void
@@ -231,7 +263,15 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 	mtx_lock(&a_nxa->lock);
 	a_nxa->gcdict_active = a_active;
 	mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
-	mtx_unlock(&a_nxa->lock);
+	if (a_active && a_nxa->gcdict_threshold > 0 && a_nxa->gcdict_threshold
+	    <= a_nxa->gcdict_new) {
+		mtx_lock(&a_nxa->interlock);
+		a_nxa->prev_new = 0;
+		mtx_unlock(&a_nxa->lock);
+		nxa_p_collect(a_nxa);
+		mtx_unlock(&a_nxa->interlock);
+	} else
+		mtx_unlock(&a_nxa->lock);
 }
 
 cw_nxoi_t
@@ -295,14 +335,12 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 		mtx_unlock(&a_nxa->interlock);
 	} else
 		mtx_unlock(&a_nxa->lock);
-
 }
 
 void
 nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
-    cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep, cw_nxoi_t
-    *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep, cw_nxoi_t *r_scount,
-    cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
+    cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep, cw_nxoi_t *r_mmark, cw_nxoi_t
+    *r_msweep, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
 {
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
@@ -318,28 +356,22 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
 		*r_new = a_nxa->gcdict_new;
 
 	/* current. */
-	if (r_ccount != NULL)
-		*r_ccount = a_nxa->gcdict_current[0];
 	if (r_cmark != NULL)
-		*r_cmark = a_nxa->gcdict_current[1];
+		*r_cmark = a_nxa->gcdict_current[0];
 	if (r_csweep != NULL)
-		*r_csweep = a_nxa->gcdict_current[2];
+		*r_csweep = a_nxa->gcdict_current[1];
 
 	/* maximum. */
-	if (r_mcount != NULL)
-		*r_mcount = a_nxa->gcdict_maximum[0];
 	if (r_mmark != NULL)
-		*r_mmark = a_nxa->gcdict_maximum[1];
+		*r_mmark = a_nxa->gcdict_maximum[0];
 	if (r_msweep != NULL)
-		*r_msweep = a_nxa->gcdict_maximum[2];
+		*r_msweep = a_nxa->gcdict_maximum[1];
 
 	/* sum. */
-	if (r_scount != NULL)
-		*r_scount = a_nxa->gcdict_sum[0];
 	if (r_smark != NULL)
-		*r_smark = a_nxa->gcdict_sum[1];
+		*r_smark = a_nxa->gcdict_sum[0];
 	if (r_ssweep != NULL)
-		*r_ssweep = a_nxa->gcdict_sum[2];
+		*r_ssweep = a_nxa->gcdict_sum[1];
 
 	mtx_unlock(&a_nxa->lock);
 }
@@ -363,29 +395,7 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	nxoe_l_registered_set(a_nxoe, TRUE);
 	ql_tail_insert(&a_nxa->seq_set, a_nxoe, link);
 
-	/* Update new. */
-	a_nxa->gcdict_new++;
-
-	/* Update current[0]. */
-	a_nxa->gcdict_current[0]++;
-
-	/* Update maximum[0]. */
-	if (a_nxa->gcdict_maximum[0] < a_nxa->gcdict_current[0])
-		a_nxa->gcdict_maximum[0] = a_nxa->gcdict_current[0];
-
-	/* Update sum[0]. */
-	a_nxa->gcdict_sum[0]++;
-
-	/* Trigger a collection if the threshold was reached. */
-	if (a_nxa->gcdict_new >= a_nxa->gcdict_threshold &&
-	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
-		mtx_lock(&a_nxa->interlock);
-		a_nxa->prev_new = 0;
-		mtx_unlock(&a_nxa->lock);
-		nxa_p_collect(a_nxa);
-		mtx_unlock(&a_nxa->interlock);
-	} else
-		mtx_unlock(&a_nxa->lock);
+	mtx_unlock(&a_nxa->lock);
 }
 
 cw_bool_t
@@ -599,7 +609,6 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 
 	/* Update statistics counters. */
 	a_nxa->gcdict_new = 0;
-	a_nxa->gcdict_current[0] = nroot + nreachable;
 
 	mtx_unlock(&a_nxa->lock);
 
@@ -624,16 +633,16 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 
 	/* Update timing statistics. */
 	/* mark. */
-	a_nxa->gcdict_current[1] = mark_us;
-	if (mark_us > a_nxa->gcdict_maximum[1])
-		a_nxa->gcdict_maximum[1] = mark_us;
-	a_nxa->gcdict_sum[1] += mark_us;
+	a_nxa->gcdict_current[0] = mark_us;
+	if (mark_us > a_nxa->gcdict_maximum[0])
+		a_nxa->gcdict_maximum[0] = mark_us;
+	a_nxa->gcdict_sum[0] += mark_us;
 
 	/* sweep. */
-	a_nxa->gcdict_current[2] = sweep_us;
-	if (sweep_us > a_nxa->gcdict_maximum[2])
-		a_nxa->gcdict_maximum[2] = sweep_us;
-	a_nxa->gcdict_sum[2] += sweep_us;
+	a_nxa->gcdict_current[1] = sweep_us;
+	if (sweep_us > a_nxa->gcdict_maximum[1])
+		a_nxa->gcdict_maximum[1] = sweep_us;
+	a_nxa->gcdict_sum[1] += sweep_us;
 
 	/* Increment the collections counter. */
 	a_nxa->gcdict_collections++;

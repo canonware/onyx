@@ -23,13 +23,15 @@ main()
 	{
 		cw_dch_t	*dch_a, dch_b;
 
-		dch_a = dch_new(NULL, cw_g_mem, 2, 2, 1, ch_string_hash,
-		    ch_string_key_comp);
+		dch_a = dch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 2, 2, 1,
+		    ch_string_hash, ch_string_key_comp);
 		_cw_check_ptr(dch_a);
 		dch_delete(dch_a);
 
-		_cw_assert(dch_new(&dch_b, cw_g_mem, 4, 3, 1, ch_direct_hash,
-		    ch_direct_key_comp) == &dch_b);
+		_cw_assert(dch_new(&dch_b, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 4, 3, 1,
+		    ch_direct_hash, ch_direct_key_comp) == &dch_b);
 		dch_delete(&dch_b);
 	}
 
@@ -41,8 +43,9 @@ main()
 		char		*c = "two of these";
 		char		*d = "two of these\0foo";
 
-		dch = dch_new(NULL, cw_g_mem, 4, 2, 1, ch_string_hash,
-		    ch_string_key_comp);
+		dch = dch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 4, 2, 1,
+		    ch_string_hash, ch_string_key_comp);
 		_cw_check_ptr(dch);
 		_cw_assert(dch_count(dch) == 0);
 
@@ -73,8 +76,9 @@ main()
 		char		*d = "two of these\0foo";
 		char		*k, *v;
 
-		dch = dch_new(NULL, cw_g_mem, 4, 2, 1, ch_string_hash,
-		    ch_string_key_comp);
+		dch = dch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 4, 2, 1,
+		    ch_string_hash, ch_string_key_comp);
 		_cw_check_ptr(dch);
 		_cw_assert(dch_count(dch) == 0);
 
@@ -132,8 +136,9 @@ main()
 		chi_pezz = pezz_new(NULL, cw_g_mem, sizeof(cw_chi_t), 10);
 		_cw_check_ptr(chi_pezz);
 
-		dch = dch_new(NULL, cw_g_mem, 4, 2, 1, ch_string_hash,
-		    ch_string_key_comp);
+		dch = dch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 4, 2, 1,
+		    ch_string_hash, ch_string_key_comp);
 		_cw_check_ptr(dch);
 
 		dch_insert(dch, a, a, (cw_chi_t *)pezz_get(chi_pezz));
@@ -176,8 +181,9 @@ main()
 		chi_pezz = pezz_new(NULL, cw_g_mem, sizeof(cw_chi_t), 10);
 		_cw_check_ptr(chi_pezz);
 
-		dch = dch_new(NULL, cw_g_mem, 3, 2, 1, ch_string_hash,
-		    ch_string_key_comp);
+		dch = dch_new(NULL, (cw_opaque_alloc_t *)mem_malloc_e,
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem, 3, 2, 1,
+		    ch_string_hash, ch_string_key_comp);
 		_cw_check_ptr(dch);
 
 		dch_insert(dch, a, a, (cw_chi_t *)pezz_get(chi_pezz));

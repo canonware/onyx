@@ -20,27 +20,35 @@ static void dch_p_shrink(cw_dch_t *a_dch);
 static void dch_p_insert(cw_ch_t *a_ch, cw_chi_t * a_chi);
 
 cw_dch_t *
-dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
-    a_base_grow, cw_uint32_t a_base_shrink, cw_ch_hash_t *a_hash,
-    cw_ch_key_comp_t *a_key_comp)
+dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc, cw_opaque_dealloc_t
+    *a_dealloc, void *a_arg, cw_uint32_t a_base_table, cw_uint32_t a_base_grow,
+    cw_uint32_t a_base_shrink, cw_ch_hash_t *a_hash, cw_ch_key_comp_t
+    *a_key_comp)
 {
 	cw_dch_t	*retval;
 
+	_cw_check_ptr(a_alloc);
+	_cw_check_ptr(a_dealloc);
 	_cw_assert(a_base_table > 0);
 	_cw_assert(a_base_grow > 0);
 	_cw_assert(a_base_grow > a_base_shrink);
+	_cw_check_ptr(a_hash);
+	_cw_check_ptr(a_key_comp);
 
 	if (a_dch != NULL) {
 		retval = a_dch;
 		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_dch_t *)mem_malloc(a_mem, sizeof(cw_dch_t));
+		retval = (cw_dch_t *)_cw_opaque_alloc(a_alloc, a_arg,
+		    sizeof(cw_dch_t));
 		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = TRUE;
 	}
 
-	retval->mem = a_mem;
+	retval->alloc = a_alloc;
+	retval->dealloc = a_dealloc;
+	retval->arg = a_arg;
 	retval->base_table = a_base_table;
 	retval->base_grow = a_base_grow;
 	retval->base_shrink = a_base_shrink;
@@ -52,13 +60,13 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 	volatile cw_dch_t	*v_retval;
 	xep_try {
 		v_retval = retval;
-		retval->ch = ch_new(NULL, a_mem, retval->base_table,
-		    retval->hash, retval->key_comp);
+		retval->ch = ch_new(NULL, a_alloc, a_dealloc, a_arg,
+		    retval->base_table, retval->hash, retval->key_comp);
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		retval = (cw_dch_t *)v_retval;
 		if (a_dch->is_malloced)
-			mem_free(a_mem, retval);
+			_cw_opaque_dealloc(a_dealloc, a_arg, retval);
 	}
 	xep_end();
 
@@ -77,8 +85,8 @@ dch_delete(cw_dch_t *a_dch)
 
 	ch_delete(a_dch->ch);
 
-	if (TRUE == a_dch->is_malloced)
-		mem_free(a_dch->mem, a_dch);
+	if (a_dch->is_malloced)
+		_cw_opaque_dealloc(a_dch->dealloc, a_dch->arg, a_dch);
 #ifdef _CW_DBG
 	else
 		memset(a_dch, 0x5a, sizeof(cw_dch_t));
@@ -198,8 +206,9 @@ dch_p_grow(cw_dch_t *a_dch)
 
 	if ((count + 1) > (a_dch->grow_factor * a_dch->base_grow)) {
 		/* Too big.  Create a new ch twice as large and populate it. */
-		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table *
-		    a_dch->grow_factor * 2, a_dch->hash, a_dch->key_comp);
+		t_ch = ch_new(NULL, a_dch->alloc, a_dch->dealloc, a_dch->arg,
+		    a_dch->base_table * a_dch->grow_factor * 2, a_dch->hash,
+		    a_dch->key_comp);
 		for (i = 0; i < count; i++) {
 			chi = ql_first(&a_dch->ch->chi_ql);
 			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
@@ -251,8 +260,9 @@ dch_p_shrink(cw_dch_t *a_dch)
 		_cw_assert(new_factor > 0);
 		_cw_assert(new_factor < a_dch->grow_factor);
 
-		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table * new_factor,
-		    a_dch->hash, a_dch->key_comp);
+		t_ch = ch_new(NULL, a_dch->alloc, a_dch->dealloc, a_dch->arg,
+		    a_dch->base_table * new_factor, a_dch->hash,
+		    a_dch->key_comp);
 		for (i = 0; i < count; i++) {
 			chi = ql_first(&a_dch->ch->chi_ql);
 			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);

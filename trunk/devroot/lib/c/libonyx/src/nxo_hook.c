@@ -22,7 +22,8 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data, cw_nxo_hook_eval_t
 {
 	cw_nxoe_hook_t	*hook;
 
-	hook = (cw_nxoe_hook_t *)_cw_malloc(sizeof(cw_nxoe_hook_t));
+	hook = (cw_nxoe_hook_t *)nxa_malloc(nx_nxa_get(a_nx),
+	    sizeof(cw_nxoe_hook_t));
 
 	nxoe_l_new(&hook->nxoe, NXOT_HOOK, FALSE);
 	nxo_null_new(&hook->tag);

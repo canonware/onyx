@@ -45,7 +45,11 @@ struct cw_ch_s {
 	cw_uint32_t	num_removes;
 #endif
 
-	cw_mem_t	*mem;
+	/* Opaque allocation/deallocation pointers. */
+	cw_opaque_alloc_t *alloc;
+	cw_opaque_dealloc_t *dealloc;
+	void		*arg;
+
 	cw_bool_t	is_malloced;	/* TRUE if we malloced this structure
 					 * internally. */
 	ql_head(cw_chi_t) chi_ql;	/* Head of the list of chi's. */
@@ -72,8 +76,9 @@ typedef cw_bool_t	cw_ch_key_comp_t (const void *, const void *);
 #define _CW_CH_TABLE2SIZEOF(t)						\
 	(sizeof(cw_ch_t) + (((t) - 1) * sizeof(cw_chi_t *)))
 
-cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t
-    a_table_size, cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
+cw_ch_t		*ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,
+    cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_uint32_t a_table_size,
+    cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 void		ch_delete(cw_ch_t *a_ch);
 cw_uint32_t	ch_count(cw_ch_t *a_ch);
 void		ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,

@@ -21,7 +21,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstash.h libstash_incs.h bhp.h
+  local incs = libstash.h bhp.h
 #if [HAVE_LIBSTASH_BUF]
                buf.h
 #endif
@@ -123,7 +123,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 }
 
 /* Libraries. */
-LIBSTASH_REV = 1;
+LIBSTASH_REV = 2;
 
 LIBSTASH_A = [objdir]/lib/c/libstash/lib/libstash.a;
 LIBSTASH_S = [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_REV];

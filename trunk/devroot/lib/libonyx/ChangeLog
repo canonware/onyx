@@ -1,9 +1,15 @@
 2001-07-27  Jason Evans  <jasone@canonware.com>
 
+	* src/nxo_dict.c (nxoe_l_dict_delete): Don't leak the internal dch.
+
 	* src/nxa.c: Restructure garbage collection such that explicit and
 	threshhold-triggered collection are done synchronously using the
 	context of the mutator thread.  This avoids context switches and
 	prevents the possibility of a backlog of pending collections.
+
+	Track number of bytes of memory allocation rather than number of
+	object allocations in order to provide more predictable
+	threshold-triggered collection.
 
 	* src/systemdict.c (systemdict_copy): Pop the source dictionary off
 	ostack before returning.
