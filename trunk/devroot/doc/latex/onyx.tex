@@ -3330,23 +3330,25 @@ onyx:4>
 	\end{description}
 \label{systemdict:countestack}
 \index{countestack@\onyxop{}{countestack}{}}
-\item[{\onyxop{--}{countestack}{--}}: ]
+\item[{\onyxop{--}{countestack}{count}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			The number of objects currently on the execution stack
+			(recursion depth).
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the current number of objects on the execution stack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> countestack 1 sprint
+2
+onyx:0> estack 1 sprint
+(--start-- -file-)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:counttomark}
@@ -3937,23 +3939,22 @@ onyx:0>
 	\end{description}
 \label{systemdict:estack}
 \index{estack@\onyxop{}{estack}{}}
-\item[{\onyxop{--}{estack}{--}}: ]
+\item[{\onyxop{--}{estack}{stack}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A current snapshot (copy) of the execution stack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a current snapshot of the execution stack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> estack 1 sprint
+(--start-- -file-)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:eval}
@@ -4506,23 +4507,22 @@ onyx:5>
 	\end{description}
 \label{systemdict:istack}
 \index{istack@\onyxop{}{istack}{}}
-\item[{\onyxop{--}{istack}{--}}: ]
+\item[{\onyxop{--}{istack}{stack}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[stack: ]
+			A current snapshot (copy) of the index stack.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get a current snapshot of the index stack.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> istack 1 sprint
+(0 0)
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:join}

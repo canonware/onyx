@@ -1159,7 +1159,8 @@ systemdict_countestack(cw_nxo_t *a_thread)
 	ostack = nxo_thread_ostack_get(a_thread);
 
 	nxo = nxo_stack_push(ostack);
-	nxo_integer_new(nxo, nxo_stack_count(estack));
+	/* Don't count this operator. */
+	nxo_integer_new(nxo, nxo_stack_count(estack) - 1);
 }
 
 void
@@ -1732,6 +1733,9 @@ systemdict_estack(cw_nxo_t *a_thread)
 	nxo_stack_new(stack, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread));
 	nxo_stack_copy(stack, estack);
+
+	/* Get rid of this operator in the snapshot. */
+	nxo_stack_pop(stack);
 }
 
 void
@@ -2534,6 +2538,9 @@ systemdict_istack(cw_nxo_t *a_thread)
 	nxo_stack_new(stack, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread));
 	nxo_stack_copy(stack, istack);
+
+	/* Get rid of this operator in the snapshot. */
+	nxo_stack_pop(stack);
 }
 
 void

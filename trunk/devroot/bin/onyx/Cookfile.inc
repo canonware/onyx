@@ -58,29 +58,30 @@ SRCS = [SRCS] [ONYX_SRCS];
                  and_d.nx.in and_e.nx.in and_f.nx.in bind_a.nx.in
                  catenate_a.nx.in catenate_b.nx.in catenate_c.nx.in
                  catenate_d.nx.in clear_a.nx.in cleartomark_a.nx.in copy_a.nx.in
-                 count_a.nx.in counttomark_a.nx.in counttomark_b.nx.in
-                 counttomark_c.nx.in cvlit_a.nx.in cvlit_b.nx.in cvn_a.nx.in
-                 cvn_b.nx.in cvn_c.nx.in cvrs_a.nx.in cvrs_b.nx.in cvrs_c.nx.in
-                 cvrs_d.nx.in cvrs_e.nx.in cvrs_f.nx.in cvs_a.nx.in cvs_b.nx.in
-                 cvx_a.nx.in cvx_b.nx.in div_a.nx.in div_b.nx.in div_c.nx.in
-                 div_d.nx.in div_e.nx.in dup_a.nx.in dup_b.nx.in eq_a.nx.in
-                 eq_b.nx.in eval.nx.in eval_a.nx.in eval_b.nx.in exch_a.nx.in
-                 exch_b.nx.in exch_c.nx.in exit_a.nx.in exp_a.nx.in exp_b.nx.in
-                 exp_c.nx.in exp_d.nx.in exp_e.nx.in for_a.nx.in for_b.nx.in
-                 for_c.nx.in for_d.nx.in for_e.nx.in gc_roll.nx.in ge_a.nx.in
-                 ge_b.nx.in ge_c.nx.in ge_d.nx.in ge_e.nx.in ge_f.nx.in
-                 ge_g.nx.in ge_h.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in
-                 gt_d.nx.in gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in
-                 hello.nx.in if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in
-                 ifelse_b.nx.in ifelse_c.nx.in immediate_a.nx.in
-                 immediate_b.nx.in index_a.nx.in index_b.nx.in index_c.nx.in
-                 index_d.nx.in index_e.nx.in index_f.nx.in integer.nx.in
-                 integer_a.nx.in integer_b.nx.in integer_c.nx.in integer_d.nx.in
-                 le_a.nx.in le_b.nx.in le_c.nx.in le_d.nx.in le_e.nx.in
-                 le_f.nx.in le_g.nx.in le_h.nx.in loop_a.nx.in loop_b.nx.in
-                 lt_a.nx.in lt_b.nx.in lt_c.nx.in lt_d.nx.in lt_e.nx.in
-                 lt_f.nx.in lt_g.nx.in lt_h.nx.in mark_a.nx.in mod_a.nx.in
-                 mod_b.nx.in mod_c.nx.in mod_d.nx.in mod_e.nx.in monitor_a.nx.in
+                 count_a.nx.in countestack_a.nx.in counttomark_a.nx.in
+                 counttomark_b.nx.in counttomark_c.nx.in cvlit_a.nx.in
+                 cvlit_b.nx.in cvn_a.nx.in cvn_b.nx.in cvn_c.nx.in cvrs_a.nx.in
+                 cvrs_b.nx.in cvrs_c.nx.in cvrs_d.nx.in cvrs_e.nx.in
+                 cvrs_f.nx.in cvs_a.nx.in cvs_b.nx.in cvx_a.nx.in cvx_b.nx.in
+                 div_a.nx.in div_b.nx.in div_c.nx.in div_d.nx.in div_e.nx.in
+                 dup_a.nx.in dup_b.nx.in eq_a.nx.in eq_b.nx.in eval.nx.in
+                 eval_a.nx.in eval_b.nx.in exch_a.nx.in exch_b.nx.in
+                 exch_c.nx.in exit_a.nx.in exp_a.nx.in exp_b.nx.in exp_c.nx.in
+                 exp_d.nx.in exp_e.nx.in for_a.nx.in for_b.nx.in for_c.nx.in
+                 for_d.nx.in for_e.nx.in gc_roll.nx.in ge_a.nx.in ge_b.nx.in
+                 ge_c.nx.in ge_d.nx.in ge_e.nx.in ge_f.nx.in ge_g.nx.in
+                 ge_h.nx.in gt_a.nx.in gt_b.nx.in gt_c.nx.in gt_d.nx.in
+                 gt_e.nx.in gt_f.nx.in gt_g.nx.in gt_h.nx.in hello.nx.in
+                 if_a.nx.in if_b.nx.in if_c.nx.in ifelse_a.nx.in ifelse_b.nx.in
+                 ifelse_c.nx.in immediate_a.nx.in immediate_b.nx.in
+                 index_a.nx.in index_b.nx.in index_c.nx.in index_d.nx.in
+                 index_e.nx.in index_f.nx.in integer.nx.in integer_a.nx.in
+                 integer_b.nx.in integer_c.nx.in integer_d.nx.in le_a.nx.in
+                 le_b.nx.in le_c.nx.in le_d.nx.in le_e.nx.in le_f.nx.in
+                 le_g.nx.in le_h.nx.in loop_a.nx.in loop_b.nx.in lt_a.nx.in
+                 lt_b.nx.in lt_c.nx.in lt_d.nx.in lt_e.nx.in lt_f.nx.in
+                 lt_g.nx.in lt_h.nx.in mark_a.nx.in mod_a.nx.in mod_b.nx.in
+                 mod_c.nx.in mod_d.nx.in mod_e.nx.in monitor_a.nx.in
                  monitor_b.nx.in monitor_c.nx.in mul_a.nx.in mul_b.nx.in
                  mul_c.nx.in mul_d.nx.in ne_a.nx.in ne_b.nx.in neg_a.nx.in
                  neg_b.nx.in neg_c.nx.in not_a.nx.in not_b.nx.in not_c.nx.in

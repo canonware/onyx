@@ -196,13 +196,11 @@ systemdict begin
 	% currenterror that we pushed.
 	/dstack dstack spop pop def
 
-	% estack.  Get rid of extra elements that were pushed within the error
-	% handling machinery.
-	estack spop pop /estack exch def
+	% estack.
+	estack /estack exch def
 
-	% istack.  Get rid of extra elements that were pushed within the error
-	% handling machinery.
-	istack spop pop /istack exch def
+	% istack.
+	istack /istack exch def
 
 	% Push the offending object onto ostack.
 	/estack load sdup spop exch pop

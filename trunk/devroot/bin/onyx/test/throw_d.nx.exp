@@ -37,14 +37,10 @@ estack/istack trace (0..3):
 	--pop--
 	--def--
 	--estack--
-	--spop--
-	--pop--
 	/estack
 	--exch--
 	--def--
 	--istack--
-	--spop--
-	--pop--
 	/istack
 	--exch--
 	--def--

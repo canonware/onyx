@@ -36,14 +36,10 @@ estack/istack trace (0..2):
 	--pop--
 	--def--
 	--estack--
-	--spop--
-	--pop--
 	/estack
 	--exch--
 	--def--
 	--istack--
-	--spop--
-	--pop--
 	/istack
 	--exch--
 	--def--
@@ -58,7 +54,7 @@ estack/istack trace (0..2):
 	/errordict
 	--load--
 	--exch--
- 54:-->	--get--
+ 50:-->	--get--
 	--eval--
 	/errordict
 	--load--
