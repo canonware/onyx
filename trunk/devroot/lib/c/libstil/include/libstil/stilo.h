@@ -69,6 +69,7 @@ typedef enum {
 	STILOT_NULL,
 	STILOT_OPERATOR,
 	STILOT_STRING
+#define	STILOT_LAST	STILOT_STRING
 }	cw_stilot_t;
 
 /* Attributes. */
@@ -251,11 +252,10 @@ void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
 void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_stilo_t *a_key);
-cw_bool_t	stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
-    const cw_stilo_t *a_key, cw_stilo_t *r_stilo);
-cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
-void		stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+cw_bool_t	stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t *a_key,
     cw_stilo_t *r_stilo);
+cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
+void		stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilo_t *r_stilo);
 
 /*
  * file.

@@ -1573,10 +1573,10 @@ systemdict_foreach(cw_stilt_t *a_stilt)
 				val = stils_push(ostack);
 
 				/* Get next key. */
-				stilo_dict_iterate(what, a_stilt, key);
+				stilo_dict_iterate(what, key);
 
 				/* Use key to get val. */
-				stilo_dict_lookup(what, a_stilt, key, val);
+				stilo_dict_lookup(what, key, val);
 
 				/* Push proc onto estack and execute it. */
 				stilo = stils_push(estack);
@@ -1741,7 +1741,7 @@ systemdict_get(cw_stilt_t *a_stilt)
 		cw_stilo_t	*val;
 
 		val = stils_push(ostack);
-		if (stilo_dict_lookup(from, a_stilt, with, val)) {
+		if (stilo_dict_lookup(from, with, val)) {
 			stils_pop(ostack);
 			stilt_error(a_stilt, STILTE_UNDEFINED);
 			return;
@@ -1877,7 +1877,7 @@ systemdict_handleerror(cw_stilt_t *a_stilt)
 	handleerror = stils_push(estack);
 	stilo_name_new(key, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_handleerror), stiln_len(STILN_handleerror), TRUE);
-	if (stilo_dict_lookup(errordict, a_stilt, key, handleerror)) {
+	if (stilo_dict_lookup(errordict, key, handleerror)) {
 		stils_pop(estack);
 		stils_npop(tstack, 2);
 		xep_throw(_CW_STILX_ERRORDICT);
@@ -2005,7 +2005,7 @@ systemdict_known(cw_stilt_t *a_stilt)
 		return;
 	}
 
-	known = !stilo_dict_lookup(dict, a_stilt, key, NULL);
+	known = !stilo_dict_lookup(dict, key, NULL);
 	stilo_boolean_new(dict, known);
 
 	stils_pop(ostack);
@@ -3367,7 +3367,7 @@ systemdict_store(cw_stilt_t *a_stilt)
 	 */
 	for (i = 0, depth = stils_count(dstack), dict = NULL; i < depth; i++) {
 		dict = stils_down_get(dstack, dict);
-		if (stilo_dict_lookup(dict, a_stilt, key, NULL) == FALSE) {
+		if (stilo_dict_lookup(dict, key, NULL) == FALSE) {
 			/* Found. */
 			stilo_dict_def(dict, a_stilt, key, val);
 			return;
@@ -3607,10 +3607,8 @@ systemdict_system(cw_stilt_t *a_stilt)
 		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
 		for (i = 0; i < dcount; i++) {
 			/* Get key and val. */
-			stilo_dict_iterate(stilt_envdict_get(a_stilt), a_stilt,
-			    key);
-			stilo_dict_lookup(stilt_envdict_get(a_stilt), a_stilt,
-			    key, val);
+			stilo_dict_iterate(stilt_envdict_get(a_stilt), key);
+			stilo_dict_lookup(stilt_envdict_get(a_stilt), key, val);
 			if (stilo_type_get(key) != STILOT_NAME ||
 			    stilo_type_get(val) != STILOT_STRING) {
 				stilt_error(a_stilt, STILTE_TYPECHECK);
@@ -4154,7 +4152,7 @@ systemdict_where(cw_stilt_t *a_stilt)
 	 */
 	for (i = 0, depth = stils_count(dstack), dict = NULL; i < depth; i++) {
 		dict = stils_down_get(dstack, dict);
-		if (stilo_dict_lookup(dict, a_stilt, key, NULL) == FALSE) {
+		if (stilo_dict_lookup(dict, key, NULL) == FALSE) {
 			/* Found. */
 			stilo = stils_push(ostack);
 			stilo_dup(key, dict);

@@ -162,7 +162,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 		stilo_name_new(tname, stilt_stil_get(a_stilt),
 		    stiln_str(STILN_recordstacks),
 		    stiln_len(STILN_recordstacks), TRUE);
-		if (stilo_dict_lookup(currenterror, a_stilt, tname, tstilo)) {
+		if (stilo_dict_lookup(currenterror, tname, tstilo)) {
 			stils_npop(tstack, 3);
 			xep_throw(_CW_STILX_CURRENTERROR);
 		}

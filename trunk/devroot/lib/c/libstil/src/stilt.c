@@ -919,7 +919,7 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 * happens.
 	 */
 	handler = stils_push(&a_stilt->estack);
-	if (stilo_dict_lookup(errordict, a_stilt, key, handler)) {
+	if (stilo_dict_lookup(errordict, key, handler)) {
 		stils_npop(&a_stilt->tstack, 2);
 		stils_pop(&a_stilt->estack);
 		xep_throw(_CW_STILX_ERRORDICT);
@@ -948,8 +948,7 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	for (i = 0, depth = stils_count(&a_stilt->dstack), dict = NULL; i <
 	    depth; i++) {
 		dict = stils_down_get(&a_stilt->dstack, dict);
-		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) ==
-		    FALSE) {
+		if (stilo_dict_lookup(dict, a_key, r_value) == FALSE) {
 			/* Found. */
 			retval = FALSE;
 			goto RETURN;

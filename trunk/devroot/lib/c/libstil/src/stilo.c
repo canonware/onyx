@@ -782,10 +782,7 @@ stilo_p_no_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t a_syntactic)
 {
 	cw_stilte_t	retval;
 
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-notype-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+	retval = stilo_file_output(a_file, "-notype-");
 
 	return retval;
 }
@@ -991,13 +988,11 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
     a_syntactic)
 {
 	cw_stilte_t	retval;
-	cw_stilo_t	*arr;
-	cw_uint32_t	nelms, i;
-
-	arr = stilo_array_get(a_stilo);
-	nelms = stilo_array_len_get(a_stilo);
 
 	if (a_syntactic) {
+		cw_stilo_t	*arr;
+		cw_uint32_t	nelms, i;
+
 		if (a_stilo->attrs == STILOA_EXECUTABLE) {
 			retval = stilo_file_output(a_file, "{");
 			if (retval)
@@ -1007,9 +1002,11 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 			if (retval)
 				goto RETURN;
 		}
+
+		arr = stilo_array_get(a_stilo);
+		nelms = stilo_array_len_get(a_stilo);
 		for (i = 0; i < nelms; i++) {
-			retval = stilo_print(&arr[i], a_file, a_syntactic,
-			    FALSE);
+			retval = stilo_print(&arr[i], a_file, TRUE, FALSE);
 			if (retval)
 				goto RETURN;
 
@@ -1029,7 +1026,7 @@ stilo_p_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 				goto RETURN;
 		}
 	} else {
-		retval = stilo_file_output(a_file, "--nostringval--");
+		retval = stilo_file_output(a_file, "-array-");
 		if (retval)
 			goto RETURN;
 	}
@@ -1209,10 +1206,13 @@ stilo_p_boolean_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t	retval;
 
-	if (a_stilo->o.boolean.val)
-		retval = stilo_file_output(a_file, "true");
-	else
-		retval = stilo_file_output(a_file, "false");
+	if (a_syntactic) {
+		if (a_stilo->o.boolean.val)
+			retval = stilo_file_output(a_file, "true");
+		else
+			retval = stilo_file_output(a_file, "false");
+	} else
+		retval = stilo_file_output(a_file, "-boolean-");
 
 	return retval;
 }
@@ -1289,10 +1289,7 @@ stilo_p_condition_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t	retval;
 
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-condition-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+	retval = stilo_file_output(a_file, "-condition-");
 
 	return retval;
 }
@@ -1542,12 +1539,61 @@ stilo_p_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
     a_syntactic)
 {
 	cw_stilte_t	retval;
-	
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-dict-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
 
+#if (0)
+	/*
+	 * This code is nice and all, but unfortunately, any time that
+	 * systemdict gets printed (such as in handleerror), we go into an
+	 * infinite loop.  It is here mainly as an example of how to
+	 * syntactically print a dictionary, so that it can be used in places
+	 * where infinite recursion isn't a risk.
+	 *
+	 * Note that this code assumes there are references to key and val
+	 * elsewhere in the interpreter, which isn't normally a safe assumption.
+	 * Under normal circumstances, key and val should reside on tstack.
+	 */
+	if (a_syntactic) {
+		cw_stilo_t	key, val;
+		cw_uint32_t	count, i;
+
+		retval = stilo_file_output(a_file, "<<");
+		if (retval)
+			goto RETURN;
+
+		for (i = 0, count = stilo_dict_count(a_stilo); i < count; i++) {
+			/* Get key and val. */
+			stilo_dict_iterate(a_stilo, &key);
+			stilo_dict_lookup(a_stilo, &key, &val);
+
+			/* Print key. */
+			retval = stilo_print(&key, a_file, TRUE, FALSE);
+			if (retval)
+				goto RETURN;
+			retval = stilo_file_output(a_file, " ");
+			if (retval)
+				goto RETURN;
+
+			/* Print val. */
+			retval = stilo_print(&val, a_file, TRUE, FALSE);
+			if (retval)
+				goto RETURN;
+			if (i < count - 1) {
+				retval = stilo_file_output(a_file, " ");
+				if (retval)
+					goto RETURN;
+			}
+		}
+		retval = stilo_file_output(a_file, ">>");
+	} else
+#endif
+	{
+		retval = stilo_file_output(a_file, "-dict-");
+		if (retval)
+			goto RETURN;
+	}
+
+	retval = STILTE_NONE;
+	RETURN:
 	return retval;
 }
 
@@ -1634,8 +1680,8 @@ stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 }
 
 cw_bool_t
-stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
-    *a_key, cw_stilo_t *r_stilo)
+stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t *a_key, cw_stilo_t
+    *r_stilo)
 {
 	cw_bool_t		retval;
 	cw_stiloe_dict_t	*dict;
@@ -1687,8 +1733,7 @@ stilo_dict_count(cw_stilo_t *a_stilo)
 }
 
 void
-stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
-    *r_stilo)
+stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilo_t *r_stilo)
 {
 	cw_stiloe_dict_t	*dict;
 	cw_stilo_t		*stilo;
@@ -1813,10 +1858,7 @@ stilo_p_file_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t		retval;
 
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-file-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+	retval = stilo_file_output(a_file, "-file-");
 
 	return retval;
 }
@@ -3118,10 +3160,7 @@ stilo_p_hook_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t	retval;
 
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-hook-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+	retval = stilo_file_output(a_file, "-hook-");
 
 	return retval;
 }
@@ -3182,7 +3221,11 @@ stilo_p_integer_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t	retval;
 	
-	retval = stilo_file_output(a_file, "[q|s:s]", a_stilo->o.integer.i);
+	if (a_syntactic) {
+		retval = stilo_file_output(a_file, "[q|s:s]",
+		    a_stilo->o.integer.i);
+	} else
+		retval = stilo_file_output(a_file, "-integer-");
 
 	return retval;
 }
@@ -3202,10 +3245,7 @@ stilo_p_mark_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t	retval;
 	
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-mark-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+	retval = stilo_file_output(a_file, "-mark-");
 
 	return retval;
 }
@@ -3261,10 +3301,7 @@ stilo_p_mutex_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 {
 	cw_stilte_t	retval;
 
-	if (a_syntactic)
-		retval = stilo_file_output(a_file, "-mutex-");
-	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+	retval = stilo_file_output(a_file, "-mutex-");
 
 	return retval;
 }
@@ -3455,29 +3492,35 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
     a_syntactic)
 {
 	cw_stilte_t		retval;
-	cw_stiloe_name_t	*name;
 
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_stilo->type == STILOT_NAME);
+	if (a_syntactic) {
+		cw_stiloe_name_t	*name;
 
-	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+		_cw_check_ptr(a_stilo);
+		_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+		_cw_assert(a_stilo->type == STILOT_NAME);
 
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
+		name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+
+		_cw_check_ptr(name);
+		_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
+		_cw_assert(name->stiloe.type == STILOT_NAME);
 	
-	if ((a_syntactic) && (a_stilo->attrs == STILOA_LITERAL)) {
-		retval = stilo_file_output(a_file, "/");
+		if ((a_syntactic) && (a_stilo->attrs == STILOA_LITERAL)) {
+			retval = stilo_file_output(a_file, "/");
+			if (retval)
+				goto RETURN;
+		}
+
+		retval = stilo_file_output_n(a_file, name->len, "[s]",
+		    name->str);
 		if (retval)
 			goto RETURN;
-	}
-
-	retval = stilo_file_output_n(a_file, name->len, "[s]",
-	    name->str);
-	if (retval)
+	} else {
+		retval = stilo_file_output(a_file, "-name-");
 		goto RETURN;
-
+	}
+		
 	retval = STILTE_NONE;
 	RETURN:
 	return retval;
@@ -3574,7 +3617,7 @@ stilo_p_null_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 	if (a_syntactic)
 		retval = stilo_file_output(a_file, "null");
 	else
-		retval = stilo_file_output(a_file, "--nostringval--");
+		retval = stilo_file_output(a_file, "-null-");
 
 	return retval;
 }
@@ -3608,7 +3651,7 @@ stilo_p_operator_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 		} else
 			retval = stilo_file_output(a_file, "-operator-");
 	} else
-		retval = stilo_file_output(a_file, "--nostringval--");
+		retval = stilo_file_output(a_file, "-operator-");
 
 	return retval;
 }
@@ -3833,11 +3876,7 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 		if (retval)
 			goto RETURN;
 	} else {
-		if (len > 0) {
-			retval = stilo_file_output_n(a_file, len, "[s]", str);
-			if (retval)
-				goto RETURN;
-		}
+		retval = stilo_file_output(a_file, "-string-");
 		if (retval)
 			goto RETURN;
 	}
