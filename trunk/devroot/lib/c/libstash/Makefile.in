@@ -9,8 +9,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 180 $
-# Last modified: $Date: 1998-08-29 21:02:02 -0700 (Sat, 29 Aug 1998) $
+# Current revision: $Revision: 187 $
+# Last modified: $Date: 1998-08-31 12:00:28 -0700 (Mon, 31 Aug 1998) $
 #
 # Description: Master Makefile for libstash.
 #              
@@ -300,12 +300,12 @@ uninstall :
 doc :
 
 clean : FORCE
-	rm -f *~
+	rm -f *~ */*~
 	rm -f *.bak *.BAK
 	rm -f core test/core *.core test/*.core
 	rm -f test/*.o test/*.out test/*.diff
 	rm -f $(CTESTS) $(PTESTS) $(BTESTS)
-	rm -f *~ obj/*/*.[dop]* bin/*~
+	rm -f obj/*/*.[dop]*
 	rm -f lib/lib*
 	rm -f test/*.d
 	rm -f test/*.diff
