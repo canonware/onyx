@@ -2,7 +2,7 @@ dnl
 dnl <Copyright = jasone>
 dnl <License>
 dnl 
-dnl Version: <Version>
+dnl Version: Onyx <Version>
 dnl 
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT([Cookfile.in])

@@ -5,9 +5,9 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version>
  *
- * Master Cookfile.  Most of the top level build system logic is in
+ * Master Onyx Cookfile.  Most of the top level build system logic is in
  * Cookfile.inc.in, so that cook can re-read it if config.status needs to
  * regenerate it.
  *

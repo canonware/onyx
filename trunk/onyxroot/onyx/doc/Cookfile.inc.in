@@ -5,7 +5,7 @@
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version>
  *
  * Top level Cookfile for documentation.  Documentation is only rebuilt if the
  * --with-docs option is specified.
