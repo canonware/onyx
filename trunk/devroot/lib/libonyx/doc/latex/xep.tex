@@ -16,7 +16,7 @@
 \label{xep}
 \index{xep@\classname{xep}{}}
 The \classname{xep} class implements exception handling, with support for
-\cppdef{xep\_try}, \cppmacro{xep\_catch}{}, and \cppdef{xep\_finally} blocks.
+\cppdef{xep\_try} and \cppmacro{xep\_catch}{} blocks.
 Minimal use must include at least:
 \begin{verbatim}
 xep_begin();
@@ -43,9 +43,6 @@ xep_mcatch(YET_ANOTHER) {
 xep_acatch {
         /* Handle all exceptions not explicitly handled above... */
         xep_handled();
-}
-xep_finally {
-        /* Execute after everything else. */
 }
 xep_end();
 \end{verbatim}
@@ -145,18 +142,6 @@ block; doing so will corrupt the exception handler chain.
 		blocks.  There may only be one \cppdef{xep\_acatch} block within
 		a try/catch block.  The exception is not considered handled
 		unless \cfunc{xep\_handled}{} is called.
-	\end{capilist}
-\label{xep_finally}
-\index{xep_finally@\cppdef{xep\_finally}}
-\citem{\cppdef{xep\_finally} \dots}
-	\begin{capilist}
-	\item[Input(s): ] None.
-	\item[Output(s): ] None.
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Begin a block of code that is executed if no exceptions are
-		thrown in the exception handling code block or if an exception
-		handler is executed.
 	\end{capilist}
 \label{xep_value}
 \index{xep_value@\cfunc{xep\_value}{}}

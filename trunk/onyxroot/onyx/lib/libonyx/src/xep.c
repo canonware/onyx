@@ -50,12 +50,13 @@ xep_l_shutdown(void)
 }	
 
 void
-xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
+xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
+	    cw_uint32_t a_line_num)
 {
     cw_xep_t *xep_first, *xep;
 
     cw_assert(cw_g_xep_initialized);
-    cw_assert(a_value > CW_XEPS_FINALLY);
+    cw_assert(a_value > CW_XEPS_CATCH);
 
     /* Iterate backward through the exception handlers until the exception is
      * handled or there are no more exception handlers. */
@@ -94,15 +95,7 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 	    }
 	    case CW_XEPS_CATCH:
 	    {
-		/* Re-throw, do finally first. */
-		xep->value = a_value;
-		xep->state = CW_XEPS_FINALLY;
-		longjmp(xep->context, (int)CW_XEPV_FINALLY);
-		cw_not_reached();
-	    }
-	    case CW_XEPS_FINALLY:
-	    {
-		/* Exception thrown within finally; propagate. */
+		/* Exception thrown within handler; propagate. */
 		break;
 	    }
 	    default:
@@ -121,26 +114,18 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 }
 
 void
-xep_retry(void)
+xep_p_retry(cw_xep_t *a_xep)
 {
-    cw_xep_t *xep;
-
     cw_assert(cw_g_xep_initialized);
 
-#ifdef CW_THREADS
-    xep = qr_prev((cw_xep_t *) tsd_get(&cw_g_xep_key), link);
-#else
-    xep = qr_prev(cw_g_xep_first, link);
-#endif
 #ifdef CW_DBG
-    switch (xep->state)
+    switch (a_xep->state)
     {
 	case CW_XEPS_CATCH:
 	{
 	    break;
 	}
 	case CW_XEPS_TRY:
-	case CW_XEPS_FINALLY:
 	{
 	    cw_error("Exception retry outside handler");
 	}
@@ -150,34 +135,26 @@ xep_retry(void)
 	}
     }
 #endif
-    xep->value = CW_XEPV_NONE;
-    xep->state = CW_XEPS_TRY;
-    xep->is_handled = TRUE;
-    longjmp(xep->context, (int)CW_XEPV_CODE);
+    a_xep->value = CW_XEPV_NONE;
+    a_xep->state = CW_XEPS_TRY;
+    a_xep->is_handled = TRUE;
+    longjmp(a_xep->context, (int)CW_XEPV_CODE);
     cw_not_reached();
 }
 
 void
-xep_handled(void)
+xep_p_handled(cw_xep_t *a_xep)
 {
-    cw_xep_t *xep;
-
     cw_assert(cw_g_xep_initialized);
 
-#ifdef CW_THREADS
-    xep = qr_prev((cw_xep_t *) tsd_get(&cw_g_xep_key), link);
-#else
-    xep = qr_prev(cw_g_xep_first, link);
-#endif
 #ifdef CW_DBG
-    switch (xep->state)
+    switch (a_xep->state)
     {
 	case CW_XEPS_CATCH:
 	{
 	    break;
 	}
 	case CW_XEPS_TRY:
-	case CW_XEPS_FINALLY:
 	{
 	    cw_error("Exception handled outside handler");
 	}
@@ -188,9 +165,8 @@ xep_handled(void)
     }
 #endif
 
-    xep->value = CW_XEPV_NONE;
-    xep->state = CW_XEPS_TRY;
-    xep->is_handled = TRUE;
+    a_xep->is_handled = TRUE;
+    xep_p_unlink(a_xep);
 }
 
 void
@@ -210,6 +186,9 @@ xep_p_link(cw_xep_t *a_xep)
     qr_new(a_xep, link);
     if (xep_first != NULL)
     {
+	cw_check_ptr(qr_prev(xep_first, link));
+	cw_check_ptr(qr_next(xep_first, link));
+
 	qr_before_insert(xep_first, a_xep, link);
     }
     else
@@ -224,6 +203,7 @@ xep_p_link(cw_xep_t *a_xep)
     a_xep->value = CW_XEPV_NONE;
     a_xep->state = CW_XEPS_TRY;
     a_xep->is_handled = TRUE;
+    a_xep->is_linked = TRUE;
 }
 
 void
@@ -233,60 +213,48 @@ xep_p_unlink(cw_xep_t *a_xep)
 
     cw_assert(cw_g_xep_initialized);
 
-#ifdef CW_THREADS
-    xep_first = (cw_xep_t *) tsd_get(&cw_g_xep_key);
-#else
-    xep_first = cw_g_xep_first;
-#endif
-
-    switch (a_xep->state)
+    if (a_xep->is_linked)
     {
-	case CW_XEPS_TRY:	/* No exception. */
-	case CW_XEPS_CATCH:	/* Exception now handled. */
+#ifdef CW_THREADS
+	xep_first = (cw_xep_t *) tsd_get(&cw_g_xep_key);
+#else
+	xep_first = cw_g_xep_first;
+#endif
+	cw_check_ptr(qr_prev(xep_first, link));
+	cw_check_ptr(qr_next(xep_first, link));
+
+	/* Remove handler from ring. */
+	if (a_xep != xep_first)
 	{
-	    a_xep->state = CW_XEPS_FINALLY;
-	    longjmp(a_xep->context, (int)CW_XEPV_FINALLY);
-	    cw_not_reached();
+	    qr_remove(a_xep, link);
 	}
-	case CW_XEPS_FINALLY:	/* Done. */
+	else
 	{
-	    /* Remove handler from ring. */
+#ifdef CW_THREADS
+	    tsd_set(&cw_g_xep_key, NULL);
+#else
+	    cw_g_xep_first = NULL;
+#endif
+	}
+	a_xep->is_linked = FALSE;
+
+	if (a_xep->is_handled == FALSE)
+	{
 	    if (a_xep != xep_first)
 	    {
-		qr_remove(a_xep, link);
+		/* Propagate exception. */
+		xep_throw_e(a_xep->value, a_xep->filename,
+			    a_xep->line_num);
 	    }
 	    else
 	    {
-#ifdef CW_THREADS
-		tsd_set(&cw_g_xep_key, NULL);
-#else
-		cw_g_xep_first = NULL;
-#endif
+		/* No more exception handlers. */
+		fprintf(stderr, "%s(): Unhandled exception "
+			"%u thrown at %s:%u\n", __FUNCTION__,
+			a_xep->value, a_xep->filename,
+			a_xep->line_num);
+		abort();
 	    }
-
-	    if (a_xep->is_handled == FALSE)
-	    {
-		if (a_xep != xep_first)
-		{
-		    /* Propagate exception. */
-		    xep_throw_e(a_xep->value, a_xep->filename,
-				a_xep->line_num);
-		}
-		else
-		{
-		    /* No more exception handlers. */
-		    fprintf(stderr, "%s(): Unhandled exception "
-			    "%u thrown at %s:%u\n", __FUNCTION__,
-			    a_xep->value, a_xep->filename,
-			    a_xep->line_num);
-		    abort();
-		}
-	    }
-	    break;
-	}
-	default:
-	{
-	    cw_not_reached();
 	}
     }
 }

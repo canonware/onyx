@@ -203,13 +203,13 @@ typedef enum
 #define CW_ONYXX_MAX 127
 
 /* Out of memory. */
-#define CW_ONYXX_OOM 3
+#define CW_ONYXX_OOM 2
 /* Internal use, for the exit operator. */
-#define CW_ONYXX_EXIT 4
+#define CW_ONYXX_EXIT 3
 /* Internal use, for the stop operator, caught by the stopped operator. */
-#define CW_ONYXX_STOP 5
+#define CW_ONYXX_STOP 4
 /* Internal use, for the quit operator, caught by the start operator. */
-#define CW_ONYXX_QUIT 6
+#define CW_ONYXX_QUIT 5
 
 #include <stdio.h>
 #include <stdlib.h>

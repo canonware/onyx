@@ -17,24 +17,23 @@ typedef cw_uint32_t cw_xepv_t;
 
 #define CW_XEPV_NONE 0
 #define CW_XEPV_CODE 1
-#define CW_XEPV_FINALLY 2
 
 typedef enum
 {
     CW_XEPS_TRY,
-    CW_XEPS_CATCH,
-    CW_XEPS_FINALLY
+    CW_XEPS_CATCH
 } cw_xeps_t;
 
 struct cw_xep_s
 {
-    qr(cw_xep_t) link;
+    volatile qr(cw_xep_t) link;
+    volatile cw_xepv_t value;
+    volatile cw_bool_t is_handled;
+    volatile cw_bool_t is_linked;
+    volatile cw_xeps_t state;
+    volatile const char *filename;
+    volatile cw_uint32_t line_num;
     jmp_buf context;
-    cw_xepv_t value;
-    cw_bool_t is_handled;
-    cw_xeps_t state;
-    const char *filename;
-    cw_uint32_t line_num;
 };
 
 #define xep_begin()							\
@@ -63,8 +62,6 @@ struct cw_xep_s
 		    break;						\
 		}
 
-#define xep_finally xep_catch(CW_XEPV_FINALLY)
-
 #define xep_end()							\
 	}								\
 	xep_p_unlink(&_xep);						\
@@ -73,18 +70,23 @@ struct cw_xep_s
 #define xep_value() (_xep.value)
 
 void
-xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num);
+xep_throw_e(cw_xepv_t a_value, volatile const char *a_filename,
+	    cw_uint32_t a_line_num);
 
 #define xep_throw(a_value) xep_throw_e((a_value), __FILE__, __LINE__)
 
-void
-xep_retry(void);
+#define xep_retry() xep_p_retry(&_xep)
 
-void
-xep_handled(void);
+#define xep_handled() xep_p_handled(&_xep)
 
 /* Private, but visible here so that the cpp macros above don't cause
  * compilation warnings. */ 
+void
+xep_p_retry(cw_xep_t *a_xep);
+
+void
+xep_p_handled(cw_xep_t *a_xep);
+
 void
 xep_p_link(cw_xep_t *a_xep);
 

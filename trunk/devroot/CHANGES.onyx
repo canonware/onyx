@@ -1,3 +1,9 @@
+2002-07-09 : Jason Evans <jasone@canonware.com>
+
+	* Significantly revamp the xep code to adopt the semantics of C++
+	  exceptions.  Remove xep_finally.  Fix volatility bugs.  Improve
+	  performance by avoiding longjmp() calls in the common case.
+
 2002-07-07 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:
