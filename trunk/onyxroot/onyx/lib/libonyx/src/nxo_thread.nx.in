@@ -41,7 +41,7 @@ dstack dup sbdup dup spop begin pop
 $threaddict currentdict def
 def
 
-# Define and initialize currenterror
+# Define and initialize currenterror.
 $currenterror <
     $newerror	false
     $errorname	`'
@@ -53,7 +53,7 @@ $currenterror <
     $column	0
 > def
 
-# Define and initialize currenterror.
+# Define and initialize errordict.
 $errordict <
     $stop $stop load
 
