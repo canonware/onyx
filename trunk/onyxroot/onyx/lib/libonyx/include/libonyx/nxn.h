@@ -282,7 +282,6 @@ typedef enum
     NXN_ENTRY(loop),
     NXN_ENTRY(lt),
 #ifdef CW_SOCKET
-    NXN_ENTRY(MSG_NOSIGNAL),
     NXN_ENTRY(MSG_OOB),
     NXN_ENTRY(MSG_PEEK),
     NXN_ENTRY(MSG_WAITALL),

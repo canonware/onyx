@@ -7224,8 +7224,7 @@ static const struct cw_systemdict_name_arg send_recv_flag[] =
 {
     {NXN_MSG_OOB, MSG_OOB},
     {NXN_MSG_PEEK, MSG_PEEK},
-    {NXN_MSG_WAITALL, MSG_WAITALL},
-    {NXN_MSG_NOSIGNAL, MSG_NOSIGNAL}
+    {NXN_MSG_WAITALL, MSG_WAITALL}
 };
 
 void
