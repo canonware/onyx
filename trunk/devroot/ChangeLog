@@ -1,3 +1,16 @@
+2002-01-20  Jason Evans  <jasone@canonware.com>
+
+	* : Restructure the build system to place more logic in the
+	configuration phase and less in the Cookfiles.
+
+	Change paths and binary names to incorporate version numbers, so
+	that multiple installations (different versions) can coexist in
+	the same tree.
+
+	Change installation paths for modules and Onyx code.
+
+	Reorganize documentation in order to support building multiple manuals.
+
 2002-01-13  Jason Evans  <jasone@canonware.com>
 
 	* : Add the --disable-real configure flag.
