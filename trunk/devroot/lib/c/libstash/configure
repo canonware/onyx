@@ -2130,6 +2130,7 @@ main()
   fprintf(stderr, "iovcnt: %d\n", i);
 
   ftruncate(fd, 0);
+  lseek(fd, 0, SEEK_SET);
   nwrite = sprintf(buf, "%d\n", i);
   write(fd, buf, nwrite);
 
@@ -2138,7 +2139,7 @@ main()
 }
 
 EOF
-if { (eval echo configure:2142: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
+if { (eval echo configure:2143: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext} && (./conftest; exit) 2>/dev/null
 then
   :
 else
@@ -2186,7 +2187,7 @@ else { echo "configure: error: can not run $ac_config_sub" 1>&2; exit 1; }
 fi
 
 echo $ac_n "checking host system type""... $ac_c" 1>&6
-echo "configure:2190: checking host system type" >&5
+echo "configure:2191: checking host system type" >&5
 
 host_alias=$host
 case "$host_alias" in

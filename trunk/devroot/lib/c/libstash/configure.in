@@ -108,6 +108,7 @@ main()
   fprintf(stderr, "iovcnt: %d\n", i);
 
   ftruncate(fd, 0);
+  lseek(fd, 0, SEEK_SET);
   nwrite = sprintf(buf, "%d\n", i);
   write(fd, buf, nwrite);
 
