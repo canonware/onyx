@@ -19,7 +19,7 @@ type $dicttype ne {
 $SIG_GETMASK <> sigmask
 $SIGABRT known {
     $SIG_GETMASK <$foo `foo' $SIGABRT false> sigmask
-    dup $foo get 1 sprint
+    dup $foo get pop
     $SIGABRT known {
 	`$SIGABRT defined\n' print
     } if
