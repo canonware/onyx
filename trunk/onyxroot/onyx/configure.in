@@ -871,9 +871,10 @@ if test "x$lib_onyx" = "x1" ; then
 #include <sys/time.h>
 #include <time.h>
 ], [
-    tzname = (void *) 0;
+    tzname[[0]] = 'a';
 ], AC_MSG_RESULT([yes])
    AC_DEFINE([CW_LIBONYX_USE_TZNAME]),
+   AC_MSG_RESULT([no])
    AC_MSG_ERROR([Cannot support localtime operator (POSIX)])))
 
     dnl Look for either (struct tm).tm_gmtoff or altzone.
@@ -893,9 +894,10 @@ if test "x$lib_onyx" = "x1" ; then
 #include <sys/time.h>
 #include <time.h>
 ], [
-    altzone = (void *) 0;
+    altzone = 0;
 ], AC_MSG_RESULT([yes])
    AC_DEFINE([CW_LIBONYX_USE_ALTZONE]),
+   AC_MSG_RESULT([no])
    AC_MSG_ERROR([Cannot support localtime operator (POSIX)])))
 
     AC_CHECK_FUNCS([unsetenv])
