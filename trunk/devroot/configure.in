@@ -245,17 +245,26 @@ if test "x$build_onyx" = "xyes" ; then
 fi
 
 if test "x$build_slate" = "xyes" ; then
-  if test "x$enable_libedit" != "x1" ; then
-    AC_CHECK_HEADERS(curses.h, , build_slate="no")
-    AC_CHECK_HEADERS(term.h, , build_slate="no")
-    AC_SEARCH_LIBS(set_term, ncurses curses, , build_slate="no")
+  if test "x$prefix" = "xNONE" ; then
+    CW_SLATE_RPATH="/usr/local/share/slate/nxcode:/usr/local/share/onyx/nxcode"
+    CW_SLATE_MPATH="/usr/local/share/slate/nxmod:/usr/local/share/onyx/nxmod"
+  else
+    CW_SLATE_RPATH="$prefix/share/slate/nxcode:$prefix/share/onyx/nxcode"
+    CW_SLATE_MPATH="$prefix/share/slate/nxmod:$prefix/share/onyx/nxmod"
   fi
-  AC_CHECK_HEADERS(panel.h, , build_slate="no")
-  AC_SEARCH_LIBS(new_panel, panel, , build_slate="no")
+  AC_DEFINE_UNQUOTED(CW_SLATE_RPATH, "$CW_SLATE_RPATH")
+  AC_DEFINE_UNQUOTED(CW_SLATE_MPATH, "$CW_SLATE_MPATH")
 
-  if test "x$build_slate" != "xyes" ; then
-    AC_MSG_ERROR(Missing features necessary to build slate)
-  fi
+  AC_DEFINE_UNQUOTED(CW_TSLATE_SLATE, "$abs_objdir/bin/slate/bin/slate")
+
+  tmpath=SLATE_MPATH=:.
+  trpath=SLATE_RPATH=:.
+  for i in $mods ; do
+    tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
+    trpath=$trpath:$abs_objdir/mod/$i/src
+  done
+  AC_DEFINE_UNQUOTED(CW_TSLATE_RPATH, "$trpath")
+  AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")
 fi
 
 dnl 

@@ -3871,259 +3871,41 @@ EOF
 fi
 
 if test "x$build_slate" = "xyes" ; then
-  if test "x$enable_libedit" != "x1" ; then
-    for ac_hdr in curses.h
-do
-ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
-echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:3880: checking for $ac_hdr" >&5
-if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 3885 "configure"
-#include "confdefs.h"
-#include <$ac_hdr>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3890: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=yes"
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=no"
-fi
-rm -f conftest*
-fi
-if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-    ac_tr_hdr=HAVE_`echo $ac_hdr | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
-  cat >> confdefs.h <<EOF
-#define $ac_tr_hdr 1
-EOF
- 
-else
-  echo "$ac_t""no" 1>&6
-build_slate="no"
-fi
-done
-
-    for ac_hdr in term.h
-do
-ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
-echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:3921: checking for $ac_hdr" >&5
-if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 3926 "configure"
-#include "confdefs.h"
-#include <$ac_hdr>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:3931: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=yes"
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=no"
-fi
-rm -f conftest*
-fi
-if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-    ac_tr_hdr=HAVE_`echo $ac_hdr | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
-  cat >> confdefs.h <<EOF
-#define $ac_tr_hdr 1
-EOF
- 
-else
-  echo "$ac_t""no" 1>&6
-build_slate="no"
-fi
-done
-
-    
-echo $ac_n "checking for library containing set_term""... $ac_c" 1>&6
-echo "configure:3960: checking for library containing set_term" >&5
-if eval "test \"`echo '$''{'ac_cv_search_set_term'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_func_search_save_LIBS="$LIBS"
-ac_cv_search_set_term="no"
-cat > conftest.$ac_ext <<EOF
-#line 3967 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char set_term();
-
-int main() {
-set_term()
-; return 0; }
-EOF
-if { (eval echo configure:3978: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
-  rm -rf conftest*
-  ac_cv_search_set_term="none required"
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-fi
-rm -f conftest*
-test "$ac_cv_search_set_term" = "no" && for i in ncurses curses; do
-LIBS="-l$i  $ac_func_search_save_LIBS"
-cat > conftest.$ac_ext <<EOF
-#line 3989 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char set_term();
-
-int main() {
-set_term()
-; return 0; }
-EOF
-if { (eval echo configure:4000: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
-  rm -rf conftest*
-  ac_cv_search_set_term="-l$i"
-break
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-fi
-rm -f conftest*
-done
-LIBS="$ac_func_search_save_LIBS"
-fi
-
-echo "$ac_t""$ac_cv_search_set_term" 1>&6
-if test "$ac_cv_search_set_term" != "no"; then
-  test "$ac_cv_search_set_term" = "none required" || LIBS="$ac_cv_search_set_term $LIBS"
-  
-else :
-  build_slate="no"
-fi
+  if test "x$prefix" = "xNONE" ; then
+    CW_SLATE_RPATH="/usr/local/share/slate/nxcode:/usr/local/share/onyx/nxcode"
+    CW_SLATE_MPATH="/usr/local/share/slate/nxmod:/usr/local/share/onyx/nxmod"
+  else
+    CW_SLATE_RPATH="$prefix/share/slate/nxcode:$prefix/share/onyx/nxcode"
+    CW_SLATE_MPATH="$prefix/share/slate/nxmod:$prefix/share/onyx/nxmod"
   fi
-  for ac_hdr in panel.h
-do
-ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
-echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4025: checking for $ac_hdr" >&5
-if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  cat > conftest.$ac_ext <<EOF
-#line 4030 "configure"
-#include "confdefs.h"
-#include <$ac_hdr>
-EOF
-ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4035: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
-ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
-if test -z "$ac_err"; then
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=yes"
-else
-  echo "$ac_err" >&5
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  eval "ac_cv_header_$ac_safe=no"
-fi
-rm -f conftest*
-fi
-if eval "test \"`echo '$ac_cv_header_'$ac_safe`\" = yes"; then
-  echo "$ac_t""yes" 1>&6
-    ac_tr_hdr=HAVE_`echo $ac_hdr | sed 'y%abcdefghijklmnopqrstuvwxyz./-%ABCDEFGHIJKLMNOPQRSTUVWXYZ___%'`
   cat >> confdefs.h <<EOF
-#define $ac_tr_hdr 1
+#define CW_SLATE_RPATH "$CW_SLATE_RPATH"
 EOF
- 
-else
-  echo "$ac_t""no" 1>&6
-build_slate="no"
-fi
-done
 
-  
-echo $ac_n "checking for library containing new_panel""... $ac_c" 1>&6
-echo "configure:4064: checking for library containing new_panel" >&5
-if eval "test \"`echo '$''{'ac_cv_search_new_panel'+set}'`\" = set"; then
-  echo $ac_n "(cached) $ac_c" 1>&6
-else
-  ac_func_search_save_LIBS="$LIBS"
-ac_cv_search_new_panel="no"
-cat > conftest.$ac_ext <<EOF
-#line 4071 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char new_panel();
-
-int main() {
-new_panel()
-; return 0; }
+  cat >> confdefs.h <<EOF
+#define CW_SLATE_MPATH "$CW_SLATE_MPATH"
 EOF
-if { (eval echo configure:4082: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
-  rm -rf conftest*
-  ac_cv_search_new_panel="none required"
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-fi
-rm -f conftest*
-test "$ac_cv_search_new_panel" = "no" && for i in panel; do
-LIBS="-l$i  $ac_func_search_save_LIBS"
-cat > conftest.$ac_ext <<EOF
-#line 4093 "configure"
-#include "confdefs.h"
-/* Override any gcc2 internal prototype to avoid an error.  */
-/* We use char because int might match the return type of a gcc2
-    builtin and then its argument prototype would still apply.  */
-char new_panel();
 
-int main() {
-new_panel()
-; return 0; }
+
+  cat >> confdefs.h <<EOF
+#define CW_TSLATE_SLATE "$abs_objdir/bin/slate/bin/slate"
 EOF
-if { (eval echo configure:4104: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
-  rm -rf conftest*
-  ac_cv_search_new_panel="-l$i"
-break
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-fi
-rm -f conftest*
-done
-LIBS="$ac_func_search_save_LIBS"
-fi
 
-echo "$ac_t""$ac_cv_search_new_panel" 1>&6
-if test "$ac_cv_search_new_panel" != "no"; then
-  test "$ac_cv_search_new_panel" = "none required" || LIBS="$ac_cv_search_new_panel $LIBS"
-  
-else :
-  build_slate="no"
-fi
 
-  if test "x$build_slate" != "xyes" ; then
-    { echo "configure: error: Missing features necessary to build slate" 1>&2; exit 1; }
-  fi
+  tmpath=SLATE_MPATH=:.
+  trpath=SLATE_RPATH=:.
+  for i in $mods ; do
+    tmpath=$tmpath:$abs_objdir/mod/$i/nxmod
+    trpath=$trpath:$abs_objdir/mod/$i/src
+  done
+  cat >> confdefs.h <<EOF
+#define CW_TSLATE_RPATH "$trpath"
+EOF
+
+  cat >> confdefs.h <<EOF
+#define CW_TSLATE_MPATH "$tmpath"
+EOF
+
 fi
 
 echo "$ac_t""===============================================================================" 1>&6

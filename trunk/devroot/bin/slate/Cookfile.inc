@@ -24,7 +24,7 @@
   priv_incs = [fromto % [srcdir]/bin/slate/include/% [priv_incs]];
   priv_incs = [priv_incs] [objdir]/bin/slate/include/slate_defs.h;
 
-  local priv_cincs = ;
+  local priv_cincs = slate_nxcode.c;
   prix_cincs = [fromto % [srcdir]/bin/slate/src/% [priv_cincs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
@@ -34,7 +34,10 @@
 SLATE_SRCS = buf.c buffer.c hist.c slate.c slate_ops.c;
 SLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [SLATE_SRCS]];
 
-SRCS = [SRCS] [SLATE_SRCS];
+TSLATE_SRCS = tslate.c;
+TSLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [TSLATE_SRCS]];
+
+SRCS = [SRCS] [SLATE_SRCS] [TSLATE_SRCS];
 
 /* LaTeX source files. */
 {
@@ -46,13 +49,26 @@ SRCS = [SRCS] [SLATE_SRCS];
 
 /* Binaries. */
 SLATE = [objdir]/bin/slate/bin/slate;
-BINS = [BINS] [SLATE];
+TSLATE = [objdir]/bin/slate/bin/tslate;
+BINS = [BINS] [SLATE] [TSLATE];
+
+[TSLATE] : [SLATE];
 
 /*
  * User cook'ables.
  */
 
+BOOTSTRAP = [BOOTSTRAP] slate_bootstrap;
+
+slate_bootstrap : [ONYX]
+{
+  cat [srcdir]/bin/slate/src/slate_nxcode.nx
+    | [ONYX] [srcdir]/bin/slate/src/slate_nxcode_gen.nx
+    > [srcdir]/bin/slate/src/slate_nxcode.c;
+}
+
 slate : [SLATE];
+tslate : [TSLATE];
 
 slate_install : [SLATE]
 #if [matches macho [abi]]
@@ -94,6 +110,13 @@ slate_distclean :
 /*
  * Dependencies.
  */
+
+[TSLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [TSLATE_SRCS]]
+  set mkdir
+{
+  [CC] [A_CFLAGS] -o [target]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [TSLATE_SRCS]];
+}
 
 [SLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
 #if [enable_libonyx]
