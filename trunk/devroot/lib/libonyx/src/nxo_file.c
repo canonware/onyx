@@ -687,7 +687,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			    | POLLRDNORM
 #endif
 			    ;
-			while ((poll(&events, 1, -1)) == -1)
+			while ((poll(&events, 1, -1)) == -1 && errno == EINTR)
 			{
 			    /* EINTR; try again. */
 			}
@@ -718,7 +718,8 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			    | POLLRDNORM
 #endif
 			    ;
-			while ((nready = poll(&events, 1, 0)) == -1)
+			while ((nready = poll(&events, 1, 0)) == -1
+			       && errno == EINTR)
 			{
 			    /* EINTR; try again. */
 			}
