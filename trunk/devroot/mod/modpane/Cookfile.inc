@@ -34,7 +34,12 @@ MODPANE_MSRCS = modpane.c;
 MODPANE_MSRCS = [fromto % [srcdir]/mod/modpane/src/% [MODPANE_MSRCS]];
 MSRCS = [MSRCS] [MODPANE_MSRCS];
 
-MODPANE_NXCODE = modpane.nx;
+/* Generated source code (created by configure). */
+MODPANE_NXCODE_GEN = modpane_defs.nx.in;
+MODPANE_NXCODE_GEN = [fromto %.nx.in [objdir]/mod/modpane/nxcode/modpane/%.nx
+                             [MODPANE_NXCODE_GEN]];
+
+MODPANE_NXCODE = modpane.nx terminfo.nx;
 MODPANE_NXCODE = [fromto % [srcdir]/mod/modpane/nxcode/modpane/%
                          [MODPANE_NXCODE]];
 
@@ -64,7 +69,7 @@ echo [INSTALL] -m 0444 [MODPANE] [PREFIX]/share/onyx/nxmod
 echo [INSTALL] -d [PREFIX]/share/onyx/nxcode/modpane
 [INSTALL] -d [PREFIX]/share/onyx/nxcode/modpane
 
-for i in [MODPANE_NXCODE]; do
+for i in [MODPANE_NXCODE] [MODPANE_NXCODE_GEN]; do
 	echo [INSTALL] -m 0644 $i [PREFIX]/share/onyx/nxcode/modpane/
 	[INSTALL] -m 0644 $i [PREFIX]/share/onyx/nxcode/modpane/
 done
@@ -83,6 +88,7 @@ modpane_clean :
 
 modpane_distclean :
 {
+  rm -f [MODPANE_NXCODE_GEN];
 }
 
 /*

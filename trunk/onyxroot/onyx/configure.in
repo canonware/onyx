@@ -268,6 +268,10 @@ if test "x$build_slate" = "xyes" ; then
   AC_DEFINE_UNQUOTED(CW_TSLATE_MPATH, "$tmpath")
 fi
 
+if test "x$build_modpane" = "xyes" ; then
+  cfgoutputs="$cfgoutputs mod/modpane/nxcode/modpane/modpane_defs.nx"
+fi
+
 dnl 
 dnl Print out the results of configuration.
 dnl 

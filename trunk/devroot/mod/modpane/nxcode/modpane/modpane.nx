@@ -10,3 +10,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 `modpane.nxm' `modpane_init' mrequire
+
+`modpane/modpane_defs.nx' require
+`modpane/terminfo.nx' require

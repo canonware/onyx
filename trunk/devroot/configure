@@ -3934,6 +3934,10 @@ EOF
 
 fi
 
+if test "x$build_modpane" = "xyes" ; then
+  cfgoutputs="$cfgoutputs mod/modpane/nxcode/modpane/modpane_defs.nx"
+fi
+
 echo "$ac_t""===============================================================================" 1>&6
 echo "$ac_t""CFLAGS       : ${CFLAGS}" 1>&6
 echo "$ac_t""CPPFLAGS     : ${CPPFLAGS}" 1>&6
