@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 108 $
- * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
+ * $Revision: 112 $
+ * $Date: 1998-06-30 15:56:19 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -182,6 +182,13 @@ oh_get_num_items(cw_oh_t * a_oh_o)
     rwl_runlock(&a_oh_o->rw_lock);
   }
   return retval;
+}
+
+cw_uint64_t
+oh_get_base_size(cw_oh_t * a_oh_o)
+{
+  _cw_check_ptr(a_oh_o);
+  return (1 << a_oh_o->base_power);
 }
 
 cw_uint32_t
@@ -952,7 +959,7 @@ oh_p_item_search(cw_oh_t * a_oh_o,
   /* Jump by the secondary hash value until we either find what we're
    * looking for, or hit an empty slot. */
   for (i = 0, j = slot;
-       i < a_oh_o->size;
+       ;
        i++, j = (j + a_oh_o->curr_h2) % a_oh_o->size)
   {
     if (a_oh_o->items[j] == NULL)
@@ -996,15 +1003,20 @@ oh_p_rehash(cw_oh_t * a_oh_o)
   }
 }
 
+/****************************************************************************
+ * <<< Description >>>
+ *
+ *  Figure out whether there are any items that bounced past this slot
+ *  using the secondary hash.  If so, shuffle things backward to fill this
+ *  slot in.  We know we've looked far enough forward when we hit an empty
+ *  slot.
+ *
+ ****************************************************************************/
 void
 oh_p_slot_shuffle(cw_oh_t * a_oh_o, cw_uint64_t a_slot)
 {
   cw_uint64_t i, curr_empty, curr_look, curr_distance;
   
-  /* Figure out whether there are any items that bounced past this slot
-   * using the secondary hash.  If so, shuffle things backward to fill
-   * this slot in.  We know we've looked far enough forward when we hit
-   * an empty slot. */
   for(i = 0,
 	curr_distance = 1,
 	curr_empty = a_slot,

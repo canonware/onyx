@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 102 $
- * $Date: 1998-06-29 21:47:36 -0700 (Mon, 29 Jun 1998) $
+ * $Revision: 112 $
+ * $Date: 1998-06-30 15:56:19 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -72,6 +72,7 @@ struct cw_oh_s
 #define oh_get_size _CW_NS_CMN(oh_get_size)
 #define oh_get_num_items _CW_NS_CMN(oh_get_num_items)
 
+#define oh_get_base_size _CW_NS_CMN(oh_get_base_size)
 #define oh_get_base_h2 _CW_NS_CMN(oh_get_base_h2)
 #define oh_get_base_shrink_point _CW_NS_CMN(oh_get_base_shrink_point)
 #define oh_get_base_grow_point _CW_NS_CMN(oh_get_base_grow_point)
@@ -106,6 +107,7 @@ void oh_delete(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_size(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_items(cw_oh_t * a_oh_o);
 
+cw_uint64_t oh_get_base_size(cw_oh_t * a_oh_o);
 cw_uint32_t oh_get_base_h2(cw_oh_t * a_oh_o);
 cw_uint32_t oh_get_base_shrink_point(cw_oh_t * a_oh_o);
 cw_uint32_t oh_get_base_grow_point(cw_oh_t * a_oh_o);
