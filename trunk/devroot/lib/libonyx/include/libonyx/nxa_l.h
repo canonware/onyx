@@ -40,8 +40,10 @@ cw_bool_t
 nxa_l_white_get(void);
 
 #ifndef CW_USE_INLINES
+#ifdef CW_THREADS
 cw_mtx_t *
 nxa_l_name_lock_get(void);
+#endif
 
 cw_dch_t *
 nxa_l_name_hash_get(void);
