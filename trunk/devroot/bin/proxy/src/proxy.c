@@ -260,7 +260,7 @@ main(int argc, char **argv)
 
 				conn->is_verbose = TRUE;
 
-				conn->out = out_new(NULL);
+				conn->out = out_new(NULL, cw_g_mem);
 
 				_cw_out_put_s(logfile,
 				    "[s]/[s].pid_[i].conn[i]", opt_dirname,
@@ -963,7 +963,7 @@ handle_client_send(void *a_arg)
 
 	out_put(conn->out, "New connection\n");
 
-	buf_new(&buf);
+	buf_new(&buf, cw_g_mem);
 
 	/* Finish initializing conn. */
 	mtx_new(&conn->lock);
@@ -1065,7 +1065,7 @@ handle_client_recv(void *a_arg)
 	connection_t	*conn = (connection_t *) a_arg;
 	char		*str = NULL;
 
-	buf_new(&buf);
+	buf_new(&buf, cw_g_mem);
 
 	/*
 	 * Continually read data from the socket, create a string, print to the

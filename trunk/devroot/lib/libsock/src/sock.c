@@ -85,14 +85,14 @@ sock_new(cw_sock_t *a_sock, cw_uint32_t a_in_max_buf_size)
 		retval->is_malloced = FALSE;
 	}
 
-	if (buf_new(&retval->in_buf) == NULL) {
+	if (buf_new(&retval->in_buf, cw_g_mem) == NULL) {
 		if (retval->is_malloced) {
 			_cw_free(retval);
 			retval = NULL;
 			goto RETURN;
 		}
 	}
-	if (buf_new(&retval->out_buf) == NULL) {
+	if (buf_new(&retval->out_buf, cw_g_mem) == NULL) {
 		buf_delete(&retval->in_buf);
 		if (retval->is_malloced) {
 			_cw_free(retval);

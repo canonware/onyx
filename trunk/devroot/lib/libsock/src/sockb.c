@@ -202,18 +202,18 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 		 * Create the spare bufc pool and initialize associated
 		 * variables.
 		 */
-		if (pezz_new(&g_sockb->bufc_pool, sizeof(cw_bufc_t),
+		if (pezz_new(&g_sockb->bufc_pool, cw_g_mem, sizeof(cw_bufc_t),
 		    (a_max_spare_bufcs)? a_max_spare_bufcs : 1) == NULL)
 			goto OOM_5;
-		if (pezz_new(&g_sockb->buffer_pool, a_bufc_size,
+		if (pezz_new(&g_sockb->buffer_pool, cw_g_mem, a_bufc_size,
 		    (a_max_spare_bufcs) ? a_max_spare_bufcs : 1) == NULL)
 			goto OOM_6;
 		/* Create the message queues. */
-		if (pezz_new(&g_sockb->messages_pezz, sizeof(struct
+		if (pezz_new(&g_sockb->messages_pezz, cw_g_mem, sizeof(struct
 		    cw_sockb_msg_s), 8) == NULL)
 			goto OOM_7;
-		if (mq_new(&g_sockb->messages, sizeof(struct cw_sockb_msg_s *))
-		    == NULL)
+		if (mq_new(&g_sockb->messages, cw_g_mem, sizeof(struct
+		    cw_sockb_msg_s *)) == NULL)
 			goto OOM_8;
 
 		/* Create the lock used for protecting gethostbyname(). */
@@ -281,7 +281,8 @@ sockb_get_spare_bufc(void)
 	_cw_check_ptr(g_sockb);
 
 	retval = bufc_new((cw_bufc_t *)_cw_pezz_get(&g_sockb->bufc_pool),
-	    (cw_opaque_dealloc_t *)pezz_put, (void *)&g_sockb->bufc_pool);
+	    cw_g_mem, (cw_opaque_dealloc_t *)pezz_put, (void
+	    *)&g_sockb->bufc_pool);
 	if (retval == NULL) {
 		retval = NULL;
 		goto RETURN;
@@ -615,8 +616,8 @@ sockb_p_entry_func(void *a_arg)
 	_cw_free(a_arg);
 
 	/* Initialize data structures. */
-	buf_new(&tmp_buf);
-	buf_new(&buf_in);
+	buf_new(&tmp_buf, cw_g_mem);
+	buf_new(&buf_in, cw_g_mem);
 	{
 		cw_uint32_t	i;
 

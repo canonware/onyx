@@ -214,7 +214,7 @@ main(int argc, char **argv)
 	if (opt_log != NULL) {
 		int	fd;
 
-		log_out = out_new(NULL);
+		log_out = out_new(NULL, cw_g_mem);
 
 		fd = open(opt_log, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
@@ -257,8 +257,8 @@ main(int argc, char **argv)
 		cw_bool_t	done_reading = FALSE;
 		char		*str = NULL;
 
-		mq = mq_new(NULL, sizeof(int));
-		buf = buf_new(NULL);
+		mq = mq_new(NULL, cw_g_mem, sizeof(int));
+		buf = buf_new(NULL, cw_g_mem);
 
 		sock_stdin = sock_new(NULL, 16384);
 		sock_wrap(sock_stdin, dup(0), FALSE);

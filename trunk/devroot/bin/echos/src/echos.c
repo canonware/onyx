@@ -27,9 +27,9 @@ handle_client(void *a_arg)
 
 	_cw_out_put("New connection\n");
 
-	buf_new(&buf);
+	buf_new(&buf, cw_g_mem);
 
-	while (1) {
+	for (;;) {
 		if (sock_read(sock, &buf, 0, NULL) < 0)
 			break;
 		iovec = buf_get_iovec(&buf, 0xffffffff, buf_get_size(&buf),
@@ -61,7 +61,7 @@ main(int argc, char **argv)
 	cw_socks_t	*socks;
 	cw_sock_t	*sock, *sock_ptr;
 	int		port;
-	cw_thd_t	*thd;
+	cw_thd_t	thd;
 
 	_cw_out_put("[s]: pid [i]\n", argv[0], getpid());
 
@@ -95,10 +95,10 @@ main(int argc, char **argv)
 		sock_ptr = socks_accept(socks, NULL, sock);
 		_cw_check_ptr(sock_ptr);
 
-		thd = thd_new(NULL, handle_client, (void *)sock);
+		thd_new(&thd, handle_client, (void *)sock);
 
 		/* Detach the thread. */
-		thd_delete(thd);
+		thd_delete(&thd);
 	}
 
 	sock_delete(sock);

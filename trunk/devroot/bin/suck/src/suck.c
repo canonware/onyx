@@ -114,9 +114,9 @@ main(int argc, char **argv)
 	 * Loop, accepting connections, reading from the open sock's, and
 	 * closing sock's on error.
 	 */
-	buf_new(&buf);
+	buf_new(&buf, cw_g_mem);
 
-	mq = mq_new(NULL, sizeof(int));
+	mq = mq_new(NULL, cw_g_mem, sizeof(int));
 	if (mq == NULL)
 		_cw_error("Memory allocation error");
 	/* Start thread to accept connections. */

@@ -147,9 +147,9 @@ main(int argc, char **argv)
 			_cw_out_put_l("New connection ([i])\n", i);
 	}
 
-	buf_new(&buf);
-	buf_new(&t_buf);
-	bufc_new(&bufc, NULL, NULL);
+	buf_new(&buf, cw_g_mem);
+	buf_new(&t_buf, cw_g_mem);
+	bufc_new(&bufc, cw_g_mem, NULL, NULL);
 	buffer = _cw_malloc(opt_bsize);
 	if (buffer == NULL)
 		_cw_error("Memory allocation error");
