@@ -37,6 +37,7 @@ struct cw_nxoe_array_s {
 		struct {
 			cw_nxo_t	*arr;
 			cw_uint32_t	len;
+			cw_uint32_t	alloc_len;
 		}	a;
 	}	e;
 };

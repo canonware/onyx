@@ -35,9 +35,10 @@ nxo_array_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 		mtx_new(&array->lock);
 #endif
 	array->e.a.len = a_len;
+	array->e.a.alloc_len = a_len;
 	if (array->e.a.len > 0) {
 		array->e.a.arr = (cw_nxo_t *)nxa_malloc(nxa, sizeof(cw_nxo_t) *
-		    array->e.a.len);
+		    array->e.a.alloc_len);
 		for (i = 0; i < array->e.a.len; i++)
 			nxo_null_new(&array->e.a.arr[i]);
 	}
@@ -95,8 +96,8 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
-	if (array->nxoe.indirect == FALSE && array->e.a.len > 0) {
-		nxa_free(a_nxa, array->e.a.arr, array->e.a.len *
+	if (array->nxoe.indirect == FALSE && array->e.a.alloc_len > 0) {
+		nxa_free(a_nxa, array->e.a.arr, array->e.a.alloc_len *
 		    sizeof(cw_nxo_t));
 	}
 

@@ -32,7 +32,8 @@ struct cw_nxoe_string_s {
 		}	i;
 		struct {
 			cw_uint8_t	*str;
-			cw_sint32_t	len;
+			cw_uint32_t	len;
+			cw_uint32_t	alloc_len;
 		}	s;
 	}	e;
 };

@@ -45,9 +45,10 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 		mtx_new(&string->lock);
 #endif
 	string->e.s.len = a_len;
+	string->e.s.alloc_len = a_len;
 	if (string->e.s.len > 0) {
 		string->e.s.str = (cw_uint8_t *)nxa_malloc(nxa,
-		    string->e.s.len);
+		    string->e.s.alloc_len);
 		memset(string->e.s.str, 0, string->e.s.len);
 	} else
 		string->e.s.str = NULL;
@@ -105,8 +106,8 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa)
 	_cw_dassert(string->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(string->nxoe.type == NXOT_STRING);
 
-	if (string->nxoe.indirect == FALSE && string->e.s.len > 0)
-		nxa_free(a_nxa, string->e.s.str, string->e.s.len);
+	if (string->nxoe.indirect == FALSE && string->e.s.alloc_len > 0)
+		nxa_free(a_nxa, string->e.s.str, string->e.s.alloc_len);
 
 #ifdef _CW_THREADS
 	if (string->nxoe.locking && string->nxoe.indirect == FALSE)
