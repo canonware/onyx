@@ -142,7 +142,8 @@ a\_field}}
 \label{qr_meld}
 \index{qr_meld@\cppmacro{qr\_meld}{}}
 \citem{\cppmacro[void]{qr\_meld}{{\lt}qr\_type{\gt} *a\_qr\_a,
-{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}
+{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}qr\_type{\gt} a\_type, {\lt}field\_name{\gt}
+a\_field}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -150,6 +151,8 @@ a\_field}}
 			Pointer to a \classname{qr}.
 		\item[a\_qr\_b: ]
 			Pointer to a \classname{qr}.
+		\item[a\_type: ]
+			Data type for the \classname{qr} elements.
 		\item[a\_field: ]
 			Field within the \classname{qr} elements to use.
 		\end{description}
@@ -161,7 +164,8 @@ a\_field}}
 \label{qr_split}
 \index{qr_split@\cppmacro{qr\_split}{}}
 \citem{\cppmacro[void]{qr\_split}{{\lt}qr\_type{\gt} *a\_qr\_a,
-{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}
+{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}qr\_type{\gt} a\_type, {\lt}field\_name{\gt}
+a\_field}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -169,6 +173,8 @@ a\_field}}
 			Pointer to a \classname{qr}.
 		\item[a\_qr\_b: ]
 			Pointer to a \classname{qr}.
+		\item[a\_type: ]
+			Data type for the \classname{qr} elements.
 		\item[a\_field: ]
 			Field within the \classname{qr} elements to use.
 		\end{description}

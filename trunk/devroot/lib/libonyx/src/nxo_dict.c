@@ -611,7 +611,7 @@ nxo_p_dict_hash(const void *a_key)
 	}
 	case NXOT_OPERATOR:
 	{
-	    retval = ch_direct_hash((void *) key->o.operator.f);
+	    retval = ch_direct_hash((void *) key->o.oper.f);
 	    break;
 	}
 	case NXOT_STRING:

@@ -236,7 +236,7 @@ main()
     {
 	qr_after_insert(&entries[i - 1], &entries[i], link);
     }
-    qr_split(&entries[0], &entries[4], link);
+    qr_split(&entries[0], &entries[4], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -247,7 +247,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_meld(a, e)\n");
-    qr_meld(&entries[0], &entries[4], link);
+    qr_meld(&entries[0], &entries[4], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -258,7 +258,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_meld(a, e)\n");
-    qr_meld(&entries[0], &entries[4], link);
+    qr_meld(&entries[0], &entries[4], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -269,7 +269,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_split(a, e)\n");
-    qr_split(&entries[0], &entries[4], link);
+    qr_split(&entries[0], &entries[4], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -280,7 +280,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_split(a, a)\n");
-    qr_split(&entries[0], &entries[0], link);
+    qr_split(&entries[0], &entries[0], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -291,7 +291,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_meld(a, a)\n");
-    qr_meld(&entries[0], &entries[0], link);
+    qr_meld(&entries[0], &entries[0], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -302,7 +302,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_split(a, b)\n");
-    qr_split(&entries[0], &entries[1], link);
+    qr_split(&entries[0], &entries[1], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);
@@ -313,7 +313,7 @@ main()
 	fprintf(stderr, "\n");
     }
     fprintf(stderr, "qr_meld(a, b)\n");
-    qr_meld(&entries[0], &entries[1], link);
+    qr_meld(&entries[0], &entries[1], ring_t, link);
     for (i = 0; i < NENTRIES; i++)
     {
 	fprintf(stderr, "  qr_foreach(%c):", entries[i].id);

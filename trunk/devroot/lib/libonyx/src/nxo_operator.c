@@ -26,6 +26,6 @@ void
 nxo_operator_new(cw_nxo_t *a_nxo, cw_op_t *a_op, cw_nxn_t a_nxn)
 {
     nxo_p_new(a_nxo, NXOT_OPERATOR);
-    a_nxo->o.operator.f = a_op;
+    a_nxo->o.oper.f = a_op;
     nxo_p_operator_nxn_set(a_nxo, a_nxn);
 }

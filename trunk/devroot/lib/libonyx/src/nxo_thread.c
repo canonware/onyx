@@ -2229,32 +2229,33 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 
 #ifdef CW_THREADS
     nxo_string_new(nxo, a_thread->nx, a_thread->locking,
-		   strlen(a_prefix) + a_thread->index + strlen(a_suffix)
-		   + ((a_c >= 0) ? 1 : 0));
+		   strlen((char *) a_prefix) + a_thread->index
+		   + strlen((char *) a_suffix) + ((a_c >= 0) ? 1 : 0));
 #else
     nxo_string_new(nxo, a_thread->nx, FALSE,
-		   strlen(a_prefix) + a_thread->index + strlen(a_suffix)
-		   + ((a_c >= 0) ? 1 : 0));
+		   strlen((char *) a_prefix) + a_thread->index
+		   + strlen((char *) a_suffix) + ((a_c >= 0) ? 1 : 0));
 #endif
     nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
     /* Prefix. */
-    nxo_string_set(nxo, 0, a_prefix, strlen(a_prefix));
+    nxo_string_set(nxo, 0, a_prefix, strlen((char *) a_prefix));
 
     /* Main text. */
-    nxo_string_set(nxo, strlen(a_prefix), a_thread->tok_str, a_thread->index);
+    nxo_string_set(nxo, strlen((char *) a_prefix), a_thread->tok_str,
+		   a_thread->index);
 
     /* Suffix. */
-    nxo_string_set(nxo, strlen(a_prefix) + a_thread->index, a_suffix,
-		   strlen(a_suffix));
+    nxo_string_set(nxo, strlen((char *) a_prefix) + a_thread->index, a_suffix,
+		   strlen((char *) a_suffix));
 
     /* Current character, if any. */
     if (a_c >= 0)
     {
 	cw_uint8_t c = (cw_uint8_t) a_c;
 
-	nxo_string_set(nxo, strlen(a_prefix) + a_thread->index +
-		       strlen(a_suffix), &c, 1);
+	nxo_string_set(nxo, strlen((char *) a_prefix) + a_thread->index +
+		       strlen((char *) a_suffix), &c, 1);
     }
 
     nxoe_p_thread_reset(a_thread);

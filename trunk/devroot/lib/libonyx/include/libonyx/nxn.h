@@ -692,7 +692,7 @@ nxn_len(cw_nxn_t a_nxn)
 {
     cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
 
-    return strlen(cw_g_nx_names[a_nxn]);
+    return strlen((const char *) cw_g_nx_names[a_nxn]);
 }
 #endif /* (defined(CW_USE_INLINES) && !defined(CW_NXN_C_) \
 	*  || (!defined(CW_USE_INLINES) && defined(CW_NXN_C_))) */

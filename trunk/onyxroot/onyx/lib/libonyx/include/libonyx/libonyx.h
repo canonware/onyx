@@ -109,6 +109,7 @@ typedef long double cw_fp64_t;
 #error "Lacking mandatory typedefs"
 #endif
 
+#ifndef __cplusplus
 /* Grossness to make sure things still work, even if TRUE and/or FALSE are/is
  * defined. */
 #ifdef FALSE
@@ -136,6 +137,16 @@ typedef enum
 #define TRUE (1)
 #undef CW_TRUE_DEFINED
 #endif
+#else /* __cplusplus */
+typedef bool cw_bool_t;
+
+#ifndef FALSE
+#define FALSE false
+#endif
+#ifndef TRUE
+#define TRUE true
+#endif
+#endif /* __cplusplus */
 
 /* Minimum initial size of dictionaries.  This number shouldn't be too large,
  * since for dictionaries below this size, an array is used internally instead

@@ -1,3 +1,23 @@
+2002-12-15 : Jason Evans <jasone@canonware.com>
+
+	* Cast (cw_uint8_t *) to (char *) for strlen() calls.  Submitted by
+          Zeljko Vrba.
+
+	* lib/libonyx/include/libonyx/qr.h : Add a_type parameter to qr_meld()
+          and qr_split(), since C++ does not allow mixing (void *) assignments
+          with typed variables.  Reported by Zeljko Vrba.
+
+	* lib/libonyx/include/libonyx/nxo_stack.h : Add casts to fix comparisons
+          between cw_sint32_t and cw_uint32_t.  Submitted by Zeljko Vrba.
+
+	* lib/libonyx/include/libonyx/nxo.h:cw_nxo_t : Rename the operator field
+          to oper in order to avoid a collision with the C++ keyword.  Reported
+          by Zeljko Vrba.
+
+	* lib/libonyx/include/libonyx/libonyx.h:cw_bool_t : Use the C++ bool
+          type and true/false when C++ is being used, in order to reduce
+          conflicts with other libraries.  Submitted by Zeljko Vrba.
+
 2002-12-01 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.2.0 released.
