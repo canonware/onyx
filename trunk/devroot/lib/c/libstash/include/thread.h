@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 32 $
- * $Date: 1998-04-19 01:42:19 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 38 $
+ * $Date: 1998-04-19 21:30:27 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -53,9 +53,10 @@ typedef struct cw_thd_s cw_thd_t;
 typedef struct cw_mtx_s cw_mtx_t;
 typedef struct cw_cnd_s cw_cnd_t;
 typedef struct cw_sem_s cw_sem_t;
-typedef struct cw_rwl_s cw_rwl_t;
-typedef struct cw_tsd_s cw_tsd_t;
 typedef struct cw_lwq_s cw_lwq_t;
+typedef struct cw_rwl_s cw_rwl_t;
+typedef struct cw_rwq_s cw_rwq_t;
+typedef struct cw_tsd_s cw_tsd_t;
 typedef struct cw_btl_s cw_btl_t;
 
 /*
@@ -83,9 +84,19 @@ struct cw_sem_s
 {
   cw_bool_t is_malloced;
   cw_mtx_t lock;
-  cw_cnd_t nonzero;
-  cw_uint32_t count;
+  cw_cnd_t gtzero;
+  cw_sint32_t count;
   cw_uint32_t waiters;
+};
+
+struct cw_lwq_s
+{
+  cw_bool_t is_malloced;
+  cw_mtx_t lock;
+  cw_uint32_t num_lockers;
+  cw_uint32_t num_lock_waiters;
+  cw_list_t * list;
+  cw_list_t * spares_list;
 };
 
 struct cw_rwl_s
@@ -100,26 +111,36 @@ struct cw_rwl_s
   cw_uint32_t write_waiters;
 };
 
+struct cw_rwq_s
+{
+  cw_bool_t is_malloced;
+  cw_mtx_t lock;
+  cw_cnd_t read_wait;
+  cw_uint32_t num_readers;
+  cw_uint32_t read_waiters;
+
+  cw_lwq_t write_waiters;
+};
+
 struct cw_tsd_s
 {
   cw_bool_t is_malloced;
   pthread_key_t key;
 };
 
-struct cw_lwq_s
-{
-  cw_bool_t is_malloced;
-  cw_mtx_t lock;
-  cw_uint32_t num_lockers;
-  cw_uint32_t num_lock_waiters;
-  cw_list_t * list;
-};
-
 struct cw_btl_s
 {
   cw_bool_t is_malloced;
   cw_mtx_t lock;
-  
+
+  cw_rwq_t stlock;
+
+  cw_uint32_t max_dlocks;
+  cw_sem_t dlock_sem;
+
+  cw_rwl_t rxlock;
+
+  cw_sem_t wlock_sem;
 };
 
 /*
@@ -148,6 +169,14 @@ struct cw_btl_s
 #define sem_wait _CW_NS_CMN(sem_wait)
 #define sem_trywait _CW_NS_CMN(sem_trywait)
 #define sem_getvalue _CW_NS_CMN(sem_getvalue)
+#define sem_adjust _CW_NS_CMN(sem_adjust)
+
+#define lwq_new _CW_NS_CMN(lwq_new)
+#define lwq_delete _CW_NS_CMN(lwq_delete)
+#define lwq_lock _CW_NS_CMN(lwq_lock)
+#define lwq_unlock _CW_NS_CMN(lwq_unlock)
+#define lwq_num_waiters _CW_NS_CMN(lwq_num_waiters)
+#define lwq_purge_spares _CW_NS_CMN(lwq_purge_spares)
 
 #define rwl_new _CW_NS_CMN(rwl_new)
 #define rwl_delete _CW_NS_CMN(rwl_delete)
@@ -156,24 +185,22 @@ struct cw_btl_s
 #define rwl_wlock _CW_NS_CMN(rwl_wlock)
 #define rwl_wunlock _CW_NS_CMN(rwl_wunlock)
 
+#define rwq_new _CW_NS_CMN(rwq_new)
+#define rwq_delete _CW_NS_CMN(rwq_delete)
+#define rwq_rlock _CW_NS_CMN(rwq_rlock)
+#define rwq_runlock _CW_NS_CMN(rwq_runlock)
+#define rwq_wlock _CW_NS_CMN(rwq_wlock)
+#define rwq_wunlock _CW_NS_CMN(rwq_wunlock)
+
 #define tsd_new _CW_NS_CMN(tsd_new)
 #define tsd_delete _CW_NS_CMN(tsd_delete)
 #define tsd_get _CW_NS_CMN(tsd_get)
 #define tsd_set _CW_NS_CMN(tsd_set)
 
-#define lwq_new _CW_NS_CMN(lwq_new)
-#define lwq_delete _CW_NS_CMN(lwq_delete)
-#define lwq_lock _CW_NS_CMN(lwq_lock)
-#define lwq_unlock _CW_NS_CMN(lwq_unlock)
-
 #define btl_new _CW_NS_CMN(btl_new)
 #define btl_delete _CW_NS_CMN(btl_delete)
 #define btl_slock _CW_NS_CMN(btl_slock)
 #define btl_tlock _CW_NS_CMN(btl_tlock)
-#define btl_dlock _CW_NS_CMN(btl_dlock)
-#define btl_rlock _CW_NS_CMN(btl_rlock)
-#define btl_wlock _CW_NS_CMN(btl_wlock)
-#define btl_xlock _CW_NS_CMN(btl_xlock)
 #define btl_s2dlock _CW_NS_CMN(btl_s2dlock)
 #define btl_s2rlock _CW_NS_CMN(btl_s2rlock)
 #define btl_s2wlock _CW_NS_CMN(btl_s2wlock)
@@ -187,6 +214,8 @@ struct cw_btl_s
 #define btl_runlock _CW_NS_CMN(btl_runlock)
 #define btl_wunlock _CW_NS_CMN(btl_wunlock)
 #define btl_xunlock _CW_NS_CMN(btl_xunlock)
+#define btl_get_dlocks _CW_NS_CMN(btl_get_dlocks)
+#define btl_set_dlocks _CW_NS_CMN(btl_set_dlocks)
 
 /*
  * Function prototypes.
@@ -214,12 +243,21 @@ cw_bool_t cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
 void cnd_wait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o);
 
 /* sem : Semaphore. */
-cw_sem_t * sem_new(cw_sem_t * a_sem_o, cw_uint32_t a_count);
+cw_sem_t * sem_new(cw_sem_t * a_sem_o, cw_sint32_t a_count);
 void sem_delete(cw_sem_t * a_sem_o);
 void sem_post(cw_sem_t * a_sem_o);
 void sem_wait(cw_sem_t * a_sem_o);
 cw_bool_t sem_trywait(cw_sem_t * a_sem_o);
-cw_uint32_t sem_getvalue(cw_sem_t * a_sem_o);
+cw_sint32_t sem_getvalue(cw_sem_t * a_sem_o);
+void sem_adjust(cw_sem_t * a_sem_o, cw_sint32_t a_adjust);
+
+/* lwq : Lock wait queue. */
+cw_lwq_t * lwq_new(cw_lwq_t * a_lwq_o);
+void lwq_delete(cw_lwq_t * a_lwq_o);
+void lwq_lock(cw_lwq_t * a_lwq_o);
+void lwq_unlock(cw_lwq_t * a_lwq_o);
+cw_sint32_t lwq_num_waiters(cw_lwq_t * a_lwq_o);
+void lwq_purge_spares(cw_lwq_t * a_lwq_o);
 
 /* rwl : Read/write lock.  Multiple readers allowed, but write lock
  * requires exclusive access. */
@@ -230,27 +268,25 @@ void rwl_runlock(cw_rwl_t * a_rwl_o);
 void rwl_wlock(cw_rwl_t * a_rwl_o);
 void rwl_wunlock(cw_rwl_t * a_rwl_o);
 
+/* rwq : Same as rwl, except write lockers are queued. */
+cw_rwq_t * rwq_new(cw_rwq_t * a_rwq_o);
+void rwq_delete(cw_rwq_t * a_rwq_o);
+void rwq_rlock(cw_rwq_t * a_rwq_o);
+void rwq_runlock(cw_rwq_t * a_rwq_o);
+void rwq_wlock(cw_rwq_t * a_rwq_o);
+void rwq_wunlock(cw_rwq_t * a_rwq_o);
+
 /* tsd : Thread-specific data. */
 cw_tsd_t * tsd_new(cw_tsd_t * a_tsd_o, void (*a_func)(void *));
 void tsd_delete(cw_tsd_t * a_tsd_o);
 void * tsd_get(cw_tsd_t * a_tsd_o);
 void tsd_set(cw_tsd_t * a_tsd_o, void * a_val);
 
-/* lwq : Lock wait queue. */
-cw_lwq_t * lwq_new(cw_lwq_t * a_lwq_o);
-void lwq_delete(cw_lwq_t * a_lwq_o);
-void lwq_lock(cw_lwq_t * a_lwq_o);
-void lwq_unlock(cw_lwq_t * a_lwq_o);
-
 /* btl : B-tree lock. */
 cw_btl_t * btl_new(cw_btl_t * a_btl_o);
 void btl_delete(cw_btl_t * a_btl_o);
 void btl_slock(cw_btl_t * a_btl_o);
 void btl_tlock(cw_btl_t * a_btl_o);
-void btl_dlock(cw_btl_t * a_btl_o);
-void btl_rlock(cw_btl_t * a_btl_o);
-void btl_wlock(cw_btl_t * a_btl_o);
-void btl_xlock(cw_btl_t * a_btl_o);
 void btl_s2dlock(cw_btl_t * a_btl_o);
 void btl_s2rlock(cw_btl_t * a_btl_o);
 void btl_s2wlock(cw_btl_t * a_btl_o);
@@ -264,5 +300,7 @@ void btl_dunlock(cw_btl_t * a_btl_o);
 void btl_runlock(cw_btl_t * a_btl_o);
 void btl_wunlock(cw_btl_t * a_btl_o);
 void btl_xunlock(cw_btl_t * a_btl_o);
+cw_uint32_t btl_get_dlocks(cw_btl_t * a_btl_o);
+cw_uint32_t btl_set_dlocks(cw_btl_t * a_btl_o, cw_uint32_t a_dlocks);
 
 #endif /* _THREAD_H_ */
