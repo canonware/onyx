@@ -13,6 +13,7 @@
 
 #ifdef _LIBSTASH_DBG
 #define _CW_CH_MAGIC 0x574936af
+#define _CW_CHI_MAGIC 0xabdcee0e
 #endif
 
 cw_ch_t *
@@ -59,6 +60,8 @@ ch_delete(cw_ch_t *a_ch)
 
 	while (ql_first(&a_ch->chi_ql) != NULL) {
 		chi = ql_first(&a_ch->chi_ql);
+		_cw_check_ptr(chi);
+		_cw_assert(chi->magic == _CW_CHI_MAGIC);
 		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 		if (chi->is_malloced)
 			_cw_mem_free(a_ch->mem, chi);
@@ -114,6 +117,9 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 	ql_elm_new(chi, slot_link);
 	slot = a_ch->hash(a_key) % a_ch->table_size;
 	chi->slot = slot;
+#ifdef _LIBSTASH_DBG
+	chi->magic = _CW_CHI_MAGIC;
+#endif
 
 	/* Hook into ch-wide list. */
 	ql_tail_insert(&a_ch->chi_ql, chi, ch_link);
@@ -149,7 +155,10 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	slot = a_ch->hash(a_search_key) % a_ch->table_size;
 
 	for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
-	     ql_next(&a_ch->table[slot], chi, slot_link)) {
+	    ql_next(&a_ch->table[slot], chi, slot_link)) {
+		_cw_check_ptr(chi);
+		_cw_assert(chi->magic == _CW_CHI_MAGIC);
+
 		/* Is this the chi we want? */
 		if (a_ch->key_comp(a_search_key, chi->key)) {
 			/* Detach from ch-wide list. */
@@ -164,8 +173,12 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 				*r_data = (void *)chi->data;
 			if (chi->is_malloced)
 				_cw_mem_free(a_ch->mem, chi);
-			else if (r_chi != NULL)
+			else if (r_chi != NULL) {
+#ifdef _LIBSTASH_DBG
+				chi->magic = 0;
+#endif
 				*r_chi = chi;
+			}
 
 			a_ch->count--;
 #ifdef _LIBSTASH_DBG
@@ -195,6 +208,9 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 
 	for (chi = ql_first(&a_ch->table[slot]); chi != NULL; chi =
 	     ql_next(&a_ch->table[slot], chi, slot_link)) {
+		_cw_check_ptr(chi);
+		_cw_assert(chi->magic == _CW_CHI_MAGIC);
+
 		/* Is this the chi we want? */
 		if (a_ch->key_comp(a_key, chi->key) == TRUE) {
 			if (r_data != NULL)
@@ -223,6 +239,8 @@ ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data)
 		retval = TRUE;
 		goto RETURN;
 	}
+	_cw_check_ptr(chi);
+	_cw_assert(chi->magic == _CW_CHI_MAGIC);
 	if (r_key != NULL)
 		*r_key = (void *)chi->key;
 	if (r_data != NULL)
@@ -251,6 +269,8 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 		retval = TRUE;
 		goto RETURN;
 	}
+	_cw_check_ptr(chi);
+	_cw_assert(chi->magic == _CW_CHI_MAGIC);
 
 	/* Detach from the ch-wide list. */
 	ql_remove(&a_ch->chi_ql, chi, ch_link);
@@ -264,8 +284,12 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 		*r_data = (void *)chi->data;
 	if (chi->is_malloced)
 		_cw_mem_free(a_ch->mem, chi);
-	else if (r_chi != NULL)
+	else if (r_chi != NULL) {
+#ifdef _LIBSTASH_DBG
+		chi->magic = 0;
+#endif
 		*r_chi = chi;
+	}
 
 	a_ch->count--;
 #ifdef _LIBSTASH_DBG

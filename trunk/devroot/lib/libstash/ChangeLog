@@ -1,5 +1,9 @@
 2000-07-21  Jason Evans  <jasone@canonware.com>
 
+	* src/ch.c: Add magic to the chi structure.  This seems prudent,
+	given that the library user can control allocation of chi's, and
+	can therefore easily screw them up.
+
 	* src/sema.c: Rename the sem class to sema in order to avoid name
 	collisions with POSIX semaphores.  Since the portable version of
 	thread suspension/resumption uses POSIX semaphores (needs the
