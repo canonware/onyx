@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 18 $
- * $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 33 $
+ * $Date: 1998-04-19 01:43:20 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -42,47 +42,47 @@
 #define _INC_LIST_PRIV_H_
 #include <config.h>
 
-list_item_t *
-list_item_init()
+cw_list_item_t *
+list_item_new()
 {
-  list_item_t * retval;
+  cw_list_item_t * retval;
 
-  retval = (list_item_t *) _cw_malloc(sizeof(list_item_t));
-  _cw_check_ptr(retval);
+  retval = (cw_list_item_t *) _cw_malloc(sizeof(cw_list_item_t));
 
   return retval;
 }
 
 void
-list_item_fini(list_item_t * arg_cont)
+list_item_delete(cw_list_item_t * a_cont)
 {
-  _cw_check_ptr(arg_cont);
+  _cw_check_ptr(a_cont);
 
-  _cw_free(arg_cont);
+  _cw_free(a_cont);
 }
 
-void * list_item_get(list_item_t * arg_cont)
+void *
+list_item_get(cw_list_item_t * a_cont)
 {
-  _cw_check_ptr(arg_cont);
+  _cw_check_ptr(a_cont);
 
-  return arg_cont->item;
+  return a_cont->item;
 }
 
-void list_item_set(list_item_t * arg_cont, void * arg_item)
+void
+list_item_set(cw_list_item_t * a_cont, void * a_item)
 {
-  _cw_check_ptr(arg_cont);
-  _cw_check_ptr(arg_item);
+  _cw_check_ptr(a_cont);
+  _cw_check_ptr(a_item);
 
-  arg_cont->item = arg_item;
+  a_cont->item = a_item;
 }
 
-list_t *
-list_init()
+cw_list_t *
+list_new()
 {
-  list_t * retval;
+  cw_list_t * retval;
 
-  retval = (list_t *) _cw_malloc(sizeof(list_t));
-  _cw_check_ptr(retval);
+  retval = (cw_list_t *) _cw_malloc(sizeof(cw_list_t));
 
   retval->head = NULL;
   retval->tail = NULL;
@@ -92,194 +92,184 @@ list_init()
 }
      
 void
-list_fini(list_t * arg_list)
+list_delete(cw_list_t * a_list)
 {
-  /*   list_item_t * curr_ptr; */
   cw_sint32_t i;
 
-  _cw_check_ptr(arg_list);
+  _cw_check_ptr(a_list);
 
-  for (i = list_count(arg_list); i > 0; i--)
+  for (i = list_count(a_list); i > 0; i--)
   {
-    _cw_free(list_hpop(arg_list));
+    _cw_free(list_hpop(a_list));
   }
-  _cw_free(arg_list);
-  
-  /*   if ((arg_list->head != NULL) && (arg_list->tail != NULL)) */
-  /*   { */
-  /*     for (curr_ptr = arg_list->head->next; */
-  /* 	 curr_ptr != NULL; */
-  /* 	 curr_ptr = curr_ptr->next) */
-  /*     { */
-  /*       _cw_free(curr_ptr->prev); */
-  /*     } */
-  /*     _cw_free(arg_list->tail); */
-  /*   } */
-
-  /*   _cw_free(arg_list); */
+  _cw_free(a_list);
 }
 
 cw_sint32_t
-list_count(list_t * arg_list)
+list_count(cw_list_t * a_list)
 {
-  _cw_check_ptr(arg_list);
+  _cw_check_ptr(a_list);
   
-  return arg_list->count;
+  return a_list->count;
 }
 
 void
-list_hpush(list_t * arg_list, list_item_t * arg_item)
+list_hpush(cw_list_t * a_list, cw_list_item_t * a_item)
 {
-  _cw_check_ptr(arg_list);
-  _cw_check_ptr(arg_item);
+  _cw_check_ptr(a_list);
+  _cw_check_ptr(a_item);
   
-  if (arg_list->head != NULL)
+  if (a_list->head != NULL)
   {
-    arg_item->prev = NULL;
-    arg_item->next = arg_list->head;
-    arg_list->head->prev = arg_item;
-    arg_list->head = arg_item;
+    a_item->prev = NULL;
+    a_item->next = a_list->head;
+    a_list->head->prev = a_item;
+    a_list->head = a_item;
   }
   else
   {
-    arg_item->prev = NULL;
-    arg_item->next = NULL;
-    arg_list->head = arg_item;
-    arg_list->tail = arg_item;
+    a_item->prev = NULL;
+    a_item->next = NULL;
+    a_list->head = a_item;
+    a_list->tail = a_item;
   }
-  arg_list->count++;
+  a_list->count++;
 }
 
-list_item_t *
-list_hpop(list_t * arg_list)
+cw_list_item_t *
+list_hpop(cw_list_t * a_list)
 {
-  list_item_t * retval;
+  cw_list_item_t * retval;
 
-  _cw_check_ptr(arg_list);
+  _cw_check_ptr(a_list);
 
-  if (arg_list->head == NULL)
+  if (a_list->head == NULL)
   {
     retval = NULL;
+    goto RETURN;
   }
-  else if (arg_list->head == arg_list->tail)
+  else if (a_list->head == a_list->tail)
   {
-    retval = arg_list->head;
-    arg_list->head = NULL;
-    arg_list->tail = NULL;
+    retval = a_list->head;
+    a_list->head = NULL;
+    a_list->tail = NULL;
   }
   else
   {
-    retval = arg_list->head;
+    retval = a_list->head;
+    a_list->head = a_list->head->next;
+    _cw_assert(a_list->head != NULL);
+    _cw_assert(a_list->head->prev != NULL);
+    a_list->head->prev = NULL;
     retval->next = NULL;
-    arg_list->head = arg_list->head->next;
-    arg_list->head->prev = NULL;
   }
-  arg_list->count--;
+  a_list->count--;
 
+ RETURN:
   return retval;
 }
 
 void
-list_tpush(list_t * arg_list, list_item_t * arg_item)
+list_tpush(cw_list_t * a_list, cw_list_item_t * a_item)
 {
-  _cw_check_ptr(arg_list);
-  _cw_check_ptr(arg_item);
+  _cw_check_ptr(a_list);
+  _cw_check_ptr(a_item);
 
-  if (arg_list->tail != NULL)
+  if (a_list->tail != NULL)
   {
-    arg_item->next = NULL;
-    arg_item->prev = arg_list->tail;
-    arg_list->tail->next = arg_item;
-    arg_list->tail = arg_item;
+    a_item->next = NULL;
+    a_item->prev = a_list->tail;
+    a_list->tail->next = a_item;
+    a_list->tail = a_item;
   }
   else
   {
-    arg_item->prev = NULL;
-    arg_item->next = NULL;
-    arg_list->head = arg_item;
-    arg_list->tail = arg_item;
+    a_item->prev = NULL;
+    a_item->next = NULL;
+    a_list->head = a_item;
+    a_list->tail = a_item;
   }
-  arg_list->count++;
+  a_list->count++;
 }
 
-list_item_t *
-list_tpop(list_t * arg_list)
+cw_list_item_t *
+list_tpop(cw_list_t * a_list)
 {
-  list_item_t * retval;
+  cw_list_item_t * retval;
 
-  _cw_check_ptr(arg_list);
+  _cw_check_ptr(a_list);
 
-  if (arg_list->tail == NULL)
+  if (a_list->tail == NULL)
   {
     retval = NULL;
   }
-  else if (arg_list->tail == arg_list->head)
+  else if (a_list->tail == a_list->head)
   {
-    retval = arg_list->tail;
-    arg_list->head = NULL;
-    arg_list->tail = NULL;
+    retval = a_list->tail;
+    a_list->head = NULL;
+    a_list->tail = NULL;
   }
   else
   {
-    retval = arg_list->tail;
+    retval = a_list->tail;
+    a_list->tail = a_list->tail->prev;
+    a_list->tail->next = NULL;
     retval->prev = NULL;
-    arg_list->tail = arg_list->tail->prev;
-    arg_list->tail->next = NULL;
   }
-  arg_list->count++;
+  a_list->count--;
 
   return retval;
 }
 
 void
-list_insert_after(list_t * arg_list,
-		  list_item_t * arg_in_list,
-		  list_item_t * arg_to_insert)
+list_insert_after(cw_list_t * a_list,
+		  cw_list_item_t * a_in_list,
+		  cw_list_item_t * a_to_insert)
 {
-  _cw_check_ptr(arg_list);
-  _cw_check_ptr(arg_in_list);
-  _cw_check_ptr(arg_to_insert);
+  _cw_check_ptr(a_list);
+  _cw_check_ptr(a_in_list);
+  _cw_check_ptr(a_to_insert);
 
-  if (arg_in_list->next == NULL)
+  if (a_in_list->next == NULL)
   {
-    arg_in_list->next = arg_to_insert;
-    arg_to_insert->prev = arg_in_list;
-    arg_to_insert->next = NULL;
+    a_in_list->next = a_to_insert;
+    a_to_insert->prev = a_in_list;
+    a_to_insert->next = NULL;
   }
   else
   {
-    arg_to_insert->prev = arg_in_list;
-    arg_to_insert->next = arg_in_list->next;
-    arg_in_list->next = arg_to_insert;
-    arg_to_insert->next->prev = arg_to_insert;
+    a_to_insert->prev = a_in_list;
+    a_to_insert->next = a_in_list->next;
+    a_in_list->next = a_to_insert;
+    a_to_insert->next->prev = a_to_insert;
   }
-  arg_list->count++;
+  a_list->count++;
 }
 
-list_item_t *
-list_remove(list_t * arg_list, list_item_t * arg_to_remove)
+cw_list_item_t *
+list_remove(cw_list_t * a_list, cw_list_item_t * a_to_remove)
 {
-  list_item_t * retval;
+  cw_list_item_t * retval;
 
-  _cw_check_ptr(arg_list);
-  _cw_check_ptr(arg_to_remove);
+  _cw_check_ptr(a_list);
+  _cw_check_ptr(a_to_remove);
 
-  if (arg_to_remove->prev == NULL)
+  if (a_to_remove->prev == NULL)
   {
-    retval = list_hpop(arg_list);
+    retval = list_hpop(a_list);
   }
-  else if (arg_to_remove->next == NULL)
+  else if (a_to_remove->next == NULL)
   {
-    retval = list_tpop(arg_list);
+    retval = list_tpop(a_list);
   }
   else
   {
-    arg_to_remove->prev->next = arg_to_remove->next;
-    arg_to_remove->next->prev = arg_to_remove->prev;
-    arg_to_remove->prev = NULL;
-    arg_to_remove->next = NULL;
-    retval = arg_to_remove;
-    arg_list->count--;
+    a_to_remove->prev->next = a_to_remove->next;
+    a_to_remove->next->prev = a_to_remove->prev;
+    a_to_remove->prev = NULL;
+    a_to_remove->next = NULL;
+    retval = a_to_remove;
+    a_list->count--;
   }
 
   return retval;

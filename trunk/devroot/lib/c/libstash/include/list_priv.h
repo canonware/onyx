@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 17 $
- * $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 33 $
+ * $Date: 1998-04-19 01:43:20 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -41,17 +41,17 @@
 #ifndef _LIST_PRIV_H_
 #define _LIST_PRIV_H_
 
-struct list_item_s
+struct cw_list_item_s
 {
-  struct list_item_s * next;
-  struct list_item_s * prev;
+  struct cw_list_item_s * next;
+  struct cw_list_item_s * prev;
   void * item;
 };
 
-struct list_s
+struct cw_list_s
 {
-  list_item_t * head;
-  list_item_t * tail;
+  cw_list_item_t * head;
+  cw_list_item_t * tail;
   cw_sint32_t count;
 };
 

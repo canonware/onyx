@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 17 $
- * $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 33 $
+ * $Date: 1998-04-19 01:43:20 -0700 (Sun, 19 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -41,8 +41,8 @@
 #ifndef _LIST_H_
 #define _LIST_H_
 
-typedef struct list_item_s list_item_t;
-typedef struct list_s list_t;
+typedef struct cw_list_item_s cw_list_item_t;
+typedef struct cw_list_s cw_list_t;
 
 /*
  * Namespace definitions.
@@ -54,7 +54,7 @@ typedef struct list_s list_t;
 #define list_item_set _CW_NS_CMN(list_item_set)
 
 #define list_new _CW_NS_CMN(list_new)
-#define list_delete _CW_NS_CMN(list_fine)
+#define list_delete _CW_NS_CMN(list_delete)
 #define list_count _CW_NS_CMN(list_count)
 #define list_hpush _CW_NS_CMN(list_hpush)
 #define list_hpop _CW_NS_CMN(list_hpop)
@@ -63,22 +63,22 @@ typedef struct list_s list_t;
 #define list_insert_after _CW_NS_CMN(list_insert_after)
 #define list_remove _CW_NS_CMN(list_remove)
 
-list_item_t * list_item_new();
-void list_item_delete(list_item_t * arg_cont);
-void * list_item_get(list_item_t * arg_cont);
-void list_item_set(list_item_t * arg_cont, void * arg_item);
+cw_list_item_t * list_item_new();
+void list_item_delete(cw_list_item_t * a_cont);
+void * list_item_get(cw_list_item_t * a_cont);
+void list_item_set(cw_list_item_t * a_cont, void * a_item);
 
-list_t * list_new();
-void list_delete(list_t * arg_list);
-cw_sint32_t list_count(list_t * arg_list);
-void list_hpush(list_t * arg_list, list_item_t * arg_item);
-list_item_t * list_hpop(list_t * arg_list);
-void list_tpush(list_t * arg_list, list_item_t * arg_item);
-list_item_t * list_tpop(list_t * arg_list);
-void list_insert_after(list_t * arg_list,
-		       list_item_t * arg_in_list,
-		       list_item_t * arg_to_insert);
-list_item_t * list_remove(list_t * arg_list,
-			  list_item_t * arg_to_remove);
+cw_list_t * list_new();
+void list_delete(cw_list_t * a_list);
+cw_sint32_t list_count(cw_list_t * a_list);
+void list_hpush(cw_list_t * a_list, cw_list_item_t * a_item);
+cw_list_item_t * list_hpop(cw_list_t * a_list);
+void list_tpush(cw_list_t * a_list, cw_list_item_t * a_item);
+cw_list_item_t * list_tpop(cw_list_t * a_list);
+void list_insert_after(cw_list_t * a_list,
+		       cw_list_item_t * a_in_list,
+		       cw_list_item_t * a_to_insert);
+cw_list_item_t * list_remove(cw_list_t * a_list,
+			     cw_list_item_t * a_to_remove);
 
 #endif /* _LIST_H_ */
