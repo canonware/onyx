@@ -27,24 +27,24 @@ void	version(const char *a_progname);
 const char * basename(const char *a_str);
 
 /* Global. */
-cw_sock_t *sock_vec[_LIBSOCK_SUCK_MAX_CONNS];
-cw_mq_t *mq;
-cw_socks_t *socks;
-cw_uint32_t opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
+cw_sock_t	*sock_vec[_LIBSOCK_SUCK_MAX_CONNS];
+cw_mq_t		*mq;
+cw_socks_t	*socks;
+cw_uint32_t	opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
 
 int
 main(int argc, char **argv)
 {
-	int     retval = 0, bytes_read, sockfd;
-	struct timespec tout;
-	cw_buf_t buf;
-	cw_bool_t did_work;
-	cw_thd_t accept_thd;
+	int		retval = 0, bytes_read, sockfd;
+	struct timespec	tout;
+	cw_buf_t	buf;
+	cw_bool_t	did_work;
+	cw_thd_t	accept_thd;
 
 	/* Command line parsing variables. */
-	int     c;
-	cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
-	int     opt_port = 0;
+	int		c;
+	cw_bool_t	cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
+	int		opt_port = 0;
 
 	bzero(sock_vec, _LIBSOCK_SUCK_MAX_CONNS * sizeof(cw_sock_t *));
 
@@ -52,12 +52,12 @@ main(int argc, char **argv)
 	dbg_register(cw_g_dbg, "mem_error");
 	dbg_register(cw_g_dbg, "prog_error");
 	dbg_register(cw_g_dbg, "sockb_error");
-/*    dbg_register(cw_g_dbg, "sockb_verbose"); */
+/*  	dbg_register(cw_g_dbg, "sockb_verbose"); */
 	dbg_register(cw_g_dbg, "socks_error");
 	dbg_register(cw_g_dbg, "sock_error");
 
 	/* Parse command line. */
-	while (-1 != (c = getopt(argc, argv, "hVb:p:"))) {
+	while ((c = getopt(argc, argv, "hVb:p:")) != -1) {
 		switch (c) {
 		case 'h':
 			opt_help = TRUE;
@@ -78,21 +78,21 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ((TRUE == cl_error) || (optind < argc)) {
+	if (cl_error || (optind < argc)) {
 		_cw_out_put("Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto CLERROR;
 	}
-	if (TRUE == opt_help) {
+	if (opt_help) {
 		usage(basename(argv[0]));
 		goto CLERROR;
 	}
-	if (TRUE == opt_version) {
+	if (opt_version) {
 		version(basename(argv[0]));
 		goto CLERROR;
 	}
-	if (0 == opt_bsize) {
+	if (opt_bsize == 0) {
 		_cw_out_put("Invalid block size\n");
 		retval = 1;
 		goto CLERROR;
@@ -100,12 +100,12 @@ main(int argc, char **argv)
 	if (sockb_init(100000, opt_bsize, 8))
 		_cw_error("Initialization failure in sockb_init()");
 	socks = socks_new();
-	if (NULL == socks)
+	if (socks == NULL)
 		_cw_error("Memory allocation error");
-	if (TRUE == socks_listen(socks, INADDR_ANY, &opt_port))
+	if (socks_listen(socks, INADDR_ANY, &opt_port))
 		exit(1);
-	_cw_out_put("[s]: Listening on port [i]\n",
-	    basename(argv[0]), opt_port);
+	_cw_out_put("[s]: Listening on port [i]\n", basename(argv[0]),
+	    opt_port);
 
 	tout.tv_sec = 0;
 	tout.tv_nsec = 0;
@@ -117,26 +117,25 @@ main(int argc, char **argv)
 	buf_new(&buf);
 
 	mq = mq_new(NULL);
-	if (NULL == mq)
+	if (mq == NULL)
 		_cw_error("Memory allocation error");
 	/* Start thread to accept connections. */
 	thd_new(&accept_thd, accept_entry_func, NULL);
 
-	while (1) {
+	for (;;) {
 		did_work = FALSE;
 
-		while (NULL != (void *)(sockfd = (int)mq_get(mq))) {
+		while ((void *)(sockfd = (int)mq_get(mq)) != NULL) {
 			did_work = TRUE;
 
-			if (NULL != sock_vec[sockfd]) {
+			if (sock_vec[sockfd] != NULL) {
 				bytes_read = sock_read(sock_vec[sockfd], &buf,
 				    0, &tout);
-				if (0 < bytes_read) {
+				if (bytes_read > 0) {
 					/* Throw the data away. */
 					buf_release_head_data(&buf, bytes_read);
-				} else if (0 > bytes_read) {
-					while (TRUE == sockb_in_notify(NULL,
-					    sockfd))
+				} else if (bytes_read < 0) {
+					while (sockb_in_notify(NULL, sockfd))
 						thd_yield();
 
 					sock_delete(sock_vec[sockfd]);
@@ -151,34 +150,34 @@ main(int argc, char **argv)
 	buf_delete(&buf);
 
 	sockb_shutdown();
-CLERROR:
+	CLERROR:
 	libstash_shutdown();
 	return retval;
 }
 
-void   *
+void *
 accept_entry_func(void *a_arg)
 {
-	cw_sock_t *sock;
+	cw_sock_t	*sock;
 
 	sock = sock_new(NULL, opt_bsize * 8);
-	if (NULL == sock)
+	if (sock == NULL)
 		_cw_error("Memory allocation error");
-	while (1) {
-		if (sock == socks_accept(socks, NULL, sock)) {
+	for (;;) {
+		if (socks_accept(socks, NULL, sock) == sock) {
 			_cw_out_put_l("New connection\n");
 
 			sock_vec[sock_get_fd(sock)] = sock;
 
-			while (TRUE == sockb_in_notify(mq, sock_get_fd(sock)))
+			while (sockb_in_notify(mq, sock_get_fd(sock)))
 				thd_yield();
 
 			/*
-			 * Create another sock object for the next time we
-			 * call socks_accept().
+			 * Create another sock object for the next time we call
+			 * socks_accept().
 			 */
 			sock = sock_new(NULL, opt_bsize * 8);
-			if (NULL == sock)
+			if (sock == NULL)
 				_cw_error("Memory allocation error");
 		}
 	}
@@ -189,8 +188,7 @@ accept_entry_func(void *a_arg)
 void
 usage(const char *a_progname)
 {
-	_cw_out_put(
-	    "[s] usage:\n"
+	_cw_out_put("[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
 	    "    [s] [[-b <bsize>] [[-p <port>]\n"
@@ -217,8 +215,8 @@ version(const char *a_progname)
 const char *
 basename(const char *a_str)
 {
-	const char *retval = NULL;
-	cw_uint32_t i;
+	const char	*retval = NULL;
+	cw_uint32_t	i;
 
 	_cw_check_ptr(a_str);
 

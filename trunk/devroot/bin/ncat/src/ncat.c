@@ -29,42 +29,45 @@ typedef enum {
 }       format_t;
 
 /* Function prototypes. */
-cw_sock_t * client_setup(const char *a_rhost, int a_rport, struct timespec
+cw_sock_t 	*client_setup(const char *a_rhost, int a_rport, struct timespec
     *a_timeout);
-cw_sock_t * server_setup(int a_port, struct timespec *a_timeout);
-char	*get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
-char	*get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
-char	*get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str);
-cw_bool_t oom_handler(const void *a_data, cw_uint32_t a_size);
-void	usage(void);
-void	version(void);
-const char * basename(const char *a_str);
+cw_sock_t	*server_setup(int a_port, struct timespec *a_timeout);
+char		*get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char
+    *a_str);
+char		*get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char
+    *a_str);
+char		*get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char
+    *a_str);
+cw_bool_t	oom_handler(const void *a_data, cw_uint32_t a_size);
+void		usage(void);
+void		version(void);
+const char	*basename(const char *a_str);
 
 /* Global. */
-const char *g_progname;
-cw_out_t *log_out = NULL;
+const char	*g_progname;
+cw_out_t	*log_out = NULL;
 
 int
 main(int argc, char **argv)
 {
-	int     retval = 0;
-	cw_buf_t *buf = NULL;
-	cw_sock_t *sock = NULL;
-	cw_sock_t *sock_stdin = NULL;
-	cw_sock_t *sock_stdout = NULL;
-	cw_mq_t *mq = NULL;
-	struct timespec *tout = NULL;
+	int		retval = 0;
+	cw_buf_t	*buf = NULL;
+	cw_sock_t	*sock = NULL;
+	cw_sock_t	*sock_stdin = NULL;
+	cw_sock_t	*sock_stdout = NULL;
+	cw_mq_t		*mq = NULL;
+	struct timespec	*tout = NULL;
 
-	int     c;
-	cw_bool_t opt_client = FALSE, opt_server = FALSE;
-	cw_bool_t cl_error = FALSE;
-	cw_bool_t opt_verbose = FALSE, opt_quiet = FALSE;
-	int     opt_port = 0;
-	char   *opt_rhost = "localhost";
-	char   *opt_log = NULL;
-	format_t opt_format = NONE;
+	int		c;
+	cw_bool_t	opt_client = FALSE, opt_server = FALSE;
+	cw_bool_t	cl_error = FALSE;
+	cw_bool_t	opt_verbose = FALSE, opt_quiet = FALSE;
+	int		opt_port = 0;
+	char		*opt_rhost = "localhost";
+	char		*opt_log = NULL;
+	format_t	opt_format = NONE;
 
-	if (TRUE == libstash_init()) {
+	if (libstash_init()) {
 		retval = 1;
 		goto RETURN;
 	}
@@ -74,7 +77,7 @@ main(int argc, char **argv)
 
 	dbg_register(cw_g_dbg, "ncat_error");
 
-	while (-1 != (c = getopt(argc, argv, "hVvql:f:r:p:t:"))) {
+	while ((c = getopt(argc, argv, "hVvql:f:r:p:t:")) != -1) {
 		switch (c) {
 		case 'h':
 			usage();
@@ -83,7 +86,7 @@ main(int argc, char **argv)
 			version();
 			goto RETURN;
 		case 'v':
-			if (TRUE == opt_verbose) {
+			if (opt_verbose) {
 				dbg_register(cw_g_dbg, "sockb_verbose");
 				dbg_register(cw_g_dbg, "sockb_error");
 				dbg_register(cw_g_dbg, "socks_error");
@@ -100,11 +103,10 @@ main(int argc, char **argv)
 
 			break;
 		case 'l':
-			if (NONE == opt_format) {
+			if (opt_format == NONE) {
 				/*
-				 * Set the default logging format if the
-				 * user hasn't already specified a logging
-				 * format.
+				 * Set the default logging format if the user
+				 * hasn't already specified a logging format.
 				 */
 				opt_format = PRETTY;
 			}
@@ -128,13 +130,13 @@ main(int argc, char **argv)
 
 			break;
 		case 'r': {
-			char   *colon, *port_str;
-			struct servent *ent;
+			char		*colon, *port_str;
+			struct servent	*ent;
 
 			opt_client = TRUE;
 
 			colon = strstr(optarg, ":");
-			if (NULL == colon) {
+			if (colon == NULL) {
 				opt_rhost = "localhost";
 				port_str = optarg;
 			} else {
@@ -143,7 +145,7 @@ main(int argc, char **argv)
 				port_str = colon + 1;
 			}
 
-			if (NULL != (ent = getservbyname(port_str, "tcp")))
+			if ((ent = getservbyname(port_str, "tcp")) != NULL)
 				opt_port = (cw_uint32_t)ntohs(ent->s_port);
 			else
 				opt_port = strtoul(port_str, NULL, 10);
@@ -151,11 +153,11 @@ main(int argc, char **argv)
 			break;
 		}
 		case 'p': {
-			struct servent *ent;
+			struct servent	*ent;
 
 			opt_server = TRUE;
 
-			if (NULL != (ent = getservbyname(optarg, "tcp")))
+			if ((ent = getservbyname(optarg, "tcp")) != NULL)
 				opt_port = (cw_uint32_t)ntohs(ent->s_port);
 			else
 				opt_port = strtoul(optarg, NULL, 10);
@@ -173,36 +175,35 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ((TRUE == cl_error) || (optind < argc)) {
+	if ((cl_error) || (optind < argc)) {
 		_cw_out_put("[s]: Unrecognized option(s)\n", g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
 	/* Check validity of command line options. */
-	if ((TRUE == opt_verbose) && (TRUE == opt_quiet)) {
+	if (opt_verbose && opt_quiet) {
 		_cw_out_put("[s]: \"-v\" and \"-q\" are incompatible\n",
 		    g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
-	if (FALSE == opt_client) {
-		if (FALSE == opt_server) {
+	if (opt_client == FALSE) {
+		if (opt_server == FALSE) {
 			_cw_out_put("[s]: -p or -r must be specified\n",
 			    g_progname);
 			usage();
 			retval = 1;
 			goto RETURN;
 		}
-	} else if (TRUE == opt_server) {
-		_cw_out_put("[s]: -p and -r are incompatible\n",
-		    g_progname);
+	} else if (opt_server) {
+		_cw_out_put("[s]: -p and -r are incompatible\n", g_progname);
 		usage();
 		retval = 1;
 		goto RETURN;
 	}
-	if ((NULL == opt_log) && (NONE != opt_format)) {
+	if ((opt_log == NULL) && (opt_format != NONE)) {
 		_cw_out_put("[s]: -f requires -l to be specified\n",
 		    g_progname);
 		usage();
@@ -210,17 +211,17 @@ main(int argc, char **argv)
 		goto RETURN;
 	}
 	/* Open log file if specified. */
-	if (NULL != opt_log) {
-		int     fd;
+	if (opt_log != NULL) {
+		int	fd;
 
 		log_out = out_new(NULL);
 
 		fd = open(opt_log, O_CREAT | O_WRONLY | O_TRUNC, 0644);
 
-		if (-1 == fd) {
+		if (fd == -1) {
 			if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
-				_cw_out_put("[s]: Unable to open log file \"[s]\"\n",
-				    opt_log);
+				_cw_out_put("[s]: Unable to open log file"
+				    " \"[s]\"\n", opt_log);
 			}
 			retval = 1;
 			goto RETURN;
@@ -231,7 +232,7 @@ main(int argc, char **argv)
 		_cw_out_put("[s]: pid: [i]\n", g_progname, getpid());
 	sockb_init(16, 4096, 4);
 
-	if (TRUE == opt_client) {
+	if (opt_client) {
 		/* Try to connect to the server. */
 		sock = client_setup(opt_rhost, opt_port, tout);
 	} else {
@@ -239,22 +240,22 @@ main(int argc, char **argv)
 		sock = server_setup(opt_port, tout);
 	}
 
-	if (NULL == sock) {
+	if (sock == NULL) {
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-			if (TRUE == opt_client) {
-				_cw_out_put("[s]: Connection failure or timeout\n",
-				    g_progname);
+			if (opt_client) {
+				_cw_out_put("[s]: Connection failure or "
+				    "timeout\n", g_progname);
 			} else {
-				_cw_out_put("[s]: Error listening on port [i] or timeout\n",
-				    g_progname, opt_port);
+				_cw_out_put("[s]: Error listening on port"
+				    " [i] or timeout\n", g_progname, opt_port);
 			}
 		}
 	} else {
-		struct timespec zero;
-		int     fd, fd_sock, fd_sock_stdin;
-		cw_sint32_t bytes_read;
-		cw_bool_t done_reading = FALSE;
-		char   *str = NULL;
+		struct timespec	zero;
+		int		fd, fd_sock, fd_sock_stdin;
+		cw_sint32_t	bytes_read;
+		cw_bool_t	done_reading = FALSE;
+		char		*str = NULL;
 
 		mq = mq_new(NULL);
 		buf = buf_new(NULL);
@@ -274,17 +275,16 @@ main(int argc, char **argv)
 		zero.tv_nsec = 0;
 
 		for (;;) {
-			if ((NULL != tout) && (TRUE == done_reading)) {
+			if ((tout != NULL) && (done_reading)) {
 				/*
-				 * If mq_timedget() times out, fd will be
-				 * set to 0, which will cause the program to
-				 * quit.
+				 * If mq_timedget() times out, fd will be set to
+				 * 0, which will cause the program to quit.
 				 */
 				fd = (int)mq_timedget(mq, tout);
 			} else
 				fd = (int)mq_get(mq);
 
-			if (fd_sock_stdin == fd) {
+			if (fd == fd_sock_stdin) {
 				do {
 					bytes_read = sock_read(sock_stdin, buf,
 					    0, &zero);
@@ -312,27 +312,26 @@ main(int argc, char **argv)
 						_cw_error("Programming error");
 					}
 
-					if (TRUE == sock_write(sock, buf)) {
+					if (sock_write(sock, buf)) {
 						sock_flush_out(sock_stdout);
 
 						/*
-						 * We're two loops deep
-						 * here, so our choices are
-						 * to check a variable every
-						 * time around the outer
-						 * while loop, or use a goto
-						 * (not much different than
-						 * break, really).
+						 * We're two loops deep here, so
+						 * our choices are to check a
+						 * variable every time around
+						 * the outer while loop, or use
+						 * a goto (not much different
+						 * than break, really).
 						 */
 						goto DONE;
 					}
-				} while (0 < sock_buffered_in(sock_stdin));
+				} while (sock_buffered_in(sock_stdin) > 0);
 
-				if (0 > bytes_read) {
+				if (bytes_read < 0) {
 					sock_flush_out(sock_stdout);
 					done_reading = TRUE;
 				}
-			} else if (fd_sock == fd) {
+			} else if (fd == fd_sock) {
 				do {
 					bytes_read = sock_read(sock, buf, 0,
 					    &zero);
@@ -360,16 +359,14 @@ main(int argc, char **argv)
 						_cw_error("Programming error");
 					}
 
-					if (TRUE == sock_write(sock_stdout,
-					    buf))
+					if (sock_write(sock_stdout, buf))
 						break;
-				} while (0 < sock_buffered_in(sock));
+				} while (sock_buffered_in(sock) > 0);
 
-				if (0 > bytes_read) {
+				if (bytes_read < 0) {
 					/*
-					 * The peer has disconnected.  Flush
-					 * any buffered data to stdout, then
-					 * quit.
+					 * The peer has disconnected.  Flush any
+					 * buffered data to stdout, then quit.
 					 */
 					sock_flush_out(sock_stdout);
 					break;
@@ -380,25 +377,25 @@ main(int argc, char **argv)
 			}
 		}
 
-DONE:
-		if (NULL != str)
+		DONE:
+		if (str != NULL)
 			_cw_free(str);
 	}
 
-RETURN:
-	if (NULL != buf)
+	RETURN:
+	if (buf != NULL)
 		buf_delete(buf);
-	if (NULL != sock)
+	if (sock != NULL)
 		sock_delete(sock);
-	if (NULL != sock_stdin)
+	if (sock_stdin != NULL)
 		sock_delete(sock_stdin);
-	if (NULL != sock_stdout)
+	if (sock_stdout != NULL)
 		sock_delete(sock_stdout);
-	if (NULL != mq)
+	if (mq != NULL)
 		mq_delete(mq);
-	if (NULL != tout)
+	if (tout != NULL)
 		_cw_free(tout);
-	if (NULL != log_out) {
+	if (log_out != NULL) {
 		close(out_get_default_fd(log_out));
 		out_delete(log_out);
 	}
@@ -410,13 +407,13 @@ RETURN:
 cw_sock_t *
 client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 {
-	cw_sock_t *retval;
-	cw_sint32_t error;
+	cw_sock_t	*retval;
+	cw_sint32_t	error;
 
         retval = sock_new(NULL, 32768);
 
         error = sock_connect(retval, a_rhost, a_rport, a_timeout);
-	if (-1 == error) {
+	if (error == -1) {
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
 			_cw_out_put("[s]: Error connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
@@ -424,7 +421,7 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 		sock_delete(retval);
 
 		retval = NULL;
-	} else if (1 == error) {
+	} else if (error == 1) {
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
 			_cw_out_put("[s]: Timeout connecting to [s]:[i]\n",
 			    g_progname, a_rhost, a_rport);
@@ -433,8 +430,8 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 		retval = NULL;
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
-		_cw_out_put("[s]: Connected to [s]:[i]\n",
-		    g_progname, a_rhost, a_rport);
+		_cw_out_put("[s]: Connected to [s]:[i]\n", g_progname, a_rhost,
+		    a_rport);
 	}
 	return retval;
 }
@@ -442,38 +439,38 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 cw_sock_t *
 server_setup(int a_port, struct timespec * a_timeout)
 {
-	cw_sock_t *retval;
-	cw_socks_t *socks;
-	int     port, ask_port;
+	cw_sock_t	*retval;
+	cw_socks_t	*socks;
+	int		port, ask_port;
 
         socks = socks_new();
 
         port = ask_port = a_port;
-	if (TRUE == socks_listen(socks, INADDR_ANY, &port)) {
+	if (socks_listen(socks, INADDR_ANY, &port)) {
 		retval = NULL;
 		goto RETURN;
 	}
-	if (0 == ask_port) {
+	if (ask_port == 0) {
 		/*
-		 * If the user didn't request a particular port,
-		 * print out what port we got, since without this
-		 * info, running in server mode is rather useless.
+		 * If the user didn't request a particular port, print out what
+		 * port we got, since without this info, running in server mode
+		 * is rather useless.
 		 */
 		if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
-			_cw_out_put("[s]: Listening on port [i]\n",
-			    g_progname, port);
+			_cw_out_put("[s]: Listening on port [i]\n", g_progname,
+			    port);
 		}
 	}
 	retval = sock_new(NULL, 32768);
 
-	if (NULL == socks_accept(socks, a_timeout, retval)) {
+	if (socks_accept(socks, a_timeout, retval) == NULL) {
 		sock_delete(retval);
 		retval = NULL;
 		goto RETURN;
 	}
 	if (dbg_is_registered(cw_g_dbg, "ncat_verbose"))
 		_cw_out_put("[s]: Connection established\n", g_progname);
-RETURN:
+	RETURN:
 	socks_delete(socks);
 	return retval;
 }
@@ -481,13 +478,13 @@ RETURN:
 char   *
 get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
-	char   *retval, *p, *p_a, *p_b, *t_str;
-	char   *c_trans, line_a[81], line_b[81];
-	char	line_sep[81] =
+	char		*retval, *p, *p_a, *p_b, *t_str;
+	char		*c_trans, line_a[81], line_b[81];
+	char		line_sep[81] =
 	    "         |                 |                 |                 |\n";
-	cw_uint32_t str_len, buf_size, i, j;
-	cw_uint8_t c;
-	size_t  len;
+	cw_uint32_t	str_len, buf_size, i, j;
+	cw_uint8_t	c;
+	size_t		len;
 
 	buf_size = buf_get_size(a_buf);
 
@@ -498,8 +495,10 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	    + 1			/* Blank line. */
 	    + 81		/* Last dashed line. */
 	    + 1)		/* Terminating \0. */
-	    +(((buf_size / 16) + 1) * 227);	/* 16 bytes data prints as 227
-						 * bytes. */
+	    +(((buf_size / 16) + 1) * 227);	/*
+						 * 16 bytes data prints as 227
+						 * bytes.
+						 */
 
 	if (a_str == NULL) {
 		/* Allocate for the first time. */
@@ -520,8 +519,8 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	p += len;
 
 	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-	    (TRUE == is_send) ? "send" : "recv", buf_size, buf_size, (buf_size
-	    != 1) ? "s" : "");
+	    (is_send) ? "send" : "recv", buf_size, buf_size, (buf_size != 1) ?
+	    "s" : "");
 	memcpy(p, line_a, len);
 	p += len;
 
@@ -997,24 +996,23 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	return retval;
 }
 
-char   *
+char *
 get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
-	char   *retval, *p;
-	char   *syms = "0123456789abcdef";
-	cw_uint32_t str_len, buf_size, i;
-	cw_uint8_t c;
+	char		*retval, *p;
+	char		*syms = "0123456789abcdef";
+	cw_uint32_t	str_len, buf_size, i;
+	cw_uint8_t	c;
 
 	buf_size = buf_get_size(a_buf);
 
 	/* Calculate the total size of the output. */
 	str_len = (1		/* '<' or '>'. */
 	    + (buf_size << 1)	/* Hex dump. */
-	    +1			/* Newline. */
-	    + 1			/* Null terminator. */
-	    );
+	    + 1			/* Newline. */
+	    + 1);		/* Null terminator. */
 
-	if (NULL == a_str) {
+	if (a_str == NULL) {
 		/* Allocate for the first time. */
 		retval = _cw_malloc(str_len);
 	} else {
@@ -1023,7 +1021,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	}
 	p = retval;
 
-	if (TRUE == is_send)
+	if (is_send)
 		p[0] = '>';
 	else
 		p[0] = '<';
@@ -1051,8 +1049,8 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 char   *
 get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
-	char   *retval, *t_str, *p;
-	cw_uint32_t str_len, buf_size, i;
+	char		*retval, *t_str, *p;
+	cw_uint32_t	str_len, buf_size, i;
 
 	buf_size = buf_get_size(a_buf);
 
@@ -1062,10 +1060,9 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	    + buf_size		/* Data. */
 	    + 1			/* Newline. */
 	    + 81		/* Last dashed line. */
-	    + 1			/* Null terminator. */
-	    );
+	    + 1);		/* Null terminator. */
 
-	if (NULL == a_str) {
+	if (a_str == NULL) {
 		/* Allocate for the first time. */
 		retval = _cw_malloc(str_len);
 	} else {
@@ -1083,9 +1080,8 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	p += strlen(t_str);
 
 	/* Header. */
-	p += _cw_out_put_s(p, "[s]:0x[i|b:16] ([i]) byte[s]\n", (TRUE ==
-	    is_send) ? "send" : "recv", buf_size, buf_size, (buf_size != 1) ?
-	    "s" : "");
+	p += _cw_out_put_s(p, "[s]:0x[i|b:16] ([i]) byte[s]\n", (is_send) ?
+	    "send" : "recv", buf_size, buf_size, (buf_size != 1) ? "s" : "");
 
 	/* Data. */
 	for (i = 0; i < buf_size; i++) {
@@ -1118,8 +1114,7 @@ oom_handler(const void *a_data, cw_uint32_t a_size)
 void
 usage(void)
 {
-	_cw_out_put(
-	    "[s]: Usage:\n"
+	_cw_out_put("[s]: Usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
 	    "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -r [[<rhost>:]<rport>\n"
@@ -1153,8 +1148,8 @@ version(void)
 const char *
 basename(const char *a_str)
 {
-	const char *retval = NULL;
-	cw_uint32_t i;
+	const char	*retval = NULL;
+	cw_uint32_t	i;
 
 	_cw_check_ptr(a_str);
 

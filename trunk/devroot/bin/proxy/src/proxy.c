@@ -22,8 +22,8 @@
 #include <fcntl.h>
 
 struct handler_s {
-	sigset_t hupset;
-	cw_thd_t sig_thd;
+	sigset_t	hupset;
+	cw_thd_t	sig_thd;
 };
 
 typedef enum {
@@ -31,23 +31,23 @@ typedef enum {
 }       format_t;
 
 typedef struct {
-	cw_thd_t send_thd;
-	cw_thd_t recv_thd;
-	cw_mtx_t lock;
-	cw_bool_t should_quit;
-	cw_out_t *out;
-	cw_sock_t client_sock;
-	cw_sock_t remote_sock;
+	cw_thd_t	send_thd;
+	cw_thd_t	recv_thd;
+	cw_mtx_t	lock;
+	cw_bool_t	should_quit;
+	cw_out_t	*out;
+	cw_sock_t	client_sock;
+	cw_sock_t	remote_sock;
 
-	char   *rhost;
-	int     rport;
+	char		*rhost;
+	int		rport;
 
-	cw_bool_t is_verbose;
-	format_t format;
+	cw_bool_t	is_verbose;
+	format_t	format;
 }       connection_t;
 
-cw_bool_t should_quit = FALSE;
-const char *g_progname;
+cw_bool_t	should_quit = FALSE;
+const char	*g_progname;
 
 /* Function prototypes. */
 void	*sig_handler(void *a_arg);
@@ -64,21 +64,21 @@ const char *basename(const char *a_str);
 int
 main(int argc, char **argv)
 {
-	int     retval = 0;
-	cw_socks_t *socks;
-	connection_t *conn;
-	char    logfile[2048];
-	cw_uint32_t conn_num;
-	struct timespec timeout;
+	int		retval = 0;
+	cw_socks_t	*socks;
+	connection_t	*conn;
+	char		logfile[2048];
+	cw_uint32_t	conn_num;
+	struct timespec	timeout;
 
 	struct handler_s handler_arg;
 
-	int     c;
-	cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
-	cw_bool_t opt_verbose = FALSE, opt_quiet = FALSE, opt_log = FALSE;
-	format_t opt_format = PRETTY;
-	int     opt_port = 0, opt_rport = 0;
-	char   *opt_rhost = NULL, *opt_dirname = NULL;
+	int		c;
+	cw_bool_t	cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
+	cw_bool_t	opt_verbose = FALSE, opt_quiet = FALSE, opt_log = FALSE;
+	format_t	opt_format = PRETTY;
+	int		opt_port = 0, opt_rport = 0;
+	char		*opt_rhost = NULL, *opt_dirname = NULL;
 
 	libstash_init();
 	mem_set_oom_handler(cw_g_mem, oom_handler, NULL);
@@ -87,12 +87,12 @@ main(int argc, char **argv)
 	dbg_register(cw_g_dbg, "sockb_error");
 	dbg_register(cw_g_dbg, "socks_error");
 	dbg_register(cw_g_dbg, "sock_error");
-/*    dbg_register(cw_g_dbg, "sock_sockopt"); */
-/*    dbg_register(cw_g_dbg, "mem_verbose"); */
-/*    dbg_register(cw_g_dbg, "pezz_verbose"); */
+/*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
+/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
+/*  	dbg_register(cw_g_dbg, "pezz_verbose"); */
 
 	/* Parse command line. */
-	while (-1 != (c = getopt(argc, argv, "hVvqp:r:lf:d:"))) {
+	while ((c = getopt(argc, argv, "hVvqp:r:lf:d:")) != -1) {
 		switch (c) {
 		case 'h':
 			opt_help = TRUE;
@@ -103,10 +103,10 @@ main(int argc, char **argv)
 		case 'v':
 			opt_verbose = TRUE;
 			dbg_register(cw_g_dbg, "prog_verbose");
-/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
+/*  			dbg_register(cw_g_dbg, "mem_verbose"); */
 			dbg_register(cw_g_dbg, "sockb_verbose");
 			dbg_register(cw_g_dbg, "socks_verbose");
-/*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
+/*  			dbg_register(cw_g_dbg, "sock_sockopt"); */
 			break;
 		case 'q':
 			opt_quiet = TRUE;
@@ -121,7 +121,7 @@ main(int argc, char **argv)
 			opt_port = strtoul(optarg, NULL, 10);
 			break;
 		case 'r': {
-			char   *colon;
+			char	*colon;
 
 			colon = strstr(optarg, ":");
 			if (colon == NULL) {
@@ -164,48 +164,49 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ((TRUE == cl_error) || (optind < argc)) {
+	if ((cl_error) || (optind < argc)) {
 		_cw_out_put("Unrecognized option(s)\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
-	if (TRUE == opt_help) {
+	if (opt_help) {
 		usage();
 		goto CLERROR;
 	}
-	if (TRUE == opt_version) {
+	if (opt_version) {
 		version();
 		goto CLERROR;
 	}
 	/* Check validity of command line options. */
-	if ((TRUE == opt_verbose) && (TRUE == opt_quiet)) {
+	if ((opt_verbose) && (opt_quiet)) {
 		_cw_out_put("\"-v\" and \"-q\" are incompatible\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
-	if ((TRUE == opt_log) && (NULL != opt_dirname)) {
+	if ((opt_log) && (opt_dirname != NULL)) {
 		_cw_out_put("\"-l\" and \"-d\" are incompatible\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
-	if ((NULL != opt_dirname) && (512 < strlen(opt_dirname))) {
-		_cw_out_put("Argument to \"-d\" flag is too long (512 bytes max)\n");
+	if ((opt_dirname != NULL) && (strlen(opt_dirname) > 512)) {
+		_cw_out_put("Argument to \"-d\" flag is too long "
+		    "(512 bytes max)\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
-	if (NULL == opt_rhost) {
+	if (opt_rhost == NULL) {
 		_cw_out_put("\"-r\" flag must be specified\n");
 		usage();
 		retval = 1;
 		goto CLERROR;
 	}
 	/*
-	 * Set the per-thread signal masks such that only one thread will
-	 * catch the signal.
+	 * Set the per-thread signal masks such that only one thread will catch
+	 * the signal.
 	 */
 	sigemptyset(&handler_arg.hupset);
 	sigaddset(&handler_arg.hupset, SIGHUP);
@@ -213,15 +214,15 @@ main(int argc, char **argv)
 	thd_sigmask(SIG_BLOCK, &handler_arg.hupset);
 	thd_new(&handler_arg.sig_thd, sig_handler, (void *)&handler_arg);
 
-	if (NULL != opt_dirname) {
-		cw_sint32_t fd;
+	if (opt_dirname != NULL) {
+		cw_sint32_t	fd;
 
 		_cw_out_put_s(logfile, "[s]/[s].pid_[i].log", opt_dirname,
 		    g_progname, getpid());
 
 		fd = (cw_sint32_t)open(logfile, O_RDWR | O_CREAT | O_TRUNC,
 		    0644);
-		if (-1 == fd) {
+		if (fd == -1) {
 			if (dbg_is_registered(cw_g_dbg, "prog_error")) {
 				_cw_out_put_e("Error opening \"[s]\": [s]\n",
 				    logfile, strerror(errno));
@@ -234,7 +235,7 @@ main(int argc, char **argv)
 	if (sockb_init(1024, 2048, 4096))
 		_cw_error("Initialization failure");
 	socks = socks_new();
-	if (TRUE == socks_listen(socks, INADDR_ANY, &opt_port))
+	if (socks_listen(socks, INADDR_ANY, &opt_port))
 		exit(1);
 	if (dbg_is_registered(cw_g_dbg, "prog_verbose")) {
 		_cw_out_put_l("[s]: Listening on port [i]\n", argv[0],
@@ -249,31 +250,31 @@ main(int argc, char **argv)
 		timeout.tv_sec = 5;
 		timeout.tv_nsec = 0;
 
-		if (NULL == socks_accept(socks, &timeout, &conn->client_sock)
+		if (socks_accept(socks, &timeout, &conn->client_sock) == NULL
 		    || should_quit) {
 			sock_delete(&conn->client_sock);
 			_cw_free(conn);
 		} else {
-			if (NULL != opt_dirname) {
-				cw_sint32_t fd;
+			if (opt_dirname != NULL) {
+				cw_sint32_t	fd;
 
 				conn->is_verbose = TRUE;
 
 				conn->out = out_new(NULL);
 
 				_cw_out_put_s(logfile,
-				    "[s]/[s].pid_[i].conn[i]",
-				    opt_dirname, g_progname, getpid(),
-				    conn_num);
+				    "[s]/[s].pid_[i].conn[i]", opt_dirname,
+				    g_progname, getpid(), conn_num);
 				conn_num++;
 
 				fd = (cw_sint32_t)open(logfile, O_RDWR | O_CREAT
 				    | O_TRUNC, 0644);
-				if (-1 == fd) {
+				if (fd == -1) {
 					if (dbg_is_registered(cw_g_dbg,
 					    "prog_error")) {
-						_cw_out_put_e("Error opening \"[s]\": [s]\n",
-						    logfile, strerror(errno));
+						_cw_out_put_e("Error opening"
+						    " \"[s]\": [s]\n", logfile,
+						    strerror(errno));
 					}
 					out_delete(conn->out);
 					conn->out = NULL;
@@ -296,17 +297,17 @@ main(int argc, char **argv)
 	socks_delete(socks);
 
 	sockb_shutdown();
-CLERROR:
+	CLERROR:
 	libstash_shutdown();
 	return retval;
 }
 
-void   *
+void *
 sig_handler(void *a_arg)
 {
-	extern cw_bool_t should_quit;
-	struct handler_s *arg = (struct handler_s *)a_arg;
-	int     sig, error;
+	extern cw_bool_t	should_quit;
+	struct handler_s	*arg = (struct handler_s *)a_arg;
+	int			sig, error;
 
 	error = sigwait(&arg->hupset, &sig);
 	if (error || (sig != SIGHUP && sig != SIGINT))
@@ -318,16 +319,16 @@ sig_handler(void *a_arg)
 	return NULL;
 }
 
-char   *
+char *
 get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
-	char   *retval, *p, *p_a, *p_b, *t_str;
-	char   *c_trans, line_a[81], line_b[81];
-	char	line_sep[81] =
+	char		*retval, *p, *p_a, *p_b, *t_str;
+	char		*c_trans, line_a[81], line_b[81];
+	char		line_sep[81] =
 	    "         |                 |                 |                 |\n";
-	cw_uint32_t str_len, buf_size, i, j;
-	cw_uint8_t c;
-	size_t  len;
+	cw_uint32_t	str_len, buf_size, i, j;
+	cw_uint8_t	c;
+	size_t		len;
 
 	buf_size = buf_get_size(a_buf);
 
@@ -338,8 +339,10 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	    + 1			/* Blank line. */
 	    + 81		/* Last dashed line. */
 	    + 1)		/* Terminating \0. */
-	    +(((buf_size / 16) + 1) * 227);	/* 16 bytes data prints as 227
-						 * bytes. */
+	    +(((buf_size / 16) + 1) * 227);	/*
+						 * 16 bytes data prints as 227
+						 * bytes.
+						 */
 
 	if (a_str == NULL) {
 		/* Allocate for the first time. */
@@ -359,11 +362,8 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	memcpy(p, t_str, len);
 	p += len;
 
-	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-	    (TRUE == is_send) ? "send" : "recv",
-	    buf_size,
-	    buf_size,
-	    (buf_size != 1) ? "s" : "");
+	len = _cw_out_put_s(line_a, "[s]:0x[i|b:16] ([i]) byte[s]\n", (is_send)
+	    ? "send" : "recv", buf_size, buf_size, (buf_size != 1) ? "s" : "");
 	memcpy(p, line_a, len);
 	p += len;
 
@@ -839,24 +839,23 @@ get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	return retval;
 }
 
-char   *
+char *
 get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
-	char   *retval, *p;
-	char   *syms = "0123456789abcdef";
-	cw_uint32_t str_len, buf_size, i;
-	cw_uint8_t c;
+	char		*retval, *p;
+	char		*syms = "0123456789abcdef";
+	cw_uint32_t	str_len, buf_size, i;
+	cw_uint8_t	c;
 
 	buf_size = buf_get_size(a_buf);
 
 	/* Calculate the total size of the output. */
 	str_len = (1		/* '<' or '>'. */
 	    + (buf_size << 1)	/* Hex dump. */
-	    +1			/* Newline. */
-	    + 1			/* Null terminator. */
-	    );
+	    + 1			/* Newline. */
+	    + 1);		/* Null terminator. */
 
-	if (NULL == a_str) {
+	if (a_str == NULL) {
 		/* Allocate for the first time. */
 		retval = _cw_malloc(str_len);
 	} else {
@@ -865,7 +864,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	}
 	p = retval;
 
-	if (TRUE == is_send)
+	if (is_send)
 		p[0] = '>';
 	else
 		p[0] = '<';
@@ -890,11 +889,11 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	return retval;
 }
 
-char   *
+char *
 get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
-	char   *retval, *t_str, *p;
-	cw_uint32_t str_len, buf_size, i;
+	char		*retval, *t_str, *p;
+	cw_uint32_t	str_len, buf_size, i;
 
 	buf_size = buf_get_size(a_buf);
 
@@ -904,10 +903,9 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	    + buf_size		/* Data. */
 	    + 1			/* Newline. */
 	    + 81		/* Last dashed line. */
-	    + 1			/* Null terminator. */
-	    );
+	    + 1);		/* Null terminator. */
 
-	if (NULL == a_str) {
+	if (a_str == NULL) {
 		/* Allocate for the first time. */
 		retval = _cw_malloc(str_len);
 	} else {
@@ -925,11 +923,8 @@ get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	p += strlen(t_str);
 
 	/* Header. */
-	p += _cw_out_put_s(p, "[s]:0x[i|b:16] ([i]) byte[s]\n",
-	    (TRUE == is_send) ? "send" : "recv",
-	    buf_size,
-	    buf_size,
-	    (buf_size != 1) ? "s" : "");
+	p += _cw_out_put_s(p, "[s]:0x[i|b:16] ([i]) byte[s]\n", (is_send) ?
+	    "send" : "recv", buf_size, buf_size, (buf_size != 1) ? "s" : "");
 
 	/* Data. */
 	for (i = 0; i < buf_size; i++) {
@@ -962,9 +957,9 @@ oom_handler(const void *a_data, cw_uint32_t a_size)
 void   *
 handle_client_send(void *a_arg)
 {
-	cw_buf_t buf;
-	connection_t *conn = (connection_t *) a_arg;
-	char   *str = NULL;
+	cw_buf_t	buf;
+	connection_t	*conn = (connection_t *) a_arg;
+	char		*str = NULL;
 
 	out_put(conn->out, "New connection\n");
 
@@ -979,8 +974,8 @@ handle_client_send(void *a_arg)
 
 	/* Connect to the remote end. */
 	sock_new(&conn->remote_sock, 16384);
-	if (0 != sock_connect(&conn->remote_sock, conn->rhost, conn->rport,
-	    NULL)) {
+	if (sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL) !=
+	    0) {
 		out_put_e(conn->out, __FILE__, __LINE__, __FUNCTION__,
 		    "Error in sock_connect(&conn->remote_sock, \"[s]\", [i])\n",
 		    conn->rhost, conn->rport);
@@ -988,18 +983,18 @@ handle_client_send(void *a_arg)
 	}
 	/*
 	 * Okay, the connection is totally established now.  Create another
-	 * thread to handle the data being sent from the remote end back to
-	 * the client.  That allows both this thread and the new one to
-	 * block, waiting for data, rather than polling.
+	 * thread to handle the data being sent from the remote end back to the
+	 * client.  That allows both this thread and the new one to block,
+	 * waiting for data, rather than polling.
 	 */
 	thd_new(&conn->recv_thd, handle_client_recv, (void *)conn);
 
 	/*
-	 * Continually read data from the socket, create a out string, print
-	 * to out, then send the data on.
+	 * Continually read data from the socket, create a out string, print to
+	 * out, then send the data on.
 	 */
-	while (FALSE == conn->should_quit) {
-		if (0 > sock_read(&conn->client_sock, &buf, 0, NULL)) {
+	while (conn->should_quit == FALSE) {
+		if (sock_read(&conn->client_sock, &buf, 0, NULL) < 0) {
 			mtx_lock(&conn->lock);
 			conn->should_quit = TRUE;
 			mtx_unlock(&conn->lock);
@@ -1017,7 +1012,8 @@ handle_client_send(void *a_arg)
 					str = get_out_str_hex(&buf, TRUE, str);
 					break;
 				case ASCII:
-					str = get_out_str_ascii(&buf, TRUE, str);
+					str = get_out_str_ascii(&buf, TRUE,
+					    str);
 					break;
 				default:
 					_cw_error("Programming error");
@@ -1025,8 +1021,8 @@ handle_client_send(void *a_arg)
 
 				out_put(conn->out, "[s]", str);
 			}
-			if ((TRUE == sock_write(&conn->remote_sock, &buf)) ||
-			    (TRUE == sock_flush_out(&conn->remote_sock))) {
+			if ((sock_write(&conn->remote_sock, &buf)) ||
+			    (sock_flush_out(&conn->remote_sock))) {
 				mtx_lock(&conn->lock);
 				conn->should_quit = TRUE;
 				mtx_unlock(&conn->lock);
@@ -1036,12 +1032,12 @@ handle_client_send(void *a_arg)
 	}
 	sock_disconnect(&conn->remote_sock);
 
-	if (NULL != str)
+	if (str != NULL)
 		_cw_free(str);
 	/* Join on the recv thread. */
 	thd_join(&conn->recv_thd);
 
-RETURN:
+	RETURN:
 	/* Don't do this if the socket wasn't created. */
 	sock_delete(&conn->remote_sock);
 
@@ -1055,28 +1051,28 @@ RETURN:
 	buf_delete(&buf);
 
 	out_put(conn->out, "Connection closed\n");
-	if (NULL != conn->out)
+	if (conn->out != NULL)
 		out_delete(conn->out);
 	_cw_free(conn);
 
 	return NULL;
 }
 
-void   *
+void *
 handle_client_recv(void *a_arg)
 {
-	cw_buf_t buf;
-	connection_t *conn = (connection_t *) a_arg;
-	char   *str = NULL;
+	cw_buf_t	buf;
+	connection_t	*conn = (connection_t *) a_arg;
+	char		*str = NULL;
 
 	buf_new(&buf);
 
 	/*
-	 * Continually read data from the socket, create a string, print to
-	 * the log, then send the data on.
+	 * Continually read data from the socket, create a string, print to the
+	 * log, then send the data on.
 	 */
-	while (FALSE == conn->should_quit) {
-		if ((0 > sock_read(&conn->remote_sock, &buf, 0, NULL)) ||
+	while (conn->should_quit == FALSE) {
+		if ((sock_read(&conn->remote_sock, &buf, 0, NULL) < 0) ||
 		    (conn->should_quit)) {
 			mtx_lock(&conn->lock);
 			conn->should_quit = TRUE;
@@ -1102,8 +1098,8 @@ handle_client_recv(void *a_arg)
 
 				out_put(conn->out, "[s]", str);
 			}
-			if ((TRUE == sock_write(&conn->client_sock, &buf))
-			    || (TRUE == sock_flush_out(&conn->client_sock))) {
+			if ((sock_write(&conn->client_sock, &buf)) ||
+			    (sock_flush_out(&conn->client_sock))) {
 				mtx_lock(&conn->lock);
 				conn->should_quit = TRUE;
 				mtx_unlock(&conn->lock);
@@ -1113,7 +1109,7 @@ handle_client_recv(void *a_arg)
 	}
 	sock_disconnect(&conn->client_sock);
 
-	if (NULL != str)
+	if (str != NULL)
 		_cw_free(str);
 	buf_delete(&buf);
 	return NULL;
@@ -1122,8 +1118,7 @@ handle_client_recv(void *a_arg)
 void
 usage(void)
 {
-	_cw_out_put(
-	    "[s] usage:\n"
+	_cw_out_put("[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
 	    "    [s] [[-v | -q] [[-f {p|h|a}] [[-l | -d <dirpath>] -p <port> -r [[<rhost>:]<rport>\n"
@@ -1157,8 +1152,8 @@ version(void)
 const char *
 basename(const char *a_str)
 {
-	const char *retval = NULL;
-	cw_uint32_t i;
+	const char	*retval = NULL;
+	cw_uint32_t	i;
 
 	_cw_check_ptr(a_str);
 

@@ -22,39 +22,39 @@
 #define _LIBSOCK_BLOW_DEFAULT_NBLOCKS 65536
 
 /* Function Prototypes. */
-void    usage(const char *a_progname);
-void    version(const char *a_progname);
-const char *basename(const char *a_str);
+void		usage(const char *a_progname);
+void		version(const char *a_progname);
+const char	*basename(const char *a_str);
 
 int
 main(int argc, char **argv)
 {
-	int     retval = 0;
-	cw_uint32_t i, j;
-	cw_sock_t *sock_array = NULL;
-	struct timespec timeout;
-	cw_buf_t buf, t_buf;
-	cw_bufc_t bufc;
-	void   *buffer;
+	int		retval = 0;
+	cw_uint32_t	i, j;
+	cw_sock_t	*sock_array = NULL;
+	struct timespec	timeout;
+	cw_buf_t	buf, t_buf;
+	cw_bufc_t	bufc;
+	void		*buffer;
 
 	/* Command line parsing variables. */
-	int     c;
-	cw_bool_t cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
-	cw_uint32_t opt_nsocks = _LIBSOCK_BLOW_DEFAULT_NSOCKS;
-	cw_uint32_t opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
-	cw_uint32_t opt_nblocks = _LIBSOCK_BLOW_DEFAULT_NBLOCKS;
-	int     opt_rport = 0;
-	char   *opt_rhost = NULL;
+	int		c;
+	cw_bool_t	cl_error = FALSE, opt_help = FALSE, opt_version = FALSE;
+	cw_uint32_t	opt_nsocks = _LIBSOCK_BLOW_DEFAULT_NSOCKS;
+	cw_uint32_t	opt_bsize = _LIBSOCK_BLOW_DEFAULT_BSIZE;
+	cw_uint32_t	opt_nblocks = _LIBSOCK_BLOW_DEFAULT_NBLOCKS;
+	int		opt_rport = 0;
+	char		*opt_rhost = NULL;
 
 	libstash_init();
 	dbg_register(cw_g_dbg, "mem_error");
 	dbg_register(cw_g_dbg, "prog_error");
-/*    dbg_register(cw_g_dbg, "sockb_verbose"); */
+/*  	dbg_register(cw_g_dbg, "sockb_verbose"); */
 	dbg_register(cw_g_dbg, "sockb_error");
 	dbg_register(cw_g_dbg, "sock_error");
 
 	/* Parse command line. */
-	while (-1 != (c = getopt(argc, argv, "hVn:b:c:r:"))) {
+	while ((c = getopt(argc, argv, "hVn:b:c:r:")) != -1) {
 		switch (c) {
 		case 'h':
 			opt_help = TRUE;
@@ -72,7 +72,7 @@ main(int argc, char **argv)
 			opt_nblocks = strtoul(optarg, NULL, 10);
 			break;
 		case 'r': {
-			char   *colon;
+			char	*colon;
 
 			colon = strstr(optarg, ":");
 			if (colon == NULL) {
@@ -92,36 +92,36 @@ main(int argc, char **argv)
 		}
 	}
 
-	if ((TRUE == cl_error) || (optind < argc)) {
+	if ((cl_error) || (optind < argc)) {
 		_cw_out_put("Unrecognized option(s)\n");
 		usage(basename(argv[0]));
 		retval = 1;
 		goto CLERROR;
 	}
-	if (TRUE == opt_help) {
+	if (opt_help) {
 		usage(basename(argv[0]));
 		goto CLERROR;
 	}
-	if (TRUE == opt_version) {
+	if (opt_version) {
 		version(basename(argv[0]));
 		goto CLERROR;
 	}
-	if (NULL == opt_rhost) {
+	if (opt_rhost == NULL) {
 		_cw_out_put("Remote host:port not specified\n");
 		retval = 1;
 		goto CLERROR;
 	}
-	if (0 == opt_bsize) {
+	if (opt_bsize == 0) {
 		_cw_out_put("Invalid block size\n");
 		retval = 1;
 		goto CLERROR;
 	}
-	if (0 == opt_nsocks) {
+	if (opt_nsocks == 0) {
 		_cw_out_put("Invalid number of connections\n");
 		retval = 1;
 		goto CLERROR;
 	}
-	if (0 == opt_nblocks) {
+	if (opt_nblocks == 0) {
 		_cw_out_put("Invalid number of blocks\n");
 		retval = 1;
 		goto CLERROR;
@@ -130,14 +130,14 @@ main(int argc, char **argv)
 		_cw_error("Initialization failure in sockb_init()");
 	/* Open the connections. */
 	sock_array = (cw_sock_t *)_cw_calloc(opt_nsocks, sizeof(cw_sock_t));
-	if (NULL == sock_array)
+	if (sock_array == NULL)
 		_cw_error("Memory allocation error");
 	for (i = 0; i < opt_nsocks; i++) {
 		sock_new(&sock_array[i], opt_bsize);
 		timeout.tv_sec = 10;
 		timeout.tv_nsec = 0;
-		if (0 != sock_connect(&sock_array[i], opt_rhost, opt_rport,
-		    &timeout)) {
+		if (sock_connect(&sock_array[i], opt_rhost, opt_rport, &timeout)
+		    != 0) {
 			_cw_out_put_e("Error in sock_connect()\n");
 			retval = 1;
 			for (j = 0; j < i; j++)
@@ -151,11 +151,11 @@ main(int argc, char **argv)
 	buf_new(&t_buf);
 	bufc_new(&bufc, NULL, NULL);
 	buffer = _cw_malloc(opt_bsize);
-	if (NULL == buffer)
+	if (buffer == NULL)
 		_cw_error("Memory allocation error");
 	bufc_set_buffer(&bufc, buffer, opt_bsize, TRUE, (cw_opaque_dealloc_t
 	    *)mem_free, cw_g_mem);
-	if (TRUE == buf_append_bufc(&buf, &bufc, 0, opt_bsize))
+	if (buf_append_bufc(&buf, &bufc, 0, opt_bsize))
 		_cw_error("Memory allocation error");
 	bufc_delete(&bufc);
 
@@ -166,34 +166,31 @@ main(int argc, char **argv)
 	 * overhead).
 	 */
 	for (i = 0; i < opt_nblocks; i++) {
-		if (0xf == (i & 0xf)) {
+		if ((i & 0xf) == 0xf) {
 			for (j = 0; j < opt_nsocks; j++) {
-				if (TRUE == sock_flush_out(&sock_array[j])) {
+				if (sock_flush_out(&sock_array[j])) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
-					    NULL,
-					    "Error in sock_flush_out() for connection [i]\n",
-					    j);
+					    NULL, "Error in sock_flush_out() "
+					    "for connection [i]\n", j);
 					goto SHUTDOWN;
 				}
-				if (TRUE == buf_catenate_buf(&t_buf, &buf, TRUE))
+				if (buf_catenate_buf(&t_buf, &buf, TRUE))
 					_cw_error("Memory allocation error");
-				if (TRUE == sock_write(&sock_array[j], &t_buf)) {
+				if (sock_write(&sock_array[j], &t_buf)) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
-					    NULL,
-					    "Error in sock_write() for connection [i]\n",
-					    j);
+					    NULL, "Error in sock_write() "
+					    "for connection [i]\n", j);
 					goto SHUTDOWN;
 				}
 			}
 		} else {
 			for (j = 0; j < opt_nsocks; j++) {
-				if (TRUE == buf_catenate_buf(&t_buf, &buf, TRUE))
+				if (buf_catenate_buf(&t_buf, &buf, TRUE))
 					_cw_error("Memory allocation error");
-				if (TRUE == sock_write(&sock_array[j], &t_buf)) {
+				if (sock_write(&sock_array[j], &t_buf)) {
 					out_put_e(cw_g_out, __FILE__, __LINE__,
-					    NULL,
-					    "Error in sock_write() for connection [i]\n",
-					    j);
+					    NULL, "Error in sock_write() "
+					    "for connection [i]\n", j);
 					goto SHUTDOWN;
 				}
 			}
@@ -201,7 +198,7 @@ main(int argc, char **argv)
 	}
 	buf_delete(&buf);
 
-SHUTDOWN:
+	SHUTDOWN:
 	/* Flush and close all the sockets. */
 	for (i = 0; i < opt_nsocks; i++) {
 		sock_flush_out(&sock_array[i]);
@@ -209,11 +206,11 @@ SHUTDOWN:
 		_cw_out_put_l("Connection closed ([i])\n", i);
 	}
 
-RETURN:
-	if (NULL != sock_array)
+	RETURN:
+	if (sock_array != NULL)
 		_cw_free(sock_array);
 	sockb_shutdown();
-CLERROR:
+	CLERROR:
 	libstash_shutdown();
 	return retval;
 }
@@ -221,8 +218,7 @@ CLERROR:
 void
 usage(const char *a_progname)
 {
-	_cw_out_put(
-	    "[s] usage:\n"
+	_cw_out_put("[s] usage:\n"
 	    "    [s] -h\n"
 	    "    [s] -V\n"
 	    "    [s] [[-n <nsocks>] [[-b <bsize>] [[-c <nblocks>] -r [[<rhost>:]<rport>\n"
@@ -256,8 +252,8 @@ version(const char *a_progname)
 const char *
 basename(const char *a_str)
 {
-	const char *retval = NULL;
-	cw_uint32_t i;
+	const char	*retval = NULL;
+	cw_uint32_t	i;
 
 	_cw_check_ptr(a_str);
 
