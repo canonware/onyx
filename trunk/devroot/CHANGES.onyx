@@ -1,3 +1,8 @@
+2003-10-05 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_p_nxmod_delete() : Add support
+	  for a hook function that is called just before a module is unloaded.
+
 2003-10-02 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_{while,until}() : Replace an

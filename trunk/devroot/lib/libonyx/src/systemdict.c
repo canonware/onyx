@@ -7016,6 +7016,8 @@ systemdict_p_nxmod_new(void *a_handle)
     /* Set the default iteration for module destruction to 1.  This number can
      * be overridden on a per-module basis in the module initialization code. */
     retval->iter = 1;
+    /* There is no pre-unload hook called by default. */
+    retval->pre_unload_hook = NULL;
     retval->dlhandle = a_handle;
 
     return retval;
@@ -7037,6 +7039,11 @@ systemdict_p_nxmod_delete(void *a_data, cw_uint32_t a_iter)
     {
 	retval = TRUE;
 	goto RETURN;
+    }
+
+    if (nxmod->pre_unload_hook != NULL)
+    {
+	nxmod->pre_unload_hook();
     }
 
 #ifdef CW_MODLOAD_VERBOSE
