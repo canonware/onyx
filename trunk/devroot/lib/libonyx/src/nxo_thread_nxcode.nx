@@ -77,11 +77,11 @@ def
 			% It saves quite a bit of space, so seems worth the
 			% obfuscation.
 			%
-			dup cvx exch [exch /throw load /eval cvx] cvx
+			dup [exch /throw load /eval cvx] cvx
 		} foreach
 	} if
 
-	/handleerror cvx {
+	/handleerror {
 		/currenterror load begin
 
 		% If this is a syntaxerror, print the line and column numbers.
