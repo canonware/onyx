@@ -1,0 +1,108 @@
+# -*-mode:makefile-*-
+# @configure_input@
+##############################################################################
+# $Source$
+# $Author: jasone $
+# Current revision: $Revision: 2 $
+# Last modified: $Date: 1997-12-07 17:34:03 -0800 (Sun, 07 Dec 1997) $
+#
+# Description: Makefile for sqrl include dir.
+#              
+##############################################################################
+
+#
+# external variables
+#
+
+SHELL = /bin/sh
+MAKE  = /usr/bin/make
+
+#
+# variables
+#
+
+# file lists
+DIRS =
+
+#
+# implicit rules
+#
+
+.SUFFIXES:
+
+#
+# user 'make'ables
+#
+
+all: suball hereall FORCE
+
+check: subcheck herecheck FORCE
+
+install: subinstall hereinstall FORCE
+
+uninstall: subuninstall hereuninstall FORCE
+
+clean: subclean hereclean FORCE
+
+distclean: subdistclean hereclean heredistclean
+
+targets:
+	@echo "User 'make'ables: all (default)"
+	@echo "                  check"
+	@echo "                  install"
+	@echo "                  uninstall"
+	@echo "                  clean"
+	@echo "                  distclean"
+	@echo "                  targets"
+
+#
+# internal build rules
+#
+
+FORCE:
+
+# all
+suball:
+	@$(SHELL) -c 'for i in $(DIRS); do cd $$i; $(MAKE) -i all; cd -; done'
+
+hereall: 
+
+# check
+subcheck:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i check; cd -; done'
+
+herecheck: 
+
+# install
+subinstall:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i install; cd -; done'
+
+hereinstall: hereall
+
+# uninstall
+subuninstall:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i uninstall; cd -; done'
+
+hereuninstall: 
+
+# clean
+subclean:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i clean; cd -; done'
+
+hereclean:
+	rm -f *~
+	rm -f *.bak *.BAK
+	rm -f core
+
+# distclean
+subdistclean:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i distclean; cd -; done'
+
+heredistclean:
+	rm -f "#"*"#"
+	rm -f Makefile

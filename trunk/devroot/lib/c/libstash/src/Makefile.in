@@ -1,0 +1,156 @@
+# -*-mode:makefile-*-
+# @configure_input@
+##############################################################################
+# $Source$
+# $Author: jasone $
+# Current revision: $Revision: 2 $
+# Last modified: $Date: 1997-12-07 17:34:03 -0800 (Sun, 07 Dec 1997) $
+#
+# Description: Makefile for SQuirreL source code.
+#              
+##############################################################################
+
+#
+# external variables
+#
+
+SHELL   = /bin/sh
+MAKE    = /usr/bin/make
+CC	= @CC@
+AR	= @AR@
+RANLIB	= @RANLIB@
+INSTALL	= @INSTALL@
+
+INCS    = -I@top_srcdir@ -I@top_srcdir@/lib_common/include
+CFLAGS  = @CFLAGS@
+
+DEFINES = -D_REENTRANT @DEFS@
+LIBS    = -L@top_srcdir@/src $(STATLIB:%=-l%) @LIBS@
+
+#
+# variables
+#
+
+# file lists
+SRCS     = log.c
+OBJS     = $(SRCS:.c=.o)
+DIRS     = 
+STATLIB  = common
+TARGETS  = 
+
+#
+# implicit rules
+#
+
+.SUFFIXES:
+.SUFFIXES: .c .h .o .d
+
+.c.o:
+	$(CC) -c $< $(CFLAGS) $(INCS) $(DEFINES)
+
+#
+# user 'make'ables
+#
+
+all: suball hereall FORCE
+
+check: subcheck herecheck FORCE
+
+install: subinstall hereinstall FORCE
+
+uninstall: subuninstall hereuninstall FORCE
+
+clean: subclean hereclean FORCE
+
+distclean: subdistclean hereclean heredistclean FORCE
+
+targets:
+	@echo "User 'make'ables: all (default)"
+	@echo "                  check"
+	@echo "                  install"
+	@echo "                  uninstall"
+	@echo "                  clean"
+	@echo "                  distclean"
+	@echo "                  targets"
+
+#
+# internal build rules
+#
+
+FORCE:
+
+# all
+suball:
+	@$(SHELL) -c 'for i in $(DIRS); do cd $$i; $(MAKE) -i all; cd -; done'
+
+hereall: $(TARGETS) $(STATLIB)
+
+# check
+subcheck:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i check; cd -; done'
+
+herecheck:
+
+# install
+subinstall:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i install; cd -; done'
+
+hereinstall: hereall
+	$(SHELL) -c '$(INSTALL) -d -m 755 @prefix@/bin/'
+	$(SHELL) -c \
+	'for i in $(TARGETS); do \
+	$(INSTALL) -s -m 755 $$i @prefix@/bin/$$i; done'
+
+# uninstall
+subuninstall:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i uninstall; cd -; done'
+
+hereuninstall: 
+	@$(SHELL) -c \
+	'for i in $(TARGETS); do rm -f @prefix@/bin/$$i; done'
+
+# clean
+subclean:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i clean; cd -; done'
+
+hereclean:
+	rm -f *.o *~ *.d
+	rm -f $(STATLIB:%=lib%.a)
+	rm -f *.bak *.BAK
+	rm -f core
+
+# distclean
+subdistclean:
+	@$(SHELL) -c \
+	'for i in $(DIRS); do cd $$i; $(MAKE) -i distclean; cd -; done'
+
+heredistclean:
+	rm -f "#"*"#"
+	rm -f $(TARGETS)
+	rm -f $(OBJS)
+	rm -f Makefile
+
+$(STATLIB:%=lib%.a): $(OBJS)
+	$(AR) cr $@ $?
+	$(RANLIB) $@
+
+$(TARGETS): $(STATLIB:%=lib%.a) $(TARGETS:=.o)
+	$(CC) -o $@ $(@:=.o) $(LIBS)
+
+#
+# Rule for dependency file creation
+#
+
+%.d: %.c
+	$(SHELL) -ec "$(CC) -M $(DEFINES) $(INCS) $< \
+	| sed \"s/\($*\)\.o\([ :]*\)/\1.o \1.d \2/g\" > $@"
+
+#
+# Include dependencies.
+#
+
+include $(SRCS:.c=.d) $(TARGETS:=.d)
