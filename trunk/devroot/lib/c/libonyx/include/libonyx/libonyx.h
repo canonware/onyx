@@ -314,7 +314,7 @@ extern cw_mem_t	*cw_g_mem;
  */
 #define _cw_error(a)							\
 	do {								\
-		fprintf(stderr, "%s:%u%s(): Error: %s\n", __FILE__,	\
+		fprintf(stderr, "%s:%u:%s(): Error: %s\n", __FILE__,	\
 		    __LINE__, __FUNCTION__, a);				\
 		abort();						\
 	} while (0)
