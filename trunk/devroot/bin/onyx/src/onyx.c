@@ -758,7 +758,7 @@ prompt(EditLine *a_el)
 	    /* Copy the prompt string to a global buffer. */
 	    maxlen
 		= (plen > CW_PROMPT_STRLEN - 1) ? CW_PROMPT_STRLEN - 1 : plen;
-	    strncpy(prompt_str, pstr, CW_PROMPT_STRLEN - 1);
+	    strncpy(prompt_str, pstr, maxlen);
 	}
 
 	prompt_str[maxlen] = '\0';

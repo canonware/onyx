@@ -1,3 +1,7 @@
+2002-01-04  Jason Evans  <jasone@canonware.com>
+
+	* src/onyx.c (prompt): Fix an out-of-bounds memory access.
+
 2001-11-13  Jason Evans  <jasone@canonware.com>
 
 	* src/onyx_ops.c (onyx_ops_modload_sym_delete): Increase the GC sweep
