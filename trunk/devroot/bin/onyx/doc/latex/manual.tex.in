@@ -65,10 +65,10 @@ initialization, some of which can be controlled directly by the user.
 editing.}
 \item{Language changes specific to interactive invocation are made (see
 Section~\ref{sec:onyx_lang_diffs}).}
-\item{If the {\tt ONYXRC} environment variable is set, then the contents of the
-file it specifies are evaluated.}
 \item{Initialization expressions and scripts (specified by the {\tt -i} and {\tt
 -s} flags) are evaluated in the order they are specified on the command line.}
+\item{If the {\tt ONYXRC} environment variable is set, then the contents of the
+file it specifies are evaluated.}
 \item{stdin is evaluated.}
 \end{enumerate}
 
@@ -94,6 +94,12 @@ called as a more intuitive name for resuming.}
 \index{promptstring@\onyxop{}{promptstring}{}}
 \item{The name ``promptstring'' is defined in systemdict; it takes no arguments
 and returns a string.  The return string is used as the interactive prompt.}
+\label{onyx_interactive:preprompt}
+\index{preprompt@\onyxop{}{preprompt}{}}
+\item{If the name ``preprompt'' is defined in any of the dictionaries on dstack,
+it will be called just before the prompt is displayed.  This is provided
+separately from ``promptstring'', which is potentially called multiple times if
+the prompt needs to be refreshed.}
 \end{itemize}
 
 If \binname{onyx} is being run non-interactively:
