@@ -348,8 +348,14 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 
     if (stack->nspare < CW_LIBONYX_STACK_CACHE)
     {
+#ifdef CW_DBG
+	cw_nxoe_stacko_t *spare = ql_first(&stack->stack);
+#endif
 	ql_first(&stack->stack) = qr_next(ql_first(&stack->stack), link);
 	stack->nspare++;
+#ifdef CW_DBG
+	memset(&spare->nxo, 0x5a, sizeof(cw_nxo_t));
+#endif
     }
     else
     {
@@ -406,6 +412,9 @@ nxo_stack_bpop(cw_nxo_t *a_nxo)
     {
 	qr_meld(ql_first(&stack->stack), stacko, cw_nxoe_stacko_t, link);
 	stack->nspare++;
+#ifdef CW_DBG
+	memset(&stacko->nxo, 0x5a, sizeof(cw_nxo_t));
+#endif
     }
     else
     {
@@ -447,6 +456,9 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
     {
 	cw_nxoe_stacko_t *top;
 	cw_uint32_t i;
+#ifdef CW_DBG
+	cw_nxoe_stacko_t *spare = ql_first(&stack->stack);
+#endif
 
 	/* Get a pointer to what will be the new stack top. */
 	for (i = 0, top = ql_first(&stack->stack); i < a_count; i++)
@@ -456,6 +468,13 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 
 	ql_first(&stack->stack) = top;
 	stack->nspare += a_count;
+#ifdef CW_DBG
+	for (i = 0; i < a_count; i++)
+	{
+	    memset(&spare->nxo, 0x5a, sizeof(cw_nxo_t));
+	    spare = qr_next(spare, link);
+	}
+#endif
     }
     else
     {
@@ -526,6 +545,13 @@ nxo_stack_nbpop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 	}
 
 	stack->nspare += a_count;
+#ifdef CW_DBG
+	for (i = 0; i < a_count; i++)
+	{
+	    memset(&bottom->nxo, 0x5a, sizeof(cw_nxo_t));
+	    bottom = qr_next(bottom, link);
+	}
+#endif
     }
     else
     {
@@ -574,6 +600,9 @@ nxo_stack_remove(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	qr_before_insert(ql_first(&stack->stack),
 			 (cw_nxoe_stacko_t *) a_object, link);
 	stack->nspare++;
+#ifdef CW_DBG
+	memset(a_object, 0x5a, sizeof(cw_nxo_t));
+#endif
     }
     else
     {

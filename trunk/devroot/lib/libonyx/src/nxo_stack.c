@@ -144,6 +144,9 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
     cw_nxoe_stacko_t *top, *stacko, *tstacko;
+#ifdef CW_DBG
+    cw_nxoe_stacko_t *spare = ql_first(&a_stack->stack);
+#endif
 
     /* We need to discard some spares, so get a pointer to the beginning of the
      * region to be removed from the ring. */
@@ -195,6 +198,13 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     }
 
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;
+
+#ifdef CW_DBG
+    for (; spare != ql_first(&a_stack->stack); spare = qr_next(spare, link))
+    {
+	memset(&spare->nxo, 0x5a, sizeof(cw_nxo_t));
+    }
+#endif
 }
 
 /* This function handles a special case for nxo_stack_nbpop(), but is done as a
@@ -263,4 +273,11 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     }
 
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;
+
+#ifdef CW_DBG
+    for (; bottom != ql_first(&a_stack->stack); bottom = qr_next(bottom, link))
+    {
+	memset(&bottom->nxo, 0x5a, sizeof(cw_nxo_t));
+    }
+#endif
 }
