@@ -504,7 +504,7 @@ stila_p_collect(cw_stila_t *a_stila)
 #endif
 
 			/*
-			 * If object is white, color it.
+			 * If object is white (and registered), color it.
 			 */
 			if ((stiloe_l_color_get(stiloe) == a_stila->white) &&
 			    stiloe_l_registered_get(stiloe)) {
