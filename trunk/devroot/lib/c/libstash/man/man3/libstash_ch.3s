@@ -17,8 +17,8 @@ ch - Chained hashing.
 .br
 .B ch_new
 .RI ( "cw_ch_t * a_ch" ", " "cw_uint32_t a_table_size" ", "
-.IR "cw_pezz_t * a_chi_pezz" ", " "ch_hash_t * a_hash" ", "
-.IR "ch_key_comp_t * a_key_comp" )
+.IR "cw_pezz_t * a_chi_pezz" ", " "cw_ch_hash_t * a_hash" ", "
+.IR "cw_ch_key_comp_t * a_key_comp" )
 
 .I void
 .br
@@ -110,8 +110,8 @@ the number of items can vary wildly.
 .br
 .B ch_new
 .RI ( "cw_ch_t * a_ch" ", " "cw_uint32_t a_table_size" ", "
-.IR "cw_pezz_t * a_chi_pezz" ", " "ch_hash_t * a_hash" ", "
-.IR "ch_key_comp_t * a_key_comp" )
+.IR "cw_pezz_t * a_chi_pezz" ", " "cw_ch_hash_t * a_hash" ", "
+.IR "cw_ch_key_comp_t * a_key_comp" )
 .br
 Input(s):
 .RS
@@ -127,7 +127,7 @@ Number of slots in the hash table.
 .RE
 .IR a_chi_pezz :
 .RS
-Non-NULL: Pointer to a pezz from which to allocate cw_chi_t structures
+Non-NULL: Pointer to a pezz from which to allocate cw_chi_t structures.
 .br
 NULL: Allocate cw_chi_t structures using the mem class.
 .RE
@@ -566,7 +566,7 @@ Test two keys (pointers) for equality.
 .RE
 
 .SH SEE ALSO
-libstash(3s).
+libstash(3s), libstash_pezz(3s).
 
 .SH HISTORY
 Written by Jason Evans <jasone@canonware.com>.
