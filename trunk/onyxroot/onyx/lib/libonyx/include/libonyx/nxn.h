@@ -10,530 +10,552 @@
  *
  ******************************************************************************/
 
-extern const cw_uint8_t *cw_g_nx_names[];
+/* Define some cpp magic to allow this file to be treated differently when
+ * included by nxn.c, so that cw_g_nx_names can be defined there. */
+#ifdef CW_NXN_C_
+#define NXN_XENTRY(a_nxn, a_str)	a_str
+#else
+#define NXN_XENTRY(a_nxn, a_str)	a_nxn
+#endif
+#define NXN_SENTRY(a_nxn, a_str)	NXN_XENTRY(NXN_##a_nxn, a_str)
+#define NXN_ENTRY(a_name)		NXN_XENTRY(NXN_##a_name, #a_name)
 
-/* Same order as in nxn.c. */
+/* If nxn.c is including this file the second time, then the following is read
+ * as an array of string constants.  Otherwise, it is read as an enumeration,
+ * which directly corresponds to the array of string constants.  This trickery
+ * is lamentable, but is better than the alternative of maintaining the two
+ * representations separately. */
+#ifdef CW_NXN_C_
+const cw_uint8_t *cw_g_nx_names[] =
+#else
+extern const cw_uint8_t *cw_g_nx_names[];
 typedef enum
+#endif
 {
-    NXN_ZERO,
-    NXN_sym_lp,
-    NXN_sym_rp,
-    NXN_sym_lt,
-    NXN_sym_gt,
-    NXN_sym_lb,
-    NXN_sym_rb,
-    NXN_abs,
+    NXN_SENTRY(ZERO, ""),
+    NXN_SENTRY(sym_lp, "("),
+    NXN_SENTRY(sym_rp, ")"),
+    NXN_SENTRY(sym_lt, "<"),
+    NXN_SENTRY(sym_gt, ">"),
+    NXN_SENTRY(sym_lb, "["),
+    NXN_SENTRY(sym_rb, "]"),
+    NXN_ENTRY(abs),
 #ifdef CW_POSIX
-    NXN_accept,
+    NXN_ENTRY(accept),
 #endif
-    NXN_active,
-    NXN_add,
-    NXN_adn,
-    NXN_and,
-    NXN_argv,
-    NXN_array,
-    NXN_arraytype,
+    NXN_ENTRY(active),
+    NXN_ENTRY(add),
+    NXN_ENTRY(adn),
+    NXN_ENTRY(and),
+    NXN_ENTRY(argv),
+    NXN_ENTRY(array),
+    NXN_ENTRY(arraytype),
 #ifdef CW_REAL
-    NXN_atan,
+    NXN_ENTRY(atan),
 #endif
 #ifdef CW_POSIX
-    NXN_atime,
+    NXN_ENTRY(atime),
 #endif
-    NXN_aup,
-    NXN_bdup,
-    NXN_begin,
-    NXN_bind,
+    NXN_ENTRY(aup),
+    NXN_ENTRY(bdup),
+    NXN_ENTRY(begin),
+    NXN_ENTRY(bind),
 #ifdef CW_POSIX
-    NXN_bindsocket,
-    NXN_blksize,
-    NXN_blocks,
+    NXN_ENTRY(bindsocket),
+    NXN_ENTRY(blksize),
+    NXN_ENTRY(blocks),
 #endif
-    NXN_booleantype,
-    NXN_bpop,
+    NXN_ENTRY(booleantype),
+    NXN_ENTRY(bpop),
 #ifdef CW_THREADS
-    NXN_broadcast,
+    NXN_ENTRY(broadcast),
 #endif
-    NXN_bytesavailable,
-    NXN_cat,
+    NXN_ENTRY(bytesavailable),
+    NXN_ENTRY(cat),
 #ifdef CW_POSIX
-    NXN_cd,
+    NXN_ENTRY(cd),
 #endif
 #ifdef CW_REAL
-    NXN_ceiling,
+    NXN_ENTRY(ceiling),
 #endif
 #ifdef CW_POSIX
-    NXN_chmod,
-    NXN_chown,
-    NXN_chroot,
+    NXN_ENTRY(chmod),
+    NXN_ENTRY(chown),
+    NXN_ENTRY(chroot),
 #endif
-    NXN_clear,
-    NXN_cleartomark,
+    NXN_ENTRY(clear),
+    NXN_ENTRY(cleartomark),
 #ifdef CW_POSIX
-    NXN_close,
+    NXN_ENTRY(close),
 #endif
-    NXN_collect,
+    NXN_ENTRY(collect),
 #ifdef CW_THREADS
-    NXN_condition,
-    NXN_conditiontype,
+    NXN_ENTRY(condition),
+    NXN_ENTRY(conditiontype),
 #endif
 #ifdef CW_POSIX
-    NXN_connect,
+    NXN_ENTRY(connect),
 #endif
-    NXN_copy,
+    NXN_ENTRY(copy),
 #ifdef CW_REAL
-    NXN_cos,
+    NXN_ENTRY(cos),
 #endif
-    NXN_count,
-    NXN_countdstack,
-    NXN_countestack,
-    NXN_counttomark,
+    NXN_ENTRY(count),
+    NXN_ENTRY(countdstack),
+    NXN_ENTRY(countestack),
+    NXN_ENTRY(counttomark),
 #ifdef CW_POSIX
-    NXN_ctime,
+    NXN_ENTRY(ctime),
 #endif
-    NXN_currentdict,
+    NXN_ENTRY(currentdict),
 #ifdef CW_THREADS
-    NXN_currentlocking,
+    NXN_ENTRY(currentlocking),
 #endif
 #ifdef CW_REAL
-    NXN_cvds,
+    NXN_ENTRY(cvds),
 #endif
-    NXN_cve,
+    NXN_ENTRY(cve),
 #ifdef CW_REAL
-    NXN_cves,
+    NXN_ENTRY(cves),
 #endif
-    NXN_cvlit,
-    NXN_cvn,
-    NXN_cvrs,
-    NXN_cvs,
-    NXN_cvx,
-    NXN_dec,
-    NXN_def,
+    NXN_ENTRY(cvlit),
+    NXN_ENTRY(cvn),
+    NXN_ENTRY(cvrs),
+    NXN_ENTRY(cvs),
+    NXN_ENTRY(cvx),
+    NXN_ENTRY(dec),
+    NXN_ENTRY(def),
 #ifdef CW_THREADS
-    NXN_detach,
+    NXN_ENTRY(detach),
 #endif
 #ifdef CW_POSIX
-    NXN_dev,
+    NXN_ENTRY(dev),
 #endif
-    NXN_dict,
-    NXN_dicttype,
-    NXN_die,
+    NXN_ENTRY(dict),
+    NXN_ENTRY(dicttype),
+    NXN_ENTRY(die),
 #ifdef CW_POSIX
-    NXN_dirforeach,
+    NXN_ENTRY(dirforeach),
 #endif
 #ifdef CW_REAL
-    NXN_div,
+    NXN_ENTRY(div),
 #endif
-    NXN_dn,
-    NXN_dstack,
-    NXN_dup,
-    NXN_echeck,
+    NXN_ENTRY(dn),
+    NXN_ENTRY(dstack),
+    NXN_ENTRY(dup),
+    NXN_ENTRY(echeck),
 #ifdef CW_POSIX
-    NXN_egid,
+    NXN_ENTRY(egid),
 #endif
-    NXN_end,
+    NXN_ENTRY(end),
 #ifdef CW_POSIX
-    NXN_envdict,
+    NXN_ENTRY(envdict),
 #endif
-    NXN_eq,
-    NXN_errorname,
-    NXN_estack,
-    NXN_estackoverflow,
+    NXN_ENTRY(eq),
+    NXN_ENTRY(errorname),
+    NXN_ENTRY(estack),
+    NXN_ENTRY(estackoverflow),
 #ifdef CW_POSIX
-    NXN_euid,
+    NXN_ENTRY(euid),
 #endif
-    NXN_eval,
-    NXN_exch,
+    NXN_ENTRY(eval),
+    NXN_ENTRY(exch),
 #ifdef CW_POSIX
-    NXN_exec,
+    NXN_ENTRY(exec),
 #endif
-    NXN_exit,
-    NXN_exp,
-    NXN_false,
-    NXN_filetype,
-    NXN_finotype,
+    NXN_ENTRY(exit),
+    NXN_ENTRY(exp),
+    NXN_ENTRY(false),
+    NXN_ENTRY(filetype),
+    NXN_ENTRY(finotype),
 #ifdef CW_REAL
-    NXN_floor,
+    NXN_ENTRY(floor),
 #endif
-    NXN_flush,
-    NXN_flushfile,
-    NXN_for,
-    NXN_foreach,
+    NXN_ENTRY(flush),
+    NXN_ENTRY(flushfile),
+    NXN_ENTRY(for),
+    NXN_ENTRY(foreach),
 #ifdef CW_POSIX
-    NXN_fork,
+    NXN_ENTRY(fork),
 #endif
-    NXN_gcdict,
-    NXN_ge,
-    NXN_get,
-    NXN_getinterval,
+    NXN_ENTRY(gcdict),
+    NXN_ENTRY(ge),
+    NXN_ENTRY(get),
+    NXN_ENTRY(getinterval),
 #ifdef CW_POSIX
-    NXN_gid,
+    NXN_ENTRY(gid),
 #endif
-    NXN_globaldict,
+    NXN_ENTRY(globaldict),
 #ifdef CW_THREADS
-    NXN_gstderr,
-    NXN_gstdin,
-    NXN_gstdout,
+    NXN_ENTRY(gstderr),
+    NXN_ENTRY(gstdin),
+    NXN_ENTRY(gstdout),
 #endif
-    NXN_gt,
-    NXN_hooktag,
-    NXN_hooktype,
+    NXN_ENTRY(gt),
+    NXN_ENTRY(hooktag),
+    NXN_ENTRY(hooktype),
 #ifdef CW_POSIX
-    NXN_hostbyname,
+    NXN_ENTRY(hostbyname),
 #endif
-    NXN_ibdup,
-    NXN_ibpop,
-    NXN_idiv,
-    NXN_idup,
-    NXN_if,
-    NXN_ifelse,
-    NXN_inc,
+    NXN_ENTRY(ibdup),
+    NXN_ENTRY(ibpop),
+    NXN_ENTRY(idiv),
+    NXN_ENTRY(idup),
+    NXN_ENTRY(if),
+    NXN_ENTRY(ifelse),
+    NXN_ENTRY(inc),
 #ifdef CW_POSIX
-    NXN_ino,
+    NXN_ENTRY(ino),
 #endif
-    NXN_integertype,
-    NXN_invalidaccess,
-    NXN_invalidexit,
-    NXN_invalidfileaccess,
-    NXN_iobuf,
-    NXN_ioerror,
-    NXN_ipop,
-    NXN_istack,
+    NXN_ENTRY(integertype),
+    NXN_ENTRY(invalidaccess),
+    NXN_ENTRY(invalidexit),
+    NXN_ENTRY(invalidfileaccess),
+    NXN_ENTRY(iobuf),
+    NXN_ENTRY(ioerror),
+    NXN_ENTRY(ipop),
+    NXN_ENTRY(istack),
 #ifdef CW_THREADS
-    NXN_join,
+    NXN_ENTRY(join),
 #endif
-    NXN_known,
+    NXN_ENTRY(known),
 #ifdef CW_THREADS
-    NXN_lcheck,
+    NXN_ENTRY(lcheck),
 #endif
-    NXN_le,
-    NXN_length,
-    NXN_limitcheck,
+    NXN_ENTRY(le),
+    NXN_ENTRY(length),
+    NXN_ENTRY(limitcheck),
 #ifdef CW_POSIX
-    NXN_link,
-    NXN_listen,
-#endif
-#ifdef CW_REAL
-    NXN_ln,
-#endif
-    NXN_load,
-#ifdef CW_THREADS
-    NXN_lock,
+    NXN_ENTRY(link),
+    NXN_ENTRY(listen),
 #endif
 #ifdef CW_REAL
-    NXN_log,
+    NXN_ENTRY(ln),
 #endif
-    NXN_loop,
-    NXN_lt,
-    NXN_mark,
-    NXN_marktype,
-#ifdef CW_POSIX
-    NXN_mkdir,
-    NXN_mkfifo,
+    NXN_ENTRY(load),
+#ifdef CW_THREADS
+    NXN_ENTRY(lock),
 #endif
-    NXN_mod,
+#ifdef CW_REAL
+    NXN_ENTRY(log),
+#endif
+    NXN_ENTRY(loop),
+    NXN_ENTRY(lt),
+    NXN_ENTRY(mark),
+    NXN_ENTRY(marktype),
 #ifdef CW_POSIX
-    NXN_mode,
+    NXN_ENTRY(mkdir),
+    NXN_ENTRY(mkfifo),
+#endif
+    NXN_ENTRY(mod),
+#ifdef CW_POSIX
+    NXN_ENTRY(mode),
 #endif
 #ifdef HAVE_DLOPEN
-    NXN_modload,
+    NXN_ENTRY(modload),
 #endif
 #ifdef CW_THREADS
-    NXN_monitor,
+    NXN_ENTRY(monitor),
 #endif
 #ifdef CW_POSIX
-    NXN_mtime,
+    NXN_ENTRY(mtime),
 #endif
-    NXN_mul,
+    NXN_ENTRY(mul),
 #ifdef CW_THREADS
-    NXN_mutex,
-    NXN_mutextype,
+    NXN_ENTRY(mutex),
+    NXN_ENTRY(mutextype),
 #endif
-    NXN_nametype,
-    NXN_nbpop,
-    NXN_ndn,
-    NXN_ndup,
-    NXN_ne,
-    NXN_neg,
-    NXN_newerror,
-    NXN_nip,
+    NXN_ENTRY(nametype),
+    NXN_ENTRY(nbpop),
+    NXN_ENTRY(ndn),
+    NXN_ENTRY(ndup),
+    NXN_ENTRY(ne),
+    NXN_ENTRY(neg),
+    NXN_ENTRY(newerror),
+    NXN_ENTRY(nip),
 #ifdef CW_POSIX
-    NXN_nlink,
+    NXN_ENTRY(nlink),
 #endif
-    NXN_nonblocking,
-    NXN_not,
-    NXN_npop,
+    NXN_ENTRY(nonblocking),
+    NXN_ENTRY(not),
+    NXN_ENTRY(npop),
 #ifdef CW_POSIX
-    NXN_nsleep,
+    NXN_ENTRY(nsleep),
 #endif
-    NXN_null,
-    NXN_nulltype,
-    NXN_nup,
-    NXN_onyxdict,
+    NXN_ENTRY(null),
+    NXN_ENTRY(nulltype),
+    NXN_ENTRY(nup),
+    NXN_ENTRY(onyxdict),
 #ifdef CW_POSIX
-    NXN_open,
+    NXN_ENTRY(open),
 #endif
-    NXN_operatortype,
-    NXN_or,
-    NXN_ostack,
-    NXN_over,
+    NXN_ENTRY(operatortype),
+    NXN_ENTRY(or),
+    NXN_ENTRY(ostack),
+    NXN_ENTRY(over),
 #ifdef CW_POSIX
-    NXN_peername,
+    NXN_ENTRY(peername),
 #endif
 #ifdef CW_PTHREADS
-    NXN_period,
+    NXN_ENTRY(period),
 #endif
 #ifdef CW_POSIX
-    NXN_pid,
+    NXN_ENTRY(pid),
 #endif
-    NXN_pmark,
-    NXN_pmarktype,
+    NXN_ENTRY(pmark),
+    NXN_ENTRY(pmarktype),
 #ifdef CW_POSIX
-    NXN_pipe,
-    NXN_poll,
-    NXN_POLLERR,
-    NXN_POLLHUP,
-    NXN_POLLIN,
-    NXN_POLLNVAL,
-    NXN_POLLOUT,
-    NXN_POLLPRI,
-    NXN_POLLRDBAND,
-    NXN_POLLRDNORM,
-    NXN_POLLWRNORM,
-    NXN_POLLWRBAND,
+    NXN_ENTRY(pipe),
+    NXN_ENTRY(poll),
+    NXN_ENTRY(POLLERR),
+    NXN_ENTRY(POLLHUP),
+    NXN_ENTRY(POLLIN),
+    NXN_ENTRY(POLLNVAL),
+    NXN_ENTRY(POLLOUT),
+    NXN_ENTRY(POLLPRI),
+    NXN_ENTRY(POLLRDBAND),
+    NXN_ENTRY(POLLRDNORM),
+    NXN_ENTRY(POLLWRNORM),
+    NXN_ENTRY(POLLWRBAND),
 #endif
-    NXN_pop,
+    NXN_ENTRY(pop),
 #ifdef CW_POSIX
-    NXN_ppid,
+    NXN_ENTRY(ppid),
 #endif
-    NXN_print,
-    NXN_product,
-    NXN_promptstring,
-    NXN_put,
-    NXN_putinterval,
+    NXN_ENTRY(print),
+    NXN_ENTRY(product),
+    NXN_ENTRY(promptstring),
+    NXN_ENTRY(put),
+    NXN_ENTRY(putinterval),
 #ifdef CW_POSIX
-    NXN_pwd,
+    NXN_ENTRY(pwd),
 #endif
-    NXN_quit,
-    NXN_rand,
-    NXN_rangecheck,
+    NXN_ENTRY(quit),
+    NXN_ENTRY(rand),
+    NXN_ENTRY(rangecheck),
 #ifdef CW_POSIX
-    NXN_rdev,
+    NXN_ENTRY(rdev),
 #endif
-    NXN_read,
-    NXN_readline,
+    NXN_ENTRY(read),
+    NXN_ENTRY(readline),
 #ifdef CW_POSIX
-    NXN_readlink,
-    NXN_realtime,
+    NXN_ENTRY(readlink),
+    NXN_ENTRY(realtime),
 #endif
 #ifdef CW_REAL
-    NXN_realtype,
+    NXN_ENTRY(realtype),
 #endif
 #ifdef CW_POSIX
-    NXN_recv,
-    NXN_rename,
+    NXN_ENTRY(recv),
+    NXN_ENTRY(rename),
 #endif
-    NXN_repeat,
+    NXN_ENTRY(repeat),
 #ifdef CW_POSIX
-    NXN_rmdir,
+    NXN_ENTRY(rmdir),
 #endif
-    NXN_roll,
-    NXN_rot,
+    NXN_ENTRY(roll),
+    NXN_ENTRY(rot),
 #ifdef CW_REAL
-    NXN_round,
+    NXN_ENTRY(round),
 #endif
-    NXN_sadn,
-    NXN_saup,
-    NXN_sbdup,
-    NXN_sbpop,
-    NXN_sbpush,
-    NXN_sclear,
-    NXN_scleartomark,
-    NXN_scount,
-    NXN_scounttomark,
-    NXN_sdn,
-    NXN_sdup,
+    NXN_ENTRY(sadn),
+    NXN_ENTRY(saup),
+    NXN_ENTRY(sbdup),
+    NXN_ENTRY(sbpop),
+    NXN_ENTRY(sbpush),
+    NXN_ENTRY(sclear),
+    NXN_ENTRY(scleartomark),
+    NXN_ENTRY(scount),
+    NXN_ENTRY(scounttomark),
+    NXN_ENTRY(sdn),
+    NXN_ENTRY(sdup),
 #ifdef CW_POSIX
-    NXN_seek,
+    NXN_ENTRY(seek),
 #endif
-    NXN_self,
+    NXN_ENTRY(self),
 #ifdef CW_POSIX
-    NXN_send,
+    NXN_ENTRY(send),
 #endif
-    NXN_setactive,
+    NXN_ENTRY(setactive),
 #ifdef CW_POSIX
-    NXN_setegid,
-    NXN_setenv,
-    NXN_seteuid,
-    NXN_setgid,
+    NXN_ENTRY(setegid),
+    NXN_ENTRY(setenv),
+    NXN_ENTRY(seteuid),
+    NXN_ENTRY(setgid),
 #endif
 #ifdef CW_THREADS
-    NXN_setgstderr,
-    NXN_setgstdin,
-    NXN_setgstdout,
+    NXN_ENTRY(setgstderr),
+    NXN_ENTRY(setgstdin),
+    NXN_ENTRY(setgstdout),
 #endif
-    NXN_setiobuf,
+    NXN_ENTRY(setiobuf),
 #ifdef CW_THREADS
-    NXN_setlocking,
+    NXN_ENTRY(setlocking),
 #endif
-    NXN_setnonblocking,
+    NXN_ENTRY(setnonblocking),
 #ifdef CW_PTHREADS
-    NXN_setperiod,
+    NXN_ENTRY(setperiod),
 #endif
 #ifdef CW_POSIX
-    NXN_setsockopt,
+    NXN_ENTRY(setsockopt),
 #endif
-    NXN_setstderr,
-    NXN_setstdin,
-    NXN_setstdout,
-    NXN_setthreshold,
+    NXN_ENTRY(setstderr),
+    NXN_ENTRY(setstdin),
+    NXN_ENTRY(setstdout),
+    NXN_ENTRY(setthreshold),
 #ifdef CW_POSIX
-    NXN_setuid,
+    NXN_ENTRY(setuid),
 #endif
-    NXN_sexch,
-    NXN_shift,
-    NXN_sibdup,
-    NXN_sibpop,
-    NXN_sidup,
+    NXN_ENTRY(sexch),
+    NXN_ENTRY(shift),
+    NXN_ENTRY(sibdup),
+    NXN_ENTRY(sibpop),
+    NXN_ENTRY(sidup),
 #ifdef CW_THREADS
-    NXN_signal,
+    NXN_ENTRY(signal),
 #endif
 #ifdef CW_REAL
-    NXN_sin,
+    NXN_ENTRY(sin),
 #endif
-    NXN_sipop,
+    NXN_ENTRY(sipop),
 #ifdef CW_POSIX
-    NXN_size,
+    NXN_ENTRY(size),
 #endif
-    NXN_snbpop,
-    NXN_sndn,
-    NXN_sndup,
-    NXN_snip,
-    NXN_snpop,
-    NXN_snup,
+    NXN_ENTRY(snbpop),
+    NXN_ENTRY(sndn),
+    NXN_ENTRY(sndup),
+    NXN_ENTRY(snip),
+    NXN_ENTRY(snpop),
+    NXN_ENTRY(snup),
 #ifdef CW_POSIX
-    NXN_socket,
-    NXN_socketpair,
-    NXN_sockname,
-    NXN_sockopt,
+    NXN_ENTRY(socket),
+    NXN_ENTRY(socketpair),
+    NXN_ENTRY(sockname),
+    NXN_ENTRY(sockopt),
 #endif
-    NXN_sover,
-    NXN_spop,
-    NXN_spush,
+    NXN_ENTRY(sover),
+    NXN_ENTRY(spop),
+    NXN_ENTRY(spush),
 #ifdef CW_REAL
-    NXN_sqrt,
+    NXN_ENTRY(sqrt),
 #endif
 #ifdef CW_POSIX
-    NXN_srand,
+    NXN_ENTRY(srand),
 #endif
-    NXN_sroll,
-    NXN_srot,
-    NXN_stack,
-    NXN_stacktype,
-    NXN_stackunderflow,
-    NXN_start,
-    NXN_stats,
+    NXN_ENTRY(sroll),
+    NXN_ENTRY(srot),
+    NXN_ENTRY(stack),
+    NXN_ENTRY(stacktype),
+    NXN_ENTRY(stackunderflow),
+    NXN_ENTRY(start),
+    NXN_ENTRY(stats),
 #ifdef CW_POSIX
-    NXN_status,
+    NXN_ENTRY(status),
 #endif
-    NXN_stdin,
-    NXN_stderr,
-    NXN_stdout,
-    NXN_stop,
-    NXN_stopped,
-    NXN_string,
-    NXN_stringtype,
-    NXN_stuck,
-    NXN_sub,
-    NXN_sunder,
-    NXN_sup,
+    NXN_ENTRY(stdin),
+    NXN_ENTRY(stderr),
+    NXN_ENTRY(stdout),
+    NXN_ENTRY(stop),
+    NXN_ENTRY(stopped),
+    NXN_ENTRY(string),
+    NXN_ENTRY(stringtype),
+    NXN_ENTRY(stuck),
+    NXN_ENTRY(sub),
+    NXN_ENTRY(sunder),
+    NXN_ENTRY(sup),
 #ifdef CW_POSIX
-    NXN_symlink,
+    NXN_ENTRY(symlink),
 #endif
-    NXN_syntaxerror,
-    NXN_system,
-    NXN_systemdict,
-    NXN_tell,
+    NXN_ENTRY(syntaxerror),
+    NXN_ENTRY(system),
+    NXN_ENTRY(systemdict),
+    NXN_ENTRY(tell),
 #ifdef CW_POSIX
-    NXN_test,
+    NXN_ENTRY(test),
 #endif
 #ifdef CW_THREADS
-    NXN_thread,
+    NXN_ENTRY(thread),
 #endif
-    NXN_threaddstack,
-    NXN_threadestack,
-    NXN_threadistack,
-    NXN_threadostack,
-    NXN_threadsdict,
-    NXN_threadtype,
-    NXN_threshold,
-    NXN_throw,
+    NXN_ENTRY(threaddstack),
+    NXN_ENTRY(threadestack),
+    NXN_ENTRY(threadistack),
+    NXN_ENTRY(threadostack),
+    NXN_ENTRY(threadsdict),
+    NXN_ENTRY(threadtype),
+    NXN_ENTRY(threshold),
+    NXN_ENTRY(throw),
 #ifdef CW_THREADS
-    NXN_timedwait,
+    NXN_ENTRY(timedwait),
 #endif
-    NXN_token,
-    NXN_true,
+    NXN_ENTRY(token),
+    NXN_ENTRY(true),
 #ifdef CW_REAL
-    NXN_trunc,
+    NXN_ENTRY(trunc),
 #endif
 #ifdef CW_POSIX
-    NXN_truncate,
+    NXN_ENTRY(truncate),
 #endif
 #ifdef CW_THREADS
-    NXN_trylock,
+    NXN_ENTRY(trylock),
 #endif
-    NXN_tuck,
-    NXN_type,
-    NXN_typecheck,
+    NXN_ENTRY(tuck),
+    NXN_ENTRY(type),
+    NXN_ENTRY(typecheck),
 #ifdef CW_POSIX
-    NXN_uid,
-    NXN_umask,
+    NXN_ENTRY(uid),
+    NXN_ENTRY(umask),
 #endif
-    NXN_undef,
-    NXN_undefined,
-    NXN_undefinedfilename,
-    NXN_undefinedresult,
-    NXN_under,
+    NXN_ENTRY(undef),
+    NXN_ENTRY(undefined),
+    NXN_ENTRY(undefinedfilename),
+    NXN_ENTRY(undefinedresult),
+    NXN_ENTRY(under),
 #ifdef CW_POSIX
-    NXN_unlink,
+    NXN_ENTRY(unlink),
 #endif
 #ifdef CW_THREADS
-    NXN_unlock,
+    NXN_ENTRY(unlock),
 #endif
-    NXN_unmatchedfino,
-    NXN_unmatchedmark,
-    NXN_unregistered,
+    NXN_ENTRY(unmatchedfino),
+    NXN_ENTRY(unmatchedmark),
+    NXN_ENTRY(unregistered),
 #ifdef CW_POSIX
-    NXN_unsetenv,
+    NXN_ENTRY(unsetenv),
 #endif
-    NXN_until,
-    NXN_up,
-    NXN_version,
+    NXN_ENTRY(until),
+    NXN_ENTRY(up),
+    NXN_ENTRY(version),
 #ifdef CW_THREADS
-    NXN_wait,
+    NXN_ENTRY(wait),
 #endif
 #ifdef CW_POSIX
-    NXN_waitpid,
+    NXN_ENTRY(waitpid),
 #endif
-    NXN_where,
-    NXN_while,
-    NXN_write,
-    NXN_xcheck,
-    NXN_xor
+    NXN_ENTRY(where),
+    NXN_ENTRY(while),
+    NXN_ENTRY(write),
+    NXN_ENTRY(xcheck),
+    NXN_ENTRY(xor)
 #ifdef CW_THREADS
     ,
-    NXN_yield
+    NXN_ENTRY(yield)
 #define NXN_LAST NXN_yield
 #else
 #define NXN_LAST NXN_xor
 #endif
-} cw_nxn_t;
+}
+#ifndef CW_NXN_C_
+cw_nxn_t
+#endif
+;
 
 #ifndef CW_USE_INLINES
 const cw_uint8_t *nxn_str(cw_nxn_t a_nxn);
 cw_uint32_t nxn_len(cw_nxn_t a_nxn);
 #endif
 
-#if (defined(CW_USE_INLINES) || defined(CW_NXN_C_))
+#if (defined(CW_USE_INLINES) && !defined(CW_NXN_C_) \
+     || (!defined(CW_USE_INLINES) && defined(CW_NXN_C_)))
 CW_INLINE const cw_uint8_t *
 nxn_str(cw_nxn_t a_nxn)
 {
@@ -549,4 +571,9 @@ nxn_len(cw_nxn_t a_nxn)
 
     return strlen(cw_g_nx_names[a_nxn]);
 }
-#endif /* (defined(CW_USE_INLINES) || defined(CW_NXN_C_)) */
+#endif /* (defined(CW_USE_INLINES) && !defined(CW_NXN_C_) \
+	*  || (!defined(CW_USE_INLINES) && defined(CW_NXN_C_))) */
+
+#undef NXN_ENTRY
+#undef NXN_SENTRY
+#undef NXN_XENTRY
