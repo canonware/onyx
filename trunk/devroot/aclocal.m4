@@ -283,7 +283,6 @@ AC_SUBST(onyx_version)
 AC_SUBST(enable_onyx)
 if test "x$enable_onyx" = "x1" ; then
   cfgoutputs="$cfgoutputs bin/onyx/src/batch.nx bin/onyx/src/interactive.nx"
-  cfgoutputs="$cfgoutputs bin/onyx/src/onyx.nx"
   AC_DEFINE(CW_USE_ONYX)
 fi
 ])

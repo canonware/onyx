@@ -28,7 +28,7 @@ ONYX_COMMON_SRCS = [addprefix @srcroot@/bin/onyx/src/
 
 /* Onyx source files that are used to generate C code. */
 ONYX_NSRCS = [addprefix @srcroot@/bin/onyx/src/
-                        batch.nx.in interactive.nx.in onyx.nx.in
+                        batch.nx.in interactive.nx.in
                         ];
 
 /* bonyx-only source files. */

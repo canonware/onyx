@@ -238,11 +238,21 @@ if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_SIZEOF(double)
   AC_CHECK_SIZEOF(long double)
 
-if test "x$enable_posix" = "x1" ; then
-dnl Try to figure out which field of struct dirent contains the entry string
-dnl length.
-AC_MSG_CHECKING(for (struct dirent).d_namlen)
-AC_TRY_LINK([
+  if test "x$enable_posix" = "x1" ; then
+    if test "x$prefix" = "xNONE" ; then
+      rpath_post="\`/usr/local/share/onyx-$onyx_version/nx'"
+      mpath_post="\`/usr/local/share/onyx-$onyx_version/nxm'"
+    else
+      rpath_post="\`$prefix/share/onyx-$onyx_version/nx'"
+      mpaath_post="\`$prefix/share/onyx-$onyx_version/nxm'"
+    fi
+    AC_SUBST(rpath_post)
+    AC_SUBST(mpath_post)
+
+    dnl Try to figure out which field of struct dirent contains the entry string
+    dnl length.
+    AC_MSG_CHECKING(for (struct dirent).d_namlen)
+    AC_TRY_LINK([
 #include <sys/types.h>
 #include <dirent.h>
 ], [
@@ -251,9 +261,9 @@ AC_TRY_LINK([
     ent.d_namlen = 0;
 ], AC_MSG_RESULT(yes), AC_MSG_RESULT(no)
 
-dnl d_namlen doesn't exist, so try d_reclen.
-AC_MSG_CHECKING(for (struct dirent).d_reclen)
-AC_TRY_LINK([
+    dnl d_namlen doesn't exist, so try d_reclen.
+    AC_MSG_CHECKING(for (struct dirent).d_reclen)
+    AC_TRY_LINK([
 #include <sys/types.h>
 #include <dirent.h>
 ], [
@@ -265,9 +275,9 @@ AC_TRY_LINK([
    AC_MSG_RESULT(no)
    AC_MSG_ERROR(struct dirent too deviant)))
 
-dnl Look for nanosecond resolution of atime in struct stat.
-AC_MSG_CHECKING(for (struct stat).st_atimespec)
-AC_TRY_LINK([
+    dnl Look for nanosecond resolution of atime in struct stat.
+    AC_MSG_CHECKING(for (struct stat).st_atimespec)
+    AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/stat.h>
 ], [
@@ -278,9 +288,9 @@ AC_TRY_LINK([
    AC_DEFINE(CW_LIBONYX_USE_STAT_ATIMESPEC),
    AC_MSG_RESULT(no))
 
-dnl Look for nanosecond resolution of mtime in struct stat.
-AC_MSG_CHECKING(for (struct stat).st_mtimespec)
-AC_TRY_LINK([
+    dnl Look for nanosecond resolution of mtime in struct stat.
+    AC_MSG_CHECKING(for (struct stat).st_mtimespec)
+    AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/stat.h>
 ], [
@@ -291,9 +301,9 @@ AC_TRY_LINK([
    AC_DEFINE(CW_LIBONYX_USE_STAT_MTIMESPEC),
    AC_MSG_RESULT(no))
 
-dnl Look for nanosecond resolution of ctime in struct stat.
-AC_MSG_CHECKING(for (struct stat).st_ctimespec)
-AC_TRY_LINK([
+    dnl Look for nanosecond resolution of ctime in struct stat.
+    AC_MSG_CHECKING(for (struct stat).st_ctimespec)
+    AC_TRY_LINK([
 #include <sys/types.h>
 #include <sys/stat.h>
 ], [
@@ -304,32 +314,23 @@ AC_TRY_LINK([
    AC_DEFINE(CW_LIBONYX_USE_STAT_CTIMESPEC),
    AC_MSG_RESULT(no))
 
-AC_CHECK_FUNCS(unsetenv)
-fi
+    AC_CHECK_FUNCS(unsetenv)
+  fi
 fi
 
 dnl 
 dnl onyx configuration.
 dnl 
 if test "x$bin_onyx" = "x1" ; then
-  if test "x$prefix" = "xNONE" ; then
-    CW_ONYX_RPATH="/usr/local/share/onyx-$onyx_version/nx"
-    CW_ONYX_MPATH="/usr/local/share/onyx-$onyx_version/nxm"
-  else
-    CW_ONYX_RPATH="$prefix/share/onyx-$onyx_version/nx"
-    CW_ONYX_MPATH="$prefix/share/onyx-$onyx_version/nxm"
-  fi
-  AC_DEFINE_UNQUOTED(CW_ONYX_RPATH, "$CW_ONYX_RPATH")
-  AC_DEFINE_UNQUOTED(CW_ONYX_MPATH, "$CW_ONYX_MPATH")
-
   AC_DEFINE_UNQUOTED(CW_TONYX_ONYX, "$abs_objroot/bin/onyx/bin/onyx")
 
-  tmpath=ONYX_MPATH=:.
-  trpath=ONYX_RPATH=:.
+  tmpath=ONYX_MPATH=
+  trpath=ONYX_RPATH=
   for i in $mods ; do
     tmpath=$tmpath:$abs_objroot/mod/$i/nxm
     trpath=$trpath:$abs_objroot/mod/$i/nx
   done
+  dnl XXX Leading ":" should be removed.
   AC_DEFINE_UNQUOTED(CW_TONYX_RPATH, "$trpath")
   AC_DEFINE_UNQUOTED(CW_TONYX_MPATH, "$tmpath")
 fi

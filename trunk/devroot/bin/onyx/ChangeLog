@@ -1,3 +1,7 @@
+2002-01-28  Jason Evans  <jasone@canonware.com>
+
+	* : Move require and mrequire from onyx to libonyx.
+
 2002-01-22  Jason Evans  <jasone@canonware.com>
 
 	* : Generate embedded onyx code during the build using a bootstrap
