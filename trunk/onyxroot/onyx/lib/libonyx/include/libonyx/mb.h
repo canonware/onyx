@@ -30,11 +30,14 @@ mb_write(void);
  * processors in a multiprocessor system, but 1) Intel reserves the right to
  * change that, and 2) the compiler's optimizer could re-order instructions if
  * there weren't some form of barrier.  Therefore, even if running on an
- * architecture that does not need memory barriers (everything through i686), an
- * "optimizer barrier" is necessary. */
+ * architecture that does not need memory barriers (everything through at least
+ * i686), an "optimizer barrier" is necessary. */
 CW_INLINE void
 mb_write(void)
 {
+#if (0)
+    /* This is a true memory barrier.  Benchmarks indicate a ~2.5x slowdown of
+     * Onyx with this enabled. */
     asm volatile ("push %%eax;"
 		  "push %%ebx;"
 		  "push %%ecx;"
@@ -49,6 +52,15 @@ mb_write(void)
 		  : /* Inputs. */
 		  : "memory" /* Clobbers. */
 		  );
+#else
+    /* This is hopefully enough to keep the compiler from reordering
+     * instructions around this one. */
+    asm volatile ("nop;"
+		  : /* Outputs. */
+		  : /* Inputs. */
+		  : "memory" /* Clobbers. */
+		  );
+#endif
 }
 #elif (defined(CW_CPU_PPC))
 CW_INLINE void
