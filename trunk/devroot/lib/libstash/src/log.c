@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 41 $
- * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 54 $
+ * $Date: 1998-04-30 02:42:01 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -40,8 +40,8 @@
 
 #define _INC_STDARG_H_
 #define _INC_STRING_H_
-#define _INC_LOG_PRIV_H_
 #include <config.h>
+#include <log_priv.h>
 
 cw_log_t *
 log_new()
@@ -50,7 +50,7 @@ log_new()
 
   retval = (cw_log_t *) _cw_malloc(sizeof(cw_log_t));
   
-/*   pthread_mutexattr_init(&retval->mutex); */
+  /*   pthread_mutexattr_init(&retval->mutex); */
   retval->is_logfile_open = FALSE;
   retval->logfile_name = NULL;
   retval->log_fp = NULL;
@@ -66,6 +66,7 @@ log_delete(cw_log_t * a_log_o)
   
   if ((a_log_o->log_fp != NULL) && (a_log_o->log_fp != stderr))
   {
+    fflush(a_log_o->log_fp);
     fclose(a_log_o->log_fp);
   }
 
@@ -133,20 +134,20 @@ log_printf(cw_log_t * a_log_o, char * a_format, ...)
 
   _cw_check_ptr(a_log_o);
 
-  if (a_log_o->log_fp != NULL)
-    {
-      va_start(ap, a_format);
-      retval = vfprintf(a_log_o->log_fp, a_format, ap);
-      va_end(ap);
-      fflush(a_log_o->log_fp);
-    }
+  if ((a_log_o == NULL) || (a_log_o->log_fp == NULL))
+  {
+    /* Use stderr. */
+    va_start(ap, a_format);
+    retval = vfprintf(stderr, a_format, ap);
+    va_end(ap);
+  }
   else
-    {
-      /* Use stderr. */
-      va_start(ap, a_format);
-      retval = vfprintf(stderr, a_format, ap);
-      va_end(ap);
-    }
+  {
+    va_start(ap, a_format);
+    retval = vfprintf(a_log_o->log_fp, a_format, ap);
+    va_end(ap);
+    fflush(a_log_o->log_fp);
+  }
 
   return retval;
 }
@@ -162,50 +163,48 @@ log_eprintf(cw_log_t * a_log_o,
   va_list ap;
   int retval;
 
-  _cw_check_ptr(a_log_o);
-
-  if (a_log_o->log_fp != NULL)
+  if ((a_log_o == NULL) || (a_log_o->log_fp == NULL))
+  {
+    /* Use stderr. */
+    if (a_filename != NULL)
     {
-      if (a_filename != NULL)
-	{
-	  fprintf(a_log_o->log_fp,
-		  "At %s, line %d: ",
-		  a_filename,
-		  a_line_num);
-	}
-      if (a_func_name != NULL)
-	{
-	  fprintf(a_log_o->log_fp,
-		  "%s(): ",
-		  a_func_name);
-	}
-
-      va_start(ap, a_format);
-      retval = vfprintf(a_log_o->log_fp, a_format, ap);
-      va_end(ap);
-      fflush(a_log_o->log_fp);
+      fprintf(stderr,
+	      "At %s, line %d: ",
+	      a_filename,
+	      a_line_num);
     }
+    if (a_func_name != NULL)
+    {
+      fprintf(stderr,
+	      "%s(): ",
+	      a_func_name);
+    }
+
+    va_start(ap, a_format);
+    retval = vfprintf(stderr, a_format, ap);
+    va_end(ap);
+  }
   else
+  {
+    if (a_filename != NULL)
     {
-      /* Use stderr. */
-      if (a_filename != NULL)
-	{
-	  fprintf(stderr,
-		  "At %s, line %d: ",
-		  a_filename,
-		  a_line_num);
-	}
-      if (a_func_name != NULL)
-	{
-	  fprintf(stderr,
-		  "%s(): ",
-		  a_func_name);
-	}
-
-      va_start(ap, a_format);
-      retval = vfprintf(stderr, a_format, ap);
-      va_end(ap);
+      fprintf(a_log_o->log_fp,
+	      "At %s, line %d: ",
+	      a_filename,
+	      a_line_num);
     }
+    if (a_func_name != NULL)
+    {
+      fprintf(a_log_o->log_fp,
+	      "%s(): ",
+	      a_func_name);
+    }
+
+    va_start(ap, a_format);
+    retval = vfprintf(a_log_o->log_fp, a_format, ap);
+    va_end(ap);
+    fflush(a_log_o->log_fp);
+  }
 
   return retval;
 }
