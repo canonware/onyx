@@ -3895,42 +3895,32 @@ systemdict_realtime(cw_nxo_t *a_thread)
 void
 systemdict_rename(cw_nxo_t *a_thread)
 {
-	cw_nxo_t	*ostack;
-	cw_nxo_t	*string_from, *string_to;
-	cw_uint8_t	str_from[PATH_MAX], str_to[1024];
-	cw_uint32_t	nbytes;
+	cw_nxo_t	*ostack, *tstack;
+	cw_nxo_t	*from, *to, *tfrom, *tto;
 
 	ostack = nxo_thread_ostack_get(a_thread);
-	NXO_STACK_GET(string_to, ostack, a_thread);
-	NXO_STACK_DOWN_GET(string_from, ostack, a_thread, string_to);
+	tstack = nxo_thread_tstack_get(a_thread);
+	NXO_STACK_GET(to, ostack, a_thread);
+	NXO_STACK_DOWN_GET(from, ostack, a_thread, to);
 
-	if (nxo_type_get(string_from) != NXOT_STRING ||
-	    nxo_type_get(string_to) != NXOT_STRING) {
+	if (nxo_type_get(from) != NXOT_STRING || nxo_type_get(to) !=
+	    NXOT_STRING) {
 		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	}
-
-	if (nxo_string_len_get(string_from) >= sizeof(str_from)) {
+	if (nxo_string_len_get(from) >= PATH_MAX || nxo_string_len_get(to) >=
+	    PATH_MAX) {
 		nxo_thread_nerror(a_thread, NXN_limitcheck);
 		return;
 	}
-	nbytes = nxo_string_len_get(string_from);
-	nxo_string_lock(string_from);
-	memcpy(str_from, nxo_string_get(string_from), nbytes);
-	nxo_string_unlock(string_from);
-	str_from[nbytes] = '\0';
 
-	if (nxo_string_len_get(string_to) >= sizeof(str_to)) {
-		nxo_thread_nerror(a_thread, NXN_limitcheck);
-		return;
-	}
-	nbytes = nxo_string_len_get(string_to);
-	nxo_string_lock(string_to);
-	memcpy(str_to, nxo_string_get(string_to), nbytes);
-	nxo_string_unlock(string_to);
-	str_to[nbytes] = '\0';
+	tto = nxo_stack_push(tstack);
+	nxo_string_cstring(tto, to, a_thread);
+	
+	tfrom = nxo_stack_push(tstack);
+	nxo_string_cstring(tfrom, from, a_thread);
 
-	if (rename(str_from, str_to) == -1) {
+	if (rename(nxo_string_get(tfrom), nxo_string_get(tto)) == -1) {
 		switch (errno) {
 		case EACCES:
 		case EPERM:
@@ -3944,9 +3934,11 @@ systemdict_rename(cw_nxo_t *a_thread)
 		default:
 			nxo_thread_nerror(a_thread, NXN_ioerror);
 		}
+		nxo_stack_npop(tstack, 2);
 		return;
 	}
 
+	nxo_stack_npop(tstack, 2);
 	nxo_stack_npop(ostack, 2);
 }
 #endif
