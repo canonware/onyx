@@ -32,7 +32,6 @@ static const cw_stiln_t errordict_ops[] = {
 	STILN_typecheck,
 	STILN_undefined,
 	STILN_undefinedfilename,
-	STILN_undefinedresource,
 	STILN_undefinedresult,
 	STILN_unmatchedmark,
 	STILN_unregistered,
@@ -140,7 +139,6 @@ errordict_generic(cw_stilt_t *a_stilt)
 	case STILTE_TYPECHECK:
 	case STILTE_UNDEFINED:
 	case STILTE_UNDEFINEDFILENAME:
-	case STILTE_UNDEFINEDRESOURCE:
 	case STILTE_UNDEFINEDRESULT:
 	case STILTE_UNMATCHEDMARK:
 	case STILTE_UNREGISTERED:

@@ -181,7 +181,6 @@ const cw_uint8_t *cw_g_stil_names[] = {
 	"undef",
 	"undefined",
 	"undefinedfilename",
-	"undefinedresource",
 	"undefinedresult",
 	"unlock",
 	"unmatchedmark",

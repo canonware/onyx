@@ -184,7 +184,6 @@ typedef enum {
 	STILN_undef,
 	STILN_undefined,
 	STILN_undefinedfilename,
-	STILN_undefinedresource,
 	STILN_undefinedresult,
 	STILN_unlock,
 	STILN_unmatchedmark,

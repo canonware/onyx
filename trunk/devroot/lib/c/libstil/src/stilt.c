@@ -38,7 +38,6 @@ stilte_stiln(cw_stilte_t a_stilte)
 		STILN_typecheck,
 		STILN_undefined,
 		STILN_undefinedfilename,
-		STILN_undefinedresource,
 		STILN_undefinedresult,
 		STILN_unmatchedmark,
 		STILN_unregistered,
