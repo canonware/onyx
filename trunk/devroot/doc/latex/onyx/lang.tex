@@ -30,9 +30,10 @@ named procedures that can be called at a later time, but behind the scenes, the
 code is actually being interpreted as it is scanned in such a way that an
 executable object is created.  As such, Onyx is not suited for compilation,
 native or byte code.  However, the language syntax is very simple and the
-scanner/parser is extremely fast.  There is also a mechanism for binding
-procedures, which makes interpreter performance approximately the same as would
-be expected of a byte code interpreter.
+scanner/parser is extremely fast.  There is also a mechanism for
+\htmlref{\onyxop{}{bind}{}}{systemdict:bind}ing procedures, which makes
+interpreter performance approximately the same as would be expected of a byte
+code interpreter.
 
 Onyx is implemented as a C library that can be embedded in other programs.
 Mechanisms are provided for extending the set of operators available.  This
@@ -4277,6 +4278,23 @@ onyx:0>
 		\item{The value is an executable or evaluatable operator.}
 		\item{The value is an executable or evaluatable hook.}
 		\item{The value is an evaluatable array.}
+		\end{itemize}
+
+		Binding has a large positive impact on performance, since name
+		lookups are thereafter avoided.  However, binding is not done by
+		default because there are situations where it is useful to leave
+		procedures unbound:
+		\begin{itemize}
+		\item{Debugging is easier, since the names associated with
+		objects are still available.}
+		\item{Behavior is more dynamic.  It is possible to replace a
+		definition on dstack and have it immediately take effect on
+		unbound procedures.  Note however that great care must be taken
+		when relying on this, since binding is recursive, and a lack of
+		complete understanding of what procedures reference each other
+		can result in undesired bound procedures.  For this reason, it
+		is generally best to make dynamic behavior explicit by using the
+		\htmlref{\onyxop{}{load}{}}{systemdict:load} operator.}
 		\end{itemize}
 	\item[Example(s): ]\begin{verbatim}
 
