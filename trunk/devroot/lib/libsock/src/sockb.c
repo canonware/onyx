@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#define _LIBSTASH_SOCKB_CONFESS
+/*  #define _LIBSTASH_SOCKB_CONFESS */
 
 #define _LIBSTASH_USE_PEZZ
 #define _LIBSTASH_USE_MQ
@@ -323,7 +323,6 @@ sockb_in_notify(cw_mq_t * a_mq, int a_sockfd)
   
   _cw_check_ptr(g_sockb);
   _cw_assert(a_sockfd >= 0);
-  _cw_assert(a_sockfd < FD_SETSIZE);
 
   mtx_new(&mtx);
   cnd_new(&cnd);
@@ -390,7 +389,6 @@ sockb_l_register_sock(cw_sock_t * a_sock)
   _cw_check_ptr(a_sock);
   _cw_check_ptr(g_sockb);
   _cw_assert(sock_get_fd(a_sock) >= 0);
-  _cw_assert(sock_get_fd(a_sock) < FD_SETSIZE);
 
   message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
@@ -426,7 +424,6 @@ sockb_l_unregister_sock(cw_uint32_t a_sockfd)
   struct cw_sockb_msg_s * message;
 
   _cw_check_ptr(g_sockb);
-  _cw_assert(a_sockfd < FD_SETSIZE);
 
   message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
@@ -462,7 +459,6 @@ sockb_l_out_notify(cw_uint32_t a_sockfd)
   struct cw_sockb_msg_s * message;
 
   _cw_check_ptr(g_sockb);
-  _cw_assert(a_sockfd < FD_SETSIZE);
 
   message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
@@ -498,7 +494,6 @@ sockb_l_in_space(cw_uint32_t a_sockfd)
   struct cw_sockb_msg_s * message;
 
   _cw_check_ptr(g_sockb);
-  _cw_assert(a_sockfd < FD_SETSIZE);
 
   message = (struct cw_sockb_msg_s *) _cw_pezz_get(&g_sockb->messages_pezz);
   if (NULL == message)
@@ -621,15 +616,6 @@ sockb_l_get_spare_fd(void)
     }
     retval = -1;
   }
-  else if (retval >= FD_SETSIZE)
-  {
-    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
-    {
-      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-		"Reached maximum number of connections ([i])\n", FD_SETSIZE);
-    }
-    retval = -1;
-  }
   
   return retval;
 }
@@ -712,7 +698,7 @@ sockb_p_entry_func(void * a_arg)
       
 	  sockfd = sock_get_fd(sock);
 	  _cw_assert(max_fds > sockfd);
-	  if (-1 == regs[sockfd].pollfd_pos)
+	  if ((-1 == regs[sockfd].pollfd_pos) && (max_fds > nfds))
 	  {
 	    /* The sock isn't registered.  Register it. */
 #ifdef _LIBSTASH_SOCKB_CONFESS
@@ -722,23 +708,25 @@ sockb_p_entry_func(void * a_arg)
 	    
 	    regs[sockfd].sock = sock;
 	    regs[sockfd].pollfd_pos = nfds;
-	    _cw_assert(NULL == regs[sockfd].notify_mq);
+	    regs[sockfd].notify_mq = NULL;
 
-/*  	    bzero(&fds[nfds], sizeof(struct pollfd)); */
 	    fds[nfds].fd = sockfd;
 	    fds[nfds].events = POLLIN;
 	    nfds++;
-	    
+
 	    /* Notify the sock that it's registered. */
-	    sock_l_message_callback(sock);
+	    sock_l_message_callback(sock, FALSE);
 	  }
-#ifdef _LIBSTASH_SOCKB_CONFESS
 	  else
 	  {
+#ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Refuse to register [i]\n", sockfd);
-	  }
 #endif
+	    
+	    sock_l_message_callback(sock, TRUE);
+	  }
+
 	  break;
 	}
 	case UNREGISTER:
@@ -782,7 +770,7 @@ sockb_p_entry_func(void * a_arg)
 #endif      
 
 	  /* Notify the sock that it's unregistered. */
-	  sock_l_message_callback(regs[sockfd].sock);
+	  sock_l_message_callback(regs[sockfd].sock, FALSE);
 	  regs[sockfd].sock = NULL;
 	  break;
 	}
@@ -834,30 +822,48 @@ sockb_p_entry_func(void * a_arg)
 	{
 	  sockfd = message->data.in_notify.sockfd;
 
-	  regs[sockfd].notify_mq = message->data.in_notify.mq;
-#ifdef _LIBSTASH_SOCKB_CONFESS
-	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		    "regs[[[i]].notify_mq = 0x[p]\n",
-		    sockfd,
-		    regs[sockfd].notify_mq);
-#endif
-	  mtx_lock(message->data.in_notify.mtx);
-	  cnd_signal(message->data.in_notify.cnd);
-	  mtx_unlock(message->data.in_notify.mtx);
-
-	  if (NULL != regs[sockfd].notify_mq)
+	  if (-1 != regs[sockfd].pollfd_pos)
 	  {
-	    if (0 < sock_l_get_in_size(regs[sockfd].sock))
+	    _cw_check_ptr(regs[sockfd].sock);
+	    regs[sockfd].notify_mq = message->data.in_notify.mq;
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+		      "regs[[[i]].notify_mq = 0x[p]\n",
+		      sockfd,
+		      regs[sockfd].notify_mq);
+#endif
+
+	    mtx_lock(message->data.in_notify.mtx);
+	    cnd_signal(message->data.in_notify.cnd);
+	    mtx_unlock(message->data.in_notify.mtx);
+
+	    if (NULL != regs[sockfd].notify_mq)
 	    {
-	      if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+	      if (0 < sock_l_get_in_size(regs[sockfd].sock))
 	      {
-		/* Send an out notification, since there are data already
-		 * queued up. */
-		regs[sockfd].notify_mq = NULL;
+		/* Send an out notification, since there are data already queued
+		 * up. */
+		if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
+		{
+		  regs[sockfd].notify_mq = NULL;
+		}
 	      }
 	    }
 	  }
-	  
+	  else
+	  {
+	    mtx_lock(message->data.in_notify.mtx);
+	    cnd_signal(message->data.in_notify.cnd);
+	    mtx_unlock(message->data.in_notify.mtx);
+
+#ifdef _LIBSTASH_SOCKB_CONFESS
+	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+		      "Refuse to set regs[[[i]].notify_mq = 0x[p]\n",
+		      sockfd,
+		      message->data.in_notify.mq);
+#endif
+	  }
+
 	  break;
 	}
 	default:
@@ -1202,11 +1208,8 @@ sockb_p_entry_func(void * a_arg)
 	    
 	    if (NULL != regs[sockfd].notify_mq)
 	    {
-	      _cw_marker("Got here");
 	      if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
 	      {
-		/* XXX */
-		_cw_error("Got here");
 		regs[sockfd].notify_mq = NULL;
 	      }
 	    }

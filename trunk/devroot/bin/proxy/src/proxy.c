@@ -923,7 +923,7 @@ handle_client_send(void * a_arg)
    * then send the data on. */
   while (FALSE == conn->should_quit)
   {
-    if (-1 == sock_read(&conn->client_sock, &buf, 0, NULL))
+    if (0 > sock_read(&conn->client_sock, &buf, 0, NULL))
     {
       mtx_lock(&conn->lock);
       conn->should_quit = TRUE;
@@ -1004,7 +1004,7 @@ handle_client_recv(void * a_arg)
    * then send the data on. */
   while (FALSE == conn->should_quit)
   {
-    if ((-1 == sock_read(&conn->remote_sock, &buf, 0, NULL))
+    if ((0 > sock_read(&conn->remote_sock, &buf, 0, NULL))
 	|| (conn->should_quit))
     {
       mtx_lock(&conn->lock);

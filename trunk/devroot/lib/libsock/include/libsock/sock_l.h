@@ -139,6 +139,8 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf);
  *
  * a_sock : Pointer to a sock.
  *
+ * a_error : FALSE == success, TRUE == error.
+ *
  * <<< Output(s) >>>
  *
  * None.
@@ -149,7 +151,7 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf);
  *
  ****************************************************************************/
 void
-sock_l_message_callback(cw_sock_t * a_sock);
+sock_l_message_callback(cw_sock_t * a_sock, cw_bool_t a_error);
 
 /****************************************************************************
  *

@@ -1,3 +1,13 @@
+1999-08-18  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c: Improve locking logic to avoid various potential
+	race conditions and deadlock.
+
+	* : Don't ignore memory allocation errors.
+	
+	* src/sockb.c (sockb_l_get_spare_fd): Don't limit the number of
+	sockets to FD_SETSIZE.
+
 1999-08-06  Jason Evans  <jasone@canonware.com>
 
 	* src/sockb.c (sockb_p_entry_func): Use poll() instead of

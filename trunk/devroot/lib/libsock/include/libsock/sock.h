@@ -22,10 +22,6 @@ struct cw_sock_s
 {
   cw_bool_t is_malloced;
 
-  cw_mtx_t lock;
-  cw_cnd_t callback_cnd;
-  cw_bool_t is_registered;
-
   cw_uint32_t os_inbuf_size;
   cw_uint32_t os_outbuf_size;
   cw_uint16_t port;
@@ -34,6 +30,10 @@ struct cw_sock_s
   int sockfd;
   cw_bool_t is_connected;
   cw_bool_t error;
+
+  cw_mtx_t lock;
+  cw_cnd_t callback_cnd;
+  cw_bool_t is_registered;
 
   cw_uint32_t in_max_buf_size;
   cw_mtx_t in_lock;
@@ -212,9 +212,9 @@ sock_disconnect(cw_sock_t * a_sock);
  * <<< Output(s) >>>
  *
  * retval : -2 : Error.  This should only happen if the socket has been closed.
- *        : -1 : Memory allocation error.
- *        :  0 : Timeout.
- *        : >0 : Data read.
+ *          -1 : Memory allocation error.
+ *           0 : Timeout.
+ *          >0 : Data read.
  *
  * <<< Description >>>
  *
