@@ -28,6 +28,7 @@
 #include <netdb.h> /* For socket and socketpair operators. */
 #include <sys/socket.h> /* For socket and socketpair operators. */
 #ifndef CW_HAVE_SOCKLEN_T
+/* socklen_t is missing on Mac OS X <= 10.2. */
 typedef int socklen_t;
 #endif
 #endif
@@ -1567,7 +1568,6 @@ systemdict_connect(cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, NXN_ioerror);
 		return;
 	    case ENOTSOCK:
-		fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		nxo_thread_nerror(a_thread, NXN_argcheck);
 		return;
 	    case ENOBUFS:
@@ -1590,7 +1590,6 @@ systemdict_connect(cw_nxo_t *a_thread)
 			      &sockaddr.sin_addr);
 	    if (error < 0)
 	    {
-		fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
 		nxo_thread_nerror(a_thread, NXN_argcheck);
 		return;
 	    }
@@ -1600,11 +1599,15 @@ systemdict_connect(cw_nxo_t *a_thread)
 		struct in_addr *iaddr;
 
 		/* Not a dotted number IP address.  Try it as a hostname. */
-		/* XXX Not reentrant. */
+#ifdef CW_THREADS
+		mtx_lock(&cw_g_gethostbyname_mtx);
+#endif
 		ent = gethostbyname(nxo_string_get(addr));
 		if (ent == NULL)
 		{
-		    fprintf(stderr, "%s:%d:%s()\n", __FILE__, __LINE__, __FUNCTION__);
+#ifdef CW_THREADS
+		    mtx_unlock(&cw_g_gethostbyname_mtx);
+#endif
 		    nxo_thread_nerror(a_thread, NXN_argcheck);
 		    return;
 		}
@@ -1616,6 +1619,9 @@ systemdict_connect(cw_nxo_t *a_thread)
 
 	    sockaddr.sin_port = htons(sockport);
 
+#ifdef CW_THREADS
+	    mtx_unlock(&cw_g_gethostbyname_mtx);
+#endif
 	    break;
 	case AF_LOCAL:
 	case AF_ROUTE:
@@ -1635,24 +1641,41 @@ systemdict_connect(cw_nxo_t *a_thread)
     {
 	switch (errno)
 	{
-	    /* XXX */
-	    case EBADF:
-	    case EFAULT:
-	    case ENOTSOCK:
-	    case EISCONN:
 	    case ECONNREFUSED:
 	    case ETIMEDOUT:
 	    case ENETUNREACH:
-	    case EADDRINUSE:
+	    {
+		nxo_thread_nerror(a_thread, NXN_neterror);
+		break;
+	    }
 	    case EINPROGRESS:
 	    case EALREADY:
-	    case EAGAIN:
+	    {
+		nxo_thread_nerror(a_thread, NXN_ioerror);
+		break;
+	    }
 	    case EAFNOSUPPORT:
+	    {
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		break;
+	    }
 	    case EACCES:
+	    case EISCONN:
+	    case ENOTSOCK:
 	    case EPERM:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
+		break;
+	    }
+	    case EADDRINUSE:
+	    case EAGAIN:
+	    case EBADF:
+	    case EFAULT:
 	    default:
+	    {
 		nxo_thread_nerror(a_thread, NXN_unregistered);
 		return;
+	    }
 	}
     }
 
@@ -8080,7 +8103,9 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	tnxo = nxo_stack_push(tstack);
 	nxo_string_cstring(tnxo, nxo, a_thread);
 
-	/* XXX This doesn't look reentrant. */
+#ifdef CW_THREADS
+	mtx_lock(&cw_g_getprotobyname_mtx);
+#endif
 	ent = getprotobyname(nxo_string_get(tnxo));
 
 	nxo_stack_pop(tstack);
@@ -8088,6 +8113,9 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	if (ent == NULL)
 	{
 	    /* Not a socket protocol. */
+#ifdef CW_THREADS
+	    mtx_unlock(&cw_g_getprotobyname_mtx);
+#endif
 	    endprotoent();
 	    nxo_thread_nerror(a_thread, NXN_argcheck);
 	    return;
@@ -8095,6 +8123,9 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 
 	endprotoent();
 	protocol = ent->p_proto;
+#ifdef CW_THREADS
+	mtx_unlock(&cw_g_getprotobyname_mtx);
+#endif
 
 	/* The next argument must be the socket type. */
 	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);

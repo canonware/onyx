@@ -33,6 +33,11 @@ cw_mem_t *cw_g_mem = NULL;
 static cw_mem_t *cw_g_mem_mem = NULL;
 #endif
 
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+cw_mtx_t cw_g_gethostbyname_mtx;
+cw_mtx_t cw_g_getprotobyname_mtx;
+#endif
+
 void
 libonyx_init(void)
 {
@@ -87,11 +92,22 @@ libonyx_init(void)
      * program. */
     signal(SIGPIPE, SIG_IGN);
 #endif
+
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+    /* Initialize mutexes that protect non-reentrant functions. */
+    mtx_new(&cw_g_gethostbyname_mtx);
+    mtx_new(&cw_g_getprotobyname_mtx);
+#endif
 }
 
 void
 libonyx_shutdown(void)
 {
+#if (defined(CW_POSIX) && defined(CW_THREADS))
+    mtx_delete(&cw_g_getprotobyname_mtx);
+    mtx_delete(&cw_g_gethostbyname_mtx);
+#endif
+
     /* Shut down global modules in reverse order. */
     mem_delete(cw_g_mem);
     cw_g_mem = NULL;
