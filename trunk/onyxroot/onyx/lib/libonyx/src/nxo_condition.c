@@ -10,6 +10,8 @@
  *
  ******************************************************************************/
 
+#define CW_NXO_CONDITION_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
@@ -32,30 +34,6 @@ nxo_condition_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxo_p_type_set(a_nxo, NXOT_CONDITION);
 
     nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) condition);
-}
-
-cw_bool_t
-nxoe_l_condition_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
-{
-    cw_nxoe_condition_t *condition;
-
-    condition = (cw_nxoe_condition_t *) a_nxoe;
-
-    cw_check_ptr(condition);
-    cw_dassert(condition->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(condition->nxoe.type == NXOT_CONDITION);
-
-    cnd_delete(&condition->condition);
-
-    nxa_free(a_nxa, condition, sizeof(cw_nxoe_condition_t));
-
-    return FALSE;
-}
-
-cw_nxoe_t *
-nxoe_l_condition_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
-{
-    return NULL;
 }
 
 void

@@ -26,8 +26,92 @@ struct cw_nxoe_hook_s
     cw_nxo_hook_delete_t *delete_f;
 };
 
+#ifndef CW_USE_INLINES
 cw_bool_t
 nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+#endif
+
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_HOOK_C_))
+CW_INLINE cw_bool_t
+nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+{
+    cw_bool_t retval;
+    cw_nxoe_hook_t *hook;
+
+    hook = (cw_nxoe_hook_t *) a_nxoe;
+
+    cw_check_ptr(hook);
+    cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(hook->nxoe.type == NXOT_HOOK);
+
+    if (hook->delete_f != NULL)
+    {
+	retval = hook->delete_f(hook->data, nxa_nx_get(a_nxa), a_iter);
+    }
+    else
+    {
+	retval = FALSE;
+    }
+
+    if (retval == FALSE)
+    {
+	nxa_free(a_nxa, hook, sizeof(cw_nxoe_hook_t));
+    }
+
+    return retval;
+}
+
+CW_INLINE cw_nxoe_t *
+nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+{
+    cw_nxoe_t *retval;
+    cw_nxoe_hook_t *hook;
+
+    hook = (cw_nxoe_hook_t *) a_nxoe;
+
+    if (a_reset)
+    {
+	hook->ref_iter = 0;
+    }
+
+    switch (hook->ref_iter)
+    {
+	case 0:
+	{
+	    hook->ref_iter++;
+	    retval = nxo_nxoe_get(&hook->tag);
+	    if (retval != NULL)
+	    {
+		break;
+	    }
+	}
+	case 1:
+	{
+	    hook->ref_iter++;
+	    if (hook->ref_iter_f != NULL)
+	    {
+		retval = hook->ref_iter_f(hook->data, TRUE);
+	    }
+	    else
+	    {
+		retval = NULL;
+	    }
+	    break;
+	}
+	case 2:
+	{
+	    retval = hook->ref_iter_f(hook->data, FALSE);
+	    break;
+	}
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    return retval;
+}
+#endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_HOOK_C_)) */

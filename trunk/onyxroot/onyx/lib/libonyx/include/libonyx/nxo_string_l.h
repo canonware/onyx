@@ -41,8 +41,70 @@ struct cw_nxoe_string_s
     } e;
 };
 
+#ifndef CW_USE_INLINES
 cw_bool_t
 nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+#endif
+
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_STRING_C_))
+CW_INLINE cw_bool_t
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+{
+    cw_nxoe_string_t *string;
+
+    string = (cw_nxoe_string_t *) a_nxoe;
+
+    cw_check_ptr(string);
+    cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(string->nxoe.type == NXOT_STRING);
+
+    if (string->nxoe.indirect == FALSE && string->e.s.alloc_len > 0)
+    {
+	nxa_free(a_nxa, string->e.s.str, string->e.s.alloc_len);
+    }
+
+#ifdef CW_THREADS
+    if (string->nxoe.locking && string->nxoe.indirect == FALSE)
+    {
+	mtx_delete(&string->lock);
+    }
+#endif
+
+    nxa_free(a_nxa, string, sizeof(cw_nxoe_string_t));
+
+    return FALSE;
+}
+
+CW_INLINE cw_nxoe_t *
+nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+{
+    cw_nxoe_t *retval;
+    cw_nxoe_string_t *string;
+
+    string = (cw_nxoe_string_t *) a_nxoe;
+
+    if (a_reset)
+    {
+	string->ref_iter = 0;
+    }
+
+    if (a_nxoe->indirect == FALSE)
+    {
+	retval = NULL;
+    }
+    else if (string->ref_iter == 0)
+    {
+	retval = string->e.i.nxo.o.nxoe;
+	string->ref_iter++;
+    }
+    else
+    {
+	retval = NULL;
+    }
+
+    return retval;
+}
+#endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_STRING_C_)) */

@@ -56,11 +56,117 @@ struct cw_nxoe_dict_s
     } data;
 };
 
+cw_nxo_t *
+nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key);
+
+#ifndef CW_USE_INLINES
 cw_bool_t
 nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+#endif
 
-cw_nxo_t *
-nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key);
+#if (defined(CW_USE_INLINES) || defined(CW_NXO_DICT_C_))
+CW_INLINE cw_bool_t
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+{
+    cw_nxoe_dict_t *dict;
+    cw_nxoe_dicto_t *dicto;
+    cw_chi_t *chi;
+
+    dict = (cw_nxoe_dict_t *) a_nxoe;
+
+    cw_check_ptr(dict);
+    cw_dassert(dict->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(dict->nxoe.type == NXOT_DICT);
+
+#ifdef CW_THREADS
+    if (dict->nxoe.locking)
+    {
+	mtx_delete(&dict->lock);
+    }
+#endif
+    if (dict->is_hash)
+    {
+	while (dch_remove_iterate(&dict->data.hash, NULL, (void **) &dicto,
+				  &chi)
+	       == FALSE)
+	{
+	    nxa_free(a_nxa, dicto, sizeof(cw_nxoe_dicto_t));
+	    nxa_free(a_nxa, chi, sizeof(cw_chi_t));
+	}
+	dch_delete(&dict->data.hash);
+    }
+    nxa_free(a_nxa, dict, sizeof(cw_nxoe_dict_t));
+
+    return FALSE;
+}
+
+CW_INLINE cw_nxoe_t *
+nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+{
+    cw_nxoe_t *retval;
+    cw_nxoe_dict_t *dict;
+
+    dict = (cw_nxoe_dict_t *) a_nxoe;
+
+    if (a_reset)
+    {
+	dict->ref_iter = 0;
+	dict->dicto = NULL;
+    }
+
+    retval = NULL;
+    if (dict->is_hash)
+    {
+	while (retval == NULL
+	       && dict->ref_iter < dch_count(&dict->data.hash))
+	{
+	    if (dict->dicto == NULL)
+	    {
+		/* Key. */
+		dch_get_iterate(&dict->data.hash, NULL, (void **) &dict->dicto);
+		retval = nxo_nxoe_get(&dict->dicto->key);
+	    }
+	    else
+	    {
+		/* Value. */
+		retval = nxo_nxoe_get(&dict->dicto->val);
+		dict->ref_iter++;
+		dict->dicto = NULL;
+	    }
+	}
+    }
+    else
+    {
+	while (retval == NULL && dict->ref_iter < CW_LIBONYX_DICT_SIZE)
+	{
+	    if (dict->dicto == NULL)
+	    {
+		if (nxo_type_get(&dict->data.array[dict->ref_iter].key)
+		    != NXOT_NO)
+		{
+		    /* Key. */
+		    dict->dicto = &dict->data.array[dict->ref_iter];
+		    retval = nxo_nxoe_get(&dict->dicto->key);
+		}
+		else
+		{
+		    /* Empty slot. */
+		    dict->ref_iter++;
+		}
+	    }
+	    else
+	    {
+		/* Value. */
+		retval = nxo_nxoe_get(&dict->dicto->val);
+		dict->ref_iter++;
+		dict->dicto = NULL;
+	    }
+	}
+    }
+
+    return retval;
+}
+#endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_DICT_C_)) */

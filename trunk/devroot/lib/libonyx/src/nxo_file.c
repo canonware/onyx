@@ -10,6 +10,8 @@
  *
  ******************************************************************************/
 
+#define CW_NXO_FILE_C_
+
 #include "../include/libonyx/libonyx.h"
 
 #ifdef CW_POSIX_FILE
@@ -27,8 +29,6 @@
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_file_l.h"
-
-static cw_nxn_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
 #ifdef CW_THREADS
 #define nxoe_p_file_lock(a_nxoe)					\
@@ -80,79 +80,6 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
     nxo_p_type_set(a_nxo, NXOT_FILE);
 
     nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) file);
-}
-
-cw_bool_t
-nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
-{
-    cw_nxoe_file_t *file;
-
-    file = (cw_nxoe_file_t *) a_nxoe;
-
-    cw_check_ptr(file);
-    cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(file->nxoe.type == NXOT_FILE);
-
-    nxo_p_file_buffer_flush(file);
-    if (file->buffer != NULL)
-    {
-	nxa_free(a_nxa, file->buffer, file->buffer_size);
-    }
-#ifdef CW_THREADS
-    if (file->nxoe.locking)
-    {
-	mtx_delete(&file->lock);
-    }
-#endif
-    switch (file->mode)
-    {
-	case FILE_NONE:
-	{
-	    break;
-	}
-#ifdef CW_POSIX_FILE
-	case FILE_POSIX:
-	{
-	    if (file->f.p.wrapped == FALSE)
-	    {
-		close(file->f.p.fd);
-	    }
-	    break;
-	}
-#endif
-	case FILE_SYNTHETIC:
-	{
-	    if (file->f.s.delete_f != NULL)
-	    {
-		file->f.s.delete_f(file->f.s.arg, nxa_nx_get(a_nxa));
-	    }
-	    break;
-	}
-    }
-
-    nxa_free(a_nxa, file, sizeof(cw_nxoe_file_t));
-
-    return FALSE;
-}
-
-cw_nxoe_t *
-nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
-{
-    cw_nxoe_t *retval;
-    cw_nxoe_file_t *file;
-
-    file = (cw_nxoe_file_t *) a_nxoe;
-
-    if (file->mode == FILE_SYNTHETIC && file->f.s.ref_iter_f != NULL)
-    {
-	retval = file->f.s.ref_iter_f(file->f.s.arg, a_reset);
-    }
-    else
-    {
-	retval = NULL;
-    }
-
-    return retval;
 }
 
 #ifdef CW_POSIX_FILE
@@ -1636,7 +1563,7 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
     return retval;
 }
 
-static cw_nxn_t
+cw_nxn_t
 nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 {
     cw_nxn_t retval;

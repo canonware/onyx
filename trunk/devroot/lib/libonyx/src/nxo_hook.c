@@ -10,11 +10,12 @@
  *
  ******************************************************************************/
 
+#define CW_NXO_HOOK_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_hook_l.h"
-#include "../include/libonyx/nxo_name_l.h"
 
 void
 nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
@@ -38,86 +39,6 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
     nxo_p_type_set(a_nxo, NXOT_HOOK);
 
     nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) hook);
-}
-
-cw_bool_t
-nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
-{
-    cw_bool_t retval;
-    cw_nxoe_hook_t *hook;
-
-    hook = (cw_nxoe_hook_t *) a_nxoe;
-
-    cw_check_ptr(hook);
-    cw_dassert(hook->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(hook->nxoe.type == NXOT_HOOK);
-
-    if (hook->delete_f != NULL)
-    {
-	retval = hook->delete_f(hook->data, nxa_nx_get(a_nxa), a_iter);
-    }
-    else
-    {
-	retval = FALSE;
-    }
-
-    if (retval == FALSE)
-    {
-	nxa_free(a_nxa, hook, sizeof(cw_nxoe_hook_t));
-    }
-
-    return retval;
-}
-
-cw_nxoe_t *
-nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
-{
-    cw_nxoe_t *retval;
-    cw_nxoe_hook_t *hook;
-
-    hook = (cw_nxoe_hook_t *) a_nxoe;
-
-    if (a_reset)
-    {
-	hook->ref_iter = 0;
-    }
-
-    switch (hook->ref_iter)
-    {
-	case 0:
-	{
-	    hook->ref_iter++;
-	    retval = nxo_nxoe_get(&hook->tag);
-	    if (retval != NULL)
-	    {
-		break;
-	    }
-	}
-	case 1:
-	{
-	    hook->ref_iter++;
-	    if (hook->ref_iter_f != NULL)
-	    {
-		retval = hook->ref_iter_f(hook->data, TRUE);
-	    }
-	    else
-	    {
-		retval = NULL;
-	    }
-	    break;
-	}
-	case 2:
-	{
-	    retval = hook->ref_iter_f(hook->data, FALSE);
-	    break;
-	}
-	default:
-	{
-	    cw_not_reached();
-	}
-    }
-
-    return retval;
 }
 
 cw_nxo_t *

@@ -113,64 +113,6 @@ nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
     }
 }
 
-cw_bool_t
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
-{
-    cw_nxoe_string_t *string;
-
-    string = (cw_nxoe_string_t *) a_nxoe;
-
-    cw_check_ptr(string);
-    cw_dassert(string->nxoe.magic == CW_NXOE_MAGIC);
-    cw_assert(string->nxoe.type == NXOT_STRING);
-
-    if (string->nxoe.indirect == FALSE && string->e.s.alloc_len > 0)
-    {
-	nxa_free(a_nxa, string->e.s.str, string->e.s.alloc_len);
-    }
-
-#ifdef CW_THREADS
-    if (string->nxoe.locking && string->nxoe.indirect == FALSE)
-    {
-	mtx_delete(&string->lock);
-    }
-#endif
-
-    nxa_free(a_nxa, string, sizeof(cw_nxoe_string_t));
-
-    return FALSE;
-}
-
-cw_nxoe_t *
-nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
-{
-    cw_nxoe_t *retval;
-    cw_nxoe_string_t *string;
-
-    string = (cw_nxoe_string_t *) a_nxoe;
-
-    if (a_reset)
-    {
-	string->ref_iter = 0;
-    }
-
-    if (a_nxoe->indirect == FALSE)
-    {
-	retval = NULL;
-    }
-    else if (string->ref_iter == 0)
-    {
-	retval = string->e.i.nxo.o.nxoe;
-	string->ref_iter++;
-    }
-    else
-    {
-	retval = NULL;
-    }
-
-    return retval;
-}
-
 void
 nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {

@@ -61,13 +61,13 @@ struct cw_nxoe_array_s
     } while (0)
 #endif
 
+#ifndef CW_USE_INLINES
 cw_bool_t
 nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
-#ifndef CW_USE_INLINES
 #define nxo_l_array_el_get nxo_array_el_get
 
 void
@@ -81,6 +81,73 @@ nxo_l_array_bound_set(cw_nxo_t *a_nxo);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_ARRAY_C_))
+CW_INLINE cw_bool_t
+nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+{
+    cw_nxoe_array_t *array;
+
+    array = (cw_nxoe_array_t *) a_nxoe;
+
+    cw_check_ptr(array);
+    cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(array->nxoe.type == NXOT_ARRAY);
+
+    if (array->nxoe.indirect == FALSE && array->e.a.alloc_len > 0)
+    {
+	nxa_free(a_nxa, array->e.a.arr,
+		 array->e.a.alloc_len * sizeof(cw_nxo_t));
+    }
+
+#ifdef CW_THREADS
+    if (array->nxoe.locking && array->nxoe.indirect == FALSE)
+    {
+	mtx_delete(&array->lock);
+    }
+#endif
+
+    nxa_free(a_nxa, array, sizeof(cw_nxoe_array_t));
+
+    return FALSE;
+}
+
+CW_INLINE cw_nxoe_t *
+nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
+{
+    cw_nxoe_t *retval;
+    cw_nxoe_array_t *array;
+
+    array = (cw_nxoe_array_t *) a_nxoe;
+
+    if (a_reset)
+    {
+	array->ref_iter = 0;
+    }
+
+    if (a_nxoe->indirect)
+    {
+	if (array->ref_iter == 0)
+	{
+	    retval = array->e.i.nxo.o.nxoe;
+	    array->ref_iter++;
+	}
+	else
+	{
+	    retval = NULL;
+	}
+    }
+    else
+    {
+	retval = NULL;
+	while (retval == NULL && array->ref_iter < array->e.a.len)
+	{
+	    retval = nxo_nxoe_get(&array->e.a.arr[array->ref_iter]);
+	    array->ref_iter++;
+	}
+    }
+
+    return retval;
+}
+
 CW_INLINE void
 nxo_l_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {

@@ -1,5 +1,13 @@
 2002-07-14 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/nxa.c : Restructure code for reference iteration and
+	  deletion so that type-specific functions can be inlined, rather than
+	  using the function pointer table behind nxoe_l_ref_iter() and
+	  nxoe_l_delete().
+
+	* lib/libonyx/src/nxo.c : Remove nxoe_l_ref_iter() and nxoe_l_delete(),
+	  since the only callers of those functions were in nxa.c.
+
 	* lib/libonyx/src/nxo_dict.c : Use an embedded array rather than a dch
 	  for small dict sizes.  This reduces the memory overhead of small dicts
 	  without a significant performance impact.

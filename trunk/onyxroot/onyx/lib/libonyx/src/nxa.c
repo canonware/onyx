@@ -81,8 +81,19 @@
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
+#include "../include/libonyx/nxo_array_l.h"
+#ifdef CW_THREADS
+#include "../include/libonyx/nxo_condition_l.h"
+#endif
 #include "../include/libonyx/nxo_dict_l.h"
+#include "../include/libonyx/nxo_file_l.h"
+#include "../include/libonyx/nxo_hook_l.h"
+#ifdef CW_THREADS
+#include "../include/libonyx/nxo_mutex_l.h"
+#endif
+#include "../include/libonyx/nxo_name_l.h"
 #include "../include/libonyx/nxo_stack_l.h"
+#include "../include/libonyx/nxo_string_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
 static void
@@ -680,6 +691,7 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 {
     cw_nxoe_t *retval, *gray, *nxoe;
     cw_uint32_t nreachable = 0;
+    cw_bool_t reset;
 
     /* Iterate through the gray objects and process them until only black and
      * white objects are left. */
@@ -687,10 +699,56 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
     do
     {
 	cw_assert(nxoe_l_color_get(gray) != a_nxa->white);
-	for (nxoe = nxoe_l_ref_iter(gray, TRUE);
-	     nxoe != NULL;
-	     nxoe = nxoe_l_ref_iter(gray, FALSE))
+
+	reset = TRUE;
+	for (reset = TRUE;; reset = FALSE)
 	{
+	    switch (nxoe_l_type_get(gray))
+	    {
+		case NXOT_ARRAY:
+		    nxoe = nxoe_l_array_ref_iter(gray, reset);
+		    break;
+#ifdef CW_THREADS
+		case NXOT_CONDITION:
+		    nxoe = nxoe_l_condition_ref_iter(gray, reset);
+		    break;
+#endif
+		case NXOT_DICT:
+		    nxoe = nxoe_l_dict_ref_iter(gray, reset);
+		    break;
+		case NXOT_FILE:
+		    nxoe = nxoe_l_file_ref_iter(gray, reset);
+		    break;
+		case NXOT_HOOK:
+		    nxoe = nxoe_l_hook_ref_iter(gray, reset);
+		    break;
+#ifdef CW_THREADS
+		case NXOT_MUTEX:
+		    nxoe = nxoe_l_mutex_ref_iter(gray, reset);
+		    break;
+#endif
+		case NXOT_NAME:
+		    nxoe = nxoe_l_name_ref_iter(gray, reset);
+		    break;
+		case NXOT_STACK:
+		    nxoe = nxoe_l_stack_ref_iter(gray, reset);
+		    break;
+		case NXOT_STRING:
+		    nxoe = nxoe_l_string_ref_iter(gray, reset);
+		    break;
+		case NXOT_THREAD:
+		    nxoe = nxoe_l_thread_ref_iter(gray, reset);
+		    break;
+		default:
+		    cw_not_reached();
+		    break;
+	    }
+
+	    if (nxoe == NULL)
+	    {
+		break;
+	    }
+
 	    /* If object is white and registered, color it. */
 	    if (nxoe_l_color_get(nxoe) == a_nxa->white
 		&& nxoe_l_registered_get(nxoe))
@@ -733,7 +791,7 @@ nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
     cw_nxoe_t *last, *defer, *nxoe;
     cw_uint32_t i;
-    cw_bool_t again;
+    cw_bool_t again, notyet;
 
     /* Iterate through the garbage objects and delete them.  If nxoe_l_delete()
      * returns TRUE, the object deletion is deferred until a later pass.
@@ -749,7 +807,48 @@ nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 	{
 	    nxoe = qr_next(defer, link);
 	    qr_remove(nxoe, link);
-	    if (nxoe_l_delete(nxoe, a_nxa, i))
+	    switch (nxoe_l_type_get(nxoe))
+	    {
+		case NXOT_ARRAY:
+		    notyet = nxoe_l_array_delete(nxoe, a_nxa, i);
+		    break;
+#ifdef CW_THREADS
+		case NXOT_CONDITION:
+		    notyet = nxoe_l_condition_delete(nxoe, a_nxa, i);
+		    break;
+#endif
+		case NXOT_DICT:
+		    notyet = nxoe_l_dict_delete(nxoe, a_nxa, i);
+		    break;
+		case NXOT_FILE:
+		    notyet = nxoe_l_file_delete(nxoe, a_nxa, i);
+		    break;
+		case NXOT_HOOK:
+		    notyet = nxoe_l_hook_delete(nxoe, a_nxa, i);
+		    break;
+#ifdef CW_THREADS
+		case NXOT_MUTEX:
+		    notyet = nxoe_l_mutex_delete(nxoe, a_nxa, i);
+		    break;
+#endif
+		case NXOT_NAME:
+		    notyet = nxoe_l_name_delete(nxoe, a_nxa, i);
+		    break;
+		case NXOT_STACK:
+		    notyet = nxoe_l_stack_delete(nxoe, a_nxa, i);
+		    break;
+		case NXOT_STRING:
+		    notyet = nxoe_l_string_delete(nxoe, a_nxa, i);
+		    break;
+		case NXOT_THREAD:
+		    notyet = nxoe_l_thread_delete(nxoe, a_nxa, i);
+		    break;
+		default:
+		    cw_not_reached();
+		    break;
+	    }
+
+	    if (notyet)
 	    {
 		again = TRUE;
 		qr_after_insert(defer, nxoe, link);
