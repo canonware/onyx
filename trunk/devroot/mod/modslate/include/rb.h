@@ -255,6 +255,8 @@ struct									\
 	(a_node)->a_field.rbn_par = t;					\
     } while (0)
 
+/* a_node is always the first argument to a_comp.  This is assumed in
+ * buf_p_bufp_insert() for the case of inserting an empty bufp. */
 #define rb_insert(a_tree, a_node, a_comp, a_type, a_field)		\
     do									\
     {									\

@@ -234,6 +234,8 @@
 
 /* Prototypes. */
 /* XXX */
+static cw_sint32_t
+mkr_p_comp(cw_mkr_t *a_a, cw_mkr_t *a_b);
 
 /* bufv. */
 
@@ -381,6 +383,10 @@ bufp_p_comp(cw_bufp_t *a_a, cw_bufp_t *a_b)
     }
     else
     {
+	/* New bufp's are empty when they are inserted by mkr_l_insert().  As a
+	 * result, this function will claim that a_a is greater than a_b.  This
+	 * is important, since the empty bufp must come after the non-empty
+	 * bufp. */
 	retval = 1;
     }
 
@@ -757,6 +763,7 @@ buf_p_bufp_cur_set(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
     }
 }
 
+/* bufv resizing must be done manually. */
 static void
 buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 {
@@ -775,40 +782,14 @@ buf_p_bufp_insert(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
     {
 	ql_head_insert(&a_buf->plist, a_bufp, plink);
     }
-
-    /* Resize bufv. */
-    if (a_buf->bufvcnt == 0)
-    {
-	a_buf->bufv = (cw_bufv_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
-						    2 * sizeof(cw_bufv_t));
-    }
-    else
-    {
-	a_buf->bufv = (cw_bufv_t *) cw_opaque_realloc(a_buf->realloc,
-						      a_buf->bufv,
-						      a_buf->arg,
-						      a_buf->bufvcnt,
-						      (a_buf->bufvcnt + 2)
-						      * sizeof(cw_bufv_t));
-    }
-    a_buf->bufvcnt += 2;
 }
 
+/* bufv resizing must be done manually. */
 static void
 buf_p_bufp_remove(cw_buf_t *a_buf, cw_bufp_t *a_bufp)
 {
     rb_remove(&a_buf->ptree, a_bufp, cw_bufp_t, pnode);
     ql_remove(&a_buf->plist, a_bufp, plink);
-
-    /* Resize bufv. */
-    cw_assert(a_buf->bufvcnt != 2);
-    a_buf->bufv = (cw_bufv_t *) cw_opaque_realloc(a_buf->realloc,
-						  a_buf->bufv,
-						  a_buf->arg,
-						  a_buf->bufvcnt,
-						  (a_buf->bufvcnt - 2)
-						  * sizeof(cw_bufv_t));
-    a_buf->bufvcnt -= 2;
 }
 
 cw_buf_t *
@@ -843,9 +824,6 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     retval->len = 0;
     retval->nlines = 1;
 
-    /* Initialize bufvcnt, so that buf_p_bufp_insert() will know what to do. */
-    retval->bufvcnt = 0;
-
     /* Initialize bufp tree and list. */
     rb_tree_new(&retval->ptree, pnode);
     ql_new(&retval->plist);
@@ -859,6 +837,12 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
 
     /* Initialize current bufp. */
     retval->bufp_cur = bufp;
+
+    /* Initialize bufv to have two elements, since the buf starts out with one
+     * bufp. */
+    retval->bufv = (cw_bufv_t *) cw_opaque_alloc(a_alloc, a_arg,
+						 2 * sizeof(cw_bufv_t));
+    retval->bufvcnt = 2;
 
     /* Initialize extent trees and lists. */
     rb_tree_new(&retval->ftree, fnode);
@@ -1208,12 +1192,14 @@ mkr_p_remove(cw_mkr_t *a_mkr)
     ql_remove(&bufp->mlist, a_mkr, mlink);
 }
 
-/* Insert data into a single bufp. */
+/* Insert data into a single bufp.  This function assumes that the bufp
+ * internals are consistent, and that the data will fit. */
 static void
 mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
-		    const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
+		    const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt,
+		    cw_uint32_t a_count)
 {
-    cw_uint32_t i, nlines;
+    cw_uint32_t nlines;
     cw_bufv_t bufv;
     cw_mkr_t *first, *mkr;
     cw_buf_t *buf;
@@ -1226,7 +1212,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     buf_p_bufp_cur_set(buf, bufp);
 
     /* Move the gap. */
-    bufp_gap_move(bufp, a_mkr->ppos);
+    bufp_p_gap_move(bufp, a_mkr->ppos);
 
     /* Insert. */
     bufv.data = &bufp->b[bufp->gap_off];
@@ -1234,11 +1220,11 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     nlines = bufv_p_copy(&bufv, 1, a_bufv, a_bufvcnt);
 
     /* Shrink the gap. */
-    bufp->gap_off += count;
-    bufp->gap_len -= count;
+    bufp->gap_off += a_count;
+    bufp->gap_len -= a_count;
 
     /* Adjust the buf's length and line count. */
-    bufp->len += count;
+    bufp->len += a_count;
     bufp->nlines += nlines;
 
     /* Find the first mkr that is at the same ppos as a_mkr.  This may be
@@ -1264,7 +1250,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 	    mkr_p_remove(a_mkr);
 	    a_mkr->ppos = bufp_p_pos_b2p(bufp,
 					 bufp_p_pos_p2b(bufp, a_mkr->ppos)
-					 - count);
+					 - a_count);
 	    mkr_p_insert(a_mkr);
 
 	    cw_assert(ql_next(&bufp->mlist, a_mkr, mlink) == first);
@@ -1281,7 +1267,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 		 mkr != NULL && mkr->ppos == a_mkr->ppos;
 		 mkr = ql_next(&bufp->mlist, mkr, mlink))
 	    {
-		mkr->line += nlines;
+		mkr->pline += nlines;
 	    }
 	}
 	else
@@ -1300,7 +1286,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 	     mkr != NULL;
 	     mkr = ql_next(&bufp->mlist, mkr, mlink))
 	{
-	    mkr->line += nlines;
+	    mkr->pline += nlines;
 	}
     }
 }
@@ -1310,8 +1296,9 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	     const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
 {
     cw_uint64_t cnt;
+    cw_uint32_t i;
     cw_buf_t *buf;
-    cw_bufp_t *bufp;
+    cw_bufp_t *bufp, *nextp;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
@@ -1342,10 +1329,14 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	cnt += a_bufv[i].len;
     }
 
-    /* Depending on how much data are to be inserted, there are two
+    /* Depending on how much data are to be inserted, there are three
      * possibilities:
      *
      * 1) All the data will fit in the bufp.  This is the common case.
+     *
+     * 2) There is not enough space in the bufp, but sliding some data and/or
+     *    splitting the data being inserted between the bufp and the next bufp
+     *    makes it possible to insert the data without splitting.
      *
      * 2) There is not enough space in the bufp, so it is split into two bufp's,
      *    and zero or more additional bufp's are inserted between the two in
@@ -1354,25 +1345,159 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     if (cnt <= bufp->gap_len)
     {
 	/* The data will fit. */
-	mkr_p_simple_insert(a_mkr, a_after, a_bufv, a_bufvcnt);
+	mkr_p_simple_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
+    }
+    else if ((nextp = ql_next(&buf->plist, bufp, plink)) != NULL
+	     && cnt <= bufp->gap_len + nextp->gap_len)
+    {
+	/* The data won't fit in this bufp, but enough data can be slid to the
+	 * next bufp to make room.  The data to be inserted may be split across
+	 * the two bufp's as well.  This case must be handled specially (as
+	 * opposed to simply splitting the bufp), because otherwise very sparse
+	 * bufp's (as bad as one character per bufp) could result.  Since
+	 * coalescing is only done during deletion, such fragmentation would
+	 * potentially exist forever after.  The sliding code assures that for
+	 * each insertion operation, new bufp's are on average at least 50%
+	 * full, yet the algorithmic cost of sliding is strongly bounded
+	 * (O(1)).
+	 *
+	 * Buffer operations tend toward high locality, so on the assumption
+	 * that future operations will tend to be at the end of the data being
+	 * inserted, try to leave all available gap space in the bufp that
+	 * contains the end of the data being inserted.  Doing so decreases the
+	 * likelihood of having to do another slide operation soon after this
+	 * one.
+	 *
+	 * In the following diagrams, bufp's are delimited by [], existing data
+	 * are Y and Z, data being inserted are I, and ^ points to the insertion
+	 * point.
+	 *
+	 **********************************************************************
+	 *
+	 *     IIIIIIII
+	 * [YYYY    ][ZZZZ    ]
+	 *     ^
+	 *
+	 * [YYYIIIII][IIIYZZZZ]
+	 *
+	 **********************************************************************
+	 *
+	 *      IIII
+	 * [YYYYYY  ][ZZZZ    ]
+	 *      ^
+	 *
+	 * [YYYYIIII][YY  ZZZZ]
+	 *
+	 **********************************************************************
+	 *
+	 *        II
+	 * [YYYYYYYY][ZZZZ    ]
+	 *        ^
+	 *
+	 * [YYYYYYII][YY   ZZZZ]
+	 *
+	 **********************************************************************
+	 *
+	 *         II
+	 * [YYYYYYYY][ZZZZ    ]
+	 *         ^
+	 *
+	 * [YYYYYYYI][I   ZZZZ]
+	 *
+	 **********************************************************************
+	 *
+	 *      II
+	 * [YYYYYYYY][ZZZ     ]
+	 *      ^
+	 *
+	 * [YYYYII  ][YYYY ZZZ]
+	 *
+	 **********************************************************************/
+
+	/* XXX */
     }
     else
     {
-	/* Additional space is needed. */
+	cw_uint32_t nextra;
+	cw_mkr_t *mkr, *mmkr;
 
-	/* Split the bufp. */
-	/* XXX */
+	/* Additional space is needed.  Split the bufp.  The easiest way to do
+	 * this is (bufp is original, nextp is new):
+	 *
+	 * 1) Move bufp's gap to the split point.
+	 *
+	 * 2) Create nextp and insert it just after bufp.
+	 *
+	 * 3) Insert the data after bufp's gap to the same offset in nextp.
+	 *
+	 * 4) Subtract nextp's nlines from bufp's nlines.
+	 *
+	 * 5) Starting at the end of bufp's marker list, remove the markers and
+	 *    insert them into nextp until all markers that are in the gap have
+	 *    been moved.
+	 *
+	 * 6) Doctor up bufp's the gap length.
+	 *
+	 * 7) Adjust bufp_cur.
+	 *
+	 * 8) Resize bufv.  This is taken care of after inserting additional
+	 * bufp's (if it is necessary).
+	 */
 
-	if (cnt > ((cw_uint64_t) a_mkr->bufp->gap_len + CW_BUFP_SIZE))
+	/* 1. */
+	bufp_p_gap_move(bufp, a_mkr->ppos);
+
+	/* 2. */
+	nextp = bufp_p_new(buf);
+	nextp->bob_relative = TRUE;
+	nextp->bpos = bufp->bpos + bufp->len;
+	nextp->line = bufp->line + bufp->nlines;
+	buf_p_bufp_insert(buf, nextp);
+	cw_assert(ql_next(&buf->plist, bufp, plink) == nextp);
+
+	/* 3. */
+	/* From. */
+	buf->bufv[0].data = &bufp->b[bufp->gap_off + bufp->gap_len];
+	buf->bufv[0].len = CW_BUFP_SIZE - (bufp->gap_off + bufp->gap_len);
+	/* To. */
+	buf->bufv[1].data = &nextp->b[bufp->gap_off + bufp->gap_len];
+	buf->bufv[1].len = CW_BUFP_SIZE - (bufp->gap_off + bufp->gap_len);
+
+	nextp->nlines = bufv_p_copy(&buf->bufv[1], 1, &buf->bufv[0], 1);
+
+	/* 4. */
+	bufp->nlines -= nextp->nlines;
+
+	/* 5. */
+	for (mkr = ql_last(&bufp->mlist, mlink);
+	     mkr->ppos >= bufp->gap_off;)
 	{
-	    cw_uint32_t i, nextra;
+	    /* Get the previous mkr before removing mkr from the list. */
+	    mmkr = mkr;
+	    mkr = ql_prev(&bufp->mlist, mkr, mlink);
 
-	    /* Splitting the current bufp provides a total of
-	     * a_mkr->bufp->gap_len + CW_BUFP_SIZE bytes of space.  Calculate
-	     * how many more bufp's are needed. */
-	    nextra = (cnt - ((cw_uint64_t) a_mkr->bufp->gap_len + CW_BUFP_SIZE))
+	    mkr_p_remove(mmkr);
+	    mmkr->bufp = nextp;
+	    mkr_p_insert(mmkr);
+	}
+
+	/* 6. */
+	bufp->gap_len = CW_BUFP_SIZE - bufp->gap_off;
+
+	/* 7. */
+	buf->bufp_cur = nextp;
+
+	/* Check if splitting bufp provided enough space.  If not, calculate how
+	 * many more bufp's are needed, then insert them. */
+	if (cnt > ((cw_uint64_t) bufp->gap_len + nextp->gap_len + CW_BUFP_SIZE))
+	{
+	    cw_uint32_t i;
+
+	    /* Splitting bufp didn't provide enough space.  Calculate how many
+	     * more bufp's are needed. */
+	    nextra = (cnt - ((cw_uint64_t) bufp->gap_len + CW_BUFP_SIZE))
 		/ (cw_uint64_t) CW_BUFP_SIZE;
-	    if ((cnt - ((cw_uint64_t) a_mkr->bufp->gap_len + CW_BUFP_SIZE))
+	    if ((cnt - ((cw_uint64_t) bufp->gap_len + CW_BUFP_SIZE))
 		% (cw_uint64_t) CW_BUFP_SIZE != 0)
 	    {
 		nextra++;
@@ -1383,15 +1508,27 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	    {
 		bufp = bufp_p_new(buf);
 		bufp->bob_relative = TRUE;
-		/* XXX */
-		
+		bufp->bpos = nextp->bpos;
+		bufp->line = nextp->line;
 
-	    /* XXX */
-
+		buf_p_bufp_insert(buf, bufp);
 	    }
-	    /* XXX Resize bufv here, and everywhere buf_p_bufp_insert() is
-	     *called, then remove bufv resizing from buf_p_bufp_insert(). */
 	}
+	else
+	{
+	    nextra = 0;
+	}
+
+	/* Resize bufv to make enough room for all of the bufp's that were just
+	 * inserted (including the extra one from splitting). */
+	buf->bufv = (cw_bufv_t *) cw_opaque_realloc(buf->realloc, buf->bufv,
+						    buf->arg,
+						    buf->bufvcnt
+						    * sizeof(cw_bufv_t),
+						    (buf->bufvcnt
+						     + (nextra + 1) * 2)
+						    * sizeof(cw_bufv_t));
+	buf->bufvcnt += (nextra + 1) * 2;
 
 	/* Iteratively call mkr_p_simple_insert(), taking care never to insert
 	 * more data than will fit in the bufp being inserted into. */

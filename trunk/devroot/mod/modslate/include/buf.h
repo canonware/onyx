@@ -113,6 +113,7 @@ struct cw_bufp_s
     cw_uint32_t gap_off;
 
     /* Gap length, in elements. */
+    /* XXX Use len instead? */
     cw_uint32_t gap_len;
 
     /* Text buffer, with gap. */
@@ -150,18 +151,18 @@ struct cw_buf_s
     /* Number of lines (>= 1). */
     cw_uint64_t nlines;
 
-    /* An array of bufv's with twice as many elements as there are bufp's.  This
-     * is large enough to create a vector for the entire buf, even if all bufp's
-     * are split by their gaps. */
-    cw_bufv_t *bufv;
-    cw_uint32_t bufvcnt;
-
     /* bufp tree and list. */
     rb_tree(cw_bufp_t) ptree;
     ql_head(cw_bufp_t) plist;
 
     /* Pointer to the last bufp that stores its position relative to BOB. */
     cw_bufp_t *bufp_cur;
+
+    /* An array of bufv's with twice as many elements as there are bufp's.  This
+     * is large enough to create a vector for the entire buf, even if all bufp's
+     * are split by their gaps. */
+    cw_bufv_t *bufv;
+    cw_uint32_t bufvcnt;
 
     /* Extent trees and lists.  ftree and flist are ordered in forward order.
      * rtree and rlist are ordered in reverse order. */
