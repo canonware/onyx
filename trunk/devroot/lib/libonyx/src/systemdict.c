@@ -5651,7 +5651,20 @@ systemdict_poll(cw_nxo_t *a_thread)
     }
 
     /* Call poll(). */
-    nready = poll(fds, nfds, (int) timeout);
+    while ((nready = poll(fds, nfds, (int) timeout)) == -1 && errno == EINTR)
+    {
+	/* EINTR; try again. */
+    }
+    if (nready == -1)
+    {
+	switch (errno)
+	{
+	    case ENOMEM:
+		xep_throw(CW_ONYXX_OOM);
+	    default:
+		cw_not_reached();
+	}
+    }
 
     /* Translate the results. */
     nxo_array_new(nxo, nx, nxo_thread_currentlocking(a_thread), nready);
