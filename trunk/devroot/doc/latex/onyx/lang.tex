@@ -813,6 +813,7 @@ program-defined definition shadows the built in definition during name lookups.
 
 \subsection{currenterror}
 \label{sec:currenterror}
+\index{currenterror@\onyxop{}{currenterror}{}}
 
 Each thread has its own currenterror dictionary, which is used by the error
 handling machinery to store error state.
@@ -1112,6 +1113,7 @@ onyx:1>
 
 \subsection{envdict}
 \label{sec:envdict}
+\index{envdict@\onyxop{}{envdict}{}}
 
 The envdict dictionary contains keys of type name and values of type string that
 correspond to the environment passed into the program.  All threads share the
@@ -1123,6 +1125,7 @@ modified directly, the changes will not be visible to programs such as
 
 \subsection{errordict}
 \label{sec:errordict}
+\index{errordict@\onyxop{}{errordict}{}}
 
 Each thread has its own errordict, which is used by default by the error
 handling machinery.
@@ -1236,6 +1239,7 @@ Custom stop
 
 \subsection{gcdict}
 \label{sec:gcdict}
+\index{gcdict@\onyxop{}{gcdict}{}}
 
 The gcdict dictionary provides garbage collection control and status
 capabilities.
@@ -1524,6 +1528,7 @@ onyx:0>
 
 \subsection{globaldict}
 \label{sec:globaldict}
+\index{globaldict@\onyxop{}{globaldict}{}}
 
 All threads share the same globaldict, which is meant as a repository for
 globally shared objects.  globaldict is empty when the Onyx interpreter is
@@ -1531,6 +1536,7 @@ initialized, and is implicitly locked.
 
 \subsection{onyxdict}
 \label{sec:onyxdict}
+\index{onyxdict@\onyxop{}{onyxdict}{}}
 
 Various portions of Onyx use the onyxdict dictionary for storage of
 miscellaneous objects that normally should not be part of the namespace visible
@@ -1661,6 +1667,7 @@ onyx:0>
 
 \subsection{outputsdict}
 \label{sec:outputsdict}
+\index{outputsdict@\onyxop{}{outputsdict}{}}
 
 The outputsdict dictionary is primarily used to support
 \htmlref{\onyxop{}{outputs}{}}{systemdict:outputs}, but its contents may be of
@@ -2394,6 +2401,7 @@ onyx:0>
 
 \subsection{sprintsdict}
 \label{sec:sprintsdict}
+\index{sprintsdict@\onyxop{}{sprintsdict}{}}
 
 The sprintsdict dictionary is primarily used to support
 \htmlref{\onyxop{}{sprints}{}}{systemdict:sprints}, but its contents may be of
@@ -3133,6 +3141,7 @@ onyx:1>
 
 \subsection{systemdict}
 \label{sec:systemdict}
+\index{systemdict@\onyxop{}{systemdict}{}}
 
 The systemdict dictionary contains most of the operators that are of general
 use.  Although there are no mechanisms that prevent modification of systemdict,
@@ -3616,8 +3625,13 @@ array. \\
 \hline \hline
 -- & {\bf \htmlref{gcdict}{systemdict:gcdict}} & dict & Get gcdict. \\
 \hline
+-- & {\bf \htmlref{userdict}{systemdict:userdict}} & dict & Get userdict. \\
+\hline
 -- & {\bf \htmlref{globaldict}{systemdict:globaldict}} & dict & Get
 globaldict. \\
+\hline
+-- & {\bf \htmlref{systemdict}{systemdict:systemdict}} & dict & Get
+systemdict. \\
 \hline
 -- & {\bf \htmlref{onyxdict}{systemdict:onyxdict}} & dict & Get onyxdict. \\
 \hline
@@ -3859,10 +3873,10 @@ stderr. \\
 \hline \hline
 \multicolumn{4}{|l|}{Socket and networking operators} \\
 \hline \hline
-family type & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
+family type proto & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
 socket. \\
 \hline
-family type proto & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
+family type & {\bf \htmlref{socket}{systemdict:socket}} & sock & Create a
 socket. \\
 \hline
 sock addr port & {\bf \htmlref{bindsocket}{systemdict:bindsocket}} & -- & Bind
@@ -3886,7 +3900,7 @@ connection. \\
 sock addr port & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
 socket. \\
 \hline
-sock addr & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
+sock path & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
 socket. \\
 \hline
 service & {\bf \htmlref{serviceport}{systemdict:serviceport}} & port & Get port
@@ -3921,11 +3935,11 @@ a message. \\
 sock string & {\bf \htmlref{recv}{systemdict:recv}} & substring & Receive a
 message. \\
 \hline
-family type & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock sock &
-Create a socket pair. \\
-\hline
 family type proto & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock
 sock & Create a socket pair. \\
+\hline
+family type & {\bf \htmlref{socketpair}{systemdict:socketpair}} & sock sock &
+Create a socket pair. \\
 \hline \hline
 \multicolumn{4}{|l|}{Logical and bitwise operators} \\
 \hline \hline
@@ -4292,24 +4306,40 @@ onyx:0>
 	\end{description}
 \label{systemdict:accept}
 \index{accept@\onyxop{}{accept}{}}
-\item[{\onyxop{OPARGS}{accept}{OPOUTS}}: ]
+\item[{\onyxop{sock}{accept}{sock}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A listening socket.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket that is connected to a client.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{neterror}{neterror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Accept a connection and create a socket that is connected to a
+		client.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup `localhost' 7777 bindsocket
+onyx:1> dup listen
+onyx:1> dup accept
+onyx:2> dup peername 1 sprint
+<$family $AF_INET $address 2130706433 $port 33742>
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:add}
@@ -4664,24 +4694,48 @@ onyx:1>
 	\end{description}
 \label{systemdict:bindsocket}
 \index{bindsocket@\onyxop{}{bindsocket}{}}
-\item[{\onyxop{OPARGS}{bindsocket}{OPOUTS}}: ]
+\item[{\onyxop{sock addr port}{bindsocket}{--}}: ]
+\item[{\onyxop{sock addr}{bindsocket}{--}}: ]
+\item[{\onyxop{sock path}{bindsocket}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[addr: ]
+			An IPv4 address or DNS hostname.
+		\item[port: ]
+			An IPv4 port number.  If not specified, the OS chooses a
+			port number.
+		\item[path: ]
+			A filesystem path for a Unix-domain socket.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{neterror}{neterror}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Bind an address/port to an IPv4 socket, or a filesystem path to
+		a Unix-domain socket.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup `localhost' 7777 bindsocket
+onyx:1> dup sockname 1 sprint
+<$family $AF_INET $address 2130706433 $port 7777>
+onyx:1> close
+onyx:0> $AF_LOCAL $SOCK_STREAM socket
+onyx:1> dup `/tmp/socket' bindsocket
+onyx:1> dup sockname 1 sprint
+<$family $AF_LOCAL $path `/tmp/socket'>
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:bpop}
@@ -5093,24 +5147,38 @@ onyx:0>
 	\end{description}
 \label{systemdict:connect}
 \index{connect@\onyxop{}{connect}{}}
-\item[{\onyxop{OPARGS}{connect}{OPOUTS}}: ]
+\item[{\onyxop{sock addr port}{connect}{--}}: ]
+\item[{\onyxop{sock path}{connect}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[addr: ]
+			An IPv4 address or DNS hostname.
+		\item[port: ]
+			An IPv4 port number.  If not specified, the OS chooses a
+			port number.
+		\item[path: ]
+			A filesystem path for a Unix-domain socket.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{neterror}{neterror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Connect \oparg{sock}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup `localhost' 7777 connect
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:copy}
@@ -7455,24 +7523,33 @@ onyx:2>
 	\end{description}
 \label{systemdict:listen}
 \index{listen@\onyxop{}{listen}{}}
-\item[{\onyxop{OPARGS}{listen}{OPOUTS}}: ]
+\item[{\onyxop{sock backlog}{listen}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[backlog: ]
+			Maximum backlog of connections to listen for.  If not
+			specified, the maximum backlog is used.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{neterror}{neterror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Listen for connections on a socket.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup `localhost' 7777 bindsocket
+onyx:1> dup listen
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ln}
@@ -8704,24 +8781,46 @@ onyx:4>
 	\end{description}
 \label{systemdict:peername}
 \index{peername@\onyxop{}{peername}{}}
-\item[{\onyxop{OPARGS}{peername}{OPOUTS}}: ]
+\item[{\onyxop{sock}{peername}{dict}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary of information about the peer end of
+			\oparg{sock}.  Depending on the socket family, the
+			following entries may exist:
+			\begin{description}\item[]
+			\item[family: ] Socket family.
+			\item[address: ] IPv4 address.
+			\item[port: ] IPv4 port.
+			\item[path: ] Unix-domain socket path.
+			\end{description}
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{neterror}{neterror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Get information about the peer end of \oparg{sock}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup `localhost' 7777 bindsocket
+onyx:1> dup listen
+onyx:1> dup accept
+onyx:2> dup peername 1 sprint
+<$family $AF_INET $address 2130706433 $port 33746>
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:pid}
@@ -9293,24 +9392,49 @@ onyx:0>
 	\end{description}
 \label{systemdict:recv}
 \index{recv@\onyxop{}{recv}{}}
-\item[{\onyxop{OPARGS}{recv}{OPOUTS}}: ]
+\item[{\onyxop{sock string flags}{recv}{substring}}: ]
+\item[{\onyxop{sock string}{recv}{substring}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[string: ]
+			A string to use as a buffer for the message being
+			received.
+		\item[flags: ]
+			An array of flag names.  The following flags are
+			supported:
+			\begin{description}\item[]
+			\item[\$MSG\_OOB]
+			\item[\$MSG\_PEEK]
+			\item[\$MSG\_WAITALL]
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[substring: ]
+			A substring of \oparg{string} that contains message
+			data.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{neterror}{neterror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_DGRAM socket
+onyx:1> dup `localhost' 7777 bindsocket
+onyx:1> dup true setnonblocking
+onyx:1> dup 10 string recv
+onyx:2> 1 sprint
+`hello'
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rename}
@@ -9976,15 +10100,63 @@ onyx:0>
 	\end{description}
 \label{systemdict:send}
 \index{send@\onyxop{}{send}{}}
-\item[{\onyxop{OPARGS}{send}{OPOUTS}}: ]
+\item[{\onyxop{sock mesg flags}{send}{nsend}}: ]
+\item[{\onyxop{sock mesg}{send}{nsend}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[mesg: ]
+			A message string.
+		\item[flags: ]
+			An array of flag names.  The following flags are
+			supported:
+			\begin{description}\item[]
+			\item[\$MSG\_OOB]
+			\item[\$MSG\_PEEK]
+			\item[\$MSG\_WAITALL]
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[nsend: ]
+			Number of bytes of \oparg{mesg} actually sent.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{neterror}{neterror}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
+		\end{description}
+	\item[Description: ]
+		Send a message.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> $AF_INET $SOCK_DGRAM socket
+onyx:1> dup `localhost' 7777 connect
+onyx:1> dup `hello' send
+onyx:2> 1 sprint
+5
+onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:serviceport}
+\index{serviceport@\onyxop{}{serviceport}{}}
+\item[{\onyxop{service}{serviceport}{port}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[service: ]
+			A string that represents a network service name.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[port: ]
+			The port number corresponding to \oparg{service}, or 0
+			if the service is unknown.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -9994,6 +10166,9 @@ onyx:0>
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `ftp' serviceport 1 sprint
+21
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setegid}
@@ -10316,24 +10491,69 @@ onyx:1>
 	\end{description}
 \label{systemdict:setsockopt}
 \index{setsockopt@\onyxop{}{setsockopt}{}}
-\item[{\onyxop{OPARGS}{setsockopt}{OPOUTS}}: ]
+\item[{\onyxop{sock level optname optval}{setsockopt}{--}}: ]
+\item[{\onyxop{sock optname optval}{setsockopt}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[level: ]
+			Level at which to set the socket option.  If not
+			specified, \$SOL\_SOCKET is used.
+		\item[optname: ]
+			Name of option to set the value of.  The following
+			option names are supported:
+			\begin{description}\item[]
+			\item[\$SO\_DEBUG]
+			\item[\$SO\_REUSEADDR]
+			\item[\$SO\_REUSEPORT]
+			\item[\$SO\_KEEPALIVE]
+			\item[\$SO\_DONTROUTE]
+			\item[\$SO\_BROADCAST]
+			\item[\$SO\_OOBINLINE]
+			\item[\$SO\_SNDBUF]
+			\item[\$SO\_RCVBUF]
+			\item[\$SO\_SNDLOWAT]
+			\item[\$SO\_RCVLOWAT]
+			\item[\$SO\_TYPE]
+			\item[\$SO\_ERROR: ]
+				\oparg{optval} is an integer.
+			\item[\$SO\_LINGER: ]
+				\oparg{optval} is a dictionary, and the
+				following entries are defined:
+				\begin{description}
+				\item[\$on: ]
+					Boolean.
+				\item[\$time: ]
+					Linger time in seconds.
+				\end{description}
+			\item[\$SO\_SNDTIMEO]
+			\item[\$SO\_RCVTIMEO: ]
+				\oparg{optval} is an integer, in nanoseconds.
+			\end{description}
+		\item[optval: ]
+			Value to associate with \oparg{optname}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Set a socket option.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup $SO_OOBINLINE sockopt 1 sprint
+0
+onyx:1> dup $SO_OOBINLINE 1 setsockopt 
+onyx:1> dup $SO_OOBINLINE sockopt 1 sprint
+1
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setstderr}
@@ -10896,90 +11116,198 @@ onyx:1>
 	\end{description}
 \label{systemdict:socket}
 \index{socket@\onyxop{}{socket}{}}
-\item[{\onyxop{OPARGS}{socket}{OPOUTS}}: ]
+\item[{\onyxop{family type proto}{socket}{sock}}: ]
+\item[{\onyxop{family type}{socket}{sock}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[family: ]
+			The name of a socket address family, either \$AF\_INET
+			or \$AF\_LOCAL.
+		\item[type: ]
+			The name of a socket type, either \$SOCK\_STREAM or
+			\$SOCK\_DGRAM.
+		\item[proto: ]
+			The name of a socket protocol.  This argument is not
+			useful, given the current limited choice of address
+			families.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Create a socket.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> $AF_LOCAL $SOCK_DGRAM socket
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:socketpair}
 \index{socketpair@\onyxop{}{socketpair}{}}
-\item[{\onyxop{OPARGS}{socketpair}{OPOUTS}}: ]
+\item[{\onyxop{family type proto}{socketpair}{sock sock}}: ]
+\item[{\onyxop{family type}{socketpair}{sock sock}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[family: ]
+			The name of a socket address family, either \$AF\_INET
+			or \$AF\_LOCAL.
+		\item[type: ]
+			The name of a socket type, either \$SOCK\_STREAM or
+			\$SOCK\_DGRAM.
+		\item[proto: ]
+			The name of a socket protocol.  This argument is not
+			useful, given the current limited choice of address
+			families.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A connected socket.  There are no functional differences
+			between the two sockets that are returned.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Create a pair of sockets that are connected to each other.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_LOCAL $SOCK_STREAM socketpair
+onyx:2> pstack
+-file-
+-file-
+onyx:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sockname}
 \index{sockname@\onyxop{}{sockname}{}}
-\item[{\onyxop{OPARGS}{sockname}{OPOUTS}}: ]
+\item[{\onyxop{sock}{sockname}{dict}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[dict: ]
+			A dictionary of information about \oparg{sock}.
+			Depending on the socket family, the following entries
+			may exist:
+			\begin{description}\item[]
+			\item[family: ] Socket family.
+			\item[address: ] IPv4 address.
+			\item[port: ] IPv4 port.
+			\item[path: ] Unix-domain socket path.
+			\end{description}
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{neterror}{neterror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Get information about \oparg{sock}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup `localhost' bindsocket
+onyx:1> dup sockname 1 sprint
+<$family $AF_INET $address 2130706433 $port 33745>
+onyx:1> close
+onyx:0> $AF_LOCAL $SOCK_STREAM socket
+onyx:1> dup `/tmp/socket' bindsocket
+onyx:1> dup sockname 1 sprint
+<$family $AF_LOCAL $path `/tmp/socket'>
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sockopt}
 \index{sockopt@\onyxop{}{sockopt}{}}
-\item[{\onyxop{OPARGS}{sockopt}{OPOUTS}}: ]
+\item[{\onyxop{sock level optname}{sockopt}{optval}}: ]
+\item[{\onyxop{sock optname}{sockopt}{optval}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[sock: ]
+			A socket.
+		\item[level: ]
+			Level at which to get the socket option.  If not
+			specified, \$SOL\_SOCKET is used.
+		\item[optname: ]
+			Name of option to get the value of.  The following
+			option names are supported:
+			\begin{description}\item[]
+			\item[\$SO\_DEBUG]
+			\item[\$SO\_REUSEADDR]
+			\item[\$SO\_REUSEPORT]
+			\item[\$SO\_KEEPALIVE]
+			\item[\$SO\_DONTROUTE]
+			\item[\$SO\_BROADCAST]
+			\item[\$SO\_OOBINLINE]
+			\item[\$SO\_SNDBUF]
+			\item[\$SO\_RCVBUF]
+			\item[\$SO\_SNDLOWAT]
+			\item[\$SO\_RCVLOWAT]
+			\item[\$SO\_TYPE]
+			\item[\$SO\_ERROR: ]
+				\oparg{optval} is an integer.
+			\item[\$SO\_LINGER: ]
+				\oparg{optval} is a dictionary, and the
+				following entries are defined:
+				\begin{description}
+				\item[\$on: ]
+					Boolean.
+				\item[\$time: ]
+					Linger time in seconds.
+				\end{description}
+			\item[\$SO\_SNDTIMEO]
+			\item[\$SO\_RCVTIMEO: ]
+				\oparg{optval} is an integer, in nanoseconds.
+			\end{description}
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[optval: ]
+			Value associated with \oparg{optname}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
 		\end{description}
 	\item[Description: ]
+		Get a socket option.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $AF_INET $SOCK_STREAM socket
+onyx:1> dup $SO_SNDBUF sockopt 1 sprint
+16384
+onyx:1>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:sover}
@@ -11731,6 +12059,27 @@ onyx:0> [`/usr/bin/which' `onyx'] system
 /usr/local/bin/onyx
 onyx:1> 1 sprint
 0
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:systemdict}
+\index{systemdict@\onyxop{}{systemdict}{}}
+\item[{\onyxop{--}{systemdict}{dict}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dictionary.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get systemdict.  See Section~\ref{sec:systemdict} for details on
+		systemdict.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> systemdict 0 sprint
+-dict-
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -12664,6 +13013,27 @@ onyx:0> `a' `b' `c' `d' up pstack
 onyx:4>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:userdict}
+\index{userdict@\onyxop{}{userdict}{}}
+\item[{\onyxop{--}{userdict}{dict}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dictionary.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get userdict.  See Section~\ref{sec:userdict} for details on
+		userdict.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> userdict 1 sprint
+<>
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:version}
 \index{version@\onyxop{}{version}{}}
 \item[{\onyxop{--}{version}{string}}: ]
@@ -12957,6 +13327,7 @@ onyx:0>
 
 \subsection{threaddict}
 \label{sec:threaddict}
+\index{threaddict@\onyxop{}{threaddict}{}}
 
 Each thread has its own threaddict, which is not shared with any other threads.
 threaddict is meant to be used for thread-specific definitions that would
@@ -13077,6 +13448,7 @@ onyx:0>
 
 \subsection{userdict}
 \label{sec:userdict}
+\index{userdict@\onyxop{}{userdict}{}}
 
 Each thread has its own userdict, which is not shared with any other threads.
 userdict is meant to be used for general storage of definitions that do not need

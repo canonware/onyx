@@ -1944,6 +1944,13 @@ systemdict_connect(cw_nxo_t *a_thread)
 	{
 	    struct sockaddr_in sockaddr;
 
+	    if (npop != 3)
+	    {
+		/* Port must be specified for an IP connection. */
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		goto ERROR;
+	    }
+
 	    /* Begin initialization of sockaddr. */
 	    memset(&sockaddr, 0, sizeof(struct sockaddr_in));
 	    sockaddr.sin_family = family;
@@ -7282,7 +7289,7 @@ systemdict_recv(cw_nxo_t *a_thread)
 
     nxo_string_lock(nxo);
     nread = recv(nxo_file_fd_get(sock), nxo_string_get(nxo),
-		 nxo_string_len_get(nxo), 0);
+		 nxo_string_len_get(nxo), flags);
     nxo_string_unlock(nxo);
 
     if (nread == -1)
@@ -7967,7 +7974,7 @@ systemdict_send(cw_nxo_t *a_thread)
 
     nxo_string_lock(nxo);
     nwrite = send(nxo_file_fd_get(sock), nxo_string_get(nxo),
-		  nxo_string_len_get(nxo), 0);
+		  nxo_string_len_get(nxo), flags);
     nxo_string_unlock(nxo);
 
     if (nwrite == -1)
@@ -8464,6 +8471,8 @@ systemdict_p_sockopt(cw_nxo_t *a_thread, cw_bool_t a_set)
 
     if (a_set)
     {
+	npop++;
+
 	switch (opt)
 	{
 	    case SO_DEBUG:
