@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 80 $
- * Last modified: $Date: 1998-05-18 23:40:54 -0700 (Mon, 18 May 1998) $
+ * Current revision: $Revision: 84 $
+ * Last modified: $Date: 1998-05-26 23:47:28 -0700 (Tue, 26 May 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.
@@ -108,13 +108,6 @@
 #  endif
 #endif
 
-#if (defined(_INC_BT_H_))
-#  ifndef _BT_H_
-#    include <bt.h>
-#    define _BT_H_
-#  endif
-#endif
-
 #if (defined(_INC_BUF_H_))
 #  ifndef _BUF_H_
 #    include <buf.h>
@@ -122,10 +115,24 @@
 #  endif
 #endif
 
+#if (defined(_INC_DAG_H_))
+#  ifndef _DAG_H_
+#    include <dag.h>
+#    define _DAG_H_
+#  endif
+#endif
+
 #if (defined(_INC_GLOB_H_))
 #  ifndef _GLOB_H_
 #    include <glob.h>
 #    define _GLOB_H_
+#  endif
+#endif
+
+#if (defined(_INC_BT_H_))
+#  ifndef _JT_H_
+#    include <jt.h>
+#    define _JT_H_
 #  endif
 #endif
 
@@ -158,6 +165,13 @@
 #  ifndef _SOCK_H_
 #    include <sock.h>
 #    define _SOCK_H_
+#  endif
+#endif
+
+#if (defined(_INC_ZT_H_))
+#  ifndef _ZT_H_
+#    include <zt.h>
+#    define _ZT_H_
 #  endif
 #endif
 

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 64 $
- * $Date: 1998-05-01 21:20:21 -0700 (Fri, 01 May 1998) $
+ * $Revision: 84 $
+ * $Date: 1998-05-26 23:47:28 -0700 (Tue, 26 May 1998) $
  *
  * <<< Description >>>
  *
@@ -38,7 +38,7 @@
  *
  ****************************************************************************/
 
-#ifndef _BT_PRIV_H_
-#define _BT_PRIV_H_
+#define _INC_JT_H_
+#include <config.h>
 
-#endif /* _BT_PRIV_H_ */
+#include <jt_priv.h>

@@ -30,8 +30,8 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 79 $
-# Last modified: $Date: 1998-05-18 23:40:15 -0700 (Mon, 18 May 1998) $
+# Current revision: $Revision: 84 $
+# Last modified: $Date: 1998-05-26 23:47:28 -0700 (Tue, 26 May 1998) $
 #
 # Description: Sample Makefile stub for a subdirectory.
 #              
@@ -41,10 +41,11 @@
 CURRDIR := lib/common/include
 
 $(CURRDIR)_INCS := common_incs.h bhp.h bhp_priv.h br.h br_priv.h \
-	brblk.h brblk_priv.h bt.h bt_priv.h buf.h buf_priv.h dbg.h dbg_priv.h \
-	glob.h list.h list_priv.h locks.h locks_priv.h log.h log_priv.h \
-	mem.h mem_priv.h oh.h oh_priv.h res.h res_priv.h sock.h sock_priv.h \
-	thread.h thread_priv.h
+	brblk.h brblk_priv.h buf.h buf_priv.h dag.h dag_priv.h \
+	dbg.h dbg_priv.h glob.h \
+	jt.h jt_priv.h list.h list_priv.h locks.h locks_priv.h \
+	log.h log_priv.h mem.h mem_priv.h oh.h oh_priv.h res.h res_priv.h \
+	sock.h sock_priv.h thread.h thread_priv.h
 $(CURRDIR)_SRCS :=# List of .c sources.
 $(CURRDIR)_LEXERS :=# List of .l sources.
 $(CURRDIR)_PARSERS :=# List of .y sources.
