@@ -21,8 +21,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 2 $
- * Last modified: $Date: 1997-12-07 17:34:03 -0800 (Sun, 07 Dec 1997) $
+ * Current revision: $Revision: 4 $
+ * Last modified: $Date: 1997-12-14 22:01:41 -0800 (Sun, 14 Dec 1997) $
  *
  * Description: Functions for logging and error printing.
  *              
@@ -30,8 +30,8 @@
  */
 
 #define _INC_STDARG_H_
-#define _INC_STRING_H_
-#include <includes.h>
+/* #define _INC_STRING_H_ */
+#include <inc_common.h>
 
 #define G_ERROR_BUFF_SIZE 512
 
@@ -176,7 +176,7 @@ leprintf(char * arg_filename,
       if (arg_filename != NULL)
 	{
 	  fprintf(stderr, 
-		  "At %s, line %d: ", 
+		  "At %s, line %d: ",
 		  arg_filename, 
 		  arg_line_num);
 	}
