@@ -16,24 +16,490 @@
 \label{nxa}
 \index{\classname{nxa}{}}
 
+The \classname{nxa} class implements garbage collection.  The garbage collector
+runs in a separate thread and is controlled via an asynchronous message queue.
+
 \subsubsection{API}
 \begin{capi}
-\label{nxa_}
-\index{\cfunc{nxa\_}{}}
-\citem{\cfunc[]{nxa\_}{}}
+\label{nxa_new}
+\index{\cfunc{nxa\_new}{}}
+\citem{\cfunc[void]{nxa\_new}{cw\_nxa\_t *a\_nxa, cw\_nx\_t *a\_nx}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_nx: ]
+			Pointer to a \classname{nx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxa_delete}
+\index{\cfunc{nxa\_delete}{}}
+\citem{\cfunc[void]{nxa\_delete}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{nxa_collect}
+\index{\cfunc{nxa\_collect}{}}
+\citem{\cfunc[void]{nxa\_collect}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Send a message to the garbage collector thread to do a
+		collection.
+	\end{capilist}
+\label{nxa_dump}
+\index{\cfunc{nxa\_dump}{}}
+\citem{\cfunc[void]{nxa\_dump}{cw\_nxa\_t *a\_nxa, cw\_nxo\_t *a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		Output printed to \onyxop{stdout}{}.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Print the internal state of gcdict to \onyxop{stdout}{}.
+	\end{capilist}
+\label{nxa_active_get}
+\index{\cfunc{nxa\_active\_get}{}}
+\citem{\cfunc[cw\_bool\_t]{nxa\_active\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Garbage collector deactivated.
+			\item[TRUE: ]
+				Garbage collector active.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return whether the garbage collector is active (runnable).
+	\end{capilist}
+\label{nxa_active_set}
+\index{\cfunc{nxa\_active\_set}{}}
+\citem{\cfunc[void]{nxa\_active\_set}{cw\_nxa\_t *a\_nxa, cw\_bool\_t
+a\_active}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_active: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Deactivate garbage collector.
+			\item[TRUE: ]
+				Activate garbage collector.
+			\end{description}
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Send a message to the garbage collector to activate or
+		deactivate.  The asynchronous nature of the message means that
+		it is possible for the garbage collector to run after this
+		function returns, even if a deactivation message has been sent.
+	\end{capilist}
+\label{nxa_period_get}
+\index{\cfunc{nxa\_period\_get}{}}
+\citem{\cfunc[cw\_nxoi\_t]{nxa\_period\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Current inactivity period in seconds that the garbage
+			collector waits before doing a collection.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the current inactivity period in seconds that the garbage
+		collector waits before doing a collection.
+	\end{capilist}
+\label{nxa_period_set}
+\index{\cfunc{nxa\_period\_set}{}}
+\citem{\cfunc[void]{nxa\_period\_set}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
+a\_period}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_period: ]
+			Inactivity period in seconds that the garbage collector
+			should wait before doing a collection.  If 0, the
+			garbage collector will never run due to inactivity.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Set the inactivity period in seconds that the garbage collector
+		should wait before doing a collection.
+	\end{capilist}
+\label{nxa_threshold_get}
+\index{\cfunc{nxa\_threshold\_get}{}}
+\citem{\cfunc[cw\_nxoi\_t]{nxa\_threshold\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of objects allocated since the last garbage
+			collection that will trigger the garbage collector to
+			run.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the number of objects allocated since the last garbage
+		collection that will trigger the garbage collector to run.
+	\end{capilist}
+\label{nxa_threshold_set}
+\index{\cfunc{nxa\_threshold\_set}{}}
+\citem{\cfunc[void]{nxa\_threshold\_set}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
+a\_threshold}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_threshold: ]
+			The number of objects allocated since the last garbage
+			collection that will trigger the garbage collector to
+			run.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Set the number of objects allocated since the last garbage
+		collection that will trigger the garbage collector to run.
+	\end{capilist}
+\label{nxa_collections_get}
+\index{\cfunc{nxa\_collections\_get}{}}
+\citem{\cfunc[cw\_nxoi\_t]{nxa\_collections\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			The number of times the garbage collector has run.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the number of times the garbage collector has run.
+	\end{capilist}
+\label{nxa_new_get}
+\index{\cfunc{nxa\_new\_get}{}}
+\citem{\cfunc[cw\_nxoi\_t]{nxa\_new\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			The number of objects that have been allocated since the
+			last garbage collection.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the numbber of objects that have been allocated since the
+		last garbage collection.
+	\end{capilist}
+\label{nxa_current_get}
+\index{\cfunc{nxa\_current\_get}{}}
+\citem{\cfunc[void]{nxa\_current\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[r\_count: ]
+			Pointer to an integer.
+		\item[r\_mark: ]
+			Pointer to an integer.
+		\item[r\_sweep: ]
+			Pointer to an integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[*r\_count: ]
+			Number of objects.
+		\item[*r\_mark: ]
+			Number of microseconds spent in the mark phase of
+			garbage collection.
+		\item[*r\_sweep: ]
+			Number of microseconts spent in the sweep phase of
+			garbage collection.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the current garbage collector statistics.
+		\cvar{*r\_count} is the current number of composite objects,
+		whereas \cvar{*r\_mark} and \cvar{*r\_sweep} are times for the
+		most recent garbage collection.
+	\end{capilist}
+\label{nxa_maximum_get}
+\index{\cfunc{nxa\_maximum\_get}{}}
+\citem{\cfunc[void]{nxa\_maximum\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[r\_count: ]
+			Pointer to an integer.
+		\item[r\_mark: ]
+			Pointer to an integer.
+		\item[r\_sweep: ]
+			Pointer to an integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[*r\_count: ]
+			Number of objects.
+		\item[*r\_mark: ]
+			Number of microseconds spent in the mark phase of
+			garbage collection.
+		\item[*r\_sweep: ]
+			Number of microseconts spent in the sweep phase of
+			garbage collection.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the maximum garbage collector statistics.
+		\cvar{*r\_count} is the maximum number of composite objects that
+		have ever existed. \cvar{*r\_mark} and \cvar{*r\_sweep} are
+		times for the longest recent garbage collection phases.
+	\end{capilist}
+\label{nxa_sum_get}
+\index{\cfunc{nxa\_sum\_get}{}}
+\citem{\cfunc[void]{nxa\_sum\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[r\_count: ]
+			Pointer to an integer.
+		\item[r\_mark: ]
+			Pointer to an integer.
+		\item[r\_sweep: ]
+			Pointer to an integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[*r\_count: ]
+			Number of objects.
+		\item[*r\_mark: ]
+			Number of microseconds spent in the mark phase of
+			garbage collection.
+		\item[*r\_sweep: ]
+			Number of microseconts spent in the sweep phase of
+			garbage collection.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the sum garbage collector statistics.
+		\cvar{*r\_count} is the total number of composite objects that
+		have ever been created.  \cvar{*r\_mark} and \cvar{*r\_sweep}
+		are the total times spent in garbage collection.
+	\end{capilist}
+\label{nxa_gcdict_get}
+\index{\cppmacro{nxa\_gcdict\_get}{}}
+\citem{\cppmacro[cw\_nxo\_t *]{nxa\_gcdict\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a dict \classname{nxo}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the dict \classname{nxo} corresponding to
+		\onyxop{gcdict}{}.
+	\end{capilist}
+\label{nxa_chi_get}
+\index{\cppmacro{nxa\_chi\_get}{}}
+\citem{\cppmacro[cw\_chi\_t *]{nxa\_chi\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a \htmlref{\classname{chi}}{chi}.
 		\end{description}
 	\item[Exception(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{\_CW\_STASHX\_}{_CW_STASHX_}.]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
 		\end{description}
 	\item[Description: ]
+		Allocate a \classname{chi} and return a pointer to it.
+	\end{capilist}
+\label{nxa_chi_put}
+\index{\cppmacro{nxa\_chi\_put}{}}
+\citem{\cppmacro[void]{nxa\_chi\_put}{cw\_nxa\_t *a\_nxa, cw\_chi\_t *a\_chi}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_chi: ]
+			Pointer to a \htmlref{\classname{chi}}{chi}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Deallocate a \classname{chi} that was allocated with
+		\cppmacro{cnxa\_chi\_get}{}.
+	\end{capilist}
+\label{nxa_dicto_get}
+\index{\cppmacro{nxa\_dicto\_get}{}}
+\citem{\cppmacro[cw\_dicto\_t *]{nxa\_dicto\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a \htmlref{\classname{dicto}}{dicto}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate a \classname{dicto} and return a pointer to it.
+	\end{capilist}
+\label{nxa_dicto_put}
+\index{\cppmacro{nxa\_dicto\_put}{}}
+\citem{\cppmacro[void]{nxa\_dicto\_put}{cw\_nxa\_t *a\_nxa, cw\_dicto\_t
+*a\_dicto}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_dicto: ]
+			Pointer to a \htmlref{\classname{dicto}}{dicto}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Deallocate a \classname{dicto} that was allocated with
+		\cppmacro{cnxa\_dicto\_get}{}.
+	\end{capilist}
+\label{nxa_stackc_get}
+\index{\cppmacro{nxa\_stackc\_get}{}}
+\citem{\cppmacro[cw\_stackc\_t *]{nxa\_stackc\_get}{cw\_nxa\_t *a\_nxa}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a \htmlref{\classname{stackc}}{stackc}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate a \classname{stackc} and return a pointer to it.
+	\end{capilist}
+\label{nxa_stackc_put}
+\index{\cppmacro{nxa\_stackc\_put}{}}
+\citem{\cppmacro[void]{nxa\_stackc\_put}{cw\_nxa\_t *a\_nxa, cw\_stackc\_t
+*a\_stackc}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxa: ]
+			Pointer to a \classname{nxa}.
+		\item[a\_stackc: ]
+			Pointer to a \htmlref{\classname{stackc}}{stackc}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Deallocate a \classname{stackc} that was allocated with
+		\cppmacro{cnxa\_stackc\_get}{}.
 	\end{capilist}
 \end{capi}

@@ -365,12 +365,103 @@ operator.}
 \end{enumerate}
 
 \section{Threads}
+
+Onyx supports multiple threads of execution by using the operating system's
+native threading facilities.  Along with threads comes the need for methods of
+synchronization between threads.
+
 \subsection{Implicit synchronization}
+
+Implicit synchronization is a mandatory language feature, since objects such as
+\htmlref{globaldict}{systemdict:globaldict} are implicitly accessed by the
+interpreter, which makes it impossible to require the user to explicitly handle
+all synchronization.  Onyx provides optional implicit synchronization
+capabilities for composite objects on an object by object basis.  Each thread
+has a setting which can be accessed via
+\htmlref{currentlocking}{systemdict:currentlocking} (initially set to false) and
+set via \htmlref{setlocking}{systemdict:setlocking}.  If implicit locking is
+active, then new objects will be created such that simple accesses are
+synchronized.
+
+Implicit synchronization can be a source of deadlock, so care must be taken when
+accessing implicitly locked objects.  For example, if two threads copy two
+implicitly locked strings to the other string, deadlock can result.
+
+\begin{verbatim}
+% Initialization.
+/A `aaaaaa'
+/B `bbbbbb'
+
+...
+
+% In thread A:
+A B copy
+
+...
+
+% In thread B:
+B A copy
+\end{verbatim}
+
+Following is a description of the implicit locking semantics for each type of
+composite object:
+\begin{description}
+\item[array: ] Array copying is protected.  Array element modifications are
+protected, but element reads are not protected.
+\item[condition: ] No implicit locking is done for conditions.
+\item[dict: ] All dict operations are protected, except that copying only
+protects the source, not the destination.
+\item[file: ] All file operations are protected.  There are no potential
+deadlocks due to implicit file locking.
+\item[hook: ] No implicit locking is done for hooks.
+\item[mutex: ] No implicit locking is done for mutexes.
+\item[stack: ] All stack operations are protected.  There are no potential
+deadlocks due to implicit stack locking.
+\item[string: ] String copying is protected.  Character access is protected by
+many operators, but string copying is the only potential cause of deadlock for
+string access.
+\item[thread: ]  Implicit locking is not done for thread operations, since other
+synchronization is adequate to protect thread objects.
+\end{description}
+
 \subsection{Explicit synchronization}
 
+Onyx includes a foundation of mutexes and condition variable, with which all
+other synchronization primitives can be constructed.
+
 \section{Memory management}
-\subsection{Allocation}
-\subsection{Garbage collection}
+Onyx programs do not need to track memory allocations, since memory reclamation
+is done implicitly via garbage collection.  Onyx uses an asynchronous atomic
+mark and sweep garbage collector.  The garbage collector is asynchronous in that
+it is a separate thread and can collect at any time.  However, it is atomic,
+which means that while the garbage collector is in the mark phase, no other
+threads are running.
+
+The atomic nature of garbage collection may sound worrisome with regard to
+performance, but in fact there are tangible benefits and no significant negative
+impacts.  Total throughput is improved, since minimal locking is necessary.
+Concurrent garbage collection would impose a significant locking overhead.
+
+On the down side, atomic garbage collection cannot make strong real-time
+guarantees.  However, the garbage collector is very effecient, and for typical
+applications, garbage collection delays are measured in the tens of milliseconds
+on current hardware as of the year 2000.  For interactive applications, anything
+under about 100 milliseconds is undetectable by the user.
+
+There are three parameters that can be used to customize garbage collection:
+\begin{enumerate}
+\item{The garbage collector can be turned off for situations where many objects
+are being created over a short period of time.}
+\item{The garbage collector is sent a message to run whenever a certain number
+of composite objects have been created since the last collection.  This
+threshold can be changed to suit the application.}
+\item{If no composite objects have been created for an extended period of time
+(seconds), the garbage collector will run if any composite objects have been
+allocated since the last collection.  This idle timeout period can be changed.}
+\end{enumerate}
+
+Garbage collection is controlled via \htmlref{gcdict}{systemdict:gcdict}, which
+is described in Section~\ref{sec:gcdict}.
 
 \section{Dictionary reference}
 
@@ -479,6 +570,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \end{longtable}
 
 \subsection{gcdict}
+\label{sec:gcdict}
 
 \begin{longtable}{|r|l|l|p{3in}|}
 \caption[gcdict summary]{gcdict summary by functional group}
@@ -536,6 +628,7 @@ globally shared objects.  globaldict is empty when the onyx interpreter is
 initialized.
 
 \subsection{systemdict}
+\label{sec:systemdict}
 
 All threads share the same systemdict, which contains most of the operators that
 are of general use.  Although there are no mechanisms that prevent modification

@@ -87,6 +87,7 @@
 	{
 		\end{description}
 		\end{list}
+		\vspace{8pt}
 	}
 %end{latexonly}
 \begin{htmlonly}
@@ -101,7 +102,9 @@
 	}
 \end{htmlonly}
 
-\newcommand{\citem}[1]{\bfseries #1: \normalfont}
+\newcommand{\citem}[1]{\bfseries #1: \normalfont
+
+}
 \newenvironment{capi}
 	{\setlength{\parskip}{0pt}}
 	{\setlength{\parskip}{8pt}}
@@ -129,9 +132,6 @@
 \newcommand{\lb}{[}
 \newcommand{\rb}{]}
 
-% Handle long \item lines in descriptions.
-%\newcommand{\litem}[2]{\item[#1]\item[#2]}
-
 % The build system does substitution of the YYY..ZZZ strings after the html
 % is generated.
 \begin{htmlonly}
@@ -142,9 +142,6 @@
 %\newcommand{\twid}{~}
 \newcommand{\lb}{YYYlbZZZ}
 \newcommand{\rb}{YYYrbZZZ}
-
-% Handle long \item lines in descriptions.
-%\newcommand{\litem}[2]{\item[#1#2]}
 \end{htmlonly}
 
 % Generate an index.
