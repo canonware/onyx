@@ -7,7 +7,7 @@
  *
  * Version: <Version>
  *
- * Master Canonware cook file.
+ * Master Canonware Cookfile.
  *
  ******************************************************************************/
 
@@ -125,9 +125,6 @@ install_bins :
 #if @bin_echos@
           echos_install_a
 #endif
-#if @bin_ficl@
-          ficl_install_a
-#endif
 #if @bin_ncat@
           ncat_install_a
 #endif
@@ -151,9 +148,6 @@ install_bins :
 install_libs :
 #if @lib_stil@
           libstil_install
-#endif
-#if @lib_ficl@
-          libficl_install
 #endif
 #if @lib_edit@
           libedit_install
@@ -181,9 +175,6 @@ uninstall_bins :
 #if @bin_echos@
           echos_uninstall
 #endif
-#if @bin_ficl@
-          ficl_uninstall
-#endif
 #if @bin_ncat@
           ncat_uninstall
 #endif
@@ -207,9 +198,6 @@ uninstall_bins :
 uninstall_libs :
 #if @lib_stil@
           libstil_uninstall
-#endif
-#if @lib_ficl@
-          libficl_uninstall
 #endif
 #if @lib_edit@
           libedit_uninstall
@@ -235,9 +223,6 @@ clean :
 #if @bin_echos@
           echos_clean
 #endif
-#if @bin_ficl@
-          ficl_clean
-#endif
 #if @bin_ncat@
           ncat_clean
 #endif
@@ -258,9 +243,6 @@ clean :
 #endif
 #if @lib_stil@
           libstil_clean
-#endif
-#if @lib_ficl@
-          libficl_clean
 #endif
 #if @lib_edit@
           libedit_clean
@@ -295,26 +277,14 @@ clean :
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [SRCS]];
 
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [CTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.perf [CTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]];
 
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_s [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [BTESTS]];
-  rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.out [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.diff [BTESTS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0% [BTESTS]];
@@ -360,9 +330,6 @@ distclean : clean
 #if @bin_echos@
           echos_distclean
 #endif
-#if @bin_ficl@
-          ficl_distclean
-#endif
 #if @bin_ncat@
           ncat_distclean
 #endif
@@ -383,9 +350,6 @@ distclean : clean
 #endif
 #if @lib_stil@
           libstil_distclean
-#endif
-#if @lib_ficl@
-          libficl_distclean
 #endif
 #if @lib_edit@
           libedit_distclean
@@ -484,13 +448,10 @@ dataend
 
 /*
  * Libraries.  Order matters.  They should appear in an order that works on the
- * link line (-lstil -lficl -ledit -lsock -lstash).
+ * link line (-lstil -ledit -lsock -lstash).
  */
 #if @lib_stil@
 #  include [srcdir]/lib/c/libstil/Cookfile.inc
-#endif
-#if @lib_ficl@
-#  include [srcdir]/lib/c/libficl/Cookfile.inc
 #endif
 #if @lib_edit@
 #  include [srcdir]/lib/c/libedit/Cookfile.inc
@@ -516,9 +477,6 @@ dataend
 #endif
 #if @bin_echos@
 #  include [srcdir]/bin/echos/Cookfile.inc
-#endif
-#if @bin_ficl@
-#  include [srcdir]/bin/ficl/Cookfile.inc
 #endif
 #if @bin_ncat@
 #  include [srcdir]/bin/ncat/Cookfile.inc
