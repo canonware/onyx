@@ -661,7 +661,7 @@ get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 	return retval;
 }
 
-char   *
+char *
 get_out_str_ascii(cw_buf_t *a_buf, cw_bool_t is_send, char *a_str)
 {
 	char		*retval, *t_str, *p;
