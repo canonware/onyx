@@ -13,7 +13,7 @@
 
 #include <libsock/libsock.h>
 
-#define _LIBSOCK_SUCK_MAX_CONNS 100000
+#define _LIBSOCK_SUCK_MAX_CONNS 1000
 
 /* Command line defaults. */
 #define _LIBSOCK_BLOW_DEFAULT_BSIZE 4096
@@ -49,8 +49,8 @@ main(int argc, char **argv)
 	libstash_init();
 	dbg_register(cw_g_dbg, "mem_error");
 	dbg_register(cw_g_dbg, "prog_error");
-	dbg_register(cw_g_dbg, "sockb_error");
-/*  	dbg_register(cw_g_dbg, "sockb_verbose"); */
+	dbg_register(cw_g_dbg, "libsock_error");
+/*  	dbg_register(cw_g_dbg, "libsock_verbose"); */
 	dbg_register(cw_g_dbg, "socks_error");
 	dbg_register(cw_g_dbg, "sock_error");
 
@@ -95,7 +95,7 @@ main(int argc, char **argv)
 		retval = 1;
 		goto CLERROR;
 	}
-	if (libsock_init(100000, opt_bsize, 8))
+	if (libsock_init(_LIBSOCK_SUCK_MAX_CONNS, opt_bsize, 8))
 		_cw_error("Initialization failure in libsock_init()");
 	socks = socks_new();
 	if (socks == NULL)

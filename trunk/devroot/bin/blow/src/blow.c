@@ -14,10 +14,12 @@
 
 #include <libsock/libsock.h>
 
+#define _LIBSOCK_BLOW_MAX_CONNS		1000
+
 /* Command line defaults. */
-#define _LIBSOCK_BLOW_DEFAULT_NSOCKS 1
-#define _LIBSOCK_BLOW_DEFAULT_BSIZE 4096
-#define _LIBSOCK_BLOW_DEFAULT_NBLOCKS 65536
+#define _LIBSOCK_BLOW_DEFAULT_NSOCKS	1
+#define _LIBSOCK_BLOW_DEFAULT_BSIZE	4096
+#define _LIBSOCK_BLOW_DEFAULT_NBLOCKS	65536
 
 /* Function Prototypes. */
 void		usage(const char *a_progname);
@@ -46,9 +48,10 @@ main(int argc, char **argv)
 
 	libstash_init();
 	dbg_register(cw_g_dbg, "mem_error");
+/*  	dbg_register(cw_g_dbg, "mem_verbose"); */
 	dbg_register(cw_g_dbg, "prog_error");
-/*  	dbg_register(cw_g_dbg, "sockb_verbose"); */
-	dbg_register(cw_g_dbg, "sockb_error");
+/*  	dbg_register(cw_g_dbg, "libsock_verbose"); */
+	dbg_register(cw_g_dbg, "libsock_error");
 	dbg_register(cw_g_dbg, "sock_error");
 
 	/* Parse command line. */
@@ -124,7 +127,7 @@ main(int argc, char **argv)
 		retval = 1;
 		goto CLERROR;
 	}
-	if (libsock_init(100000, opt_bsize, 8))
+	if (libsock_init(_LIBSOCK_BLOW_MAX_CONNS, opt_bsize, 8))
 		_cw_error("Initialization failure in libsock_init()");
 	/* Open the connections. */
 	sock_array = (cw_sock_t *)_cw_calloc(opt_nsocks, sizeof(cw_sock_t));

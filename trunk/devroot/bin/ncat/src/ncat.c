@@ -85,8 +85,8 @@ main(int argc, char **argv)
 			goto RETURN;
 		case 'v':
 			if (opt_verbose) {
-				dbg_register(cw_g_dbg, "sockb_verbose");
-				dbg_register(cw_g_dbg, "sockb_error");
+				dbg_register(cw_g_dbg, "libsock_verbose");
+				dbg_register(cw_g_dbg, "libsock_error");
 				dbg_register(cw_g_dbg, "socks_error");
 				dbg_register(cw_g_dbg, "sock_error");
 			} else {
