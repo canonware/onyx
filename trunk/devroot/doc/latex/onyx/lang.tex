@@ -3130,29 +3130,28 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \hline \hline
 -- & {\bf \htmlref{mark}{systemdict:mark}} & mark & Create a mark. \\
 \hline
-\dots object & {\bf \htmlref{bpush}{systemdict:bpush}} & object \dots & Push
+\commas obj & {\bf \htmlref{bpush}{systemdict:bpush}} & obj \commas & Push
 object onto bottom of stack. \\
 \hline
 -- & {\bf \htmlref{count}{systemdict:count}} & count & Get the number of objects
 on ostack. \\
 \hline
-mark \dots & {\bf \htmlref{counttomark}{systemdict:counttomark}} & mark \dots
-count & Get the depth of the topmost mark on ostack. \\
+mark \dots & {\bf \htmlref{counttomark}{systemdict:counttomark}} & mark
+\dots count & Get the depth of the topmost mark on ostack. \\
 \hline
-object & {\bf \htmlref{dup}{systemdict:dup}} & object object & Duplicate an
-object. \\
+obj & {\bf \htmlref{dup}{systemdict:dup}} & obj dup & Duplicate an object. \\
 \hline
-object \dots & {\bf \htmlref{bdup}{systemdict:bdup}} & object \dots object &
+obj \commas & {\bf \htmlref{bdup}{systemdict:bdup}} & obj \commas dup &
 Duplicate bottom object. \\
 \hline
 objects count & {\bf \htmlref{ndup}{systemdict:ndup}} & objects objects &
 Duplicate objects. \\
 \hline
-object \dots index & {\bf \htmlref{idup}{systemdict:idup}} & object \dots
-object & Duplicate object on ostack at index. \\
+obj \dots index & {\bf \htmlref{idup}{systemdict:idup}} & obj \dots
+dup & Duplicate object on ostack at index. \\
 \hline
-\dots object \dots index & {\bf \htmlref{ibdup}{systemdict:ibdup}} & \dots
-object \dots object & Duplicate object on ostack at index from bottom. \\
+\dots obj \commas index & {\bf \htmlref{ibdup}{systemdict:ibdup}} & \dots
+obj \commas dup & Duplicate object on ostack at index from bottom. \\
 \hline
 a b & {\bf \htmlref{tuck}{systemdict:tuck}} & b a b & Tuck duplicate of top
 object under second object. \\
@@ -3180,9 +3179,9 @@ objects down one. \\
 region count amount & {\bf \htmlref{roll}{systemdict:roll}} & rolled & Roll
 \oparg{count} objects up by \oparg{amount}. \\
 \hline
-object & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove object. \\
+obj & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove object. \\
 \hline
-object \dots & {\bf \htmlref{bpop}{systemdict:bpop}} & \dots & Remove bottom
+obj \commas & {\bf \htmlref{bpop}{systemdict:bpop}} & \commas & Remove bottom
 object. \\
 \hline
 objects count & {\bf \htmlref{npop}{systemdict:npop}} & -- & Remove count
@@ -3191,11 +3190,11 @@ objects. \\
 objects \dots count & {\bf \htmlref{nbpop}{systemdict:nbpop}} & \dots & Remove
 count objects from bottom. \\
 \hline
-object \dots index & {\bf \htmlref{ipop}{systemdict:ipop}} & \dots & Remove
+obj \dots index & {\bf \htmlref{ipop}{systemdict:ipop}} & \dots & Remove
 object at index. \\
 \hline
-\dots object \dots index & {\bf \htmlref{ibpop}{systemdict:ibpop}} & \dots \dots
-& Remove object at index from bottom. \\
+\dots obj \commas index & {\bf \htmlref{ibpop}{systemdict:ibpop}} & \dots
+\commas & Remove object at index from bottom. \\
 \hline
 a b & {\bf \htmlref{nip}{systemdict:nip}} & b & Remove second object. \\
 \hline
@@ -3210,9 +3209,9 @@ snapshot. \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
-object & {\bf \htmlref{eval}{systemdict:eval}} & -- & Evaluate object. \\
+obj & {\bf \htmlref{eval}{systemdict:eval}} & -- & Evaluate object. \\
 \hline
-boolean object & {\bf \htmlref{if}{systemdict:if}} & -- & Conditionally evaluate
+boolean obj & {\bf \htmlref{if}{systemdict:if}} & -- & Conditionally evaluate
 object. \\
 \hline
 boolean a b & {\bf \htmlref{ifelse}{systemdict:ifelse}} & -- & Conditionally
@@ -3241,27 +3240,27 @@ context. \\
 %begin{latexonly}
 file/string & {\bf \htmlref{token}{systemdict:token}} & false & Scan for a
 token. \\
-file/string & {\bf \htmlref{token}{systemdict:token}} & rem object true & \\
+file/string & {\bf \htmlref{token}{systemdict:token}} & rem obj true & \\
 \hline
 %end{latexonly}
 \begin{htmlonly}
 file/string & {\bf \htmlref{token}{systemdict:token}} & false & Scan for a
 token. \\
-file/string & {\bf \htmlref{token}{systemdict:token}} & file/substring object
+file/string & {\bf \htmlref{token}{systemdict:token}} & file/substring obj
 true & Scan for a token. \\
 \end{htmlonly}
-object & {\bf \htmlref{start}{systemdict:start}} & -- & Evaluate object. \\
+obj & {\bf \htmlref{start}{systemdict:start}} & -- & Evaluate object. \\
 \hline
 -- & {\bf \htmlref{quit}{systemdict:quit}} & -- & Unwind to innermost start
 context. \\
 \hline
-object & {\bf \htmlref{stopped}{systemdict:stopped}} & boolean & Evaluate
+obj & {\bf \htmlref{stopped}{systemdict:stopped}} & boolean & Evaluate
 object. \\
 \hline
 -- & {\bf \htmlref{stop}{systemdict:stop}} & -- & Unwind to innermost stopped or
 start context. \\
 \hline
-name & {\bf \htmlref{throw}{systemdict:throw}} & object & Throw an error. \\
+name & {\bf \htmlref{throw}{systemdict:throw}} & obj & Throw an error. \\
 \hline
 -- & {\bf \htmlref{estack}{systemdict:estack}} & stack & Get a current estack
 snapshot. \\
@@ -3333,11 +3332,11 @@ fino objects & {\bf \htmlref{)}{systemdict:sym_rp}} & stack & Create a stack. \\
 \hline
 -- & {\bf \htmlref{stack}{systemdict:stack}} & stack & Create a stack. \\
 \hline
-stack object & {\bf \htmlref{spush}{systemdict:spush}} & -- & Push object
-onto stack. \\
+stack obj & {\bf \htmlref{spush}{systemdict:spush}} & -- & Push object onto
+stack. \\
 \hline
-stack object & {\bf \htmlref{sbpush}{systemdict:sbpush}} & -- & Push object
-onto bottom of stack. \\
+stack obj & {\bf \htmlref{sbpush}{systemdict:sbpush}} & -- & Push object onto
+bottom of stack. \\
 \hline
 stack & {\bf \htmlref{scount}{systemdict:scount}} & count & Get the number of
 objects on a stack. \\
@@ -3492,10 +3491,10 @@ string index substring & {\bf \htmlref{putinterval}{systemdict:putinterval}} &
 srcstring dststring & {\bf \htmlref{copy}{systemdict:copy}} & dstsubstring &
 Copy string. \\
 \hline
-object depth & {\bf \htmlref{sprints}{systemdict:sprints}} & string &
+obj depth & {\bf \htmlref{sprints}{systemdict:sprints}} & string &
 Create syntactical string from object. \\
 \hline
-object flags & {\bf \htmlref{outputs}{systemdict:outputs}} & string &
+obj flags & {\bf \htmlref{outputs}{systemdict:outputs}} & string &
 Create formatted string from object. \\
 \hline
 string pattern & {\bf \htmlref{search}{systemdict:search}} & post pattern pre
@@ -3521,10 +3520,10 @@ length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
 \hline
 array & {\bf \htmlref{length}{systemdict:length}} & count & Get array length. \\
 \hline
-array index & {\bf \htmlref{get}{systemdict:get}} & object & Get array
+array index & {\bf \htmlref{get}{systemdict:get}} & obj & Get array
 element. \\
 \hline
-array index object & {\bf \htmlref{put}{systemdict:put}} & -- & Set array
+array index obj & {\bf \htmlref{put}{systemdict:put}} & -- & Set array
 element. \\
 \hline
 array index length & {\bf \htmlref{getinterval}{systemdict:getinterval}} &
@@ -3660,10 +3659,10 @@ to file. \\
 string & {\bf \htmlref{print}{systemdict:print}} & -- & Print string to
 stdout. \\
 \hline
-object depth & {\bf \htmlref{sprint}{systemdict:sprint}} & -- &
-Syntactically print object to stdout. \\
+obj depth & {\bf \htmlref{sprint}{systemdict:sprint}} & -- & Syntactically print
+object to stdout. \\
 \hline
-object flags & {\bf \htmlref{output}{systemdict:output}} & -- & Formatted print
+obj flags & {\bf \htmlref{output}{systemdict:output}} & -- & Formatted print
 to stdout. \\
 \hline
 -- & {\bf \htmlref{pstack}{systemdict:pstack}} & -- & Syntactically print
@@ -3790,24 +3789,21 @@ a shift & {\bf \htmlref{shift}{systemdict:shift}} & integer & Bitwise shift. \\
 \hline \hline
 \multicolumn{4}{|l|}{Type, conversion, and attribute operators} \\
 \hline \hline
-object & {\bf \htmlref{type}{systemdict:type}} & name & Get object type. \\
+obj & {\bf \htmlref{type}{systemdict:type}} & name & Get object type. \\
 \hline
-object & {\bf \htmlref{echeck}{systemdict:echeck}} & boolean & Evaluatable? \\
+obj & {\bf \htmlref{echeck}{systemdict:echeck}} & boolean & Evaluatable? \\
 \hline
-object & {\bf \htmlref{xcheck}{systemdict:xcheck}} & boolean & Executable? \\
+obj & {\bf \htmlref{xcheck}{systemdict:xcheck}} & boolean & Executable? \\
 \hline
-object & {\bf \htmlref{cve}{systemdict:cve}} & object & Set evaluatable
-attribute. \\
+obj & {\bf \htmlref{cve}{systemdict:cve}} & obj & Set evaluatable attribute. \\
 \hline
-object & {\bf \htmlref{cvx}{systemdict:cvx}} & object & Set executable
-attribute. \\
+obj & {\bf \htmlref{cvx}{systemdict:cvx}} & obj & Set executable attribute. \\
 \hline
-object & {\bf \htmlref{cvlit}{systemdict:cvlit}} & object & Set literal
-attribute. \\
+obj & {\bf \htmlref{cvlit}{systemdict:cvlit}} & obj & Set literal attribute. \\
 \hline
 string & {\bf \htmlref{cvn}{systemdict:cvn}} & name & Convert string to name. \\
 \hline
-object & {\bf \htmlref{cvs}{systemdict:cvs}} & string & Convert object to
+obj & {\bf \htmlref{cvs}{systemdict:cvs}} & string & Convert object to
 string. \\
 \hline
 integer radix & {\bf \htmlref{cvrs}{systemdict:cvrs}} & string & Convert integer
@@ -3870,7 +3866,7 @@ implicit locking mode. \\
 boolean & {\bf \htmlref{setlocking}{systemdict:setlocking}} & -- & Set implicit
 locking mode. \\
 \hline
-object & {\bf \htmlref{lcheck}{systemdict:lcheck}} & boolean & Implicitly
+obj & {\bf \htmlref{lcheck}{systemdict:lcheck}} & boolean & Implicitly
 locked? \\
 \hline \hline
 \multicolumn{4}{|l|}{Miscellaneous operators} \\
@@ -4339,17 +4335,23 @@ onyx:0>
 	\end{description}
 \label{systemdict:bdup}
 \index{bdup@\onyxop{}{bdup}{}}
-\item[{\onyxop{object \dots}{bdup}{object \dots object}}: ]
+\item[{\onyxop{obj \commas}{bdup}{obj \commas dup}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
+		\item[\commas: ]
+			Zero or more objects.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
+		\item[\commas: ]
+			Zero or more objects.
+		\item[dup: ]
+			A duplicate of \oparg{obj}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -4456,14 +4458,20 @@ onyx:1>
 	\end{description}
 \label{systemdict:bpop}
 \index{bpop@\onyxop{}{bpop}{}}
-\item[{\onyxop{object \dots}{bpop}{\dots}}: ]
+\item[{\onyxop{obj \commas}{bpop}{\commas}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[\commas: ]
+			Zero or more objects.
+		\item[obj: ]
 			An object.
 		\end{description}
-	\item[Output(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[\commas: ]
+			Zero or more objects.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
@@ -4480,20 +4488,28 @@ onyx:1>
 	\end{description}
 \label{systemdict:bpush}
 \index{bpush@\onyxop{}{bpush}{}}
-\item[{\onyxop{\dots object}{bpush}{object \dots}}: ]
+\item[{\onyxop{\commas obj}{bpush}{obj \commas}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
+			An object.
+		\item[\commas: ]
+			Zero or more objects.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[\commas: ]
+			Zero or more objects.
+		\item[obj: ]
 			An object.
 		\end{description}
-	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Push \oparg{object} onto the bottom of ostack.
+		Push \oparg{obj} onto the bottom of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 1 2 3
@@ -4806,6 +4822,8 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
+		\item[\dots: ]
+			Zero or more objects.
 		\item[mark: ]
 			A mark object.
 		\end{description}
@@ -5044,11 +5062,15 @@ onyx:0>
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
+		\item[\dots: ]
+			Zero or more objects.
 		\item[mark: ]
 			A mark object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
+		\item[\dots: ]
+			\oparg{count} objects.
 		\item[mark: ]
 			The same mark that was passed in.
 		\item[count: ]
@@ -5153,16 +5175,16 @@ onyx:0>
 	\end{description}
 \label{systemdict:cve}
 \index{cve@\onyxop{}{cve}{}}
-\item[{\onyxop{object}{cve}{object}}: ]
+\item[{\onyxop{obj}{cve}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The same object that was passed in, but with the
 			evaluatable attribute set.
 		\end{description}
@@ -5171,7 +5193,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Set the evaluatable attribute for \oparg{object}.
+		Set the evaluatable attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 2 3] cve 1 sprint
@@ -5219,16 +5241,16 @@ onyx:0>
 	\end{description}
 \label{systemdict:cvlit}
 \index{cvlit@\onyxop{}{cvlit}{}}
-\item[{\onyxop{object}{cvlit}{object}}: ]
+\item[{\onyxop{obj}{cvlit}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The same object that was passed in, but with the literal
 			attribute set.
 		\end{description}
@@ -5237,7 +5259,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Set the literal attribute for \oparg{object}.
+		Set the literal attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} cvlit 1 sprint
@@ -5310,18 +5332,18 @@ onyx:0>
 	\end{description}
 \label{systemdict:cvs}
 \index{cvs@\onyxop{}{cvs}{}}
-\item[{\onyxop{object}{cvs}{string}}: ]
+\item[{\onyxop{obj}{cvs}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			A string representation of \oparg{object}.  The string
-			depends on the type of \oparg{object}:
+			A string representation of \oparg{obj}.  The string
+			depends on the type of \oparg{obj}:
 			\begin{description}
 			\item[boolean: ] {\tt `true'} or  {\tt `false'}.
 			\item[name: ] The string representation of the name.
@@ -5330,7 +5352,7 @@ onyx:0>
 			operator name or {\tt `-operator-'}.
 			\item[real: ] The real in exponential notation.
 			\item[string: ] A printable representation of
-			\oparg{object}.  The result can be evaluated to produce
+			\oparg{obj}.  The result can be evaluated to produce
 			the original string.
 			\item[Other types: ] {\tt `--nostringval--'}.
 			\end{description}
@@ -5340,7 +5362,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Convert \oparg{object} to a string representation.
+		Convert \oparg{obj} to a string representation.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> true cvs 1 sprint
@@ -5362,16 +5384,16 @@ onyx:0>
 	\end{description}
 \label{systemdict:cvx}
 \index{cvx@\onyxop{}{cvx}{}}
-\item[{\onyxop{object}{cvx}{object}}: ]
+\item[{\onyxop{obj}{cvx}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The same object that was passed in, but with the
 			executable attribute set.
 		\end{description}
@@ -5380,7 +5402,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Set the executable attribute for \oparg{object}.
+		Set the executable attribute for \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 2 3] cvx 1 sprint
@@ -5636,17 +5658,19 @@ onyx:0>
 	\end{description}
 \label{systemdict:dup}
 \index{dup@\onyxop{}{dup}{}}
-\item[{\onyxop{object}{dup}{object object}}: ]
+\item[{\onyxop{obj}{dup}{obj dup}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The same object that was passed in.
+		\item[dup: ]
+			A duplicate of \oparg{obj}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -5666,17 +5690,17 @@ onyx:2>
 	\end{description}
 \label{systemdict:echeck}
 \index{echeck@\onyxop{}{echeck}{}}
-\item[{\onyxop{object}{echeck}{boolean}}: ]
+\item[{\onyxop{obj}{echeck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{object} has the evaluatable attribute,
+			True if \oparg{obj} has the evaluatable attribute,
 			false otherwise.
 		\end{description}
 	\item[Errors(s): ]
@@ -5684,7 +5708,7 @@ onyx:2>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{object} for evaluatable attribute.
+		Check \oparg{obj} for evaluatable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} cve
@@ -5872,11 +5896,11 @@ onyx:0>
 	\end{description}
 \label{systemdict:eval}
 \index{eval@\onyxop{}{eval}{}}
-\item[{\onyxop{object}{eval}{--}}: ]
+\item[{\onyxop{obj}{eval}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
@@ -5885,7 +5909,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Evaluate \oparg{object}.  See Section~\ref{sec:onyx_objects} for
+		Evaluate object.  See Section~\ref{sec:onyx_objects} for
 		details on object evaluation.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -6335,7 +6359,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:get}
 \index{get@\onyxop{}{get}{}}
-\item[{\onyxop{array index}{get}{object}}: ]
+\item[{\onyxop{array index}{get}{obj}}: ]
 \item[{\onyxop{dict key}{get}{value}}: ]
 \item[{\onyxop{string index}{get}{integer}}: ]
 	\begin{description}\item[]
@@ -6354,7 +6378,7 @@ onyx:0>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The object in \oparg{array} at offset \oparg{index}.
 		\item[value: ]
 			The value in \oparg{dict} corresponding to \oparg{key}.
@@ -6599,19 +6623,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:ibdup}
 \index{ibdup@\onyxop{}{ibdup}{}}
-\item[{\onyxop{\dots object \dots index}{ibdup}{\dots object \dots object}}: ]
+\item[{\onyxop{\dots obj \commas index}{ibdup}{\dots obj \commas dup}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[\dots: ]
+			\oparg{index} objects.
+		\item[obj: ]
 			An object.
+		\item[\commas: ]
+			Zero or more objects.
 		\item[index: ]
 			Offset from bottom of ostack, counting from 0.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[\dots: ]
+			\oparg{index} objects.
+		\item[obj: ]
 			An object.
+		\item[\commas: ]
+			Zero or more objects.
+		\item[dup: ]
+			Duplicate of \oparg{obj}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6620,7 +6654,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a duplicate of the \oparg{object} on ostack that is at
+		Create a duplicate of the object on ostack that is at
 		offset \oparg{index} from the bottom of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -6635,16 +6669,26 @@ onyx:5>
 	\end{description}
 \label{systemdict:ibpop}
 \index{ibpop@\onyxop{}{ibpop}{}}
-\item[{\onyxop{\dots object \dots index}{ibpop}{\dots \dots}}: ]
+\item[{\onyxop{\dots obj \commas index}{ibpop}{\dots \commas}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[\dots: ]
+			\oparg{index} objects.
+		\item[obj: ]
 			An object.
+		\item[\commas: ]
+			Zero or more objects.
 		\item[index: ]
 			Offset from bottom of ostack, counting from 0.
 		\end{description}
-	\item[Output(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[\dots: ]
+			\oparg{index} objects.
+		\item[\commas: ]
+			Zero or more objects.
+		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{rangecheck}{rangecheck}.]
@@ -6652,7 +6696,7 @@ onyx:5>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Remove the \oparg{object} from ostack that is at offset
+		Remove the object from ostack that is at offset
 		\oparg{index} from the bottom of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -6707,11 +6751,11 @@ onyx:3>
 	\end{description}
 \label{systemdict:idup}
 \index{idup@\onyxop{}{idup}{}}
-\item[{\onyxop{object \dots index}{idup}{object \dots object}}: ]
+\item[{\onyxop{obj \dots index}{idup}{obj \dots dup}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\item[index: ]
 			Offset from top of ostack, counting from 0, not counting
@@ -6719,8 +6763,10 @@ onyx:3>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The same object that was passed in.
+		\item[dup: ]
+			A duplicate of \oparg{obj}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -6729,8 +6775,7 @@ onyx:3>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a duplicate of the \oparg{object} on ostack at
-		\oparg{index}.
+		Create a duplicate of the object on ostack at \oparg{index}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 3 2 1 0 2 idup pstack
@@ -6744,13 +6789,13 @@ onyx:5>
 	\end{description}
 \label{systemdict:if}
 \index{if@\onyxop{}{if}{}}
-\item[{\onyxop{boolean object}{if}{--}}: ]
+\item[{\onyxop{boolean obj}{if}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
 			A boolean.
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
@@ -6760,7 +6805,7 @@ onyx:5>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Evaluate \oparg{object} if \oparg{boolean} is true.
+		Evaluate \oparg{obj} if \oparg{boolean} is true.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> true {`yes' 1 sprint} if
@@ -6834,11 +6879,11 @@ onyx:0>
 	\end{description}
 \label{systemdict:ipop}
 \index{ipop@\onyxop{}{ipop}{}}
-\item[{\onyxop{object \dots index}{ipop}{\dots}}: ]
+\item[{\onyxop{obj \dots index}{ipop}{\dots}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\item[index: ]
 			Offset from top of ostack, counting from 0, not counting
@@ -6851,7 +6896,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Remove the \oparg{object} at \oparg{index} from ostack.
+		Remove the \oparg{obj} at \oparg{index} from ostack.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 2 1 0 
@@ -6943,17 +6988,17 @@ onyx:1>
 	\end{description}
 \label{systemdict:lcheck}
 \index{lcheck@\onyxop{}{lcheck}{}}
-\item[{\onyxop{object}{lcheck}{boolean}}: ]
+\item[{\onyxop{obj}{lcheck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An array, dict, file, or string.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{object} is implicitly locked, false
+			True if \oparg{obj} is implicitly locked, false
 			otherwise.
 		\end{description}
 	\item[Errors(s): ]
@@ -6962,7 +7007,7 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Check if \oparg{object} is implicitly locked.
+		Check if \oparg{obj} is implicitly locked.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> false setlocking
@@ -7890,24 +7935,45 @@ onyx:1>
 	\end{description}
 \label{systemdict:nup}
 \index{nup@\onyxop{}{nup}{}}
-\item[{\onyxop{OPARGS}{nup}{OPOUTS}}: ]
+\item[{\onyxop{a \dots b count}{nup}{\dots b a}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[a: ]
+			An object.
+		\item[\dots: ]
+			$count - 2$ objects.
+		\item[b: ]
+			An object.
+		\item[count: ]
+			Number of objects to rotate upward.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[\dots: ]
+			$count - 2$ objects.
+		\item[b: ]
+			An object.
+		\item[a: ]
+			An object.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Rotate \oparg{count} objects on ostack up one position.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> `a' `b' `c' `d' `e' 4 nup pstack
+`d'
+`c'
+`b'
+`e'
+`a'
+onyx:5>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:onyxdict}
@@ -8047,11 +8113,11 @@ onyx:4>
 	\end{description}
 \label{systemdict:output}
 \index{output@\onyxop{}{output}{}}
-\item[{\onyxop{object depth}{output}{--}}: ]
+\item[{\onyxop{obj depth}{output}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object to print syntactically.
 		\item[depth: ]
 			Maximum recursion depth.
@@ -8064,7 +8130,7 @@ onyx:4>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{object}.  See
+		Syntactically print \oparg{obj}.  See
 		Section~\ref{sec:outputsdict} for format specifier details.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -8086,11 +8152,11 @@ onyx:0>
 	\end{description}
 \label{systemdict:outputs}
 \index{outputs@\onyxop{}{outputs}{}}
-\item[{\onyxop{object flags}{outputs}{string}}: ]
+\item[{\onyxop{obj flags}{outputs}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object to print syntactically.
 		\item[depth: ]
 			Formatting flags.  See Section~\ref{sec:outputsdict} for
@@ -8099,7 +8165,7 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			A formatted string representation of \oparg{object}.
+			A formatted string representation of \oparg{obj}.
 			See Section~\ref{sec:outputsdict} for format specifier
 			details.
 		\end{description}
@@ -8109,7 +8175,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a formatted string representation of \oparg{object}.
+		Create a formatted string representation of \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 [2 3] 4] </w 20 /p `_' /j /c /r 1> outputs print `\n' print flush
@@ -8193,11 +8259,11 @@ onyx:0>
 	\end{description}
 \label{systemdict:pop}
 \index{pop@\onyxop{}{pop}{}}
-\item[{\onyxop{object}{pop}{--}}: ]
+\item[{\onyxop{obj}{pop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
@@ -8405,7 +8471,7 @@ onyx:6>
 	\end{description}
 \label{systemdict:put}
 \index{put@\onyxop{}{put}{}}
-\item[{\onyxop{array index object}{put}{--}}: ]
+\item[{\onyxop{array index obj}{put}{--}}: ]
 \item[{\onyxop{dict key value}{put}{--}}: ]
 \item[{\onyxop{string index integer}{put}{--}}: ]
 	\begin{description}\item[]
@@ -8419,10 +8485,10 @@ onyx:6>
 			A string object.
 		\item[index: ]
 			Offset in \oparg{array} or \oparg{string} to put
-			\oparg{object} or \oparg{integer}, respectively.
+			\oparg{obj} or \oparg{integer}, respectively.
 		\item[key: ]
 			An object to use as a key in \oparg{dict}.
-		\item[object: ]
+		\item[obj: ]
 			An object to insert into \oparg{array} at offset
 			\oparg{index}.
 		\item[value: ]
@@ -10012,7 +10078,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:spop}
 \index{spop@\onyxop{}{spop}{}}
-\item[{\onyxop{stack}{spop}{object}}: ]
+\item[{\onyxop{stack}{spop}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -10021,7 +10087,7 @@ onyx:0>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The object that was popped off of \oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
@@ -10042,11 +10108,11 @@ onyx:2>
 	\end{description}
 \label{systemdict:sprint}
 \index{sprint@\onyxop{}{sprint}{}}
-\item[{\onyxop{object depth}{sprint}{--}}: ]
+\item[{\onyxop{obj depth}{sprint}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object to print syntactically.
 		\item[depth: ]
 			Maximum recursion depth.
@@ -10059,7 +10125,7 @@ onyx:2>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{object}.  See
+		Syntactically print \oparg{obj}.  See
 		Section~\ref{sec:sprintsdict} for printing details.
 	\item[Example(s): ]\begin{verbatim}
 
@@ -10075,11 +10141,11 @@ onyx:1>
 	\end{description}
 \label{systemdict:sprints}
 \index{sprints@\onyxop{}{sprints}{}}
-\item[{\onyxop{object depth}{sprints}{string}}: ]
+\item[{\onyxop{obj depth}{sprints}{string}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object to print syntactically.
 		\item[depth: ]
 			Maximum recursion depth.
@@ -10087,7 +10153,7 @@ onyx:1>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[string: ]
-			A syntactical string representation of \oparg{object}.
+			A syntactical string representation of \oparg{obj}.
 			See Section~\ref{sec:sprintsdict} for printing details.
 		\end{description}
 	\item[Errors(s): ]
@@ -10096,7 +10162,7 @@ onyx:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Create a syntactical string representation of \oparg{object}.
+		Create a syntactical string representation of \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 [2 3] 4]
@@ -10132,13 +10198,13 @@ onyx:0>
 	\end{description}
 \label{systemdict:spush}
 \index{spush@\onyxop{}{spush}{}}
-\item[{\onyxop{stack object}{spush}{--}}: ]
+\item[{\onyxop{stack obj}{spush}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
 			A stack object.
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
@@ -10148,7 +10214,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Push \oparg{object} onto \oparg{stack}.
+		Push \oparg{obj} onto \oparg{stack}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> () dup 1 spush
@@ -10272,11 +10338,11 @@ onyx:1> pstack
 	\end{description}
 \label{systemdict:start}
 \index{start@\onyxop{}{start}{}}
-\item[{\onyxop{object}{start}{--}}: ]
+\item[{\onyxop{obj}{start}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ] None.
@@ -10285,7 +10351,7 @@ onyx:1> pstack
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Evaluate \oparg{object}.  This operator provides a context that
+		Evaluate \oparg{obj}.  This operator provides a context that
 		silently terminates execution stack unwinding due to the
 		\htmlref{\onyxop{}{exit}{}}{systemdict:exit},
 		\htmlref{\onyxop{}{quit}{}}{systemdict:quit}, and
@@ -10449,11 +10515,11 @@ onyx:0>
 	\end{description}
 \label{systemdict:stopped}
 \index{stopped@\onyxop{}{stopped}{}}
-\item[{\onyxop{object}{stopped}{boolean}}: ]
+\item[{\onyxop{obj}{stopped}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object to evaluate.
 		\end{description}
 	\item[Output(s): ]
@@ -10467,7 +10533,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Evaluate \oparg{object}.  This operator provides a context that
+		Evaluate \oparg{obj}.  This operator provides a context that
 		terminates execution stack unwinding due to the
 		\htmlref{\onyxop{}{stop}{}}{systemdict:stop}.  It will also
 		terminate execution stack unwinding due to the 
@@ -10843,7 +10909,7 @@ onyx:0>
 	\end{description}
 \label{systemdict:throw}
 \index{throw@\onyxop{}{throw}{}}
-\item[{\onyxop{name}{throw}{object}}: ]
+\item[{\onyxop{name}{throw}{obj}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -10851,7 +10917,7 @@ onyx:0>
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			The object that was being executed when the error was
 			thrown.
 		\end{description}
@@ -10937,7 +11003,7 @@ onyx:0>
 \label{systemdict:token}
 \index{token@\onyxop{}{token}{}}
 \item[{\onyxop{file/string}{token}{false}}: ]
-\item[{\onyxop{file/string}{token}{file/substring object true}}: ]
+\item[{\onyxop{file/string}{token}{file/substring obj true}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -10954,7 +11020,7 @@ onyx:0>
 			The same file object that was passed in.
 		\item[substring: ]
 			The remainder of \oparg{string} after scanning a token.
-		\item[object: ]
+		\item[obj: ]
 			An object that was constructed by scanning a token.
 		\item[false/true: ]
 			If true, a token was successfully scanned, false
@@ -11169,18 +11235,18 @@ onyx:4>
 	\end{description}
 \label{systemdict:type}
 \index{type@\onyxop{}{type}{}}
-\item[{\onyxop{object}{type}{name}}: ]
+\item[{\onyxop{obj}{type}{name}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[name: ]
 			An executable name that corresponds to the type of
-			\oparg{object}:
+			\oparg{obj}:
 			\begin{description}
 			\item[array: ] arraytype.
 			\item[boolean: ] booleantype.
@@ -11206,7 +11272,7 @@ onyx:4>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Get a name that represent the type of \oparg{object}.
+		Get a name that represent the type of \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> true type 1 sprint
@@ -11579,17 +11645,17 @@ onyx:1>
 	\end{description}
 \label{systemdict:xcheck}
 \index{xcheck@\onyxop{}{xcheck}{}}
-\item[{\onyxop{object}{xcheck}{boolean}}: ]
+\item[{\onyxop{obj}{xcheck}{boolean}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[object: ]
+		\item[obj: ]
 			An object.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[boolean: ]
-			True if \oparg{object} has the executable or evaluatable
+			True if \oparg{obj} has the executable or evaluatable
 			attribute, false otherwise.
 		\end{description}
 	\item[Errors(s): ]
@@ -11597,7 +11663,7 @@ onyx:1>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Check \oparg{object} for executable or evaluatable attribute.
+		Check \oparg{obj} for executable or evaluatable attribute.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {1 2 3} xcheck 1 sprint
