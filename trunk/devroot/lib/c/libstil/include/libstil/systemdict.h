@@ -101,6 +101,7 @@ void	systemdict_quit(cw_stilt_t *a_stilt);
 void	systemdict_rand(cw_stilt_t *a_stilt);
 void	systemdict_rcheck(cw_stilt_t *a_stilt);
 void	systemdict_read(cw_stilt_t *a_stilt);
+void	systemdict_readline(cw_stilt_t *a_stilt);
 void	systemdict_readonly(cw_stilt_t *a_stilt);
 void	systemdict_readstring(cw_stilt_t *a_stilt);
 void	systemdict_realtime(cw_stilt_t *a_stilt);

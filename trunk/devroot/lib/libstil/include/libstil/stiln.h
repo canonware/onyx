@@ -146,6 +146,7 @@ typedef enum {
 	STILN_rangecheck,
 	STILN_rcheck,
 	STILN_read,
+	STILN_readline,
 	STILN_readonly,
 	STILN_readstring,
 	STILN_realtime,

@@ -21,6 +21,16 @@
 #define _CW_STILOE_MAGIC	0x0fa6e798
 #endif
 
+/*
+ * Size of stack-allocated buffer to use for stilo_file_readline().  If this
+ * overflows, heap allocation is used.
+ */
+#ifdef _LIBSTIL_DBG
+#define	_CW_STILO_FILE_READLINE_BUFSIZE	 25
+#else
+#define	_CW_STILO_FILE_READLINE_BUFSIZE	100
+#endif
+
 typedef struct cw_stiloe_array_s cw_stiloe_array_t;
 typedef struct cw_stiloe_condition_s cw_stiloe_condition_t;
 typedef struct cw_stiloe_file_s cw_stiloe_file_t;
@@ -1950,7 +1960,7 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len,
 	if (file->fd == -1) {
 		retval = -1;
 		goto RETURN;
-	}		
+	}
 
 	/*
 	 * Use the internal buffer if it exists.  If there aren't enough data in
@@ -2048,6 +2058,231 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t a_len,
 /*  	_cw_out_put_n(retval, "[s]", r_str); */
 /*  	_cw_out_put(":\n"); */
 	RETURN:
+	return retval;
+}
+
+/* STILTE_IOERROR */
+cw_stilte_t
+stilo_file_readline(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
+    *r_string, cw_bool_t *r_eof)
+{
+	cw_stilte_t		retval;
+	cw_stiloe_file_t	*file;
+	cw_uint8_t		*line, s_line[_CW_STILO_FILE_READLINE_BUFSIZE];
+	cw_uint32_t		i, maxlen;
+	cw_sint32_t		nread;
+	enum {NORMAL, CR}	state;
+
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == STILOT_FILE);
+
+	file = (cw_stiloe_file_t *)a_stilo->o.stiloe;
+
+	_cw_check_ptr(file);
+	_cw_assert(file->stiloe.magic == _CW_STILOE_MAGIC);
+
+	line = s_line;
+
+	if (file->fd == -1) {
+		retval = STILTE_IOERROR;
+		goto RETURN;
+	}
+
+	/*
+	 * Copy bytes until we see a \n or EOF.  Note that \r\n is converted to
+	 * \n.
+	 */
+	if (file->buffer != NULL) {
+		cw_uint32_t	offset;
+
+		/* Flush the internal buffer if it has write data. */
+		if (file->buffer_mode == BUFFER_WRITE) {
+			retval = stilo_file_buffer_flush(a_stilo, a_stilt);
+			if (retval)
+				goto RETURN;
+		}
+
+		/*
+		 * Copy bytes from the internal buffer, one at a time,
+		 * replenishing the internal buffer as necessary.
+		 */
+		for (i = 0, offset = 0, maxlen =
+		    _CW_STILO_FILE_READLINE_BUFSIZE, state = NORMAL;; i++) {
+			/*
+			 * If we're about to overflow the line buffer, expand
+			 * it.
+			 */
+			if (i == maxlen) {
+				if (line == s_line) {
+					/* First expansion. */
+					line = (cw_uint8_t
+					    *)stilt_malloc(a_stilt, maxlen <<
+					    1);
+					memcpy(line, s_line, maxlen);
+				} else {
+					cw_uint8_t	*oldline;
+
+					/*
+					 * We've already expanded at least
+					 * once.
+					 */
+					oldline = line;
+					line = (cw_uint8_t
+					    *)stilt_malloc(a_stilt, maxlen <<
+					    1);
+					memcpy(line, oldline, maxlen);
+					stilt_free(a_stilt, oldline);
+				}
+				maxlen <<= 1;
+			}
+
+			if ((offset >= file->buffer_offset) ||
+			    (file->buffer_mode == BUFFER_EMPTY)) {
+				/* Replenish the internal buffer. */
+				if (file->fd >= 0) {
+					nread = read(file->fd, file->buffer,
+					    file->buffer_size);
+				} else {
+					/* Use the read wrapper function. */
+					nread = file->read_f(file->arg, a_stilo,
+					    a_stilt, file->buffer_size,
+					    file->buffer);
+				}
+				if (nread <= 0) {
+					/* EOF. */
+					file->fd = -1;
+					file->buffer_offset = 0;
+					file->buffer_mode = BUFFER_EMPTY;
+
+					stilo_string_new(r_string, a_stilt, i);
+					stilo_string_set(r_string, 0, line, i);
+
+					retval = STILTE_NONE;
+					*r_eof = TRUE;
+					goto RETURN;
+				}
+
+				file->buffer_mode = BUFFER_READ;
+				file->buffer_offset = nread;
+				offset = 0;
+			}
+
+			line[i] = file->buffer[offset];
+			offset++;
+
+			switch (line[i]) {
+			case '\r':
+				state = CR;
+				break;
+			case '\n':
+				if (state == CR) {
+					/* Throw away the preceding \r. */
+					i--;
+				}
+				stilo_string_new(r_string, a_stilt, i);
+				stilo_string_set(r_string, 0, line, i);
+
+				/*
+				 * Shift the remaining buffered data to the
+				 * beginning of the buffer.
+				 */
+				if (file->buffer_offset - offset > 0) {
+					memmove(file->buffer,
+					    &file->buffer[offset],
+					    file->buffer_offset - offset);
+					file->buffer_offset -= offset;
+				} else {
+					file->buffer_offset = 0;
+					file->buffer_mode = BUFFER_EMPTY;
+				}
+
+				retval = STILTE_NONE;
+				*r_eof = FALSE;
+				goto RETURN;
+			default:
+				state = NORMAL;
+				break;
+			}
+		}
+	} else {
+		/*
+		 * There is no internal buffer, so we must read one byte at a
+		 * time from the file.  This is horribly inneficient, but we
+		 * don't have anywhere to unput characters past a newline.
+		 */
+		for (i = 0, maxlen = _CW_STILO_FILE_READLINE_BUFSIZE, state =
+			 NORMAL;; i++) {
+			/*
+			 * If we're about to overflow the line buffer, expand
+			 * it.
+			 */
+			if (i == maxlen) {
+				if (line == s_line) {
+					/* First expansion. */
+					line = (cw_uint8_t
+					    *)stilt_malloc(a_stilt, maxlen <<
+					    1);
+					memcpy(line, s_line, maxlen);
+				} else {
+					cw_uint8_t	*oldline;
+
+					/*
+					 * We've already expanded at least
+					 * once.
+					 */
+					oldline = line;
+					line = (cw_uint8_t
+					    *)stilt_malloc(a_stilt, maxlen <<
+					    1);
+					memcpy(line, oldline, maxlen);
+					stilt_free(a_stilt, oldline);
+				}
+				maxlen <<= 1;
+			}
+
+			if (file->fd >= 0)
+				nread = read(file->fd, &line[i], 1);
+			else {
+				/* Use the read wrapper function. */
+				nread = file->read_f(file->arg, a_stilo,
+				    a_stilt, 1, &line[i]);
+			}
+			if (nread <= 0) {
+				/* EOF. */
+				stilo_string_new(r_string, a_stilt, i);
+				stilo_string_set(r_string, 0, line, i);
+
+				retval = STILTE_NONE;
+				*r_eof = TRUE;
+				goto RETURN;
+			}
+
+			switch (line[i]) {
+			case '\r':
+				state = CR;
+				break;
+			case '\n':
+				if (state == CR) {
+					/* Throw away the preceding \r. */
+					i--;
+				}
+				stilo_string_new(r_string, a_stilt, i);
+				stilo_string_set(r_string, 0, line, i);
+
+				retval = STILTE_NONE;
+				*r_eof = FALSE;
+				goto RETURN;
+			default:
+				state = NORMAL;
+				break;
+			}
+		}
+	}
+
+	RETURN:
+	if (line != s_line)
+		stilt_free(a_stilt, line);
 	return retval;
 }
 

@@ -115,8 +115,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 	stilo_name_new(tname, a_stilt, stiln_str(STILN_errorname),
 	    stiln_len(STILN_errorname), TRUE);
 	stiln = stilte_stiln(stilt_error_get(a_stilt));
-	stilo_string_new(tstilo, a_stilt, stiln_len(stiln));
-	stilo_string_set(tstilo, 0, stiln_str(stiln), stiln_len(stiln));
+	stilo_name_new(tstilo, a_stilt, stiln_str(stiln), stiln_len(stiln),
+	    TRUE);
 	stilo_dict_def(derror, a_stilt, tname, tstilo);
 	
 	switch (stilt_error_get(a_stilt)) {
@@ -231,21 +231,15 @@ errordict_handleerror(cw_stilt_t *a_stilt)
 {
 	_cw_stil_code(a_stilt, "
 $error begin
-(newerror\t: ) print
-newerror ==
-(errorname\t: ) print
-errorname ==
-(recordstacks\t: ) print
-recordstacks ==
-(command\t\t: ) print
-//command ==
-
-(ostack\t\t: ) print
-ostack ==
-(estack\t\t: ) print
-estack ==
-(dstack\t\t: ) print
-dstack ==
+(Error /) print errorname cvs print ( in ) print //command ==
+recordstacks {
+	(ostack: ) print
+	ostack ==
+	(estack: ) print
+	estack ==
+	(dstack: ) print
+	dstack ==
+} if
 end
 ");
 }
