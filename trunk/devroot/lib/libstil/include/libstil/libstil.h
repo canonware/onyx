@@ -57,7 +57,7 @@ extern  "C" {
  * Default number of sequence set additions since last collection that will
  * cause an immediate collection.
  */
-#define	_LIBSTIL_GCDICT_THRESHOLD      50000
+#define	_LIBSTIL_GCDICT_THRESHOLD      20000
 
 /*
  * Initial size of globaldict.  This is a bit arbitrary, and some applications
