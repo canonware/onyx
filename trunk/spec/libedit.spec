@@ -1,18 +1,12 @@
-# Originally authored by Lars Kellogg-Stedman <lars@larsshack.org>.
-
 Name: 		libedit
+Summary:	A command line editing library.
 Version:	2.6.7
 Release:	1
-Summary:	A command line editing library.
-Copyright:	BSD
+License:	BSD
 Group:		Development/Libraries
-
-Vendor:		Christos Zoulas <christos@zoulas.com>
-Packager:	Jason Evans <jasone@canonware.com>
-Source:		ftp://ftp.astron.com:/pub/libedit/libedit-%{version}.tar.gz
-
-Buildroot:	%{_tmppath}/%{name}-root
-Prefix:		/usr
+Source0:	ftp://ftp.astron.com:/pub/libedit/libedit-%{version}.tar.gz
+Buildroot:	%{_tmppath}/%{name}-%{version}-%{release}-root
+Provides:	libedit.so
 
 %description
 libedit implements command line editing and history features that can be used
@@ -38,19 +32,29 @@ create applications that use libedit.
 make
 
 %install
-[ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
-make PREFIX=$RPM_BUILD_ROOT%{prefix} install
+rm -fr %{buildroot}
+make PREFIX=%{buildroot} install
+mkdir %{buildroot}/%{_prefix}/share
+mv %{buildroot}/%{_prefix}/man %{buildroot}/%{_prefix}/share
 
 %clean
-[ "$RPM_BUILD_ROOT" -a "$RPM_BUILD_ROOT" != / ] && rm -rf $RPM_BUILD_ROOT
+rm -fr %{buildroot}
+
+%post
+/sbin/ldconfig
+
+%postun
+if [ "$1" -ge "1" ]; then
+  /sbin/ldconfig
+fi
 
 %files
 %defattr(-,root,root)
-/usr/man/man5/*
-/usr/lib/libedit.so*
+%{_mandir}/man5/*
+%{_libdir}/libedit.so*
 
 %files devel
 %defattr(-,root,root)
-/usr/man/man3/*
-/usr/include/histedit.h
-/usr/lib/libedit.a
+%{_mandir}/man3/*
+%{_includedir}/histedit.h
+%{_libdir}/libedit.a
