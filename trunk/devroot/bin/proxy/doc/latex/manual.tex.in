@@ -21,21 +21,36 @@ three formats.  Which format to use (if any) should be chosen according to the
 nature of the data being streamed.
 
 \section{Usage}
-\begin{verbatim}
 proxy -h
+
 proxy -V
-proxy [-v | -q] [-l | -d <dirpath>] [-f {p|h|a}] [-i <ip>]
-      [-p <port>] [-r [<rhost>:]<rport> | -t]
-\end{verbatim}
+
+proxy [-v {\pipe} -q] [-l {\pipe} -d {\lt}dirpath{\gt}] [-f {p{\pipe}h{\pipe}a}]
+[-i {\lt}ip{\gt}] [-p {\lt}port{\gt}] [-r [{\lt}rhost{\gt}:]{\lt}rport{\gt}
+{\pipe} -t]
 
 \subsection{Options}
 \begin{description}
-\item[-d <dirpath>: ] Write logs to ``<dirpath>/proxy.*''.
-\item[$-f {p|h|a}$: ] Specify format of log output:
-\item[\-f \lbracket: ] Specify format of log output:
+\item[-d {\lt}dirpath{\gt}: ] Write logs to ``{\lt}dirpath{\gt}/proxy.*''.
+\item[-f \{p{\pipe}h{\pipe}a\}: ] Specify format of log output:
 	\begin{description}
 	\item[p: ] Pretty.
 	\item[h: ] Hexadecimal.
 	\item[a: ] Ascii.
 	\end{description}
+\item[-h: ] Display usage information and exit.
+\item[-l: ] Write logs to stderr.
+\item[-i {\lt}ip{\gt}: ] Bind to IP address {\lt}ip{\gt}.  The special values of
+ANY (default) and LOOPBACK are supported.
+\item[-p {\lt}port{\gt}: ] Listen on port {\lt}port{\gt}.
+\item[-q: ] Be quiet.  This flag is incompatible with the -v flag.
+\item[-r {\lt}rhost{\gt}:{\lt}rport{\gt}: ] Sent output to host {\lt}rhost{\gt}
+on port {\lt}rport{\gt}.  If {\lt}rhost{\gt} is not specified, then localhost is
+assumed.
+\item[-t: ] This option is only available on systems that include ipfilter
+functionality.  Use /dev/ipnat to determine what host:port to connect to.  See
+ipnat(4), ipnat(5), ipf(8), and ipfstat(8) for ipfilter details.
+\item[-V: ] Display the version number and exit.
+\item[-v: ] Be verbose.  This flag is incompatible with the -q flag.
+
 \end{description}
