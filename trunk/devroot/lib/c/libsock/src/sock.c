@@ -426,7 +426,8 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
 }
 
 cw_sint32_t
-sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read)
+sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read,
+		struct timespec * a_timeout)
 {
   cw_sint32_t retval, size;
   
@@ -451,14 +452,21 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read)
     {
       /* There's no data available right now. */
       a_sock->in_need_signal_count++;
-      cnd_wait(&a_sock->in_cnd, &a_sock->in_lock);
+      if (NULL == a_timeout)
+      {
+	cnd_wait(&a_sock->in_cnd, &a_sock->in_lock);
+      }
+      else
+      {
+	cnd_timedwait(&a_sock->in_cnd, &a_sock->in_lock, a_timeout);
+      }
       a_sock->in_need_signal_count--;
     }
 
     size = buf_get_size(&a_sock->in_buf);
     if (0 < size)
     {
-      if ((a_max_read == 0) || (buf_get_size(&a_sock->in_buf) < a_max_read))
+      if ((a_max_read == 0) || (size < a_max_read))
       {
 	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
 	retval = size;
@@ -478,8 +486,7 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read)
     }
     else
     {
-    /* XXX Should we disconnect here? */
-      retval = -1;
+      retval = 0;
       mtx_unlock(&a_sock->in_lock);
     }
   }

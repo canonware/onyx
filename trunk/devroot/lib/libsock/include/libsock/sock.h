@@ -225,20 +225,25 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
  *
  * a_max_read : Maximum number of bytes to read into a_spare, or 0 for no limit.
  *
+ * a_timeout : Maximum time to wait for data before returning, or NULL to wait
+ *             indefinitely.
+ *
  * <<< Output(s) >>>
  *
- * retval : -1 : No data read.  This should only happen if the socket has been
+ * retval : -1 : Error.  This should only happen if the socket has been
  *               closed.
+ *        : 0 : Timeout.
  *        : > 0 : Data read.
  *
  * <<< Description >>>
  *
- * Read data from the socket, and don't return until there is data.
+ * Read data from the socket, and don't return until there is data (not
+ * necessarily a_max_read), or the timeout expires.
  *
  ****************************************************************************/
 cw_sint32_t
-sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,
-		cw_sint32_t a_max_read);
+sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read,
+		struct timespec * a_timeout);
 
 /****************************************************************************
  *
