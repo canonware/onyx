@@ -17,26 +17,19 @@
 int
 main()
 {
-    cw_mema_t mema;
-
     libonyx_init();
     fprintf(stderr, "Test begin\n");
-
-    mema_new(&mema, (cw_opaque_alloc_t *) mem_malloc_e,
-	     (cw_opaque_calloc_t *) mem_calloc_e,
-	     (cw_opaque_realloc_t *) mem_realloc_e,
-	     (cw_opaque_dealloc_t *) mem_free_e, cw_g_mem);
 
     /* dch_new(), dch_delete(). */
     {
 	cw_dch_t *dch_a, dch_b;
 
-	dch_a = dch_new(NULL, &mema, 2, 2, 1, ch_string_hash,
+	dch_a = dch_new(NULL, cw_g_mema, 2, 2, 1, ch_string_hash,
 			ch_string_key_comp);
 	cw_check_ptr(dch_a);
 	dch_delete(dch_a);
 
-	cw_assert(dch_new(&dch_b, &mema, 4, 3, 1, ch_direct_hash,
+	cw_assert(dch_new(&dch_b, cw_g_mema, 4, 3, 1, ch_direct_hash,
 			  ch_direct_key_comp) == &dch_b);
 	dch_delete(&dch_b);
     }
@@ -49,7 +42,8 @@ main()
 	char *c = "two of these";
 	char *d = "two of these\0foo";
 
-	dch = dch_new(NULL, &mema, 4, 2, 1, ch_string_hash, ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 4, 2, 1, ch_string_hash,
+		      ch_string_key_comp);
 	cw_check_ptr(dch);
 	cw_assert(dch_count(dch) == 0);
 
@@ -80,7 +74,8 @@ main()
 	char *d = "two of these\0foo";
 	char *k, *v;
 
-	dch = dch_new(NULL, &mema, 4, 2, 1, ch_string_hash, ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 4, 2, 1, ch_string_hash,
+		      ch_string_key_comp);
 	cw_check_ptr(dch);
 	cw_assert(dch_count(dch) == 0);
 
@@ -133,7 +128,8 @@ main()
 	char *d = "two of these\0foo";
 	char *v;
 
-	dch = dch_new(NULL, &mema, 4, 2, 1, ch_string_hash, ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 4, 2, 1, ch_string_hash,
+		      ch_string_key_comp);
 	cw_check_ptr(dch);
 
 	dch_insert(dch, a, a, NULL);
@@ -171,7 +167,8 @@ main()
 	char *d = "two of these\0foo";
 	char *k, *v;
 
-	dch = dch_new(NULL, &mema, 3, 2, 1, ch_string_hash, ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 3, 2, 1, ch_string_hash,
+		      ch_string_key_comp);
 	cw_check_ptr(dch);
 
 	dch_insert(dch, a, a, NULL);
@@ -224,8 +221,6 @@ main()
 
 	dch_delete(dch);
     }
-
-    mema_delete(&mema);
 
     fprintf(stderr, "Test end\n");
     libonyx_shutdown();
