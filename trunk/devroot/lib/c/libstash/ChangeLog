@@ -1,3 +1,11 @@
+1999-09-20  Jason Evans  <jasone@canonware.com>
+
+	* : Add the arena class (contributed by Chris Toshok
+	<toshok@hungry.com>).  arena implements a chunk-based allocation
+	mechanism.  Memory is allocated in chunks as needed, and the
+	chunks are linearly carved up.  All allocated memory is
+	deallocated in the final call to arena_delete().
+
 1999-09-18  Jason Evans  <jasone@canonware.com>
 
 	* src/mq.c (mq_timedget): Add.

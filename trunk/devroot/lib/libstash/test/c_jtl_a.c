@@ -16,7 +16,7 @@
 
 #include <libstash/libstash_r.h>
 
-#define _LIBSTASH_TEST_NUM_THREADS 100
+#define _LIBSTASH_TEST_NUM_THREADS 50
 
 struct foo_var_s
 {
@@ -31,12 +31,15 @@ thread_entry_func(void * a_arg)
 {
   struct foo_var_s * foo_var = (struct foo_var_s *) a_arg;
 
+/*    out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  	     "Thread [i] start\n", foo_var->thd_num); */
+  
   if (foo_var->is_tlock == TRUE)
   {
     /* Grab tlock. */
     jtl_tlock(foo_var->lock, foo_var->tq_el);
     usleep(1);
-    out_put_e(cw_g_out, NULL, 0, "thread_entry_func",
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 	      "Thread [i] has tlock\n", foo_var->thd_num);
     jtl_tunlock(foo_var->lock);
   }
@@ -44,30 +47,30 @@ thread_entry_func(void * a_arg)
   {
     /* Grab slock. */
     jtl_slock(foo_var->lock);
-/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  		"Thread [i] has slock\n", foo_var->thd_num); */
 
     jtl_2qlock(foo_var->lock);
-/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  		"Thread [i] has qlock\n", foo_var->thd_num); */
     jtl_qunlock(foo_var->lock);
 
     jtl_2rlock(foo_var->lock);
-/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  		"Thread [i] has rlock\n", foo_var->thd_num); */
     jtl_runlock(foo_var->lock);
 
     jtl_2wlock(foo_var->lock);
-/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  		"Thread [i] has wlock\n", foo_var->thd_num); */
     jtl_wunlock(foo_var->lock);
 
     jtl_2xlock(foo_var->lock);
-/*      out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  		"Thread [i] has xlock\n", foo_var->thd_num); */
     jtl_xunlock(foo_var->lock);
   } 
-/*    out_put_e(cw_g_out, NULL, 0, "thread_entry_func", */
+/*    out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  	     "Thread [i] is done\n", foo_var->thd_num); */
   _cw_free(foo_var);
     

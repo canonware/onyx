@@ -91,6 +91,12 @@
 #  endif
 #endif
 
+#ifdef _LIBSTASH_USE_ARENA
+#  ifndef _LIBSTASH_USE_LIST
+#    define _LIBSTASH_USE_LIST
+#  endif
+#endif
+
 #ifdef _LIBSTASH_USE_DBG
 #  ifndef _LIBSTASH_USE_OH
 #    define _LIBSTASH_USE_OH
@@ -214,6 +220,13 @@
 #  ifndef _PEZZ_H_
 #    include "pezz.h"
 #    define _PEZZ_H_
+#  endif
+#endif
+
+#ifdef _LIBSTASH_USE_ARENA
+#  ifndef _ARENA_H_
+#    include "arena.h"
+#    define _ARENA_H_
 #  endif
 #endif
 
