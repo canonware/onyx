@@ -68,11 +68,13 @@ dnl Build onyx by default.
 CW_ENABLE_ONYX
 
 dnl Build slate by default.
-if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1" \
-     -a "x$enable_posix" = "x1" -a "x$enable_posix_file" = "x1" ; then
-  CW_ENABLE_SLATE
-else
-  AC_MSG_RESULT(Missing configuration options necessary for slate)
+CW_ENABLE_SLATE
+if test "x$enable_slate" = "x1" ; then
+  if test "x$enable_threads" = "x0" -o "x$enable_real" = "x0" \
+     -o "x$enable_posix" = "x0" -o "x$enable_posix_file" = "x0" ; then
+    AC_MSG_RESULT(Missing configuration options necessary for slate)
+    enable_slate=0
+  fi
 fi
 
 dnl Do not compile with debugging by default.
