@@ -28,7 +28,7 @@
 /* If using gcc, use inline functions. */
 #ifndef _CW_INLINE
 #ifdef __GNUC__
-#define _CW_INLINE __inline__
+#define _CW_INLINE static __inline__
 #define _CW_USE_INLINES
 #else
 #define _CW_INLINE
