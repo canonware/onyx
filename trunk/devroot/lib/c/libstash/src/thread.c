@@ -29,12 +29,47 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 38 $
- * $Date: 1998-04-19 21:30:27 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
+ * 
+ * Implementation of thread locking primitives.
  *
+ * thd : Thread.
  *
+ * mtx : Mutex.
+ *
+ * cnd : Condition variable.
+ * 
+ * sem : Semaphore.  This implementation is a bit different than normal, in 
+ * that it is possible to decrement the count to less than zero.  This
+ * allows dynamic modification of resource pools locked by semaphores.
+ *
+ * lwq : Lock wait queue.  Same as mtx, except that lock waiters are
+ * queued.  This is useful when serializeability is important, or when
+ * wishing to avoid the (implementation-independent) non-deterministic
+ * order in which lock waiters are granted a mutex.
+ * 
+ * rwl : Read/write lock.  Multiple simultaneous readers are allowed, but
+ * only one locker (with no readers) is allowed.  This implementation
+ * toggles back and forth between read locks and write locks to assure
+ * deterministic locking.
+ *
+ * rwq : Same as rwl, except write lock waiters are queued, to ensure
+ * serialization.
+ *
+ * tsd : Thread-specific data.
+ *
+ * btl : B-tree lock.  These are used by the block repository to provide
+ * the necessary locking semantics for concurrent B-trees.  The following
+ * lock types are encapsulated by btl:
+ *   s : Non-serialized place holder lock.
+ *   t : Serialized place holder lock.
+ *   d : Potential deletion lock (only needed when holding an s lock).
+ *   r : Non-exclusive read lock.
+ *   w : Write lock that allows simultaneous r locks.
+ *   x : Exclusive write lock.  No simultaneous r or w locks allowed.
  *
  ****************************************************************************/
 
@@ -67,7 +102,7 @@ thd_new(cw_thd_t * a_thd_o,
 
   if (error)
   {
-    log_eprintf(g_log_obj, __FILE__, __LINE__, "thd_new",
+    log_eprintf(g_log_o, __FILE__, __LINE__, "thd_new",
 		"Cannot create thread, error %d\n", error);
     abort();
   }
@@ -76,7 +111,7 @@ thd_new(cw_thd_t * a_thd_o,
 
 /*   if (error) */
 /*   { */
-/*     log_eprintf(g_log_obj, __FILE__, __LINE__, "thd_new", */
+/*     log_eprintf(g_log_o, __FILE__, __LINE__, "thd_new", */
 /* 		"Cannot detach thread, error %d\n", error); */
 /*     abort(); */
 /*   } */
@@ -130,7 +165,7 @@ mtx_new(cw_mtx_t * a_mtx_o)
 
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "mtx_new",
+    log_printf(g_log_o, __FILE__, __LINE__, "mtx_new",
 	       "Unable to create mutex, error %d\n", error);
     abort();
   }
@@ -149,7 +184,7 @@ mtx_delete(cw_mtx_t * a_mtx_o)
 
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "mtx_delete",
+    log_printf(g_log_o, __FILE__, __LINE__, "mtx_delete",
 	       "Unable to destroy mutex, error %d\n", error);
     abort();
   }
@@ -171,7 +206,7 @@ mtx_lock(cw_mtx_t * a_mtx_o)
 
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "mtx_lock",
+    log_printf(g_log_o, __FILE__, __LINE__, "mtx_lock",
 	       "Error locking mutex, error %d\n", error);
     abort();
   }
@@ -200,7 +235,7 @@ mtx_unlock(cw_mtx_t * a_mtx_o)
   
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "mtx_unlock",
+    log_printf(g_log_o, __FILE__, __LINE__, "mtx_unlock",
 	       "Error unlocking mutex, error %d\n", error);
     abort();
   }
@@ -227,7 +262,7 @@ cnd_new(cw_cnd_t * a_cnd_o)
 
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "cnd_new",
+    log_printf(g_log_o, __FILE__, __LINE__, "cnd_new",
 	       "Error creating condition variable, error %d\n", error);
     abort();
   }
@@ -245,7 +280,7 @@ cnd_delete(cw_cnd_t * a_cnd_o)
   error = pthread_cond_destroy(&a_cnd_o->condition);
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "cnd_delete",
+    log_printf(g_log_o, __FILE__, __LINE__, "cnd_delete",
 	       "Error destroying condition variable, error %d\n", error);
     abort();
   }
@@ -266,7 +301,7 @@ cnd_signal(cw_cnd_t * a_cnd_o)
   pthread_cond_signal(&a_cnd_o->condition);
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "cnd_signal",
+    log_printf(g_log_o, __FILE__, __LINE__, "cnd_signal",
 	       "Error signalling condition variable, error %d\n", error);
     abort();
   }
@@ -282,7 +317,7 @@ cnd_broadcast(cw_cnd_t * a_cnd_o)
   pthread_cond_broadcast(&a_cnd_o->condition);
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "cnd_broadcast",
+    log_printf(g_log_o, __FILE__, __LINE__, "cnd_broadcast",
 	       "Error broadcasting condition variable, error %d\n", error);
     abort();
   }
@@ -301,7 +336,7 @@ cnd_timedwait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o,
 			 a_time);
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "cnd_timedwait",
+    log_printf(g_log_o, __FILE__, __LINE__, "cnd_timedwait",
 	       "Error timed waiting on condition variable, error %d\n", error);
     abort();
   }
@@ -321,7 +356,7 @@ cnd_wait(cw_cnd_t * a_cnd_o, cw_mtx_t * a_mtx_o)
   pthread_cond_wait(&a_cnd_o->condition, &a_mtx_o->mutex);
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "cnd_wait",
+    log_printf(g_log_o, __FILE__, __LINE__, "cnd_wait",
 	       "Error waiting on condition variable, error %d\n", error);
     abort();
   }
@@ -720,13 +755,16 @@ rwl_wunlock(cw_rwl_t * a_rwl_o)
 
   a_rwl_o->num_writers--;
 
-  if (a_rwl_o->write_waiters > 0)
-  {
-    cnd_signal(&a_rwl_o->write_wait);
-  }
-  else if (a_rwl_o->read_waiters > 0)
+  /* Doing this in reverse order could potentially be more efficient, but
+   * by using this order, we get rid of any non-determinism, i.e. we don't
+   * have to worry about a read lock waiter never getting the lock. */
+  if (a_rwl_o->read_waiters > 0)
   {
     cnd_broadcast(&a_rwl_o->read_wait);
+  }
+  else if (a_rwl_o->write_waiters > 0)
+  {
+    cnd_signal(&a_rwl_o->write_wait);
   }
   
   mtx_unlock(&a_rwl_o->lock);
@@ -901,7 +939,7 @@ tsd_set(cw_tsd_t * a_tsd_o, void * a_val)
   error = pthread_setspecific(a_tsd_o->key, a_val);
   if (error)
   {
-    log_printf(g_log_obj, __FILE__, __LINE__, "tsd_set",
+    log_printf(g_log_o, __FILE__, __LINE__, "tsd_set",
 	       "Error setting thread-specific data, error %d\n", error);
     abort();
   }

@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 39 $
- * $Date: 1998-04-19 21:31:10 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -51,13 +51,13 @@ insert_items(void * arg)
 {
   int i;
   char * string;
-  oh_t * hash_obj = (oh_t *) arg;
+  cw_oh_t * hash_o = (cw_oh_t *) arg;
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
     string = (char *) _cw_malloc(20);
     sprintf(string, "String %d", i);
-    oh_item_insert(hash_obj, (void *) string, &string);
+    oh_item_insert(hash_o, (void *) string, &string);
   }
   return NULL;
 }
@@ -65,16 +65,16 @@ insert_items(void * arg)
 int
 main()
 {
-  oh_t * hash_obj;
+  cw_oh_t * hash_o;
   cw_thd_t threads[NUM_THREADS];
   int i;
 
   glob_new();
-  hash_obj = oh_new();
+  hash_o = oh_new();
 
   for (i = 0; i < NUM_THREADS; i++)
   {
-    thd_new(&threads[i], insert_items, (void *) hash_obj);
+    thd_new(&threads[i], insert_items, (void *) hash_o);
   }
 
   /* Join on threads, then delete them. */
@@ -85,10 +85,10 @@ main()
     thd_delete(&threads[i]);
   }
 
-  log_printf(g_log_obj, "Number of items in hash table: %d\n",
-	     oh_get_num_items(hash_obj));
+  log_printf(g_log_o, "Number of items in hash table: %d\n",
+	     oh_get_num_items(hash_o));
   
-  oh_delete(hash_obj);
+  oh_delete(hash_o);
   glob_delete();
   
   return 0;

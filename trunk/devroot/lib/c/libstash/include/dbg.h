@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 14 $
- * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -61,11 +61,11 @@ typedef struct cw_dbg_s cw_dbg_t;
 #define dbg_clear _CW_NS_CMN(dbg_clear)
 
 cw_dbg_t * dbg_new();
-void dbg_delete(cw_dbg_t * arg_dbg_obj);
-cw_bool_t dbg_fmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
-cw_bool_t dbg_pmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
-cw_bool_t dbg_turn_on(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
-cw_bool_t dbg_turn_off(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag);
-void dbg_clear(cw_dbg_t * arg_dbg_obj);
+void dbg_delete(cw_dbg_t * a_dbg_o);
+cw_bool_t dbg_fmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
+cw_bool_t dbg_pmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
+cw_bool_t dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
+cw_bool_t dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
+void dbg_clear(cw_dbg_t * a_dbg_o);
 
 #endif /* _DBG_H_ */

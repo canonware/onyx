@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 39 $
- * $Date: 1998-04-19 21:31:10 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -47,7 +47,7 @@
 int
 main()
 {
-  oh_t * hash_obj;
+  cw_oh_t * hash_o;
   char ** strings, ** junk;
 /*   oh_h1_t * h1_ptr; */
   int i;
@@ -63,64 +63,64 @@ main()
     sprintf(strings[i], "(%d) This is string %d", i, i);
   }
   
-  hash_obj = oh_new();
+  hash_o = oh_new();
 
-/*   h1_ptr = oh_get_h1(hash_obj); */
-/*   oh_set_h1(hash_obj, new_h1); */
+/*   h1_ptr = oh_get_h1(hash_o); */
+/*   oh_set_h1(hash_o, new_h1); */
   
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    error = oh_item_insert(hash_obj, (void *) strings[i],
+    error = oh_item_insert(hash_o, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
     {
-      log_printf(g_log_obj, "(1) Error at i == %d\n", i);
+      log_printf(g_log_o, "(1) Error at i == %d\n", i);
       exit(1);
     }
   }
 
   for (i = 0; i < (NUM_STRINGS / 2); i++)
   {
-    error = oh_item_delete(hash_obj, (void *) strings[i],
+    error = oh_item_delete(hash_o, (void *) strings[i],
 				 (void *) junk);
     if (error == TRUE)
     {
-      log_printf(g_log_obj, "(2) Error at i == %d\n", i);
+      log_printf(g_log_o, "(2) Error at i == %d\n", i);
       exit(1);
     }
   }
 
   for (i = 0; i < NUM_STRINGS / 2; i++)
   {
-    error = oh_item_insert(hash_obj, (void *) strings[i],
+    error = oh_item_insert(hash_o, (void *) strings[i],
 				 (void *) &(strings[i]));
     if (error == TRUE)
     {
-      log_printf(g_log_obj, "(3) Error at i == %d\n", i);
+      log_printf(g_log_o, "(3) Error at i == %d\n", i);
       exit(1);
     }
   }
 
   for (i = 0; i < NUM_STRINGS; i++)
   {
-    error = oh_item_delete(hash_obj, (void *) strings[i],
+    error = oh_item_delete(hash_o, (void *) strings[i],
 				 (void *) junk);
     if (error == TRUE)
     {
-      log_printf(g_log_obj, "(4) Error at i == %d\n", i);
+      log_printf(g_log_o, "(4) Error at i == %d\n", i);
       exit(1);
     }
   }
 
-  error = oh_item_insert(hash_obj, (void *) strings[0],
+  error = oh_item_insert(hash_o, (void *) strings[0],
 			       (void *) &(strings[0]));
   
-  log_printf(g_log_obj, "Table size: %d\n",
-	     oh_get_size(hash_obj));
-  log_printf(g_log_obj, "Number of items: %d\n",
-	     oh_get_num_items(hash_obj));
-  log_printf(g_log_obj, "Number of invalid slots: %d\n",
-	     oh_get_num_invalid(hash_obj));
+  log_printf(g_log_o, "Table size: %d\n",
+	     oh_get_size(hash_o));
+  log_printf(g_log_o, "Number of items: %d\n",
+	     oh_get_num_items(hash_o));
+  log_printf(g_log_o, "Number of invalid slots: %d\n",
+	     oh_get_num_invalid(hash_o));
 
   for (i = 0; i < NUM_STRINGS; i++)
   {

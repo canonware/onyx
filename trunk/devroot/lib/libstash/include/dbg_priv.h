@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 14 $
- * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -88,7 +88,7 @@ struct cw_dbg_s
   cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_T_MAX + 1];
 };
 
-void dbg_build_tbl(cw_dbg_t * arg_dbg_obj);
-void dbg_recalc_fpmatch(cw_dbg_t * arg_dbg_obj);
+void dbg_build_tbl(cw_dbg_t * a_dbg_o);
+void dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o);
 
 #endif /* _DBG_PRIV_H_ */

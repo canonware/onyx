@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 36 $
- * $Date: 1998-04-19 21:27:40 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -76,13 +76,13 @@ typedef struct
   void * data;
 } cw_oh_item_t;
 
-struct oh_s
+struct cw_oh_s
 {
   cw_rwl_t rw_lock;
   cw_oh_item_t ** items;
 
-  cw_uint32_t (*base_h1)(oh_t *, void *);
-  cw_uint32_t (*curr_h1)(oh_t *, void *);
+  cw_uint32_t (*base_h1)(cw_oh_t *, void *);
+  cw_uint32_t (*curr_h1)(cw_oh_t *, void *);
 
   cw_uint32_t size;
   cw_uint32_t num_items;
@@ -111,19 +111,18 @@ struct oh_s
 #endif
 };
 
-cw_bool_t oh_coalesce_priv(oh_t * arg_oh_obj);
-cw_bool_t oh_grow_priv(oh_t * arg_oh_obj,
-			  cw_sint32_t arg_num_doublings);
-cw_bool_t oh_shrink_priv(oh_t * arg_oh_obj,
-			    cw_sint32_t arg_num_halvings);
+cw_bool_t oh_coalesce_priv(cw_oh_t * a_oh_o);
+cw_bool_t oh_grow_priv(cw_oh_t * a_oh_o,
+		       cw_sint32_t a_num_doublings);
+cw_bool_t oh_shrink_priv(cw_oh_t * a_oh_o,
+			 cw_sint32_t a_num_halvings);
 
-cw_uint32_t oh_h1_priv(oh_t * arg_oh_obj, void * arg_key);
-cw_bool_t oh_item_insert_priv(oh_t * arg_oh_obj,
-			      cw_oh_item_t * arg_item);
-cw_bool_t oh_item_search_priv(oh_t * arg_oh_obj,
-			      void * arg_key,
-			      cw_uint32_t * arg_slot);
-cw_bool_t oh_rehash_priv(oh_t * arg_oh_obj, cw_bool_t arg_force);
-
+cw_uint32_t oh_h1_priv(cw_oh_t * a_oh_o, void * a_key);
+cw_bool_t oh_item_insert_priv(cw_oh_t * a_oh_o,
+			      cw_oh_item_t * a_item);
+cw_bool_t oh_item_search_priv(cw_oh_t * a_oh_o,
+			      void * a_key,
+			      cw_uint32_t * a_slot);
+cw_bool_t oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force);
 
 #endif /* _OH_PRIV_H_ */

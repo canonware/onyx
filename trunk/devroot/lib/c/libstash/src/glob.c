@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 23 $
- * $Date: 1998-04-12 01:42:02 -0700 (Sun, 12 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -42,24 +42,24 @@
 #include <config.h>
 
 /* Globals. */
-cw_mem_t * g_mem_obj = NULL;
-cw_dbg_t * g_dbg_obj = NULL;
-cw_log_t * g_log_obj = NULL;
+cw_mem_t * g_mem_o = NULL;
+cw_dbg_t * g_dbg_o = NULL;
+cw_log_t * g_log_o = NULL;
 
 void
 glob_new()
 {
   /* Start up global modules. */
-  g_mem_obj = mem_new();
-  g_dbg_obj = dbg_new();
-  g_log_obj = log_new();
+  g_mem_o = mem_new();
+  g_dbg_o = dbg_new();
+  g_log_o = log_new();
 }
 
 void
 glob_delete()
 {
   /* Shut down global modules in reverse order. */
-  log_delete(g_log_obj);
-  dbg_delete(g_dbg_obj);
-  mem_delete(g_mem_obj);
+  log_delete(g_log_o);
+  dbg_delete(g_dbg_o);
+  mem_delete(g_mem_o);
 }

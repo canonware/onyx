@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 36 $
- * $Date: 1998-04-19 21:27:40 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -43,7 +43,7 @@
 
 #define _OH_PERF_
 
-typedef struct oh_s oh_t;
+typedef struct cw_oh_s cw_oh_t;
 
 #define oh_new _CW_NS_CMN(oh_new)
 #define oh_delete _CW_NS_CMN(oh_delete)
@@ -68,6 +68,7 @@ typedef struct oh_s oh_t;
 #define oh_item_delete _CW_NS_CMN(oh_delete)
 #define oh_item_search _CW_NS_CMN(oh_search)
 
+#define oh_item_delete_iterate _CW_NS_CMN(oh_item_delete_iterate)
 #define oh_dump _CW_NS_CMN(oh_dump)
 
 #ifdef _OH_PERF_
@@ -79,48 +80,50 @@ typedef struct oh_s oh_t;
 #  define oh_get_num_rehashes _CW_NS_CMN(oh_get_num_rehashes)
 #endif
 
-typedef cw_uint32_t oh_h1_t(oh_t *, void *);
+typedef cw_uint32_t oh_h1_t(cw_oh_t *, void *);
 
-oh_t * oh_new();
-void oh_delete(oh_t * arg_oh_obj);
-cw_bool_t oh_rehash(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_size(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_items(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_invalid(oh_t * arg_oh_obj);
+cw_oh_t * oh_new();
+void oh_delete(cw_oh_t * a_oh_o);
+cw_bool_t oh_rehash(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_size(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_items(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_invalid(cw_oh_t * a_oh_o);
 
-oh_h1_t * oh_get_h1(oh_t * arg_oh_obj);
-cw_sint32_t oh_get_base_h2(oh_t * arg_oh_obj);
-cw_sint32_t oh_get_base_shrink_point(oh_t * arg_oh_obj);
-cw_sint32_t oh_get_base_grow_point(oh_t * arg_oh_obj);
-cw_sint32_t oh_get_base_rehash_point(oh_t * arg_oh_obj);
+oh_h1_t * oh_get_h1(cw_oh_t * a_oh_o);
+cw_sint32_t oh_get_base_h2(cw_oh_t * a_oh_o);
+cw_sint32_t oh_get_base_shrink_point(cw_oh_t * a_oh_o);
+cw_sint32_t oh_get_base_grow_point(cw_oh_t * a_oh_o);
+cw_sint32_t oh_get_base_rehash_point(cw_oh_t * a_oh_o);
 
-cw_bool_t oh_set_h1(oh_t * arg_oh_obj,
-		 oh_h1_t * arg_new_h1);
-cw_bool_t oh_set_base_h2(oh_t * arg_oh_obj,
-		      cw_uint32_t arg_h2);
-cw_bool_t oh_set_base_shrink_point(oh_t * arg_oh_obj,
-				cw_sint32_t arg_shrink_point);
-cw_bool_t oh_set_base_grow_point(oh_t * arg_oh_obj,
-			      cw_sint32_t arg_grow_point);
-cw_bool_t oh_set_base_rehash_point(oh_t * arg_oh_obj,
-				cw_sint32_t arg_rehash_point);
+cw_bool_t oh_set_h1(cw_oh_t * a_oh_o,
+		    oh_h1_t * a_new_h1);
+cw_bool_t oh_set_base_h2(cw_oh_t * a_oh_o,
+			 cw_uint32_t a_h2);
+cw_bool_t oh_set_base_shrink_point(cw_oh_t * a_oh_o,
+				   cw_sint32_t a_shrink_point);
+cw_bool_t oh_set_base_grow_point(cw_oh_t * a_oh_o,
+				 cw_sint32_t a_grow_point);
+cw_bool_t oh_set_base_rehash_point(cw_oh_t * a_oh_o,
+				   cw_sint32_t a_rehash_point);
 
-cw_bool_t oh_item_insert(oh_t * arg_oh_obj, void * arg_key,
-		      void * arg_data_addr);
-cw_bool_t oh_item_delete(oh_t * arg_oh_obj, void * arg_key,
-		      void ** arg_data);
-cw_bool_t oh_item_search(oh_t * arg_oh_obj, void * arg_key,
-		      void ** arg_data);
+cw_bool_t oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
+			 void * a_data_addr);
+cw_bool_t oh_item_delete(cw_oh_t * a_oh_o, void * a_key,
+			 void ** a_data);
+cw_bool_t oh_item_search(cw_oh_t * a_oh_o, void * a_key,
+			 void ** a_data);
 
-void oh_dump(oh_t * arg_oh_obj, cw_bool_t arg_all);
+cw_bool_t oh_item_delete_iterate(cw_oh_t * a_oh_o, void ** a_key,
+				 void ** a_data);
+void oh_dump(cw_oh_t * a_oh_o, cw_bool_t a_all);
 
 #ifdef _OH_PERF_
-cw_uint32_t oh_get_num_collisions(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_inserts(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_deletes(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_grows(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_shrinks(oh_t * arg_oh_obj);
-cw_uint32_t oh_get_num_rehashes(oh_t * arg_oh_obj);
+cw_uint32_t oh_get_num_collisions(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_inserts(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_deletes(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_grows(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_shrinks(cw_oh_t * a_oh_o);
+cw_uint32_t oh_get_num_rehashes(cw_oh_t * a_oh_o);
 #endif
 
 #endif /* _OH_H_ */

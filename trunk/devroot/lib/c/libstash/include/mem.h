@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 14 $
- * $Date: 1998-03-29 05:26:20 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -51,10 +51,10 @@ typedef struct cw_mem_s cw_mem_t;
 #define mem_free _CW_NS_CMN(mem_free)
 
 cw_mem_t * mem_new();
-void mem_delete(cw_mem_t * arg_mem_obj);
-void * mem_malloc(cw_mem_t * arg_mem_obj, size_t arg_size);
-void * mem_calloc(cw_mem_t * arg_mem_obj, size_t arg_number, size_t arg_size);
-void * mem_realloc(cw_mem_t * arg_mem_obj, void * arg_ptr, size_t arg_size);
-void mem_free(cw_mem_t * arg_mem_obj, void * arg_ptr);
+void mem_delete(cw_mem_t * a_mem_o);
+void * mem_malloc(cw_mem_t * a_mem_o, size_t a_size);
+void * mem_calloc(cw_mem_t * a_mem_o, size_t a_number, size_t a_size);
+void * mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size);
+void mem_free(cw_mem_t * a_mem_o, void * a_ptr);
 
 #endif /* _MEM_H_ */

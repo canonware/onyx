@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 18 $
- * $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -95,11 +95,11 @@ dbg_new()
  *
  ****************************************************************************/
 void
-dbg_delete(cw_dbg_t * arg_dbg_obj)
+dbg_delete(cw_dbg_t * a_dbg_o)
 {
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
-  _cw_free(arg_dbg_obj);
+  _cw_free(a_dbg_o);
 }
 
 /****************************************************************************
@@ -121,19 +121,19 @@ dbg_delete(cw_dbg_t * arg_dbg_obj)
  *
  ****************************************************************************/
 cw_bool_t
-dbg_fmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
+dbg_fmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
-  if (arg_dbg_obj->is_current == FALSE)
+  if (a_dbg_o->is_current == FALSE)
   {
-    dbg_recalc_fpmatch(arg_dbg_obj);
+    dbg_recalc_fpmatch(a_dbg_o);
   }
-  if (arg_flag <= _CW_DBG_T_MAX)
+  if (a_flag <= _CW_DBG_T_MAX)
   {
-    retval = arg_dbg_obj->fmatch[arg_flag];
+    retval = a_dbg_o->fmatch[a_flag];
   }
   else
   {
@@ -162,20 +162,20 @@ dbg_fmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
  *
  ****************************************************************************/
 cw_bool_t
-dbg_pmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
+dbg_pmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   cw_bool_t retval;
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
-  if (arg_dbg_obj->is_current == FALSE)
+  if (a_dbg_o->is_current == FALSE)
   {
-    dbg_recalc_fpmatch(arg_dbg_obj);
+    dbg_recalc_fpmatch(a_dbg_o);
   }
 
-  if (arg_flag <= _CW_DBG_T_MAX)
+  if (a_flag <= _CW_DBG_T_MAX)
   {
-    retval = arg_dbg_obj->pmatch[arg_flag];
+    retval = a_dbg_o->pmatch[a_flag];
   }
   else
   {
@@ -204,21 +204,21 @@ dbg_pmatch(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
  *
  ****************************************************************************/
 cw_bool_t
-dbg_turn_on(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
+dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   cw_bool_t retval;
   cw_uint32_t x;
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
-  if (arg_flag <= _CW_DBG_T_MAX)
+  if (a_flag <= _CW_DBG_T_MAX)
   {
-    arg_dbg_obj->is_current = FALSE;
+    a_dbg_o->is_current = FALSE;
     for (x = 0; x <= _CW_DBG_C_MAX; x++)
     {
-      if (arg_dbg_obj->tbl[x][arg_flag] == TRUE)
+      if (a_dbg_o->tbl[x][a_flag] == TRUE)
       {
-	arg_dbg_obj->curr_settings[x] = TRUE;
+	a_dbg_o->curr_settings[x] = TRUE;
       }
     }
     retval = FALSE;
@@ -250,21 +250,21 @@ dbg_turn_on(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
  *
  ****************************************************************************/
 cw_bool_t
-dbg_turn_off(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
+dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
 {
   cw_bool_t retval;
   cw_uint32_t x;
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
-  if (arg_flag <= _CW_DBG_T_MAX)
+  if (a_flag <= _CW_DBG_T_MAX)
   {
-    arg_dbg_obj->is_current = FALSE;
+    a_dbg_o->is_current = FALSE;
     for (x = 0; x <= _CW_DBG_C_MAX; x++)
     {
-      if (arg_dbg_obj->tbl[x][arg_flag] == TRUE)
+      if (a_dbg_o->tbl[x][a_flag] == TRUE)
       {
-	arg_dbg_obj->curr_settings[x] = FALSE;
+	a_dbg_o->curr_settings[x] = FALSE;
       }
     }
     retval = FALSE;
@@ -296,17 +296,17 @@ dbg_turn_off(cw_dbg_t * arg_dbg_obj, cw_uint32_t arg_flag)
  *
  ****************************************************************************/
 void
-dbg_clear(cw_dbg_t * arg_dbg_obj)
+dbg_clear(cw_dbg_t * a_dbg_o)
 {
   cw_uint32_t x;
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
-  arg_dbg_obj->is_current = FALSE;
+  a_dbg_o->is_current = FALSE;
   
   for (x = 0; x <= _CW_DBG_C_MAX; x++)
   {
-    arg_dbg_obj->curr_settings[x] = FALSE;
+    a_dbg_o->curr_settings[x] = FALSE;
   }
 }
 
@@ -329,13 +329,13 @@ dbg_clear(cw_dbg_t * arg_dbg_obj)
  *
  ****************************************************************************/
 void
-dbg_build_tbl(cw_dbg_t * arg_dbg_obj)
+dbg_build_tbl(cw_dbg_t * a_dbg_o)
 {
   cw_uint32_t x, y, i;
   extern cw_sint32_t dbg_raw_tbl[];
   extern cw_sint32_t dbg_raw_on[];
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
   /* Build table. */
   for (i = 0, y = 0; y <= _CW_DBG_T_MAX; i++)
@@ -353,7 +353,7 @@ dbg_build_tbl(cw_dbg_t * arg_dbg_obj)
     {
       _cw_assert(dbg_raw_tbl[i] <= _CW_DBG_C_MAX);
 
-      arg_dbg_obj->tbl[dbg_raw_tbl[i]][y] = TRUE;
+      a_dbg_o->tbl[dbg_raw_tbl[i]][y] = TRUE;
     }
   }
 
@@ -364,9 +364,9 @@ dbg_build_tbl(cw_dbg_t * arg_dbg_obj)
 
     for (x = 0; x <= _CW_DBG_T_MAX; x++)
     {
-      if (arg_dbg_obj->tbl[x][dbg_raw_on[i]] == TRUE)
+      if (a_dbg_o->tbl[x][dbg_raw_on[i]] == TRUE)
       {
-	arg_dbg_obj->curr_settings[x] = TRUE;
+	a_dbg_o->curr_settings[x] = TRUE;
       }
     }
   }
@@ -391,12 +391,12 @@ dbg_build_tbl(cw_dbg_t * arg_dbg_obj)
  *
  ****************************************************************************/
 void
-dbg_recalc_fpmatch(cw_dbg_t * arg_dbg_obj)
+dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o)
 {
   cw_uint32_t x, y;
   cw_bool_t f, p;
   
-  _cw_check_ptr(arg_dbg_obj);
+  _cw_check_ptr(a_dbg_o);
 
   for (y = 0; y <= _CW_DBG_T_MAX; y++)
   {
@@ -405,22 +405,21 @@ dbg_recalc_fpmatch(cw_dbg_t * arg_dbg_obj)
 	   && ((f == TRUE) || (p == FALSE));
 	 x++)
     {
-      if ((arg_dbg_obj->tbl[x][y] == TRUE)
-	  && (arg_dbg_obj->curr_settings[x] == FALSE))
+      if ((a_dbg_o->tbl[x][y] == TRUE)
+	  && (a_dbg_o->curr_settings[x] == FALSE))
       {
 	f = FALSE;
       }
-      if ((arg_dbg_obj->tbl[x][y] == TRUE)
-	  && (arg_dbg_obj->curr_settings[x] == TRUE))
+      if ((a_dbg_o->tbl[x][y] == TRUE)
+	  && (a_dbg_o->curr_settings[x] == TRUE))
       {
 	p = TRUE;
       }
     }
 
-    arg_dbg_obj->fmatch[y] = f;
-    arg_dbg_obj->pmatch[y] = p;
+    a_dbg_o->fmatch[y] = f;
+    a_dbg_o->pmatch[y] = p;
   }
   
-  arg_dbg_obj->is_current = TRUE;
+  a_dbg_o->is_current = TRUE;
 }
-

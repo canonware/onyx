@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 32 $
- * Last modified: $Date: 1998-04-19 01:42:19 -0700 (Sun, 19 Apr 1998) $
+ * Current revision: $Revision: 41 $
+ * Last modified: $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -79,11 +79,6 @@
 #  include <mem.h>
 #  define _MEM_H_
 #endif
-
-/* #ifndef _RESOURCE_H_ */
-/* #  include <resource.h> */
-/* #  define _RESOURCE_H_ */
-/* #endif */
 
 /* 
  * Other project headers we don't always want to include.
@@ -149,6 +144,13 @@
 #  ifndef _MEM_PRIV_H_
 #    include <mem_priv.h>
 #    define _MEM_PRIV_H_
+#  endif
+#endif
+
+#if (defined(_INC_RES_H_) || defined(_INC_ALL_))
+#  ifndef _RES_H_
+#    include <res.h>
+#    define _RES_H_
 #  endif
 #endif
 

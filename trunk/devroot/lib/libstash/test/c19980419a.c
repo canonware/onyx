@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 34 $
- * $Date: 1998-04-19 01:44:14 -0700 (Sun, 19 Apr 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -75,40 +75,40 @@ main()
   }
   _cw_assert(list_count(list1) == NUM_ITEMS);
   
-  log_printf(g_log_obj, "hpop()ping from list1 and hpush()ing to list2\n");
+  log_printf(g_log_o, "hpop()ping from list1 and hpush()ing to list2\n");
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
     item = list_hpop(list1);
     _cw_check_ptr(item);
-    log_printf(g_log_obj, "%s\n", (char *) list_item_get(item));
+    log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
     list_hpush(list2, item);
   }
 
   _cw_assert(list_count(list1) == 0);
   _cw_assert(list_count(list2) == NUM_ITEMS);
 
-  log_printf(g_log_obj, "tpop()ping from list2 and hpush()ing to list2\n");
+  log_printf(g_log_o, "tpop()ping from list2 and hpush()ing to list2\n");
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
     item = list_tpop(list2);
     _cw_check_ptr(item);
-    log_printf(g_log_obj, "%s\n", (char *) list_item_get(item));
+    log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
     list_hpush(list2, item);
   }
 
   _cw_assert(list_count(list1) == 0);
-  log_printf(g_log_obj, "list2->count == %d\n", list_count(list2));
+  log_printf(g_log_o, "list2->count == %d\n", list_count(list2));
   _cw_assert(list_count(list2) == NUM_ITEMS);
 
-  log_printf(g_log_obj, "tpop()ping from list2 and tpush()ing to list1\n");
+  log_printf(g_log_o, "tpop()ping from list2 and tpush()ing to list1\n");
   
   for (i = 0; i < NUM_ITEMS; i++)
   {
     item = list_tpop(list2);
     _cw_check_ptr(item);
-    log_printf(g_log_obj, "%s\n", (char *) list_item_get(item));
+    log_printf(g_log_o, "%s\n", (char *) list_item_get(item));
     list_tpush(list1, item);
   }
 

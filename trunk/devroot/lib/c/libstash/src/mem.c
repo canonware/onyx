@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 15 $
- * $Date: 1998-03-29 05:26:45 -0800 (Sun, 29 Mar 1998) $
+ * $Revision: 41 $
+ * $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -90,12 +90,12 @@ mem_new()
  *
  ****************************************************************************/
 void
-mem_delete(cw_mem_t * arg_mem_obj)
+mem_delete(cw_mem_t * a_mem_o)
 {
-  _cw_check_ptr(arg_mem_obj);
+  _cw_check_ptr(a_mem_o);
 
   /* Calling free() directly since we had to bootstrap the structure. */
-  free(arg_mem_obj);
+  free(a_mem_o);
 }
 
 /****************************************************************************
@@ -117,13 +117,13 @@ mem_delete(cw_mem_t * arg_mem_obj)
  *
  ****************************************************************************/
 void *
-mem_malloc(cw_mem_t * arg_mem_obj, size_t arg_size)
+mem_malloc(cw_mem_t * a_mem_o, size_t a_size)
 {
   void * retval;
   
-  _cw_check_ptr(arg_mem_obj);
+  _cw_check_ptr(a_mem_o);
 
-  retval = malloc(arg_size);
+  retval = malloc(a_size);
   _cw_check_ptr(retval);
 
   return retval;
@@ -148,14 +148,14 @@ mem_malloc(cw_mem_t * arg_mem_obj, size_t arg_size)
  *
  ****************************************************************************/
 void *
-mem_calloc(cw_mem_t * arg_mem_obj, size_t arg_number,
-		  size_t arg_size)
+mem_calloc(cw_mem_t * a_mem_o, size_t a_number,
+		  size_t a_size)
 {
   void * retval;
 
-  _cw_check_ptr(arg_mem_obj);
+  _cw_check_ptr(a_mem_o);
 
-  retval = calloc(arg_number, arg_size);
+  retval = calloc(a_number, a_size);
   _cw_check_ptr(retval);
 
   return retval;
@@ -180,14 +180,14 @@ mem_calloc(cw_mem_t * arg_mem_obj, size_t arg_number,
  *
  ****************************************************************************/
 void *
-mem_realloc(cw_mem_t * arg_mem_obj, void * arg_ptr, size_t arg_size)
+mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size)
 {
   void * retval;
 
-  _cw_check_ptr(arg_mem_obj);
-  _cw_check_ptr(arg_ptr);
+  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_ptr);
 
-  retval = realloc(arg_ptr, arg_size);
+  retval = realloc(a_ptr, a_size);
   _cw_check_ptr(retval);
 
   return retval;
@@ -212,10 +212,10 @@ mem_realloc(cw_mem_t * arg_mem_obj, void * arg_ptr, size_t arg_size)
  *
  ****************************************************************************/
 void
-mem_free(cw_mem_t * arg_mem_obj, void * arg_ptr)
+mem_free(cw_mem_t * a_mem_o, void * a_ptr)
 {
-  _cw_check_ptr(arg_mem_obj);
-  _cw_check_ptr(arg_ptr);
+  _cw_check_ptr(a_mem_o);
+  _cw_check_ptr(a_ptr);
 
-  free(arg_ptr);
+  free(a_ptr);
 }
