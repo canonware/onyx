@@ -27,7 +27,7 @@ void	thd_delete(cw_thd_t *a_thd);
 void	*thd_join(cw_thd_t *a_thd);
 cw_thd_t *thd_self(void);
 #define	thd_yield() sched_yield()
-#define	thd_sigmask(how, set, oset) pthread_sigmask((how), (set), (oset))
+void	thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset);
 void	thd_crit_enter(void);
 void	thd_crit_leave(void);
 void	thd_single_enter(void);

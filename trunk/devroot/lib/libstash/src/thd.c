@@ -264,6 +264,29 @@ thd_self(void)
 }
 
 void
+thd_sigmask(int a_how, const sigset_t *a_set, sigset_t *r_oset)
+{
+	_cw_assert(a_how == SIG_BLOCK || a_how == SIG_UNBLOCK || a_how ==
+	    SIG_SETMASK);
+
+#ifdef _CW_THD_GENERIC_SR
+	{
+		sigset_t	set;
+
+		/*
+		 * Make a local copy of the signal mask, then modify it
+		 * appropriately to keep from breaking suspend/resume.
+		 */
+		memcpy(&set, a_set, sizeof(sigset_t));
+		sigdelset(&set, _CW_THD_SIGSR);
+		pthread_sigmask(a_how, &set, r_oset);
+	}
+#else
+	pthread_sigmask(a_how, a_set, r_oset);
+#endif
+}
+
+void
 thd_crit_enter(void)
 {
 	cw_thd_t	*thd;
