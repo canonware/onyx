@@ -45,6 +45,7 @@
 #include "ch.h"
 #include "dch.h"
 #include "pezz.h"
+#include "pool.h"
 #include "bhp.h"
 #include "res.h"
 #include "treen.h"

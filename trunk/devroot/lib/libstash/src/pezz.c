@@ -7,10 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Implementation of the pezz class.
- *
  ****************************************************************************/
 
 #include "../include/libstash/libstash.h"
@@ -33,11 +29,11 @@ pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t
 		retval = (cw_pezz_t *)_cw_malloc(sizeof(cw_pezz_t));
 		if (retval == NULL)
 			goto OOM_1;
-		bzero(retval, sizeof(cw_pezz_t));
+		memset(retval, 0, sizeof(cw_pezz_t));
 		retval->is_malloced = TRUE;
 	} else {
 		retval = a_pezz;
-		bzero(retval, sizeof(cw_pezz_t));
+		memset(retval, 0, sizeof(cw_pezz_t));
 		retval->is_malloced = FALSE;
 	}
 
@@ -156,25 +152,21 @@ pezz_delete(cw_pezz_t *a_pezz)
 
 	mtx_delete(&a_pezz->lock);
 
-#ifdef _LIBSTASH_DBG
-	a_pezz->magic = 0;
-#endif
-
 	if (a_pezz->is_malloced)
 		_cw_free(a_pezz);
+#ifdef _LIBSTASH_DBG
+	else
+		memset(a_pezz, 0x5a, sizeof(cw_pezz_t));
+#endif
 }
 
 cw_uint32_t
 pezz_get_buffer_size(cw_pezz_t *a_pezz)
 {
-	cw_uint32_t	retval;
-
 	_cw_check_ptr(a_pezz);
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
 
-	retval = a_pezz->buffer_size;
-
-	return retval;
+	return a_pezz->buffer_size;
 }
 
 void *

@@ -255,7 +255,7 @@ Pointer to a string which is used as a prefix for all output.
 .RE
 Output(s):
 .RS
-None.
+Output printed to cw_g_out.
 .RE
 Description:
 .RS

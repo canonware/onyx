@@ -528,6 +528,7 @@ l | l | l.
  mtx@libstash_mtx(3s)@Mutex.
  out@libstash_out(3s)@Output (printf(3) replacement).
  pezz@libstash_pezz(3s)@Cached memory allocation.
+ pool@libstash_pool(3s)@Cached memory allocation.
  res@libstash_res(3s)@Resource (name/value pairs).
  ring@libstash_ring(3s)@Ring (similar uses as for lists).
  rwl@libstash_rwl(3s)@Read/write lock.

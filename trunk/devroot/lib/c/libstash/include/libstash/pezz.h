@@ -63,7 +63,6 @@ typedef struct {
 	const char	*filename;
 	cw_uint32_t	line_num;
 }	cw_pezz_item_t;
-
 #endif
 
 cw_pezz_t *pezz_new(cw_pezz_t *a_pezz, cw_uint32_t a_buffer_size, cw_uint32_t

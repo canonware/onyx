@@ -1,3 +1,9 @@
+2000-07-01  Jason Evans  <jasone@canonware.com>
+
+	* : Add the pool class.  pool is similar to pezz, but each buffer
+	is malloc()ed, and cached allocations can be deallocated via
+	pool_drain().
+
 2000-06-28  Jason Evans  <jasone@canonware.com>
 
 	* src/mq.c: Significantly rework both the API and internals of the
