@@ -136,5 +136,5 @@ doc_relclean :
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
     -dir [abs_objdir]/%0html -split 5 -toc_depth 4
     -footnode -noinfo -auto_link -transparent -image_type png
-    -show_section_numbers [abs_objdir]/%0latex/%.tex;
+    [abs_objdir]/%0latex/%.tex;
 }
