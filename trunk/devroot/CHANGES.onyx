@@ -228,6 +228,8 @@
 
 2002-03-30 : Jason Evans <jasone@canonware.com>
 
+	* Onyx 3.0.2 released.
+
 	* lib/libonyx/src/systemdict.c:systemdict_dirforeach() : Use strlen()
 	  rather than the reclen field of struct dirent if there is no namlen
 	  field.  (Reported by John Liles.)
@@ -242,6 +244,10 @@
 2002-03-27 : Jason Evans <jasone@canonware.com>
 
 	* Rename the catenate operator to cat.
+
+2002-03-23 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 3.0.1 released.
 
 2002-03-22 : Jason Evans <jasone@canonware.com>
 
@@ -276,6 +282,10 @@
 	  before inserting the thd into the ring.  pthread_create() also sets
 	  it, but if only one place sets it, then there is a race between one
 	  thread setting thd->pthread and the other using it.
+
+2002-02-10 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 3.0.0 released.
 
 2002-02-07 : Jason Evans <jasone@canonware.com>
 
@@ -363,6 +373,10 @@
 
 	* bin/onyx/src/onyx.c:prompt() : Fix an out-of-bounds memory access.
 
+2001-12-24 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 2.3.1 released.
+
 2001-12-23 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/nx_l.h:nx_l_ref_iter() : Don't skip over
@@ -374,6 +388,8 @@
 	set, rather than short-circuiting after finding the first root.
 
 2001-12-21 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 2.3.0 released.
 
 	* Cookfile.in : Strip leading and trailing whitespace from CC, CPPFLAGS,
 	CFLAGS, and LDFLAGS in order to avoid argument splitting confusion.
@@ -427,6 +443,8 @@
 
 2001-11-04 : Jason Evans <jasone@canonware.com>
 
+	* Onyx 2.2.0 released.
+
 	* lib/libonyx/src/nxa.c : Rename nxa_new() and nxa_delete() to
 	nxa_l_new() and nxa_l_delete(), since the functions are not part of the
 	public API.
@@ -477,6 +495,10 @@
 	* bin/onyx/src/onyx.c:signal_handle() : Reset the terminal before
 	exiting due to a signal.
 
+2001-09-22 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 2.1.0 released.
+
 2001-09-21 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxa.c:nxa_p_gc_entry() : Only do periodic collection
@@ -508,6 +530,8 @@
 
 2001-08-21 : Jason Evans <jasone@canonware.com>
 
+	* Onyx 2.0.0 released.
+
 	* Maintain the current number of bytes allocated by the interpreter and
 	use this count for threshold-based collection.
 
@@ -528,8 +552,6 @@
 
 	* lib/libonyx/src/nxa.c:nxa_p_roots() : Don't iterate through objects
 	once a root object is found; nxa_p_mark() does that just fine.
-
-2001-08-19 : Jason Evans <jasone@canonware.com>
 
 	* Add the --disable-posix-file configure option.  This option disables
 	standard onyx file object operations, and requires that all file objects
@@ -553,6 +575,10 @@
 
 	* Add the --disable-libedit configure option, and implement rudimentary
 	interactive command line editing that does not use libedit.
+
+2001-08-01 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 1.1.0 released.
 
 2001-07-30 : Jason Evans <jasone@canonware.com>
 
@@ -652,8 +678,14 @@
 
 2001-07-18 : Jason Evans <jasone@canonware.com>
 
+	* Onyx 1.0.2 released.
+
 	* doc/Cookfile.inc : Add -local_icons flag to latex2html invocation so
 	that icons will be included in the distribution.
+
+	* Onyx 1.0.1 released (retracted).
+
+	* Onyx 1.0.0 released.
 
 2001-07-13 : Jason Evans <jasone@canonware.com>
 
