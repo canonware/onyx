@@ -220,6 +220,10 @@ AC_TRY_LINK([
    AC_MSG_ERROR(struct dirent too deviant)))
 fi
 
+if test "x$build_ncat" = "xyes" -o "x$build_proxy" = "xyes" ; then
+  AC_CHECK_FUNCS(inet_aton, AC_DEFINE(_CW_HAVE_INET_ATON))
+fi
+
 if test "x$build_onyx" = "xyes" ; then
   if test "x$prefix" = "xNONE" ; then
     _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/nxcode"

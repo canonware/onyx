@@ -1,3 +1,7 @@
+2001-07-11  Jason Evans  <jasone@canonware.com>
+
+	* configure.in: Add test for inet_aton().
+
 2001-07-10  Chris Toshok  <toshok@toshok.org>
 
 	* configure.in: add `CW_BUILD_MOD(modnxgtk, mod_nxgtk)'
