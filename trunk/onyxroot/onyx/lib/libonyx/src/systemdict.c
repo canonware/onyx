@@ -380,7 +380,8 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 #define NOPS								\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
-    nxo_dict_new(a_dict, a_nx, TRUE, NFASTOPS + NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
+    nxo_dict_new(a_dict, a_nx, TRUE,
+		 NFASTOPS + NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
 
     /* Fast operators. */
     for (i = 0; i < NFASTOPS; i++)
