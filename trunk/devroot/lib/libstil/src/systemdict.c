@@ -3920,12 +3920,10 @@ systemdict_thread(cw_stilo_t *a_thread)
 	thread = stilo_stack_under_push(ostack, stack);
 	stilo_thread_new(thread, stilo_thread_stil_get(a_thread));
 
-	/* Set up the new thread's estack. */
-	stilo = stilo_stack_push(stilo_thread_estack_get(thread));
-	stilo_dup(stilo, entry);
-
 	/* Set up the new thread's ostack. */
 	stilo_stack_copy(stilo_thread_ostack_get(thread), stack);
+	stilo = stilo_stack_push(stilo_thread_ostack_get(thread));
+	stilo_dup(stilo, entry);
 
 	/* Clean up. */
 	stilo_stack_npop(ostack, 2);

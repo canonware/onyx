@@ -77,6 +77,7 @@ stilo_threade_stiln(cw_stilo_threade_t a_threade)
 #define _CW_STILO_THREAD_NEWLINE()					\
 		newline = 1
 
+static void		stilo_p_thread_join(cw_stiloe_thread_t *a_stiloe);
 static cw_uint32_t	stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread,
     cw_stilo_threadp_t *a_threadp, cw_uint32_t a_token, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
@@ -281,6 +282,14 @@ stiloe_l_thread_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 		_cw_free(thread->tok_str);
 	}
 
+	if (thread->entry != NULL) {
+		/*
+		 * The thread wasn't joined or detached.  This will never happen
+		 * except at interpreter shutdown, so we can safely join the
+		 * thread to clean things up.
+		 */
+		stilo_p_thread_join(thread);
+	}
 	_CW_STILOE_FREE(thread);
 }
 
@@ -415,7 +424,7 @@ stilo_p_thread_entry(void *a_arg)
 	cw_stilo_thread_entry_t	*arg = (cw_stilo_thread_entry_t *)a_arg;
 
 	/* Run. */
-	stilo_thread_loop(arg->thread);
+	stilo_thread_start(arg->thread);
 
 	/* Wait to be joined or detated, if not already so. */
 	mtx_lock(&arg->lock);
@@ -507,11 +516,33 @@ stilo_thread_detach(cw_stilo_t *a_stilo)
 	mtx_unlock(&thread->entry->lock);
 }
 
+static void
+stilo_p_thread_join(cw_stiloe_thread_t *a_stiloe)
+{
+	mtx_lock(&a_stiloe->entry->lock);
+	a_stiloe->entry->joined = TRUE;
+	if (a_stiloe->entry->done) {
+		/* The thread is already done, so wake it back up. */
+		cnd_signal(&a_stiloe->entry->done_cnd);
+	}
+	/* Wait for the thread to totally go away. */
+	while (a_stiloe->entry->gone == FALSE)
+		cnd_wait(&a_stiloe->entry->join_cnd, &a_stiloe->entry->lock);
+	mtx_unlock(&a_stiloe->entry->lock);
+
+	/* Clean up. */
+	cnd_delete(&a_stiloe->entry->join_cnd);
+	cnd_delete(&a_stiloe->entry->done_cnd);
+	mtx_delete(&a_stiloe->entry->lock);
+	thd_join(a_stiloe->entry->thd);
+	_cw_free(a_stiloe->entry);
+	a_stiloe->entry = NULL;
+}
+
 void
 stilo_thread_join(cw_stilo_t *a_stilo)
 {
 	cw_stiloe_thread_t	*thread;
-	cw_stilo_thread_entry_t	*entry;
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
@@ -522,25 +553,8 @@ stilo_thread_join(cw_stilo_t *a_stilo)
 
 	_cw_check_ptr(thread->entry);
 
-	mtx_lock(&thread->entry->lock);
-	thread->entry->joined = TRUE;
-	if (thread->entry->done) {
-		/* The thread is already done, so wake it back up. */
-		cnd_signal(&thread->entry->done_cnd);
-	}
-	/* Wait for the thread to totally go away. */
-	while (thread->entry->gone == FALSE)
-		cnd_wait(&thread->entry->join_cnd, &thread->entry->lock);
-	mtx_unlock(&thread->entry->lock);
-
-	/* Clean up. */
-	cnd_delete(&thread->entry->join_cnd);
-	cnd_delete(&thread->entry->done_cnd);
-	mtx_delete(&thread->entry->lock);
-	thd_join(thread->entry->thd);
-	entry = thread->entry;
+	stilo_p_thread_join(thread);
 	stil_l_thread_remove(stilo_thread_stil_get(a_stilo), a_stilo);
-	_cw_free(entry);
 }
 
 cw_stilo_threadts_t
