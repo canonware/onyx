@@ -18,6 +18,7 @@
 #include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
+#include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_name_l.h"
 
@@ -172,11 +173,16 @@ nx_delete(cw_nx_t *a_nx)
 	_cw_dassert(a_nx->magic == _CW_NX_MAGIC);
 
 	a_nx->shutdown = TRUE;
-	nxa_delete(&a_nx->nxa);
+	/*
+	 * All objects must be destroyed before name_hash is deleted, in order
+	 * to avoid a circular shutdown dependency.
+	 */
+	nxa_l_shutdown(&a_nx->nxa);
 	dch_delete(&a_nx->name_hash);
 #ifdef _CW_THREADS
 	mtx_delete(&a_nx->name_lock);
 #endif
+	nxa_delete(&a_nx->nxa);
 
 	if (a_nx->is_malloced)
 		_cw_free(a_nx);

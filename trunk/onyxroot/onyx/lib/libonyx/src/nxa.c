@@ -179,6 +179,17 @@ nxa_delete(cw_nxa_t *a_nxa)
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
 #ifdef _CW_THREADS
+	mtx_delete(&a_nxa->lock);
+#endif
+}
+
+void
+nxa_l_shutdown(cw_nxa_t *a_nxa)
+{
+	_cw_check_ptr(a_nxa);
+	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
+
+#ifdef _CW_THREADS
 	mq_put(&a_nxa->gc_mq, NXAM_SHUTDOWN);
 
 	thd_join(a_nxa->gc_thd);
@@ -187,10 +198,6 @@ nxa_delete(cw_nxa_t *a_nxa)
 	mtx_delete(&a_nxa->seq_mtx);
 #else
 	nxa_p_collect(a_nxa);
-#endif
-
-#ifdef _CW_THREADS
-	mtx_delete(&a_nxa->lock);
 #endif
 }
 
