@@ -19,6 +19,9 @@
 #define	_CW_STILA_MAGIC		0x63935743
 #endif
 
+/* Print collection timing information if defined. */
+/*  #define	_LIBSTIL_STILA_TIME */
+
 /* Number of stack elements per memory chunk. */
 #define	_CW_STIL_STILSC_COUNT	16
 
@@ -133,8 +136,6 @@ stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 
 	mtx_lock(&a_stila->lock);
-/*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
-/*  	    "0x[p|w:8|p:0] : [i]\n", a_stiloe, a_stiloe->type); */
 	stiloe_l_color_set(a_stiloe, a_stila->white);
 	_cw_assert(stiloe_l_registered_get(a_stiloe) == FALSE);
 	_cw_assert(qr_next(a_stiloe, link) == a_stiloe);
@@ -261,6 +262,11 @@ stila_p_collect(cw_stila_t *a_stila)
 	cw_stilt_t	*stilt;
 	cw_stils_t	*stils;
 	cw_stiloe_t	*stiloe, *black, *gray, *white;
+#ifdef _LIBSTIL_STILA_TIME
+	struct timeval	before, middle, after;
+
+	gettimeofday(&before, NULL);
+#endif
 
 	mtx_lock(&a_stila->lock);
 	thd_single_enter();
@@ -629,11 +635,14 @@ stila_p_collect(cw_stila_t *a_stila)
 	thd_single_leave();
 	mtx_unlock(&a_stila->lock);
 
+#ifdef _LIBSTIL_STILA_TIME
+	gettimeofday(&middle, NULL);
+#endif
+
 	/*
 	 * Now that we can safely call code that potentially does locking, clean
 	 * up the unreferenced objects.
 	 */
-#if (1)
 	if (white != NULL) {
 		cw_stiloe_t	*p, *n;
 
@@ -646,8 +655,29 @@ stila_p_collect(cw_stila_t *a_stila)
 			p = n;
 		} while (p != white);
 	}
-#endif
 #ifdef _LIBSTIL_CONFESS
 	out_put_e(NULL, NULL, 0, __FUNCTION__, "Done collecting\n");
+#endif
+#ifdef _LIBSTIL_STILA_TIME
+	gettimeofday(&after, NULL);
+	{
+		cw_uint64_t	t1, t2, t3;
+
+		t1 = before.tv_sec;
+		t1 *= 1000000;
+		t1 += before.tv_usec;
+		
+		t2 = middle.tv_sec;
+		t2 *= 1000000;
+		t2 += middle.tv_usec;
+
+		t3 = after.tv_sec;
+		t3 *= 1000000;
+		t3 += after.tv_usec;
+
+		out_put_e(NULL, NULL, 0, __FUNCTION__,
+		    "[q] us mark&sweep + [q] us deallocate = [q] us\n",
+		    t2 - t1, t3 - t2, t3 -t1);
+	}
 #endif
 }
