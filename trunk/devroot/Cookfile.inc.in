@@ -126,16 +126,18 @@ if [not [defined LDFLAGS]] then
   echo stamp > @srcroot@/config.stamp.in;
 }
 
-[fromto %0% @srcroot@/%0%.in @cfghdrs@] : @srcroot@/config.stamp.in;
+[fromto @objroot@/%0% @srcroot@/%0%.in
+        [filter_out @objroot@/config.stamp @cfghdrs@]]
+  : @srcroot@/config.stamp.in;
 
-@objroot@/config.stamp : [fromto %0% @srcroot@/%0%.in @cfghdrs@]
+@objroot@/config.stamp : [fromto @objroot@/%0% @srcroot@/%0%.in @cfghdrs@]
                          @objroot@/config.status
 {
   @objroot@/config.status;
 }
 
 [addprefix @objroot@/ @cfgoutputs@] : [prepost @srcroot@/ .in @cfgoutputs@]
-                                      @objroot@/config.status
+                                      @objroot@/config.stamp
 {
   @objroot@/config.status;
 }
