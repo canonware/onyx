@@ -26,6 +26,10 @@
 #include <dirent.h> /* For dirforeach operator. */
 #ifdef CW_POSIX
 #include <netdb.h> /* For socket and socketpair operators. */
+#include <sys/socket.h> /* For socket and socketpair operators. */
+#ifndef CW_HAVE_SOCKLEN_T
+typedef int socklen_t;
+#endif
 #endif
 #ifdef CW_REAL
 #ifndef HAVE_ASPRINTF
@@ -1554,7 +1558,7 @@ systemdict_connect(cw_nxo_t *a_thread)
 	return;
     }
 
-    socknamelen = sizeof(socklen_t);
+    socknamelen = sizeof(sockname);
     if (getsockname(nxo_file_fd_get(sock), &sockname, &socknamelen) == -1)
     {
 	switch (errno)

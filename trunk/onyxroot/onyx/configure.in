@@ -227,6 +227,9 @@ fi
 AC_SUBST(enable_posix)
 if test "x$enable_posix" = "x1" ; then
   AC_DEFINE(CW_POSIX)
+  AC_CHECK_TYPE(socklen_t, AC_DEFINE(CW_HAVE_SOCKLEN_T), , [
+#include <sys/socket.h>
+])
 fi
 
 dnl Enable inline functions by default.
