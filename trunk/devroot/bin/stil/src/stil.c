@@ -45,6 +45,7 @@ void		envdict_init(cw_stilt_t *a_stilt, char **a_envp);
 char		*prompt(EditLine *a_el);
 cw_sint32_t	cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len,
     cw_uint8_t *r_str);
+void		usage(const char *a_progname);
 const char	*basename(const char *a_str);
 
 int
@@ -52,8 +53,18 @@ main(int argc, char **argv, char **envp)
 {
 	int		retval;
 	cw_stil_t	stil;
+	static const cw_uint8_t	version[] =
+	    "product print (, version ) print version print (.\n) print flush";
 
 	libstash_init();
+#ifdef _LIBSTIL_CONFESS
+	/*
+	 * Don't print memory leakage information, since objects are not freed
+	 * in order to make post-mortem debugging simpler.
+	 */
+	dbg_unregister(cw_g_dbg, "mem_error");
+	dbg_unregister(cw_g_dbg, "pool_error");
+#endif
 
 	/*
 	 * Do a bunch of extra setup work to hook in command editing
@@ -63,8 +74,6 @@ main(int argc, char **argv, char **envp)
 	 */
 	if (isatty(0) && argc == 1) {
 		static const cw_uint8_t	code[] =
-		    "product print (, version ) print version print (.\n)"
-		    " print flush"
 		    "/stop {} def"
 		    "/promptstring {count cvs dup length 4 add string"
 		    " dup 0 (s:) putinterval dup dup length 2 sub (> )"
@@ -84,6 +93,7 @@ main(int argc, char **argv, char **envp)
 		 * Print product and version info.  Redefine stop so that the
 		 * interpreter won't exit on error.
 		 */
+		stilt_interpret(&stilt, &stilts, version, sizeof(version) - 1);
 		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
 		stilt_flush(&stilt, &stilts);
 
@@ -109,41 +119,107 @@ main(int argc, char **argv, char **envp)
 		if (arg.buffer != NULL)
 			_cw_free(arg.buffer);
 	} else {
-		int			src_fd;
 		cw_stilo_t		*file;
 		static const cw_uint8_t	magic[] =
 		    "/#! {mark} def /!# {cleartomark} def";
+		int			c;
 
 		stil_new(&stil, NULL, NULL, NULL, NULL);
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts);
 
 		/*
-		 * Set up argv and envdict.  Since this is a non-interactive
-		 * invocation, don't include the first element of argv.
+		 * Parse command line arguments.
 		 */
-		argv_init(&stilt, argc - 1, &argv[1]);
+		c = getopt(argc, argv, "hVe:");
+		switch (c) {
+		case 'h':
+			usage(basename(argv[0]));
+			retval = 0;
+			goto RETURN;
+		case 'V':
+			stilt_interpret(&stilt, &stilts, version,
+			    sizeof(version) - 1);
+			stilt_flush(&stilt, &stilts);
+			retval = 0;
+			goto RETURN;
+		case 'e': {
+			cw_stilo_t	*string;
+			cw_uint8_t	*str;
+
+			if (argc != 3) {
+				_cw_out_put("[s]: Incorrect number of "
+				    "arguments\n", basename(argv[0]));
+				usage(basename(argv[0]));
+				retval = 1;
+				goto RETURN;
+			}
+			
+			/* Push the string onto the execution stack. */
+			string = stils_push(stilt_estack_get(&stilt));
+			stilo_string_new(string, &stil, strlen(optarg));
+			stilo_attrs_set(string, STILOA_EXECUTABLE);
+			str = stilo_string_get(string);
+			memcpy(str, optarg, stilo_string_len_get(string));
+			break;
+		}
+		case -1:
+			break;
+		default:
+			_cw_out_put("[s]: Unrecognized option\n",
+			    basename(argv[0]));
+			usage(basename(argv[0]));
+			retval = 1;
+			goto RETURN;
+		}
+
+		/*
+		 * If there is anything left on the command line, it should be
+		 * the name of a source file, followed by optional arguments.
+		 */
+		if (optind < argc) {
+			int	src_fd;
+
+			/*
+			 * Open the source file, wrap it in a stil file object,
+			 * and push it onto the execution stack.
+			 */
+			src_fd = open(argv[optind], O_RDONLY);
+			if (src_fd == -1) {
+				_cw_out_put("[s]: Error in open(\"[s]\","
+				    " O_RDONLY): [s]\n", basename(argv[0]),
+				    argv[optind], strerror(errno));
+				retval = 1;
+				goto RETURN;
+			}
+			file = stils_push(stilt_estack_get(&stilt));
+			stilo_file_new(file, &stil);
+			stilo_attrs_set(file, STILOA_EXECUTABLE);
+			stilo_file_fd_wrap(file, src_fd);
+		} else if (argc == 1) {
+			/*
+			 * No source file specified, and there there was no -e
+			 * expression specified either, so treat stdin as the
+			 * source.
+			 *
+			 * In other words, there were no arguments specified,
+			 * and this isn't a tty.
+			 */
+			file = stils_push(stilt_estack_get(&stilt));
+			stilo_dup(file, stil_stdin_get(&stil));
+			stilo_attrs_set(file, STILOA_EXECUTABLE);
+		}
+
+		/*
+		 * Set up argv and envdict.  Since this is a non-interactive
+		 * invocation, don't include all elements of argv.
+		 */
+		argv_init(&stilt, argc - optind, &argv[optind]);
 		envdict_init(&stilt, envp);
 
 		/* Create procedures to handle #! magic. */
 		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
 		stilt_flush(&stilt, &stilts);
-
-		/*
-		 * Open the source file, wrap it in a stil file object, and push
-		 * it onto the execution stack.
-		 */
-		src_fd = open(argv[1], O_RDONLY);
-		if (src_fd == -1) {
-			_cw_out_put("[s]: Error in open(): [s]\n",
-			    basename(argv[0]), strerror(errno));
-			retval = 1;
-			goto RETURN;
-		}
-		file = stils_push(stilt_estack_get(&stilt));
-		stilo_file_new(file, &stil);
-		stilo_file_fd_wrap(file, src_fd);
-		stilo_attrs_set(file, STILOA_EXECUTABLE);
 
 		/* Run the interpreter non-interactively. */
 		systemdict_start(&stilt);
@@ -397,6 +473,25 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 	RETURN:
 	return retval;
+}
+
+void
+usage(const char *a_progname)
+{
+	_cw_out_put("[s] usage:\n"
+	    "    [s]\n"
+	    "    [s] -h\n"
+	    "    [s] -V\n"
+	    "    [s] -e <expr>\n"
+	    "    [s] <file> [[<args>]\n"
+	    "\n"
+	    "    Option    | Description\n"
+	    "    ----------+------------------------------------\n"
+	    "    -h        | Print usage and exit.\n"
+	    "    -V        | Print version information and exit.\n"
+	    "    -e <expr> | Execute <expr> as stil code.\n",
+	    a_progname, a_progname, a_progname, a_progname, a_progname,
+	    a_progname);
 }
 
 /* Doesn't strip trailing '/' characters. */
