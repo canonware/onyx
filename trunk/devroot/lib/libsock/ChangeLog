@@ -1,3 +1,8 @@
+1999-03-24  Jason Evans  <jasone@canonware.com>
+
+	* src/sock.c (sock_read_noblock): Add a_max_read parameter.
+	(sock_read_block): Add a_max_read parameter.
+
 1999-03-16  Jason Evans  <jasone@canonware.com>
 
 	* bin/proxy.c : Add command line interface.  Add ability to log to

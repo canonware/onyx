@@ -197,6 +197,8 @@ sock_disconnect(cw_sock_t * a_sock);
  *
  * a_spare : Pointer to a spare cw_buf_t, to which data may be appended.
  *
+ * a_max_read : Maximum number of bytes to read into a_spare, or 0 for no limit.
+ *
  * <<< Output(s) >>>
  *
  * retval : -1 : Socket error.
@@ -210,7 +212,8 @@ sock_disconnect(cw_sock_t * a_sock);
  *
  ****************************************************************************/
 cw_sint32_t
-sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare);
+sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
+		  cw_sint32_t a_max_read);
 
 /****************************************************************************
  *
@@ -219,6 +222,8 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare);
  * a_sock : Pointer to a cw_sock_t instance.
  *
  * a_spare : Pointer to a spare cw_buf_t, to which data may be appended.
+ *
+ * a_max_read : Maximum number of bytes to read into a_spare, or 0 for no limit.
  *
  * <<< Output(s) >>>
  *
@@ -232,7 +237,8 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare);
  *
  ****************************************************************************/
 cw_sint32_t
-sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare);
+sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,
+		cw_sint32_t a_max_read);
 
 /****************************************************************************
  *

@@ -900,7 +900,7 @@ handle_client_send(void * a_arg)
 	if (buf_get_size(&buf) == 0)
 	{
 	  /* Need more data. */
-	  if (-1 == sock_read_block(&conn->client_sock, &buf))
+	  if (-1 == sock_read_block(&conn->client_sock, &buf, 0))
 	  {
 	    log_printf(conn->log, "Socket closed while parsing commands\n");
 	    parse_error = TRUE;
@@ -1009,7 +1009,7 @@ handle_client_send(void * a_arg)
    * log, then send the data on. */
   while (FALSE == conn->should_quit)
   {
-    if (-1 == sock_read_block(&conn->client_sock, &buf))
+    if (-1 == sock_read_block(&conn->client_sock, &buf, 0))
     {
       mtx_lock(&conn->lock);
       conn->should_quit = TRUE;
@@ -1090,7 +1090,7 @@ handle_client_recv(void * a_arg)
    * log, then send the data on. */
   while (FALSE == conn->should_quit)
   {
-    if ((-1 == sock_read_block(&conn->remote_sock, &buf))
+    if ((-1 == sock_read_block(&conn->remote_sock, &buf, 0))
 	|| (conn->should_quit))
     {
       mtx_lock(&conn->lock);

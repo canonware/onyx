@@ -372,7 +372,8 @@ sock_disconnect(cw_sock_t * a_sock)
 }
 
 cw_sint32_t
-sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare)
+sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare,
+		  cw_sint32_t a_max_read)
 {
   cw_sint32_t retval, size;
   
@@ -397,7 +398,14 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare)
     if (0 < size)
     {
       retval = size;
-      buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+      if (a_max_read == 0)
+      {
+	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+      }
+      else
+      {
+	buf_split(a_spare, &a_sock->in_buf, a_max_read);
+      }
 
       mtx_unlock(&a_sock->in_lock);
       
@@ -417,7 +425,7 @@ sock_read_noblock(cw_sock_t * a_sock, cw_buf_t * a_spare)
 }
 
 cw_sint32_t
-sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare)
+sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare,	cw_sint32_t a_max_read)
 {
   cw_sint32_t retval, size;
   
@@ -450,7 +458,14 @@ sock_read_block(cw_sock_t * a_sock, cw_buf_t * a_spare)
     if (0 < size)
     {
       retval = size;
-      buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+      if (a_max_read == 0)
+      {
+	buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE);
+      }
+      else
+      {
+	buf_split(a_spare, &a_sock->in_buf, a_max_read);
+      }
 
       mtx_unlock(&a_sock->in_lock);
       
