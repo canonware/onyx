@@ -12,7 +12,7 @@
 
 /* Define CW_HIST_DUMP to enable verbose internal history state dumping. */
 #ifdef CW_BUF_DUMP
-#define CW_HIST_DUMP
+/* #define CW_HIST_DUMP */
 #endif
 
 /* Buffer page size for the history buffer.  History operations have high
