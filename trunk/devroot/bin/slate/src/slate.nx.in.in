@@ -279,8 +279,8 @@ $tmark scratch marker:new def
 
 true scratch:history_setactive
 
-$disp envdict $TERM get stdin stdout display def
-disp display_start
+$disp envdict $TERM get stdin stdout display:new def
+disp:start
 
 stdin 0 setiobuf {
     redisplay
@@ -289,4 +289,4 @@ stdin 0 setiobuf {
     scratch:validate
 } loop
 
-disp display_stop
+disp:stop

@@ -29,7 +29,7 @@ MODPANE_NX_GEN = [fromto %.nx.in @objroot@/mod/modpane/nx/modpane/%.nx
                          ];
 
 MODPANE_NX = [addprefix @srcroot@/mod/modpane/nx/modpane/
-                        modpane.nx
+                        display.nx modpane.nx pane.nx
                         ];
 
 /* Modules. */

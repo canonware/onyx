@@ -20,6 +20,8 @@ globaldict $panedict dict dup begin put
 `modpane.nxm' `modpane_init' mrequire
 
 `modpane/modpane_defs.nx' require
+`modpane/display.nx' require
+`modpane/pane.nx' require
 
 # Pop panedict off dstack and restore currentlocking.
 setlocking

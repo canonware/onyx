@@ -14,25 +14,13 @@
 void
 modpane_display_init(cw_nxo_t *a_thread);
 
-/* Predicates. */
-
+/* Helper functions. */
 cw_nxn_t
-display_type(cw_nxo_t *a_nxo);
+modpane_display_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
 
-/* Handles. */
-
-/* display. */
+/* Methods. */
 void
-modpane_display(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_display_p(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_display_aux_get(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_display_aux_set(void *a_data, cw_nxo_t *a_thread);
+modpane_display_display(void *a_data, cw_nxo_t *a_thread);
 
 void
 modpane_display_size(void *a_data, cw_nxo_t *a_thread);

@@ -14,25 +14,13 @@
 void
 modpane_pane_init(cw_nxo_t *a_thread);
 
-/* Predicates. */
-
+/* Helper functions. */
 cw_nxn_t
-pane_type(cw_nxo_t *a_nxo);
+modpane_pane_p(cw_nxo_t *a_instance, cw_nxo_t *a_thread);
 
-/* Handles. */
-
-/* pane. */
+/* Methods. */
 void
-modpane_pane(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_pane_p(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_pane_aux_get(void *a_data, cw_nxo_t *a_thread);
-
-void
-modpane_pane_aux_set(void *a_data, cw_nxo_t *a_thread);
+modpane_pane_pane(void *a_data, cw_nxo_t *a_thread);
 
 void
 modpane_pane_size(void *a_data, cw_nxo_t *a_thread);
