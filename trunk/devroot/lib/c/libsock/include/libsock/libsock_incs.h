@@ -8,40 +8,16 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * The idea here is to keep cpp from having to process a header file more
- * than once, and to capture class dependencies so that it isn't necessary
- * to manually include multiple headers just to use one class.
- *
  ****************************************************************************/
 
 /*
  * System headers to always be included.
  */
 
-#ifndef _SYS_TYPES_H_
-#  include <sys/types.h>
-#  define _SYS_TYPES_H_
-#endif
+#include <sys/time.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
 
-#ifndef _SYS_TIME_H_
-#  include <sys/time.h>
-#  define _SYS_TIME_H_
-#endif
-
-/*
- * Define dependencies between the headers.  These must be listed in forward
- * dependency order.
- */
-
-#ifndef _LIBSTASH_USE_BUF
-#  define _LIBSTASH_USE_BUF
-#endif
-#ifndef _LIBSTASH_USE_MQ
-#  define _LIBSTASH_USE_MQ
-#endif
- 
 /*
  * Include libstash_r.h now so that any dependencies on its classes are
  * satisfied before continuing on.
@@ -54,22 +30,6 @@
  * example, sock.h must come before socks.h.
  */
 
-#ifndef _SOCK_H_
-#  include "sock.h"
-#  define _SOCK_H_
-#endif
- 
-#ifndef _SOCKB_H_
-#  include "sockb.h"
-#  define _SOCKB_H_
-#endif
- 
-#ifdef _LIBSOCK_USE_SOCKS
-#  ifndef _SOCKS_H_
-#    include <sys/types.h>
-#    include <sys/socket.h>
-#    include <netinet/in.h>
-#    include "socks.h"
-#    define _SOCKS_H_
-#  endif
-#endif
+#include "sock.h"
+#include "sockb.h"
+#include "socks.h"

@@ -10,7 +10,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSOCK_USE_SOCK
 #include "libsock/libsock.h"
 
 #include <fcntl.h>

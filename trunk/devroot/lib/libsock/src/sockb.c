@@ -16,11 +16,6 @@
 
 /*  #define _LIBSOCK_SOCKB_CONFESS */
 
-#define _LIBSTASH_USE_PEZZ
-#define _LIBSTASH_USE_MQ
-#include "libstash/libstash_r.h"
-
-#define _LIBSOCK_USE_SOCKB
 #include "libsock/libsock.h"
 
 #include <sys/types.h>

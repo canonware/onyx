@@ -23,7 +23,6 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#define  _LIBSOCK_USE_SOCKS
 #include "libsock/libsock.h"
 
 typedef enum

@@ -15,7 +15,6 @@
  *
  ****************************************************************************/
 
-#define _LIBSOCK_USE_SOCKS
 #include <libsock/libsock.h>
 
 void *

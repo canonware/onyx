@@ -1,3 +1,8 @@
+1999-09-30  Jason Evans  <jasone@canonware.com>
+
+	* : Remove all _LIBSTASH_USE_* and _LIBSOCK_USE_* macros.  All
+	headers are now always included when possible.
+
 1999-09-24  Jason Evans  <jasone@canonware.com>
 
 	* : Make handling of memory errors more consistent.  Never
