@@ -8209,8 +8209,8 @@ void
 systemdict_path(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *tstack, *envdict, *nxo, *tkey, *tval;
-    char *prog, *path, *rem, *elm, *buf;
-    uint32_t proglen, pathlen, buflen, len;
+    char *prog, *path, *buf;
+    uint32_t proglen, pathlen, buflen, pbeg, pend, len;
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -8241,11 +8241,8 @@ systemdict_path(cw_nxo_t *a_thread)
 	return;
     }
 
-    /* Create a '\0'-terminated copy of the path. */
-    pathlen = nxo_string_len_get(tval) + 1;
-    path = (char *) cw_malloc(pathlen);
-    memcpy(path, nxo_string_get(tval), pathlen - 1);
-    path[pathlen - 1] = '\0';
+    pathlen = nxo_string_len_get(tval);
+    path = nxo_string_get(tval);
 
     /* Create a buffer that is guaranteed to be large enough to contain the
      * catenation of a path element and the program name being searched for.
@@ -8256,20 +8253,19 @@ systemdict_path(cw_nxo_t *a_thread)
     buf = (char *) cw_malloc(buflen);
 
     /* Iterate through the path and search for the program. */
-    for (rem = path; (elm = strsep((char **) &rem, ":")) != NULL;)
+    for (pbeg = 0; pbeg < pathlen; pbeg = pend + 1)
     {
+	for (pend = pbeg; path[pend] != ':' && pend < pathlen; pend++)
+	{
+	    /* Do nothing. */
+	}
+	/* pbeg is the offset to the beginning of this path element, and pend is
+	 * the offset to the character just past the end of this path
+	 * element. */
+
 	/* Build up the path. */
-	if (rem != NULL)
-	{
-	    memcpy(buf, elm, rem - elm - 1);
-	    len = rem - elm - 1;
-	}
-	else
-	{
-	    len = strlen(elm);
-	    cw_assert(len < buflen);
-	    memcpy(buf, elm, len);
-	}
+	len = pend - pbeg;
+	memcpy(buf, &path[pbeg], len);
 	buf[len] = '/';
 	len++;
 	memcpy(&buf[len], prog, proglen);
@@ -8290,7 +8286,6 @@ systemdict_path(cw_nxo_t *a_thread)
 
     RETURN:
     cw_free(buf);
-    cw_free(path);
     nxo_stack_npop(tstack, 2);
 }
 #endif
