@@ -39,7 +39,7 @@ struct cw_nxoe_file_s
 #endif
 	FILE_SYNTHETIC
     } mode:2;
-    bool nonblocking:2/*1*/;
+    bool nonblocking:1;
 
     union
     {

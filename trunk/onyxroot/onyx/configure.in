@@ -780,8 +780,7 @@ dnl
 if test "x$lib_onyx" = "x1" ; then
   AC_CHECK_SIZEOF([int *], [4]) dnl defines SIZEOF_INT_P
 
-  AC_CHECK_HEADERS([stdbool.h], , 
-                   [AC_MSG_ERROR([Cannot build without stdbool.h])])
+  AC_HEADER_STDBOOL
 
   AC_CHECK_HEADERS([sys/socket.h netinet/in.h arpa/inet.h machine/endian.h])
 

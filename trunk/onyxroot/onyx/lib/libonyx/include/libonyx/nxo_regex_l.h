@@ -36,8 +36,8 @@ struct cw_nxoe_regex_s
 
     /* Flags used when matching that determine where in the input string to
      * start searching. */
-    bool cont:2/*1*/;
-    bool global:2/*1*/;
+    bool cont:1;
+    bool global:1;
 };
 
 #ifndef CW_USE_INLINES

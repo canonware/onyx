@@ -44,11 +44,11 @@ struct cw_thd_s
 #ifdef CW_MTHREADS
     thread_t mthread;
 #endif
-    bool suspensible:2/*1*/;
-    bool suspended:2/*1*/; /* Suspended by thd_suspend()? */
-    bool singled:2/*1*/; /* Suspended by thd_single_enter()? */
+    bool suspensible:1;
+    bool suspended:1; /* Suspended by thd_suspend()? */
+    bool singled:1; /* Suspended by thd_single_enter()? */
     qr(cw_thd_t) link;
-    bool delete:2/*1*/;
+    bool delete:1;
 };
 
 #ifdef CW_DBG

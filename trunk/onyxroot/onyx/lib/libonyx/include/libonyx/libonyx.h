@@ -130,7 +130,17 @@ extern "C" {
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#ifdef HAVE_STDBOOL_H
 #include <stdbool.h>
+#else
+#ifndef false
+#define false 0
+#endif
+#ifndef true
+#define true 1
+#endif
+typedef unsigned char bool;
+#endif
 #include <inttypes.h>
 #include <unistd.h>
 #include <limits.h>
