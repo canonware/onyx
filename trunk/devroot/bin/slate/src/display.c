@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include "../include/modslate.h"
+#include "slate.h"
 
 struct cw_display {
 	cw_uint32_t	iter;	/* For GC iteration. */
@@ -32,7 +32,7 @@ static const struct cw_slate_entry slate_display_ops[] = {
 void
 slate_display_init(cw_nxo_t *a_thread)
 {
-	slate_hooks_init(a_thread, slate_display_ops,
+	slate_ops(a_thread, slate_display_ops,
 	    (sizeof(slate_display_ops) / sizeof(struct cw_slate_entry)));
 }
 
@@ -85,9 +85,9 @@ display_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 		goto RETURN;
 	}
 
-	slate_slate_lock(NULL, NULL);
+	slate_funnel_lock(NULL);
 	delscreen(display->screen);
-	slate_slate_unlock(NULL, NULL);
+	slate_funnel_unlock(NULL);
 
 	if (display->in != NULL) {
 #ifdef _CW_DBG
@@ -158,7 +158,7 @@ display_type(cw_nxo_t *a_nxo)
 
 /* %term %infile %outfile display %=display= */
 void
-slate_display(void *a_data, cw_nxo_t *a_thread)
+slate_display(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*estack, *ostack, *tstack, *tnxo, *tag;
 	cw_nxo_t		*term, *infile, *outfile;
@@ -237,7 +237,7 @@ slate_display(void *a_data, cw_nxo_t *a_thread)
 
 /* %=display= display_start - */
 void
-slate_display_start(void *a_data, cw_nxo_t *a_thread)
+slate_display_start(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -262,7 +262,7 @@ slate_display_start(void *a_data, cw_nxo_t *a_thread)
 
 /* %=display= display_stop - */
 void
-slate_display_stop(void *a_data, cw_nxo_t *a_thread)
+slate_display_stop(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;
@@ -283,7 +283,7 @@ slate_display_stop(void *a_data, cw_nxo_t *a_thread)
 
 /* %=display= display_redisplay - */
 void
-slate_display_redisplay(void *a_data, cw_nxo_t *a_thread)
+slate_display_redisplay(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *nxo;
 	cw_nxn_t		error;

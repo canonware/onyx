@@ -75,6 +75,8 @@ enable_threads = @enable_threads@;
 enable_posix = @enable_posix@;
 enable_posix_file = @enable_posix_file@;
 enable_libedit = @enable_libedit@;
+enable_onyx = @enable_onyx@;
+enable_libonyx = @enable_libonyx@;
 with_docs = @with_docs@;
 
 BOOTSTRAP = ;

@@ -12,7 +12,7 @@
  *
  ******************************************************************************/
 
-#include "../include/modslate.h"
+#include "slate.h"
 
 struct cw_frame {
 	cw_uint32_t	iter;	/* For GC iteration. */
@@ -30,7 +30,7 @@ static const struct cw_slate_entry slate_frame_ops[] = {
 void
 slate_frame_init(cw_nxo_t *a_thread)
 {
-	slate_hooks_init(a_thread, slate_frame_ops,
+	slate_ops(a_thread, slate_frame_ops,
 	    (sizeof(slate_frame_ops) / sizeof(struct cw_slate_entry)));
 }
 
@@ -65,7 +65,7 @@ frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
 	struct cw_frame	*frame = (struct cw_frame *)a_data;
 
-	slate_slate_lock(NULL, NULL);
+	slate_funnel_lock(NULL);
 #ifdef _CW_DBG
 	{
 		int	error;
@@ -85,7 +85,7 @@ frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 	del_panel(frame->panel);
 	delwin(frame->window);
 #endif
-	slate_slate_unlock(NULL, NULL);
+	slate_funnel_unlock(NULL);
 
 	nxa_free(nx_nxa_get(a_nx), frame, sizeof(struct cw_frame));
 
@@ -126,7 +126,7 @@ frame_type(cw_nxo_t *a_nxo)
 
 /* %=display= frame %=frame= */
 void
-slate_frame(void *a_data, cw_nxo_t *a_thread)
+slate_frame(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*estack, *ostack, *tstack, *tnxo, *tag;
 	cw_nxo_t	*display;
@@ -188,7 +188,7 @@ slate_frame(void *a_data, cw_nxo_t *a_thread)
 }
 
 void
-slate_frame_focus(void *a_data, cw_nxo_t *a_thread)
+slate_frame_focus(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack, *nxo;
 	cw_nxn_t	error;

@@ -9,7 +9,7 @@
  *
  ******************************************************************************/
 
-#include "../include/modslate.h"
+#include "slate.h"
 
 struct cw_window {
 	cw_uint32_t	iter;	/* For GC iteration. */
@@ -27,7 +27,7 @@ static const struct cw_slate_entry slate_window_ops[] = {
 void
 slate_window_init(cw_nxo_t *a_thread)
 {
-	slate_hooks_init(a_thread, slate_window_ops,
+	slate_ops(a_thread, slate_window_ops,
 	    (sizeof(slate_window_ops) / sizeof(struct cw_slate_entry)));
 }
 
@@ -109,7 +109,7 @@ window_type(cw_nxo_t *a_nxo)
 
 /* %=frame= %=buffer= window %=window= */
 void
-slate_window(void *a_data, cw_nxo_t *a_thread)
+slate_window(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*estack, *ostack, *tstack, *tnxo, *tag;
 	cw_nxo_t		*frame, *buffer;
@@ -168,7 +168,7 @@ slate_window(void *a_data, cw_nxo_t *a_thread)
 
 /* %=window= window_buffer %=buffer= */
 void
-slate_window_buffer(void *a_data, cw_nxo_t *a_thread)
+slate_window_buffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *tstack, *nxo, *tnxo;
 	cw_nxn_t		error;
@@ -192,7 +192,7 @@ slate_window_buffer(void *a_data, cw_nxo_t *a_thread)
 
 /* %=window %=buffer window_setbuffer - */
 void
-slate_window_setbuffer(void *a_data, cw_nxo_t *a_thread)
+slate_window_setbuffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, *tstack, *nxo, *buffer;
 	cw_nxn_t		error;

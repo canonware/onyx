@@ -9,9 +9,13 @@
  *
  ******************************************************************************/
 
-void	slate_window_init(cw_nxo_t *a_thread);
-cw_nxn_t window_type(cw_nxo_t *a_nxo);
+#define	SLATE_ENTRY(name)	{#name, slate_##name}
 
-void	slate_window(cw_nxo_t *a_thread);
-void	slate_window_buffer(cw_nxo_t *a_thread);
-void	slate_window_setbuffer(cw_nxo_t *a_thread);
+struct cw_slate_entry {
+	const cw_uint8_t	*name;
+	cw_op_t			*op_f;
+};
+
+void	slate_ops(cw_nxo_t *a_thread, const struct cw_slate_entry *a_entries,
+    cw_uint32_t a_nentries);
+void	slate_ops_init(cw_nxo_t *a_thread);

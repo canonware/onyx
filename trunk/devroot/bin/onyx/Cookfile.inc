@@ -18,14 +18,6 @@
  * File lists.
  */
 
-/* Include files that _are_ installed. */
-{
-  local incs = ;
-  incs = [fromto % [srcdir]/bin/onyx/include/% [incs]];
-
-  INCS = [INCS] [incs];
-}
-
 /* Include files that are _not_ installed. */
 {
   local priv_incs = onyx.h
@@ -54,14 +46,6 @@ TONYX_SRCS = tonyx.c;
 TONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [TONYX_SRCS]];
 
 SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
-
-/* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
-{
-  local ctests = ;
-  ctests = [fromto % [srcdir]/bin/onyx/test/% [ctests]];
-
-  CTESTS = [CTESTS] [ctests];
-}
 
 /*
  * Onyx tests.
@@ -211,10 +195,10 @@ onyx_bootstrap : [ONYX]
 onyx : [ONYX];
 tonyx : [TONYX];
 
-onyx_install_self : [ONYX]
+onyx_install : [ONYX]
 #if [matches macho [abi]]
 /* Make sure install_name is set correctly before relinking. */
-                    install_libs
+               install_libs
 #endif
 {
   [INSTALL] -d [PREFIX]/bin;
@@ -223,8 +207,10 @@ onyx_install_self : [ONYX]
 #if [enable_libedit]
        [LIBEDIT_A]
 #endif
+#if [enable_libonyx]
 #if [matches elf [abi]]
        [RPATH][PREFIX]/lib
+#endif
 #endif
        [LDFLAGS] -lonyx
        [EXTRALIBS];
@@ -233,9 +219,6 @@ onyx_install_self : [ONYX]
   [INSTALL] -d [PREFIX]/man/man1;
   [INSTALL] -m 0444 [objdir]/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
 }
-
-onyx_install : onyx_install_self
-               libonyx_install_s /* libedit_install_s */;
 
 onyx_uninstall :
 {
@@ -265,7 +248,9 @@ onyx_distclean :
 }
 
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
+#if [enable_libonyx]
           [LIBONYX_S]
+#endif
 #if [enable_libedit]
           [LIBEDIT_A]
 #endif
@@ -276,8 +261,10 @@ onyx_distclean :
 #if [enable_libedit]
        [LIBEDIT_A]
 #endif
+#if [enable_libonyx]
 #if [matches elf [abi]]
        [RPATH][abs_objdir]/lib/libonyx/lib
+#endif
 #endif
        [LDFLAGS] -lonyx
        [EXTRALIBS];

@@ -169,29 +169,28 @@ if test "x$enable_inlines" = "x1" ; then
 fi
 ])
 
-dnl Build onyx and libonyx by default.  At a minimum, find an existing
-dnl installation.
-AC_DEFUN(CW_ENABLE_ONYX,
+dnl Build libonyx by default.  At a minimum, find an existing installation.
+AC_DEFUN(CW_ENABLE_LIBONYX,
 [
-AC_ARG_ENABLE(onyx, [  --disable-onyx          Do not build onyx],
-if test "x$enable_onyx" = "xno" ; then
-  enable_onyx="0"
+AC_ARG_ENABLE(libonyx, [  --disable-libonyx       Do not build libonyx],
+if test "x$enable_libonyx" = "xno" ; then
+  enable_libonyx="0"
 else
-  enable_onyx="1"
+  enable_libonyx="1"
 fi
 ,
-enable_onyx="1"
+enable_libonyx="1"
 )
-if test "x$enable_onyx" = "x0" ; then
+if test "x$enable_libonyx" = "x0" ; then
   AC_CHECK_HEADERS(libonyx/libonyx.h, , \
     AC_MSG_ERROR(Cannot find libonyx/libonyx.h))
   AC_CHECK_LIB(onyx, libonyx_init, LIBS="$LIBS", \
     AC_MSG_ERROR(Cannot find libonyx))
 fi
 
-AC_SUBST(enable_onyx)
-if test "x$enable_onyx" = "x1" ; then
-  AC_DEFINE(_CW_USE_ONYX)
+AC_SUBST(enable_libonyx)
+if test "x$enable_libonyx" = "x1" ; then
+  AC_DEFINE(_CW_USE_LIBONYX)
 fi
 ])
 
@@ -219,7 +218,32 @@ if test "x$enable_libedit" = "x1" ; then
 fi
 ])
 
-dnl Build slate and modslate by default.
+dnl Build onyx by default.
+AC_DEFUN(CW_ENABLE_ONYX,
+[
+AC_ARG_ENABLE(onyx, [  --disable-onyx          Do not build onyx],
+if test "x$enable_onyx" = "xno" ; then
+  enable_onyx="0"
+else
+  enable_onyx="1"
+fi
+,
+enable_onyx="1"
+)
+if test "x$enable_onyx" = "x0" ; then
+  AC_PATH_PROG(ONYX, onyx, , $PATH)
+  if test "x$ONYX" = "x" ; then
+    AC_MSG_ERROR(Cannot find onyx)
+  fi
+fi
+
+AC_SUBST(enable_onyx)
+if test "x$enable_onyx" = "x1" ; then
+  AC_DEFINE(_CW_USE_ONYX)
+fi
+])
+
+dnl Build slate by default.
 AC_DEFUN(CW_ENABLE_SLATE,
 [
 AC_ARG_ENABLE(slate, [  --disable-slate         Do not build slate],

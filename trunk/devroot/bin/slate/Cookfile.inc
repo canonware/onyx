@@ -18,19 +18,25 @@
  * File lists.
  */
 
+/* Include files that are _not_ installed. */
+{
+  local priv_incs = buf.h buffer.h display.h frame.h funnel.h hist.h slate.h
+                    slate_ops.h window.h;
+  priv_incs = [fromto % [srcdir]/bin/slate/include/% [priv_incs]];
+  priv_incs = [priv_incs] [objdir]/bin/slate/include/slate_defs.h;
+
+  local priv_cincs = ;
+  prix_cincs = [fromto % [srcdir]/bin/slate/src/% [priv_cincs]];
+
+  PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
+}
+
 /* Source files. */
-SLATE_SRCS = slate.nx;
+SLATE_SRCS = buf.c buffer.c display.c frame.c funnel.c hist.c slate.c
+             slate_ops.c window.c;
 SLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [SLATE_SRCS]];
 
-/*
- * Onyx tests.
- */
-{
-  local otests = ;
-  otests = [fromto % [srcdir]/bin/slate/test/% [otests]];
-
-  OTESTS = [OTESTS] [otests];
-}
+SRCS = [SRCS] [SLATE_SRCS];
 
 /* LaTeX source files. */
 {
@@ -50,30 +56,26 @@ BINS = [BINS] [SLATE];
 
 slate : [SLATE];
 
-slate_install_self :
+slate_install : [SLATE]
+#if [matches macho [abi]]
+/* Make sure install_name is set correctly before relinking. */
+                install_libs
+#endif
 {
   [INSTALL] -d [PREFIX]/bin;
 
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo \"[srcdir]/bin/slate/src/slate.nx --> [PREFIX]/bin/slate\"
-
-echo \"#![PREFIX]/bin/onyx\" > [PREFIX]/bin/slate
-echo \"!#\" >> [PREFIX]/bin/slate
-[CAT] [srcdir]/bin/slate/src/slate.nx >> [PREFIX]/bin/slate;
-chmod u+x [PREFIX]/bin/slate;
-dataend
-
+  [CC] [A_CFLAGS] -o [PREFIX]/bin/slate
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+#if [matches elf [abi]]
+       [RPATH][PREFIX]/lib
+#endif
+       [LDFLAGS] -lonyx
+       [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/slate;
 
 /*  [INSTALL] -d [PREFIX]/man/man1;
   [INSTALL] -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1; */
 }
-
-slate_install : slate_install_self
-                onyx_install modslate_install;
 
 slate_uninstall :
 {
@@ -95,18 +97,25 @@ slate_distclean :
  * Dependencies.
  */
 
-[objdir]/bin/slate/bin/% : [srcdir]/bin/slate/src/%.nx [TONYX] [MODSLATE]
+[SLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+#if [enable_libonyx]
+          [LIBONYX_S]
+#endif
+#if [enable_libedit]
+          [LIBEDIT_A]
+#endif
   set mkdir
 {
-  [SHELL] -e;
-data
-#![SHELL]
-
-echo \"[srcdir]/bin/slate/src/%.nx --> [target]\"
-
-echo \"#![abs_objdir]/[TONYX]\" > [target]
-echo \"!#\" >> [target]
-[CAT] [srcdir]/bin/slate/src/%.nx >> [target];
-chmod u+x [target];
-dataend
+  [CC] [A_CFLAGS] -o [target]
+       [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
+#if [enable_libedit]
+       [LIBEDIT_A]
+#endif
+#if [enable_libonyx]
+#if [matches elf [abi]]
+       [RPATH][abs_objdir]/lib/libonyx/lib
+#endif
+#endif
+       [LDFLAGS] -lonyx
+       [EXTRALIBS];
 }
