@@ -99,13 +99,14 @@ main()
     _cw_assert(2 == ch_count(ch));
     
     _cw_assert(FALSE == ch_remove(ch, c, (void **) &k, (void **) &v));
-    _cw_assert(c == k);
-    _cw_assert(c == v);
+    _cw_assert(d == k);
+    _cw_assert(d == v);
     _cw_assert(1 == ch_count(ch));
 
-    _cw_assert(TRUE == ch_remove(ch, c, NULL, NULL));
+    _cw_assert(FALSE == ch_remove(ch, c, NULL, NULL));
+    _cw_assert(0 == ch_count(ch));
     
-    _cw_assert(FALSE == ch_remove(ch, d, NULL, NULL));
+    _cw_assert(TRUE == ch_remove(ch, d, NULL, NULL));
     _cw_assert(0 == ch_count(ch));
     
     _cw_assert(TRUE == ch_remove(ch, a, NULL, NULL));
@@ -143,7 +144,7 @@ main()
     _cw_assert(b == v);
     
     _cw_assert(FALSE == ch_search(ch, c, (void **) &v));
-    _cw_assert(c == v);
+    _cw_assert(d == v);
     
     _cw_assert(FALSE == ch_search(ch, d, (void **) &v));
     _cw_assert(d == v);

@@ -205,7 +205,7 @@ ch_remove(cw_ch_t * a_ch, const void * a_search_key, void ** r_key,
     chi = (cw_chi_t *) ring_get_data(t_ring);
 
     /* Is this the chi we want? */
-    if (a_search_key == chi->key)
+    if (TRUE == a_ch->key_comp(a_search_key, chi->key))
     {
       /* Detach from ch-wide ring. */
       if (a_ch->chi_ring == &chi->ch_link)
@@ -289,7 +289,7 @@ ch_search(cw_ch_t * a_ch, const void * a_key, void ** r_data)
     chi = (cw_chi_t *) ring_get_data(t_ring);
 
     /* Is this the chi we want? */
-    if (a_key == chi->key)
+    if (TRUE == a_ch->key_comp(a_key, chi->key))
     {
       if (NULL != r_data)
       {
