@@ -213,7 +213,7 @@ docs_relclean :
   set mkdir
 {
   [LATEX2HTML] -init_file [srcdir]/%0latex/.latex2html-init
-    -dir [abs_objdir]/%0html -split 4 -toc_depth 4 -show_section_numbers
+    -dir [abs_objdir]/%0html -split 5 -toc_depth 4 -show_section_numbers
     -footnode -noinfo -auto_link -transparent -image_type png -local_icons
     [abs_objdir]/%0latex/%.tex;
   /*
