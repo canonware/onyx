@@ -16,7 +16,7 @@
 /* Initial size of dictionaries created with the dict operator. */
 #define	_CW_SYSTEMDICT_DICT_SIZE	16
 
-#define soft_operator(a_str) do {					\
+#define soft_code(a_str) do {					\
 	cw_stilts_t	stilts;						\
 	static const cw_uint8_t	code[] = (a_str);			\
 									\
@@ -100,8 +100,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(ge),
 	ENTRY(get),
 	ENTRY(getinterval),
-	ENTRY(globaldict),
 	ENTRY(gt),
+	ENTRY(handleerror),
 	ENTRY(if),
 	ENTRY(ifelse),
 	ENTRY(index),
@@ -167,7 +167,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	{STILN_sym_lb, systemdict_mark},
 	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
-	ENTRY(systemdict),
 	ENTRY(timedwait),
 	ENTRY(token),
 	ENTRY(true),
@@ -194,10 +193,11 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_uint32_t	i;
 	cw_stilo_t	name, operator;
 
+#define	NEXTRA	2
 #define NENTRIES							\
-	((sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry)))
+	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
-	stilo_dict_new(a_dict, a_stilt, NENTRIES);
+	stilo_dict_new(a_dict, a_stilt, NENTRIES + NEXTRA);
 
 	for (i = 0; i < NENTRIES; i++) {
 		stilo_name_new(&name, a_stilt,
@@ -208,7 +208,28 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 
 		stilo_dict_def(a_dict, a_stilt, &name, &operator);
 	}
+
+	/* Initialize entries that are not operators. */
+	stilo_name_new(&name, a_stilt, stiln_str(STILN_globaldict),
+	    stiln_len(STILN_globaldict), TRUE);
+	stilo_dup(&operator, stilt_globaldict_get(a_stilt));
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	stilo_name_new(&name, a_stilt, stiln_str(STILN_systemdict),
+	    stiln_len(STILN_systemdict), TRUE);
+	stilo_dup(&operator, stilt_systemdict_get(a_stilt));
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+#ifdef _LIBSTIL_DBG
+	if (stilo_dict_count(a_dict) != NENTRIES + NEXTRA) {
+		_cw_out_put_e("stilo_dict_count(a_dict) != NENTRIES + NEXTRA"
+		    " ([i] != [i])\n", stilo_dict_count(a_dict), NENTRIES +
+		    NEXTRA);
+		_cw_error("Adjust NEXTRA");
+	}
+#endif
 #undef NENTRIES
+#undef NEXTRA
 }
 
 void
@@ -272,7 +293,7 @@ systemdict_aload(cw_stilt_t *a_stilt)
 void
 systemdict_anchorsearch(cw_stilt_t *a_stilt)
 {
-	soft_operator("
+	soft_code("
 %/anchorsearch
 %{
   exch dup 3 1 roll % Make a copy of the original string.
@@ -919,7 +940,7 @@ systemdict_executive(cw_stilt_t *a_stilt)
 	tstack = stilt_tstack_get(a_stilt);
 
 	/* Create a procedure that we can execute again and again. */
-	soft_operator("{//stdin 128 //string //readstring //cvx //exec}");
+	soft_code("{//stdin 128 //string //readstring //cvx //exec}");
 	tstilo = stils_push(tstack, a_stilt);
 	stilo_dup(tstilo, stils_get(ostack, a_stilt));
 	stils_pop(ostack, a_stilt);
@@ -1403,21 +1424,43 @@ systemdict_getinterval(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_globaldict(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	stilo = stils_push(ostack, a_stilt);
-	stilo_dup(stilo, stilt_globaldict_get(a_stilt));
-}
-
-void
 systemdict_gt(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_handleerror(cw_stilt_t *a_stilt)
+{
+	cw_stils_t	*estack, *tstack;
+	cw_stilo_t	*key, *errordict, *handleerror;
+
+	estack = stilt_estack_get(a_stilt);
+	tstack = stilt_tstack_get(a_stilt);
+
+	/* Get errordict. */
+	errordict = stils_push(tstack, a_stilt);
+	key = stils_push(tstack, a_stilt);
+	stilo_name_new(key, a_stilt, stiln_str(STILN_errordict),
+	    stiln_len(STILN_errordict), TRUE);
+	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
+		stils_npop(tstack, a_stilt, 2);
+		xep_throw(_CW_STILX_ERRORDICT);
+	}
+
+	/* Get handleerror from errordict and push it onto estack. */
+	handleerror = stils_push(estack, a_stilt);
+	stilo_name_new(key, a_stilt, stiln_str(STILN_handleerror),
+	    stiln_len(STILN_handleerror), TRUE);
+	if (stilo_dict_lookup(errordict, a_stilt, key, handleerror)) {
+		stils_pop(estack, a_stilt);
+		stils_npop(tstack, a_stilt, 2);
+		xep_throw(_CW_STILX_ERRORDICT);
+	}
+	stils_npop(tstack, a_stilt, 2);
+
+	/* Execute handleerror. */
+	stilt_loop(a_stilt);
 }
 
 void
@@ -1741,19 +1784,19 @@ systemdict_print(cw_stilt_t *a_stilt)
 void
 systemdict_product(cw_stilt_t *a_stilt)
 {
-	soft_operator("`Canonware stil'");
+	soft_code("`Canonware stil'");
 }
 
 void
 systemdict_prompt(cw_stilt_t *a_stilt)
 {
-	soft_operator("promptstring print flush");
+	soft_code("promptstring print flush");
 }
 
 void
 systemdict_promptstring(cw_stilt_t *a_stilt)
 {
-	soft_operator("`s> '");
+	soft_code("`s> '");
 }
 
 void
@@ -2112,7 +2155,7 @@ systemdict_roll(cw_stilt_t *a_stilt)
 void
 systemdict_run(cw_stilt_t *a_stilt)
 {
-	soft_operator("`r' file cvx exec");
+	soft_code("`r' file cvx exec");
 }
 
 void
@@ -2230,25 +2273,7 @@ systemdict_start(cw_stilt_t *a_stilt)
 	xep_catch(_CW_STILX_STOP) {
 		xep_handled();
 
-		soft_operator("
-$error begin
-`newerror: ' print
-newerror ==
-`errorname: ' print
-errorname ==
-`recordstacks: ' print
-recordstacks ==
-`command: ' print
-//command ==
-
-`ostack: ' print
-ostack ==
-`estack: ' print
-estack ==
-`dstack: ' print
-dstack ==
-end
-");
+		soft_code("handleerror");
 /*  		stilt_loop(a_stilt); */
 	}
 	/* XXX Set up exception handling. */
@@ -2474,18 +2499,6 @@ systemdict_sym_rb(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_systemdict(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack;
-	cw_stilo_t	*stilo;
-
-	ostack = stilt_ostack_get(a_stilt);
-
-	stilo = stils_push(ostack, a_stilt);
-	stilo_dup(stilo, stilt_systemdict_get(a_stilt));
-}
-
-void
 systemdict_timedwait(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -2547,7 +2560,7 @@ systemdict_usertime(cw_stilt_t *a_stilt)
 void
 systemdict_version(cw_stilt_t *a_stilt)
 {
-	soft_operator("`" _LIBSTIL_VERSION "'");
+	soft_code("`" _LIBSTIL_VERSION "'");
 }
 
 void
