@@ -995,10 +995,10 @@ The following documents the classes that are built into Onyx.
 
 \input{@abs_srcroot@/doc/latex/onyx/lang_class_vclass}
 \input{@abs_srcroot@/doc/latex/onyx/lang_class_mclass}
-\input{@abs_srcroot@/doc/latex/onyx/lang_class_module}
+\input{@abs_objroot@/doc/latex/onyx/lang_class_module}
 
 \section{Module reference}
 
 The following documents the modules that are provided with Onyx.
 
-\input{@abs_srcroot@/mod/modclopt/doc/latex/manual}
+\input{@abs_objroot@/mod/modclopt/doc/latex/manual}

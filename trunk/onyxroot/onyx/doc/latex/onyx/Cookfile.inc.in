@@ -23,18 +23,18 @@
 ONYX_TEX_SRCS = [addprefix @srcroot@/doc/latex/onyx/
 
                            front.tex back.tex lang_class_mclass.tex
-                           lang_class_module.tex lang_class_vclass.tex
-                           lang_dict_currenterror.tex lang_dict_envdict.tex
-                           lang_dict_errordict.tex lang_dict_gcdict.tex
-                           lang_dict_globaldict.tex lang_dict_onyxdict.tex
-                           lang_dict_outputsdict.tex lang_dict_sprintsdict.tex
-                           lang_dict_systemdict.tex lang_dict_threaddict.tex
-                           lang_dict_threadsdict.tex lang_dict_userdict.tex
-                           modfoo.nx module_dep_load.out module_mdef.out tut.tex
+                           lang_class_vclass.tex lang_dict_currenterror.tex
+                           lang_dict_envdict.tex lang_dict_errordict.tex
+                           lang_dict_gcdict.tex lang_dict_globaldict.tex
+                           lang_dict_onyxdict.tex lang_dict_outputsdict.tex
+                           lang_dict_sprintsdict.tex lang_dict_systemdict.tex
+                           lang_dict_threaddict.tex lang_dict_threadsdict.tex
+                           lang_dict_userdict.tex modfoo.nx module_dep_load.out
+                           module_mdef.out tut.tex
 
                 ]
                 [addprefix @objroot@/doc/latex/onyx/
-                           lang.tex onyx.tex]
+                           lang.tex lang_class_module.tex onyx.tex]
                 ;
 
 /* xfig source files. */
