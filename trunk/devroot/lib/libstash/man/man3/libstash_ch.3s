@@ -225,7 +225,7 @@ Output(s):
 .RS
 FALSE: Success.
 .br
-TRUE: Memory allocation error.
+TRUE: Memory allocation error.  Cannot occur if (a_chi != NULL).
 .RE
 .RE
 Description:
