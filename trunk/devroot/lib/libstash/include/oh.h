@@ -60,35 +60,35 @@ struct cw_oh_s
   cw_uint64_t num_shrinks;
 };
 
-#define oh_new _CW_NS_ANY(oh_new)
-#define oh_delete _CW_NS_ANY(oh_delete)
-#define oh_get_size _CW_NS_ANY(oh_get_size)
-#define oh_get_num_items _CW_NS_ANY(oh_get_num_items)
+#define oh_new _CW_NS_STASH(oh_new)
+#define oh_delete _CW_NS_STASH(oh_delete)
+#define oh_get_size _CW_NS_STASH(oh_get_size)
+#define oh_get_num_items _CW_NS_STASH(oh_get_num_items)
 
-#define oh_get_base_size _CW_NS_ANY(oh_get_base_size)
-#define oh_get_base_h2 _CW_NS_ANY(oh_get_base_h2)
-#define oh_get_base_shrink_point _CW_NS_ANY(oh_get_base_shrink_point)
-#define oh_get_base_grow_point _CW_NS_ANY(oh_get_base_grow_point)
+#define oh_get_base_size _CW_NS_STASH(oh_get_base_size)
+#define oh_get_base_h2 _CW_NS_STASH(oh_get_base_h2)
+#define oh_get_base_shrink_point _CW_NS_STASH(oh_get_base_shrink_point)
+#define oh_get_base_grow_point _CW_NS_STASH(oh_get_base_grow_point)
 
-#define oh_set_h1 _CW_NS_ANY(oh_set_h1)
-#define oh_set_key_compare _CW_NS_ANY(oh_set_key_compare)
-#define oh_set_base_h2 _CW_NS_ANY(oh_set_base_h2)
-#define oh_set_base_shrink_point _CW_NS_ANY(oh_set_base_shrink_point)
-#define oh_set_base_grow_point _CW_NS_ANY(oh_set_base_grow_point)
+#define oh_set_h1 _CW_NS_STASH(oh_set_h1)
+#define oh_set_key_compare _CW_NS_STASH(oh_set_key_compare)
+#define oh_set_base_h2 _CW_NS_STASH(oh_set_base_h2)
+#define oh_set_base_shrink_point _CW_NS_STASH(oh_set_base_shrink_point)
+#define oh_set_base_grow_point _CW_NS_STASH(oh_set_base_grow_point)
 
-#define oh_item_insert _CW_NS_ANY(oh_item_insert)
-#define oh_item_delete _CW_NS_ANY(oh_item_delete)
-#define oh_item_search _CW_NS_ANY(oh_item_search)
+#define oh_item_insert _CW_NS_STASH(oh_item_insert)
+#define oh_item_delete _CW_NS_STASH(oh_item_delete)
+#define oh_item_search _CW_NS_STASH(oh_item_search)
 
-#define oh_item_get_iterate _CW_NS_ANY(oh_item_get_iterate)
-#define oh_item_delete_iterate _CW_NS_ANY(oh_item_delete_iterate)
-#define oh_dump _CW_NS_ANY(oh_dump)
+#define oh_item_get_iterate _CW_NS_STASH(oh_item_get_iterate)
+#define oh_item_delete_iterate _CW_NS_STASH(oh_item_delete_iterate)
+#define oh_dump _CW_NS_STASH(oh_dump)
 
-#define oh_get_num_collisions _CW_NS_ANY(oh_get_num_collisions)
-#define oh_get_num_inserts _CW_NS_ANY(oh_get_num_inserts)
-#define oh_get_num_deletes _CW_NS_ANY(oh_get_num_deletes)
-#define oh_get_num_grows _CW_NS_ANY(oh_get_num_grows)
-#define oh_get_num_shrinks _CW_NS_ANY(oh_get_num_shrinks)
+#define oh_get_num_collisions _CW_NS_STASH(oh_get_num_collisions)
+#define oh_get_num_inserts _CW_NS_STASH(oh_get_num_inserts)
+#define oh_get_num_deletes _CW_NS_STASH(oh_get_num_deletes)
+#define oh_get_num_grows _CW_NS_STASH(oh_get_num_grows)
+#define oh_get_num_shrinks _CW_NS_STASH(oh_get_num_shrinks)
 
 /* Typedefs to allow easy function pointer passing. */
 typedef cw_uint64_t oh_h1_t(cw_oh_t *, void *);

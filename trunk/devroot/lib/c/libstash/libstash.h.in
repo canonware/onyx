@@ -12,116 +12,116 @@
  *
  ****************************************************************************/
 
-#ifndef _LIBSTASH_H_
-#  define _LIBSTASH_H_
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#ifndef _LIBSTASH_H_A_
+#  define _LIBSTASH_H_A_
 
 #define _LIBSTASH_VERSION_ <Version>
 
 /*
  * Various macros possibly defined by configure.
  */
-#undef _CW_OS_FREEBSD
-#undef _CW_OS_LINUX
-#undef _CW_OS_SOLARIS
+#  undef _CW_OS_FREEBSD
+#  undef _CW_OS_LINUX
+#  undef _CW_OS_SOLARIS
 
-#undef SIZEOF_SIGNED_CHAR
-#undef SIZEOF_UNSIGNED_CHAR
-#undef SIZEOF_SIGNED_SHORT
-#undef SIZEOF_UNSIGNED_SHORT
-#undef SIZEOF_INT
-#undef SIZEOF_UNSIGNED
-#undef SIZEOF_LONG
-#undef SIZEOF_UNSIGNED_LONG
-#undef SIZEOF_LONG_LONG
-#undef SIZEOF_UNSIGNED_LONG_LONG
-#undef SIZEOF_FLOAT
-#undef SIZEOF_DOUBLE
-#undef SIZEOF_LONG_DOUBLE
-#undef SIZEOF_INT_P
+#  undef SIZEOF_SIGNED_CHAR
+#  undef SIZEOF_UNSIGNED_CHAR
+#  undef SIZEOF_SIGNED_SHORT
+#  undef SIZEOF_UNSIGNED_SHORT
+#  undef SIZEOF_INT
+#  undef SIZEOF_UNSIGNED
+#  undef SIZEOF_LONG
+#  undef SIZEOF_UNSIGNED_LONG
+#  undef SIZEOF_LONG_LONG
+#  undef SIZEOF_UNSIGNED_LONG_LONG
+#  undef SIZEOF_FLOAT
+#  undef SIZEOF_DOUBLE
+#  undef SIZEOF_LONG_DOUBLE
+#  undef SIZEOF_INT_P
 
 /*
  * Global typedefs.
  */
 
-#if (SIZEOF_SIGNED_CHAR == 1)
-#  define _TYPE_SINT8_DEFINED
+#  if (SIZEOF_SIGNED_CHAR == 1)
+#    define _TYPE_SINT8_DEFINED
 typedef signed char cw_sint8_t;
-#endif
+#  endif
 
-#if (SIZEOF_SIGNED_CHAR == 1)
-#  define _TYPE_UINT8_DEFINED
+#  if (SIZEOF_SIGNED_CHAR == 1)
+#    define _TYPE_UINT8_DEFINED
 typedef unsigned char cw_uint8_t;
-#endif
+#  endif
 
-#if (SIZEOF_SIGNED_SHORT == 2)
-#  define _TYPE_SINT16_DEFINED
+#  if (SIZEOF_SIGNED_SHORT == 2)
+#    define _TYPE_SINT16_DEFINED
 typedef signed short cw_sint16_t;
-#endif
+#  endif
 
-#if (SIZEOF_UNSIGNED_SHORT == 2)
-#  define _TYPE_UINT16_DEFINED
+#  if (SIZEOF_UNSIGNED_SHORT == 2)
+#    define _TYPE_UINT16_DEFINED
 typedef unsigned short cw_uint16_t;
-#endif
+#  endif
 
-#if (SIZEOF_INT == 4)
-#  define _TYPE_SINT32_DEFINED
+#  if (SIZEOF_INT == 4)
+#    define _TYPE_SINT32_DEFINED
 typedef int cw_sint32_t;
-#endif
+#  endif
 
-#if (SIZEOF_UNSIGNED == 4)
-#  define _TYPE_UINT32_DEFINED
+#  if (SIZEOF_UNSIGNED == 4)
+#    define _TYPE_UINT32_DEFINED
 typedef unsigned cw_uint32_t;
-#endif
+#  endif
 
-#if (SIZEOF_LONG == 8)
-#  define _TYPE_SINT64_DEFINED
+#  if (SIZEOF_LONG == 8)
+#    define _TYPE_SINT64_DEFINED
 typedef long cw_sint64_t;
-#endif
+#  endif
 
-#if (SIZEOF_UNSIGNED_LONG == 8)
-#  define _TYPE_UINT64_DEFINED
+#  if (SIZEOF_UNSIGNED_LONG == 8)
+#    define _TYPE_UINT64_DEFINED
 typedef unsigned long cw_uint64_t;
-#endif
+#  endif
 
-#if (SIZEOF_LONG_LONG == 8)
-#  define _TYPE_SINT64_DEFINED
+#  if (SIZEOF_LONG_LONG == 8)
+#    define _TYPE_SINT64_DEFINED
 typedef long long cw_sint64_t;
-#endif
+#  endif
 
-#if (SIZEOF_UNSIGNED_LONG_LONG == 8)
-#  define _TYPE_UINT64_DEFINED
+#  if (SIZEOF_UNSIGNED_LONG_LONG == 8)
+#    define _TYPE_UINT64_DEFINED
 typedef unsigned long long cw_uint64_t;
-#endif
+#  endif
 
-#if (SIZEOF_FLOAT == 4)
-#  define _TYPE_FLOAT4_DEFINED
+#  if (SIZEOF_FLOAT == 4)
+#    define _TYPE_FLOAT4_DEFINED
 typedef float cw_float4_t;
-#endif
+#  endif
 
-#if (SIZEOF_DOUBLE == 8)
-#  define _TYPE_FLOAT8_DEFINED
+#  if (SIZEOF_DOUBLE == 8)
+#    define _TYPE_FLOAT8_DEFINED
 typedef double cw_float8_t;
-#endif
+#  endif
 
-#if (SIZEOF_LONG_DOUBLE == 12)
-#  define _TYPE_FLOAT12_DEFINED
+#  if (SIZEOF_LONG_DOUBLE == 12)
+#    define _TYPE_FLOAT12_DEFINED
 typedef long double cw_float12_t;
-#elif (SIZEOF_LONG_DOUBLE == 16)
+#  elif (SIZEOF_LONG_DOUBLE == 16)
 #  define _TYPE_FLOAT16_DEFINED
 typedef long double cw_float16_t;
-#endif
+#  endif
 
-#if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
+#  if (!defined(_TYPE_SINT8_DEFINED) || !defined(_TYPE_UINT8_DEFINED) \
   || !defined(_TYPE_SINT16_DEFINED) || !defined(_TYPE_UINT16_DEFINED) \
   || !defined(_TYPE_SINT32_DEFINED) || !defined(_TYPE_UINT32_DEFINED) \
   || !defined(_TYPE_SINT64_DEFINED) || !defined(_TYPE_UINT64_DEFINED) \
   || !defined(_TYPE_FLOAT4_DEFINED) || !defined(_TYPE_FLOAT8_DEFINED))
-#  error "Lacking mandatory typedefs"
-#endif
+#    error "Lacking mandatory typedefs"
+#  endif
 
 typedef enum
 {
@@ -133,22 +133,28 @@ typedef enum
  * Namespace setup.
  */
 
-#  define _CW_PREF _libstash_
+#  define _CW_STASH_PREFIX _libstash_
 
 #  define _cw_ns_glue(x,y,z) x##y##z
 #  define _cw_ns_xglue(x,y,z) _cw_ns_glue(x,y,z)
 
 /* Create one of these for each namespace. */
-#  define _CW_NS_ANY(x) _cw_ns_xglue(_CW_PREF,,x)
+#  define _CW_NS_STASH(x) _cw_ns_xglue(_CW_STASH_PREFIX,,x)
 
 /*
  * Project headers to always be included.
  */
 
-#  ifndef _STASH_INCS_H_
-#    include "stash_incs.h"
-#    define _STASH_INCS_H_
-#  endif
+#endif /* _LIBSTASH_H_A_ */
+
+/* This needs to be done every time this file is included, in case both
+ * libstash.h and, say, libsqrl.h are included.  Unfortunately, it has to be in
+ * the middle of this file because what follows depends on stuff that is
+ * included in/by stash_incs.h. */
+#include "stash_incs.h"
+
+#ifndef _LIBSTASH_H_B_
+#  define _LIBSTASH_H_B_
 
 /*
  * Global variables.
@@ -165,8 +171,8 @@ extern cw_log_t * g_log_o;
 #  define _cw_realloc(a, b) mem_realloc(g_mem_o, a, b)
 #  define _cw_free(a) mem_free(g_mem_o, a)
 
+#endif /* _LIBSTASH_H_B_ */
+
 #ifdef __cplusplus
 };
 #endif
-
-#endif /* _LIBSTASH_H_ */

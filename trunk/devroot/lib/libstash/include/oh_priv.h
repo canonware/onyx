@@ -14,13 +14,13 @@
  *
  ****************************************************************************/
 
-#define oh_p_grow _CW_NS_ANY(oh_p_grow)
-#define oh_p_shrink _CW_NS_ANY(oh_p_shrink)
-#define oh_p_h1 _CW_NS_ANY(oh_p_h1)
-#define oh_p_insert _CW_NS_ANY(oh_p_insert)
-#define oh_p_search _CW_NS_ANY(oh_p_search)
-#define oh_p_rehash _CW_NS_ANY(oh_p_rehash)
-#define oh_p_slot_shuffle _CW_NS_ANY(oh_p_slot_shuffle)
+#define oh_p_grow _CW_NS_STASH(oh_p_grow)
+#define oh_p_shrink _CW_NS_STASH(oh_p_shrink)
+#define oh_p_h1 _CW_NS_STASH(oh_p_h1)
+#define oh_p_insert _CW_NS_STASH(oh_p_insert)
+#define oh_p_search _CW_NS_STASH(oh_p_search)
+#define oh_p_rehash _CW_NS_STASH(oh_p_rehash)
+#define oh_p_slot_shuffle _CW_NS_STASH(oh_p_slot_shuffle)
 
 /* 2^(_OH_BASE_POWER) is the base table size used for calculations. */
 #define _OH_BASE_POWER 8;

@@ -18,14 +18,14 @@
 
 typedef struct cw_log_s cw_log_t;
 
-#define log_new _CW_NS_ANY(log_new)
-#define log_delete _CW_NS_ANY(log_delete)
-#define log_set_logfile _CW_NS_ANY(log_set_logfile)
-#define log_printf _CW_NS_ANY(log_printf)
-#define log_eprintf _CW_NS_ANY(log_eprintf)
-#define log_lprintf _CW_NS_ANY(log_eprintf)
-#define log_leprintf _CW_NS_ANY(log_leprintf)
-#define log_print_uint64 _CW_NS_ANY(log_print_uint64)
+#define log_new _CW_NS_STASH(log_new)
+#define log_delete _CW_NS_STASH(log_delete)
+#define log_set_logfile _CW_NS_STASH(log_set_logfile)
+#define log_printf _CW_NS_STASH(log_printf)
+#define log_eprintf _CW_NS_STASH(log_eprintf)
+#define log_lprintf _CW_NS_STASH(log_eprintf)
+#define log_leprintf _CW_NS_STASH(log_leprintf)
+#define log_print_uint64 _CW_NS_STASH(log_print_uint64)
 
 cw_log_t * log_new();
 void log_delete(cw_log_t * a_log_o);

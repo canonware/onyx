@@ -21,8 +21,8 @@ struct cw_list_item_s
   void * item;
 };
 
-#define list_p_hpop _CW_NS_ANY(list_p_hpop)
-#define list_p_tpop _CW_NS_ANY(list_p_tpop)
+#define list_p_hpop _CW_NS_STASH(list_p_hpop)
+#define list_p_tpop _CW_NS_STASH(list_p_tpop)
 
 void * list_p_hpop(cw_list_t * a_list_o);
 void * list_p_tpop(cw_list_t * a_list_o);

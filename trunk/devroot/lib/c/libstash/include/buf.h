@@ -37,25 +37,25 @@ struct cw_bufel_s
   cw_uint32_t * buf;
 };
 
-#define buf_new _CW_NS_ANY(buf_new)
-#define buf_delete _CW_NS_ANY(buf_delete)
-#define buf_get_size _CW_NS_ANY(buf_get_size)
-#define buf_append_buf _CW_NS_ANY(buf_append_buf)
-#define buf_rm_head_bufel _CW_NS_ANY(buf_rm_head_bufel)
-#define buf_append_bufel _CW_NS_ANY(buf_append_bufel)
+#define buf_new _CW_NS_STASH(buf_new)
+#define buf_delete _CW_NS_STASH(buf_delete)
+#define buf_get_size _CW_NS_STASH(buf_get_size)
+#define buf_append_buf _CW_NS_STASH(buf_append_buf)
+#define buf_rm_head_bufel _CW_NS_STASH(buf_rm_head_bufel)
+#define buf_append_bufel _CW_NS_STASH(buf_append_bufel)
 
-#define bufel_new _CW_NS_ANY(bufel_new)
-#define bufel_delete _CW_NS_ANY(bufel_delete)
-#define bufel_get_size _CW_NS_ANY(bufel_get_size)
-#define bufel_set_size _CW_NS_ANY(bufel_set_size)
-#define bufel_get_beg_offset _CW_NS_ANY(bufel_get_beg_offset)
-#define bufel_set_beg_offset _CW_NS_ANY(bufel_set_beg_offset)
-#define bufel_get_end_offset _CW_NS_ANY(bufel_get_end_offset)
-#define bufel_set_end_offset _CW_NS_ANY(bufel_set_end_offset)
-#define bufel_get_uint8 _CW_NS_ANY(bufel_get_uint8)
-#define bufel_set_uint8 _CW_NS_ANY(bufel_set_uint8)
-#define bufel_get_uint32 _CW_NS_ANY(bufel_get_uint32)
-#define bufel_set_uint32 _CW_NS_ANY(bufel_set_uint32)
+#define bufel_new _CW_NS_STASH(bufel_new)
+#define bufel_delete _CW_NS_STASH(bufel_delete)
+#define bufel_get_size _CW_NS_STASH(bufel_get_size)
+#define bufel_set_size _CW_NS_STASH(bufel_set_size)
+#define bufel_get_beg_offset _CW_NS_STASH(bufel_get_beg_offset)
+#define bufel_set_beg_offset _CW_NS_STASH(bufel_set_beg_offset)
+#define bufel_get_end_offset _CW_NS_STASH(bufel_get_end_offset)
+#define bufel_set_end_offset _CW_NS_STASH(bufel_set_end_offset)
+#define bufel_get_uint8 _CW_NS_STASH(bufel_get_uint8)
+#define bufel_set_uint8 _CW_NS_STASH(bufel_set_uint8)
+#define bufel_get_uint32 _CW_NS_STASH(bufel_get_uint32)
+#define bufel_set_uint32 _CW_NS_STASH(bufel_set_uint32)
 
 #ifdef _CW_REENTRANT
 cw_buf_t * buf_new(cw_buf_t * a_buf_o, cw_bool_t a_is_threadsafe);

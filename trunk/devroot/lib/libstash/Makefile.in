@@ -104,7 +104,7 @@ P_DEFINES :=
 R_DEFINES := -D_CW_REENTRANT
 TEST_DEFINES := -D_STASH_DEBUG
 
-#CFLAGS  := @CFLAGS@
+# @CFLAGS@
 CFLAGS := -Wall -pipe
 ST_CFLAGS := 
 SH_CFLAGS := -fPIC -DPIC
@@ -212,8 +212,12 @@ include $(SRCS:src/%.c=obj/st_r_d/%.d_st_r_d)
 include $(SRCS:src/%.c=obj/st_r_o/%.d_st_r_o)
 include $(SRCS:src/%.c=obj/sh_r_o/%.d_sh_r_o)
 include $(SRCS:src/%.c=obj/st_r_p/%.d_st_r_p)
+ifneq ($(strip $(CTESTS)),)
 include $(CTESTS:=.d)
+endif
+ifneq ($(strip $(BTESTS)),)
 include $(BTESTS:=.d)
+endif
 
 $(LIB_ST_D) : $(SRCS:src/%.c=obj/st_d/%.o_st_d)
 	$(AR) cru $@ $?
@@ -355,5 +359,5 @@ distclean : clean
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
-etags : $(INCS) $(PRIV_INCS) $(SRCS)
+etags : $(INCS) $(PRIV_INCS) $(SRCS) libstash.h
 	@ETAGS@ $(INCS) $(PRIV_INCS) $(SRCS)

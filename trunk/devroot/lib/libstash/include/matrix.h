@@ -28,15 +28,15 @@ struct cw_matrix_s
   cw_uint32_t y_size;
 };
 
-#define matrix_new _CW_NS_ANY(matrix_new)
-#define matrix_delete _CW_NS_ANY(matrix_delete)
-#define matrix_init _CW_NS_ANY(matrix_init)
-#define matrix_rebuild _CW_NS_ANY(matrix_rebuild)
+#define matrix_new _CW_NS_STASH(matrix_new)
+#define matrix_delete _CW_NS_STASH(matrix_delete)
+#define matrix_init _CW_NS_STASH(matrix_init)
+#define matrix_rebuild _CW_NS_STASH(matrix_rebuild)
 #ifdef _STASH_DBG
-#  define matrix_get_element _CW_NS_ANY(matrix_get_element)
-#  define matrix_set_element _CW_NS_ANY(matrix_set_element)
-#  define matrix_get_x_size _CW_NS_ANY(matrix_get_x_size)
-#  define matrix_get_y_size _CW_NS_ANY(matrix_get_y_size)
+#  define matrix_get_element _CW_NS_STASH(matrix_get_element)
+#  define matrix_set_element _CW_NS_STASH(matrix_set_element)
+#  define matrix_get_x_size _CW_NS_STASH(matrix_get_x_size)
+#  define matrix_get_y_size _CW_NS_STASH(matrix_get_y_size)
 #else
 #  define matrix_get_element(a, b, c) (a)->grid[(a)->y_index[(c)] \
 					       * (a)->grid_x_size \
@@ -47,11 +47,11 @@ struct cw_matrix_s
 #  define matrix_get_x_size(a) (a)->x_size
 #  define matrix_get_y_size(a) (a)->y_size
 #endif
-#define matrix_copy _CW_NS_ANY(matrix_copy)
-#define matrix_dump _CW_NS_ANY(matrix_dump)
-#define matrix_is_equal _CW_NS_ANY(matrix_is_equal)
-#define matrix_remove_row _CW_NS_ANY(matrix_remove_row)
-#define matrix_remove_column _CW_NS_ANY(matrix_remove_column)
+#define matrix_copy _CW_NS_STASH(matrix_copy)
+#define matrix_dump _CW_NS_STASH(matrix_dump)
+#define matrix_is_equal _CW_NS_STASH(matrix_is_equal)
+#define matrix_remove_row _CW_NS_STASH(matrix_remove_row)
+#define matrix_remove_column _CW_NS_STASH(matrix_remove_column)
 
 cw_matrix_t * matrix_new(cw_matrix_t * a_matrix_o);
 void matrix_delete(cw_matrix_t * a_matrix_o);

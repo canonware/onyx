@@ -39,15 +39,15 @@ struct cw_bhp_s
   cw_sint32_t (*priority_compare)(cw_bhpi_t *, cw_bhpi_t *);
 };
 
-#define bhp_new _CW_NS_ANY(bhp_new)
-#define bhp_delete _CW_NS_ANY(bhp_delete)
-#define bhp_dump _CW_NS_ANY(bhp_dump)
-#define bhp_insert _CW_NS_ANY(bhp_insert)
-#define bhp_find_min _CW_NS_ANY(bhp_find_min)
-#define bhp_del_min _CW_NS_ANY(bhp_del_min)
-#define bhp_get_size _CW_NS_ANY(bhp_get_size)
-#define bhp_union _CW_NS_ANY(bhp_union)
-#define bhp_set_priority_compare _CW_NS_ANY(bhp_set_priority_compare)
+#define bhp_new _CW_NS_STASH(bhp_new)
+#define bhp_delete _CW_NS_STASH(bhp_delete)
+#define bhp_dump _CW_NS_STASH(bhp_dump)
+#define bhp_insert _CW_NS_STASH(bhp_insert)
+#define bhp_find_min _CW_NS_STASH(bhp_find_min)
+#define bhp_del_min _CW_NS_STASH(bhp_del_min)
+#define bhp_get_size _CW_NS_STASH(bhp_get_size)
+#define bhp_union _CW_NS_STASH(bhp_union)
+#define bhp_set_priority_compare _CW_NS_STASH(bhp_set_priority_compare)
 
 /* Typedefs to allow easy function pointer passing. */
 typedef cw_sint32_t bhp_prio_comp_t(cw_bhpi_t *, cw_bhpi_t *);

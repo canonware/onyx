@@ -14,6 +14,6 @@
  *
  ****************************************************************************/
 
-#define jtl_p_qrwx_unlock _CW_NS_ANY(jtl_p_qrwx_unlock)
+#define jtl_p_qrwx_unlock _CW_NS_STASH(jtl_p_qrwx_unlock)
 
 void jtl_p_qrwx_unlock(cw_jtl_t * a_jtl_o);

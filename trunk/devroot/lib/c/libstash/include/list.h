@@ -36,24 +36,24 @@ struct cw_list_s
  * Namespace definitions.
  */
 
-#define list_item_new _CW_NS_ANY(list_item_new)
-#define list_item_delete _CW_NS_ANY(list_item_delete)
-#define list_item_get _CW_NS_ANY(list_item_get)
-#define list_item_set _CW_NS_ANY(list_item_set)
+#define list_item_new _CW_NS_STASH(list_item_new)
+#define list_item_delete _CW_NS_STASH(list_item_delete)
+#define list_item_get _CW_NS_STASH(list_item_get)
+#define list_item_set _CW_NS_STASH(list_item_set)
 
-#define list_new _CW_NS_ANY(list_new)
-#define list_delete _CW_NS_ANY(list_delete)
-#define list_count _CW_NS_ANY(list_count)
-#define list_hpush _CW_NS_ANY(list_hpush)
-#define list_hpop _CW_NS_ANY(list_hpop)
-#define list_hpeek _CW_NS_ANY(list_hpeek)
-#define list_tpush _CW_NS_ANY(list_tpush)
-#define list_tpop _CW_NS_ANY(list_tpop)
-#define list_tpeek _CW_NS_ANY(list_tpeek)
-#define list_insert_after _CW_NS_ANY(list_insert_after)
-#define list_remove _CW_NS_ANY(list_remove)
-#define list_purge_spares _CW_NS_ANY(list_purge_spares)
-#define list_dump _CW_NS_ANY(list_dump)
+#define list_new _CW_NS_STASH(list_new)
+#define list_delete _CW_NS_STASH(list_delete)
+#define list_count _CW_NS_STASH(list_count)
+#define list_hpush _CW_NS_STASH(list_hpush)
+#define list_hpop _CW_NS_STASH(list_hpop)
+#define list_hpeek _CW_NS_STASH(list_hpeek)
+#define list_tpush _CW_NS_STASH(list_tpush)
+#define list_tpop _CW_NS_STASH(list_tpop)
+#define list_tpeek _CW_NS_STASH(list_tpeek)
+#define list_insert_after _CW_NS_STASH(list_insert_after)
+#define list_remove _CW_NS_STASH(list_remove)
+#define list_purge_spares _CW_NS_STASH(list_purge_spares)
+#define list_dump _CW_NS_STASH(list_dump)
 
 cw_list_item_t * list_item_new();
 void list_item_delete(cw_list_item_t * a_cont);

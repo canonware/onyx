@@ -28,14 +28,14 @@ struct cw_treen_s
   cw_treen_t ** children;
 };
 
-#define treen_new _CW_NS_ANY(treen_new)
-#define treen_delete _CW_NS_ANY(treen_delete)
-#define treen_get_num_children _CW_NS_ANY(treen_get_num_children)
-#define treen_link_child _CW_NS_ANY(tree_ins_child)
-#define treen_unlink_child _CW_NS_ANY(tree_del_child)
-#define treen_get_child_ptr _CW_NS_ANY(treen_get_child_ptr)
-#define treen_get_data_ptr _CW_NS_ANY(tree_get_data_ptr)
-#define treen_set_data_ptr _CW_NS_ANY(tree_set_data_ptr)
+#define treen_new _CW_NS_STASH(treen_new)
+#define treen_delete _CW_NS_STASH(treen_delete)
+#define treen_get_num_children _CW_NS_STASH(treen_get_num_children)
+#define treen_link_child _CW_NS_STASH(tree_ins_child)
+#define treen_unlink_child _CW_NS_STASH(tree_del_child)
+#define treen_get_child_ptr _CW_NS_STASH(treen_get_child_ptr)
+#define treen_get_data_ptr _CW_NS_STASH(tree_get_data_ptr)
+#define treen_set_data_ptr _CW_NS_STASH(tree_set_data_ptr)
 
 cw_treen_t * treen_new(cw_bool_t a_is_thread_safe);
 void treen_delete(cw_treen_t * a_treen_o);

@@ -21,12 +21,12 @@ struct cw_dbg_s
   cw_oh_t flag_hash;
 };
 
-#define dbg_new _CW_NS_ANY(dbg_new)
-#define dbg_delete _CW_NS_ANY(dbg_delete)
-#define dbg_register _CW_NS_ANY(dbg_register)
-#define dbg_unregister _CW_NS_ANY(dbg_unregister)
-#define dbg_is_registered _CW_NS_ANY(dbg_is_registered)
-#define dbg_clear _CW_NS_ANY(dbg_clear)
+#define dbg_new _CW_NS_STASH(dbg_new)
+#define dbg_delete _CW_NS_STASH(dbg_delete)
+#define dbg_register _CW_NS_STASH(dbg_register)
+#define dbg_unregister _CW_NS_STASH(dbg_unregister)
+#define dbg_is_registered _CW_NS_STASH(dbg_is_registered)
+#define dbg_clear _CW_NS_STASH(dbg_clear)
 
 cw_dbg_t * dbg_new();
 void dbg_delete(cw_dbg_t * a_dbg_o);

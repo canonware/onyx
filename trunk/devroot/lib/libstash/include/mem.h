@@ -16,12 +16,12 @@
 
 typedef struct cw_mem_s cw_mem_t;
 
-#define mem_new _CW_NS_ANY(mem_new)
-#define mem_delete _CW_NS_ANY(mem_delete)
-#define mem_malloc _CW_NS_ANY(mem_malloc)
-#define mem_calloc _CW_NS_ANY(mem_calloc)
-#define mem_realloc _CW_NS_ANY(mem_realloc)
-#define mem_free _CW_NS_ANY(mem_free)
+#define mem_new _CW_NS_STASH(mem_new)
+#define mem_delete _CW_NS_STASH(mem_delete)
+#define mem_malloc _CW_NS_STASH(mem_malloc)
+#define mem_calloc _CW_NS_STASH(mem_calloc)
+#define mem_realloc _CW_NS_STASH(mem_realloc)
+#define mem_free _CW_NS_STASH(mem_free)
 
 cw_mem_t * mem_new();
 void mem_delete(cw_mem_t * a_mem_o);
