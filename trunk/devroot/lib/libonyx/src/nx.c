@@ -62,7 +62,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	nxo_no_new(&retval->threadsdict);
 	nxo_no_new(&retval->systemdict);
 	nxo_no_new(&retval->globaldict);
+#ifdef CW_POSIX
 	nxo_no_new(&retval->envdict);
+#endif
 	nxo_no_new(&retval->stdin_nxo);
 	nxo_no_new(&retval->stdout_nxo);
 	nxo_no_new(&retval->stderr_nxo);
