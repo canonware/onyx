@@ -707,7 +707,7 @@ oh_item_search(cw_oh_t * a_oh_o,
 {
   cw_uint64_t slot;
   cw_bool_t retval;
-  
+
   _cw_check_ptr(a_oh_o);
   _cw_check_ptr(a_key);
 #ifdef _CW_REENTRANT
@@ -721,7 +721,7 @@ oh_item_search(cw_oh_t * a_oh_o,
   {
     /* Item found. */
     retval = FALSE;
-    
+
     *a_data = a_oh_o->items[slot]->data;
   }
   else
