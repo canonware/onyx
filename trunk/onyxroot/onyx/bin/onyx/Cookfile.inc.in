@@ -18,6 +18,9 @@
  * File lists.
  */
 
+TONYX_SRCS = tonyx.c;
+TONYX_SRCS = [addprefix @srcroot@/bin/onyx/src/ [TONYX_SRCS]];
+
 /* Source files common to onyx and bonyx. */
 ONYX_COMMON_SRCS = [addprefix @srcroot@/bin/onyx/src/
                               onyx.c
@@ -34,9 +37,6 @@ BONYX_ONLY_SRCS = [fromto %0%.nx.in %0%_bootstrap.c [ONYX_NSRCS]];
 /* onyx-only source files. */
 ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
                          [ONYX_NSRCS]];
-
-TONYX_SRCS = tonyx.c;
-TONYX_SRCS = [addprefix @srcroot@/bin/onyx/src/ [TONYX_SRCS]];
 
 /*
  * Onyx tests.
@@ -174,26 +174,31 @@ TONYX = @objroot@/bin/onyx/bin/tonyx;
  * User cook'ables.
  */
 
-onyx : [ONYX] [BONYX] [TONYX];
+tonyx : [TONYX];
+bonyx : [BONYX];
+onyx : [ONYX];
 
 onyx_bins_bootstrap : [BONYX]
 {
-  cat @objroot@/bin/onyx/src/batch.nx
-    | [BONYX] @srcroot@/bin/onyx/src/batch_gen.nx
-    > @srcroot@/bin/onyx/src/batch_bootstrap.c;
+  local t = [fromto @srcroot@/bin/onyx/src/%.nx.in % [ONYX_NSRCS]];
 
-  cat @objroot@/bin/onyx/src/interactive.nx
-    | [BONYX] @srcroot@/bin/onyx/src/interactive_gen.nx
-    > @srcroot@/bin/onyx/src/interactive_bootstrap.c;
+  loop
+  {
+    local f = [head [t]];
 
-  cat @objroot@/bin/onyx/src/onyx.nx
-    | [BONYX] @srcroot@/bin/onyx/src/onyx_gen.nx
-    > @srcroot@/bin/onyx/src/onyx_bootstrap.c;
+    if [not [f]] then
+      loopstop;
+    t = [tail [t]];
+    
+    cat @objroot@/bin/onyx/src/[f].nx
+      | [BONYX] @srcroot@/bin/onyx/src/[f]_gen.nx
+      > @srcroot@/bin/onyx/src/[f]_bootstrap.c;
+  }
 }
 
 onyx_bins_tests : [fromto @srcroot@/%0%.nx.in @objroot@/%0%.nx [ONYX_OTESTS]];
 
-onyx_bins_check : onyx_bins_tests
+onyx_bins_check : onyx_bins_tests [TONYX]
 {
 #if [count [ONYX_OTESTS]]
   @VERIFY@ -s @srcroot@ -o @objroot@
@@ -201,7 +206,7 @@ onyx_bins_check : onyx_bins_tests
 #endif
 }
 
-onyx_bins_check_update : onyx_bins_tests
+onyx_bins_check_update : onyx_bins_tests [TONYX]
 {
 #if [count [ONYX_OTESTS]]
   @VERIFY@ -u -s @srcroot@ -o @objroot@
@@ -284,7 +289,7 @@ onyx_bins_distclean :
 }
 
 [BONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
-          [fromto %0%.c %0%.o_a [BONYX_ONLY_SRCS]]
+          [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [BONYX_ONLY_SRCS]]
           [LIBBONYX_A]
 #if @enable_libedit@
           [LIBEDIT_A]
@@ -295,7 +300,7 @@ onyx_bins_distclean :
 }
 
 [ONYX] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
-         [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
+         [fromto @objroot@/%0%.c @objroot@/%0%.o_a [ONYX_ONLY_SRCS]]
          libonyx_libs_s
 #if @enable_libedit@
           [LIBEDIT_A]
@@ -304,7 +309,7 @@ onyx_bins_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [ONYX_COMMON_SRCS]]
-       [fromto %0%.c %0%.o_a [ONYX_ONLY_SRCS]]
+       [fromto @objroot@/%0%.c @objroot@/%0%.o_a [ONYX_ONLY_SRCS]]
 #if @enable_libedit@
        [LIBEDIT_A]
 #endif

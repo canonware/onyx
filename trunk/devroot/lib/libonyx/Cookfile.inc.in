@@ -64,18 +64,14 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
 
 /* Onyx source files that are used to generate C code. */
 LIBONYX_NSRCS = [addprefix @srcroot@/lib/libonyx/src/
-                           nx.nx.in nxo_thread.nx.in
-                           ];
+                           nx.nx.in nxo_thread.nx.in];
 
 /* libbonyx-only source files. */
-LIBBONYX_ONLY_SRCS = [fromto %.nx.in %_bootstrap.c [LIBONYX_NSRCS]];
+LIBBONYX_ONLY_SRCS = [fromto %0%.nx.in %0%_bootstrap.c [LIBONYX_NSRCS]];
 
 /* libonyx-only source files. */
 LIBONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
                             [LIBONYX_NSRCS]];
-
-LIBBONYX_ONLY_SRCS = [addprefix @srcroot@/lib/libonyx/src/
-                                nx_bootstrap.c nxo_thread_bootstrap.c];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 LIBONYX_CTESTS = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
@@ -129,30 +125,38 @@ LDFLAGS = [LDFLAGS] -L@objroot@/lib/libonyx/lib;
  * User cook'ables.
  */
 
+libbonyx_libs_a : [LIBBONYX_A];
 libonyx_libs_a : [LIBONYX_A];
 libonyx_libs_s : [LIBONYX_S];
 libonyx : libonyx_libs_a libonyx_libs_s;
 
 libonyx_libs_bootstrap : [BONYX]
 {
-  cat @objroot@/lib/libonyx/src/nx.nx
-    | [BONYX] @srcroot@/lib/libonyx/src/nx_gen.nx
-    > @srcroot@/lib/libonyx/src/nx_bootstrap.c;
+  local t = [fromto @srcroot@/lib/libonyx/src/%.nx.in % [LIBONYX_NSRCS]];
 
-  cat @objroot@/lib/libonyx/src/nxo_thread.nx
-    | [BONYX] @srcroot@/lib/libonyx/src/nxo_thread_gen.nx
-    > @srcroot@/lib/libonyx/src/nxo_thread_bootstrap.c;
+  loop
+  {
+    local f = [head [t]];
+
+    if [not [f]] then
+      loopstop;
+    t = [tail [t]];
+    
+    cat @objroot@/lib/libonyx/src/[f].nx
+      | [BONYX] @srcroot@/lib/libonyx/src/[f]_gen.nx
+      > @srcroot@/lib/libonyx/src/[f]_bootstrap.c;
+  }
 }
 
 libonyx_libs_tests : [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 
-libonyx_libs_check : libonyx_libs_tests
+libonyx_libs_check : libonyx_libs_tests [TONYX]
 {
   @VERIFY@ -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];
 }
 
-libonyx_libs_check_update : libonyx_libs_tests
+libonyx_libs_check_update : libonyx_libs_tests [TONYX]
 {
   @VERIFY@ -u -s @srcroot@ -o @objroot@
            [fromto @srcroot@/%0%.c @objroot@/%0% [LIBONYX_CTESTS]];

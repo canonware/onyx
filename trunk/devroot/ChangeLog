@@ -1,3 +1,9 @@
+2002-01-25  Jason Evans  <jasone@canonware.com>
+
+	* : Add a bootstrap phase to the build, so that the Onyx code that
+	gets embedded in the interpreter is customized to match the
+	configuration parameters.
+
 2002-01-20  Jason Evans  <jasone@canonware.com>
 
 	* : Restructure the build system to place more logic in the

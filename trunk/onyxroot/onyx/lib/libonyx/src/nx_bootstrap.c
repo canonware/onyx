@@ -11,7 +11,7 @@
  *
  ******************************************************************************/
 
-#include <libonyx/libonyx.h>
+#include "libonyx/libonyx.h"
 
 void
 nx_p_nxcode(cw_nx_t *a_nx)
