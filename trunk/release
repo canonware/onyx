@@ -64,8 +64,8 @@ if (($#ARGV >= 0)
 }
 
 $run =
-    "./snap @ARGS -p canonware -r devroot -f Cookfile.in -f COPYING -f INSTALL"
-    . " -f README -f aclocal.m4 -f config.guess"
+    "./snap @ARGS -p canonware -r devroot -f ChangeLog -f Cookfile.in"
+    . " -f COPYING -f INSTALL -f README -f aclocal.m4 -f config.guess"
     . " -f config.sub -f configure -f configure.in -f install-sh"
     . " -f doc -f test"
     . " -f lib/Cookfile -f lib/c/Cookfile -f lib/c/Cookfile.inc"
