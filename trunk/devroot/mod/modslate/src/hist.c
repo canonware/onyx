@@ -1177,7 +1177,6 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
     cw_uint64_t retval;
     cw_uint8_t *p;
     cw_mkr_t tmkr;
-    cw_bufv_t bufv;
 
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
@@ -1263,86 +1262,172 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			  > mkr_pos(&a_hist->hbeg)
 			  + histh_p_bufvlen_get(&a_hist->hhead));
 
-		/* XXX Undo more than one if possible. */
+		/* Move to the correct bpos in the buf. */
+		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
 
 		/* Take action. */
-		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
-		switch (histh_p_tag_get(&a_hist->hhead))
-		{
-		    case HISTH_TAG_SINS:
-		    case HISTH_TAG_LINS:
-		    {
-			/* Remove character. */
-			mkr_dup(&tmkr, a_mkr);
-			mkr_seek(&tmkr, -1, BUFW_REL);
-			mkr_l_remove(&tmkr, a_mkr, FALSE);
-
-			/* Adjust bpos. */
-			a_hist->hbpos--;
-			break;
-		    }
-		    case HISTH_TAG_SYNK:
-		    case HISTH_TAG_LYNK:
-		    {
-			/* Remove character. */
-			mkr_dup(&tmkr, a_mkr);
-			mkr_seek(&tmkr, 1, BUFW_REL);
-			mkr_l_remove(a_mkr, &tmkr, FALSE);
-			break;
-		    }
-		    case HISTH_TAG_SREM:
-		    case HISTH_TAG_LREM:
-		    {
-			/* Get character. */
-			p = mkr_before_get(&a_hist->hcur);
-
-			/* Set up bufv. */
-			bufv.data = p;
-			bufv.len = sizeof(*p);
-
-			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, FALSE);
-
-			/* Adjust bpos. */
-			a_hist->hbpos++;
-			break;
-		    }
-		    case HISTH_TAG_SDEL:
-		    case HISTH_TAG_LDEL:
-		    {
-			/* Get character. */
-			p = mkr_before_get(&a_hist->hcur);
-
-			/* Set up bufv. */
-			bufv.data = p;
-			bufv.len = sizeof(*p);
-
-			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
-			break;
-		    }
-		    default:
-		    {
-			cw_not_reached();
-		    }
-		}
-
-		/* Move to previous character. */
-		mkr_seek(&a_hist->hcur, -1LL, BUFW_REL);
-
-		/* Increment the undo count, if the group depth is 0. */
 		if (a_hist->gdepth == 0)
 		{
-		    retval++;
-		}
+		    cw_bufv_t bufv;
 
-		/* Move to the previous record if all data in this record have
-		 * already been undone. */
-		if (mkr_pos(&a_hist->hcur)
-		    == mkr_pos(&a_hist->hbeg)
-		    + histh_p_bufvlen_get(&a_hist->hhead))
+		    /* Undo one character at a time, in order to simplify doing
+		     * a_count undo operations. */
+
+		    switch (histh_p_tag_get(&a_hist->hhead))
+		    {
+			case HISTH_TAG_SINS:
+			case HISTH_TAG_LINS:
+			{
+			    /* Remove character. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -1LL, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos--;
+			    break;
+			}
+			case HISTH_TAG_SYNK:
+			case HISTH_TAG_LYNK:
+			{
+			    /* Remove character. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, 1, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
+			    break;
+			}
+			case HISTH_TAG_SREM:
+			case HISTH_TAG_LREM:
+			{
+			    /* Get character. */
+			    p = mkr_before_get(&a_hist->hcur);
+
+			    /* Set up bufv. */
+			    bufv.data = p;
+			    bufv.len = sizeof(*p);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos++;
+			    break;
+			}
+			case HISTH_TAG_SDEL:
+			case HISTH_TAG_LDEL:
+			{
+			    /* Get character. */
+			    p = mkr_before_get(&a_hist->hcur);
+
+			    /* Set up bufv. */
+			    bufv.data = p;
+			    bufv.len = sizeof(*p);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
+			    break;
+			}
+			default:
+			{
+			    cw_not_reached();
+			}
+		    }
+
+		    /* Move to previous character. */
+		    mkr_seek(&a_hist->hcur, -1LL, BUFW_REL);
+
+		    /* Increment the undo count. */
+		    retval++;
+
+		    /* Move to the previous record if all data in this record
+		     * have already been undone. */
+		    if (mkr_pos(&a_hist->hcur)
+			== mkr_pos(&a_hist->hbeg)
+			+ histh_p_bufvlen_get(&a_hist->hhead))
+		    {
+			hist_p_gap_prev(a_hist);
+		    }
+		}
+		else
 		{
-		    hist_p_record_prev(a_hist);
+		    cw_uint64_t ucnt;
+
+		    /* Undo the entire record, since the non-zero group depth
+		     * means there is no need to count the number of characters
+		     * undone. */
+
+		    /* Get the number of characters left in the record to
+		     * undo.  htmp is moved as a side effect, which is relied on
+		     * in some cases below. */
+		    mkr_dup(&a_hist->htmp, &a_hist->hbeg);
+		    mkr_seek(&a_hist->htmp, histh_p_bufvlen_get(&a_hist->hhead),
+			     BUFW_REL);
+		    ucnt = mkr_pos(&a_hist->hcur) - mkr_pos(&a_hist->htmp);
+
+		    switch (histh_p_tag_get(&a_hist->hhead))
+		    {
+			case HISTH_TAG_SINS:
+			case HISTH_TAG_LINS:
+			{
+			    /* Remove characters. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -(cw_sint64_t)ucnt, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos -= ucnt;
+			    break;
+			}
+			case HISTH_TAG_SYNK:
+			case HISTH_TAG_LYNK:
+			{
+			    /* Remove characters. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, ucnt, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
+			    break;
+			}
+			case HISTH_TAG_SREM:
+			case HISTH_TAG_LREM:
+			{
+			    cw_bufv_t *bufv;
+			    cw_uint32_t bufvcnt;
+
+			    /* Get bufv. */
+			    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
+						 &bufvcnt);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, FALSE, bufv, bufvcnt,
+					 FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos += ucnt;
+			    break;
+			}
+			case HISTH_TAG_SDEL:
+			case HISTH_TAG_LDEL:
+			{
+			    cw_bufv_t *bufv;
+			    cw_uint32_t bufvcnt;
+
+			    /* Get bufv. */
+			    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
+						 &bufvcnt);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, TRUE, bufv, bufvcnt,
+					 FALSE);
+			    break;
+			}
+			default:
+			{
+			    cw_not_reached();
+			}
+		    }
+
+		    /* Move to the previous record. */
+		    hist_p_gap_prev(a_hist);
 		}
 		break;
 	    }
@@ -1366,7 +1451,6 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
     cw_bool_t redid;
     cw_uint8_t *p;
     cw_mkr_t tmkr;
-    cw_bufv_t bufv;
 
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
@@ -1457,84 +1541,173 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			  < mkr_pos(&a_hist->hend)
 			  - histh_p_bufvlen_get(&a_hist->hfoot));
 
-		/* Take action. */
+		/* Move to the correct bpos in the buf. */
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
-		switch(histh_p_tag_get(&a_hist->hhead))
-		{
-		    case HISTH_TAG_SINS:
-		    case HISTH_TAG_LINS:
-		    {
-			/* Get character. */
-			p = mkr_after_get(&a_hist->hcur);
 
-			/* Set up bufv. */
-			bufv.data = p;
-			bufv.len = sizeof(*p);
-
-			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, FALSE);
-
-			/* Adjust bpos. */
-			a_hist->hbpos++;
-			break;
-		    }
-		    case HISTH_TAG_SYNK:
-		    case HISTH_TAG_LYNK:
-		    {
-			/* Get character. */
-			p = mkr_after_get(&a_hist->hcur);
-
-			/* Set up bufv. */
-			bufv.data = p;
-			bufv.len = sizeof(*p);
-
-			/* Insert bufv. */
-			mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
-			break;
-		    }
-		    case HISTH_TAG_SREM:
-		    case HISTH_TAG_LREM:
-		    {
-			/* Remove character. */
-			mkr_dup(&tmkr, a_mkr);
-			mkr_seek(&tmkr, -1, BUFW_REL);
-			mkr_l_remove(&tmkr, a_mkr, FALSE);
-
-			/* Adjust bpos. */
-			a_hist->hbpos--;
-			break;
-		    }
-		    case HISTH_TAG_SDEL:
-		    case HISTH_TAG_LDEL:
-		    {
-			/* Remove character. */
-			mkr_dup(&tmkr, a_mkr);
-			mkr_seek(&tmkr, 1, BUFW_REL);
-			mkr_l_remove(a_mkr, &tmkr, FALSE);
-			break;
-		    }
-		    default:
-		    {
-			cw_not_reached();
-		    }
-		}
-
-		/* Move to the next character. */
-		mkr_seek(&a_hist->hcur, 1LL, BUFW_REL);
-
-		/* Increment the redo count, if the group depth is 0. */
+		/* Take action. */
 		if (a_hist->gdepth == 0)
 		{
-		    retval++;
-		}
+		    cw_bufv_t bufv;
 
-		/* Move to the next record if all data in this record have
-		 * already been redone. */
-		if (mkr_pos(&a_hist->hcur)
-		    == mkr_pos(&a_hist->hend)
-		    - histh_p_bufvlen_get(&a_hist->hfoot))
+		    /* Redo one character at a time, in order to simplify doing
+		     * a_count redo operations. */
+
+		    switch(histh_p_tag_get(&a_hist->hhead))
+		    {
+			case HISTH_TAG_SINS:
+			case HISTH_TAG_LINS:
+			{
+			    /* Get character. */
+			    p = mkr_after_get(&a_hist->hcur);
+
+			    /* Set up bufv. */
+			    bufv.data = p;
+			    bufv.len = sizeof(*p);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos++;
+			    break;
+			}
+			case HISTH_TAG_SYNK:
+			case HISTH_TAG_LYNK:
+			{
+			    /* Get character. */
+			    p = mkr_after_get(&a_hist->hcur);
+
+			    /* Set up bufv. */
+			    bufv.data = p;
+			    bufv.len = sizeof(*p);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, FALSE);
+			    break;
+			}
+			case HISTH_TAG_SREM:
+			case HISTH_TAG_LREM:
+			{
+			    /* Remove character. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -1LL, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos--;
+			    break;
+			}
+			case HISTH_TAG_SDEL:
+			case HISTH_TAG_LDEL:
+			{
+			    /* Remove character. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, 1, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
+			    break;
+			}
+			default:
+			{
+			    cw_not_reached();
+			}
+		    }
+
+		    /* Move to the next character. */
+		    mkr_seek(&a_hist->hcur, 1LL, BUFW_REL);
+
+		    /* Increment the redo count. */
+		    retval++;
+
+		    /* Move to the next record if all data in this record have
+		     * already been redone. */
+		    if (mkr_pos(&a_hist->hcur)
+			== mkr_pos(&a_hist->hend)
+			- histh_p_bufvlen_get(&a_hist->hfoot))
+		    {
+			hist_p_gap_next(a_hist);
+		    }
+		}
+		else
 		{
-		    hist_p_record_next(a_hist);
+		    cw_uint64_t rcnt;
+
+		    /* Redo the entire record, since the non-zero group depth
+		     * means there is no need to count the number of characters
+		     * redone. */
+		    
+		    /* Get the number of characters left in the record to
+		     * undo.  htmp is moved as a side effect, which is relied on
+		     * in some cases below. */
+		    mkr_dup(&a_hist->htmp, &a_hist->hend);
+		    mkr_seek(&a_hist->htmp,
+			     -(cw_sint64_t)histh_p_bufvlen_get(&a_hist->hhead),
+			     BUFW_REL);
+		    rcnt = mkr_pos(&a_hist->htmp) - mkr_pos(&a_hist->hcur);
+
+		    switch(histh_p_tag_get(&a_hist->hhead))
+		    {
+			case HISTH_TAG_SINS:
+			case HISTH_TAG_LINS:
+			{
+			    cw_bufv_t *bufv;
+			    cw_uint32_t bufvcnt;
+
+			    /* Get bufv. */
+			    bufv = mkr_range_get(&a_hist->hcur, &a_hist->htmp,
+						 &bufvcnt);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, FALSE, bufv, bufvcnt,
+					 FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos += rcnt;
+			    break;
+			}
+			case HISTH_TAG_SYNK:
+			case HISTH_TAG_LYNK:
+			{
+			    cw_bufv_t *bufv;
+			    cw_uint32_t bufvcnt;
+
+			    /* Get bufv. */
+			    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
+						 &bufvcnt);
+
+			    /* Insert bufv. */
+			    mkr_l_insert(a_mkr, FALSE, TRUE, bufv, bufvcnt,
+					 FALSE);
+			    break;
+			}
+			case HISTH_TAG_SREM:
+			case HISTH_TAG_LREM:
+			{
+			    /* Remove characters. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -(cw_sint64_t)rcnt, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
+
+			    /* Adjust bpos. */
+			    a_hist->hbpos -= rcnt;
+			    break;
+			}
+			case HISTH_TAG_SDEL:
+			case HISTH_TAG_LDEL:
+			{
+			    /* Remove characters. */
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, rcnt, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
+			    break;
+			}
+			default:
+			{
+			    cw_not_reached();
+			}
+		    }
+
+		    /* Move to the next record. */
+		    hist_p_gap_next(a_hist);
 		}
 		break;
 	    }
