@@ -12,7 +12,7 @@
 
 /* Define CW_HIST_DUMP to enable verbose internal history state dumping. */
 #ifdef CW_BUF_DUMP
-/* #define CW_HIST_DUMP */
+#define CW_HIST_DUMP
 #endif
 
 struct cw_hist_s
@@ -24,8 +24,14 @@ struct cw_hist_s
     /* History buffer. */
     cw_buf_t h;
 
+    /* Marker at begin of current record in h. */
+    cw_mkr_t hbeg;
+
     /* Marker at current position in h. */
     cw_mkr_t hcur;
+
+    /* Marker at end of current record in h. */
+    cw_mkr_t hend;
 
     /* Temporary marker in h. */
     cw_mkr_t htmp;

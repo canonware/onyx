@@ -15,166 +15,43 @@
  * mechanism aims to be as compact as reasonably possible, without resorting to
  * excessive complexity.  Internally, the history mechanism is a combination of
  * a state machine that maintains enough state to be able to play the history in
- * either direction, along with a log of buffer changes.
+ * either direction, along with a log of buffer changes.  The history record
+ * format is such that the history buffer can be stored to disk during an
+ * incremental save, then used for recovery, in conjunction with the original
+ * file.  This means that the history record format must allow forward and
+ * backward traversal at all times.
  *
  * User input that does not involve explicit point movement causes the history
  * log to grow by approximately one byte per inserted/deleted character.  Log
- * records have a fixed overhead of 9 bytes.
+ * records have a fixed overhead of 18 bytes.  A log record has the following
+ * format:
+ *
+ *     T : Record tag.
+ *     A : Record auxiliary data (data length or bpos), big endian (network byte
+ *         order).
+ *   ... : Data, if any.  Data are stored in the logical order that the user
+ *         would type them in.
+ *
+ *     TAAAAAAAA...TAAAAAAAA
+ *    /\         /\        /\
+ *    ||         ||        ||
+ *   hbeg       hcur      hend
+ *
+ * Three markers are used when traversing the history.  hbeg and hend bracket
+ * the current record, and hcur is at the current position within the record for
+ * insert, yank, remove, and delete records.
  *
  * The following notation is used in discussing the history buffer:
  *
- * Undo : Meaning
- * =====:============================================
- * B    : Group begin.
- * E    : Group end.
- * (n)P : Buffer position change (64 bits, unsigned).
- * (s)I : Insert string s before point.
- * (s)Y : Insert (yank) string s after point.
- * (s)R : Remove string s before point.
- * (s)D : Remove (delete) string s after point.
- *
- * History growth -------->
- *
- * As the history is undone, it gets inverted, so that it becomes a redo log.
- * In general, the history buffer looks:
- *
- *   UUUUUUUUUUURRRRRRRR
- *             /\
- *             hcur
- *
- * where "U" is an undo record, and "R" is a redo record.  Records are kept
- * valid at all times, so that the only state necessary is:
- *
- * *) History buffer (h)
- * *) Current history buffer position (hcur), delimits undo and redo.
- * *) Current position in the data buffer.
- *
- * An undo record consists of data, followed by a record header, whereas a redo
- * record starts with a record header, followed by data.  This difference is
- * necessary since the header must be encountered first when reading the
- * history; undo and redo read in opposite directions.
- *
- * If there are redo records, it may be that one record that is partly
- * undone/redone must be split into an undo and a redo portion.  In this case,
- * an extra byte is necessary to store the extra record header.  For example,
- * consider an insert record in its original state, partly undone, and
- * completely undone:
- *
- *   (hello)R
- *   (hel)RI[lo]
- *   I[hello]
- *
- * Following are several examples of history logs and translations of their
- * meanings.  The /\ characters denote the current position (hcur):
- *
- * Example:
- *   (3)P(hello)R(olleh)I(salutations)R
- *                                    /\
- *
- * Translation:
- *   User started at bpos 3, typed "hello", backspaced through "hello", then
- *   typed "salutations".  Following is what the text looks like at each undo
- *   step:
- *
- *   -------------
- *     salutations
- *     salutation
- *     salutatio
- *     salutati
- *     salutat
- *     saluta
- *     salut
- *     salu
- *     sal
- *     sa
- *     s
- *     
- *     h
- *     he
- *     hel
- *     hell
- *     hello
- *     hell
- *     hel
- *     he
- *     h
- *
- *   -------------
- *
- * Example:
- *   B(42)P(This is a string.)YEB(It gets replaced by this one.)DE
- *                                                               /\
- *
- * Translation:
- *   At bpos 42, the user cut "This is a string.", then pasted
- *   "It gets replaced by this one.".  Following is what the text looks like at
- *   each undo step:
- *
- *   -------------------------------
- *     It gets replaced by this one.
- *
- *     This is a string.
- *   -------------------------------
- *
- * Example:
- *   (This string is more than 32 char)R(acters long.)R
- *                                                    /\
- *
- * Translation:
- *   The user typed in a string that was long enough to require a new log
- *   header.  Logically, this is no different than if the entire string could
- *   have been encoded as a single record.
- *
- * Example:
- *   B(42)P(Hello)RB(Goodbye)RE(Really)REE
- *                                       /\
- *
- * Translation:
- *   Through some programmatic means, the user inserted three strings in such a
- *   way that nested groups were created.  The entire record is undone in a
- *   single step.
- *
- * Example:
- *   B(42)P(Hello)R
- *                /\
- *
- * Translation:
- *   The user created an explicit group begin record, then inserted "Hello" at
- *   bpos 42.  The history state machine realizes that there is an unmatched
- *   group begin (it keeps a group nesting counter), so the entire string
- *   "Hello" will be removed as a single undo operation.  Redo will also cause
- *   the entire string to be inserted as a single redo operation.
- *
- *   Although it is allowable for a group begin record to be unmatched, it is
- *   not allowable for a group end record to be unmatched.  So, the following
- *   log is impossible:
- *
- *     E(42)P(Hello)R
- *                  /\
- *
- * Example:
- *   (Hello)RI(Goodbye)
- *          /\
- *
- * Translation:
- *   The user typed "HelloGoodbye", then undid "Goodbye" so that only "Hello"
- *   remains.
- *
- * Example:
- *   (Hello)RR(olleH)
- *          /\
- *
- * Translation:
- *   The user typed "Hello", then backspaced through it, then undid the
- *   backspacing so that the end buffer contents are "Hello".
- *
- * Example:
- *  (Hell)RI(o)R(olleH)
- *        /\
- *
- * Translation:
- *   The user typed "Hello", then backspaced through it, then undid the
- *   backspacing and the "o", so that the end buffer contents are "Hell".
+ * Record : Meaning
+ * =======:============================================
+ * B      : Group begin.
+ * E      : Group end.
+ * P(n,m) : Buffer position change.
+ * I(s)   : Insert string s before point.
+ * Y(s)   : Insert (yank) string s after point.
+ * R(s)   : Remove string s before point.
+ * D(s)   : Remove (delete) string s after point.
  *
  ******************************************************************************/
 
@@ -191,6 +68,7 @@
 #define HST_HDR_LEN	9
 
 /* History record tag values. */
+#define HST_TAG_NONE	0
 #define HST_TAG_GRP_BEG	1
 #define HST_TAG_GRP_END	2
 #define HST_TAG_POS	3
@@ -388,7 +266,9 @@ hist_new(cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t *a_realloc,
 
     retval = (cw_hist_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_hist_t));
     buf_new(&retval->h, a_alloc, a_realloc, a_dealloc, a_arg);
+    mkr_new(&retval->hbeg, &retval->h);
     mkr_new(&retval->hcur, &retval->h);
+    mkr_new(&retval->hend, &retval->h);
     mkr_new(&retval->htmp, &retval->h);
     retval->hbpos = 0;
     retval->gdepth = 0;
@@ -407,8 +287,10 @@ hist_delete(cw_hist_t *a_hist)
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
 
-    mkr_delete(&a_hist->hcur);
     mkr_delete(&a_hist->htmp);
+    mkr_delete(&a_hist->hend);
+    mkr_delete(&a_hist->hcur);
+    mkr_delete(&a_hist->hbeg);
     buf_delete(&a_hist->h);
     cw_opaque_dealloc(a_hist->dealloc, a_hist->arg, a_hist, sizeof(cw_hist_t));
 }
