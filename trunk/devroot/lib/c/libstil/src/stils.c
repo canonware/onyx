@@ -21,32 +21,28 @@
  * Using a ring makes it relatively simple to make all the stack operations
  * GC-safe.  One disadvantage of using rings, however, is that the stils_roll()
  * re-orders stack elements, and over time, the elements become jumbled enough
- * that it is possible that additional cache misses result.
- *
- * XXX A reasonably simple solution to the ring re-ordering problem is to
- * maintain rings of free elements on a per-chunk basis.  This will cause re-use
- * to occur mainly in the first-listed chunk, so that other chunks will tend to
- * become entirely free.  This allows other chunks to be freed, as well as
- * causing adjacent stack elements to be more contiguous in memory.
+ * that it is possible that additional cache misses result.  However, since only
+ * a relatively small number of spare elements is kept, the cache effects of
+ * jumbling should be negligible under normal conditions.
  *
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
 
 void
-stils_new(cw_stils_t *a_stils)
+stils_new(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 {
 	_cw_check_ptr(a_stils);
 
+	a_stils->stilt = a_stilt;
 	ql_new(&a_stils->stack);
-	qs_new(&a_stils->chunks);
+	ql_new(&a_stils->chunks);
 
 	a_stils->count = 0;
+	a_stils->nspare = 0;
 
 	ql_elm_new(&a_stils->under, link);
-	ql_first(&a_stils->stack) = &a_stils->under;
-	/* Fill spares. */
-	stils_p_spares_create(a_stils);
+	ql_head_insert(&a_stils->stack, &a_stils->under, link);
 
 #ifdef _LIBSTIL_DBG
 	a_stils->magic = _CW_STILS_MAGIC;
@@ -68,10 +64,11 @@ stils_delete(cw_stils_t *a_stils)
 	if (a_stils->count > 0)
 		stils_npop(a_stils, a_stils->count);
 
-	while (qs_top(&a_stils->chunks) != NULL) {
-		stilsc = qs_top(&a_stils->chunks);
-		qs_pop(&a_stils->chunks, link);
-		_cw_free(stilsc);
+	while (ql_first(&a_stils->chunks) != NULL) {
+		stilsc = ql_first(&a_stils->chunks);
+		ql_remove(&a_stils->chunks, stilsc, link);
+		stila_stilsc_put(stil_stila_get(stilt_stil_get(a_stils->stilt)),
+		    stilsc);
 	}
 
 #ifdef _LIBSTILS_DBG
@@ -206,27 +203,52 @@ void
 stils_p_spares_create(cw_stils_t *a_stils)
 {
 	cw_stilsc_t	*stilsc;
-	cw_uint32_t	nstilso, i;
+	cw_uint32_t	i;
 
 	/*
-	 * create a new stilsc, add it to the stilsc qs, and add its stilso's to
+	 * create a new stilsc, add it to the stilsc ql, and add its stilso's to
 	 * the stack.
 	 */
-	stilsc = (cw_stilsc_t
-	    *)_cw_malloc(_CW_STILSC_O2SIZEOF(_LIBSTIL_STILSC_COUNT));
+	stilsc =
+	    stila_stilsc_get(stil_stila_get(stilt_stil_get(a_stils->stilt)));
 
-#ifdef _LIBSTIL_DBG
-	stilsc->magic = _CW_STILSC_MAGIC;
-#endif
-	qs_elm_new(stilsc, link);
+	ql_elm_new(stilsc, link);
+
+	stilsc->nused = 0;
 
 	qr_new(&stilsc->objects[0], link);
-	for (i = 1, nstilso = _LIBSTIL_STILSC_COUNT; i < nstilso; i++) {
+	stilsc->objects[0].stilsc = stilsc;
+	for (i = 1; i < _LIBSTIL_STILSC_COUNT; i++) {
 		qr_new(&stilsc->objects[i], link);
 		qr_after_insert(&stilsc->objects[i - 1],
 		    &stilsc->objects[i], link);
+		stilsc->objects[i].stilsc = stilsc;
 	}
 
-	qs_push(&a_stils->chunks, stilsc, link);
+	ql_tail_insert(&a_stils->chunks, stilsc, link);
 	qr_meld(ql_first(&a_stils->stack), &stilsc->objects[0], link);
+
+	a_stils->nspare += _LIBSTIL_STILSC_COUNT;
+}
+
+void
+stils_p_spares_destroy(cw_stils_t *a_stils, cw_stilsc_t *a_stilsc)
+{
+	cw_uint32_t	i;
+
+	/*
+	 * Iterate through the objects and remove them from the stils-wide
+	 * object ring.
+	 */
+	for (i = 0; i < _LIBSTIL_STILSC_COUNT; i++)
+		qr_remove(&a_stilsc->objects[i], link);
+
+	/* Remove the stilsc from the stils's list of stilsc's. */
+	ql_remove(&a_stils->chunks, a_stilsc, link);
+
+	/* Deallocate. */
+	stila_stilsc_put(stil_stila_get(stilt_stil_get(a_stils->stilt)),
+	    a_stilsc);
+
+	a_stils->nspare -= _LIBSTIL_STILSC_COUNT;
 }

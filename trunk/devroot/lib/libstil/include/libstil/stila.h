@@ -21,6 +21,7 @@ struct cw_stila_s {
 	/* Various pools. */
 	cw_pool_t	chi_pool;
 	cw_pool_t	dicto_pool;
+	cw_pool_t	stilsc_pool;
 
 	/*
 	 * Dictionary that contains stats and flags, available from within the
@@ -80,3 +81,8 @@ void	stila_threshold_set(cw_stila_t *a_stila, cw_uint32_t a_threshold);
 	(cw_stiloe_dicto_t *)pool_get(&(a_stila)->dicto_pool)
 #define	stila_dicto_put(a_stila, a_dicto)				\
 	pool_put(&(a_stila)->dicto_pool, (a_dicto))
+
+#define	stila_stilsc_get(a_stila)					\
+	(cw_stilsc_t *)pool_get(&(a_stila)->stilsc_pool)
+#define	stila_stilsc_put(a_stila, a_stilsc)				\
+	pool_put(&(a_stila)->stilsc_pool, (a_stilsc))

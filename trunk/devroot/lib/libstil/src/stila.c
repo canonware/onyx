@@ -125,10 +125,13 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		pool_new(&a_stila->dicto_pool, NULL, sizeof(cw_stiloe_dicto_t));
 		try_stage = 3;
 
+		pool_new(&a_stila->stilsc_pool, NULL, sizeof(cw_stilsc_t));
+		try_stage = 4;
+
 		ql_new(&a_stila->seq_set);
 		a_stila->white = FALSE;
 		mq_new(&a_stila->gc_mq, NULL, sizeof(cw_stilam_t));
-		try_stage = 4;
+		try_stage = 5;
 
 #ifdef _LIBSTIL_DBG
 		a_stila->magic = _CW_STILA_MAGIC;
@@ -158,7 +161,7 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 
 		/* Initialize gcdict. */
 		gcdict_l_populate(&a_stila->gcdict, a_stila);
-		try_stage = 5;
+		try_stage = 6;
 
 		/*
 		 * Cache pointers to gcdict objects and set their initial
@@ -230,14 +233,16 @@ stila_new(cw_stila_t *a_stila, cw_stil_t *a_stil)
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 		a_stila->gc_thd = thd_new(stila_p_gc_entry, (void *)a_stila);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
-		try_stage = 6;
+		try_stage = 7;
 	}
 	xep_catch(_CW_XEPV_OOM) {
 		switch (try_stage) {
+		case 7:
 		case 6:
 		case 5:
-		case 4:
 			mq_delete(&a_stila->gc_mq);
+		case 4:
+			pool_delete(&a_stila->stilsc_pool);
 		case 3:
 			pool_delete(&a_stila->dicto_pool);
 		case 2:
@@ -262,6 +267,7 @@ stila_delete(cw_stila_t *a_stila)
 	thd_join(a_stila->gc_thd);
 	mq_delete(&a_stila->gc_mq);
 
+	pool_delete(&a_stila->stilsc_pool);
 	pool_delete(&a_stila->dicto_pool);
 	pool_delete(&a_stila->chi_pool);
 }
@@ -822,6 +828,7 @@ stila_p_collect(cw_stila_t *a_stila, cw_bool_t a_shutdown)
 	/* Drain the pools. */
 	pool_drain(&a_stila->chi_pool);
 	pool_drain(&a_stila->dicto_pool);
+	pool_drain(&a_stila->stilsc_pool);
 
 	if (a_shutdown) {
 		/*

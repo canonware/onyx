@@ -9,17 +9,8 @@
  *
  ******************************************************************************/
 
-/* Calculate stilsc size, given the number of stilso's. */
-#define _CW_STILSC_O2SIZEOF(n)						\
-	(sizeof(cw_stilsc_t) + (((n) - 1) * sizeof(cw_stilso_t)))
-
-/* Calculate number of stilso's per stilsc, given stilsc size. */
-#define _CW_STILSC_SIZEOF2O(s)						\
-	((((s) - sizeof(cw_stilsc_t)) / sizeof(cw_stilso_t)) + 1)
-
 #ifdef _LIBSTIL_DBG
 #define _CW_STILS_MAGIC 0x0ea67890
-#define _CW_STILSC_MAGIC 0x543e2aff
 #endif
 
 typedef struct cw_stils_s cw_stils_t;
@@ -28,30 +19,28 @@ typedef struct cw_stilso_s cw_stilso_t;
 struct cw_stilso_s {
 	cw_stilo_t		stilo;	/* Payload.  Must be first field. */
 	ql_elm(cw_stilso_t)	link;	/* Stack/spares linkage. */
+	cw_stilsc_t		*stilsc; /* Container stilsc. */
 };
 
 struct cw_stilsc_s {
-#ifdef _LIBSTIL_DBG
-	cw_uint32_t		magic;
-#endif
-	qs_elm(cw_stilsc_t)	link;	/* Linkage for the stack of stilsc's. */
+	ql_elm(cw_stilsc_t)	link;	/* Linkage for the stack of stilsc's. */
 
-	/*
-	 * Must be last field, since it is used for array indexing of
-	 * stilso's beyond the end of the structure.
-	 */
-	cw_stilso_t		objects[1];
+	cw_uint32_t		nused;	/* Number of objects in use. */
+
+	cw_stilso_t		objects[_LIBSTIL_STILSC_COUNT];
 };
 
 struct cw_stils_s {
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t		magic;
 #endif
+	cw_stilt_t		*stilt;
 	ql_head(cw_stilso_t)	stack;	/* Stack. */
 	cw_uint32_t		count;	/* Number of stack elements. */
+	cw_uint32_t		nspare;	/* Number of spare elements. */
 	cw_stilso_t		under;	/* Not used, just under stack bottom. */
 
-	qs_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
+	ql_head(cw_stilsc_t)	chunks;	/* List of stilsc's. */
 
 	/*
 	 * Used for remembering the current state of reference iteration.
@@ -59,7 +48,7 @@ struct cw_stils_s {
 	cw_stilso_t		*ref_stilso;
 };
 
-void		stils_new(cw_stils_t *a_stils);
+void		stils_new(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
 void		stils_delete(cw_stils_t *a_stils);
 #define		stils_count(a_stils) (a_stils)->count
 cw_uint32_t	stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
@@ -77,8 +66,10 @@ cw_stilo_t	*stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index);
 cw_stilo_t	*stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
 #endif
 
-/* Private, but the inline functions need its prototype. */
+/* Private, but the inline functions need their prototypes. */
 void		stils_p_spares_create(cw_stils_t *a_stils);
+void		stils_p_spares_destroy(cw_stils_t *a_stils, cw_stilsc_t
+    *a_stilsc);
 
 #if (defined(_CW_USE_INLINES) || defined(_STILS_C_))
 _CW_INLINE cw_stilo_t *
@@ -95,7 +86,9 @@ stils_push(cw_stils_t *a_stils)
 	stilso = qr_prev(ql_first(&a_stils->stack), link);
 	stilo_no_new(&stilso->stilo);
 	ql_first(&a_stils->stack) = stilso;
+	stilso->stilsc->nused++;
 	a_stils->count++;
+	a_stils->nspare--;
 
 	return &stilso->stilo;
 }
@@ -122,8 +115,9 @@ stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 		stilo_no_new(&stilso->stilo);
 		ql_first(&a_stils->stack) = stilso;
 	}
+	stilso->stilsc->nused++;
 	a_stils->count++;
-
+	a_stils->nspare--;
 
 	return &stilso->stilo;
 }
@@ -144,7 +138,12 @@ stils_pop(cw_stils_t *a_stils)
 
 	stilso = ql_first(&a_stils->stack);
 	ql_first(&a_stils->stack) = qr_next(ql_first(&a_stils->stack), link);
+	stilso->stilsc->nused--;
 	a_stils->count--;
+	a_stils->nspare++;
+	if (stilso->stilsc->nused == 0 && a_stils->nspare >
+	    2 * _LIBSTIL_STILSC_COUNT)
+		stils_p_spares_destroy(a_stils, stilso->stilsc);
 
 	retval = FALSE;
 	RETURN:
@@ -155,7 +154,7 @@ _CW_INLINE cw_bool_t
 stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 {
 	cw_bool_t	retval;
-	cw_stilso_t	*top;
+	cw_stilso_t	*top, *stilso;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
@@ -168,8 +167,16 @@ stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	}
 
 	/* Get a pointer to what will be the new stack top. */
-	for (i = 0, top = ql_first(&a_stils->stack); i < a_count; i++)
+	for (i = 0, top = ql_first(&a_stils->stack); i < a_count; i++) {
+		stilso = top;
 		top = qr_next(top, link);
+
+		stilso->stilsc->nused--;
+		a_stils->nspare++;
+		if (stilso->stilsc->nused == 0 && a_stils->nspare > 2 *
+		    _LIBSTIL_STILSC_COUNT)
+			stils_p_spares_destroy(a_stils, stilso->stilsc);
+	}
 
 	ql_first(&a_stils->stack) = top;
 	a_stils->count -= a_count;

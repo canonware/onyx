@@ -212,16 +212,16 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		retval->tok_str = retval->buffer;
 		try_stage = 1;
 
-		stils_new(&retval->estack);
+		stils_new(&retval->estack, retval);
 		try_stage = 2;
 
-		stils_new(&retval->ostack);
+		stils_new(&retval->ostack, retval);
 		try_stage = 3;
 
-		stils_new(&retval->dstack);
+		stils_new(&retval->dstack, retval);
 		try_stage = 4;
 
-		stils_new(&retval->tstack);
+		stils_new(&retval->tstack, retval);
 		try_stage = 5;
 
 #ifdef _LIBSTIL_DBG
