@@ -10,21 +10,24 @@ OBJDIR="onyx_obj"
 
 PREFIX=`pwd`/onyx_prefix
 
-CONFIGURE_FLAGS="--with-libedit-prefix=/space/local"
+CONFIGURE_FLAGS=
+#CONFIGURE_FLAGS="--with-libedit-prefix=/usr/local"
+
+#export CC=gcc30
 
 #
 # Set up.
 #
-echo "rm -rf $PREFIX"
+echo "===> rm -rf $PREFIX"
 rm -rf $PREFIX
 
-echo "rm -rf $OBJDIR"
+echo "===> rm -rf $OBJDIR"
 rm -rf $OBJDIR
 
-echo "mkdir $OBJDIR"
+echo "===> mkdir $OBJDIR"
 mkdir $OBJDIR
 
-echo "cd $OBJDIR"
+echo "===> cd $OBJDIR"
 cd $OBJDIR
 
 #
@@ -47,8 +50,8 @@ for d in 0 1 ; do
     echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
     ../$SRCDIR/configure $conf --prefix=$PREFIX
     if [ "x$?" != "x0" ] ; then
-        echo "===> Error in configure"
-        echo "configure options: $conf"
+        echo "===>> Error in configure"
+        echo "===>> configure options: $conf"
         exit 2
     fi
 
@@ -57,8 +60,8 @@ for d in 0 1 ; do
         echo "===> $COOK $COOKPAR $i"
         $COOK $COOKPAR $i
         if [ "x$?" != "x0" ] ; then
-            echo "===> Error cooking $i"
-            echo "configure options: $conf"
+            echo "===>> Error cooking $i"
+            echo "===>> configure options: $conf"
             exit 2
         fi
     done
@@ -67,16 +70,23 @@ for d in 0 1 ; do
         echo "===> $COOK $i"
         $COOK $i
         if [ "x$?" != "x0" ] ; then
-            echo "===> Error cooking $i"
-            echo "configure options: $conf"
+            echo "===>> Error cooking $i"
+            echo "===>> configure options: $conf"
             exit 2
         fi
     done
     echo "===> find $PREFIX -type f |grep ."
     find $PREFIX -type f |grep .
     if [ "x$?" = "x0" ] ; then
-        echo "===> uninstall didn't clean up well enough"
-        echo "configure options: $conf"
+        echo "===>> uninstall didn't clean up well enough"
+        echo "===>> configure options: $conf"
+        exit 2
+    fi
+    echo "===> find $PREFIX -type l |grep ."
+    find $PREFIX -type l |grep .
+    if [ "x$?" = "x0" ] ; then
+        echo "===>> uninstall didn't clean up well enough"
+        echo "===>> configure options: $conf"
         exit 2
     fi
 done
@@ -106,7 +116,7 @@ for d in 0 1 ; do
         conf_d="--disable-real"
         ;;
     esac
-for e in 0 1 2 ; do
+for e in 0 1 ; do
     # --enable-debug, --enable-profile
     case $e in
     0)
@@ -115,18 +125,18 @@ for e in 0 1 2 ; do
     1)
         conf_e="--enable-debug"
         ;;
-    2)
-        conf_e="--enable-profile"
-        ;;
+#    2)
+#        conf_e="--enable-profile"
+#        ;;
     esac
 for f in 0 1 ; do
-    # --disable-libedit
+    # --disable-modprompt
     case $f in
     0)
         conf_f=""
         ;;
     1)
-        conf_f="--disable-libedit"
+        conf_f="--disable-modprompt"
         ;;
     esac
 for g in 0 1 2 ; do
@@ -158,21 +168,20 @@ for h in 0 1 ; do
     echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
     ../$SRCDIR/configure $conf --prefix=$PREFIX
     if [ "x$?" != "x0" ] ; then
-        echo "===> Error in configure"
-        echo "configure options: $conf"
+        echo "===>> Error in configure"
+        echo "===>> configure options: $conf"
         exit 2
     fi
 
     # Libraries.
     for i in $libs ; do
-        echo "===> $i"
         # Parallelizable.
         for j in $i ; do
             echo "===> $COOK $COOKPAR $j"
             $COOK $COOKPAR $j
             if [ "x$?" != "x0" ] ; then
-                echo "===> Error cooking $j"
-                echo "configure options: $conf"
+                echo "===>> Error cooking $j"
+                echo "===>> configure options: $conf"
                 exit 2
             fi
         done
@@ -181,30 +190,36 @@ for h in 0 1 ; do
             echo "===> $COOK $j"
             $COOK $j
             if [ "x$?" != "x0" ] ; then
-                echo "===> Error cooking $j"
-                echo "configure options: $conf"
+                echo "===>> Error cooking $j"
+                echo "===>> configure options: $conf"
                 exit 2
             fi
         done
         echo "===> find $PREFIX -type f |grep ."
         find $PREFIX -type f |grep .
         if [ "x$?" = "x0" ] ; then
-            echo "===> uninstall didn't clean up well enough"
-            echo "configure options: $conf"
+            echo "===>> uninstall didn't clean up well enough"
+            echo "===>> configure options: $conf"
+            exit 2
+        fi
+        echo "===> find $PREFIX -type l |grep ."
+        find $PREFIX -type l |grep .
+        if [ "x$?" = "x0" ] ; then
+            echo "===>> uninstall didn't clean up well enough"
+            echo "===>> configure options: $conf"
             exit 2
         fi
     done
 
     # Binaries.
     for i in $bins ; do
-        echo "===> $i"
         # Parallelizable.
         for j in $i ; do
             echo "===> $COOK $COOKPAR $j"
             $COOK $COOKPAR $j
             if [ "x$?" != "x0" ] ; then
-                echo "===> Error cooking $j"
-                echo "configure options: $conf"
+                echo "===>> Error cooking $j"
+                echo "===>> configure options: $conf"
                 exit 2
             fi
         done
@@ -213,8 +228,8 @@ for h in 0 1 ; do
             echo "===> $COOK $j"
             $COOK $j
             if [ "x$?" != "x0" ] ; then
-                echo "===> Error cooking $j"
-                echo "configure options: $conf"
+                echo "===>> Error cooking $j"
+                echo "===>> configure options: $conf"
                 exit 2
             fi
         done
@@ -223,8 +238,8 @@ for h in 0 1 ; do
         echo "===> $PREFIX/bin/$i -h"
         $PREFIX/bin/$i -h
         if [ "x$?" != "x0" ] ; then
-            echo "===> Error running $i"
-            echo "configure options: $conf"
+            echo "===>> Error running $i"
+            echo "===>> configure options: $conf"
             exit 2
         fi
 
@@ -232,46 +247,60 @@ for h in 0 1 ; do
             echo "===> $COOK $j"
             $COOK $j
             if [ "x$?" != "x0" ] ; then
-                echo "===> Error cooking $j"
-                echo "configure options: $conf"
+                echo "===>> Error cooking $j"
+                echo "===>> configure options: $conf"
                 exit 2
             fi
         done
         echo "===> find $PREFIX -type f |grep ."
         find $PREFIX -type f |grep .
         if [ "x$?" = "x0" ] ; then
-            echo "===> uninstall didn't clean up well enough"
-            echo "configure options: $conf"
+            echo "===>> uninstall didn't clean up well enough"
+            echo "===>> configure options: $conf"
+            exit 2
+        fi
+        echo "===> find $PREFIX -type l |grep ."
+        find $PREFIX -type l |grep .
+        if [ "x$?" = "x0" ] ; then
+            echo "===>> uninstall didn't clean up well enough"
+            echo "===>> configure options: $conf"
             exit 2
         fi
     done
 
     # General targets.
     # Parallelizable.
-    for i in bins libs check ; do
+    for i in bins mods libs check ; do
         echo "===> $COOK $COOKPAR $i"
         $COOK $COOKPAR $i
         if [ "x$?" != "x0" ] ; then
-            echo "===> Error cooking $i"
-            echo "configure options: $conf"
+            echo "===>> Error cooking $i"
+            echo "===>> configure options: $conf"
             exit 2
         fi
     done
     # Non-parallelizable.
-    for i in install uninstall distclean ; do
+    for i in install install uninstall distclean ; do
         echo "===> $COOK $i"
         $COOK $i
         if [ "x$?" != "x0" ] ; then
-            echo "===> Error cooking $i"
-            echo "configure options: $conf"
+            echo "===>> Error cooking $i"
+            echo "===>> configure options: $conf"
             exit 2
         fi
     done
     echo "===> find $PREFIX -type f |grep ."
     find $PREFIX -type f |grep .
     if [ "x$?" = "x0" ] ; then
-        echo "===> uninstall didn't clean up well enough"
-        echo "configure options: $conf"
+        echo "===>> uninstall didn't clean up well enough"
+        echo "===>> configure options: $conf"
+        exit 2
+    fi
+    echo "===> find $PREFIX -type l |grep ."
+    find $PREFIX -type l |grep .
+    if [ "x$?" = "x0" ] ; then
+        echo "===>> uninstall didn't clean up well enough"
+        echo "===>> configure options: $conf"
         exit 2
     fi
 done
@@ -281,6 +310,11 @@ done
 done
 done
 
+echo "===> cd .."
 cd ..
+
+echo "===> rm -rf $OBJDIR"
 rm -rf $OBJDIR
+
+echo "===> rm -rf $PREFIX"
 rm -rf $PREFIX
