@@ -259,7 +259,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		 */
 		currenterror_l_populate(&retval->currenterror, retval);
 		errordict_l_populate(&retval->errordict, retval);
-		stilo_dict_new(&retval->userdict, stilt_stil_get(retval),
+		stilo_dict_new(&retval->userdict, a_stil, FALSE,
 		    _CW_STILT_USERDICT_SIZE);
 
 		/* Create threaddict. */
@@ -541,15 +541,15 @@ stilt_loop(cw_stilt_t *a_stilt)
 					stilo_dup(tstilo, &array[i]);
 					break;
 				case STILOT_OPERATOR:
-					if (stilo_operator_fast(&array[i]) ==
-					    FALSE) {
+					if (stilo_l_operator_fast_op_get(&array[i])
+					    == FALSE) {
 						stilo_operator_f(&array[i])
 						    (a_stilt);
 						break;
 					}
 
 					/* Fast operator. */
-					switch (stilo_operator_stiln(&array[i])) {
+					switch (stilo_l_operator_fast_op_stiln(&array[i])) {
 					case STILN_add: {
 						cw_stilo_t	*a, *b;
 
@@ -872,7 +872,7 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 */
 	errordict = stils_push(&a_stilt->tstack);
 	key = stils_push(&a_stilt->tstack);
-	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(STILN_errordict),
+	stilo_name_new(key, a_stilt->stil, stiln_str(STILN_errordict),
 	    stiln_len(STILN_errordict), TRUE);
 	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
 		stils_npop(&a_stilt->tstack, 2);
@@ -889,8 +889,8 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 * Find handler corresponding to error.
 	 */
 	stiln = stilte_stiln(a_error);
-	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(stiln),
-	    stiln_len(stiln), TRUE);
+	stilo_name_new(key, a_stilt->stil, stiln_str(stiln), stiln_len(stiln),
+	    TRUE);
 
 	/*
 	 * Push the object being executed onto ostack unless this is an
@@ -1182,8 +1182,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->index, "empty hex string");
 				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, stilt_stil_get(a_stilt),
-				    0);
+				stilo_string_new(stilo, a_stilt->stil,
+				    a_stilt->locking, 0);
 				break;
 			case '~':
 				a_stilt->state = STILTTS_BASE64_STRING;
@@ -1505,9 +1505,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					    a_stilt->index, "string");
 					token = TRUE;
 					stilo = stils_push(&a_stilt->ostack);
-					stilo_string_new(stilo,
-					    stilt_stil_get(a_stilt),
-					    a_stilt->index);
+					stilo_string_new(stilo, a_stilt->stil,
+					    a_stilt->locking, a_stilt->index);
 					stilo_string_set(stilo, 0,
 					    a_stilt->tok_str, a_stilt->index);
 
@@ -1717,8 +1716,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->index, "literal string");
 				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, stilt_stil_get(a_stilt),
-				    a_stilt->index);
+				stilo_string_new(stilo, a_stilt->stil,
+				    a_stilt->locking, a_stilt->index);
 				stilo_string_set(stilo, 0, a_stilt->tok_str,
 				    a_stilt->index);
 
@@ -1741,8 +1740,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->index, "hex string");
 				token = TRUE;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, stilt_stil_get(a_stilt),
-				    (a_stilt->index + 1) >> 1);
+				stilo_string_new(stilo, a_stilt->stil,
+				    a_stilt->locking, (a_stilt->index + 1) >>
+				    1);
 				/*
 				 * Set the character following the string in
 				 * case the final hex character is missing.
@@ -1927,8 +1927,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 
 				ngroups = a_stilt->index >> 2;
 				stilo = stils_push(&a_stilt->ostack);
-				stilo_string_new(stilo, stilt_stil_get(a_stilt),
-				    ngroups * 3 + a_stilt->m.b.nodd);
+				stilo_string_new(stilo, a_stilt->stil,
+				    a_stilt->locking, ngroups * 3 +
+				    a_stilt->m.b.nodd);
 
 				str = stilo_string_get(stilo);
 				for (j = 0; j < ngroups; j++) {
@@ -2117,7 +2118,7 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 					 * practice, just bad practice.
 					 */
 
-	stilo_name_new(&key, stilt_stil_get(a_stilt), a_token, a_len, TRUE);
+	stilo_name_new(&key, a_stilt->stil, a_token, a_len, TRUE);
 
 	stilo = stils_push(&a_stilt->estack);
 	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
@@ -2150,7 +2151,7 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	nelements = i;
 
 	tstilo = stils_push(&a_stilt->tstack);
-	stilo_array_new(tstilo, stilt_stil_get(a_stilt), nelements);
+	stilo_array_new(tstilo, a_stilt->stil, a_stilt->locking, nelements);
 	stilo_attrs_set(tstilo, STILOA_EXECUTABLE);
 	arr = stilo_array_get(tstilo);
 
@@ -2185,7 +2186,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			 * and run the execution loop.
 			 */
 			stilo = stils_push(&a_stilt->estack);
-			stilo_name_new(stilo, stilt_stil_get(a_stilt),
+			stilo_name_new(stilo, a_stilt->stil,
 			    a_stilt->tok_str, a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
@@ -2194,8 +2195,8 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		} else {
 			/* Push the name object onto the data stack. */
 			stilo = stils_push(&a_stilt->ostack);
-			stilo_name_new(stilo, stilt_stil_get(a_stilt),
-			    a_stilt->tok_str, a_stilt->index, FALSE);
+			stilo_name_new(stilo, a_stilt->stil, a_stilt->tok_str,
+			    a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 			stilt_p_reset(a_stilt);
 		}
@@ -2203,7 +2204,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 	case ACTION_LITERAL:
 		/* Push the name object onto the data stack. */
 		stilo = stils_push(&a_stilt->ostack);
-		stilo_name_new(stilo, stilt_stil_get(a_stilt), a_stilt->tok_str,
+		stilo_name_new(stilo, a_stilt->stil, a_stilt->tok_str,
 		    a_stilt->index, FALSE);
 		stilt_p_reset(a_stilt);
 		break;
@@ -2215,7 +2216,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		 * stack and push the value onto the data stack.
 		 */
 		key = stils_push(&a_stilt->estack);
-		stilo_name_new(key, stilt_stil_get(a_stilt), a_stilt->tok_str,
+		stilo_name_new(key, a_stilt->stil, a_stilt->tok_str,
 		    a_stilt->index, FALSE);
 		stilt_p_reset(a_stilt);
 

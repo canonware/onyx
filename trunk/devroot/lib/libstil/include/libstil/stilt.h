@@ -98,10 +98,11 @@ struct cw_stilt_s {
 	cw_uint32_t	ref_iter;
 
 	/*
-	 * TRUE  : Global allocation mode.
-	 * FALSE : Local allocation mode.
+	 * TRUE  : New array, dict, file, and string objects are implicitly
+	 *         locked.
+	 * FALSE : No implicit locking for new objects.
 	 */
-	cw_bool_t	global:1;
+	cw_bool_t	locking:1;
 
 	/*
 	 * Stacks.
@@ -252,14 +253,10 @@ cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define	stilt_error_get(a_stilt) (a_stilt)->error
 #define	stilt_error_set(a_stilt, a_stilte) (a_stilt)->error = (a_stilte)
 
-/*
- * If TRUE, allocation for the stilt is global.  Otherwise, allocation is
- * local.
- */
-#define	stilt_currentglobal(a_stilt)					\
-	(a_stilt)->global
-#define	stilt_setglobal(a_stilt, a_global) do {				\
-	(a_stilt)->global = (a_global);					\
+#define	stilt_currentlocking(a_stilt)					\
+	(a_stilt)->locking
+#define	stilt_setlocking(a_stilt, a_locking) do {			\
+	(a_stilt)->locking = (a_locking);				\
 } while (0);
 
 #define	stilt_chi_get(a_stilt)						\

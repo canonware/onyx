@@ -78,14 +78,6 @@ typedef enum {
 	STILOA_EXECUTABLE
 }	cw_stiloa_t;
 
-/* Permissions. */
-typedef enum {
-	STILOP_UNLIMITED,
-	STILOP_READONLY,
-	STILOP_EXECUTEONLY,
-	STILOP_NONE
-}	cw_stilop_t;
-
 /*
  * Main object structure.
  */
@@ -132,11 +124,11 @@ struct cw_stilo_s {
 	 */
 	cw_stiloa_t	attrs:1;
 	/*
-	 * Permissions.  A composite object has read and execute permissions.
-	 * Permissions for dict objects are shared accross all references, so
-	 * are stored in the stiloe.
+	 * TRUE if the bind operator has processed this array.  This is used to
+	 * avoid infinite recursion in the bind operator when binding recursive
+	 * procedures.
 	 */
-	cw_stilop_t	perms:2;
+	cw_bool_t	array_bound:1;
 	/*
 	 * If TRUE, there is a breakpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
@@ -156,10 +148,10 @@ struct cw_stilo_s {
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b);
 
 /*
- * XXX This code is only GC-safe as long as o.stiloe is memcpy()ed at or before
- * the time that the type is set.  This is probably okay with any compiler/OS
- * combination available, but the memcpy() interface does not guarantee that
- * bytes are copied in ascending order.
+ * This code is only GC-safe as long as o.stiloe is memcpy()ed at or before the
+ * time that the type is set.  This is probably okay with any compiler/OS
+ * combination available, but the memcpy() interface does not explicitly
+ * guarantee that bytes are copied in ascending order.
  *
  * To make this code safe even if the memcpy() does strange things, the memcpy()
  * call needs to be surrounded by thd_crit_{enter,leave}().
@@ -173,19 +165,13 @@ cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b);
 	(a_to)->watchpoint = FALSE;					\
 } while (0)
 	
-void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
-
 cw_stiloe_t	*stilo_stiloe_get(cw_stilo_t *a_stilo);
 
 #define		stilo_type_get(a_stilo)	(a_stilo)->type
-cw_bool_t	stilo_global_get(cw_stilo_t *a_stilo);
-cw_bool_t	stilo_local_get(cw_stilo_t *a_stilo);
+cw_bool_t	stilo_lcheck(cw_stilo_t *a_stilo);
 
 #define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
 #define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
-
-cw_stilop_t	stilo_perms_get(cw_stilo_t *a_stilo);
-cw_stilte_t	stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms);
 
 cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
     a_syntactic, cw_bool_t a_newline);
@@ -210,9 +196,10 @@ cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
  * array.
  */
 void		stilo_array_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
-    cw_uint32_t a_len);
+    cw_bool_t a_locking, cw_uint32_t a_len);
 cw_stilte_t	stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_array, cw_stil_t *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len);
+    *a_array, cw_stil_t *a_stil, cw_bool_t a_locking, cw_uint32_t a_offset,
+    cw_uint32_t a_len);
 cw_stilte_t	stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
 cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
@@ -242,10 +229,10 @@ cw_bool_t	stilo_condition_timedwait(cw_stilo_t *a_stilo, cw_stilo_t
 /*
  * dict.
  */
-void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
-    cw_uint32_t a_dict_size);
+void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t
+    a_locking, cw_uint32_t a_dict_size);
 cw_stilte_t	stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from,
-    cw_stil_t *a_stil);
+    cw_stil_t *a_stil, cw_bool_t a_locking);
 void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
 void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const
@@ -263,7 +250,8 @@ typedef cw_sint32_t cw_stilo_file_read_t (void *a_arg, cw_stilo_t *a_file,
 typedef cw_bool_t cw_stilo_file_write_t (void *a_arg, cw_stilo_t *a_file, const
     cw_uint8_t *a_str, cw_uint32_t a_len);
 
-void		stilo_file_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil);
+void		stilo_file_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t
+    a_locking);
 void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
 void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_stilo_file_read_t
     *a_read, cw_stilo_file_write_t *a_write, void *a_arg);
@@ -274,7 +262,7 @@ cw_stilte_t	stilo_file_close(cw_stilo_t *a_stilo);
 cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len,
     cw_uint8_t *r_str);
 cw_stilte_t	stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
-    cw_stilo_t *r_string, cw_bool_t *r_eof);
+    cw_bool_t a_locking, cw_stilo_t *r_string, cw_bool_t *r_eof);
 cw_stilte_t	stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
 cw_stilte_t	stilo_file_output(cw_stilo_t *a_stilo, const char *a_format,
@@ -373,17 +361,16 @@ cw_uint32_t	stilo_name_len_get(cw_stilo_t *a_stilo);
  */
 void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op,
     cw_stiln_t a_stiln);
-#define		stilo_operator_fast(a_stilo) (a_stilo)->fast_op
 #define		stilo_operator_f(a_stilo) (a_stilo)->o.operator.f
-#define		stilo_operator_stiln(a_stilo) (a_stilo)->op_code
 
 /*
  * string.
  */
 void		stilo_string_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil,
-    cw_uint32_t a_len);
+    cw_bool_t a_locking, cw_uint32_t a_len);
 cw_stilte_t	stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t
-    *a_string, cw_stil_t *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len);
+    *a_string, cw_stil_t *a_stil, cw_bool_t a_locking, cw_uint32_t a_offset,
+    cw_uint32_t a_len);
 cw_stilte_t	stilo_string_copy(cw_stilo_t *a_to, cw_stilo_t *a_from);
 cw_uint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
 cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);

@@ -47,7 +47,8 @@ errordict_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 #define NENTRIES							\
 	(sizeof(errordict_ops) / sizeof(cw_stiln_t))
 
-	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), NENTRIES);
+	stilo_dict_new(a_dict, stilt_stil_get(a_stilt),
+	    stilt_currentlocking(a_stilt), NENTRIES);
 
 	for (i = 0; i < NENTRIES; i++) {
 		stilo_name_new(&name, stilt_stil_get(a_stilt),
@@ -182,7 +183,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 			    stiln_str(STILN_ostack), stiln_len(STILN_ostack),
 			    TRUE);
 			count = stils_count(ostack);
-			stilo_array_new(arr, stilt_stil_get(a_stilt), count);
+			stilo_array_new(arr, stilt_stil_get(a_stilt),
+			    stilt_currentlocking(a_stilt), count);
 			for (i = count - 1, stilo = NULL; i >= 0; i--) {
 				stilo = stils_down_get(ostack, stilo);
 				stilo_dup(stilo_array_el_get(arr, i), stilo);
@@ -198,7 +200,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 			    stiln_str(STILN_estack), stiln_len(STILN_estack),
 			    TRUE);
 			count = stils_count(estack) - 1;
-			stilo_array_new(arr, stilt_stil_get(a_stilt), count);
+			stilo_array_new(arr, stilt_stil_get(a_stilt),
+			    stilt_currentlocking(a_stilt), count);
 			for (i = count - 1, stilo = stils_get(estack);
 			     i >= 0; i--) {
 				stilo = stils_down_get(estack, stilo);
@@ -212,7 +215,8 @@ errordict_generic(cw_stilt_t *a_stilt)
 			    stiln_str(STILN_dstack), stiln_len(STILN_dstack),
 			    TRUE);
 			count = stils_count(dstack);
-			stilo_array_new(arr, stilt_stil_get(a_stilt), count);
+			stilo_array_new(arr, stilt_stil_get(a_stilt),
+			    stilt_currentlocking(a_stilt), count);
 			for (i = count - 1, stilo = NULL; i >= 0; i--) {
 				stilo = stils_down_get(dstack, stilo);
 				stilo_dup(stilo_array_el_get(arr, i), stilo);

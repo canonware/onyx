@@ -28,14 +28,6 @@
 #define _CW_STIL_NAME_BASE_SHRINK	128
 
 /*
- * Size and fullness control of initial root set for global VM.  Global VM is
- * empty to begin with.
- */
-#define _CW_STIL_ROOTS_BASE_TABLE	 32
-#define _CW_STIL_ROOTS_BASE_GROW	 24
-#define _CW_STIL_ROOTS_BASE_SHRINK	  8
-
-/*
  * Initial size of globaldict.  This is a bit arbitrary, and some applications
  * could benefit from making it larger or smaller.
  */
@@ -85,7 +77,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		try_stage = 3;
 
 		/* Initialize stdin. */
-		stilo_file_new(&retval->stdin_stilo, retval);
+		stilo_file_new(&retval->stdin_stilo, retval, TRUE);
 		if (a_stdin == NULL)
 			stilo_file_fd_wrap(&retval->stdin_stilo, 0);
 		else {
@@ -97,7 +89,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		try_stage = 4;
 
 		/* Initialize stdout. */
-		stilo_file_new(&retval->stdout_stilo, retval);
+		stilo_file_new(&retval->stdout_stilo, retval, TRUE);
 		if (a_stdout == NULL)
 			stilo_file_fd_wrap(&retval->stdout_stilo, 1);
 		else {
@@ -109,7 +101,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		try_stage = 5;
 
 		/* Initialize stderr. */
-		stilo_file_new(&retval->stderr_stilo, retval);
+		stilo_file_new(&retval->stderr_stilo, retval, TRUE);
 		if (a_stderr == NULL)
 			stilo_file_fd_wrap(&retval->stderr_stilo, 2);
 		else {
@@ -119,7 +111,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		try_stage = 6;
 
 		/* Initialize globaldict. */
-		stilo_dict_new(&retval->globaldict, retval,
+		stilo_dict_new(&retval->globaldict, retval, TRUE,
 		    _CW_STIL_GLOBALDICT_SIZE);
 		try_stage = 7;
 

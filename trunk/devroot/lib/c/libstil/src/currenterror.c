@@ -20,7 +20,8 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_stilo_t	name, val;	/* XXX GC-unsafe. */
 
 #define NENTRIES	7	/* Number of entries in currenterror. */
-	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), NENTRIES);
+	stilo_dict_new(a_dict, stilt_stil_get(a_stilt),
+	    stilt_currentlocking(a_stilt), NENTRIES);
 
 	/*
 	 * Initialize entries that are not operators.
@@ -32,7 +33,8 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt),
 	    stiln_str(STILN_errorname), stiln_len(STILN_errorname), TRUE);
-	stilo_string_new(&val, stilt_stil_get(a_stilt), 0);
+	stilo_string_new(&val, stilt_stil_get(a_stilt),
+	    stilt_currentlocking(a_stilt), 0);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name, &val);
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_command),
@@ -42,17 +44,20 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_ostack),
 	    stiln_len(STILN_ostack), TRUE);
-	stilo_array_new(&val, stilt_stil_get(a_stilt), 0);
+	stilo_array_new(&val, stilt_stil_get(a_stilt),
+	    stilt_currentlocking(a_stilt), 0);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name, &val);
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_estack),
 	    stiln_len(STILN_estack), TRUE);
-	stilo_array_new(&val, stilt_stil_get(a_stilt), 0);
+	stilo_array_new(&val, stilt_stil_get(a_stilt),
+	    stilt_currentlocking(a_stilt), 0);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name, &val);
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_dstack),
 	    stiln_len(STILN_dstack), TRUE);
-	stilo_array_new(&val, stilt_stil_get(a_stilt), 0);
+	stilo_array_new(&val, stilt_stil_get(a_stilt),
+	    stilt_currentlocking(a_stilt), 0);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), &name, &val);
 
 	stilo_name_new(&name, stilt_stil_get(a_stilt),

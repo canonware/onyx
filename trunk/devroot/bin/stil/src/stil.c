@@ -77,7 +77,6 @@ main(int argc, char **argv, char **envp)
 	dbg_unregister(cw_g_dbg, "mem_error");
 	dbg_unregister(cw_g_dbg, "pool_error");
 #endif
-
 #ifdef _STIL_SIGHANDLER
 	/*
 	 * Set the per-thread signal masks such that only one thread will catch
@@ -227,7 +226,8 @@ main(int argc, char **argv, char **envp)
 			 * Push the string onto the execution stack.
 			 */
 			string = stils_push(stilt_estack_get(&stilt));
-			stilo_string_new(string, &stil, strlen(opt_expression));
+			stilo_string_new(string, &stil, FALSE,
+			    strlen(opt_expression));
 			stilo_attrs_set(string, STILOA_EXECUTABLE);
 			str = stilo_string_get(string);
 			memcpy(str, opt_expression,
@@ -250,7 +250,7 @@ main(int argc, char **argv, char **envp)
 				goto RETURN;
 			}
 			file = stils_push(stilt_estack_get(&stilt));
-			stilo_file_new(file, &stil);
+			stilo_file_new(file, &stil, FALSE);
 			stilo_attrs_set(file, STILOA_EXECUTABLE);
 			stilo_file_fd_wrap(file, src_fd);
 		} else if (argc == 1) {

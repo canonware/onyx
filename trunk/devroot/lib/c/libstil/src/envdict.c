@@ -22,7 +22,7 @@ envdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, char **a_envp)
 	cw_uint32_t	key_len, val_len;
 	cw_stilo_t	key_stilo, val_stilo;
 
-	stilo_dict_new(a_dict, a_stil, _CW_STIL_ENVDICT_SIZE);
+	stilo_dict_new(a_dict, a_stil, TRUE, _CW_STIL_ENVDICT_SIZE);
 
 	if (a_envp != NULL) {
 		/*
@@ -41,7 +41,7 @@ envdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, char **a_envp)
 			    FALSE);
 
 			/* Create value. */
-			stilo_string_new(&val_stilo, a_stil, val_len);
+			stilo_string_new(&val_stilo, a_stil, TRUE, val_len);
 			t_str = stilo_string_get(&val_stilo);
 			memcpy(t_str, val_str, val_len);
 

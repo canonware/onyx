@@ -30,6 +30,10 @@ static const struct cw_gcdict_entry gcdict_ops[] = {
 	ENTRY(setthreshold)
 };
 
+/*
+ * This is a global dictionary, but it should never be written to except by the
+ * GC thread, so don't bother locking it.
+ */
 void
 gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila)
 {
@@ -40,7 +44,8 @@ gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila)
 #define NENTRIES							\
 	(sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-	stilo_dict_new(a_dict, stila_l_stil_get(a_stila), NENTRIES + NEXTRA);
+	stilo_dict_new(a_dict, stila_l_stil_get(a_stila), FALSE, NENTRIES +
+	    NEXTRA);
 
 	for (i = 0; i < NENTRIES; i++) {
 		stilo_name_new(&name, stila_l_stil_get(a_stila),
@@ -74,7 +79,7 @@ gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila)
 	/* current. */
 	stilo_name_new(&name, stila_l_stil_get(a_stila),
 	    stiln_str(STILN_current), stiln_len(STILN_current), TRUE);
-	stilo_array_new(&value, stila_l_stil_get(a_stila), 3);
+	stilo_array_new(&value, stila_l_stil_get(a_stila), FALSE, 3);
 	for (i = 0; i < 3; i++)
 		stilo_array_el_set(&value, &el, i);
 	stilo_dict_def(a_dict, stila_l_stil_get(a_stila), &name, &value);
@@ -82,7 +87,7 @@ gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila)
 	/* maximum. */
 	stilo_name_new(&name, stila_l_stil_get(a_stila),
 	    stiln_str(STILN_maximum), stiln_len(STILN_maximum), TRUE);
-	stilo_array_new(&value, stila_l_stil_get(a_stila), 3);
+	stilo_array_new(&value, stila_l_stil_get(a_stila), FALSE, 3);
 	for (i = 0; i < 3; i++)
 		stilo_array_el_set(&value, &el, i);
 	stilo_dict_def(a_dict, stila_l_stil_get(a_stila), &name, &value);
@@ -90,7 +95,7 @@ gcdict_l_populate(cw_stilo_t *a_dict, cw_stila_t *a_stila)
 	/* sum. */
 	stilo_name_new(&name, stila_l_stil_get(a_stila), stiln_str(STILN_sum),
 	    stiln_len(STILN_sum), TRUE);
-	stilo_array_new(&value, stila_l_stil_get(a_stila), 3);
+	stilo_array_new(&value, stila_l_stil_get(a_stila), FALSE, 3);
 	for (i = 0; i < 3; i++)
 		stilo_array_el_set(&value, &el, i);
 	stilo_dict_def(a_dict, stila_l_stil_get(a_stila), &name, &value);

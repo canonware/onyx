@@ -84,7 +84,7 @@ struct cw_stiloe_condition_s {
 struct cw_stiloe_dict_s {
 	cw_stiloe_t	stiloe;
 	/*
-	 * Access must be locked if this is a globally allocated object.
+	 * Access is locked if this object has the locking bit set.
 	 */
 	cw_mtx_t	lock;
 	/*
@@ -108,7 +108,7 @@ struct cw_stiloe_dict_s {
 struct cw_stiloe_file_s {
 	cw_stiloe_t	stiloe;
 	/*
-	 * Modifications must be locked if this is a globally allocated object.
+	 * Access is locked if this object has the locking bit set.
 	 */
 	cw_mtx_t	lock;
 
@@ -229,18 +229,13 @@ static cw_stiloe_t *stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
 static cw_stilte_t stilo_p_dict_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
     cw_bool_t a_syntactic);
 
-#define		stiloe_p_dict_lock(a_dict) do {			\
-	if ((a_dict)->stiloe.global &&					\
-	    (a_dict)->stiloe.perms == STILOP_UNLIMITED) {		\
+#define		stiloe_p_dict_lock(a_dict) do {				\
+	if ((a_dict)->stiloe.locking)					\
 		mtx_lock(&(a_dict)->lock);				\
-		(a_dict)->stiloe.dict_locked = TRUE;			\
-	}								\
 } while (0)
 #define		stiloe_p_dict_unlock(a_dict) do {			\
-	if ((a_dict)->stiloe.dict_locked) {				\
-		(a_dict)->stiloe.dict_locked = FALSE;			\
+	if ((a_dict)->stiloe.locking)					\
 		mtx_unlock(&(a_dict)->lock);				\
-	}								\
 } while (0)
 
 /* file. */
@@ -252,11 +247,11 @@ static cw_stilte_t stilo_p_file_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
 static cw_stilte_t stilo_p_file_buffer_flush(cw_stilo_t *a_stilo);
 
 #define		stiloe_p_file_lock(a_file) do {				\
-	if ((a_file)->stiloe.global)					\
+	if ((a_file)->stiloe.locking)					\
 		mtx_lock(&(a_file)->lock);				\
 } while (0)
 #define		stiloe_p_file_unlock(a_file) do {			\
-	if ((a_file)->stiloe.global)					\
+	if ((a_file)->stiloe.locking)					\
 		mtx_unlock(&(a_file)->lock);				\
 } while (0)
 
@@ -288,15 +283,6 @@ static cw_stiloe_t *stiloe_p_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
     cw_bool_t a_syntactic);
-
-#define		stiloe_p_name_lock(a_name) do {				\
-	if ((a_name)->stiloe.global)					\
-		mtx_lock(&(a_name)->lock);				\
-} while (0)
-#define		stiloe_p_name_unlock(a_name) do {			\
-	if ((a_name)->stiloe.global)					\
-		mtx_unlock(&(a_name)->lock);				\
-} while (0)
 
 /* null. */
 static cw_stilte_t stilo_p_null_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
@@ -541,7 +527,7 @@ stilo_stiloe_get(cw_stilo_t *a_stilo)
 }
 
 cw_bool_t
-stilo_global_get(cw_stilo_t *a_stilo)
+stilo_lcheck(cw_stilo_t *a_stilo)
 {
 	cw_bool_t	retval;
 
@@ -551,101 +537,18 @@ stilo_global_get(cw_stilo_t *a_stilo)
 #ifdef _LIBSTIL_DBG
 	switch (a_stilo->type) {
 	case STILOT_ARRAY:
-	case STILOT_CONDITION:
 	case STILOT_DICT:
 	case STILOT_FILE:
-	case STILOT_HOOK:
-	case STILOT_MUTEX:
 	case STILOT_STRING:
-		retval = a_stilo->o.stiloe->global;
+		retval = a_stilo->o.stiloe->locking;
 		break;
 	default:
 		_cw_not_reached();
 	}
 #else
-	retval = a_stilo->o.stiloe->global;
+	retval = a_stilo->o.stiloe->locking;
 #endif
 
-	return retval;
-}
-
-cw_stilop_t
-stilo_perms_get(cw_stilo_t *a_stilo)
-{
-	cw_stilop_t	retval;
-
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-#ifdef _LIBSTIL_DBG
-	switch (a_stilo->type) {
-	case STILOT_ARRAY:
-	case STILOT_CONDITION:
-	case STILOT_DICT:
-	case STILOT_FILE:
-	case STILOT_HOOK:
-	case STILOT_MUTEX:
-	case STILOT_STRING:
-		break;
-	default:
-		_cw_error("Not a composite object");
-	}
-#endif
-
-	if (a_stilo->type != STILOT_DICT)
-		retval = a_stilo->perms;
-	else {
-		cw_stiloe_dict_t	*dict;
-
-		dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
-
-		retval = dict->stiloe.perms;
-	}
-
-	return retval;
-}
-
-cw_stilte_t
-stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms)
-{
-	cw_stilte_t	retval;
-
-	_cw_check_ptr(a_stilo);
-	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
-#ifdef _LIBSTIL_DBG
-	switch (a_stilo->type) {
-	case STILOT_ARRAY:
-	case STILOT_CONDITION:
-	case STILOT_DICT:
-	case STILOT_FILE:
-	case STILOT_HOOK:
-	case STILOT_MUTEX:
-	case STILOT_STRING:
-		break;
-	default:
-		_cw_error("Not a composite object");
-	}
-#endif
-
-	if (a_stilo->type != STILOT_DICT) {
-		if (a_stilo->perms >= a_perms) {
-			retval = STILTE_INVALIDACCESS;
-			goto RETURN;
-		}
-		a_stilo->perms = a_perms;
-	} else {
-		cw_stiloe_dict_t	*dict;
-
-		dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
-
-		if (dict->stiloe.perms >= a_perms) {
-			retval = STILTE_INVALIDACCESS;
-			goto RETURN;
-		}
-		dict->stiloe.perms = a_perms;
-	}
-
-	retval = STILTE_NONE;
-	RETURN:
 	return retval;
 }
 
@@ -791,7 +694,8 @@ stilo_p_no_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t a_syntactic)
  * array.
  */
 void
-stilo_array_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_len)
+stilo_array_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
+    cw_uint32_t a_len)
 {
 	cw_stiloe_array_t	*array;
 	cw_uint32_t		i;
@@ -819,7 +723,7 @@ stilo_array_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_len)
 
 cw_stilte_t
 stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t *a_array, cw_stil_t
-    *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len)
+    *a_stil, cw_bool_t a_locking, cw_uint32_t a_offset, cw_uint32_t a_len)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_array_t	*array, *orig;
@@ -951,11 +855,6 @@ stilo_array_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 		retval = STILTE_RANGECHECK;
 		goto RETURN;
 	}
-
-	/*
-	 * XXX Make sure no locally allocated objects are copied to a global
-	 * array.
-	 */
 
 	/*
 	 * Iteratively copy elements.  Only copy one level deep (not
@@ -1172,10 +1071,8 @@ stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, cw_stilo_t *a_arr,
 		arr = array->e.a.arr;
 
 		/* Set the array. */
-		for (i = 0; i < a_len; i++) {
-			/* XXX Check local/global allocation. */
+		for (i = 0; i < a_len; i++)
 			stilo_dup(&arr[i + a_offset], &a_arr[i]);
-		}
 		retval = STILTE_NONE;
 	} else {
 		retval = stilo_array_set(&array->e.i.stilo, a_offset, a_arr,
@@ -1393,7 +1290,8 @@ stilo_condition_timedwait(cw_stilo_t *a_stilo, cw_stilo_t *a_mutex, const struct
  * dict.
  */
 void
-stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_dict_size)
+stilo_dict_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
+    cw_uint32_t a_dict_size)
 {
 	cw_stiloe_dict_t	*dict;
 
@@ -1474,10 +1372,8 @@ stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 			dch_get_iterate(&dict->hash, NULL,(void
 			    **)&dict->dicto);
 			retval = stilo_stiloe_get(&dict->dicto->key);
-/*  			_cw_out_put("<K[p]>", retval); */
 		} else {
 			/* Value. */
-/*  			_cw_out_put("<V[p]>", retval); */
 			retval = stilo_stiloe_get(&dict->dicto->val);
 			dict->ref_iter++;
 			dict->dicto = NULL;
@@ -1488,7 +1384,8 @@ stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 }
 
 cw_stilte_t
-stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stil_t *a_stil)
+stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stil_t *a_stil,
+    cw_bool_t a_locking)
 {
 	cw_stiloe_dict_t	*to, *from;
 	cw_uint32_t		i, count;
@@ -1507,7 +1404,7 @@ stilo_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stil_t *a_stil)
 
 	/* Deep (but not recursive) copy. */
 	count = dch_count(&from->hash);
-	stilo_dict_new(a_to, a_stil, count);
+	stilo_dict_new(a_to, a_stil, a_locking, count);
 	to = (cw_stiloe_dict_t *)a_to->o.stiloe;
 
 /*  	stiloe_p_dict_lock(from); */
@@ -1604,8 +1501,6 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t *a_key,
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_stilo->type == STILOT_DICT);
-	/* XXX Make sure setglobal is correct. */
-	/* XXX Make sure value isn't local if dict is global. */
 
 	dict = (cw_stiloe_dict_t *)a_stilo->o.stiloe;
 
@@ -1788,7 +1683,7 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilo_t *r_stilo)
  * file.
  */
 void
-stilo_file_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil)
+stilo_file_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking)
 {
 	cw_stiloe_file_t	*file;
 
@@ -2222,8 +2117,8 @@ stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 /* STILTE_IOERROR */
 cw_stilte_t
-stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t
-    *r_string, cw_bool_t *r_eof)
+stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
+    cw_stilo_t *r_string, cw_bool_t *r_eof)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_file_t	*file;
@@ -2314,7 +2209,8 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t
 					file->buffer_offset = 0;
 					file->buffer_mode = BUFFER_EMPTY;
 
-					stilo_string_new(r_string, a_stil, i);
+					stilo_string_new(r_string, a_stil,
+					    a_locking, i);
 					stilo_string_set(r_string, 0, line, i);
 
 					retval = STILTE_NONE;
@@ -2339,7 +2235,8 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t
 					/* Throw away the preceding \r. */
 					i--;
 				}
-				stilo_string_new(r_string, a_stil, i);
+				stilo_string_new(r_string, a_stil, a_locking,
+				    i);
 				stilo_string_set(r_string, 0, line, i);
 
 				/*
@@ -2407,7 +2304,8 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t
 			}
 			if (nread <= 0) {
 				/* EOF. */
-				stilo_string_new(r_string, a_stil, i);
+				stilo_string_new(r_string, a_stil, a_locking,
+				    i);
 				stilo_string_set(r_string, 0, line, i);
 
 				retval = STILTE_NONE;
@@ -2424,7 +2322,8 @@ stilo_file_readline(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_stilo_t
 					/* Throw away the preceding \r. */
 					i--;
 				}
-				stilo_string_new(r_string, a_stil, i);
+				stilo_string_new(r_string, a_stil, a_locking,
+				    i);
 				stilo_string_set(r_string, 0, line, i);
 
 				retval = STILTE_NONE;
@@ -3684,7 +3583,8 @@ stilo_p_operator_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
  * string.
  */
 void
-stilo_string_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_len)
+stilo_string_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_bool_t a_locking,
+    cw_uint32_t a_len)
 {
 	cw_stiloe_string_t	*string;
 
@@ -3710,7 +3610,7 @@ stilo_string_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, cw_uint32_t a_len)
 
 cw_stilte_t
 stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t *a_string, cw_stil_t
-    *a_stil, cw_uint32_t a_offset, cw_uint32_t a_len)
+    *a_stil, cw_bool_t a_locking, cw_uint32_t a_offset, cw_uint32_t a_len)
 {
 	cw_stilte_t		retval;
 	cw_stiloe_string_t	*string, *orig;
