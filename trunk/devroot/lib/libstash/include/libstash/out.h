@@ -101,6 +101,9 @@ cw_sint32_t	out_put_fn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t
 cw_sint32_t	out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd, const char
     *a_format, va_list a_p);
 
+cw_sint32_t	out_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t
+    a_size, const char *a_format, va_list a_p);
+
 #define		_cw_out_put_s(a_str, a_format, a_args...)		\
 	out_put_s(cw_g_out, a_str, a_format, ## a_args)
 cw_sint32_t	out_put_s(cw_out_t *a_out, char *a_str, const char

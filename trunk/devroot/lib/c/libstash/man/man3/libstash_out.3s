@@ -165,6 +165,12 @@ helpers.
 
 .I cw_sint32_t
 .br
+.B out_put_fvn
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "va_list a_p" )
+
+.I cw_sint32_t
+.br
 .B out_put_s
 .RI ( "cw_out_t *a_out" ", " "char *a_str" ", " "const char *a_format"
 .RI ", " "..." )
@@ -1160,6 +1166,57 @@ Pointer to an out.
 .IR a_fd :
 .RS
 File descriptor_number.
+.RE
+.IR a_format :
+.RS
+Pointer to a formatting specifier string.
+.RE
+.IR a_p :
+.RS
+Variable argument list.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+>= 0: Number of bytes output.
+.br
+-1: write() error.
+.RE
+Output printed to a_fd.
+.RE
+Exception(s):
+.RS
+_CW_XEPV_OOM.
+.br
+_CW_XEPV_OUT_PARSE.
+.RE
+Description:
+.RS
+Print formatted output.
+.RE
+.RE
+
+.I cw_sint32_t
+.br
+.B out_put_fvn
+.RI ( "cw_out_t *a_out" ", " "cw_sint32_t a_fd" ", " "cw_uint32_t a_size" ", "
+.IR "const char *a_format" ", " "va_list a_p" )
+.RS
+Input(s):
+.RS
+.IR a_out :
+.RS
+Pointer to an out.
+.RE
+.IR a_fd :
+.RS
+File descriptor_number.
+.RE
+.IR a_size :
+.RS
+Maximum number of characters to output.
 .RE
 .IR a_format :
 .RS

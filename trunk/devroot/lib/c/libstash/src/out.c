@@ -480,6 +480,20 @@ out_put_fv(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format, va_list a_p)
 }
 
 cw_sint32_t
+out_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
+    *a_format, va_list a_p)
+{
+	cw_sint32_t	retval;
+
+	_cw_assert(a_fd >= 0);
+	_cw_check_ptr(a_format);
+
+	retval = out_p_put_fvn(a_out, a_fd, a_size, a_format, a_p);
+
+	return retval;
+}
+
+cw_sint32_t
 out_put_s(cw_out_t *a_out, char *a_str, const char *a_format,...)
 {
 	cw_sint32_t	retval;
