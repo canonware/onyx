@@ -651,7 +651,7 @@ object in a stack at a given index. \\
 \hline
 & {\bf \htmlref{sroll}{systemdict:sroll}} & & \\
 \hline
-stack & {\bf \htmlref{spop}{systemdict:spop}} & stack & Pop an object off
+stack & {\bf \htmlref{spop}{systemdict:spop}} & stack object & Pop an object off
 a stack. \\
 \hline
 & {\bf \htmlref{sclear}{systemdict:sclear}} & & \\
@@ -1373,7 +1373,7 @@ s:1>
 	\end{description}
 \label{systemdict:spop}
 \index{\stilop{}{spop}{}}
-\item[{\stilop{stack}{spop}{stack}}: ]
+\item[{\stilop{stack}{spop}{stack object}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -1384,6 +1384,8 @@ s:1>
 		\begin{description}\item[]
 		\item[stack: ]
 			The same stack as was passed in.
+		\item[object: ]
+			The object that was popped off of \oparg{stack}.
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
@@ -1391,13 +1393,14 @@ s:1>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Pop an object off of \oparg{stack}.
+		Pop an object off of \oparg{stack} and push it onto ostack.
 	\item[Example(s): ]\begin{verbatim}
 
 s:0> (1 2) spop
-s:1> pstack
+s:2> pstack
+2
 (1)
-s:1>
+s:2>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:spush}
