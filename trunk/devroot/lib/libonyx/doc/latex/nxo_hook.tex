@@ -70,15 +70,13 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{cw_nxo_hook_delete_t}
 \index{cw_nxo_hook_delete_t@\cfunc{cw\_nxo\_hook\_delete\_t}{}}
-\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_hook\_delete\_t}{void *a\_data, cw\_nx\_t
-*a\_nx, cw\_uint32\_t a\_iter}}
+\citem{\cfunc[cw\_bool\_t]{cw\_nxo\_hook\_delete\_t}{void *a\_data,
+cw\_uint32\_t a\_iter}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_data: ]
 			Opaque data pointer.
-		\item[a\_nx: ]
-			Pointer to an \classname{nx}.
 		\item[a\_iter: ]
 			Garbage collector sweep iteration count (starts at 0).
 			This value can be used to impose ordering of dependent
@@ -99,16 +97,14 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{nxo_hook_new}
 \index{nxo_hook_new@\cfunc{nxo\_hook\_new}{}}
-\citem{\cfunc[void]{nxo\_hook\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx, void
-*a\_data, cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
+\citem{\cfunc[void]{nxo\_hook\_new}{cw\_nxo\_t *a\_nxo, void *a\_data,
+cw\_nxo\_hook\_eval\_t *a\_eval\_f, cw\_nxo\_hook\_ref\_iter\_t
 *a\_ref\_iter\_f, cw\_nxo\_hook\_delete\_t *a\_delete\_f}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
 			Pointer to a hook \classname{nxo}.
-		\item[a\_nx: ]
-			Pointer to an \classname{nx}.
 		\item[a\_data: ]
 			Opaque data pointer to be passed to \cvar{a\_eval\_f},
 			\cvar{a\_ref\_iter\_f}, and \cvar{a\_delete\_f}.

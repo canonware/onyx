@@ -27,7 +27,7 @@ objects are deallocated.
 \label{nx_new}
 \index{nx_new@\cfunc{nx\_new}{}}
 \citem{\cfunc[cw\_nx\_t *]{nx\_new}{cw\_nx\_t *a\_nx, cw\_op\_t
-*a\_thread\_init, int a\_argc, char **a\_argv, char **a\_envp}}
+*a\_thread\_init}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -36,12 +36,6 @@ objects are deallocated.
 		\item[a\_thread\_init: ]
 			Pointer to an initialization function to be called
 			during thread initialization, or NULL.
-		\item[a\_argc: ]
-			Number of command line arguments.
-		\item[a\_argv: ]
-			Pointer to an array of command line argument strings.
-		\item[a\_envp: ]
-			Pointer to an array of environment variable strings.
 		\end{description}
 	\item[Output(s): ]
 		\begin{description}\item[]
@@ -109,27 +103,6 @@ objects are deallocated.
 	\item[Description: ]
 		Return a pointer to the \classname{nxo} corresponding to
 		\onyxop{globaldict}{}.
-	\end{capilist}
-\label{nx_envdict_get}
-\index{nx_envdict_get@\cfunc{nx\_envdict\_get}{}}
-\citem{\cfunc[cw\_nxo\_t
-*]{nx\_\htmlref{envdict}{sec:envdict}\_get}{cw\_nx\_t *a\_nx}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nx: ]
-			Pointer to an \classname{nx}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to the \classname{nxo} corresponding to
-			\onyxop{envdict}{}.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return a pointer to the \classname{nxo} corresponding to
-		\onyxop{envdict}{}.
 	\end{capilist}
 \label{nx_gcdict_get}
 \index{nx_gcdict_get@\cfunc{nx\_gcdict\_get}{}}

@@ -10,6 +10,8 @@
  *
  ******************************************************************************/
 
+#undef HAVE_DECL_OPTRESET
+
 #undef CW_USE_MODPROMPT
 
 /* Used for tonyx. */

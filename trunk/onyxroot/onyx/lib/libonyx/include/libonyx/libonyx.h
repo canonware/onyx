@@ -83,7 +83,7 @@ typedef unsigned long long cw_uint64_t;
 #define CW_TYPE_FP32_DEFINED
 typedef float cw_fp32_t;
 #endif
-    
+
 #if (SIZEOF_DOUBLE == 8)
 #define CW_TYPE_FP64_DEFINED
 typedef double cw_fp64_t;
@@ -95,7 +95,7 @@ typedef double cw_fp64_t;
 typedef long double cw_fp64_t;
 #endif
 #endif
-    
+
 #if (!defined(CW_TYPE_SINT8_DEFINED) || !defined(CW_TYPE_UINT8_DEFINED) \
      || !defined(CW_TYPE_SINT16_DEFINED) || !defined(CW_TYPE_UINT16_DEFINED) \
      || !defined(CW_TYPE_SINT32_DEFINED) || !defined(CW_TYPE_UINT32_DEFINED) \
@@ -269,13 +269,6 @@ typedef struct cw_mema_s cw_mema_t;
 #include "mq.h"
 #endif
 
-/* libonyx initialization and shutdown function prototypes. */
-void
-libonyx_init(void);
-    
-void
-libonyx_shutdown(void);
-
 /* Used for allocation via an opaque function pointer.  These macros are used
  * to call functions such as mem_free_e(). */
 #ifdef CW_DBG
@@ -440,6 +433,45 @@ libonyx_shutdown(void);
     } while (0)
 
 #endif	/* CW_LIBONYX_H_ */
+
+/* Global variables, not to be accessed directly. */
+extern cw_nxo_t cw_g_argv;
+#ifdef CW_POSIX
+extern cw_nxo_t cw_g_envdict;
+#endif
+
+/* Top level libonyx function prototypes. */
+void
+libonyx_init(int a_argc, char **a_argv, char **a_envp);
+
+void
+libonyx_shutdown(void);
+
+#ifndef CW_USE_INLINES
+cw_nxo_t *
+libonyx_argv_get(void);
+
+#ifdef CW_POSIX
+cw_nxo_t *
+libonyx_envdict_get(void);
+#endif
+#endif
+
+#if (defined(CW_USE_INLINES) || defined(CW_LIBONYX_C_))
+CW_INLINE cw_nxo_t *
+libonyx_argv_get(void)
+{
+    return &cw_g_argv;
+}
+
+#ifdef CW_POSIX
+CW_INLINE cw_nxo_t *
+libonyx_envdict_get(void)
+{
+    return &cw_g_envdict;
+}
+#endif
+#endif /* (defined(CW_USE_INLINES) || defined(CW_LIBONYX_C_)) */
 
 #ifdef __cplusplus
 };

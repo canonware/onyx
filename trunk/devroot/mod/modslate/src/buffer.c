@@ -163,12 +163,12 @@ buffer_p_eval(void *a_data, cw_nxo_t *a_thread);
 static cw_nxoe_t *
 buffer_p_ref_iter(void *a_data, cw_bool_t a_reset);
 static cw_bool_t
-buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
+buffer_p_delete(void *a_data, cw_uint32_t a_iter);
 
 static cw_nxoe_t *
 marker_p_ref_iter(void *a_data, cw_bool_t a_reset);
 static cw_bool_t
-marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
+marker_p_delete(void *a_data, cw_uint32_t a_iter);
 static cw_bufw_t
 marker_p_whence(cw_nxo_t *a_whence);
 
@@ -176,7 +176,7 @@ marker_p_whence(cw_nxo_t *a_whence);
 static cw_nxoe_t *
 extent_p_ref_iter(void *a_data, cw_bool_t a_reset);
 static cw_bool_t
-extent_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
+extent_p_delete(void *a_data, cw_uint32_t a_iter);
 #endif /* NOT_YET. */
 
 void
@@ -247,7 +247,7 @@ buffer_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static cw_bool_t
-buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
+buffer_p_delete(void *a_data, cw_uint32_t a_iter)
 {
     cw_bool_t retval;
     struct cw_buffer *buffer = (struct cw_buffer *) a_data;
@@ -273,13 +273,11 @@ void
 modslate_buffer(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *nxo, *tag;
-    cw_nx_t *nx;
     cw_uint32_t bufp_size;
     struct cw_buffer *buffer;
 
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
     if (nxo_type_get(nxo) != NXOT_INTEGER)
     {
@@ -317,12 +315,12 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
 
     /* Create a reference to the buffer, now that the internals are
      * initialized. */
-    nxo_hook_new(nxo, nx, buffer, buffer_p_eval, buffer_p_ref_iter,
+    nxo_hook_new(nxo, buffer, buffer_p_eval, buffer_p_ref_iter,
 		 buffer_p_delete);
 
     /* Set the hook tag. */
     tag = nxo_hook_tag_get(nxo);
-    nxo_name_new(tag, nx, "buffer", sizeof("buffer") - 1, FALSE);
+    nxo_name_new(tag, "buffer", sizeof("buffer") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 }
 
@@ -879,7 +877,7 @@ marker_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static cw_bool_t
-marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
+marker_p_delete(void *a_data, cw_uint32_t a_iter)
 {
     struct cw_marker *marker;
     struct cw_buffer *buffer;
@@ -939,7 +937,6 @@ void
 modslate_marker(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *tstack, *nxo, *tnxo, *tag;
-    cw_nx_t *nx;
     cw_nxn_t error;
     struct cw_marker *marker;
     struct cw_buffer *buffer;
@@ -947,7 +944,6 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
     error = modslate_hook_type(nxo, "buffer");
     if (error)
@@ -976,12 +972,12 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
      * Keep a reference to the buf on tstack to avoid a GC race. */
     tnxo = nxo_stack_push(tstack);
     nxo_dup(tnxo, nxo);
-    nxo_hook_new(nxo, nx, marker, NULL, marker_p_ref_iter, marker_p_delete);
+    nxo_hook_new(nxo, marker, NULL, marker_p_ref_iter, marker_p_delete);
     nxo_stack_pop(tstack);
 
     /* Set the hook tag. */
     tag = nxo_hook_tag_get(nxo);
-    nxo_name_new(tag, nx, "marker", sizeof("marker") - 1, FALSE);
+    nxo_name_new(tag, "marker", sizeof("marker") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 }
 
@@ -1024,7 +1020,6 @@ void
 modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *tstack, *nxo, *tnxo, *tag;
-    cw_nx_t *nx;
     cw_nxn_t error;
     struct cw_marker *marker, *marker_copy;
     struct cw_buffer *buffer;
@@ -1032,7 +1027,6 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
     NXO_STACK_GET(nxo, ostack, a_thread);
     error = modslate_hook_type(nxo, "marker");
     if (error)
@@ -1065,13 +1059,12 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
      * a GC race. */
     tnxo = nxo_stack_push(tstack);
     nxo_dup(tnxo, nxo);
-    nxo_hook_new(nxo, nx, marker_copy, NULL, marker_p_ref_iter,
-		 marker_p_delete);
+    nxo_hook_new(nxo, marker_copy, NULL, marker_p_ref_iter, marker_p_delete);
     nxo_stack_pop(tstack);
 
     /* Set the hook tag. */
     tag = nxo_hook_tag_get(nxo);
-    nxo_name_new(tag, nx, "marker", sizeof("marker") - 1, FALSE);
+    nxo_name_new(tag, "marker", sizeof("marker") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 }
 
@@ -1630,8 +1623,7 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
     /* Create an Onyx string to store the result.  Since there are two markers
      * on the stack that have references to the buffer, it is safe to trash one
      * of them here. */
-    nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
-		   nxo_thread_currentlocking(a_thread), str_len);
+    nxo_string_new(nxo, nxo_thread_currentlocking(a_thread), str_len);
 
     /* Only copy if bufv isn't NULL.  The string is zero length in that case. */
     if (bufv != NULL)
@@ -1698,8 +1690,7 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
     /* Create an Onyx string to store the result.  Since there are two markers
      * on the stack that have references to the buffer, it is safe to trash one
      * of them here. */
-    nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
-		   nxo_thread_currentlocking(a_thread), str_len);
+    nxo_string_new(nxo, nxo_thread_currentlocking(a_thread), str_len);
 
     /* Only copy if bufv isn't NULL.  The string is zero length in that case. */
     if (bufv != NULL)
@@ -1841,7 +1832,7 @@ extent_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static cw_bool_t
-extent_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
+extent_p_delete(void *a_data, cw_uint32_t a_iter)
 {
     struct cw_extent *extent;
     struct cw_buffer *buffer;

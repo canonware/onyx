@@ -19,10 +19,10 @@ typedef cw_bool_t cw_nxo_file_write_t (void *a_arg, cw_nxo_t *a_file,
 
 typedef cw_nxoe_t *cw_nxo_file_ref_iter_t (void *a_arg, cw_bool_t a_reset);
 
-typedef void cw_nxo_file_delete_t (void *a_arg, cw_nx_t *a_nx);
+typedef void cw_nxo_file_delete_t (void *a_arg);
 
 void
-nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking);
+nxo_file_new(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 
 #ifdef CW_POSIX_FILE
 void

@@ -53,7 +53,7 @@ struct cw_nxoe_stack_s
 };
 
 void
-nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking);
+nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking);
 
 void
 nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from);

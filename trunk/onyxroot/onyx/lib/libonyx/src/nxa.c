@@ -102,7 +102,7 @@
 
 /* Prototypes. */
 static void
-nxa_p_collect(void);
+nxa_p_collect(cw_bool_t a_shutdown);
 #ifdef CW_PTHREADS
 static void *
 nxa_p_gc_entry(void *a_arg);
@@ -205,7 +205,7 @@ nxa_l_init(void)
 	try_stage = 1;
 
 	/* Initialize gcdict state. */
-	s_gcdict_active = TRUE;
+	s_gcdict_active = FALSE;
 #ifdef CW_PTHREADS
 	s_gcdict_period = CW_LIBONYX_GCDICT_PERIOD;
 #endif
@@ -296,12 +296,12 @@ nxa_l_shutdown(void)
 #endif
 #ifdef CW_PTH
     mtx_lock(&s_lock);
-    nxa_p_collect(cw_g_nxa);
+    nxa_p_collect(TRUE);
     mtx_unlock(&s_lock);
 #endif
     mtx_delete(&s_seq_mtx);
 #else
-    nxa_p_collect();
+    nxa_p_collect(TRUE);
 #endif
     dch_delete(&cw_g_nxa_name_hash);
 #ifdef CW_THREADS
@@ -405,7 +405,7 @@ nxa_collect(void)
 #else
 	if (s_gcdict_active)
 	{
-	    nxa_p_collect();
+	    nxa_p_collect(FALSE);
 	}
 #endif
     }
@@ -452,7 +452,7 @@ nxa_active_set(cw_bool_t a_active)
 #else
 	    if (s_gcdict_active)
 	    {
-		nxa_p_collect();
+		nxa_p_collect(FALSE);
 	    }
 #endif
 	}
@@ -539,7 +539,7 @@ nxa_threshold_set(cw_nxoi_t a_threshold)
 #else
 	    if (s_gcdict_active)
 	    {
-		nxa_p_collect();
+		nxa_p_collect(FALSE);
 	    }
 #endif
 	}
@@ -705,7 +705,7 @@ nxa_l_count_adjust(cw_nxoi_t a_adjust)
 #else
 		if (s_gcdict_active)
 		{
-		    nxa_p_collect();
+		    nxa_p_collect(FALSE);
 		}
 #endif
 	    }
@@ -726,10 +726,43 @@ nxa_l_white_get(void)
     return s_white;
 }
 
+CW_P_INLINE cw_uint32_t
+nxa_p_root_add(cw_nxoe_t *a_nxoe, cw_nxoe_t **r_gray, cw_bool_t *r_roots)
+{
+    cw_uint32_t retval;
+
+    if (nxoe_l_registered_get(a_nxoe))
+    {
+	/* Paint object gray. */
+	retval = 1;
+	cw_assert(nxoe_l_color_get(a_nxoe) == s_white);
+	nxoe_l_color_set(a_nxoe, !s_white);
+	if (*r_roots)
+	{
+	    qr_remove(a_nxoe, link);
+	    qr_after_insert(*r_gray, a_nxoe, link);
+	}
+	else
+	{
+	    ql_first(&s_seq_set) = a_nxoe;
+	    *r_roots = TRUE;
+	}
+	/* Set gray to a_nxoe, since we inserted at the head of the
+	 * list. */
+	*r_gray = a_nxoe;
+    }
+    else
+    {
+	retval = 0;
+    }
+
+    return retval;
+}
+
 /* Find roots, if any.  Return TRUE if there are roots, FALSE otherwise.  Upon
  * return, s_seq_set points to the first object in the root set. */
 CW_P_INLINE cw_bool_t
-nxa_p_roots(cw_uint32_t *r_nroot)
+nxa_p_roots(cw_bool_t a_shutdown, cw_uint32_t *r_nroot)
 {
     cw_bool_t retval = FALSE;
     cw_nx_t *nx;
@@ -747,27 +780,21 @@ nxa_p_roots(cw_uint32_t *r_nroot)
 	     nxoe != NULL;
 	     nxoe = nx_l_ref_iter(nx, FALSE))
 	{
-	    if (nxoe_l_registered_get(nxoe))
-	    {
-		/* Paint object gray. */
-		nroot++;
-		cw_assert(nxoe_l_color_get(nxoe) == s_white);
-		nxoe_l_color_set(nxoe, !s_white);
-		if (retval)
-		{
-		    qr_remove(nxoe, link);
-		    qr_after_insert(gray, nxoe, link);
-		}
-		else
-		{
-		    ql_first(&s_seq_set) = nxoe;
-		    retval = TRUE;
-		}
-		/* Set gray to nxoe, since we inserted at the head of the
-		 * list. */
-		gray = nxoe;
-	    }
+	    nroot += nxa_p_root_add(nxoe, &gray, &retval);
 	}
+    }
+
+    if (a_shutdown == FALSE)
+    {
+	/* Add argv to the root set. */
+	nroot += nxa_p_root_add(nxo_nxoe_get(libonyx_argv_get()), &gray,
+				&retval);
+
+	/* Add envdict to the root set. */
+#ifdef CW_POSIX
+	nroot += nxa_p_root_add(nxo_nxoe_get(libonyx_envdict_get()), &gray,
+				&retval);
+#endif
     }
 
     *r_nroot = nroot;
@@ -1018,7 +1045,7 @@ nxa_p_sweep(cw_nxoe_t *a_garbage)
 /* Collect garbage using a Baker's Treadmill.  s_lock is held upon entry
  * into this function. */
 static void
-nxa_p_collect(void)
+nxa_p_collect(cw_bool_t a_shutdown)
 {
     cw_uint32_t nroot, nreachable;
     cw_nxoe_t *garbage;
@@ -1058,7 +1085,7 @@ nxa_p_collect(void)
     /* Mark the root set gray.  If there are any objects in the root set, mark
      * all objects reachable from the root set.  Otherwise, everything is
      * garbage. */
-    if (nxa_p_roots(&nroot))
+    if (nxa_p_roots(a_shutdown, &nroot))
     {
 	garbage = nxa_p_mark(&nreachable);
     }
@@ -1192,7 +1219,7 @@ nxa_p_gc_entry(void *a_arg)
 			    /* No additional registrations have happened since
 			     * the last mq_timedget() timeout and some
 			     * allocation has occurred; collect. */
-			    nxa_p_collect();
+			    nxa_p_collect(FALSE);
 			    allocated = FALSE;
 			}
 		    }
@@ -1211,7 +1238,7 @@ nxa_p_gc_entry(void *a_arg)
 	    case NXAM_COLLECT:
 	    {
 		mtx_lock(&s_lock);
-		nxa_p_collect();
+		nxa_p_collect(FALSE);
 		allocated = FALSE;
 		mtx_unlock(&s_lock);
 		break;
@@ -1225,7 +1252,7 @@ nxa_p_gc_entry(void *a_arg)
 	    {
 		shutdown = TRUE;
 		mtx_lock(&s_lock);
-		nxa_p_collect();
+		nxa_p_collect(TRUE);
 		mtx_unlock(&s_lock);
 		break;
 	    }

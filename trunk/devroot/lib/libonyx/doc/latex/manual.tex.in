@@ -37,8 +37,8 @@ main(int argc, char **argv, char **envp)
     cw_nxo_t thread, *nxo;
 
     /* Initialize libonyx and the Onyx interpreter. */
-    libonyx_init();
-    nx_new(&nx, NULL, argc, argv, envp);
+    libonyx_init(argc, argv, envp);
+    nx_new(&nx, NULL);
 
     /* Create a thread. */
     nxo_thread_new(&thread, &nx);
@@ -225,17 +225,24 @@ behavior and likely crashes.
 \begin{capi}
 \label{libonyx_init}
 \index{libonyx_init@\cfunc{libonyx\_init}{}}
-\citem{\cfunc[void]{libonyx\_init}{void}}
+\citem{\cfunc[void]{libonyx\_init}{int a\_argc, char **a\_argv, char **a\_envp}}
 	\begin{capilist}
-	\item[Input(s): ] None.
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_argc: ]
+			Number of command line arguments.
+		\item[a\_argv: ]
+			Pointer to an array of command line argument strings.
+		\item[a\_envp: ]
+			Pointer to an array of environment variable strings.
+		\end{description}
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
 		\end{description}
 	\item[Description: ]
-		Initialize various global variables.  In particular, initialize
-		\cvar{cw\_g\_mem} and \cvar{cw\_g\_mema}.
+		Initialize various global state.
 	\end{capilist}
 \label{libonyx_shutdown}
 \index{libonyx_shutdown@\cfunc{libonyx\_shutdown}{}}
@@ -247,6 +254,38 @@ behavior and likely crashes.
 	\item[Description: ]
 		Clean up the global variables that are initialized by
 		\cfunc{libonyx\_init}{}.
+	\end{capilist}
+\label{libonyx_argv_get}
+\index{libonyx_argv_get@\cfunc{libonyx\_argv\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{libonyx\_argv\_get}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the \classname{nxo} corresponding to
+			\onyxop{argv}{}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \classname{nxo} corresponding to
+		\onyxop{argv}{}.
+	\end{capilist}
+\label{libonyx_envdict_get}
+\index{libonyx_envdict_get@\cfunc{libonyx\_envdict\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{libonyx\_\htmlref{envdict}{sec:envdict}\_get}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the \classname{nxo} corresponding to
+			\onyxop{envdict}{}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \classname{nxo} corresponding to
+		\onyxop{envdict}{}.
 	\end{capilist}
 \label{cw_opaque_alloc_t}
 \index{cw_opaque_alloc_t@\cfunc{cw\_opaque\_alloc\_t}{}}

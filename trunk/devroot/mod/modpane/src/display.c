@@ -47,7 +47,7 @@ static cw_nxoe_t *
 display_p_ref_iter(void *a_data, cw_bool_t a_reset);
 
 static cw_bool_t
-display_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
+display_p_delete(void *a_data, cw_uint32_t a_iter);
 
 void
 modpane_display_init(cw_nxo_t *a_thread)
@@ -104,7 +104,7 @@ display_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static cw_bool_t
-display_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
+display_p_delete(void *a_data, cw_uint32_t a_iter)
 {
     struct cw_display *display = (struct cw_display *) a_data;
 
@@ -157,12 +157,10 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *nxo, *tag;
     cw_nxo_t *term, *infile, *outfile;
-    cw_nx_t *nx;
     struct cw_display *display;
 
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
 
     NXO_STACK_GET(outfile, ostack, a_thread);
     NXO_STACK_DOWN_GET(infile, ostack, a_thread, outfile);
@@ -194,11 +192,11 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
 
     /* Create a reference to the display. */
     nxo = nxo_stack_under_push(ostack, term);
-    nxo_hook_new(nxo, nx, display, NULL, display_p_ref_iter, display_p_delete);
+    nxo_hook_new(nxo, display, NULL, display_p_ref_iter, display_p_delete);
 
     /* Set the hook tag. */
     tag = nxo_hook_tag_get(nxo);
-    nxo_name_new(tag, nx, "display", sizeof("display") - 1, FALSE);
+    nxo_name_new(tag, "display", sizeof("display") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 
     /* Initialize aux. */

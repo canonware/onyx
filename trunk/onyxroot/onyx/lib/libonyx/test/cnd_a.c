@@ -51,7 +51,7 @@ main()
     cw_uint32_t i;
     cw_uint32_t num_waiting;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     mtx_new(&mutex);

@@ -278,11 +278,11 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxa_l_gc_register((cw_nxoe_t *) thread);
 
     /* Finish setting up the internals. */
-    nxo_stack_new(&thread->estack, a_nx, FALSE);
-    nxo_stack_new(&thread->istack, a_nx, FALSE);
-    nxo_stack_new(&thread->ostack, a_nx, FALSE);
-    nxo_stack_new(&thread->dstack, a_nx, FALSE);
-    nxo_stack_new(&thread->tstack, a_nx, FALSE);
+    nxo_stack_new(&thread->estack, FALSE);
+    nxo_stack_new(&thread->istack, FALSE);
+    nxo_stack_new(&thread->ostack, FALSE);
+    nxo_stack_new(&thread->dstack, FALSE);
+    nxo_stack_new(&thread->tstack, FALSE);
 
     nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
     nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
@@ -291,7 +291,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     /* Push threaddict, systemdict, and globaldict, onto the dictionary stack.
      * The embedded onyx initialization code creates userdict. */
     nxo = nxo_stack_push(&thread->dstack);
-    nxo_dict_new(nxo, a_nx, FALSE, CW_LIBONYX_THREADDICT_HASH);
+    nxo_dict_new(nxo, FALSE, CW_LIBONYX_THREADDICT_HASH);
 
     nxo = nxo_stack_push(&thread->dstack);
     nxo_dup(nxo, nx_systemdict_get(a_nx));
@@ -332,7 +332,16 @@ nxo_thread_start(cw_nxo_t *a_nxo)
 void
 nxo_thread_exit(cw_nxo_t *a_nxo)
 {
-    nx_l_thread_remove(nxo_thread_nx_get(a_nxo), a_nxo);
+    cw_nxoe_thread_t *thread;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+
+    thread = (cw_nxoe_thread_t *) a_nxo->o.nxoe;
+    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+    nx_l_thread_remove(thread->nx, a_nxo);
 }
 
 #ifdef CW_THREADS
@@ -458,7 +467,7 @@ nxo_thread_join(cw_nxo_t *a_nxo)
     mtx_delete(&thread->lock);
     thd_join(thread->thd);
 
-    nx_l_thread_remove(nxo_thread_nx_get(a_nxo), a_nxo);
+    nx_l_thread_remove(thread->nx, a_nxo);
 }
 #endif
 
@@ -991,7 +1000,7 @@ nxo_thread_serror(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
     /* Convert a_str to a name object on ostack. */
     errorname = nxo_stack_push(&thread->ostack);
-    nxo_name_new(errorname, thread->nx, a_str, a_len, FALSE);
+    nxo_name_new(errorname, a_str, a_len, FALSE);
 
     /* Shut off deferral temporarily.  It is possible for this C stack frame to
      * never be returned to, due to an exception (stop, quit, exit), in which
@@ -1856,11 +1865,10 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			    token = TRUE;
 			    nxo = nxo_stack_push(&a_thread->ostack);
 #ifdef CW_THREADS
-			    nxo_string_new(nxo, a_thread->nx, a_thread->locking,
+			    nxo_string_new(nxo, a_thread->locking,
 					   a_thread->index);
 #else
-			    nxo_string_new(nxo, a_thread->nx, FALSE,
-					   a_thread->index);
+			    nxo_string_new(nxo, FALSE, a_thread->index);
 #endif
 			    nxo_string_set(nxo, 0, a_thread->tok_str,
 					   a_thread->index);
@@ -2369,11 +2377,11 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     nxo = nxo_stack_push(&a_thread->ostack);
 
 #ifdef CW_THREADS
-    nxo_string_new(nxo, a_thread->nx, a_thread->locking,
+    nxo_string_new(nxo, a_thread->locking,
 		   strlen((char *) a_prefix) + a_thread->index
 		   + strlen((char *) a_suffix) + ((a_c >= 0) ? 1 : 0));
 #else
-    nxo_string_new(nxo, a_thread->nx, FALSE,
+    nxo_string_new(nxo, FALSE,
 		   strlen((char *) a_prefix) + a_thread->index
 		   + strlen((char *) a_suffix) + ((a_c >= 0) ? 1 : 0));
 #endif
@@ -2613,9 +2621,9 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 
     tnxo = nxo_stack_push(&a_thread->tstack);
 #ifdef CW_THREADS
-    nxo_array_new(tnxo, a_thread->nx, a_thread->locking, nelements);
+    nxo_array_new(tnxo, a_thread->locking, nelements);
 #else
-    nxo_array_new(tnxo, a_thread->nx, FALSE, nelements);
+    nxo_array_new(tnxo, FALSE, nelements);
 #endif
     nxo_attr_set(tnxo, NXOA_EXECUTABLE);
 
@@ -2651,8 +2659,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 		 * stack, push it onto the execution stack, and run the
 		 * execution loop. */
 		nxo = nxo_stack_push(&a_thread->estack);
-		nxo_name_new(nxo, a_thread->nx, a_thread->tok_str,
-			     a_thread->index, FALSE);
+		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
 		nxo_attr_set(nxo, a_thread->m.m.action);
 
 		nxoe_p_thread_reset(a_thread);
@@ -2662,8 +2669,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	    {
 		/* Push the name object onto the operand stack. */
 		nxo = nxo_stack_push(&a_thread->ostack);
-		nxo_name_new(nxo, a_thread->nx, a_thread->tok_str,
-			     a_thread->index, FALSE);
+		nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
 		nxo_attr_set(nxo, a_thread->m.m.action);
 		nxoe_p_thread_reset(a_thread);
 	    }
@@ -2673,8 +2679,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	{
 	    /* Push the name object onto the operand stack. */
 	    nxo = nxo_stack_push(&a_thread->ostack);
-	    nxo_name_new(nxo, a_thread->nx, a_thread->tok_str, a_thread->index,
-			 FALSE);
+	    nxo_name_new(nxo, a_thread->tok_str, a_thread->index, FALSE);
 	    nxoe_p_thread_reset(a_thread);
 	    break;
 	}
@@ -2685,8 +2690,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 	    /* Find the value associated with the name in the dictionary stack
 	     * and push the value onto the operand stack. */
 	    key = nxo_stack_push(&a_thread->tstack);
-	    nxo_name_new(key, a_thread->nx, a_thread->tok_str, a_thread->index,
-			 FALSE);
+	    nxo_name_new(key, a_thread->tok_str, a_thread->index, FALSE);
 	    nxoe_p_thread_reset(a_thread);
 
 	    nxo = nxo_stack_push(&a_thread->ostack);

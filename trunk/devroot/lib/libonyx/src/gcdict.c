@@ -40,24 +40,23 @@ static const struct cw_gcdict_entry gcdict_ops[] = {
 /* This is a global dictionary, but it should never be written to except by the
  * GC thread, so don't bother locking it. */
 void
-gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue,
-		  cw_nx_t *a_nx)
+gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue)
 {
     cw_uint32_t i;
 
 #define	NEXTRA	0
 #define NENTRIES (sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-    nxo_dict_new(a_dict, a_nx, FALSE, NENTRIES + NEXTRA);
+    nxo_dict_new(a_dict, FALSE, NENTRIES + NEXTRA);
 
     for (i = 0; i < NENTRIES; i++)
     {
-	nxo_name_new(a_tname, a_nx, nxn_str(gcdict_ops[i].nxn),
+	nxo_name_new(a_tname, nxn_str(gcdict_ops[i].nxn),
 		     nxn_len(gcdict_ops[i].nxn), TRUE);
 	nxo_operator_new(a_tvalue, gcdict_ops[i].op_f, gcdict_ops[i].nxn);
 	nxo_attr_set(a_tvalue, NXOA_EXECUTABLE);
 
-	nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
+	nxo_dict_def(a_dict, a_tname, a_tvalue);
     }
 
     cw_assert(nxo_dict_count(a_dict) == NENTRIES + NEXTRA);
@@ -176,7 +175,6 @@ gcdict_setthreshold(cw_nxo_t *a_thread)
 void
 gcdict_stats(cw_nxo_t *a_thread)
 {
-    cw_nx_t *nx;
     cw_bool_t currentlocking;
     cw_nxo_t *ostack, *tstack;
     cw_nxo_t *stats, *nxo, *tnxo;
@@ -185,7 +183,6 @@ gcdict_stats(cw_nxo_t *a_thread)
     cw_nxoi_t mcount, mmark, msweep;
     cw_nxoi_t scount, smark, ssweep;
 
-    nx = nxo_thread_nx_get(a_thread);
     currentlocking = nxo_thread_currentlocking(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -201,7 +198,7 @@ gcdict_stats(cw_nxo_t *a_thread)
 
     /* Create the main array. */
     stats = nxo_stack_push(ostack);
-    nxo_array_new(stats, nx, currentlocking, 5);
+    nxo_array_new(stats, currentlocking, 5);
 
     /* collections. */
     nxo_integer_new(nxo, collections);
@@ -212,7 +209,7 @@ gcdict_stats(cw_nxo_t *a_thread)
     nxo_array_el_set(stats, nxo, 1);
 
     /* current. */
-    nxo_array_new(nxo, nx, currentlocking, 3);
+    nxo_array_new(nxo, currentlocking, 3);
     nxo_integer_new(tnxo, ccount);
     nxo_array_el_set(nxo, tnxo, 0);
     nxo_integer_new(tnxo, cmark);
@@ -222,7 +219,7 @@ gcdict_stats(cw_nxo_t *a_thread)
     nxo_array_el_set(stats, nxo, 2);
 
     /* maximum. */
-    nxo_array_new(nxo, nx, currentlocking, 3);
+    nxo_array_new(nxo, currentlocking, 3);
     nxo_integer_new(tnxo, mcount);
     nxo_array_el_set(nxo, tnxo, 0);
     nxo_integer_new(tnxo, mmark);
@@ -232,7 +229,7 @@ gcdict_stats(cw_nxo_t *a_thread)
     nxo_array_el_set(stats, nxo, 3);
 
     /* current. */
-    nxo_array_new(nxo, nx, currentlocking, 3);
+    nxo_array_new(nxo, currentlocking, 3);
     nxo_integer_new(tnxo, scount);
     nxo_array_el_set(nxo, tnxo, 0);
     nxo_integer_new(tnxo, smark);

@@ -55,15 +55,15 @@ void
 usage(void);
 
 int
-interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
-		cw_uint32_t a_ninit, const cw_uint8_t *a_start);
+interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
+		const cw_uint8_t *a_start);
 
 int
-batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
+batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
 	  cw_uint8_t *a_expression);
 
 cw_bool_t
-file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename);
+file_setup(cw_nxo_t *a_thread, const char *a_filename);
 
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 void
@@ -73,7 +73,7 @@ cw_sint32_t
 nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str);
 
 void
-nx_read_shutdown(void *a_arg, cw_nx_t *a_nx);
+nx_read_shutdown(void *a_arg);
 #endif
 
 #ifndef CW_POSIX_FILE
@@ -92,13 +92,43 @@ int
 main(int argc, char **argv, char **envp)
 {
     int retval, c;
+    static const cw_uint8_t optstr[] =
+#ifdef _GNU_SOURCE
+	/* Without this, glibc will permute unknown options
+	 * to the end of the argument list. */
+	"+"
+#endif
+	"hVe:i:"
+#ifdef CW_POSIX_FILE
+	"f:"
+#endif
+	"s:";
     cw_bool_t opt_version = FALSE;
     cw_uint8_t *opt_expression = NULL;
     cw_uint32_t opt_ninit = 0;
     cw_nxinit_t *opt_init = NULL;
     cw_uint8_t *opt_start = NULL;
 
-    libonyx_init();
+    /* Run through the arguments to figure out how much of argv to pass to
+     * libonyx_init().  Don't bother with error checking, since that's done
+     * below. */
+    opterr = 0;
+    while ((c = getopt(argc, argv, optstr)) != -1)
+    {
+	/* Do nothing. */
+    }
+    if (optind == argc)
+    {
+	libonyx_init(argc, argv, envp);
+    }
+    else
+    {
+	libonyx_init(argc - optind, &argv[optind], envp);
+    }
+#ifdef HAVE_DECL_OPTRESET
+    optreset = 1;
+#endif
+    optind = 0;
 
     xep_begin();
     xep_try
@@ -106,17 +136,7 @@ main(int argc, char **argv, char **envp)
 	/* Parse command line arguments, but postpone taking any actions that
 	 * require the onyx interpreter to be up and running.  This is necessary
 	 * because we need to know how much of argv to pass to nx_new(). */
-	while ((c = getopt(argc, argv,
-#ifdef _GNU_SOURCE
-			   /* Without this, glibc will permute unknown options
-			    * to the end of the argument list. */
-			   "+"
-#endif
-			   "hVe:i:"
-#ifdef CW_POSIX_FILE
-			   "f:"
-#endif
-			   "s:")) != -1)
+	while ((c = getopt(argc, argv, optstr)) != -1)
 	{
 	    switch (c)
 	    {
@@ -224,12 +244,12 @@ main(int argc, char **argv, char **envp)
 	if (isatty(0) && optind == argc
 	    && opt_version == FALSE && opt_expression == NULL)
 	{
-	    retval = interactive_run(argc, argv, envp, opt_init, opt_ninit,
-				     opt_start);
+	    retval = interactive_run(opt_init, opt_ninit, opt_start);
 	}
 	else
 	{
-	    retval = batch_run(argc, argv, envp, opt_version, opt_expression);
+	    
+	    retval = batch_run(argc, argv, opt_version, opt_expression);
 	}
 
 	CLERROR:
@@ -284,8 +304,8 @@ usage(void)
 }
 
 int
-interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
-		cw_uint32_t a_ninit, const cw_uint8_t *a_start)
+interactive_run(cw_nxinit_t *a_init, cw_uint32_t a_ninit,
+		const cw_uint8_t *a_start)
 {
     int retval;
     cw_nx_t nx;
@@ -295,7 +315,7 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
     char *init;
 
     /* Initialize the interpreter. */
-    nx_new(&nx, NULL, argc, argv, envp);
+    nx_new(&nx, NULL);
 
     /* Make sure that stdin is always synthetic, so that the prompt will be
      * printed. */
@@ -324,7 +344,7 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 #endif
 	    /* Set up string for evaluation. */
 	    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	    nxo_string_new(nxo, &nx, FALSE, strlen((char *) a_init[i].str));
+	    nxo_string_new(nxo, FALSE, strlen((char *) a_init[i].str));
 	    nxo_attr_set(nxo, NXOA_EXECUTABLE);
 	    nxo_string_set(nxo, 0, (cw_uint8_t *) a_init[i].str,
 			   nxo_string_len_get(nxo));
@@ -333,7 +353,7 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 	else
 	{
 	    /* Set up file for evaluation. */
-	    if (file_setup(&nx, &thread, (char *) a_init[i].str))
+	    if (file_setup(&thread, (char *) a_init[i].str))
 	    {
 		retval = 1;
 		goto RETURN;
@@ -348,7 +368,7 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
     init = getenv("ONYXRC");
     if (init != NULL)
     {
-	if (file_setup(&nx, &thread, init))
+	if (file_setup(&thread, init))
 	{
 	    retval = 1;
 	    goto RETURN;
@@ -374,7 +394,7 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 	 * made the initial thread exit, thus causing access to a thread that is
 	 * no longer valid. */
 	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(nxo, &nx, FALSE, strlen((char *) a_start));
+	nxo_string_new(nxo, FALSE, strlen((char *) a_start));
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 	nxo_string_set(nxo, 0, a_start, nxo_string_len_get(nxo));
     }
@@ -389,7 +409,7 @@ interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 }
 
 int
-batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
+batch_run(int a_argc, char **a_argv, cw_bool_t a_version,
 	  cw_uint8_t *a_expression)
 {
     int retval;
@@ -397,9 +417,7 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
     cw_nxo_t thread;
     cw_nxo_t *nxo;
 
-    /* Since this is a non-interactive invocation, don't include all elements of
-     * argv. */
-    nx_new(&nx, NULL, argc - optind, &argv[optind], envp);
+    nx_new(&nx, NULL);
 #ifndef CW_POSIX_FILE
     stdin_init(&thread, &nx, FALSE);
     stdout_init(&nx);
@@ -426,15 +444,15 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
     {
 	/* Push the string onto the execution stack. */
 	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
-	nxo_string_new(nxo, &nx, FALSE, strlen((char *) a_expression));
+	nxo_string_new(nxo, FALSE, strlen((char *) a_expression));
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 	nxo_string_set(nxo, 0, a_expression, nxo_string_len_get(nxo));
     }
-    else if (optind < argc)
+    else if (optind < a_argc)
     {
 	/* Remaining command line arguments should be the name of a source file,
 	 * followed by optional arguments. */
-	if (file_setup(&nx, &thread, argv[optind]))
+	if (file_setup(&thread, a_argv[optind]))
 	{
 	    retval = 1;
 	    goto RETURN;
@@ -462,7 +480,7 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
  * onto the operand stack. */
 #ifdef CW_POSIX_FILE
 cw_bool_t
-file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
+file_setup(cw_nxo_t *a_thread, const char *a_filename)
 {
     cw_bool_t retval;
     int src_fd;
@@ -478,7 +496,7 @@ file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
 	goto RETURN;
     }
     file = nxo_stack_push(nxo_thread_ostack_get(a_thread));
-    nxo_file_new(file, a_nx, FALSE);
+    nxo_file_new(file, FALSE);
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
     nxo_file_fd_wrap(file, src_fd, TRUE);
@@ -489,7 +507,7 @@ file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
 }
 #else
 cw_bool_t
-file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
+file_setup(cw_nxo_t *a_thread, const char *a_filename)
 {
     cw_bool_t retval;
     int src_fd;
@@ -506,7 +524,7 @@ file_setup(cw_nx_t *a_nx, cw_nxo_t *a_thread, const char *a_filename)
 	goto RETURN;
     }
     file = nxo_stack_push(nxo_thread_ostack_get(a_thread));
-    nxo_file_new(file, a_nx, FALSE);
+    nxo_file_new(file, FALSE);
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
     /* Initialize the src argument structure. */
@@ -545,7 +563,7 @@ stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, cw_bool_t a_interactive)
     stdin_arg->buffer_count = 0;
 
     nxo = nx_stdin_get(a_nx);
-    nxo_file_new(nxo, a_nx, TRUE);
+    nxo_file_new(nxo, TRUE);
     nxo_file_synthetic(nxo, nx_read, NULL, NULL, nx_read_shutdown,
 		       (void *) stdin_arg);
 }
@@ -671,7 +689,7 @@ nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 }
 
 void
-nx_read_shutdown(void *a_arg, cw_nx_t *a_nx)
+nx_read_shutdown(void *a_arg)
 {
     struct nx_read_arg_s *arg = (struct nx_read_arg_s *) a_arg;
 
@@ -694,7 +712,7 @@ stdout_init(cw_nx_t *a_nx)
     stdout_arg.fd = 1;
 
     nxo = nx_stdout_get(a_nx);
-    nxo_file_new(nxo, a_nx, TRUE);
+    nxo_file_new(nxo, TRUE);
     nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stdout_arg);
 }
 
@@ -708,7 +726,7 @@ stderr_init(cw_nx_t *a_nx)
     stderr_arg.fd = 2;
 
     nxo = nx_stderr_get(a_nx);
-    nxo_file_new(nxo, a_nx, TRUE);
+    nxo_file_new(nxo, TRUE);
     nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stderr_arg);
 }
 

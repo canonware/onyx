@@ -13,9 +13,6 @@
 #define	CW_NX_C_
 
 #include "../include/libonyx/libonyx.h"
-#ifdef CW_POSIX
-#include "../include/libonyx/envdict_l.h"
-#endif
 #include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
@@ -28,8 +25,7 @@ void
 nx_p_nxcode(cw_nx_t *a_nx);
 
 cw_nx_t *
-nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
-       char **a_envp)
+nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init)
 {
     cw_nx_t *retval;
     volatile cw_uint32_t try_stage = 0;
@@ -62,9 +58,6 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	nxo_no_new(&retval->threadsdict);
 	nxo_no_new(&retval->systemdict);
 	nxo_no_new(&retval->globaldict);
-#ifdef CW_POSIX
-	nxo_no_new(&retval->envdict);
-#endif
 	nxo_no_new(&retval->stdin_nxo);
 	nxo_no_new(&retval->stdout_nxo);
 	nxo_no_new(&retval->stderr_nxo);
@@ -75,8 +68,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	try_stage = 2;
 
 	/* Initialize globaldict. */
-	nxo_dict_new(&retval->globaldict, retval, TRUE,
-		     CW_LIBONYX_GLOBALDICT_HASH);
+	nxo_dict_new(&retval->globaldict, TRUE, CW_LIBONYX_GLOBALDICT_HASH);
 
 	/* Use stdin_nxo and stdout_nxo as temporaries for the dictionary
 	 * population functions.  This is the only place where such temporaries
@@ -85,27 +77,20 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	 * would be wasteful. */
 
 	/* Initialize threadsdict. */
-	nxo_dict_new(&retval->threadsdict, retval, TRUE,
-		     CW_LIBONYX_THREADSDICT_HASH);
-
-#ifdef CW_POSIX
-	/* Initialize envdict. */
-	envdict_l_populate(&retval->envdict, &retval->stdin_nxo,
-			   &retval->stdout_nxo, retval, a_envp);
-#endif
+	nxo_dict_new(&retval->threadsdict, TRUE, CW_LIBONYX_THREADSDICT_HASH);
 
 	/* Initialize gcdict. */
 	gcdict_l_populate(&retval->gcdict, &retval->stdin_nxo,
-			  &retval->stdout_nxo, retval);
+			  &retval->stdout_nxo);
 
 	/* Initialize systemdict.  This must happen after the other dict
 	 * initializations, since references to them are inserted into
 	 * systemdict. */
 	systemdict_l_populate(&retval->systemdict, &retval->stdin_nxo,
-			      &retval->stdout_nxo, retval, a_argc, a_argv);
+			      &retval->stdout_nxo, retval);
 
 	/* Initialize stdin. */
-	nxo_file_new(&retval->stdin_nxo, retval, TRUE);
+	nxo_file_new(&retval->stdin_nxo, TRUE);
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stdin_nxo, 0, FALSE);
 #endif
@@ -113,7 +98,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	/* Initialize stdout. */
-	nxo_file_new(&retval->stdout_nxo, retval, TRUE);
+	nxo_file_new(&retval->stdout_nxo, TRUE);
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stdout_nxo, 1, FALSE);
 #endif
@@ -121,7 +106,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
 	/* Initialize stderr. */
-	nxo_file_new(&retval->stderr_nxo, retval, TRUE);
+	nxo_file_new(&retval->stderr_nxo, TRUE);
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stderr_nxo, 2, FALSE);
 #endif

@@ -32,7 +32,7 @@
 #include "../include/libonyx/nxo_stack_l.h"
 
 void
-nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
+nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking)
 {
     cw_nxoe_stack_t *stack;
 

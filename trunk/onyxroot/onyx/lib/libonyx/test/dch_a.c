@@ -17,7 +17,7 @@
 int
 main()
 {
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     /* dch_new(), dch_delete(). */

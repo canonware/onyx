@@ -26,15 +26,13 @@ of strings for situations where other C functions expect terminated strings.
 \begin{capi}
 \label{nxo_string_new}
 \index{nxo_string_new@\cfunc{nxo\_string\_new}{}}
-\citem{\cfunc[void]{nxo\_string\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx,
-cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
+\citem{\cfunc[void]{nxo\_string\_new}{cw\_nxo\_t *a\_nxo, cw\_bool\_t
+a\_locking, cw\_uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
 		\item[a\_nxo: ]
 			Pointer to a string \classname{nxo}.
-		\item[a\_nx: ]
-			Pointer to an \classname{nx}.
 		\item[a\_locking: ]
 			Implicit locking mode.
 		\item[a\_len: ]
@@ -51,7 +49,7 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 \label{nxo_string_substring_new}
 \index{nxo_string_substring_new@\cfunc{nxo\_string\_substring\_new}{}}
 \citem{\cfunc[void]{nxo\_string\_substring\_new}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
-*a\_string, cw\_nx\_t *a\_nx, cw\_uint32\_t a\_offset, cw\_uint32\_t a\_len}}
+*a\_string, cw\_uint32\_t a\_offset, cw\_uint32\_t a\_len}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -60,8 +58,6 @@ cw\_bool\_t a\_locking, cw\_uint32\_t a\_len}}
 		\item[a\_string: ]
 			Pointer to a string \classname{nxo} to create a
 			substring of.
-		\item[a\_nx: ]
-			Pointer to an \classname{nx}.
 		\item[a\_offset: ]
 			Offset into \cvar{a\_string}.
 		\item[a\_len: ]

@@ -29,7 +29,7 @@ main()
     qstack_t entries[NENTRIES], *t;
     qs_head(qstack_t) head;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     /* Initialize entries. */

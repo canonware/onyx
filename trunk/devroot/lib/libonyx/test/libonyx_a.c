@@ -37,7 +37,7 @@ main()
     fprintf(stderr, "Test begin\n");
 
     fprintf(stderr, "libonyx_init()\n");
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     do_mem();
 
     fprintf(stderr, "libonyx_shutdown()\n");

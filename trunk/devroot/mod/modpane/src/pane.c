@@ -44,7 +44,7 @@ static cw_nxoe_t *
 pane_p_ref_iter(void *a_data, cw_bool_t a_reset);
 
 static cw_bool_t
-pane_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
+pane_p_delete(void *a_data, cw_uint32_t a_iter);
 
 void
 modpane_pane_init(cw_nxo_t *a_thread)
@@ -101,7 +101,7 @@ pane_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static cw_bool_t
-pane_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
+pane_p_delete(void *a_data, cw_uint32_t a_iter)
 {
     struct cw_pane *pane = (struct cw_pane *) a_data;
 
@@ -153,12 +153,10 @@ void
 modpane_pane(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *nxo, *tag;
-    cw_nx_t *nx;
     struct cw_pane *pane;
 
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
 
     pane = (struct cw_pane *) nxa_malloc(sizeof(struct cw_pane));
 
@@ -175,11 +173,11 @@ modpane_pane(void *a_data, cw_nxo_t *a_thread)
 
     /* Create a reference to the pane. */
     nxo = nxo_stack_push(ostack);
-    nxo_hook_new(nxo, nx, pane, NULL, pane_p_ref_iter, pane_p_delete);
+    nxo_hook_new(nxo, pane, NULL, pane_p_ref_iter, pane_p_delete);
 
     /* Set the hook tag. */
     tag = nxo_hook_tag_get(nxo);
-    nxo_name_new(tag, nx, "pane", sizeof("pane") - 1, FALSE);
+    nxo_name_new(tag, "pane", sizeof("pane") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 
     /* Initialize aux. */

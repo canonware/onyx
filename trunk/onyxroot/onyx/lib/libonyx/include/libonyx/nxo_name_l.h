@@ -16,8 +16,6 @@ struct cw_nxoe_name_s
 {
     cw_nxoe_t nxoe;
 
-    cw_nx_t *nx;
-
     /* name is not required to be NULL-terminated, so we keep track of the
      * length. */
     const cw_uint8_t *str;

@@ -11,7 +11,7 @@
  ******************************************************************************/
 
 void
-nxo_condition_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx);
+nxo_condition_new(cw_nxo_t *a_nxo);
 
 void
 nxo_condition_signal(cw_nxo_t *a_nxo);

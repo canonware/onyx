@@ -89,13 +89,6 @@ nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 		retval = nxo_nxoe_get(&a_nx->stderr_nxo);
 		break;
 	    }
-#ifdef CW_POSIX
-	    case 7:
-	    {
-		retval = nxo_nxoe_get(&a_nx->envdict);
-		break;
-	    }
-#endif
 	    default:
 	    {
 		retval = NULL;
@@ -120,7 +113,7 @@ nx_l_thread_insert(cw_nx_t *a_nx, cw_nxo_t *a_thread)
     cw_assert(nxo_type_get(a_thread) == NXOT_THREAD);
 
     nxo_null_new(&nxo);
-    nxo_dict_def(&a_nx->threadsdict, a_nx, a_thread, &nxo);
+    nxo_dict_def(&a_nx->threadsdict, a_thread, &nxo);
 }
 
 CW_INLINE void
@@ -132,7 +125,7 @@ nx_l_thread_remove(cw_nx_t *a_nx, cw_nxo_t *a_thread)
     cw_check_ptr(a_thread);
     cw_assert(nxo_type_get(a_thread) == NXOT_THREAD);
 
-    nxo_dict_undef(&a_nx->threadsdict, a_nx, a_thread);
+    nxo_dict_undef(&a_nx->threadsdict, a_thread);
 }
 
 CW_INLINE cw_op_t *

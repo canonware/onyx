@@ -36,7 +36,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
     mtx_new(&mtx);
 

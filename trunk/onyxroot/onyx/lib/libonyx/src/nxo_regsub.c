@@ -322,12 +322,10 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 {
     cw_bool_t retval = 0;
     cw_nxo_regex_cache_t *cache;
-    cw_nx_t *nx;
     cw_uint32_t scnt, ilen, ioff, olen, omax, v;
     cw_uint8_t *istr, *ostr;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
 
     /* Allocate or extend the vector for passing to pcre_exec(), if
      * necessary. */
@@ -441,7 +439,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
     /* Create an Onyx string and copy ostr to it. */
     if (retval > 0)
     {
-	nxo_string_new(r_output, nx, nxo_thread_currentlocking(a_thread), olen);
+	nxo_string_new(r_output, nxo_thread_currentlocking(a_thread), olen);
 	if (olen > 0)
 	{
 	    nxo_string_set(r_output, 0, ostr, olen);
@@ -460,8 +458,8 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 }
 
 cw_nxn_t
-nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
-	       cw_uint32_t a_plen, cw_bool_t a_global, cw_bool_t a_insensitive,
+nxo_regsub_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern, cw_uint32_t a_plen,
+	       cw_bool_t a_global, cw_bool_t a_insensitive,
 	       cw_bool_t a_multiline, cw_bool_t a_singleline,
 	       const cw_uint8_t *a_template, cw_uint32_t a_tlen)
 {
@@ -527,9 +525,6 @@ nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 {
     cw_nxn_t retval;
     cw_nxoe_regsub_t regsub;
-    cw_nx_t *nx;
-
-    nx = nxo_thread_nx_get(a_thread);
 
     retval = nxo_p_regsub_init(&regsub, a_pattern, a_plen, a_global,
 			       a_insensitive, a_multiline, a_singleline,

@@ -11,5 +11,4 @@
  ******************************************************************************/
 
 void
-gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue,
-		  cw_nx_t *a_nx);
+gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue);

@@ -43,7 +43,7 @@ main()
     cw_thd_t *thread_a, *thread_b;
     cw_mtx_t mutex_a, mutex_b;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     mtx_new(&mutex_a);

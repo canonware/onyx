@@ -26,9 +26,6 @@ struct cw_nx_s
     cw_nxo_t threadsdict;
     cw_nxo_t systemdict;
     cw_nxo_t globaldict;
-#ifdef CW_POSIX
-    cw_nxo_t envdict;
-#endif
     cw_nxo_t gcdict;
 
     /* Files. */
@@ -42,8 +39,7 @@ struct cw_nx_s
 
 /* nx. */
 cw_nx_t *
-nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
-       char **a_envp);
+nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init);
 
 void
 nx_delete(cw_nx_t *a_nx);
@@ -66,11 +62,6 @@ nx_systemdict_get(cw_nx_t *a_nx);
 
 cw_nxo_t *
 nx_globaldict_get(cw_nx_t *a_nx);
-
-#ifdef CW_POSIX
-cw_nxo_t *
-nx_envdict_get(cw_nx_t *a_nx);
-#endif
 
 cw_nxo_t *
 nx_gcdict_get(cw_nx_t *a_nx);
@@ -112,17 +103,6 @@ nx_globaldict_get(cw_nx_t *a_nx)
 
     return &a_nx->globaldict;
 }
-
-#ifdef CW_POSIX
-CW_INLINE cw_nxo_t *
-nx_envdict_get(cw_nx_t *a_nx)
-{
-    cw_check_ptr(a_nx);
-    cw_dassert(a_nx->magic == CW_NX_MAGIC);
-
-    return &a_nx->envdict;
-}
-#endif
 
 CW_INLINE cw_nxo_t *
 nx_gcdict_get(cw_nx_t *a_nx)

@@ -115,11 +115,9 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 {
     cw_bool_t retval;
     cw_nxo_regex_cache_t *cache;
-    cw_nx_t *nx;
     int ioff;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
 
     if (nxo_string_len_get(a_input) == 0)
     {
@@ -251,14 +249,12 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 {
     cw_nxo_regex_cache_t *cache;
     cw_nxo_t *tstack, *tnxo;
-    cw_nx_t *nx;
     cw_uint8_t *istr;
     int ilen, ioff;
     cw_uint32_t i, acnt;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
 
     istr = nxo_string_get(a_input);
     ilen = (int) nxo_string_len_get(a_input);
@@ -327,15 +323,14 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	if (cache->ovp[0] < cache->ovp[1])
 	{
 	    /* Create a substring (normal case). */
-	    nxo_string_substring_new(tnxo, a_input, nx, ioff,
-				     cache->ovp[0] - ioff);
+	    nxo_string_substring_new(tnxo, a_input, ioff, cache->ovp[0] - ioff);
 	    ioff = cache->ovp[1];
 	}
 	else
 	{
 	    /* The pattern matches the empty string, so split a single character
 	     * to avoid an infinite loop. */
-	    nxo_string_substring_new(tnxo, a_input, nx, ioff, 1);
+	    nxo_string_substring_new(tnxo, a_input, ioff, 1);
 	    ioff++;
 	}
 	acnt++;
@@ -348,7 +343,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	    for (i = 1; i < cache->mcnt; i++)
 	    {
 		tnxo = nxo_stack_push(tstack);
-		nxo_string_substring_new(tnxo, a_input, nx,
+		nxo_string_substring_new(tnxo, a_input,
 					 cache->ovp[i * 2],
 					 cache->ovp[i * 2 + 1]
 					 - cache->ovp[i * 2]);
@@ -362,7 +357,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     if (ioff < ilen)
     {
 	tnxo = nxo_stack_push(tstack);
-	nxo_string_substring_new(tnxo, a_input, nx, ioff,
+	nxo_string_substring_new(tnxo, a_input, ioff,
 				 nxo_string_len_get(a_input)
 				 - (cw_uint32_t) ioff);
 	acnt++;
@@ -370,7 +365,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 
     NOMATCH:
     /* Create an array that contains the substrings on tstack. */
-    nxo_array_new(r_array, nx, nxo_thread_currentlocking(a_thread), acnt);
+    nxo_array_new(r_array, nxo_thread_currentlocking(a_thread), acnt);
 
     /* Dup the substrings into r_matches. */
     for (i = 0, tnxo = nxo_stack_get(tstack);
@@ -385,7 +380,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 }
 
 cw_nxn_t
-nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
+nxo_regex_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_pattern,
 	      cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
 	      cw_bool_t a_insensitive, cw_bool_t a_multiline,
 	      cw_bool_t a_singleline)
@@ -450,9 +445,6 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 {
     cw_nxn_t retval;
     cw_nxoe_regex_t regex;
-    cw_nx_t *nx;
-
-    nx = nxo_thread_nx_get(a_thread);
 
     retval = nxo_p_regex_init(&regex, a_pattern, a_len, a_cont, a_global,
 			      a_insensitive, a_multiline, a_singleline);
@@ -504,9 +496,6 @@ nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 {
     cw_nxn_t retval;
     cw_nxoe_regex_t regex;
-    cw_nx_t *nx;
-
-    nx = nxo_thread_nx_get(a_thread);
 
     retval = nxo_p_regex_init(&regex, a_pattern, a_len, FALSE, FALSE,
 			      a_insensitive, a_multiline, a_singleline);
@@ -542,7 +531,6 @@ nxo_regex_submatch(cw_nxo_t *a_thread, cw_uint32_t a_capture, cw_nxo_t *r_match)
     {
 	/* Create a substring for the capturing subpattern. */
 	nxo_string_substring_new(r_match, &cache->input,
-				 nxo_thread_nx_get(a_thread),
 				 cache->ovp[a_capture * 2],
 				 cache->ovp[a_capture * 2 + 1]
 				 - cache->ovp[a_capture * 2]);

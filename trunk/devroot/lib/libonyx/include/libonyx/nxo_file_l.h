@@ -125,7 +125,7 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 	{
 	    if (file->f.s.delete_f != NULL)
 	    {
-		file->f.s.delete_f(file->f.s.arg, file->nx);
+		file->f.s.delete_f(file->f.s.arg);
 	    }
 	    break;
 	}

@@ -41,8 +41,7 @@
 #endif
 
 void
-nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
-	       cw_uint32_t a_len)
+nxo_string_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
 {
     cw_nxoe_string_t *string;
 
@@ -74,7 +73,7 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 }
 
 void
-nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string, cw_nx_t *a_nx,
+nxo_string_substring_new(cw_nxo_t *a_nxo, cw_nxo_t *a_string,
 			 cw_uint32_t a_offset, cw_uint32_t a_len)
 {
     cw_nxoe_string_t *string, *orig;
@@ -207,7 +206,7 @@ nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
     if (nxo_type_get(a_from) == NXOT_STRING)
     {
 	from_len = nxo_string_len_get(a_from);
-	nxo_string_new(a_to, nxo_thread_nx_get(a_thread), FALSE, from_len + 1);
+	nxo_string_new(a_to, FALSE, from_len + 1);
 	nxo_string_lock(a_from);
 	nxo_string_set(a_to, 0, nxo_string_get(a_from), from_len);
 	nxo_string_el_set(a_to, '\0', from_len);
@@ -216,7 +215,7 @@ nxo_string_cstring(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nxo_t *a_thread)
     else
     {
 	from_len = nxo_name_len_get(a_from);
-	nxo_string_new(a_to, nxo_thread_nx_get(a_thread), FALSE, from_len + 1);
+	nxo_string_new(a_to, FALSE, from_len + 1);
 	nxo_string_set(a_to, 0, nxo_name_str_get(a_from), from_len);
 	nxo_string_el_set(a_to, '\0', from_len);
     }

@@ -50,7 +50,7 @@
 #endif
 
 void
-nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
+nxo_file_new(cw_nxo_t *a_nxo, cw_bool_t a_locking)
 {
     cw_nxoe_file_t *file;
 
@@ -63,7 +63,6 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	mtx_new(&file->lock);
     }
 #endif
-    file->nx = a_nx;
     file->mode = FILE_NONE;
 #ifdef CW_POSIX_FILE
     file->nonblocking = FALSE;
@@ -374,7 +373,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 #endif
 	    if (file->f.s.delete_f != NULL)
 	    {
-		file->f.s.delete_f(file->f.s.arg, file->nx);
+		file->f.s.delete_f(file->f.s.arg);
 	    }
 	    break;
 	}
@@ -876,8 +875,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		    file->buffer_offset = 0;
 		    file->buffer_mode = BUFFER_EMPTY;
 
-		    nxo_string_new(r_string, file->nx,
-				   a_locking, i);
+		    nxo_string_new(r_string, a_locking, i);
 		    nxo_string_lock(r_string);
 		    nxo_string_set(r_string, 0, line, i);
 		    nxo_string_unlock(r_string);
@@ -914,7 +912,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 			/* Throw away the preceding \r. */
 			i--;
 		    }
-		    nxo_string_new(r_string, file->nx, a_locking, i);
+		    nxo_string_new(r_string, a_locking, i);
 		    nxo_string_lock(r_string);
 		    nxo_string_set(r_string, 0, line, i);
 		    nxo_string_unlock(r_string);
@@ -1015,7 +1013,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 	    else if (nread <= 0)
 	    {
 		/* EOF. */
-		nxo_string_new(r_string, file->nx, a_locking, i);
+		nxo_string_new(r_string, a_locking, i);
 		nxo_string_lock(r_string);
 		nxo_string_set(r_string, 0, line, i);
 		nxo_string_unlock(r_string);
@@ -1044,7 +1042,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 			/* Throw away the preceding \r. */
 			i--;
 		    }
-		    nxo_string_new(r_string, file->nx, a_locking, i);
+		    nxo_string_new(r_string, a_locking, i);
 		    nxo_string_lock(r_string);
 		    nxo_string_set(r_string, 0, line, i);
 		    nxo_string_unlock(r_string);

@@ -58,7 +58,7 @@ main()
 {
     volatile cw_uint32_t i;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     for (i = 0; i < 11; i++)

@@ -19,7 +19,7 @@
 #include "../include/libonyx/nxo_mutex_l.h"
 
 void
-nxo_mutex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
+nxo_mutex_new(cw_nxo_t *a_nxo)
 {
     cw_nxoe_mutex_t *mutex;
 

@@ -18,8 +18,8 @@
 #include "../include/libonyx/nxo_hook_l.h"
 
 void
-nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
-	     cw_nxo_hook_eval_t *a_eval_f, cw_nxo_hook_ref_iter_t *a_ref_iter_f,
+nxo_hook_new(cw_nxo_t *a_nxo, void *a_data, cw_nxo_hook_eval_t *a_eval_f,
+	     cw_nxo_hook_ref_iter_t *a_ref_iter_f,
 	     cw_nxo_hook_delete_t *a_delete_f)
 {
     cw_nxoe_hook_t *hook;
@@ -27,7 +27,6 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
     hook = (cw_nxoe_hook_t *) nxa_malloc(sizeof(cw_nxoe_hook_t));
 
     nxoe_l_new(&hook->nxoe, NXOT_HOOK, FALSE);
-    hook->nx = a_nx;
     nxo_null_new(&hook->tag);
     hook->data = a_data;
     hook->eval_f = a_eval_f;

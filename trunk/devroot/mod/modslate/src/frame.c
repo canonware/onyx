@@ -47,7 +47,7 @@ static const struct cw_modslate_entry modslate_frame_hooks[] = {
 static cw_nxoe_t *
 frame_p_ref_iter(void *a_data, cw_bool_t a_reset);
 static cw_bool_t
-frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter);
+frame_p_delete(void *a_data, cw_uint32_t a_iter);
 
 void
 modslate_frame_init(cw_nxo_t *a_thread)
@@ -100,7 +100,7 @@ frame_p_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static cw_bool_t
-frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
+frame_p_delete(void *a_data, cw_uint32_t a_iter)
 {
 	struct cw_frame	*frame = (struct cw_frame *)a_data;
 
@@ -118,14 +118,12 @@ modslate_frame(void *a_data, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack, *tstack, *tnxo, *tag;
     cw_nxo_t *display;
-    cw_nx_t *nx;
     cw_nxn_t error;
     struct cw_frame *frame;
 
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
     NXO_STACK_GET(display, ostack, a_thread);
     error = modslate_hook_type(display, "display");
     if (error)
@@ -151,11 +149,11 @@ modslate_frame(void *a_data, cw_nxo_t *a_thread)
     /* Create a reference to the frame, now that the internals are
      * initialized. */
     tnxo = nxo_stack_push(tstack);
-    nxo_hook_new(tnxo, nx, frame, NULL, frame_p_ref_iter, frame_p_delete);
+    nxo_hook_new(tnxo, frame, NULL, frame_p_ref_iter, frame_p_delete);
 
     /* Set the hook tag. */
     tag = nxo_hook_tag_get(tnxo);
-    nxo_name_new(tag, nx, "frame", sizeof("frame") - 1, FALSE);
+    nxo_name_new(tag, "frame", sizeof("frame") - 1, FALSE);
     nxo_attr_set(tag, NXOA_EXECUTABLE);
 
     /* Clean up the stacks. */

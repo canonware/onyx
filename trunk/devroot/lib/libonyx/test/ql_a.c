@@ -30,7 +30,7 @@ main()
     list_t entries[NENTRIES], *t;
     ql_head(list_t) head;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     /* Initialize entries. */

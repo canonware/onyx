@@ -29,7 +29,7 @@ main()
     cw_uint32_t i;
     ring_t entries[NENTRIES], *t;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     /* Initialize entries. */

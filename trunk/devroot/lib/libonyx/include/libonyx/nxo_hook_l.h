@@ -16,8 +16,6 @@ struct cw_nxoe_hook_s
 {
     cw_nxoe_t nxoe;
 
-    cw_nx_t *nx;
-    
     cw_nxo_t tag;
     void *data;
     cw_nxo_hook_eval_t *eval_f;
@@ -48,7 +46,7 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     if (hook->delete_f != NULL)
     {
-	retval = hook->delete_f(hook->data, hook->nx, a_iter);
+	retval = hook->delete_f(hook->data, a_iter);
     }
     else
     {

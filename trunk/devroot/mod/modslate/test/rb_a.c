@@ -1197,7 +1197,7 @@ main()
 	};
     cw_uint32_t i, j;
 
-    libonyx_init();
+    libonyx_init(0, NULL, NULL);
     fprintf(stderr, "Test begin\n");
 
     /* Initialize tree and nodes. */

@@ -44,8 +44,7 @@ nxo_p_dict_key_comp(const void *a_k1, const void *a_k2);
 #endif
 
 void
-nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
-	     cw_uint32_t a_dict_size)
+nxo_dict_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_dict_size)
 {
     cw_nxoe_dict_t *dict;
 
@@ -87,8 +86,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 }
 
 CW_P_INLINE void
-nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
-		cw_nxo_t *a_val)
+nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 {
     cw_nxoe_dicto_t *dicto;
 
@@ -268,7 +266,7 @@ nxoe_p_dict_lookup(cw_nxoe_dict_t *a_dict, const cw_nxo_t *a_key)
 }
 
 void
-nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
+nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
     cw_nxoe_dict_t *to, *from;
     cw_uint32_t i;
@@ -304,7 +302,7 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 	    /* Get a dicto. */
 	    dch_get_iterate(&from->data.hash, NULL, (void **) &dicto_from);
 
-	    nxoe_p_dict_def(to, a_nx, &dicto_from->key, &dicto_from->val);
+	    nxoe_p_dict_def(to, &dicto_from->key, &dicto_from->val);
 	}
     }
     else
@@ -314,7 +312,7 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 	    if (nxo_type_get(&from->data.array[i].key) != NXOT_NO)
 	    {
 		dicto_from = &from->data.array[i];
-		nxoe_p_dict_def(to, a_nx, &dicto_from->key, &dicto_from->val);
+		nxoe_p_dict_def(to, &dicto_from->key, &dicto_from->val);
 	    }
 	}
 
@@ -326,7 +324,7 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 }
 
 void
-nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
+nxo_dict_def(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *a_val)
 {
     cw_nxoe_dict_t *dict;
 
@@ -343,14 +341,14 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
 #endif
-    nxoe_p_dict_def(dict, a_nx, a_key, a_val);
+    nxoe_p_dict_def(dict, a_key, a_val);
 #ifdef CW_THREADS
     nxoe_p_dict_unlock(dict);
 #endif
 }
 
 void
-nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
+nxo_dict_undef(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 {
     cw_nxoe_dict_t *dict;
 

@@ -19,8 +19,7 @@
 #include "../include/libonyx/nxa_l.h"
 
 void
-nxo_array_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
-	      cw_uint32_t a_len)
+nxo_array_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_len)
 {
     cw_nxoe_array_t *array;
     cw_uint32_t i;
@@ -54,8 +53,8 @@ nxo_array_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 }
 
 void
-nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_nx_t *a_nx,
-		       cw_uint32_t a_offset, cw_uint32_t a_len)
+nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_uint32_t a_offset,
+		       cw_uint32_t a_len)
 {
     cw_nxoe_array_t *array, *orig;
 

@@ -425,6 +425,7 @@ else
   ONYX="$BINDIR/onyx-$onyx_version"
   AC_SUBST(ONYX)
   TONYX="$abs_objroot/bin/onyx/bin/tonyx"
+  AC_CHECK_DECL(optreset)
 fi
 AC_SUBST(TONYX)
 

@@ -19,8 +19,8 @@
 #include "../include/libonyx/nxo_name_l.h"
 
 void
-nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
-	     cw_uint32_t a_len, cw_bool_t a_is_static)
+nxo_name_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
+	     cw_bool_t a_is_static)
 {
     cw_nxoe_name_t *name, key;
 #ifdef CW_THREADS
@@ -51,7 +51,6 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	name = (cw_nxoe_name_t *) nxa_malloc(sizeof(cw_nxoe_name_t));
 
 	nxoe_l_new(&name->nxoe, NXOT_NAME, FALSE);
-	name->nx = a_nx;
 	name->nxoe.name_static = a_is_static;
 	name->len = a_len;
 

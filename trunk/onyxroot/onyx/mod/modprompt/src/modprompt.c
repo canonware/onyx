@@ -59,7 +59,7 @@ static cw_nxoe_t *
 modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset);
 
 static void
-modprompt_synth_delete(void *a_data, cw_nx_t *a_nx);
+modprompt_synth_delete(void *a_data);
 
 static cw_sint32_t
 modprompt_read(void *a_data, cw_nxo_t *a_file, cw_uint32_t a_len,
@@ -99,7 +99,7 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
      * application is crazy enough use the initial thread's stdin in another
      * thread, crashes are likely. */
     file = nxo_thread_stdin_get(a_thread);
-    nxo_file_new(file, nxo_thread_nx_get(a_thread), TRUE);
+    nxo_file_new(file, TRUE);
     nxo_file_synthetic(file, modprompt_read, NULL, modprompt_synth_ref_iter,
 		       modprompt_synth_delete, synth);
     nxo_attr_set(file, NXOA_EXECUTABLE);
@@ -200,7 +200,7 @@ modprompt_synth_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 static void
-modprompt_synth_delete(void *a_data, cw_nx_t *a_nx)
+modprompt_synth_delete(void *a_data)
 {
     struct cw_modprompt_synth_s *synth = (struct cw_modprompt_synth_s *) a_data;
 

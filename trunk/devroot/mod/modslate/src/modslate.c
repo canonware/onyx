@@ -57,11 +57,9 @@ modslate_hooks_init(cw_nxo_t *a_thread,
 {
     cw_nxo_t *tstack;
     cw_nxo_t *currentdict, *name, *value;
-    cw_nx_t *nx;
     cw_uint32_t i;
 
     tstack = nxo_thread_tstack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
     currentdict = nxo_stack_get(nxo_thread_dstack_get(a_thread));
 
     name = nxo_stack_push(tstack);
@@ -69,14 +67,14 @@ modslate_hooks_init(cw_nxo_t *a_thread,
 
     for (i = 0; i < a_nentries; i++)
     {
-	nxo_name_new(name, nx, a_entries[i].name,
+	nxo_name_new(name, a_entries[i].name,
 		     strlen((char *) a_entries[i].name), FALSE);
-	nxo_hook_new(value, nx, NULL, a_entries[i].eval_f,
-		     modslate_p_hook_ref_iter, NULL);
+	nxo_hook_new(value, NULL, a_entries[i].eval_f, modslate_p_hook_ref_iter,
+		     NULL);
 	nxo_dup(nxo_hook_tag_get(value), name);
 	nxo_attr_set(value, NXOA_EXECUTABLE);
 
-	nxo_dict_def(currentdict, nx, name, value);
+	nxo_dict_def(currentdict, name, value);
     }
 
     nxo_stack_npop(tstack, 2);
@@ -137,7 +135,6 @@ void
 modslate_init(void *a_arg, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack, *ostack;
-    cw_nx_t *nx;
     cw_nxmod_t *nxmod;
 
     /* The interpreter is currently executing a hook that holds a reference to
@@ -146,7 +143,6 @@ modslate_init(void *a_arg, cw_nxo_t *a_thread)
      * This prevents the module from being closed until all hooks are gone. */
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
-    nx = nxo_thread_nx_get(a_thread);
     nxo_no_new(&modslate_module_hook);
     nxo_dup(&modslate_module_hook, nxo_stack_get(estack));
 
