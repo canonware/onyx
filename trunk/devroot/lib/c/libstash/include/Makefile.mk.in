@@ -30,15 +30,15 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 20 $
-# Last modified: $Date: 1998-04-11 19:27:39 -0700 (Sat, 11 Apr 1998) $
+# Current revision: $Revision: 21 $
+# Last modified: $Date: 1998-04-11 19:50:48 -0700 (Sat, 11 Apr 1998) $
 #
 # Description: Sample Makefile stub for a subdirectory.
 #              
 ##############################################################################
 
 # Current directory, don't need to touch this.
-CURRDIR := $(strip lib_common/include)
+CURRDIR := lib/common/include
 
 $(CURRDIR)_INCS := common_incs.h dbg.h dbg_priv.h list.h list_priv.h log.h \
 	log_priv.h mem.h mem_priv.h oh.h oh_priv.h resource.h

@@ -30,15 +30,15 @@
 #
 # $Source$
 # $Author: jasone $
-# Current revision: $Revision: 20 $
-# Last modified: $Date: 1998-04-11 19:27:39 -0700 (Sat, 11 Apr 1998) $
+# Current revision: $Revision: 21 $
+# Last modified: $Date: 1998-04-11 19:50:48 -0700 (Sat, 11 Apr 1998) $
 #
 # Description: Sample Makefile stub for a subdirectory.
 #              
 ##############################################################################
 
 # Current directory, don't need to touch this.
-CURRDIR := lib_common/src
+CURRDIR := lib/common/src
 
 $(CURRDIR)_INCS :=# List of .h headers.
 $(CURRDIR)_SRCS :=dbg.c list.c log.c mem.c oh.c# List of .c sources.
