@@ -18,7 +18,7 @@
 #include "../include/libonyx/nxo_handle_l.h"
 
 void
-nxo_handle_new(cw_nxo_t *a_nxo, void *a_data, cw_nxo_handle_eval_t *a_eval_f,
+nxo_handle_new(cw_nxo_t *a_nxo, void *a_opaque, cw_nxo_handle_eval_t *a_eval_f,
 	       cw_nxo_handle_ref_iter_t *a_ref_iter_f,
 	       cw_nxo_handle_delete_t *a_delete_f)
 {
@@ -28,7 +28,7 @@ nxo_handle_new(cw_nxo_t *a_nxo, void *a_data, cw_nxo_handle_eval_t *a_eval_f,
 
     nxoe_l_new(&handle->nxoe, NXOT_HANDLE, FALSE);
     nxo_null_new(&handle->tag);
-    handle->data = a_data;
+    handle->opaque = a_opaque;
     handle->eval_f = a_eval_f;
     handle->ref_iter_f = a_ref_iter_f;
     handle->delete_f = a_delete_f;
@@ -62,7 +62,7 @@ nxo_handle_tag_get(const cw_nxo_t *a_nxo)
 }
 
 void *
-nxo_handle_data_get(const cw_nxo_t *a_nxo)
+nxo_handle_opaque_get(const cw_nxo_t *a_nxo)
 {
     void *retval;
     cw_nxoe_handle_t *handle;
@@ -77,13 +77,13 @@ nxo_handle_data_get(const cw_nxo_t *a_nxo)
     cw_dassert(handle->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(handle->nxoe.type == NXOT_HANDLE);
 
-    retval = handle->data;
+    retval = handle->opaque;
 
     return retval;
 }
 
 void
-nxo_handle_data_set(cw_nxo_t *a_nxo, void *a_data)
+nxo_handle_opaque_set(cw_nxo_t *a_nxo, void *a_opaque)
 {
     cw_nxoe_handle_t *handle;
 
@@ -97,7 +97,7 @@ nxo_handle_data_set(cw_nxo_t *a_nxo, void *a_data)
     cw_dassert(handle->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(handle->nxoe.type == NXOT_HANDLE);
 
-    handle->data = a_data;
+    handle->opaque = a_opaque;
 }
 
 void
@@ -117,7 +117,7 @@ nxo_handle_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 
     if (handle->eval_f != NULL)
     {
-	handle->eval_f(handle->data, a_thread);
+	handle->eval_f(handle->opaque, a_thread);
     }
     else
     {

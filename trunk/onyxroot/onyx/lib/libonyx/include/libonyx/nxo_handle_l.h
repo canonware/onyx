@@ -17,7 +17,7 @@ struct cw_nxoe_handle_s
     cw_nxoe_t nxoe;
 
     cw_nxo_t tag;
-    void *data;
+    void *opaque;
     cw_nxo_handle_eval_t *eval_f;
     cw_nxo_handle_ref_iter_t *ref_iter_f;
     cw_nxo_handle_delete_t *delete_f;
@@ -46,7 +46,7 @@ nxoe_l_handle_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 
     if (handle->delete_f != NULL)
     {
-	retval = handle->delete_f(handle->data, a_iter);
+	retval = handle->delete_f(handle->opaque, a_iter);
     }
     else
     {
@@ -94,7 +94,7 @@ nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    ref_stage++;
 	    if (handle->ref_iter_f != NULL)
 	    {
-		retval = handle->ref_iter_f(handle->data, TRUE);
+		retval = handle->ref_iter_f(handle->opaque, TRUE);
 	    }
 	    else
 	    {
@@ -104,7 +104,7 @@ nxoe_l_handle_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	}
 	case 2:
 	{
-	    retval = handle->ref_iter_f(handle->data, FALSE);
+	    retval = handle->ref_iter_f(handle->opaque, FALSE);
 	    break;
 	}
 	default:
