@@ -1244,6 +1244,7 @@ slate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
 	struct cw_buffer	*buffer;
 	cw_uint8_t		*str;
 	cw_uint32_t		str_len;
+	cw_bufv_t		bufv;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -1266,8 +1267,11 @@ slate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
+	bufv.data = str;
+	bufv.len = str_len;
+
 	buffer_p_lock(buffer);
-	bufm_before_insert(&marker->bufm, str, str_len);
+	bufm_before_insert(&marker->bufm, &bufv, 1, 1);
 	buffer->seq++;
 	marker->seq++;
 	buffer_p_unlock(buffer);
@@ -1285,6 +1289,7 @@ slate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
 	struct cw_buffer	*buffer;
 	cw_uint8_t		*str;
 	cw_uint32_t		str_len;
+	cw_bufv_t		bufv;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 
@@ -1307,8 +1312,11 @@ slate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
 	marker = (struct cw_marker *)nxo_hook_data_get(nxo);
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
+	bufv.data = str;
+	bufv.len = str_len;
+
 	buffer_p_lock(buffer);
-	bufm_after_insert(&marker->bufm, str, str_len);
+	bufm_after_insert(&marker->bufm, &bufv, 1, 1);
 	buffer->seq++;
 	buffer_p_unlock(buffer);
 

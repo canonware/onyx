@@ -64,6 +64,54 @@ static void buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t
 static void buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen);
 static void buf_p_shrink(cw_buf_t *a_buf);
 
+/*
+ * A simplified version of bufv_copy() that counts '\n' characters that are
+ * copied, and returns that rather than the number of elements copied.
+ */
+_CW_INLINE cw_uint64_t
+bufv_p_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
+    const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof)
+{
+	cw_uint64_t	retval;
+	cw_uint32_t	to_el, fr_el, to_off, fr_off, cpysizeof;
+
+	_cw_check_ptr(a_to);
+	_cw_check_ptr(a_fr);
+
+	if (a_to_sizeof <= a_fr_sizeof)
+		cpysizeof = a_to_sizeof;
+	else
+		cpysizeof = a_fr_sizeof;
+
+	retval = 0;
+	to_el = 0;
+	to_off = 0;
+	/* Iterate over bufv elements. */
+	for (fr_el = 0; fr_el < a_fr_len; fr_el++) {
+		/* Iterate over bufv element contents. */
+		for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++) {
+			memcpy(&a_to[to_el].data[to_off * a_to_sizeof],
+			    &a_fr[fr_el].data[fr_off * a_fr_sizeof], cpysizeof);
+
+			/* Count newlines. */
+			if (a_to[to_el].data[to_off * a_to_sizeof] == '\n')
+				retval++;
+
+			/* Increment the position to copy to. */
+			to_off++;
+			if (to_off == a_to[to_el].len) {
+				to_off = 0;
+				to_el++;
+				if (to_el == a_to_len)
+					goto RETURN;
+			}
+		}
+	}
+
+	RETURN:
+	return retval;
+}
+
 cw_uint64_t
 bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
     const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t a_fr_sizeof,
@@ -87,8 +135,8 @@ bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t a_to_sizeof,
 	for (fr_el = 0; fr_el < a_fr_len; fr_el++) {
 		/* Iterate over bufv element contents. */
 		for (fr_off = 0; fr_off < a_fr[fr_el].len; fr_off++) {
-			memcpy(&a_to[to_el].data[to_off],
-			    &a_fr[fr_el].data[fr_off], cpysizeof);
+			memcpy(&a_to[to_el].data[to_off * a_to_sizeof],
+			    &a_fr[fr_el].data[fr_off * a_fr_sizeof], cpysizeof);
 
 			/*
 			 * Copy no more than a_maxlen elements (unless a_maxlen
@@ -734,9 +782,10 @@ void
 bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
     cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt, cw_uint32_t a_elmsize)
 {
-	cw_uint64_t	i, nlines;
+	cw_uint64_t	i, count, nlines;
 	cw_buf_t	*buf;
 	cw_bufm_t	*first, *bufm;
+	cw_bufv_t	bufv;
 
 	_cw_check_ptr(a_bufm);
 	_cw_dassert(a_bufm->magic == _CW_BUFM_MAGIC);
@@ -751,26 +800,38 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
 	if (buf->hist != NULL && a_record) {
 		if (a_after) {
 			hist_ynk(buf->hist, buf, buf_p_pos_a2b(buf,
-			    a_bufm->apos), a_str, a_len);
+			    a_bufm->apos), a_bufv, a_bufvcnt, a_elmsize);
 		} else {
 			hist_ins(buf->hist, buf, buf_p_pos_a2b(buf,
-			    a_bufm->apos), a_str, a_len);
+			    a_bufm->apos), a_bufv, a_bufvcnt, a_elmsize);
 		}
 	}
 
-	/* Make sure that the string will fit. */
-	if (a_len >= buf->gap_len)
-		buf_p_grow(buf, buf->len + a_len);
+	/* Determine the total number of elements to be inserted. */
+	count = 0;
+	for (i = 0; i < a_bufvcnt; i++)
+		count += a_bufv[i].len;
+
+	/* Make sure that the data will fit. */
+	if (count >= buf->gap_len)
+		buf_p_grow(buf, buf->len + count);
 
 	/* Move the gap. */
 	buf_p_gap_move(buf, a_bufm, buf_p_pos_a2b(buf, a_bufm->apos));
 
 	/* Insert. */
-	for (i = nlines = 0; i < a_len; i++) {
-		buf->b[(buf->gap_off + i) * buf->elmsize] = a_str[i];
-		if (a_str[i] == '\n')
-			nlines++;
-	}
+	bufv.data = &buf->b[buf->gap_off * buf->elmsize];
+	bufv.len = buf->gap_len;
+	nlines = bufv_p_copy(&bufv, 1, buf->elmsize, a_bufv, a_bufvcnt,
+	    a_elmsize);
+
+	/* Shrink the gap. */
+	buf->gap_off += count;
+	buf->gap_len -= count;
+
+	/* Adjust the buf's length and line count. */
+	buf->len += count;
+	buf->nlines += nlines;
 
 	/*
 	 * If there are multiple bufm's at the same position as a_bufm, make
@@ -778,8 +839,8 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
 	 * simplify later list iteration operations and allow moving a_bufm.
 	 */
 	for (first = NULL, bufm = ql_prev(&buf->bufms, a_bufm, link);
-	    bufm != NULL && bufm->apos == a_bufm->apos;
-	    bufm = ql_prev(&buf->bufms, bufm, link))
+	     bufm != NULL && bufm->apos == a_bufm->apos;
+	     bufm = ql_prev(&buf->bufms, bufm, link))
 		first = bufm;
 
 	if (first != NULL) {
@@ -792,16 +853,10 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after, const
 	 * This relies on the bufm list re-ordering above, since moving a_bufm
 	 * would otherwise require re-insertion into the bufm list.
 	 */
-	if (a_after)
-		a_bufm->apos = buf->gap_off;
-
-	/* Shrink the gap. */
-	buf->gap_off += a_len;
-	buf->gap_len -= a_len;
-
-	/* Adjust the buf's length and line count. */
-	buf->len += a_len;
-	buf->nlines += nlines;
+	if (a_after) {
+		a_bufm->apos = buf_p_pos_b2a(buf, buf_p_pos_a2b(buf,
+		    a_bufm->apos) - count);
+	}
 
 	if (nlines > 0) {
 		/* Adjust line. */
@@ -835,6 +890,7 @@ bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
 	cw_buf_t	*buf;
 	cw_bufm_t	*start, *end, *bufm;
 	cw_uint64_t	start_bpos, end_bpos, rcount, nlines;
+	cw_bufv_t	bufv;
 
 	_cw_check_ptr(a_start);
 	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
@@ -876,13 +932,14 @@ bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
 	 * a_end determines whether this is a before/after removal.
 	 */
 	if (buf->hist != NULL && a_record) {
+		bufv.data = &buf->b[start->apos * buf->elmsize];
+		bufv.len = rcount;
 		if (start == a_start) {
 			hist_del(buf->hist, buf, buf_p_pos_a2b(buf,
-			    start->apos), &buf->b[start->apos * buf->elmsize],
-			    rcount);
+			    start->apos), &bufv, 1, buf->elmsize);
 		} else {
 			hist_rem(buf->hist, buf, buf_p_pos_a2b(buf, end->apos),
-			    &buf->b[start->apos * buf->elmsize], rcount);
+			    &bufv, 1, buf->elmsize);
 		}
 	}
 
