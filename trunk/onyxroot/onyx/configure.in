@@ -479,7 +479,7 @@ AC_SUBST(enable_debug)
 
 dnl Only optimize if not debugging.
 if test "x$enable_debug" = "x0" -a "x$no_CFLAGS" = "xyes" ; then
-  CFLAGS="$CFLAGS -O"
+  CFLAGS="$CFLAGS -O2"
 fi
 
 dnl Look for libraries.
