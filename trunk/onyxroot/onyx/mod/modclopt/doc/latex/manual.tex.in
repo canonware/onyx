@@ -183,7 +183,6 @@ remaining arguments are returned by the \method{parse} method.
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
@@ -207,10 +206,7 @@ remaining arguments are returned by the \method{parse} method.
 		\item[arg: ]
 			A string if an argument was specified, null otherwise.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the argument string associated with the current flag, or
 		null if no argument was specified.  This method is only to be
@@ -231,10 +227,7 @@ remaining arguments are returned by the \method{parse} method.
 		\item[int: ]
 			An integer.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Return the current option argument as an integer.  Perform input
 		validation, and cause the \method{parse} method to return an
@@ -256,10 +249,7 @@ remaining arguments are returned by the \method{parse} method.
 		\item[uint: ]
 			An unsigned integer.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Return the current option argument as an unsigned integer.
 		Perform input validation, and cause the \method{parse} method to
@@ -282,10 +272,7 @@ remaining arguments are returned by the \method{parse} method.
 		\item[argv: ]
 			An array of strings.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the argument array that was passed in to the \method{parse}
 		method.  This method is only to be called from within an option
@@ -308,7 +295,6 @@ remaining arguments are returned by the \method{parse} method.
 	\item[Output(s): ] None (does not return).
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -334,7 +320,6 @@ remaining arguments are returned by the \method{parse} method.
 	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
 		\item[\htmlref{ioerror}{ioerror}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
@@ -360,10 +345,7 @@ remaining arguments are returned by the \method{parse} method.
 			leading dashes, but excluding any trailing argument
 			characters.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the current argument flag.  This method is only to be called
 		from within an option handler.
@@ -384,10 +366,7 @@ remaining arguments are returned by the \method{parse} method.
 			Array index of current argument, within the array passed
 			in to the \method{parse} method.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the array index of the current argument, within the array
 		passed in ot the \method{parse} method.  This method is only to
@@ -408,10 +387,7 @@ remaining arguments are returned by the \method{parse} method.
 		\item[instance: ]
 			An instance of clopt.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Constructor.
 	\item[Example(s): ]\begin{verbatim}
@@ -447,7 +423,6 @@ onyx:0>
 		\end{description}
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
@@ -473,10 +448,7 @@ onyx:0>
 			A string that is the basename of the first string in the
 			argument array passed to the \method{parse} method.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{cstackunderflow}{cstackunderflow}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
 		Get the program name, which is the basename of the first string
 		in the argument array passed to the \method{parse} method.  This
