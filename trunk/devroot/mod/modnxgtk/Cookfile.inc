@@ -63,6 +63,7 @@ MSRCS = [MSRCS] [MODNXGTK_MSRCS];
 }
 
 /* LaTeX source files. */
+/*
 {
   local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/mod/modnxgtk/doc/latex/% [tex_srcs]];
@@ -70,6 +71,7 @@ MSRCS = [MSRCS] [MODNXGTK_MSRCS];
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
 }
+*/
 
 /* xfig source files. */
 {
