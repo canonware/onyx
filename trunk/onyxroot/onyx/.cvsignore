@@ -1,7 +1,5 @@
-*.core
-core
 config.log
+Howto.list
 config.cache
 config.status
-.cook.fp
-lib
+Howto.cook

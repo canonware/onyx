@@ -157,7 +157,14 @@ dataend
 
 distclean :
 {
-  rm -rf [objdir]"/*";
+  rm -f [objdir]/config.cache
+  rm -f [objdir]/config.log
+  rm -f [objdir]/config.status
+  rm -f [objdir]/Howto.list
+  rm -f [objdir]/test/verify
+  rm -f [objdir]/
+  rm -f [objdir]/
+  rm -f [objdir]/
 }
 
 [objdir]/%0%.pl : [srcdir]/%0%.pl.in
