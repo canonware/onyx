@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 41 $
- * Last modified: $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * Current revision: $Revision: 62 $
+ * Last modified: $Date: 1998-05-01 16:48:14 -0700 (Fri, 01 May 1998) $
  *
  * Description: 
  *              
@@ -50,6 +50,8 @@ typedef struct cw_log_s cw_log_t;
 #define log_set_logfile _CW_NS_CMN(log_set_logfile)
 #define log_printf _CW_NS_CMN(log_printf)
 #define log_eprintf _CW_NS_CMN(log_eprintf)
+#define log_lprintf _CW_NS_CMN(log_eprintf)
+#define log_leprintf _CW_NS_CMN(log_leprintf)
 
 cw_log_t * log_new();
 void log_delete(cw_log_t * a_log_o);
@@ -64,6 +66,15 @@ int log_eprintf(cw_log_t * a_log_o,
 		char * a_func_name, /* Optional, pass NULL if not used. */
 		char * a_format, 
 		...);
+int log_lprintf(cw_log_t * a_log_o, 
+		char * a_format, 
+		...);
+int log_leprintf(cw_log_t * a_log_o, 
+		 char * a_filename, /* Optional, pass NULL if not used. */
+		 int a_line_num, /* Only used if (a_filename != NULL) */
+		 char * a_func_name, /* Optional, pass NULL if not used. */
+		 char * a_format, 
+		 ...);
 
 /* 
  * My version of assert().  It's a bit prettier and cleaner, but the same idea.
