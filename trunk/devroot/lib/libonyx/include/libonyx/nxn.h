@@ -109,6 +109,7 @@ typedef enum
 #endif
 #ifdef CW_OOP
     NXN_ENTRY(class),
+    NXN_ENTRY(classname),
     NXN_ENTRY(classtype),
 #endif
     NXN_ENTRY(clear),
@@ -561,6 +562,7 @@ typedef enum
 #endif
     NXN_ENTRY(setactive),
 #ifdef CW_OOP
+    NXN_ENTRY(setclassname),
     NXN_ENTRY(setdata),
 #endif
 #ifdef CW_POSIX

@@ -134,6 +134,11 @@ void
 systemdict_class(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_OOP
+void
+systemdict_classname(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_clear(cw_nxo_t *a_thread);
 
@@ -742,6 +747,11 @@ systemdict_send(cw_nxo_t *a_thread);
 #ifdef CW_SOCKET
 void
 systemdict_serviceport(cw_nxo_t *a_thread);
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_setclassname(cw_nxo_t *a_thread);
 #endif
 
 #ifdef CW_OOP

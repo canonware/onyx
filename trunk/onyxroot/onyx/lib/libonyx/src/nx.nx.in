@@ -950,55 +950,140 @@ $mrequire {
     `
 # Define vclass, which is provided as the top level base class.
 $vclass class dup up def
+dup $vclass setclassname
 dup <
-    $name $vclass
 > setdata
 <
-    #class new #instance
+    #class :new #instance
+    #class #instance :new #instance
     $new {
-	instance dup dn setisa
+	dup type $classtype eq {
+	    # Create instance.
+	    instance dup dn setisa
+	}{
+	    # Do nothing.
+	    nip
+	} ifelse
     }
 
     # Typically called at the beginning of :new in subclasses.  Recursively
-    # invokes :new.
+    # invokes :new, and sets isa.
     #
-    #class rnew #instance
+    #class :rnew #instance
+    #class #instance :rnew #instance
     $rnew {
-	dup super
 	dup type $classtype eq {
-	    dup methods
-	    dup type $dicttype eq {
-		dup $new known {
-		    # Call super:5new.
-		    $new get eval
+	    #class
+
+	    dup super
+	    dup type $classtype eq {
+		dup methods
+		dup type $dicttype eq {
+		    dup $new known {
+			# Call super:new.
+			$new get eval
+		    }{
+			# :new not defined.
+			pop
+			instance
+		    } ifelse
 		}{
-		    # :new not defined.
+		    # No methods.
 		    pop
 		    instance
 		} ifelse
 	    }{
-		# No methods.
+		# No superclass.
 		pop
 		instance
 	    } ifelse
+	    #class #instance
+
+	    dup dn setisa
+	    #instance
 	}{
-	    # No superclass.
-	    pop
-	    instance
+	    #class #instance
+
+	    exch super
+	    #instance #super
+	    dup type $classtype eq {
+		tuck methods
+		#super #instance #methods
+		dup type $dicttype eq {
+		    dup $new known {
+			# Call super:new.
+			$new get eval
+		    }{
+			# :new not defined.
+			pop nip
+		    } ifelse
+		}{
+		    # No methods.
+		    pop nip
+		} ifelse
+	    }{
+		# No superclass.
+		pop nip
+	    } ifelse
+	    #instance
 	} ifelse
-	#class #instance
-
-	dup dn setisa
     }
 
-    #class name #name/null
-    $name {
-	data $name get
+    #class :classname #name/null
+    $classname $classname load
+
+    #name #class :setclassname -
+    $setclassname {
+	exch setclassname
     }
-    #name #class setname -
-    $setname {
-	data $name dn put
+
+    #class :super #super
+    $super $super load
+
+    #super #class :setsuper -
+    $setsuper {
+	exch setsuper
     }
+
+    #class/instance :data #data
+    $data $data load
+
+    #data #class/instance :setdata -
+    $setdata {
+	exch setdata
+    }
+
+    #class :methods #methods
+    $methods $methods load
+
+    #methods #class :setmethods -
+    $setmethods {
+	exch setmethods
+    }
+
+    #name #class :method #method
+    $method {
+	exch method
+    }
+
+    #
+    # Instance-related methods.
+    #
+
+    #instance :isa #class
+    $isa $isa load
+
+    #class #instance :setisa -
+    $setisa {
+	exch setisa
+    }
+
+    #class #instance :kind #boolean
+    $kind {
+	exch kind
+    }
+    
+    
 > setmethods
     ' cat
 } if

@@ -1179,7 +1179,8 @@ nxo_thread_class_hier_search(cw_nxo_t *a_nxo, cw_nxo_t *a_class,
     cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-    cw_assert(nxo_type_get(a_class) == NXOT_CLASS);
+    cw_assert(nxo_type_get(a_class) == NXOT_CLASS
+	      || nxo_type_get(a_class) == NXOT_NULL);
 
     /* Iteratively search a_class's class hierarchy for a_key. */
     for (class_ = a_class;

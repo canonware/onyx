@@ -27,6 +27,7 @@ nxo_class_new(cw_nxo_t *a_nxo, void *a_opaque,
     class_ = (cw_nxoe_class_t *) nxa_malloc(sizeof(cw_nxoe_class_t));
 
     nxoe_l_new(&class_->nxoe, NXOT_CLASS, FALSE);
+    nxo_null_new(&class_->name);
     nxo_null_new(&class_->super);
     nxo_null_new(&class_->methods);
     nxo_null_new(&class_->data);
@@ -39,6 +40,27 @@ nxo_class_new(cw_nxo_t *a_nxo, void *a_opaque,
     nxo_p_type_set(a_nxo, NXOT_CLASS);
 
     nxa_l_gc_register((cw_nxoe_t *) class_);
+}
+
+cw_nxo_t *
+nxo_class_name_get(const cw_nxo_t *a_nxo)
+{
+    cw_nxo_t *retval;
+    cw_nxoe_class_t *class_;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_CLASS);
+
+    class_ = (cw_nxoe_class_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(class_);
+    cw_dassert(class_->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(class_->nxoe.type == NXOT_CLASS);
+
+    retval = &class_->name;
+
+    return retval;
 }
 
 cw_nxo_t *

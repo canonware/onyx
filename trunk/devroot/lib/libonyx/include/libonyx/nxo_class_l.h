@@ -16,6 +16,9 @@ struct cw_nxoe_class_s
 {
     cw_nxoe_t nxoe;
 
+    /* Name of class. */
+    cw_nxo_t name;
+
     /* Superclass, or null. */
     cw_nxo_t super;
 
@@ -90,7 +93,7 @@ nxoe_l_class_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	case 0:
 	{
 	    ref_stage++;
-	    retval = nxo_nxoe_get(&class_->super);
+	    retval = nxo_nxoe_get(&class_->name);
 	    if (retval != NULL)
 	    {
 		break;
@@ -99,7 +102,7 @@ nxoe_l_class_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	case 1:
 	{
 	    ref_stage++;
-	    retval = nxo_nxoe_get(&class_->methods);
+	    retval = nxo_nxoe_get(&class_->super);
 	    if (retval != NULL)
 	    {
 		break;
@@ -108,13 +111,22 @@ nxoe_l_class_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	case 2:
 	{
 	    ref_stage++;
-	    retval = nxo_nxoe_get(&class_->data);
+	    retval = nxo_nxoe_get(&class_->methods);
 	    if (retval != NULL)
 	    {
 		break;
 	    }
 	}
 	case 3:
+	{
+	    ref_stage++;
+	    retval = nxo_nxoe_get(&class_->data);
+	    if (retval != NULL)
+	    {
+		break;
+	    }
+	}
+	case 4:
 	{
 	    ref_stage++;
 	    if (class_->ref_iter_f != NULL)
@@ -127,7 +139,7 @@ nxoe_l_class_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	    }
 	    break;
 	}
-	case 4:
+	case 5:
 	{
 	    retval = class_->ref_iter_f(class_->opaque, FALSE);
 	    break;

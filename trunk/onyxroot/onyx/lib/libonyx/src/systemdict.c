@@ -162,6 +162,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #endif
 #ifdef CW_OOP
     ENTRY(class),
+    ENTRY(classname),
 #endif
     ENTRY(clear),
     ENTRY(cleartomark),
@@ -430,6 +431,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(serviceport),
 #endif
 #ifdef CW_OOP
+    ENTRY(setclassname),
     ENTRY(setdata),
 #endif
 #ifdef CW_POSIX
@@ -2184,6 +2186,27 @@ systemdict_class(cw_nxo_t *a_thread)
 
     class_ = nxo_stack_push(ostack);
     nxo_class_new(class_, NULL, NULL, NULL);
+}
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_classname(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *name;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_CLASS)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    name = nxo_stack_under_push(ostack, nxo);
+    nxo_dup(name, nxo_class_name_get(nxo));
+
+    nxo_stack_pop(ostack);
 }
 #endif
 
@@ -9300,6 +9323,29 @@ systemdict_serviceport(cw_nxo_t *a_thread)
     
     nxo_stack_pop(tstack);
     nxo_integer_new(nxo, port);
+}
+#endif
+
+#ifdef CW_OOP
+void
+systemdict_setclassname(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *class_, *name;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(name, ostack, a_thread);
+    NXO_STACK_DOWN_GET(class_, ostack, a_thread, name);
+    if (nxo_type_get(class_) != NXOT_CLASS
+	|| (nxo_type_get(name) != NXOT_NAME
+	    && nxo_type_get(name) != NXOT_NULL))
+    {
+ 	nxo_thread_nerror(a_thread, NXN_typecheck);
+ 	return;
+    }
+
+    nxo_dup(nxo_class_name_get(class_), name);
+
+    nxo_stack_npop(ostack, 2);
 }
 #endif
 

@@ -20,6 +20,9 @@ nxo_class_new(cw_nxo_t *a_nxo, void *a_opaque,
 	      cw_nxo_class_delete_t *a_delete_f);
 
 cw_nxo_t *
+nxo_class_name_get(const cw_nxo_t *a_nxo);
+
+cw_nxo_t *
 nxo_class_super_get(const cw_nxo_t *a_nxo);
 
 cw_nxo_t *

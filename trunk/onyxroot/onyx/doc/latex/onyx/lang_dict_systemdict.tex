@@ -1369,6 +1369,18 @@ operators} \\
 \hline
 \optableent
 	{class}
+	{{\bf \htmlref{classname}{systemdict:classname}}}
+	{class/null}
+	{Get class's name.}
+\hline
+\optableent
+	{class classname/null}
+	{{\bf \htmlref{setclassname}{systemdict:setclassname}}}
+	{--}
+	{Set class's name.}
+\hline
+\optableent
+	{class}
 	{{\bf \htmlref{super}{systemdict:super}}}
 	{class/null}
 	{Get class's superclass.}
@@ -3478,6 +3490,28 @@ onyx:0>
 \label{systemdict:class}
 \index{class@\onyxop{}{class}{}}
 \item[{\onyxop{OPARGS}{class}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
+		\end{verbatim}
+	\end{description}
+\label{systemdict:classname}
+\index{classname@\onyxop{}{classname}{}}
+\item[{\onyxop{OPARGS}{classname}{OPOUTS}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -9228,6 +9262,28 @@ onyx:1>
 onyx:0> `ftp' serviceport 1 sprint
 21
 onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:setclassname}
+\index{setclassname@\onyxop{}{setclassname}{}}
+\item[{\onyxop{OPARGS}{setclassname}{OPOUTS}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[: ]
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+	\item[Example(s): ]\begin{verbatim}
+
 		\end{verbatim}
 	\end{description}
 \label{systemdict:setdata}
