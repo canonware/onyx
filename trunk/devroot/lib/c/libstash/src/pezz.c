@@ -34,7 +34,7 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 			memset(retval, 0, sizeof(cw_pezz_t));
 			retval->is_malloced = FALSE;
 		} else {
-			v_retval = retval = (cw_pezz_t *)_cw_mem_malloc(a_mem,
+			v_retval = retval = (cw_pezz_t *)mem_malloc(a_mem,
 			    sizeof(cw_pezz_t));
 			memset(retval, 0, sizeof(cw_pezz_t));
 			retval->is_malloced = TRUE;
@@ -53,11 +53,11 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		retval->block_num_buffers = a_num_buffers;
 
 		/* Allocate and initialize first block. */
-		retval->mem_blocks = (void **)_cw_mem_calloc(a_mem, 1,
+		retval->mem_blocks = (void **)mem_calloc(a_mem, 1,
 		    sizeof(void *));
 		try_stage = 2;
 
-		retval->mem_blocks[0] = (void *)_cw_mem_calloc(a_mem,
+		retval->mem_blocks[0] = (void *)mem_calloc(a_mem,
 		    retval->block_num_buffers, retval->buffer_size);
 		try_stage = 3;
 
@@ -85,13 +85,13 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		retval = (cw_pezz_t *)v_retval;
 		switch (try_stage) {
 		case 3:
-			_cw_mem_free(a_mem, retval->mem_blocks[0]);
+			mem_free(a_mem, retval->mem_blocks[0]);
 		case 2:
-			_cw_mem_free(a_mem, retval->mem_blocks);
+			mem_free(a_mem, retval->mem_blocks);
 		case 1:
 			mtx_delete(&retval->lock);
 			if (retval->is_malloced)
-				_cw_mem_free(a_mem, retval);
+				mem_free(a_mem, retval);
 		case 0:
 			break;
 		default:
@@ -137,21 +137,21 @@ pezz_delete(cw_pezz_t *a_pezz)
 				    allocation->filename),
 				    allocation->line_num);
 			}
-			_cw_mem_free(a_pezz->mem, allocation);
+			mem_free(a_pezz->mem, allocation);
 		}
 		dch_delete(&a_pezz->addr_hash);
 	}
 #endif
 
 	for (i = 0; i < a_pezz->num_blocks; i++) {
-		_cw_mem_free(a_pezz->mem, a_pezz->mem_blocks[i]);
+		mem_free(a_pezz->mem, a_pezz->mem_blocks[i]);
 	}
-	_cw_mem_free(a_pezz->mem, a_pezz->mem_blocks);
+	mem_free(a_pezz->mem, a_pezz->mem_blocks);
 
 	mtx_delete(&a_pezz->lock);
 
 	if (a_pezz->is_malloced)
-		_cw_mem_free(a_pezz->mem, a_pezz);
+		mem_free(a_pezz->mem, a_pezz);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_pezz, 0x5a, sizeof(cw_pezz_t));
@@ -168,7 +168,7 @@ pezz_buffer_size_get(cw_pezz_t *a_pezz)
 }
 
 void *
-pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
+pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 {
 	void		*retval;
 	cw_pezzi_t	*pezzi;
@@ -182,13 +182,13 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 		cw_uint32_t	i;
 
 		/* No buffers available.  Add a block. */
-		t_mem_blocks = (void **)_cw_mem_realloc(a_pezz->mem,
+		t_mem_blocks = (void **)mem_realloc(a_pezz->mem,
 		    a_pezz->mem_blocks, ((a_pezz->num_blocks + 1) * sizeof(void
 		    *)));
 		a_pezz->mem_blocks = t_mem_blocks;
 
 		a_pezz->mem_blocks[a_pezz->num_blocks] = (void
-		    *)_cw_mem_calloc(a_pezz->mem, a_pezz->block_num_buffers,
+		    *)mem_calloc(a_pezz->mem, a_pezz->block_num_buffers,
 		    a_pezz->buffer_size);
 		/* All of the allocation succeeded. */
 
@@ -242,7 +242,7 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 			volatile cw_pool_item_t	*v_allocation;
 			xep_try {
 				v_allocation = allocation =
-				    _cw_mem_malloc(a_pezz->mem,
+				    mem_malloc(a_pezz->mem,
 				    sizeof(cw_pezz_item_t));
 				try_stage = 1;
 
@@ -269,7 +269,7 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 				allocation = (cw_pool_item_t *)v_allocation;
 				switch (try_stage) {
 				case 1:
-					_cw_mem_free(a_pezz->mem, allocation);
+					mem_free(a_pezz->mem, allocation);
 				case 0:
 					break;
 				default:
@@ -287,8 +287,8 @@ pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 }
 
 void
-pezz_put(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename, cw_uint32_t
-    a_line_num)
+pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
+    cw_uint32_t a_line_num)
 {
 	_cw_check_ptr(a_pezz);
 	_cw_assert(a_pezz->magic == _CW_PEZZ_MAGIC);
@@ -329,7 +329,7 @@ pezz_put(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename, cw_uint32_t
 				    allocation->filename, allocation->line_num);
 			}
 			memset(a_buffer, 0x5a, a_pezz->buffer_size);
-			_cw_mem_free(a_pezz->mem, allocation);
+			mem_free(a_pezz->mem, allocation);
 		}
 	}
 #endif

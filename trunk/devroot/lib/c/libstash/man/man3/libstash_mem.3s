@@ -27,13 +27,13 @@ mem - malloc wrapper.
 
 .I void *
 .br
-.B mem_malloc
+.B mem_malloc_e
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_mem_malloc
+.B mem_malloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
 .br
 .I void *
@@ -43,13 +43,13 @@ mem - malloc wrapper.
 
 .I void *
 .br
-.B mem_calloc
+.B mem_calloc_e
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_mem_calloc
+.B mem_calloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
 .br
 .I void *
@@ -59,13 +59,13 @@ mem - malloc wrapper.
 
 .I void *
 .br
-.B mem_realloc
+.B mem_realloc_e
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_mem_realloc
+.B mem_realloc
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
 .br
 .I void *
@@ -75,13 +75,13 @@ mem - malloc wrapper.
 
 .I void
 .br
-.B mem_free
+.B mem_free_e
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
-.B _cw_mem_free
+.B mem_free
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
 .br
 .I void
@@ -179,13 +179,13 @@ Destructor.
 
 .I void *
 .br
-.B mem_malloc
+.B mem_malloc_e
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_size" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_mem_malloc
+.B mem_malloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_size" )
 .br
 .I void *
@@ -231,13 +231,13 @@ Description:
 
 .I void *
 .br
-.B mem_calloc
+.B mem_calloc_e
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_mem_calloc
+.B mem_calloc
 .RI ( "cw_mem_t *a_mem" ", " "size_t a_number" ", " "size_t a_size" )
 .br
 .I void *
@@ -287,13 +287,13 @@ Description:
 
 .I void *
 .br
-.B mem_realloc
+.B mem_realloc_e
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" ", "
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_mem_realloc
+.B mem_realloc
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "size_t a_size" )
 .br
 .I void *
@@ -343,13 +343,13 @@ Description:
 
 .I void
 .br
-.B mem_free
+.B mem_free_e
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" ", " "const char *a_filename"
 .RI ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
-.B _cw_mem_free
+.B mem_free
 .RI ( "cw_mem_t *a_mem" ", " "void *a_ptr" )
 .br
 .I void

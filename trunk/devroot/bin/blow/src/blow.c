@@ -151,7 +151,7 @@ main(int argc, char **argv)
 	bufc_new(&bufc, cw_g_mem, NULL, NULL);
 	buffer = _cw_malloc(opt_bsize);
 	bufc_buffer_set(&bufc, buffer, opt_bsize, TRUE, (cw_opaque_dealloc_t
-	    *)mem_free, cw_g_mem);
+	    *)mem_free_e, cw_g_mem);
 	buf_bufc_append(&buf, &bufc, 0, opt_bsize);
 	bufc_delete(&bufc);
 

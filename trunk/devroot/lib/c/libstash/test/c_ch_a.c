@@ -136,10 +136,10 @@ main()
 		    ch_string_key_comp);
 		_cw_check_ptr(ch);
 
-		ch_insert(ch, a, a, (cw_chi_t *)_cw_pezz_get(chi_pezz));
-		ch_insert(ch, b, b, (cw_chi_t *)_cw_pezz_get(chi_pezz));
-		ch_insert(ch, c, c, (cw_chi_t *)_cw_pezz_get(chi_pezz));
-		ch_insert(ch, d, d, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		ch_insert(ch, a, a, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, b, b, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, c, c, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, d, d, (cw_chi_t *)pezz_get(chi_pezz));
 
 		_cw_assert(ch_search(ch, "foo", (void **)&v));
 
@@ -156,7 +156,7 @@ main()
 		_cw_assert(v == d);
 
 		while (ch_remove_iterate(ch, NULL, NULL, &chi) == FALSE)
-			_cw_pezz_put(chi_pezz, chi);
+			pezz_put(chi_pezz, chi);
 		
 		ch_delete(ch);
 		pezz_delete(chi_pezz);
@@ -180,10 +180,10 @@ main()
 		    ch_string_key_comp);
 		_cw_check_ptr(ch);
 
-		ch_insert(ch, a, a, (cw_chi_t *)_cw_pezz_get(chi_pezz));
-		ch_insert(ch, b, b, (cw_chi_t *)_cw_pezz_get(chi_pezz));
-		ch_insert(ch, c, c, (cw_chi_t *)_cw_pezz_get(chi_pezz));
-		ch_insert(ch, d, d, (cw_chi_t *)_cw_pezz_get(chi_pezz));
+		ch_insert(ch, a, a, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, b, b, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, c, c, (cw_chi_t *)pezz_get(chi_pezz));
+		ch_insert(ch, d, d, (cw_chi_t *)pezz_get(chi_pezz));
 
 		_cw_assert(ch_get_iterate(ch, (void **)&k, (void **)&v) ==
 		    FALSE);
@@ -212,25 +212,25 @@ main()
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		_cw_pezz_put(chi_pezz, chi);
+		pezz_put(chi_pezz, chi);
 		_cw_assert(k == b);
 		_cw_assert(v == b);
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		_cw_pezz_put(chi_pezz, chi);
+		pezz_put(chi_pezz, chi);
 		_cw_assert(k == c);
 		_cw_assert(v == c);
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		_cw_pezz_put(chi_pezz, chi);
+		pezz_put(chi_pezz, chi);
 		_cw_assert(k == d);
 		_cw_assert(v == d);
 
 		_cw_assert(ch_remove_iterate(ch, (void **)&k, (void **)&v, &chi)
 		    == FALSE);
-		_cw_pezz_put(chi_pezz, chi);
+		pezz_put(chi_pezz, chi);
 		_cw_assert(k == a);
 		_cw_assert(v == a);
 

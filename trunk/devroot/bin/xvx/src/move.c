@@ -31,7 +31,7 @@ move_new(cw_move_t *a_move, cw_opaque_dealloc_t *a_dealloc_func, void
 	} else {
 		retval = (cw_move_t *)_cw_malloc(sizeof(cw_move_t));
 		bzero(retval, sizeof(cw_move_t));
-		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
+		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free_e;
 		retval->dealloc_arg = cw_g_mem;
 	}
 

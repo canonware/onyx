@@ -1,3 +1,15 @@
+2000-11-12  Jason Evans  <jasone@canonware.com>
+
+	* mem: Rename mem_{m,c,re}alloc() --> mem_{m,c,re}alloc_e(),
+	_cw_mem_{m,c,re}alloc() --> mem_{m,c,re}alloc().  Rename
+	mem_free() --> mem_free_e(), _cw_mem_free() --> mem_free().
+
+	* pezz: Rename pezz_{get,put}() --> pezz_{get,put}_e().  Rename
+	_cw_pezz_{get,put}() --> pezz_{get,put}().
+
+	* pool: Rename pool_{get,put}() --> pool_{get,put}_e().  Rename
+	_cw_pool_{get,put}() --> pool_{get,put}().
+
 2000-11-05  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c: Convert parse error return values to exceptions.

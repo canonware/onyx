@@ -36,24 +36,24 @@ pool - Cached memory allocation of equal-size buffers.
 
 .I void *
 .br
-.B pool_get
+.B pool_get_e
 .RI ( "cw_pool_t *a_pool" ", " "const char *a_filename" ", " 
 .IR "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_pool_get
+.B pool_get
 .RI ( "cw_pool_t *a_pool" )
 
 .I void
 .br
-.B pool_put
+.B pool_put_e
 .RI ( "cw_pool_t *a_pool" ", " "void *a_buffer" ", " 
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
-.B _cw_pool_put
+.B pool_put
 .RI ( "cw_pool_t *a_pool" ", " "void *a_buffer" )
 
 .I void
@@ -196,13 +196,13 @@ Discard internally cached buffers, if any.
 
 .I void *
 .br
-.B pool_get
+.B pool_get_e
 .RI ( "cw_pool_t *a_pool" ", " "const char *a_filename" ", " 
 .IR "cw_uint32_t a_line_num" )
 .br
 .I void *
 .br
-.B _cw_pool_get
+.B pool_get
 .RI ( "cw_pool_t *a_pool" )
 .RS
 Input(s):
@@ -239,13 +239,13 @@ Allocate a memory buffer and return a pointer to it.
 
 .I void
 .br
-.B pool_put
+.B pool_put_e
 .RI ( "cw_pool_t *a_pool" ", " "void *a_buffer" ", " 
 .IR "const char *a_filename" ", " "cw_uint32_t a_line_num" )
 .br
 .I void
 .br
-.B _cw_pool_put
+.B pool_put
 .RI ( "cw_pool_t *a_pool" ", " "void *a_buffer" )
 .RS
 Input(s):

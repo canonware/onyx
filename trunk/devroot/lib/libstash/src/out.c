@@ -154,7 +154,7 @@ out_new(cw_out_t *a_out, cw_mem_t *a_mem)
 		retval = a_out;
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_out_t *)_cw_mem_malloc(a_mem, sizeof(cw_out_t));
+		retval = (cw_out_t *)mem_malloc(a_mem, sizeof(cw_out_t));
 		retval->is_malloced = TRUE;
 	}
 
@@ -180,11 +180,11 @@ out_delete(cw_out_t *a_out)
 	_cw_assert(a_out->magic == _CW_OUT_MAGIC);
 
 	if (a_out->extensions != NULL)
-		_cw_mem_free(a_out->mem, a_out->extensions);
+		mem_free(a_out->mem, a_out->extensions);
 	mtx_delete(&a_out->lock);
 
 	if (a_out->is_malloced)
-		_cw_mem_free(a_out->mem, a_out);
+		mem_free(a_out->mem, a_out);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_out, 0x5a, sizeof(cw_out_t));
@@ -205,11 +205,11 @@ out_register(cw_out_t *a_out, const char *a_type, cw_uint32_t a_size,
 
 	if (a_out->extensions == NULL) {
 		a_out->extensions = (cw_out_ent_t
-		    *)_cw_mem_malloc(a_out->mem, sizeof(cw_out_ent_t));
+		    *)mem_malloc(a_out->mem, sizeof(cw_out_ent_t));
 	} else {
 		cw_out_ent_t	*t_ptr;
 
-		t_ptr = (cw_out_ent_t *)_cw_mem_realloc(a_out->mem,
+		t_ptr = (cw_out_ent_t *)mem_realloc(a_out->mem,
 		    a_out->extensions, ((a_out->nextensions + 1) *
 		    sizeof(cw_out_ent_t)));
 		a_out->extensions = t_ptr;
@@ -237,12 +237,12 @@ out_merge(cw_out_t *a_a, cw_out_t *a_b)
 	if (a_b->nextensions > 0) {
 		if (a_a->extensions == NULL) {
 			a_a->extensions = (cw_out_ent_t
-			    *)_cw_mem_calloc(a_a->mem, a_b->nextensions,
+			    *)mem_calloc(a_a->mem, a_b->nextensions,
 			    sizeof(cw_out_ent_t));
 		} else {
 			cw_out_ent_t	*t_ptr;
 
-			t_ptr = (cw_out_ent_t *)_cw_mem_realloc(a_a->mem,
+			t_ptr = (cw_out_ent_t *)mem_realloc(a_a->mem,
 			    a_a->extensions, ((a_a->nextensions +
 			    a_b->nextensions) * sizeof(cw_out_ent_t)));
 			a_a->extensions = t_ptr;
@@ -750,7 +750,7 @@ out_p_put_fvle(cw_out_t *a_out, cw_sint32_t a_fd, cw_bool_t a_time_stamp, const
 
 	RETURN:
 	if (format != NULL)
-		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL, format);
+		mem_free((a_out != NULL) ? a_out->mem : NULL, format);
 	return retval;
 }
 
@@ -798,7 +798,7 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
 		mtx_unlock(&a_out->lock);
 	RETURN:
 	if (obuf != sbuf)
-		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL, obuf);
+		mem_free((a_out != NULL) ? a_out->mem : NULL, obuf);
 	return retval;
 }
 
@@ -1007,7 +1007,7 @@ out_p_put_svn(cw_out_t *a_out, char **a_str, cw_uint32_t a_size, cw_uint32_t
 	RETURN:
 	if (key.key_els != key.key_els_buf) {
 		/* out_p_format_scan() allocated a new spec key. */
-		_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+		mem_free((a_out != NULL) ? a_out->mem : NULL,
 		    key.key_els);
 	}
 	return retval;
@@ -1020,19 +1020,19 @@ out_p_buffer_expand(cw_out_t *a_out, cw_uint32_t *ar_acount, cw_uint8_t
 	cw_uint8_t	*retval;
 
 	if (*ar_acount == 0) {
-		retval = (cw_uint8_t *)_cw_mem_malloc((a_out != NULL) ?
+		retval = (cw_uint8_t *)mem_malloc((a_out != NULL) ?
 		    a_out->mem : NULL, a_expand_size);
 		if (a_copy_size > 0)
 			memcpy(retval, a_buffer, a_copy_size);
 	} else {
 		xep_begin();
 		xep_try {
-			retval = (cw_uint8_t *)_cw_mem_realloc((a_out != NULL) ?
+			retval = (cw_uint8_t *)mem_realloc((a_out != NULL) ?
 			    a_out->mem : NULL, a_buffer, a_expand_size);
 			/* realloc() copies for us. */
 		}
 		xep_catch(_CW_XEPV_OOM) {
-			_cw_mem_free((a_out != NULL) ? a_out->mem : NULL,
+			mem_free((a_out != NULL) ? a_out->mem : NULL,
 			    a_buffer);
 		}
 		xep_end();
@@ -1146,7 +1146,7 @@ out_p_el_accept(cw_out_t *a_out, const char *a_format, cw_out_key_t *a_key,
 					total_els += 2;
 			}
 		}
-		a_key->key_els = (cw_out_el_t *)_cw_mem_malloc((a_out != NULL)
+		a_key->key_els = (cw_out_el_t *)mem_malloc((a_out != NULL)
 		    ? a_out->mem : NULL, total_els * sizeof(cw_out_el_t));
 #ifdef _LIBSTASH_DBG
 		memset(a_key->key_els, 0, total_els * sizeof(cw_out_el_t));

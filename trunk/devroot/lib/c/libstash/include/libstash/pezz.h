@@ -62,9 +62,9 @@ cw_pezz_t *pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t
     a_buffer_size, cw_uint32_t a_num_buffers);
 void	pezz_delete(cw_pezz_t *a_pezz);
 cw_uint32_t pezz_buffer_size_get(cw_pezz_t *a_pezz);
-void	*pezz_get(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t
+void	*pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t
     a_line_num);
-void	pezz_put(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
+void	pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
     cw_uint32_t a_line_num);
 void	pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix);
 
@@ -75,13 +75,13 @@ void	pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix);
  * library anyway, this is a free (though perhaps small) memory savings.
  */
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-#define _cw_pezz_get(a_pezz)						\
-	pezz_get((a_pezz), __FILE__, __LINE__)
-#define _cw_pezz_put(a_pezz, a_buffer)					\
-	pezz_put((a_pezz), (a_buffer), __FILE__, __LINE__)
+#define pezz_get(a_pezz)						\
+	pezz_get_e((a_pezz), __FILE__, __LINE__)
+#define pezz_put(a_pezz, a_buffer)					\
+	pezz_put_e((a_pezz), (a_buffer), __FILE__, __LINE__)
 #else
-#define _cw_pezz_get(a_pezz)						\
-	pezz_get((a_pezz), NULL, 0)
-#define _cw_pezz_put(a_pezz, a_buffer)					\
-	pezz_put((a_pezz), (a_buffer), NULL, 0)
+#define pezz_get(a_pezz)						\
+	pezz_get_e((a_pezz), NULL, 0)
+#define pezz_put(a_pezz, a_buffer)					\
+	pezz_put_e((a_pezz), (a_buffer), NULL, 0)
 #endif

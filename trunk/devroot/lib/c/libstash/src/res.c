@@ -71,7 +71,7 @@ res_new(cw_res_t *a_res, cw_mem_t *a_mem)
 			v_retval = retval = a_res;
 			retval->is_malloced = FALSE;
 		} else {
-			v_retval = retval = (cw_res_t *)_cw_mem_malloc(a_mem,
+			v_retval = retval = (cw_res_t *)mem_malloc(a_mem,
 			    sizeof(cw_res_t));
 			retval->is_malloced = TRUE;
 		}
@@ -90,7 +90,7 @@ res_new(cw_res_t *a_res, cw_mem_t *a_mem)
 		switch (try_stage) {
 		case 1:
 			if (retval->is_malloced)
-				_cw_mem_free(a_mem, retval);
+				mem_free(a_mem, retval);
 		case 0:
 			break;
 		default:
@@ -116,13 +116,13 @@ res_delete(cw_res_t *a_res)
 	for (i = 0, num_resources = dch_count(&a_res->hash); i < num_resources;
 	     i++) {
 		dch_remove_iterate(&a_res->hash, &name, &val, NULL);
-		_cw_mem_free(a_res->mem, name);
-		_cw_mem_free(a_res->mem, val);
+		mem_free(a_res->mem, name);
+		mem_free(a_res->mem, val);
 	}
 	dch_delete(&a_res->hash);
 
 	if (a_res->is_malloced)
-		_cw_mem_free(a_res->mem, a_res);
+		mem_free(a_res->mem, a_res);
 }
 
 void
@@ -135,8 +135,8 @@ res_clear(cw_res_t *a_res)
 
 	while (dch_remove_iterate(&a_res->hash, (void **)&key, (void **)&val,
 	    NULL) == FALSE) {
-		_cw_mem_free(a_res->mem, key);
-		_cw_mem_free(a_res->mem, val);
+		mem_free(a_res->mem, key);
+		mem_free(a_res->mem, val);
 	}
 
 	rwl_wunlock(&a_res->rw_lock);
@@ -365,10 +365,10 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 	name_bufsize = _LIBSTASH_RES_BUFFSIZE;
 	val_bufsize = _LIBSTASH_RES_BUFFSIZE;
 
-	name = (char *)_cw_mem_malloc(a_res->mem, name_bufsize);
+	name = (char *)mem_malloc(a_res->mem, name_bufsize);
 	if (name == NULL)
 		goto RETURN;
-	val = (char *)_cw_mem_malloc(a_res->mem, val_bufsize);
+	val = (char *)mem_malloc(a_res->mem, val_bufsize);
 	if (val == NULL)
 		goto RETURN;
 	for (i = 0, col_num = 1; ((state != _LIBSTASH_RES_STATE_FINISH) &&
@@ -379,14 +379,14 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 		 */
 		if (name_pos >= name_bufsize) {
 			name_bufsize <<= 1;
-			name = (char *)_cw_mem_realloc(a_res->mem, name,
+			name = (char *)mem_realloc(a_res->mem, name,
 			    name_bufsize);
 			if (name == NULL)
 				goto RETURN;
 		}
 		if (val_pos >= val_bufsize) {
 			val_bufsize <<= 1;
-			val = (char *)_cw_mem_realloc(a_res->mem, val,
+			val = (char *)mem_realloc(a_res->mem, val,
 			    val_bufsize);
 			if (val == NULL)
 				goto RETURN;
@@ -943,9 +943,9 @@ res_p_res_parse(cw_res_t *a_res, cw_bool_t a_is_file)
 
 	RETURN:
 	if (NULL != name)
-		_cw_mem_free(a_res->mem, name);
+		mem_free(a_res->mem, name);
 	if (NULL != val)
-		_cw_mem_free(a_res->mem, val);
+		mem_free(a_res->mem, val);
 	return retval;
 }
 
@@ -1047,16 +1047,16 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 	char	*temp_name, *temp_val;
 
 	/* Make copies to insert into the hash table. */
-	temp_name = (char *)_cw_mem_malloc(a_res->mem, strlen(a_name) + 1);
+	temp_name = (char *)mem_malloc(a_res->mem, strlen(a_name) + 1);
 	strcpy(temp_name, a_name);
 
 	xep_begin();
 	xep_try {
-		temp_val = (char *)_cw_mem_malloc(a_res->mem, strlen(a_val) +
+		temp_val = (char *)mem_malloc(a_res->mem, strlen(a_val) +
 		    1);
 	}
 	xep_catch(_CW_XEPV_OOM) {
-		_cw_mem_free(a_res->mem, temp_name);
+		mem_free(a_res->mem, temp_name);
 	}
 	xep_end();
 
@@ -1077,8 +1077,8 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 		 */
 		dch_remove(&a_res->hash, (void *)temp_name, (void **)&old_name,
 		    (void **)&old_val, NULL);
-		_cw_mem_free(a_res->mem, old_name);
-		_cw_mem_free(a_res->mem, old_val);
+		mem_free(a_res->mem, old_name);
+		mem_free(a_res->mem, old_val);
 
 		dch_insert(&a_res->hash, (void *)temp_name, (void *)temp_val,
 		    NULL);
@@ -1096,8 +1096,8 @@ res_p_res_merge(cw_res_t *a_res, const char *a_name, const char *a_val)
 		 * could have changed even though this call was a failure.  Oh
 		 * well.
 		 */
-		_cw_mem_free(a_res->mem, temp_name);
-		_cw_mem_free(a_res->mem, temp_val);
+		mem_free(a_res->mem, temp_name);
+		mem_free(a_res->mem, temp_val);
 	}
 	xep_end();
 }

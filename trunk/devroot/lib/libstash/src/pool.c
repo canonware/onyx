@@ -31,7 +31,7 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 			memset(retval, 0, sizeof(cw_pool_t));
 			retval->is_malloced = FALSE;
 		} else {
-			v_retval = retval = (cw_pool_t *)_cw_mem_malloc(a_mem,
+			v_retval = retval = (cw_pool_t *)mem_malloc(a_mem,
 			    sizeof(cw_pool_t));
 			memset(retval, 0, sizeof(cw_pool_t));
 			retval->is_malloced = TRUE;
@@ -57,7 +57,7 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 		switch (try_stage) {
 		case 1:
 			if (retval->is_malloced)
-				_cw_mem_free(a_mem, retval);
+				mem_free(a_mem, retval);
 		case 0:
 			break;
 		default:
@@ -103,7 +103,7 @@ pool_delete(cw_pool_t *a_pool)
 				    allocation->filename),
 				    allocation->line_num);
 			}
-			_cw_mem_free(a_pool->mem, allocation);
+			mem_free(a_pool->mem, allocation);
 		}
 		dch_delete(&a_pool->addr_hash);
 	}
@@ -112,13 +112,13 @@ pool_delete(cw_pool_t *a_pool)
 	for (spare = qs_top(&a_pool->spares); spare != NULL; spare =
 	     qs_top(&a_pool->spares)) {
 		qs_pop(&a_pool->spares, link);
-		_cw_mem_free(a_pool->mem, spare);
+		mem_free(a_pool->mem, spare);
 	}
 
 	mtx_delete(&a_pool->lock);
 
 	if (a_pool->is_malloced)
-		_cw_mem_free(a_pool->mem, a_pool);
+		mem_free(a_pool->mem, a_pool);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_pool, 0x5a, sizeof(cw_pool_t));
@@ -146,14 +146,14 @@ pool_drain(cw_pool_t *a_pool)
 	for (spare = qs_top(&a_pool->spares); spare != NULL; spare =
 	     qs_top(&a_pool->spares)) {
 		qs_pop(&a_pool->spares, link);
-		_cw_mem_free(a_pool->mem, spare);
+		mem_free(a_pool->mem, spare);
 	}
 
 	mtx_unlock(&a_pool->lock);
 }
 
 void *
-pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
+pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 {
 	void		*retval;
 	cw_pool_spare_t	*spare;
@@ -168,10 +168,10 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 		retval = (void *)spare;
 	} else {
 		if (a_pool->buffer_size >= sizeof(cw_pool_spare_t))
-			retval = (void *)_cw_mem_malloc(a_pool->mem,
+			retval = (void *)mem_malloc(a_pool->mem,
 			    a_pool->buffer_size);
 		else
-			retval = (void *)_cw_mem_malloc(a_pool->mem,
+			retval = (void *)mem_malloc(a_pool->mem,
 			    sizeof(cw_pool_spare_t));
 	}
 
@@ -205,7 +205,7 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 			xep_begin();
 			volatile cw_pool_item_t	*v_allocation;
 			xep_try {
-				allocation = _cw_mem_malloc(a_pool->mem,
+				allocation = mem_malloc(a_pool->mem,
 				    sizeof(cw_pool_item_t));
 				try_stage = 1;
 				
@@ -232,7 +232,7 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 				allocation = (cw_pool_item_t *)v_allocation;
 				switch (try_stage) {
 				case 1:
-					_cw_mem_free(a_pool->mem, allocation);
+					mem_free(a_pool->mem, allocation);
 				case 0:
 					break;
 				default:
@@ -249,8 +249,8 @@ pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 }
 
 void
-pool_put(cw_pool_t *a_pool, void *a_buffer, const char *a_filename, cw_uint32_t
-    a_line_num)
+pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
+    cw_uint32_t a_line_num)
 {
 	cw_pool_spare_t	*spare;
 
@@ -286,7 +286,7 @@ pool_put(cw_pool_t *a_pool, void *a_buffer, const char *a_filename, cw_uint32_t
 				    allocation->filename, allocation->line_num);
 			}
 			memset(a_buffer, 0x5a, a_pool->buffer_size);
-			_cw_mem_free(a_pool->mem, allocation);
+			mem_free(a_pool->mem, allocation);
 		}
 	}
 #endif

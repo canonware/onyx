@@ -25,7 +25,7 @@ dbg_new(cw_mem_t *a_mem)
 {
 	cw_dbg_t	*retval;
 
-	retval = (cw_dbg_t *)_cw_mem_malloc(a_mem, sizeof(cw_dbg_t));
+	retval = (cw_dbg_t *)mem_malloc(a_mem, sizeof(cw_dbg_t));
 
 	retval->mem = a_mem;
 	mtx_new(&retval->lock);
@@ -37,7 +37,7 @@ dbg_new(cw_mem_t *a_mem)
 	}
 	xep_catch(_CW_XEPV_OOM) {
 		mtx_delete(&retval->lock);
-		_cw_mem_free(a_mem, retval);
+		mem_free(a_mem, retval);
 	}
 	xep_end();
 
@@ -52,11 +52,11 @@ dbg_delete(cw_dbg_t *a_dbg)
 	_cw_check_ptr(a_dbg);
 
 	while (ch_remove_iterate(a_dbg->flag_hash, NULL, NULL, &chi) == FALSE)
-		_cw_mem_free(a_dbg->mem, chi);
+		mem_free(a_dbg->mem, chi);
 
 	ch_delete(a_dbg->flag_hash);
 	mtx_delete(&a_dbg->lock);
-	_cw_mem_free(a_dbg->mem, a_dbg);
+	mem_free(a_dbg->mem, a_dbg);
 }
 
 cw_bool_t
@@ -71,7 +71,7 @@ dbg_register(cw_dbg_t *a_dbg, const char *a_flag)
 			/* Flag not registered. */
 			xep_begin();
 			xep_try {
-				chi = (cw_chi_t *)_cw_mem_malloc(a_dbg->mem,
+				chi = (cw_chi_t *)mem_malloc(a_dbg->mem,
 				    sizeof(cw_chi_t));
 			}
 			xep_catch(_CW_XEPV_OOM) {
@@ -96,7 +96,7 @@ dbg_unregister(cw_dbg_t *a_dbg, const char *a_flag)
 	if (a_dbg != NULL) {
 		if (ch_remove(a_dbg->flag_hash, a_flag, NULL, NULL, &chi) ==
 		    FALSE)
-			_cw_mem_free(a_dbg->mem, chi);
+			mem_free(a_dbg->mem, chi);
 	}
 }
 

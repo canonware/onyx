@@ -30,7 +30,7 @@ ch_new(cw_ch_t *a_ch, cw_mem_t *a_mem, cw_uint32_t a_table_size, cw_ch_hash_t
 		retval->is_malloced = FALSE;
 	} else {
 		retval = (cw_ch_t
-		    *)_cw_mem_malloc(a_mem, _CW_CH_TABLE2SIZEOF(a_table_size));
+		    *)mem_malloc(a_mem, _CW_CH_TABLE2SIZEOF(a_table_size));
 		if (NULL == retval)
 			goto RETURN;
 		memset(retval, 0, _CW_CH_TABLE2SIZEOF(a_table_size));
@@ -64,7 +64,7 @@ ch_delete(cw_ch_t *a_ch)
 		_cw_assert(chi->magic == _CW_CHI_MAGIC);
 		ql_head_remove(&a_ch->chi_ql, cw_chi_t, ch_link);
 		if (chi->is_malloced)
-			_cw_mem_free(a_ch->mem, chi);
+			mem_free(a_ch->mem, chi);
 #ifdef _LIBSTASH_DBG
 		else
 			memset(chi, 0x5a, sizeof(cw_chi_t));
@@ -72,7 +72,7 @@ ch_delete(cw_ch_t *a_ch)
 	}
 
 	if (a_ch->is_malloced)
-		_cw_mem_free(a_ch->mem, a_ch);
+		mem_free(a_ch->mem, a_ch);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_ch, 0x5a, _CW_CH_TABLE2SIZEOF(a_ch->table_size));
@@ -103,7 +103,7 @@ ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data, cw_chi_t
 		chi = a_chi;
 		chi->is_malloced = FALSE;
 	} else {
-		chi = (cw_chi_t *)_cw_mem_malloc(a_ch->mem, sizeof(cw_chi_t));
+		chi = (cw_chi_t *)mem_malloc(a_ch->mem, sizeof(cw_chi_t));
 		chi->is_malloced = TRUE;
 	}
 	chi->key = a_key;
@@ -163,7 +163,7 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 			if (r_data != NULL)
 				*r_data = (void *)chi->data;
 			if (chi->is_malloced)
-				_cw_mem_free(a_ch->mem, chi);
+				mem_free(a_ch->mem, chi);
 			else if (r_chi != NULL) {
 #ifdef _LIBSTASH_DBG
 				chi->magic = 0;
@@ -274,7 +274,7 @@ ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi)
 	if (r_data != NULL)
 		*r_data = (void *)chi->data;
 	if (chi->is_malloced)
-		_cw_mem_free(a_ch->mem, chi);
+		mem_free(a_ch->mem, chi);
 	else if (r_chi != NULL) {
 #ifdef _LIBSTASH_DBG
 		chi->magic = 0;

@@ -46,49 +46,49 @@ main()
 		pool_new(&pool, cw_g_mem, 4096);
 		_cw_assert(pool_buffer_size_get(&pool) == 4096);
 		for (i = 0; i < 100; i++) {
-			pointers[i] = _cw_pool_get(&pool);
+			pointers[i] = pool_get(&pool);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 100; i++) {
-			_cw_pool_put(&pool, pointers[i]);
+			pool_put(&pool, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 5; i++) {
-			pointers[i] = _cw_pool_get(&pool);
+			pointers[i] = pool_get(&pool);
 			_cw_check_ptr(pointers[i]);
 		}
 		pool_drain(&pool);
 		for (i = 0; i < 5; i++) {
-			_cw_pool_put(&pool, pointers[i]);
+			pool_put(&pool, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 6; i++) {
-			pointers[i] = _cw_pool_get(&pool);
+			pointers[i] = pool_get(&pool);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 6; i++) {
-			_cw_pool_put(&pool, pointers[i]);
+			pool_put(&pool, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 1; i++) {
-			pointers[i] = _cw_pool_get(&pool);
+			pointers[i] = pool_get(&pool);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 1; i++) {
-			_cw_pool_put(&pool, pointers[i]);
+			pool_put(&pool, pointers[i]);
 			pointers[i] = NULL;
 		}
 		pool_drain(&pool);
 
 		for (i = 0; i < 11; i++) {
-			pointers[i] = _cw_pool_get(&pool);
+			pointers[i] = pool_get(&pool);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 11; i++) {
-			_cw_pool_put(&pool, pointers[i]);
+			pool_put(&pool, pointers[i]);
 			pointers[i] = NULL;
 		}
 

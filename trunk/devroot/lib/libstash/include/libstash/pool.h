@@ -46,9 +46,9 @@ cw_pool_t	*pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t
 void		pool_delete(cw_pool_t *a_pool);
 cw_uint32_t	pool_buffer_size_get(cw_pool_t *a_pool);
 void		pool_drain(cw_pool_t *a_pool);
-void		*pool_get(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t
-    a_line_num);
-void		pool_put(cw_pool_t *a_pool, void *a_buffer, const char
+void		*pool_get_e(cw_pool_t *a_pool, const char *a_filename,
+    cw_uint32_t a_line_num);
+void		pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char
     *a_filename, cw_uint32_t a_line_num);
 void		pool_dump(cw_pool_t *a_pool, const char *a_prefix);
 
@@ -59,13 +59,13 @@ void		pool_dump(cw_pool_t *a_pool, const char *a_prefix);
  * library anyway, this is a free (though perhaps small) memory savings.
  */
 #if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-#define _cw_pool_get(a_pool)						\
-	pool_get((a_pool), __FILE__, __LINE__)
-#define _cw_pool_put(a_pool, a_buffer)					\
-	pool_put((a_pool), (a_buffer), __FILE__, __LINE__)
+#define pool_get(a_pool)						\
+	pool_get_e((a_pool), __FILE__, __LINE__)
+#define pool_put(a_pool, a_buffer)					\
+	pool_put_e((a_pool), (a_buffer), __FILE__, __LINE__)
 #else
-#define _cw_pool_get(a_pool)						\
-	pool_get((a_pool), NULL, 0)
-#define _cw_pool_put(a_pool, a_buffer)					\
-	pool_put((a_pool), (a_buffer), NULL, 0)
+#define pool_get(a_pool)						\
+	pool_get_e((a_pool), NULL, 0)
+#define pool_put(a_pool, a_buffer)					\
+	pool_put_e((a_pool), (a_buffer), NULL, 0)
 #endif

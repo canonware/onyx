@@ -45,47 +45,47 @@ main()
 		pezz_new(&pezz, cw_g_mem, 4096, 10);
 		_cw_assert(pezz_buffer_size_get(&pezz) == 4096);
 		for (i = 0; i < 100; i++) {
-			pointers[i] = _cw_pezz_get(&pezz);
+			pointers[i] = pezz_get(&pezz);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 100; i++) {
-			_cw_pezz_put(&pezz, pointers[i]);
+			pezz_put(&pezz, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 5; i++) {
-			pointers[i] = _cw_pezz_get(&pezz);
+			pointers[i] = pezz_get(&pezz);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 5; i++) {
-			_cw_pezz_put(&pezz, pointers[i]);
+			pezz_put(&pezz, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 6; i++) {
-			pointers[i] = _cw_pezz_get(&pezz);
+			pointers[i] = pezz_get(&pezz);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 6; i++) {
-			_cw_pezz_put(&pezz, pointers[i]);
+			pezz_put(&pezz, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 1; i++) {
-			pointers[i] = _cw_pezz_get(&pezz);
+			pointers[i] = pezz_get(&pezz);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 1; i++) {
-			_cw_pezz_put(&pezz, pointers[i]);
+			pezz_put(&pezz, pointers[i]);
 			pointers[i] = NULL;
 		}
 
 		for (i = 0; i < 11; i++) {
-			pointers[i] = _cw_pezz_get(&pezz);
+			pointers[i] = pezz_get(&pezz);
 			_cw_check_ptr(pointers[i]);
 		}
 		for (i = 0; i < 11; i++) {
-			_cw_pezz_put(&pezz, pointers[i]);
+			pezz_put(&pezz, pointers[i]);
 			pointers[i] = NULL;
 		}
 

@@ -36,9 +36,9 @@ bhpi_new(cw_bhpi_t *a_bhpi, cw_mem_t *a_mem, const void *a_priority, const void
 		retval->dealloc_func = a_dealloc_func;
 		retval->dealloc_arg = a_dealloc_arg;
 	} else {
-		retval = (cw_bhpi_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhpi_t));
+		retval = (cw_bhpi_t *)mem_malloc(a_mem, sizeof(cw_bhpi_t));
 		memset(retval, 0, sizeof(cw_bhpi_t));
-		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
+		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free_e;
 		retval->dealloc_arg = a_mem;
 	}
 
@@ -100,7 +100,7 @@ bhp_delete(cw_bhp_t *a_bhp)
 	if (a_bhp->is_thread_safe)
 		mtx_delete(&a_bhp->lock);
 	if (a_bhp->is_malloced)
-		_cw_mem_free(a_bhp->mem, a_bhp);
+		mem_free(a_bhp->mem, a_bhp);
 }
 
 void
@@ -420,7 +420,7 @@ bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp,
 	_cw_check_ptr(a_prio_comp);
 
 	if (a_bhp == NULL) {
-		retval = (cw_bhp_t *)_cw_mem_malloc(a_mem, sizeof(cw_bhp_t));
+		retval = (cw_bhp_t *)mem_malloc(a_mem, sizeof(cw_bhp_t));
 		retval->is_malloced = TRUE;
 	} else {
 		retval = a_bhp;

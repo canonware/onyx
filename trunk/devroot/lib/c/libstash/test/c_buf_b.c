@@ -117,7 +117,7 @@ main(int argc, char **argv)
 			buffer[j] = (char)(n % _LIBSTASH_TEST_DATA_MODULUS);
 		bufc_buffer_set(bufc, (void *)buffer,
 		    _LIBSTASH_TEST_SIZEOF_BUFFER, FALSE, (cw_opaque_dealloc_t
-		    *)mem_free, cw_g_mem);
+		    *)mem_free_e, cw_g_mem);
 		buf_bufc_append(buf_a, bufc, 0, _LIBSTASH_TEST_SIZEOF_BUFFER);
 		bufc_delete(bufc);
 	}

@@ -42,7 +42,7 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 			v_retval = retval = a_mq;
 			a_mq->is_malloced = FALSE;
 		} else {
-			v_retval = retval = (cw_mq_t *)_cw_mem_malloc(a_mem,
+			v_retval = retval = (cw_mq_t *)mem_malloc(a_mem,
 			    sizeof(cw_mq_t));
 			retval->is_malloced = TRUE;
 		}
@@ -72,7 +72,7 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 		retval->msgs_beg = 0;
 		retval->msgs_end = 0;
 
-		retval->msgs.x = (cw_uint32_t *)_cw_mem_malloc(a_mem,
+		retval->msgs.x = (cw_uint32_t *)mem_malloc(a_mem,
 		    retval->msgs_vec_count * retval->msg_size);
 		try_stage = 2;
 
@@ -91,7 +91,7 @@ mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
 		switch (try_stage) {
 		case 1:
 			if (a_mq->is_malloced)
-				_cw_mem_free(a_mem, retval);
+				mem_free(a_mem, retval);
 		case 0:
 			break;
 		default:
@@ -113,10 +113,10 @@ mq_delete(cw_mq_t *a_mq)
 	mtx_delete(&a_mq->lock);
 	cnd_delete(&a_mq->cond);
 
-	_cw_mem_free(a_mq->mem, a_mq->msgs.x);
+	mem_free(a_mq->mem, a_mq->msgs.x);
 
 	if (a_mq->is_malloced)
-		_cw_mem_free(a_mq->mem, a_mq);
+		mem_free(a_mq->mem, a_mq);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_mq, 0x5a, sizeof(cw_mq_t));
@@ -342,7 +342,7 @@ mq_put(cw_mq_t *a_mq, ...)
 			 * Array overflow.  Double the array and copy the
 			 * messages.
 			 */
-			t_msgs.x = (void *)_cw_mem_malloc(a_mq->mem,
+			t_msgs.x = (void *)mem_malloc(a_mq->mem,
 			    a_mq->msgs_vec_count * 2 * a_mq->msg_size);
 
 			switch (a_mq->msg_size) {

@@ -83,13 +83,13 @@ buf_delete(cw_buf_t *a_buf)
 	}
 
 	if (a_buf->bufel_array != a_buf->static_bufel_array)
-		_cw_mem_free(a_buf->mem, a_buf->bufel_array);
+		mem_free(a_buf->mem, a_buf->bufel_array);
 	if (a_buf->cumulative_index != a_buf->static_cumulative_index)
-		_cw_mem_free(a_buf->mem, a_buf->cumulative_index);
+		mem_free(a_buf->mem, a_buf->cumulative_index);
 	if (a_buf->iov != a_buf->static_iov)
-		_cw_mem_free(a_buf->mem, a_buf->iov);
+		mem_free(a_buf->mem, a_buf->iov);
 	if (a_buf->is_malloced)
-		_cw_mem_free(a_buf->mem, a_buf);
+		mem_free(a_buf->mem, a_buf);
 }
 
 void
@@ -163,7 +163,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 			    "[s]|    \\\n", a_prefix,
 			    a_buf->bufel_array[i].bufc, a_prefix);
 
-			sub_prefix = _cw_mem_malloc(a_buf->mem, strlen(a_prefix)
+			sub_prefix = mem_malloc(a_buf->mem, strlen(a_prefix)
 			    + 7);
 			if (sub_prefix == NULL)
 				bufc_p_dump(a_buf->bufel_array[i].bufc, "...");
@@ -172,7 +172,7 @@ buf_dump(cw_buf_t *a_buf, const char *a_prefix)
 				    a_prefix);
 				bufc_p_dump(a_buf->bufel_array[i].bufc,
 				    sub_prefix);
-				_cw_mem_free(a_buf->mem, sub_prefix);
+				mem_free(a_buf->mem, sub_prefix);
 			}
 		} else {
 			_cw_out_put("[s]|   \\--> bufc : 0x[i|b:16]"
@@ -1353,7 +1353,7 @@ buf_p_new(cw_buf_t *a_buf, cw_mem_t *a_mem, cw_bool_t a_is_threadsafe)
 	cw_buf_t	*retval;
 
 	if (a_buf == NULL) {
-		retval = (cw_buf_t *)_cw_mem_malloc(a_mem, sizeof(cw_buf_t));
+		retval = (cw_buf_t *)mem_malloc(a_mem, sizeof(cw_buf_t));
 		retval->is_malloced = TRUE;
 	} else {
 		retval = a_buf;
@@ -1511,10 +1511,10 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		for (i = a_buf->array_size << 1; i < a_min_array_size; i <<= 1);
 
 		if (a_buf->bufel_array != a_buf->static_bufel_array) {
-			t_ptr = _cw_mem_realloc(a_buf->mem, a_buf->bufel_array,
+			t_ptr = mem_realloc(a_buf->mem, a_buf->bufel_array,
 			    i * sizeof(cw_bufel_t));
 		} else {
-			t_ptr = _cw_mem_calloc(a_buf->mem, i,
+			t_ptr = mem_calloc(a_buf->mem, i,
 			    sizeof(cw_bufel_t));
 			memcpy(t_ptr, a_buf->bufel_array,
 			    (size_t) (a_buf->array_size * sizeof(cw_bufel_t)));
@@ -1526,10 +1526,10 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		a_buf->bufel_array = (cw_bufel_t *)t_ptr;
 
 		if (a_buf->cumulative_index != a_buf->static_cumulative_index) {
-			t_ptr = _cw_mem_realloc(a_buf->mem,
+			t_ptr = mem_realloc(a_buf->mem,
 			    a_buf->cumulative_index, i * sizeof(cw_uint32_t));
 		} else {
-			t_ptr = _cw_mem_calloc(a_buf->mem, i,
+			t_ptr = mem_calloc(a_buf->mem, i,
 			    sizeof(cw_uint32_t));
 			memcpy(t_ptr, a_buf->cumulative_index,
 			    (a_buf->array_size * sizeof(cw_uint32_t)));
@@ -1541,10 +1541,10 @@ buf_p_array_fit(cw_buf_t *a_buf, cw_uint32_t a_min_array_size)
 		a_buf->cumulative_index = (cw_uint32_t *)t_ptr;
 
 		if (a_buf->iov != a_buf->static_iov) {
-			t_ptr = _cw_mem_realloc(a_buf->mem, a_buf->iov, i *
+			t_ptr = mem_realloc(a_buf->mem, a_buf->iov, i *
 			    sizeof(struct iovec));
 		} else {
-			t_ptr = _cw_mem_calloc(a_buf->mem, i, sizeof(struct
+			t_ptr = mem_calloc(a_buf->mem, i, sizeof(struct
 			    iovec));
 #ifdef _LIBSTASH_DBG
 			memset(a_buf->iov, 0x5a,
@@ -2068,10 +2068,10 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		xep_begin();
 		xep_try {
 			v_bufc = bufc = bufc_new(NULL, a_buf->mem,
-			    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
+			    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem);
 			try_stage = 1;
 
-			buffer = _cw_mem_malloc(a_buf->mem, (a_offset +
+			buffer = mem_malloc(a_buf->mem, (a_offset +
 			    a_length) - a_buf->size);
 			try_stage = 2;
 		}
@@ -2089,7 +2089,7 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		xep_end();
 
 		bufc_buffer_set(bufc, buffer, (a_offset + a_length) -
-		    a_buf->size, TRUE, (cw_opaque_dealloc_t *)mem_free,
+		    a_buf->size, TRUE, (cw_opaque_dealloc_t *)mem_free_e,
 		    cw_g_mem);
 
 		xep_begin();
@@ -2144,19 +2144,19 @@ buf_p_writeable_range_make(cw_buf_t *a_buf, cw_uint32_t a_offset, cw_uint32_t
 		    (a_buf->array_size - 1))];
 		if ((bufc_p_is_writeable(bufel->bufc) == FALSE) ||
 		    (bufc_p_ref_count_get(bufel->bufc) > 1)) {
-			buffer = _cw_mem_malloc(a_buf->mem, bufel->end_offset -
+			buffer = mem_malloc(a_buf->mem, bufel->end_offset -
 			    bufel->beg_offset);
 			xep_begin();
 			xep_try {
 				bufc = bufc_new(NULL, a_buf->mem, NULL, NULL);
 			}
 			xep_catch(_CW_XEPV_OOM) {
-				_cw_mem_free(a_buf->mem, buffer);
+				mem_free(a_buf->mem, buffer);
 			}
 			xep_end();
 			bufc_buffer_set(bufc, buffer, bufel->end_offset -
 			    bufel->beg_offset, TRUE, (cw_opaque_dealloc_t
-			    *)mem_free, cw_g_mem);
+			    *)mem_free_e, cw_g_mem);
 
 			memcpy(buffer,
 			    bufel->bufc->buf + bufel->beg_offset,
@@ -2179,10 +2179,10 @@ bufc_new(cw_bufc_t *a_bufc, cw_mem_t *a_mem, cw_opaque_dealloc_t
 	cw_bufc_t	*retval;
 
 	if (a_bufc == NULL) {
-		retval = (cw_bufc_t *)_cw_mem_malloc(a_mem,
+		retval = (cw_bufc_t *)mem_malloc(a_mem,
 		    sizeof(cw_bufc_t));
 		memset(retval, 0, sizeof(cw_bufc_t));
-		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free;
+		retval->dealloc_func = (cw_opaque_dealloc_t *)mem_free_e;
 		retval->dealloc_arg = (void *)a_mem;
 	} else {
 		retval = a_bufc;

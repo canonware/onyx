@@ -28,7 +28,7 @@ main()
 		treen_delete(treen_a);
 
 		treen_a = treen_new(_cw_malloc(sizeof(cw_treen_t)), cw_g_mem,
-		    (cw_opaque_dealloc_t *)mem_free, cw_g_mem);
+		    (cw_opaque_dealloc_t *)mem_free_e, cw_g_mem);
 		_cw_check_ptr(treen_a);
 		treen_delete(treen_a);
 

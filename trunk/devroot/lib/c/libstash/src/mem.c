@@ -54,7 +54,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 			retval->is_malloced = FALSE;
 		} else {
 			v_retval = retval = (cw_mem_t
-			    *)_cw_mem_malloc(a_internal, sizeof(cw_mem_t));
+			    *)mem_malloc(a_internal, sizeof(cw_mem_t));
 			retval->is_malloced = TRUE;
 		}
 		retval->mem = a_internal;
@@ -74,7 +74,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 		case 1:
 			mtx_delete(&retval->lock);
 			if (retval->is_malloced)
-				_cw_mem_free(a_internal, retval);
+				mem_free(a_internal, retval);
 		case 0:
 			break;
 		}
@@ -113,7 +113,7 @@ mem_delete(cw_mem_t *a_mem)
 				    allocation->size, allocation->filename,
 				    allocation->line_num);
 			}
-			_cw_mem_free(a_mem->mem, allocation);
+			mem_free(a_mem->mem, allocation);
 		}
 		ch_delete(a_mem->addr_hash);
 		mtx_delete(&a_mem->lock);
@@ -121,11 +121,11 @@ mem_delete(cw_mem_t *a_mem)
 #endif
 
 	if (a_mem->is_malloced)
-		_cw_mem_free(a_mem->mem, a_mem);
+		mem_free(a_mem->mem, a_mem);
 }
 
 void *
-mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
+mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
     cw_uint32_t a_line_num)
 {
 	void	*retval;
@@ -168,7 +168,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 		} else {
 			struct cw_mem_item_s	*allocation;
 
-			allocation = _cw_mem_malloc(a_mem->mem, sizeof(struct
+			allocation = mem_malloc(a_mem->mem, sizeof(struct
 			    cw_mem_item_s));
 			if (allocation == NULL) {
 				out_put(NULL,
@@ -202,7 +202,7 @@ mem_malloc(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 }
 
 void *
-mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
+mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
     *a_filename, cw_uint32_t a_line_num)
 {
 	void	*retval;
@@ -246,7 +246,7 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 		} else {
 			struct cw_mem_item_s	*allocation;
 
-			allocation = _cw_mem_malloc(a_mem->mem, sizeof(struct
+			allocation = mem_malloc(a_mem->mem, sizeof(struct
 			    cw_mem_item_s));
 			if (allocation == NULL) {
 				out_put(NULL, "[s](0x[p]): 0x[p] <-- "
@@ -283,8 +283,8 @@ mem_calloc(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 }
 
 void *
-mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
-    cw_uint32_t a_line_num)
+mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
+    *a_filename, cw_uint32_t a_line_num)
 {
 	void	*retval;
 
@@ -368,7 +368,7 @@ mem_realloc(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 }
 
 void
-mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
+mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
     a_line_num)
 {
 #ifdef _LIBSTASH_DBG
@@ -397,7 +397,7 @@ mem_free(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 				    allocation->line_num);
 			}
 			memset(a_ptr, 0x5a, allocation->size);
-			_cw_mem_free(a_mem->mem, allocation);
+			mem_free(a_mem->mem, allocation);
 		}
 	}
 #endif

@@ -35,7 +35,7 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = FALSE;
 	} else {
-		retval = (cw_dch_t *)_cw_mem_malloc(a_mem, sizeof(cw_dch_t));
+		retval = (cw_dch_t *)mem_malloc(a_mem, sizeof(cw_dch_t));
 		memset(retval, 0, sizeof(cw_dch_t));
 		retval->is_malloced = TRUE;
 	}
@@ -58,7 +58,7 @@ dch_new(cw_dch_t *a_dch, cw_mem_t *a_mem, cw_uint32_t a_base_table, cw_uint32_t
 	xep_catch(_CW_XEPV_OOM) {
 		retval = (cw_dch_t *)v_retval;
 		if (a_dch->is_malloced)
-			_cw_mem_free(a_mem, retval);
+			mem_free(a_mem, retval);
 	}
 	xep_end();
 
@@ -78,7 +78,7 @@ dch_delete(cw_dch_t *a_dch)
 	ch_delete(a_dch->ch);
 
 	if (TRUE == a_dch->is_malloced)
-		_cw_mem_free(a_dch->mem, a_dch);
+		mem_free(a_dch->mem, a_dch);
 #ifdef _LIBSTASH_DBG
 	else
 		memset(a_dch, 0x5a, sizeof(cw_dch_t));
