@@ -1,5 +1,11 @@
 2000-07-21  Jason Evans  <jasone@canonware.com>
 
+	* src/thd.c: Add a generic implementation of thread
+	suspension/resumption.  This implementation is known to work with
+	FreeBSD's libc_r and the FreeBSD port of LinuxThreads.
+
+	thd_self(): Add.
+
 	* src/mem.c: Re-work diagnostic output format to be more
 	consistent and more informative.
 
@@ -28,10 +34,6 @@
 	needed within libstash.  The name "sema" is perhaps not ideal,
 	since Solaris threads uses it for semaphores.  However, if that
 	ever becomes an issue, the name can be changed again.
-
-	* src/thd.c: Add a generic implementation of thread
-	suspension/resumption.  This should make libstash portable to
-	Solaris and Linux again, though the code isn't fully tested.
 
 2000-07-19  Jason Evans  <jasone@canonware.com>
 

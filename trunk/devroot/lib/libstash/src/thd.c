@@ -18,12 +18,17 @@
 #include <pthread_np.h>
 #endif
 
+#ifdef _LIBSTASH_DBG
+#define _CW_THD_MAGIC 0x5638638e
+#endif
+
 /* Control internal initialization. */
 pthread_once_t	cw_g_thd_once = PTHREAD_ONCE_INIT;
 
 /* For thd_self(). */
 cw_tsd_t	cw_g_thd_self_key;
 
+static void	*thd_p_start_func(void *a_arg);
 static void	thd_p_once(void);
 static void	thd_p_suspend(cw_thd_t *a_thd);
 
@@ -42,6 +47,13 @@ static void	thd_p_suspend(cw_thd_t *a_thd);
  */
 #define _CW_THD_SIGSUSPEND	SIGPWR
 #define _CW_THD_SIGRESUME	SIGUNUSED
+#elif (defined(_CW_OS_FREEBSD))
+/*
+ * SIGUSR[12] are used by the linuxthreads port on FreeBSD, so use other signals
+ * to allow libstash to work even if linked with linuxthreads.
+ */
+#define _CW_THD_SIGSUSPEND	SIGXCPU
+#define _CW_THD_SIGRESUME	SIGPROF
 #else
 #define _CW_THD_SIGSUSPEND	SIGUSR1
 #define _CW_THD_SIGRESUME	SIGUSR2
@@ -60,9 +72,18 @@ thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg)
 
 	/* Initialize the thd_self() tsd key. */
 	thd_p_once();
-	tsd_set(&cw_g_thd_self_key, (void *)a_thd);
 
-	error = pthread_create(&a_thd->thread, NULL, a_start_func, a_arg);
+	mtx_new(&a_thd->crit_lock);
+	a_thd->start_func = a_start_func;
+	a_thd->start_arg = a_arg;
+#ifdef _LIBSTASH_DBG
+	a_thd->magic = _CW_THD_MAGIC;
+#endif
+
+	error = pthread_create(&a_thd->thread, NULL, thd_p_start_func,
+	    (void *)a_thd);
+/*  	error = pthread_create(&a_thd->thread, NULL, a_start_func, */
+/*  	    (void *)a_arg); */
 	if (error) {
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Error in pthread_create(): [s]\n", strerror(error));
@@ -76,7 +97,6 @@ thd_new(cw_thd_t *a_thd, void *(*a_start_func)(void *), void *a_arg)
 		abort();
 	}
 #endif
-	mtx_new(&a_thd->crit_lock);
 }
 
 void
@@ -85,6 +105,7 @@ thd_delete(cw_thd_t *a_thd)
 	int	error;
 
 	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 
 	mtx_delete(&a_thd->crit_lock);
 #ifdef _CW_THD_GENERIC_SR
@@ -101,12 +122,9 @@ thd_delete(cw_thd_t *a_thd)
 		    "Error in pthread_detach(): [s]\n", strerror(error));
 		abort();
 	}
-}
-
-cw_thd_t *
-thd_self(void)
-{
-	return (cw_thd_t *)tsd_get(&cw_g_thd_self_key);
+#ifdef _LIBSTASH_DBG
+	memset(a_thd, 0x5a, sizeof(cw_thd_t));
+#endif
 }
 
 void *
@@ -116,6 +134,7 @@ thd_join(cw_thd_t *a_thd)
 	int	error;
 
 	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 
 	mtx_delete(&a_thd->crit_lock);
 	error = pthread_join(a_thd->thread, &retval);
@@ -124,23 +143,49 @@ thd_join(cw_thd_t *a_thd)
 		    "Error in pthread_join(): [s]\n", strerror(error));
 		abort();
 	}
+#ifdef _LIBSTASH_DBG
+	memset(a_thd, 0x5a, sizeof(cw_thd_t));
+#endif
+	return retval;
+}
+
+cw_thd_t *
+thd_self(void)
+{
+	cw_thd_t	*retval;
+
+	retval = (cw_thd_t *)tsd_get(&cw_g_thd_self_key);
+
+	_cw_check_ptr(retval);
+	_cw_assert(retval->magic == _CW_THD_MAGIC);
+
 	return retval;
 }
 
 void
 thd_crit_enter(cw_thd_t *a_thd)
 {
-	_cw_check_ptr(a_thd);
+	cw_thd_t	*thd;
 
-	mtx_lock(&a_thd->crit_lock);
+	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+
+	thd = thd_self();
+	mtx_lock(&thd->crit_lock);
+/*  	mtx_lock(&a_thd->crit_lock); */
 }
 
 void
 thd_crit_leave(cw_thd_t *a_thd)
 {
-	_cw_check_ptr(a_thd);
+	cw_thd_t	*thd;
 
-	mtx_unlock(&a_thd->crit_lock);
+	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
+
+	thd = thd_self();
+	mtx_unlock(&thd->crit_lock);
+/*  	mtx_unlock(&a_thd->crit_lock); */
 }
 
 
@@ -148,6 +193,7 @@ void
 thd_suspend(cw_thd_t *a_thd)
 {
 	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 
 	mtx_lock(&a_thd->crit_lock);
 
@@ -160,6 +206,7 @@ thd_trysuspend(cw_thd_t *a_thd)
 	cw_bool_t	retval;
 
 	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 
 	if (mtx_trylock(&a_thd->crit_lock)) {
 		retval = TRUE;
@@ -179,6 +226,7 @@ thd_resume(cw_thd_t *a_thd)
 	int	error;
 
 	_cw_check_ptr(a_thd);
+	_cw_assert(a_thd->magic == _CW_THD_MAGIC);
 
 #ifdef _CW_THD_GENERIC_SR
 	error = pthread_kill(a_thd->thread, _CW_THD_SIGRESUME);
@@ -198,6 +246,16 @@ thd_resume(cw_thd_t *a_thd)
 	}
 #endif
 	mtx_unlock(&a_thd->crit_lock);
+}
+
+static void *
+thd_p_start_func(void *a_arg)
+{
+	cw_thd_t	*thd = (cw_thd_t *)a_arg;
+
+	tsd_set(&cw_g_thd_self_key, (void *)thd);
+	
+	return thd->start_func(thd->start_arg);
 }
 
 static void
@@ -269,12 +327,10 @@ thd_p_suspend_handle(int a_signal)
 	sigset_t	set;
 	cw_thd_t	*thd;
 
-/*  	write(2, "suspend\n", 8); */
-
 	/* Block all signals except _CW_THD_SIGRESUME while suspended. */
 	sigfillset(&set);
 	sigdelset(&set, _CW_THD_SIGRESUME);
-	thd = (cw_thd_t *)tsd_get(&cw_g_thd_self_key);
+	thd = thd_self();
 	sem_post(&thd->sem);
 	sigsuspend(&set);
 }
@@ -282,6 +338,5 @@ thd_p_suspend_handle(int a_signal)
 static void
 thd_p_resume_handle(int a_signal)
 {
-/*  	write(2, "resume\n", 7); */
 }
 #endif
