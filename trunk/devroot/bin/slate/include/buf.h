@@ -12,6 +12,12 @@
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_buf_s cw_buf_t;
 
+/* Similar to struct iovec, but with 64 bit lengths. */
+typedef struct {
+	cw_uint8_t	*data;
+	cw_uint64_t	len;
+} cw_bufv_t;
+
 /* Enumeration for seek operations. */
 typedef enum {
 	BUFW_NONE,	/* Invalid. */
@@ -65,7 +71,7 @@ struct cw_buf_s {
 	cw_uint64_t	gap_off;	/* Gap offset, in elements. */
 	cw_uint64_t	gap_len;	/* Gap length, in elements. */
 
-	struct iovec	iov[2];		/* Returned by bufm_range_get(). */
+	cw_bufv_t	bufv[2];	/* Returned by bufm_range_get(). */
 
 	ql_head(cw_bufm_t) bufms;	/* Ordered list of all markers. */
 
@@ -76,6 +82,11 @@ struct cw_buf_s {
 	cw_uint64_t	hbpos;		/* Current history bpos. */
 };
 
+/* bufv. */
+cw_uint64_t bufv_copy(cw_bufv_t *a_to, cw_uint32_t a_to_len, cw_uint32_t
+    a_to_sizeof, const cw_bufv_t *a_fr, cw_uint32_t a_fr_len, cw_uint32_t
+    a_fr_sizeof, cw_uint64_t a_maxlen);
+
 /* buf. */
 cw_buf_t *buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     cw_opaque_realloc_t *a_realloc, cw_opaque_dealloc_t *a_dealloc, void
@@ -84,10 +95,6 @@ void	buf_delete(cw_buf_t *a_buf);
 
 void	buf_lock(cw_buf_t *a_buf);
 void	buf_unlock(cw_buf_t *a_buf);
-
-cw_uint64_t buf_vec_copy(struct iovec *a_to, cw_uint32_t a_to_len, cw_uint32_t
-    a_to_sizeof, const struct iovec *a_fr, cw_uint32_t a_fr_len, cw_uint32_t
-    a_fr_sizeof, cw_uint64_t a_maxlen);
 
 cw_uint32_t buf_elmsize_get(cw_buf_t *a_buf);
 void	buf_elmsize_set(cw_buf_t *a_buf, cw_uint32_t a_elmsize);
@@ -124,7 +131,7 @@ cw_uint64_t bufm_pos(cw_bufm_t *a_bufm);
 
 cw_uint8_t *bufm_before_get(cw_bufm_t *a_bufm);
 cw_uint8_t *bufm_after_get(cw_bufm_t *a_bufm);
-struct iovec *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t
+cw_bufv_t *bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t
     *r_iovcnt);
 
 void	bufm_before_insert(cw_bufm_t *a_bufm, const cw_uint8_t *a_str,
