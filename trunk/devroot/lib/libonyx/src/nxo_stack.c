@@ -36,8 +36,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 {
     cw_nxoe_stack_t *stack;
 
-    stack = (cw_nxoe_stack_t *) nxa_malloc(nx_nxa_get(a_nx),
-					   sizeof(cw_nxoe_stack_t));
+    stack = (cw_nxoe_stack_t *) nxa_malloc(sizeof(cw_nxoe_stack_t));
 
     nxoe_l_new(&stack->nxoe, NXOT_STACK, a_locking);
 #ifdef CW_THREADS
@@ -47,7 +46,6 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
     }
 #endif
 
-    stack->nxa = nx_nxa_get(a_nx);
     ql_new(&stack->stack);
 
     stack->count = 0;
@@ -64,7 +62,7 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
     a_nxo->o.nxoe = (cw_nxoe_t *) stack;
     nxo_p_type_set(a_nxo, NXOT_STACK);
 
-    nxa_l_gc_register(stack->nxa, (cw_nxoe_t *) stack);
+    nxa_l_gc_register((cw_nxoe_t *) stack);
 }
 
 void
@@ -97,8 +95,7 @@ nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
     cw_nxoe_stacko_t *retval;
 
     /* No spares.  Allocate and insert one. */
-    retval = (cw_nxoe_stacko_t *) nxa_malloc(a_stack->nxa,
-					     sizeof(cw_nxoe_stacko_t));
+    retval = (cw_nxoe_stacko_t *) nxa_malloc(sizeof(cw_nxoe_stacko_t));
     qr_new(retval, link);
     nxo_no_new(&retval->nxo);
     qr_after_insert(&a_stack->under, retval, link);
@@ -114,8 +111,7 @@ nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack)
     cw_nxoe_stacko_t *retval;
 
     /* No spares.  Allocate and insert one. */
-    retval = (cw_nxoe_stacko_t *) nxa_malloc(a_stack->nxa,
-					     sizeof(cw_nxoe_stacko_t));
+    retval = (cw_nxoe_stacko_t *) nxa_malloc(sizeof(cw_nxoe_stacko_t));
     qr_new(retval, link);
 
     return retval;
@@ -134,7 +130,7 @@ nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
     stacko = ql_first(&a_stack->stack);
     ql_first(&a_stack->stack) = qr_next(ql_first(&a_stack->stack), link);
     qr_remove(stacko, link);
-    nxa_free(a_stack->nxa, stacko, sizeof(cw_nxoe_stacko_t));
+    nxa_free(stacko, sizeof(cw_nxoe_stacko_t));
 }
 
 /* This function handles a special case for nxo_stack_npop(), but is done as a
@@ -198,7 +194,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     {
 	tstacko = qr_next(stacko, link);
 	qr_remove(tstacko, link);
-	nxa_free(a_stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
+	nxa_free(tstacko, sizeof(cw_nxoe_stacko_t));
     }
 
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;
@@ -279,7 +275,7 @@ nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
     {
 	tstacko = qr_next(bottom, link);
 	qr_remove(tstacko, link);
-	nxa_free(a_stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
+	nxa_free(tstacko, sizeof(cw_nxoe_stacko_t));
     }
 
     a_stack->nspare = CW_LIBONYX_STACK_CACHE;

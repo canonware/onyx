@@ -54,8 +54,7 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 {
     cw_nxoe_file_t *file;
 
-    file = (cw_nxoe_file_t *) nxa_malloc(nx_nxa_get(a_nx),
-					 sizeof(cw_nxoe_file_t));
+    file = (cw_nxoe_file_t *) nxa_malloc(sizeof(cw_nxoe_file_t));
 
     nxoe_l_new(&file->nxoe, NXOT_FILE, a_locking);
 #ifdef CW_THREADS
@@ -79,7 +78,7 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
     a_nxo->o.nxoe = (cw_nxoe_t *) file;
     nxo_p_type_set(a_nxo, NXOT_FILE);
 
-    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) file);
+    nxa_l_gc_register((cw_nxoe_t *) file);
 }
 
 #ifdef CW_POSIX_FILE
@@ -341,7 +340,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
     }
     if (file->buffer != NULL)
     {
-	nxa_free(nx_nxa_get(file->nx), file->buffer, file->buffer_size);
+	nxa_free(file->buffer, file->buffer_size);
 	file->buffer = NULL;
 	file->buffer_size = 0;
 	file->buffer_mode = BUFFER_EMPTY;
@@ -814,8 +813,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		if (line == s_line)
 		{
 		    /* First expansion. */
-		    line = (cw_uint8_t *) nxa_malloc(nx_nxa_get(file->nx),
-						     maxlen << 1);
+		    line = (cw_uint8_t *) nxa_malloc(maxlen << 1);
 		    memcpy(line, s_line, maxlen);
 		}
 		else
@@ -824,11 +822,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 
 		    /* We've already expanded at least once. */
 		    oldline = line;
-		    line = (cw_uint8_t *) nxa_malloc(nx_nxa_get(file->nx),
-						     maxlen << 1);
+		    line = (cw_uint8_t *) nxa_malloc(maxlen << 1);
 		    memcpy(line, oldline, maxlen);
-		    nxa_free(nx_nxa_get(file->nx), oldline,
-			     maxlen);
+		    nxa_free(oldline, maxlen);
 		}
 		maxlen <<= 1;
 	    }
@@ -967,8 +963,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 		if (line == s_line)
 		{
 		    /* First expansion. */
-		    line = (cw_uint8_t *) nxa_malloc(nx_nxa_get(file->nx),
-						     maxlen << 1);
+		    line = (cw_uint8_t *) nxa_malloc(maxlen << 1);
 		    memcpy(line, s_line, maxlen);
 		}
 		else
@@ -977,11 +972,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 
 		    /* We've already expanded at least once. */
 		    oldline = line;
-		    line = (cw_uint8_t *) nxa_malloc(nx_nxa_get(file->nx),
-						     maxlen << 1);
+		    line = (cw_uint8_t *) nxa_malloc(maxlen << 1);
 		    memcpy(line, oldline, maxlen);
-		    nxa_free(nx_nxa_get(file->nx), oldline,
-			     maxlen);
+		    nxa_free(oldline, maxlen);
 		}
 		maxlen <<= 1;
 	    }
@@ -1080,7 +1073,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
 #endif
     if (line != s_line)
     {
-	nxa_free(nx_nxa_get(file->nx), line, maxlen);
+	nxa_free(line, maxlen);
     }
     return retval;
 }
@@ -1486,7 +1479,6 @@ void
 nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 {
     cw_nxoe_file_t *file;
-    cw_nxa_t *nxa;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -1498,7 +1490,6 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
     cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(file->nxoe.type == NXOT_FILE);
 
-    nxa = nx_nxa_get(file->nx);
 #ifdef CW_THREADS
     nxoe_p_file_lock(file);
 #endif
@@ -1506,7 +1497,7 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
     {
 	if (file->buffer != NULL)
 	{
-	    nxa_free(nxa, file->buffer, file->buffer_size);
+	    nxa_free(file->buffer, file->buffer_size);
 	    file->buffer = NULL;
 	    file->buffer_size = 0;
 	}
@@ -1515,9 +1506,9 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
     {
 	if (file->buffer != NULL)
 	{
-	    nxa_free(nxa, file->buffer, file->buffer_size);
+	    nxa_free(file->buffer, file->buffer_size);
 	}
-	file->buffer = (cw_uint8_t *) nxa_malloc(nx_nxa_get(file->nx), a_size);
+	file->buffer = (cw_uint8_t *) nxa_malloc(a_size);
 	file->buffer_size = a_size;
     }
     file->buffer_mode = BUFFER_EMPTY;

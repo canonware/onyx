@@ -107,7 +107,7 @@ pane_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 
     mtx_delete(&pane->mtx);
     pn_delete(&pane->pn);
-    nxa_free(nx_nxa_get(a_nx), pane, sizeof(struct cw_pane));
+    nxa_free(pane, sizeof(struct cw_pane));
 
     return FALSE;
 }
@@ -160,8 +160,7 @@ modpane_pane(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
 
-    pane = (struct cw_pane *) nxa_malloc(nx_nxa_get(nx),
-					 sizeof(struct cw_pane));
+    pane = (struct cw_pane *) nxa_malloc(sizeof(struct cw_pane));
 
     /* Create a reference to this hook in order to prevent the module from being
      * prematurely unloaded. */

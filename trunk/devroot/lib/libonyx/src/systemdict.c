@@ -70,6 +70,13 @@ struct cw_systemdict_name_arg
     int arg;
 };
 
+/* Globals. */
+#if (defined(CW_SOCKET) && defined(CW_THREADS))
+cw_mtx_t cw_g_gethostbyname_mtx;
+cw_mtx_t cw_g_getprotobyname_mtx;
+cw_mtx_t cw_g_getservbyname_mtx;
+#endif
+
 /* Compare a_name to the names in a_arg.  If successful, return the index of the
  * matching element.  Otherwise, return a_argcnt. */
 static cw_uint32_t
@@ -545,11 +552,37 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 };
 
 void
-systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
-		      char **a_argv)
+systemdict_l_init(void)
+{
+#ifdef CW_POSIX
+    /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
+     * program. */
+    signal(SIGPIPE, SIG_IGN);
+#endif
+
+#if (defined(CW_SOCKET) && defined(CW_THREADS))
+    /* Initialize mutexes that protect non-reentrant functions. */
+    mtx_new(&cw_g_gethostbyname_mtx);
+    mtx_new(&cw_g_getprotobyname_mtx);
+    mtx_new(&cw_g_getservbyname_mtx);
+#endif
+}
+
+void
+systemdict_l_shutdown(void)
+{
+#if (defined(CW_SOCKET) && defined(CW_THREADS))
+    mtx_delete(&cw_g_getservbyname_mtx);
+    mtx_delete(&cw_g_getprotobyname_mtx);
+    mtx_delete(&cw_g_gethostbyname_mtx);
+#endif
+}
+
+void
+systemdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue,
+		      cw_nx_t *a_nx, int a_argc, char **a_argv)
 {
     cw_uint32_t i;
-    cw_nxo_t name, value;
 
 /* Number of names that are defined below, but not as operators. */
 #ifdef CW_POSIX
@@ -566,45 +599,47 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
     /* Operators. */
     for (i = 0; i < NOPS; i++)
     {
-	nxo_name_new(&name, a_nx, nxn_str(systemdict_ops[i].nxn),
+	nxo_name_new(a_tname, a_nx, nxn_str(systemdict_ops[i].nxn),
 		     nxn_len(systemdict_ops[i].nxn), TRUE);
-	nxo_operator_new(&value, systemdict_ops[i].op_f, systemdict_ops[i].nxn);
-	nxo_attr_set(&value, NXOA_EXECUTABLE);
+	nxo_operator_new(a_tvalue, systemdict_ops[i].op_f,
+			 systemdict_ops[i].nxn);
+	nxo_attr_set(a_tvalue, NXOA_EXECUTABLE);
 
-	nxo_dict_def(a_dict, a_nx, &name, &value);
+	nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
     }
 
     /* Initialize entries that are not operators. */
 
     /* globaldict. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_globaldict), nxn_len(NXN_globaldict),
-		 TRUE);
-    nxo_dup(&value, nx_globaldict_get(a_nx));
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_globaldict),
+		 nxn_len(NXN_globaldict), TRUE);
+    nxo_dup(a_tvalue, nx_globaldict_get(a_nx));
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* systemdict. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_systemdict), nxn_len(NXN_systemdict),
-		 TRUE);
-    nxo_dup(&value, nx_systemdict_get(a_nx));
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_systemdict),
+		 nxn_len(NXN_systemdict), TRUE);
+    nxo_dup(a_tvalue, nx_systemdict_get(a_nx));
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* gcdict. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_gcdict), nxn_len(NXN_gcdict), TRUE);
-    nxo_dup(&value, nxa_gcdict_get(nx_nxa_get(a_nx)));
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_gcdict), nxn_len(NXN_gcdict), TRUE);
+    nxo_dup(a_tvalue, nx_gcdict_get(a_nx));
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
 #ifdef CW_POSIX
     /* envdict. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_envdict), nxn_len(NXN_envdict), TRUE);
-    nxo_dup(&value, nx_envdict_get(a_nx));
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_envdict), nxn_len(NXN_envdict),
+		 TRUE);
+    nxo_dup(a_tvalue, nx_envdict_get(a_nx));
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 #endif
 
     /* onyxdict. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_onyxdict), nxn_len(NXN_onyxdict),
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_onyxdict), nxn_len(NXN_onyxdict),
 		 TRUE);
-    nxo_dict_new(&value, a_nx, TRUE, CW_LIBONYX_ONYXDICT_HASH);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_dict_new(a_tvalue, a_nx, TRUE, CW_LIBONYX_ONYXDICT_HASH);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* argv. */
     {
@@ -626,39 +661,39 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 	}
 
 	/* Insert argv into systemdict. */
-	nxo_name_new(&name, a_nx, nxn_str(NXN_argv), nxn_len(NXN_argv), TRUE);
-	nxo_dict_def(a_dict, a_nx, &name, &argv_nxo);
+	nxo_name_new(a_tname, a_nx, nxn_str(NXN_argv), nxn_len(NXN_argv), TRUE);
+	nxo_dict_def(a_dict, a_nx, a_tname, &argv_nxo);
     }
 
     /* true. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_true), nxn_len(NXN_true), TRUE);
-    nxo_boolean_new(&value, TRUE);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_true), nxn_len(NXN_true), TRUE);
+    nxo_boolean_new(a_tvalue, TRUE);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* false. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_false), nxn_len(NXN_false), TRUE);
-    nxo_boolean_new(&value, FALSE);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_false), nxn_len(NXN_false), TRUE);
+    nxo_boolean_new(a_tvalue, FALSE);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* mark. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_mark), nxn_len(NXN_mark), TRUE);
-    nxo_mark_new(&value);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_mark), nxn_len(NXN_mark), TRUE);
+    nxo_mark_new(a_tvalue);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* <. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_sym_lt), nxn_len(NXN_sym_lt), TRUE);
-    nxo_mark_new(&value);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_sym_lt), nxn_len(NXN_sym_lt), TRUE);
+    nxo_mark_new(a_tvalue);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* [. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_sym_lb), nxn_len(NXN_sym_lb), TRUE);
-    nxo_mark_new(&value);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_sym_lb), nxn_len(NXN_sym_lb), TRUE);
+    nxo_mark_new(a_tvalue);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     /* null. */
-    nxo_name_new(&name, a_nx, nxn_str(NXN_null), nxn_len(NXN_null), TRUE);
-    nxo_null_new(&value);
-    nxo_dict_def(a_dict, a_nx, &name, &value);
+    nxo_name_new(a_tname, a_nx, nxn_str(NXN_null), nxn_len(NXN_null), TRUE);
+    nxo_null_new(a_tvalue);
+    nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
 
     cw_assert(nxo_dict_count(a_dict) == NOPS + NEXTRA);
 #undef NOPS
@@ -5931,7 +5966,7 @@ systemdict_p_nxmod_new(cw_nx_t *a_nx, void *a_handle)
 {
     cw_nxmod_t *retval;
 
-    retval = (cw_nxmod_t *) nxa_malloc(nx_nxa_get(a_nx), sizeof(cw_nxmod_t));
+    retval = (cw_nxmod_t *) nxa_malloc(sizeof(cw_nxmod_t));
     /* Set the default iteration for module destruction to 1.  This number can
      * be overridden on a per-module basis in the module initialization code. */
     retval->iter = 1;
@@ -5962,7 +5997,7 @@ systemdict_p_nxmod_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     fprintf(stderr, "dlclose(%p)\n", nxmod->dlhandle);
 #endif
     dlclose(nxmod->dlhandle);
-    nxa_free(nx_nxa_get(a_nx), a_data, sizeof(cw_nxmod_t));
+    nxa_free(a_data, sizeof(cw_nxmod_t));
 	
     retval = FALSE;
     RETURN:
@@ -7094,7 +7129,6 @@ systemdict_poll(cw_nxo_t *a_thread)
     cw_nxo_t *pollerr, *pollhup, *pollnval;
     cw_nxo_t boolean_true, boolean_false;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
     struct pollfd *fds;
     unsigned i, nfds;
     int nready;
@@ -7128,7 +7162,6 @@ systemdict_poll(cw_nxo_t *a_thread)
     nxo_dup(dict, nxo);
 
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
     nxo_boolean_new(&boolean_true, TRUE);
     nxo_boolean_new(&boolean_false, FALSE);
 
@@ -7166,7 +7199,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, NXN_rangecheck);
 	return;
     }
-    fds = nxa_malloc(nxa, nfds * sizeof(struct pollfd));
+    fds = nxa_malloc(nfds * sizeof(struct pollfd));
 
     /* Iterate through files. */
     for (i = 0; i < nfds; i++)
@@ -7175,7 +7208,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 	nxo_dict_lookup(dict, file, flags);
 	if (nxo_type_get(file) != NXOT_FILE || nxo_type_get(flags) != NXOT_DICT)
 	{
-	    nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
+	    nxa_free(fds, nfds * sizeof(struct pollfd));
 	    nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
 	    return;
@@ -7186,7 +7219,7 @@ systemdict_poll(cw_nxo_t *a_thread)
 	nflags = nxo_dict_count(flags);
 	if (nflags == 0)
 	{
-	    nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
+	    nxa_free(fds, nfds * sizeof(struct pollfd));
 	    nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 	    nxo_thread_nerror(a_thread, NXN_rangecheck);
 	    return;
@@ -7292,7 +7325,7 @@ systemdict_poll(cw_nxo_t *a_thread)
     }
 
     nxo_stack_pop(ostack);
-    nxa_free(nxa, fds, nfds * sizeof(struct pollfd));
+    nxa_free(fds, nfds * sizeof(struct pollfd));
     nxo_stack_npop(tstack, nxo_stack_count(tstack) - tcount);
 }
 #endif

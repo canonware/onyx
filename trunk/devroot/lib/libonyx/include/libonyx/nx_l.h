@@ -37,45 +37,41 @@ CW_INLINE cw_nxoe_t *
 nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
+    /* Used for remembering the current state of reference iteration.  This
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
+    static cw_uint32_t ref_iter;
 
     cw_check_ptr(a_nx);
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
-    if (a_nx->shutdown)
-    {
-	/* Return an empty root set so that the garbage collector will collect
-	 * everything. */
-	retval = NULL;
-	goto RETURN;
-    }
-
     if (a_reset)
     {
-	a_nx->ref_iter = 0;
+	ref_iter = 0;
     }
 
-    for (retval = NULL; retval == NULL; a_nx->ref_iter++)
+    for (retval = NULL; retval == NULL; ref_iter++)
     {
-	switch (a_nx->ref_iter)
+	switch (ref_iter)
 	{
 	    case 0:
-	    {
-		retval = nxo_nxoe_get(nxa_gcdict_get(&a_nx->nxa));
-		break;
-	    }
-	    case 1:
 	    {
 		retval = nxo_nxoe_get(&a_nx->threadsdict);
 		break;
 	    }
-	    case 2:
+	    case 1:
 	    {
 		retval = nxo_nxoe_get(&a_nx->systemdict);
 		break;
 	    }
-	    case 3:
+	    case 2:
 	    {
 		retval = nxo_nxoe_get(&a_nx->globaldict);
+		break;
+	    }
+	    case 3:
+	    {
+		retval = nxo_nxoe_get(&a_nx->gcdict);
 		break;
 	    }
 	    case 4:
@@ -137,26 +133,6 @@ nx_l_thread_remove(cw_nx_t *a_nx, cw_nxo_t *a_thread)
     cw_assert(nxo_type_get(a_thread) == NXOT_THREAD);
 
     nxo_dict_undef(&a_nx->threadsdict, a_nx, a_thread);
-}
-
-#ifdef CW_THREADS
-CW_INLINE cw_mtx_t *
-nx_l_name_lock_get(cw_nx_t *a_nx)
-{
-    cw_check_ptr(a_nx);
-    cw_dassert(a_nx->magic == CW_NX_MAGIC);
-
-    return &a_nx->name_lock;
-}
-#endif
-
-CW_INLINE cw_dch_t *
-nx_l_name_hash_get(cw_nx_t *a_nx)
-{
-    cw_check_ptr(a_nx);
-    cw_dassert(a_nx->magic == CW_NX_MAGIC);
-
-    return &a_nx->name_hash;
 }
 
 CW_INLINE cw_op_t *

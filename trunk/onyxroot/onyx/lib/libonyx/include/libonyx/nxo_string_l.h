@@ -41,7 +41,7 @@ struct cw_nxoe_string_s
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -49,7 +49,7 @@ nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_STRING_C_))
 CW_INLINE cw_bool_t
-nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_string_t *string;
 
@@ -61,7 +61,7 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
     if (string->nxoe.indirect == FALSE && string->e.s.alloc_len > 0)
     {
-	nxa_free(a_nxa, string->e.s.str, string->e.s.alloc_len);
+	nxa_free(string->e.s.str, string->e.s.alloc_len);
     }
 
 #ifdef CW_THREADS
@@ -71,7 +71,7 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     }
 #endif
 
-    nxa_free(a_nxa, string, sizeof(cw_nxoe_string_t));
+    nxa_free(string, sizeof(cw_nxoe_string_t));
 
     return FALSE;
 }
@@ -82,9 +82,8 @@ nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_t *retval;
     cw_nxoe_string_t *string;
     /* Used for remembering the current state of reference iteration.  This
-     * function is only called by the garbage collector, so as long as two
-     * interpreters aren't collecting simultaneously, using a static variable
-     * works fine. */
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
     static cw_uint32_t ref_iter;
 
     string = (cw_nxoe_string_t *) a_nxoe;

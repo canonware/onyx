@@ -23,16 +23,16 @@ runs a separate thread that is controlled via an asynchronous message queue.
 \begin{capi}
 \label{nxa_malloc_e}
 \index{nxa_malloc_e@\cfunc{nxa\_malloc\_e}{}}
-\citem{\cfunc[void *]{nxa\_malloc\_e}{cw\_nxa\_t *a\_nxa, size\_t a\_size, const
+\citem{\cfunc[void *]{nxa\_malloc\_e}{void *a\_arg, size\_t a\_size, const
 char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{nxa_malloc}
 \index{nxa_malloc@\cfunc{nxa\_malloc}{}}
-\citem{\cfunc[void *]{nxa\_malloc}{cw\_nxa\_t *a\_nxa, size\_t a\_size}}
+\citem{\cfunc[void *]{nxa\_malloc}{size\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
+		\item[a\_arg: ]
+			Unused.
 		\item[a\_size: ]
 			Size of memory range to allocate.
 		\item[a\_filename: ]
@@ -54,17 +54,16 @@ char *a\_filename, cw\_uint32\_t a\_line\_num}}
 	\end{capilist}
 \label{nxa_calloc_e}
 \index{nxa_calloc_e@\cfunc{nxa\_calloc\_e}{}}
-\citem{\cfunc[void *]{nxa\_calloc\_e}{cw\_nxa\_t *a\_nxa, size\_t a\_number,
+\citem{\cfunc[void *]{nxa\_calloc\_e}{void *a\_arg, size\_t a\_number,
 size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{nxa_calloc}
 \index{nxa_calloc@\cfunc{nxa\_calloc}{}}
-\citem{\cfunc[void *]{nxa\_calloc}{cw\_nxa\_t *a\_nxa, size\_t a\_number,
-size\_t a\_size}}
+\citem{\cfunc[void *]{nxa\_calloc}{size\_t a\_number, size\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
+		\item[a\_arg: ]
+			Unused.
 		\item[a\_number: ]
 			Number of elements to allocate.
 		\item[a\_size: ]
@@ -88,18 +87,18 @@ size\_t a\_size}}
 	\end{capilist}
 \label{nxa_realloc_e}
 \index{nxa_realloc_e@\cfunc{nxa\_realloc\_e}{}}
-\citem{\cfunc[void *]{nxa\_realloc\_e}{cw\_nxa\_t *a\_nxa, void *a\_ptr, size\_t
+\citem{\cfunc[void *]{nxa\_realloc\_e}{void *a\_arg, void *a\_ptr, size\_t
 a\_size, size\_t a\_old\_size, const char *a\_filename, cw\_uint32\_t
 a\_line\_num}}
 \label{nxa_realloc}
 \index{nxa_realloc@\cfunc{nxa\_realloc}{}}
-\citem{\cfunc[void *]{nxa\_realloc}{cw\_nxa\_t *a\_nxa, void *a\_ptr, size\_t
-a\_size, size\_t a\_old\_size}}
+\citem{\cfunc[void *]{nxa\_realloc}{void *a\_ptr, size\_t a\_size, size\_t
+a\_old\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
+		\item[a\_arg: ]
+			Unused.
 		\item[a\_ptr: ]
 			Pointer to memory range to be reallocated.
 		\item[a\_size: ]
@@ -126,17 +125,16 @@ a\_size, size\_t a\_old\_size}}
 	\end{capilist}
 \label{nxa_free_e}
 \index{nxa_free_e@\cfunc{nxa\_free\_e}{}}
-\citem{\cfunc[void *]{nxa\_free\_e}{cw\_nxa\_t *a\_nxa, void *a\_ptr, size\_t
-a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+\citem{\cfunc[void *]{nxa\_free\_e}{void *a\_arg, void *a\_ptr, size\_t a\_size,
+const char *a\_filename, cw\_uint32\_t a\_line\_num}}
 \label{nxa_free}
 \index{nxa_free@\cfunc{nxa\_free}{}}
-\citem{\cfunc[void *]{nxa\_free}{cw\_nxa\_t *a\_nxa, void *a\_ptr, size\_t
-a\_size}}
+\citem{\cfunc[void *]{nxa\_free}{void *a\_ptr, size\_t a\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
+		\item[a\_arg: ]
+			Unused.
 		\item[a\_ptr: ]
 			Pointer to to memory range to be freed.
 		\item[a\_size: ]
@@ -153,13 +151,9 @@ a\_size}}
 	\end{capilist}
 \label{nxa_collect}
 \index{nxa_collect@\cfunc{nxa\_collect}{}}
-\citem{\cfunc[void]{nxa\_collect}{cw\_nxa\_t *a\_nxa}}
+\citem{\cfunc[void]{nxa\_collect}{void}}
 	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
 		\begin{description}\item[]
@@ -168,35 +162,11 @@ a\_size}}
 	\item[Description: ]
 		Force an asynchronous garbage collection.
 	\end{capilist}
-\label{nxa_dump}
-\index{nxa_dump@\cfunc{nxa\_dump}{}}
-\citem{\cfunc[void]{nxa\_dump}{cw\_nxa\_t *a\_nxa, cw\_nxo\_t *a\_thread}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\item[a\_thread: ]
-			Pointer to a thread \classname{nxo}.
-		\end{description}
-	\item[Output(s): ]
-		Output printed to \onyxop{stdout}{}.
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Print the internal state of gcdict to \onyxop{stdout}{}.
-	\end{capilist}
 \label{nxa_active_get}
 \index{nxa_active_get@\cfunc{nxa\_active\_get}{}}
-\citem{\cfunc[cw\_bool\_t]{nxa\_active\_get}{cw\_nxa\_t *a\_nxa}}
+\citem{\cfunc[cw\_bool\_t]{nxa\_active\_get}{void}}
 	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[retval: ]
@@ -213,13 +183,10 @@ a\_size}}
 	\end{capilist}
 \label{nxa_active_set}
 \index{nxa_active_set@\cfunc{nxa\_active\_set}{}}
-\citem{\cfunc[void]{nxa\_active\_set}{cw\_nxa\_t *a\_nxa, cw\_bool\_t
-a\_active}}
+\citem{\cfunc[void]{nxa\_active\_set}{cw\_bool\_t a\_active}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
 		\item[a\_active: ]
 			\begin{description}\item[]
 			\item[FALSE: ]
@@ -241,13 +208,9 @@ a\_active}}
 	\end{capilist}
 \label{nxa_period_get}
 \index{nxa_period_get@\cfunc{nxa\_period\_get}{}}
-\citem{\cfunc[cw\_nxoi\_t]{nxa\_period\_get}{cw\_nxa\_t *a\_nxa}}
+\citem{\cfunc[cw\_nxoi\_t]{nxa\_period\_get}{void}}
 	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[retval: ]
@@ -261,13 +224,10 @@ a\_active}}
 	\end{capilist}
 \label{nxa_period_set}
 \index{nxa_period_set@\cfunc{nxa\_period\_set}{}}
-\citem{\cfunc[void]{nxa\_period\_set}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
-a\_period}}
+\citem{\cfunc[void]{nxa\_period\_set}{cw\_nxoi\_t a\_period}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
 		\item[a\_period: ]
 			Inactivity period in seconds that the garbage collector
 			should wait before doing a collection.  If 0, the
@@ -284,13 +244,9 @@ a\_period}}
 	\end{capilist}
 \label{nxa_threshold_get}
 \index{nxa_threshold_get@\cfunc{nxa\_threshold\_get}{}}
-\citem{\cfunc[cw\_nxoi\_t]{nxa\_threshold\_get}{cw\_nxa\_t *a\_nxa}}
+\citem{\cfunc[cw\_nxoi\_t]{nxa\_threshold\_get}{void}}
 	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[retval: ]
@@ -306,13 +262,10 @@ a\_period}}
 	\end{capilist}
 \label{nxa_threshold_set}
 \index{nxa_threshold_set@\cfunc{nxa\_threshold\_set}{}}
-\citem{\cfunc[void]{nxa\_threshold\_set}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
-a\_threshold}}
+\citem{\cfunc[void]{nxa\_threshold\_set}{cw\_nxoi\_t a\_threshold}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
 		\item[a\_threshold: ]
 			The number of bytes of memory allocated since the last
 			garbage collection that will trigger the garbage
@@ -330,16 +283,14 @@ a\_threshold}}
 	\end{capilist}
 \label{nxa_stats_get}
 \index{nxa_stats_get@\cfunc{nxa\_stats\_get}{}}
-\citem{\cfunc[void]{nxa\_stats\_get}{cw\_nxa\_t *a\_nxa, cw\_nxoi\_t
-*r\_collections, cw\_nxoi\_t *r\_count, cw\_nxoi\_t *r\_ccount, cw\_nxoi\_t
-*r\_cmark, cw\_nxoi\_t *r\_csweep, cw\_nxoi\_t *r\_mcount, cw\_nxoi\_t
-*r\_mmark, cw\_nxoi\_t *r\_msweep, cw\_nxoi\_t *r\_scount, cw\_nxoi\_t
-*r\_smark, cw\_nxoi\_t *r\_ssweep}}
+\citem{\cfunc[void]{nxa\_stats\_get}{cw\_nxoi\_t *r\_collections, cw\_nxoi\_t
+*r\_count, cw\_nxoi\_t *r\_ccount, cw\_nxoi\_t *r\_cmark, cw\_nxoi\_t
+*r\_csweep, cw\_nxoi\_t *r\_mcount, cw\_nxoi\_t *r\_mmark, cw\_nxoi\_t
+*r\_msweep, cw\_nxoi\_t *r\_scount, cw\_nxoi\_t *r\_smark, cw\_nxoi\_t
+*r\_ssweep}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
 		\item[r\_collections: ]
 			Pointer to an integer.
 		\item[r\_count: ]
@@ -399,43 +350,5 @@ a\_threshold}}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Return garbage collector statistics.
-	\end{capilist}
-\label{nxa_nx_get}
-\index{nxa_nx_get@\cfunc{nxa\_nx\_get}{}}
-\citem{\cfunc[cw\_nx\_t *]{nxa\_nx\_get}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to a \classname{nx}.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return a pointer to the \classname{nx} associated with
-		\cvar{a\_nxa}.
-	\end{capilist}
-\label{nxa_gcdict_get}
-\index{nxa_gcdict_get@\cfunc{nxa\_gcdict\_get}{}}
-\citem{\cfunc[cw\_nxo\_t *]{nxa\_gcdict\_get}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to a dict \classname{nxo}.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return a pointer to the dict \classname{nxo} corresponding to
-		\onyxop{gcdict}{}.
 	\end{capilist}
 \end{capi}

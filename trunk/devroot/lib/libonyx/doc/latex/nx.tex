@@ -68,41 +68,6 @@ objects are deallocated.
 	\item[Description: ]
 		Destructor.
 	\end{capilist}
-\label{nx_nxa_get}
-\index{nx_nxa_get@\cfunc{nx\_nxa\_get}{}}
-\citem{\cfunc[cw\_nxa\_t *]{nx\_nxa\_get}{cw\_nx\_t *a\_nx}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-			Pointer to an \classname{nx}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to an \classname{nxa}.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return a pointer to the garbage collector.
-	\end{capilist}
-\label{nx_mema_get}
-\index{nx_mema_get@\cfunc{nx\_mema\_get}{}}
-\citem{\cfunc[cw\_mema\_t *]{nx\_mema\_get}{cw\_nx\_t *a\_nx}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-			Pointer to an \classname{nx}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to an \classname{mema}.
-		\end{description}
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Return a pointer to a memory allocator that encapsulates the
-		garbage collector allocator functions.
-	\end{capilist}
 \label{nx_systemdict_get}
 \index{nx_systemdict_get@\cfunc{nx\_systemdict\_get}{}}
 \citem{\cfunc[cw\_nxo\_t
@@ -165,6 +130,27 @@ objects are deallocated.
 	\item[Description: ]
 		Return a pointer to the \classname{nxo} corresponding to
 		\onyxop{envdict}{}.
+	\end{capilist}
+\label{nx_gcdict_get}
+\index{nx_gcdict_get@\cfunc{nx\_gcdict\_get}{}}
+\citem{\cfunc[cw\_nxo\_t
+*]{nx\_\htmlref{gcdict}{sec:gcdict}\_get}{cw\_nx\_t *a\_nx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the \classname{nxo} corresponding to
+			\onyxop{gcdict}{}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \classname{nxo} corresponding to
+		\onyxop{gcdict}{}.
 	\end{capilist}
 \label{nx_stdin_get}
 \index{nx_stdin_get@\cfunc{nx\_stdin\_get}{}}

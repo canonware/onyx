@@ -24,10 +24,10 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
 {
     cw_nxoe_hook_t *hook;
 
-    hook = (cw_nxoe_hook_t *) nxa_malloc(nx_nxa_get(a_nx),
-					 sizeof(cw_nxoe_hook_t));
+    hook = (cw_nxoe_hook_t *) nxa_malloc(sizeof(cw_nxoe_hook_t));
 
     nxoe_l_new(&hook->nxoe, NXOT_HOOK, FALSE);
+    hook->nx = a_nx;
     nxo_null_new(&hook->tag);
     hook->data = a_data;
     hook->eval_f = a_eval_f;
@@ -38,7 +38,7 @@ nxo_hook_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, void *a_data,
     a_nxo->o.nxoe = (cw_nxoe_t *) hook;
     nxo_p_type_set(a_nxo, NXOT_HOOK);
 
-    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) hook);
+    nxa_l_gc_register((cw_nxoe_t *) hook);
 }
 
 cw_nxo_t *

@@ -103,7 +103,7 @@ mark_hook eval\n\
 ");
     nx_delete(&nx);
 
-    fprintf(stderr, "Test end\n");
     libonyx_shutdown();
+    fprintf(stderr, "Test end\n");
     return 0;
 }

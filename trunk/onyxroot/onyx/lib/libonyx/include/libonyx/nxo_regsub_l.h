@@ -62,7 +62,7 @@ struct cw_nxoe_regsub_s
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_regsub_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -70,7 +70,7 @@ nxoe_l_regsub_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_REGSUB_C_))
 CW_INLINE cw_bool_t
-nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_regsub_t *regsub;
 
@@ -82,13 +82,12 @@ nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
     if (regsub->vec != NULL)
     {
-	nxa_free(a_nxa, regsub->vec,
-		 sizeof(cw_nxoe_regsub_telm_t) * regsub->vlen);
+	nxa_free(regsub->vec, sizeof(cw_nxoe_regsub_telm_t) * regsub->vlen);
     }
 
     if (regsub->template != NULL)
     {
-	nxa_free(a_nxa, regsub->template, regsub->tlen);
+	nxa_free(regsub->template, regsub->tlen);
     }
 
     /* Destroy pcre. */
@@ -98,9 +97,9 @@ nxoe_l_regsub_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 	free(regsub->extra);
     }
     /* Tell the GC that pcre has been deallocated. */
-    nxa_l_count_adjust(a_nxa, -(cw_nxoi_t)(regsub->size + regsub->studysize));
+    nxa_l_count_adjust(-(cw_nxoi_t)(regsub->size + regsub->studysize));
 
-    nxa_free(a_nxa, regsub, sizeof(cw_nxoe_regsub_t));
+    nxa_free(regsub, sizeof(cw_nxoe_regsub_t));
 
     return FALSE;
 }

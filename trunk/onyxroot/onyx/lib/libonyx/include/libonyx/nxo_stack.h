@@ -418,7 +418,7 @@ nxo_stack_bpop(cw_nxo_t *a_nxo)
     }
     else
     {
-	nxa_free(stack->nxa, stacko, sizeof(cw_nxoe_stacko_t));
+	nxa_free(stacko, sizeof(cw_nxoe_stacko_t));
     }
 
     stack->count--;
@@ -606,7 +606,7 @@ nxo_stack_remove(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
     }
     else
     {
-	nxa_free(stack->nxa, a_object, sizeof(cw_nxoe_stacko_t));
+	nxa_free(a_object, sizeof(cw_nxoe_stacko_t));
     }
 
     stack->count--;

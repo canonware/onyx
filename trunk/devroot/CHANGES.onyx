@@ -1,3 +1,35 @@
+2003-04-18 : Jason Evans <jasone@canonware.com>
+
+	* Move the garbage collector out of cw_nx_t and make it global, thus
+	  making it possible for multiple interpreters to co-exist (and share
+	  one garbage collector).
+
+	* lib/libonyx/include/libonyx.h : Add the following global variables:
+	  + cw_g_nxa
+	  + cw_g_nxaa
+
+	* lib/libonyx/src/nx.c : Remove the following functions:
+	  + nx_nxa_get()
+	  + nx_mema_get().
+
+	  Add nx_gcdict_get().
+
+	* lib/libonyx/include/libonyx/nxa.h : Remove the a_nxa parameter from
+	  the following macros and functions:
+	  + nxa_malloc[_e]()
+	  + nxa_calloc[_e]()
+	  + nxa_realloc[_e]()
+	  + nxa_free[_e]()
+	  + nxa_collect()
+	  + nxa_active_[gs]et()
+	  + nxa_period_[gs]et()
+	  + nxa_threshold_[gs]et()
+	  + nxa_stats_get()
+
+	  Remove the following functions:
+	  + nxa_nx_get()
+	  + nxa_gcdict_get()
+
 2003-04-17 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/libonyx.c : Add the cw_g_mema global variable.

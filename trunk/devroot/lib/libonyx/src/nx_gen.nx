@@ -29,84 +29,85 @@
 #       >7 | 2
 #
 $_encdict <
-	$begin		$A	# 4
-	$cat		$B	# 19
-	$cvs		$C	# 6
-	$cvx		$D	# 13
-	$def		$E	# ~21
-	$dup		$F	# ~37
-	$echeck		$G	# 3
-	$eq		$H	# 6
-	$eval		$I	# 14
-	$exch		$J	# ~57
-	$false		$K	# 5
-	$flush		$L	# 3
-	$foreach	$M	# 9
-	$get		$N	# 32
-	$getinterval	$O	# 4
-	$gt		$P	# 7
-	$if		$Q	# 29
-	$ifelse		$R	# 20
-	$idup		$S	# ~66
-	$known		$T	# 8
-	$length		$U	# 16
-	$load		$V	# 9
-	$ne		$W	# 13
-	$nip		$X	# 4
-	$not		$Y	# 4
-	$ostack		$Z	# 3
-	$pop		$a	# ~69
-	$print		$b	# 3
-	$putinterval	$c	# 3
-	$scount		$d	# 3
-	$spop		$e	# 7
-	$stderr		$f	# 10
-	$stop		$g	# 3
-	$stopped	$h	# 3
-	$string		$i	# 2
-	$sub		$j	# 15
-	$systemdict	$k	# 3
-	$true		$l	# 4
-	$type		$m	# >= 17
-	$until		$n	# 10
-	$write		$o	# 10
-	$xcheck		$p	# 3
+    $begin		$A	# 4
+    $cat		$B	# 19
+    $cvs		$C	# 6
+    $cvx		$D	# 13
+    $def		$E	# ~21
+    $dup		$F	# ~37
+    $echeck		$G	# 3
+    $eq			$H	# 6
+    $eval		$I	# 14
+    $exch		$J	# ~57
+    $false		$K	# 5
+    $flush		$L	# 3
+    $foreach		$M	# 9
+    $get		$N	# 32
+    $getinterval	$O	# 4
+    $gt			$P	# 7
+    $if			$Q	# 29
+    $ifelse		$R	# 20
+    $idup		$S	# ~66
+    $known		$T	# 8
+    $length		$U	# 16
+    $load		$V	# 9
+    $ne			$W	# 13
+    $nip		$X	# 4
+    $not		$Y	# 4
+    $ostack		$Z	# 3
+    $over		$a	# ~26
+    $pop		$b	# ~69
+    $print		$c	# 3
+    $putinterval	$d	# 3
+    $scount		$e	# 3
+    $spop		$f	# 7
+    $stderr		$g	# 10
+    $stop		$h	# 3
+    $stopped		$i	# 3
+    $string		$j	# 2
+    $sub		$k	# 15
+    $systemdict		$l	# 3
+    $true		$m	# 4
+    $type		$n	# >= 17
+    $until		$o	# 10
+    $write		$p	# 10
+    $xcheck		$q	# 3
 > def
 
 # #proc _encarr -
 $_encarr {
-	0 1 2 idup length 1 sub {
-		# #proc #i
-		1 idup 1 idup get
-		# #proc #i #el
-		dup type $nametype eq {
-			dup dup xcheck exch echeck not and {
-				# Executable Name.  Try to replace.
-				_encdict 1 idup known {
-					_encdict exch get cvx
-					# #proc #i #e
-					2 idup 3 1 roll
-					# #proc #proc #i #e
-					put
-				}{
-					pop pop
-				} ifelse
-			}{
-				pop pop
-			} ifelse
+    0 1 2 idup length 1 sub {
+	# #proc #i
+	1 idup 1 idup get
+	# #proc #i #el
+	dup type $nametype eq {
+	    dup dup xcheck exch echeck not and {
+		# Executable Name.  Try to replace.
+		_encdict 1 idup known {
+		    _encdict exch get cvx
+		    # #proc #i #e
+		    2 idup up
+		    # #proc #proc #i #e
+		    put
 		}{
-		dup type $arraytype eq {
-			# Array.  Recurse.
-			_encarr
-			pop
-		}{
-			# Other.  Do nothing.
-			pop pop
+		    pop pop
 		} ifelse
-		} ifelse
-		# #proc
-	} for
-	pop
+	    }{
+		pop pop
+	    } ifelse
+	}{
+	    dup type $arraytype eq {
+		# Array.  Recurse.
+		_encarr
+		pop
+	    }{
+		# Other.  Do nothing.
+		pop pop
+	    } ifelse
+	} ifelse
+	# #proc
+    } for
+    pop
 } def
 
 # Output the header.
@@ -136,8 +137,8 @@ nx_p_nxcode(cw_nx_t *a_nx)
 # Output the translation dictionary.
 `<' print
 _encdict {
-	1 sprints print
-	`~' print cvx 1 sprints print
+    1 sprints print
+    `~' print cvx 1 sprints print
 } foreach
 `>begin' print
 
@@ -152,6 +153,7 @@ dup _encarr
 # Output the procedure, using a recursion depth large enough to meet or exceed
 # the depth of nested braces in the code.
 1000 sprints print
+
 `bind eval end");
     nxo_thread_exit(&thread);
 }

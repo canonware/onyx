@@ -21,7 +21,7 @@ nxo_l_thread_regex_cache_get(cw_nxo_t *a_nxo);
 #endif
 
 cw_bool_t
-nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -46,7 +46,7 @@ nxo_l_thread_regex_cache_get(cw_nxo_t *a_nxo)
 #endif
 
 CW_INLINE cw_bool_t
-nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_thread_t *thread;
 
@@ -60,14 +60,14 @@ nxoe_l_thread_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     {
 	/* This shouldn't happen, since it indicates that there is an unaccepted
 	 * token.  However, it's really the caller's fault, so just clean up. */
-	nxa_free(a_nxa, thread->tok_str, thread->buffer_len);
+	nxa_free(thread->tok_str, thread->buffer_len);
     }
 
 #ifdef CW_REGEX
-    nxo_l_regex_cache_delete(&thread->regex_cache, a_nxa);
+    nxo_l_regex_cache_delete(&thread->regex_cache);
 #endif
 
-    nxa_free(a_nxa, thread, sizeof(cw_nxoe_thread_t));
+    nxa_free(thread, sizeof(cw_nxoe_thread_t));
 
     return FALSE;
 }
@@ -78,9 +78,8 @@ nxoe_l_thread_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_t *retval;
     cw_nxoe_thread_t *thread;
     /* Used for remembering the current state of reference iteration.  This
-     * function is only called by the garbage collector, so as long as two
-     * interpreters aren't collecting simultaneously, using a static variable
-     * works fine. */
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
     static cw_uint32_t ref_iter;
 
     thread = (cw_nxoe_thread_t *) a_nxoe;

@@ -40,26 +40,24 @@ static const struct cw_gcdict_entry gcdict_ops[] = {
 /* This is a global dictionary, but it should never be written to except by the
  * GC thread, so don't bother locking it. */
 void
-gcdict_l_populate(cw_nxo_t *a_dict, cw_nxa_t *a_nxa)
+gcdict_l_populate(cw_nxo_t *a_dict, cw_nxo_t *a_tname, cw_nxo_t *a_tvalue,
+		  cw_nx_t *a_nx)
 {
     cw_uint32_t i;
-    cw_nxo_t name, value;
-    cw_nx_t *nx;
 
 #define	NEXTRA	0
 #define NENTRIES (sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-    nx = nxa_nx_get(a_nxa);
-    nxo_dict_new(a_dict, nx, FALSE, NENTRIES + NEXTRA);
+    nxo_dict_new(a_dict, a_nx, FALSE, NENTRIES + NEXTRA);
 
     for (i = 0; i < NENTRIES; i++)
     {
-	nxo_name_new(&name, nx, nxn_str(gcdict_ops[i].nxn),
+	nxo_name_new(a_tname, a_nx, nxn_str(gcdict_ops[i].nxn),
 		     nxn_len(gcdict_ops[i].nxn), TRUE);
-	nxo_operator_new(&value, gcdict_ops[i].op_f, gcdict_ops[i].nxn);
-	nxo_attr_set(&value, NXOA_EXECUTABLE);
+	nxo_operator_new(a_tvalue, gcdict_ops[i].op_f, gcdict_ops[i].nxn);
+	nxo_attr_set(a_tvalue, NXOA_EXECUTABLE);
 
-	nxo_dict_def(a_dict, nx, &name, &value);
+	nxo_dict_def(a_dict, a_nx, a_tname, a_tvalue);
     }
 
     cw_assert(nxo_dict_count(a_dict) == NENTRIES + NEXTRA);
@@ -70,19 +68,17 @@ void
 gcdict_active(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxa_t *nxa;
     cw_nxo_t *active;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    nxa = nx_nxa_get(nxo_thread_nx_get(a_thread));
     active = nxo_stack_push(ostack);
-    nxo_boolean_new(active, nxa_active_get(nxa));
+    nxo_boolean_new(active, nxa_active_get());
 }
 
 void
 gcdict_collect(cw_nxo_t *a_thread)
 {
-    nxa_collect(nx_nxa_get(nxo_thread_nx_get(a_thread)));
+    nxa_collect();
 }
 
 #ifdef CW_PTHREADS
@@ -90,13 +86,11 @@ void
 gcdict_period(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxa_t *nxa;
     cw_nxo_t *period;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    nxa = nx_nxa_get(nxo_thread_nx_get(a_thread));
     period = nxo_stack_push(ostack);
-    nxo_integer_new(period, nxa_period_get(nxa));
+    nxo_integer_new(period, nxa_period_get());
 }
 #endif
 
@@ -114,8 +108,7 @@ gcdict_setactive(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxa_active_set(nx_nxa_get(nxo_thread_nx_get(a_thread)),
-		   nxo_boolean_get(active));
+    nxa_active_set(nxo_boolean_get(active));
 
     nxo_stack_pop(ostack);
 }
@@ -140,8 +133,7 @@ gcdict_setperiod(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxa_period_set(nx_nxa_get(nxo_thread_nx_get(a_thread)),
-		   nxo_integer_get(period));
+    nxa_period_set(nxo_integer_get(period));
 
     nxo_stack_pop(ostack);
 }
@@ -166,8 +158,7 @@ gcdict_setthreshold(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxa_threshold_set(nx_nxa_get(nxo_thread_nx_get(a_thread)),
-		      nxo_integer_get(threshold));
+    nxa_threshold_set(nxo_integer_get(threshold));
 
     nxo_stack_pop(ostack);
 }
@@ -186,7 +177,6 @@ void
 gcdict_stats(cw_nxo_t *a_thread)
 {
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
     cw_bool_t currentlocking;
     cw_nxo_t *ostack, *tstack;
     cw_nxo_t *stats, *nxo, *tnxo;
@@ -196,7 +186,6 @@ gcdict_stats(cw_nxo_t *a_thread)
     cw_nxoi_t scount, smark, ssweep;
 
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
     currentlocking = nxo_thread_currentlocking(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -205,7 +194,7 @@ gcdict_stats(cw_nxo_t *a_thread)
     tnxo = nxo_stack_push(tstack);
 
     /* Get stats. */
-    nxa_stats_get(nxa, &collections, &count,
+    nxa_stats_get(&collections, &count,
 		  &ccount, &cmark, &csweep,
 		  &mcount, &mmark, &msweep,
 		  &scount, &smark, &ssweep);
@@ -259,11 +248,9 @@ void
 gcdict_threshold(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack;
-    cw_nxa_t *nxa;
     cw_nxo_t *threshold;
 
     ostack = nxo_thread_ostack_get(a_thread);
-    nxa = nx_nxa_get(nxo_thread_nx_get(a_thread));
     threshold = nxo_stack_push(ostack);
-    nxo_integer_new(threshold, nxa_threshold_get(nxa));
+    nxo_integer_new(threshold, nxa_threshold_get());
 }

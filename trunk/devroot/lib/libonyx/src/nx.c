@@ -56,29 +56,51 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	retval->magic = CW_NX_MAGIC;
 #endif
 
-	/* Initialize the GC. */
-	nxa_l_new(&retval->nxa, retval);
+	/* Initialize the internals such that if a collection happens before
+	 * we're done, reference iteration will work correctly. */
+	nxo_no_new(&retval->gcdict);
+	nxo_no_new(&retval->threadsdict);
+	nxo_no_new(&retval->systemdict);
+	nxo_no_new(&retval->globaldict);
+	nxo_no_new(&retval->envdict);
+	nxo_no_new(&retval->stdin_nxo);
+	nxo_no_new(&retval->stdout_nxo);
+	nxo_no_new(&retval->stderr_nxo);
 
-	/* Set up the mema to be used for allocation. */
-	mema_new(&retval->mema, (cw_opaque_alloc_t *) nxa_malloc_e,
-		 (cw_opaque_calloc_t *) nxa_calloc_e,
-		 (cw_opaque_realloc_t *) nxa_realloc_e,
-		 (cw_opaque_dealloc_t *) nxa_free_e, &retval->nxa);
+	/* Insert this nx into nxa's list of nx's in the root set. */
+	ql_elm_new(retval, link);
+	nxa_l_nx_insert(retval);
 	try_stage = 2;
 
-	/* Initialize the global name cache. */
-#ifdef CW_THREADS
-	mtx_new(&retval->name_lock);
+	/* Initialize globaldict. */
+	nxo_dict_new(&retval->globaldict, retval, TRUE,
+		     CW_LIBONYX_GLOBALDICT_HASH);
+
+	/* Use stdin_nxo and stdout_nxo as temporaries for the dictionary
+	 * population functions.  This is the only place where such temporaries
+	 * are needed, so embedding additional fields into cw_nx_t (and
+	 * reporting them during reference iteration) just for this purpose
+	 * would be wasteful. */
+
+	/* Initialize threadsdict. */
+	nxo_dict_new(&retval->threadsdict, retval, TRUE,
+		     CW_LIBONYX_THREADSDICT_HASH);
+
+#ifdef CW_POSIX
+	/* Initialize envdict. */
+	envdict_l_populate(&retval->envdict, &retval->stdin_nxo,
+			   &retval->stdout_nxo, retval, a_envp);
 #endif
-	dch_new(&retval->name_hash, &retval->mema,
-		CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
-		CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
-		nxo_l_name_key_comp);
-	try_stage = 3;
 
 	/* Initialize gcdict. */
-	gcdict_l_populate(nxa_gcdict_get(&retval->nxa), &retval->nxa);
-	try_stage = 4;
+	gcdict_l_populate(&retval->gcdict, &retval->stdin_nxo,
+			  &retval->stdout_nxo, retval);
+
+	/* Initialize systemdict.  This must happen after the other dict
+	 * initializations, since references to them are inserted into
+	 * systemdict. */
+	systemdict_l_populate(&retval->systemdict, &retval->stdin_nxo,
+			      &retval->stdout_nxo, retval, a_argc, a_argv);
 
 	/* Initialize stdin. */
 	nxo_file_new(&retval->stdin_nxo, retval, TRUE);
@@ -87,7 +109,6 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 #endif
 	nxo_file_buffer_size_set(&retval->stdin_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
-	try_stage = 5;
 
 	/* Initialize stdout. */
 	nxo_file_new(&retval->stdout_nxo, retval, TRUE);
@@ -96,39 +117,12 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 #endif
 	nxo_file_buffer_size_set(&retval->stdout_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
-	try_stage = 6;
 
 	/* Initialize stderr. */
 	nxo_file_new(&retval->stderr_nxo, retval, TRUE);
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stderr_nxo, 2, FALSE);
 #endif
-	try_stage = 7;
-
-	/* Initialize globaldict. */
-	nxo_dict_new(&retval->globaldict, retval, TRUE,
-		     CW_LIBONYX_GLOBALDICT_HASH);
-	try_stage = 8;
-
-#ifdef CW_POSIX
-	/* Initialize envdict. */
-	envdict_l_populate(&retval->envdict, retval, a_envp);
-	try_stage = 9;
-#endif
-
-	/* Initialize systemdict. */
-	systemdict_l_populate(&retval->systemdict, retval, a_argc,
-			      a_argv);
-	try_stage = 10;
-
-	/* Initialize threadsdict. */
-	nxo_dict_new(&retval->threadsdict, retval, TRUE,
-		     CW_LIBONYX_THREADSDICT_HASH);
-	try_stage = 11;
-
-	/* Now that all root set objects that nx is responsible for are
-	 * initialized, activate the GC. */
-	nxa_active_set(&retval->nxa, TRUE);
 
 	/* Do soft operator initialization. */
 	nx_p_nxcode(retval);
@@ -144,28 +138,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	retval = (cw_nx_t *) v_retval;
 	switch (try_stage)
 	{
-	    case 11:
-	    case 10:
-#ifdef CW_POSIX
-	    case 9:
-#endif
-	    case 8:
-	    case 7:
-	    case 6:
-	    case 5:
-	    case 4:
-	    case 3:
-	    {
-		nxa_l_shutdown(&retval->nxa);
-		dch_delete(&retval->name_hash);
-#ifdef CW_THREADS
-		mtx_delete(&retval->name_lock);
-#endif
-	    }
 	    case 2:
 	    {
-		mema_delete(&retval->mema);
-		nxa_l_delete(&retval->nxa);
+		nxa_l_nx_remove(retval);
 	    }
 	    case 1:
 	    {
@@ -195,15 +170,7 @@ nx_delete(cw_nx_t *a_nx)
     cw_check_ptr(a_nx);
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
-    a_nx->shutdown = TRUE;
-    /* All objects must be destroyed before name_hash is deleted, in order to
-     * avoid a circular shutdown dependency. */
-    nxa_l_shutdown(&a_nx->nxa);
-    dch_delete(&a_nx->name_hash);
-#ifdef CW_THREADS
-    mtx_delete(&a_nx->name_lock);
-#endif
-    nxa_l_delete(&a_nx->nxa);
+    nxa_l_nx_remove(a_nx);
 
     if (a_nx->is_malloced)
     {

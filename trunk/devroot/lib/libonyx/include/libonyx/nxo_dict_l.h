@@ -54,7 +54,7 @@ nxo_l_dict_lookup(const cw_nxo_t *a_nxo, const cw_nxo_t *a_key);
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -62,7 +62,7 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_DICT_C_))
 CW_INLINE cw_bool_t
-nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_dict_t *dict;
     cw_nxoe_dicto_t *dicto;
@@ -90,12 +90,12 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 				  &chi)
 	       == FALSE)
 	{
-	    nxa_free(a_nxa, dicto, sizeof(cw_nxoe_dicto_t));
-	    nxa_free(a_nxa, chi, sizeof(cw_chi_t));
+	    nxa_free(dicto, sizeof(cw_nxoe_dicto_t));
+	    nxa_free(chi, sizeof(cw_chi_t));
 	}
 	dch_delete(&dict->data.hash);
     }
-    nxa_free(a_nxa, dict, sizeof(cw_nxoe_dict_t));
+    nxa_free(dict, sizeof(cw_nxoe_dict_t));
 
     return FALSE;
 }
@@ -106,9 +106,8 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_t *retval;
     cw_nxoe_dict_t *dict;
     /* Used for remembering the current state of reference iteration.  This
-     * function is only called by the garbage collector, so as long as two
-     * interpreters aren't collecting simultaneously, using a static variable
-     * works fine. */
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
     static cw_uint32_t ref_iter;
     /* If non-NULL, the previous reference iteration returned the key of this
      * dicto, so the value of this dicto is the next reference to check. */

@@ -23,8 +23,7 @@ nxo_condition_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 {
     cw_nxoe_condition_t *condition;
 
-    condition = (cw_nxoe_condition_t *) nxa_malloc(nx_nxa_get(a_nx),
-						   sizeof(cw_nxoe_condition_t));
+    condition = (cw_nxoe_condition_t *) nxa_malloc(sizeof(cw_nxoe_condition_t));
 
     nxoe_l_new(&condition->nxoe, NXOT_CONDITION, FALSE);
     cnd_new(&condition->condition);
@@ -33,7 +32,7 @@ nxo_condition_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     a_nxo->o.nxoe = (cw_nxoe_t *) condition;
     nxo_p_type_set(a_nxo, NXOT_CONDITION);
 
-    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) condition);
+    nxa_l_gc_register((cw_nxoe_t *) condition);
 }
 
 void

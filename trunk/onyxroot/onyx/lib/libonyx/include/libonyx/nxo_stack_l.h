@@ -12,7 +12,7 @@
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -20,7 +20,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_STACK_C_))
 CW_INLINE cw_bool_t
-nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_stack_t *stack;
     cw_nxoe_stacko_t *stacko, *tstacko;
@@ -39,7 +39,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     {
 	tstacko = qr_next(stacko, link);
 	qr_remove(tstacko, link);
-	nxa_free(stack->nxa, tstacko, sizeof(cw_nxoe_stacko_t));
+	nxa_free(tstacko, sizeof(cw_nxoe_stacko_t));
     }
 
 #ifdef CW_THREADS
@@ -49,7 +49,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     }
 #endif
 
-    nxa_free(a_nxa, stack, sizeof(cw_nxoe_stack_t));
+    nxa_free(stack, sizeof(cw_nxoe_stack_t));
 
     return FALSE;
 }
@@ -60,9 +60,8 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_t *retval;
     cw_nxoe_stack_t *stack;
     /* Used for remembering the current state of reference iteration.  This
-     * function is only called by the garbage collector, so as long as two
-     * interpreters aren't collecting simultaneously, using a static variable
-     * works fine. */
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
     static cw_uint32_t ref_stage;
 
     stack = (cw_nxoe_stack_t *) a_nxoe;

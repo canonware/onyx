@@ -236,8 +236,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     cw_nxoe_thread_t *thread;
     cw_nxo_t *nxo;
 
-    thread = (cw_nxoe_thread_t *) nxa_calloc(nx_nxa_get(a_nx), 1,
-					     sizeof(cw_nxoe_thread_t));
+    thread = (cw_nxoe_thread_t *) nxa_calloc(1, sizeof(cw_nxoe_thread_t));
 
     nxoe_l_new(&thread->nxoe, NXOT_THREAD, FALSE);
 
@@ -276,7 +275,7 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 #endif
     nxo_p_type_set(a_nxo, NXOT_THREAD);
 
-    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) thread);
+    nxa_l_gc_register((cw_nxoe_t *) thread);
 
     /* Finish setting up the internals. */
     nxo_stack_new(&thread->estack, a_nx, FALSE);
@@ -2331,14 +2330,10 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 static void
 nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 {
-    cw_nxa_t *nxa;
-
-    nxa = nx_nxa_get(a_thread->nx);
-
     if (a_thread->index == CW_NXO_THREAD_BUFFER_SIZE)
     {
 	/* First overflow, initial expansion needed. */
-	a_thread->tok_str = (cw_uint8_t *) nxa_malloc(nxa, a_thread->index * 2);
+	a_thread->tok_str = (cw_uint8_t *) nxa_malloc(a_thread->index * 2);
 	a_thread->buffer_len = a_thread->index * 2;
 	memcpy(a_thread->tok_str, a_thread->buffer, a_thread->index);
     }
@@ -2347,10 +2342,10 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 	cw_uint8_t *t_str;
 
 	/* Overflowed, and additional expansion needed. */
-	t_str = (cw_uint8_t *) nxa_malloc(nxa, a_thread->index * 2);
+	t_str = (cw_uint8_t *) nxa_malloc(a_thread->index * 2);
 	a_thread->buffer_len = a_thread->index * 2;
 	memcpy(t_str, a_thread->tok_str, a_thread->index);
-	nxa_free(nxa, a_thread->tok_str, a_thread->index);
+	nxa_free(a_thread->tok_str, a_thread->index);
 	a_thread->tok_str = t_str;
     }
 }
@@ -2449,8 +2444,7 @@ nxoe_p_thread_reset(cw_nxoe_thread_t *a_thread)
     a_thread->state = THREADTS_START;
     if (a_thread->index > CW_NXO_THREAD_BUFFER_SIZE)
     {
-	nxa_free(nx_nxa_get(a_thread->nx), a_thread->tok_str,
-		 a_thread->buffer_len);
+	nxa_free(a_thread->tok_str, a_thread->buffer_len);
 	a_thread->tok_str = a_thread->buffer;
     }
     a_thread->index = 0;

@@ -43,6 +43,16 @@ struct cw_mem_item_s
 };
 #endif
 
+/* Globals. */
+/* #define CW_MEM_DBG */
+cw_mem_t *cw_g_mem = NULL;
+#ifdef CW_MEM_DBG
+static cw_mem_t *cw_g_mem_mem = NULL;
+#endif
+
+cw_mema_t *cw_g_mema = NULL;
+static cw_mema_t mema;
+
 /* mema. */
 cw_mema_t *
 mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
@@ -87,6 +97,69 @@ mema_delete(cw_mema_t *a_mema)
 }
 
 /* mem. */
+void
+mem_l_init(void)
+{
+    volatile cw_uint32_t try_stage = 0;
+
+    xep_begin();
+    xep_try
+    {
+#ifdef CW_MEM_DBG
+	cw_g_mem_mem = mem_new(NULL, NULL);
+	try_stage = 1;
+
+	cw_g_mem = mem_new(NULL, cw_g_mem_mem);
+#else
+	cw_g_mem = mem_new(NULL, NULL);
+#endif
+    }
+    xep_catch(CW_ONYXX_OOM)
+    {
+	switch (try_stage)
+	{
+#ifdef CW_MEM_DBG
+	    case 1:
+	    {
+		mem_delete(cw_g_mem_mem);
+		cw_g_mem_mem = NULL;
+	    }
+#endif
+	    case 0:
+	    {
+		break;
+	    }
+	    default:
+	    {
+		cw_not_reached();
+	    }
+	}
+    }
+    xep_end();
+
+    cw_g_mema = mema_new(&mema,
+			 (cw_opaque_alloc_t *) mem_malloc_e,
+			 (cw_opaque_calloc_t *) mem_calloc_e,
+			 (cw_opaque_realloc_t *) mem_realloc_e,
+			 (cw_opaque_dealloc_t *) mem_free_e,
+			 cw_g_mem);
+}
+
+void
+mem_l_shutdown(void)
+{
+    mema_delete(cw_g_mema);
+    cw_g_mema = NULL;
+
+    mem_delete(cw_g_mem);
+    cw_g_mem = NULL;
+
+#ifdef CW_MEM_DBG
+    mem_delete(cw_g_mem_mem);
+    cw_g_mem_mem = NULL;
+#endif
+}
+
 cw_mem_t *
 mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 {

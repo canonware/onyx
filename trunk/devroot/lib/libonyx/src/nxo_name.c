@@ -27,7 +27,6 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
     cw_mtx_t *name_lock;
 #endif
     cw_dch_t *name_hash;
-    cw_nxa_t *nxa;
     cw_bool_t do_register;
 
     /* Fake up a key so that we can search the hash tables. */
@@ -35,9 +34,9 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
     key.len = a_len;
 
 #ifdef CW_THREADS
-    name_lock = nx_l_name_lock_get(a_nx);
+    name_lock = nxa_l_name_lock_get();
 #endif
-    name_hash = nx_l_name_hash_get(a_nx);
+    name_hash = nxa_l_name_hash_get();
 
     /* Look in the global hash for the name.  If the name doesn't exist, create
      * it. */
@@ -49,16 +48,16 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
     {
 	/* Not found in the name hash.  Create, initialize, and insert a new
 	 * entry. */
-	nxa = nx_nxa_get(a_nx);
-	name = (cw_nxoe_name_t *) nxa_malloc(nxa, sizeof(cw_nxoe_name_t));
+	name = (cw_nxoe_name_t *) nxa_malloc(sizeof(cw_nxoe_name_t));
 
 	nxoe_l_new(&name->nxoe, NXOT_NAME, FALSE);
+	name->nx = a_nx;
 	name->nxoe.name_static = a_is_static;
 	name->len = a_len;
 
 	if (a_is_static == FALSE)
 	{
-	    name->str = nxa_malloc(nxa, a_len);
+	    name->str = nxa_malloc(a_len);
 	    /* Cast away the const here; it's one of two places that the string
 	     * is allowed to be modified, and this cast is better than dropping
 	     * the const altogether. */
@@ -70,7 +69,7 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	}
 
 	dch_insert(name_hash, (void *) name, (void **) name,
-		   (cw_chi_t *) nxa_malloc(nx_nxa_get(a_nx), sizeof(cw_chi_t)));
+		   (cw_chi_t *) nxa_malloc(sizeof(cw_chi_t)));
 
 	do_register = TRUE;
     }
@@ -89,11 +88,11 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
      * deadlock. */
     if (do_register)
     {
-	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) name);
+	nxa_l_gc_register((cw_nxoe_t *) name);
     }
     else
     {
-	nxa_l_gc_reregister(nx_nxa_get(a_nx), (cw_nxoe_t *) name);
+	nxa_l_gc_reregister((cw_nxoe_t *) name);
     }
 
 #ifdef CW_THREADS

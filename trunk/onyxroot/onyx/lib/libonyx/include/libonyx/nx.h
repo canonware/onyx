@@ -19,27 +19,8 @@ struct cw_nx_s
 
     cw_bool_t is_malloced;
 
-    /* Used for remembering the current state of reference iteration. */
-    cw_uint32_t ref_iter;
-
-    /* Set to TRUE before the final garbage collection so that all objects get
-     * collected. */
-    cw_bool_t shutdown;
-
-    /* Global hash of names (key: {name, len}, value: (nxoe_name *)).  This hash
-     * table keeps track of *all* name "values" in the virtual machine.  When a
-     * name object is created, it actually adds a reference to a nxoe_name in
-     * this hash and uses a pointer to that nxoe_name as a unique key. */
-#ifdef CW_THREADS
-    cw_mtx_t name_lock;
-#endif
-    cw_dch_t name_hash;
-
-    /* Memory allocator. */
-    cw_nxa_t nxa;
-
-    /* Structure containing opaque memory allocator pointers. */
-    cw_mema_t mema;
+    /* Linkage for nxa's list of nx's. */
+    ql_elm(cw_nx_t) link;
 
     /* Dictionaries. */
     cw_nxo_t threadsdict;
@@ -48,6 +29,7 @@ struct cw_nx_s
 #ifdef CW_POSIX
     cw_nxo_t envdict;
 #endif
+    cw_nxo_t gcdict;
 
     /* Files. */
     cw_nxo_t stdin_nxo;
@@ -76,12 +58,6 @@ void
 nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr);
 
 #ifndef CW_USE_INLINES
-cw_nxa_t *
-nx_nxa_get(cw_nx_t *a_nx);
-
-cw_mema_t *
-nx_mema_get(cw_nx_t *a_nx);
-
 cw_nxo_t *
 nx_threadsdict_get(cw_nx_t *a_nx);
 
@@ -97,6 +73,9 @@ nx_envdict_get(cw_nx_t *a_nx);
 #endif
 
 cw_nxo_t *
+nx_gcdict_get(cw_nx_t *a_nx);
+
+cw_nxo_t *
 nx_stdin_get(cw_nx_t *a_nx);
 
 cw_nxo_t *
@@ -107,24 +86,6 @@ nx_stderr_get(cw_nx_t *a_nx);
 #endif
 
 #if (defined(CW_USE_INLINES) || defined(CW_NX_C_))
-CW_INLINE cw_nxa_t *
-nx_nxa_get(cw_nx_t *a_nx)
-{
-    cw_check_ptr(a_nx);
-    cw_dassert(a_nx->magic == CW_NX_MAGIC);
-
-    return &a_nx->nxa;
-}
-
-CW_INLINE cw_mema_t *
-nx_mema_get(cw_nx_t *a_nx)
-{
-    cw_check_ptr(a_nx);
-    cw_dassert(a_nx->magic == CW_NX_MAGIC);
-
-    return &a_nx->mema;
-}
-
 CW_INLINE cw_nxo_t *
 nx_threadsdict_get(cw_nx_t *a_nx)
 {
@@ -162,6 +123,15 @@ nx_envdict_get(cw_nx_t *a_nx)
     return &a_nx->envdict;
 }
 #endif
+
+CW_INLINE cw_nxo_t *
+nx_gcdict_get(cw_nx_t *a_nx)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    return &a_nx->gcdict;
+}
 
 CW_INLINE cw_nxo_t *
 nx_stdin_get(cw_nx_t *a_nx)

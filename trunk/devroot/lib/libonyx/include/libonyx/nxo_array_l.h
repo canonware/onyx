@@ -41,7 +41,7 @@ struct cw_nxoe_array_s
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -68,7 +68,7 @@ nxo_l_array_bound_set(cw_nxo_t *a_nxo);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_ARRAY_C_))
 CW_INLINE cw_bool_t
-nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_array_t *array;
 
@@ -80,8 +80,7 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
     if (array->nxoe.indirect == FALSE && array->e.a.alloc_len > 0)
     {
-	nxa_free(a_nxa, array->e.a.arr,
-		 array->e.a.alloc_len * sizeof(cw_nxo_t));
+	nxa_free(array->e.a.arr, array->e.a.alloc_len * sizeof(cw_nxo_t));
     }
 
 #ifdef CW_THREADS
@@ -91,7 +90,7 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     }
 #endif
 
-    nxa_free(a_nxa, array, sizeof(cw_nxoe_array_t));
+    nxa_free(array, sizeof(cw_nxoe_array_t));
 
     return FALSE;
 }
@@ -102,9 +101,8 @@ nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_t *retval;
     cw_nxoe_array_t *array;
     /* Used for remembering the current state of reference iteration.  This
-     * function is only called by the garbage collector, so as long as two
-     * interpreters aren't collecting simultaneously, using a static variable
-     * works fine. */
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
     static cw_uint32_t ref_iter;
 
     array = (cw_nxoe_array_t *) a_nxoe;

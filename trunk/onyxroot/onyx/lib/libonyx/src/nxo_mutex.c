@@ -23,8 +23,7 @@ nxo_mutex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 {
     cw_nxoe_mutex_t *mutex;
 
-    mutex = (cw_nxoe_mutex_t *) nxa_malloc(nx_nxa_get(a_nx),
-					  sizeof(cw_nxoe_mutex_t));
+    mutex = (cw_nxoe_mutex_t *) nxa_malloc(sizeof(cw_nxoe_mutex_t));
 
     nxoe_l_new(&mutex->nxoe, NXOT_MUTEX, FALSE);
     mtx_new(&mutex->lock);
@@ -33,7 +32,7 @@ nxo_mutex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     a_nxo->o.nxoe = (cw_nxoe_t *) mutex;
     nxo_p_type_set(a_nxo, NXOT_MUTEX);
 
-    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) mutex);
+    nxa_l_gc_register((cw_nxoe_t *) mutex);
 }
 
 void

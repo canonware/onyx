@@ -427,6 +427,11 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 #include "nxo_regsub.h"
 #endif
 #include "nxa.h"
+
+/* More global variables. */
+extern cw_nxa_t *cw_g_nxa;
+extern cw_mema_t *cw_g_nxaa;
+
 #include "nxo_stack.h"
 #include "nxo_string.h"
 #include "nxo_thread.h"

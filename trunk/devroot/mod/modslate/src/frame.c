@@ -107,7 +107,7 @@ frame_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 //	del_panel(frame->panel);
 //	delwin(frame->window);
 
-	nxa_free(nx_nxa_get(a_nx), frame, sizeof(struct cw_frame));
+	nxa_free(frame, sizeof(struct cw_frame));
 
 	return FALSE;
 }
@@ -133,8 +133,7 @@ modslate_frame(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    frame = (struct cw_frame *)nxa_malloc(nx_nxa_get(nx),
-					  sizeof(struct cw_frame));
+    frame = (struct cw_frame *)nxa_malloc(sizeof(struct cw_frame));
 
     /* Create a reference to this operator in order to prevent the module from
      * being prematurely unloaded. */

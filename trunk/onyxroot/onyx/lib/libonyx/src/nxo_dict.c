@@ -48,11 +48,8 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 	     cw_uint32_t a_dict_size)
 {
     cw_nxoe_dict_t *dict;
-    cw_nxa_t *nxa;
 
-    nxa = nx_nxa_get(a_nx);
-
-    dict = (cw_nxoe_dict_t *) nxa_malloc(nxa, sizeof(cw_nxoe_dict_t));
+    dict = (cw_nxoe_dict_t *) nxa_malloc(sizeof(cw_nxoe_dict_t));
 
     nxoe_l_new(&dict->nxoe, NXOT_DICT, a_locking);
 #ifdef CW_THREADS
@@ -77,7 +74,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 
 	/* Don't let the table get more than 80% full, or less than 25% full,
 	 * when shrinking. */
-	dch_new(&dict->data.hash, nx_mema_get(a_nx), a_dict_size * 1.25,
+	dch_new(&dict->data.hash, cw_g_nxaa, a_dict_size * 1.25,
 		a_dict_size, a_dict_size / 4, nxo_p_dict_hash,
 		nxo_p_dict_key_comp);
     }
@@ -86,7 +83,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
     a_nxo->o.nxoe = (cw_nxoe_t *) dict;
     nxo_p_type_set(a_nxo, NXOT_DICT);
 
-    nxa_l_gc_register(nxa, (cw_nxoe_t *) dict);
+    nxa_l_gc_register((cw_nxoe_t *) dict);
 }
 
 CW_P_INLINE void
@@ -111,14 +108,10 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 	else
 	{
 	    cw_chi_t *chi;
-	    cw_nxa_t *nxa;
-
-	    nxa = nx_nxa_get(a_nx);
 
 	    /* Allocate and initialize. */
-	    dicto = (cw_nxoe_dicto_t *) nxa_malloc(nxa,
-						   sizeof(cw_nxoe_dicto_t));
-	    chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
+	    dicto = (cw_nxoe_dicto_t *) nxa_malloc(sizeof(cw_nxoe_dicto_t));
+	    chi = (cw_chi_t *) nxa_malloc(sizeof(cw_chi_t));
 	    nxo_no_new(&dicto->key);
 	    nxo_dup(&dicto->key, a_key);
 	    nxo_no_new(&dicto->val);
@@ -173,9 +166,6 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 	    {
 		cw_nxoe_dicto_t tarray[CW_LIBONYX_DICT_SIZE];
 		cw_chi_t *chi;
-		cw_nxa_t *nxa;
-
-		nxa = nx_nxa_get(a_nx);
 
 		memcpy(tarray, &a_dict->data.array, sizeof(tarray));
 
@@ -191,7 +181,7 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 		 *
 		 * Don't let the table get more than 80% full, or less than 25%
 		 * full, when shrinking. */
-		dch_new(&a_dict->data.hash, nx_mema_get(a_nx),
+		dch_new(&a_dict->data.hash, cw_g_nxaa,
 			CW_LIBONYX_DICT_SIZE * 2.5, CW_LIBONYX_DICT_SIZE * 2,
 			CW_LIBONYX_DICT_SIZE / 2,
 			nxo_p_dict_hash, nxo_p_dict_key_comp);
@@ -201,8 +191,8 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 		    {
 			/* Allocate and initialize. */
 			dicto = (cw_nxoe_dicto_t *)
-			    nxa_malloc(nxa, sizeof(cw_nxoe_dicto_t));
-			chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
+			    nxa_malloc(sizeof(cw_nxoe_dicto_t));
+			chi = (cw_chi_t *) nxa_malloc(sizeof(cw_chi_t));
 			nxo_no_new(&dicto->key);
 			nxo_dup(&dicto->key, &tarray[i].key);
 			nxo_no_new(&dicto->val);
@@ -220,9 +210,8 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 		/* Finally, do the insertion. */
 
 		/* Allocate and initialize. */
-		dicto = (cw_nxoe_dicto_t *) nxa_malloc(nxa,
-						       sizeof(cw_nxoe_dicto_t));
-		chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
+		dicto = (cw_nxoe_dicto_t *) nxa_malloc(sizeof(cw_nxoe_dicto_t));
+		chi = (cw_chi_t *) nxa_malloc(sizeof(cw_chi_t));
 		nxo_no_new(&dicto->key);
 		nxo_dup(&dicto->key, a_key);
 		nxo_no_new(&dicto->val);
@@ -395,12 +384,8 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 
 	if (error == FALSE)
 	{
-	    cw_nxa_t *nxa;
-
-	    nxa = nx_nxa_get(a_nx);
-
-	    nxa_free(nxa, dicto, sizeof(cw_nxoe_dicto_t));
-	    nxa_free(nxa, chi, sizeof(cw_chi_t));
+	    nxa_free(dicto, sizeof(cw_nxoe_dicto_t));
+	    nxa_free(chi, sizeof(cw_chi_t));
 	}
     }
     else

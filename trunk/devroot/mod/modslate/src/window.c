@@ -170,7 +170,7 @@ window_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
 	struct cw_window	*window = (struct cw_window *)a_data;
 
-	nxa_free(nx_nxa_get(a_nx), window, sizeof(struct cw_window));
+	nxa_free(window, sizeof(struct cw_window));
 
 	return FALSE;
 }
@@ -212,8 +212,7 @@ modslate_window(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-    window = (struct cw_window *)nxa_malloc(nx_nxa_get(nx),
-					  sizeof(struct cw_window));
+    window = (struct cw_window *)nxa_malloc(sizeof(struct cw_window));
 
     /* Create a reference to this operator in order to prevent the module from
      * being prematurely unloaded. */

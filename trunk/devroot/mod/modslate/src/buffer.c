@@ -262,7 +262,7 @@ buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 
     mtx_delete(&buffer->mtx);
     buf_delete(&buffer->buf);
-    nxa_free(nx_nxa_get(a_nx), buffer, sizeof(struct cw_buffer));
+    nxa_free(buffer, sizeof(struct cw_buffer));
 
     retval = FALSE;
     RETURN:
@@ -293,8 +293,7 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     }
     bufp_size = nxo_integer_get(nxo);
 
-    buffer = (struct cw_buffer *) nxa_malloc(nx_nxa_get(nx),
-					     sizeof(struct cw_buffer));
+    buffer = (struct cw_buffer *) nxa_malloc(sizeof(struct cw_buffer));
 
     /* Create a reference to this hook in order to prevent the module from being
      * prematurely unloaded. */
@@ -302,9 +301,10 @@ modslate_buffer(void *a_data, cw_nxo_t *a_thread)
     nxo_dup(&buffer->hook, nxo_stack_get(estack));
 
     /* Initialize the buf. */
+    /* XXX Use cw_g_nxaa. */
     buf_new(&buffer->buf, bufp_size, (cw_opaque_alloc_t *) nxa_malloc_e,
 	    (cw_opaque_realloc_t *) nxa_realloc_e,
-	    (cw_opaque_dealloc_t *) nxa_free_e, (void *) nx_nxa_get(nx));
+	    (cw_opaque_dealloc_t *) nxa_free_e, (void *) cw_g_nxa);
 
     /* Initialize the protection mutex; buf's aren't thread-safe. */
     mtx_new(&buffer->mtx);
@@ -890,7 +890,7 @@ marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     buffer_p_lock(buffer);
     mkr_delete(&marker->mkr);
     buffer_p_unlock(buffer);
-    nxa_free(nx_nxa_get(a_nx), marker, sizeof(struct cw_marker));
+    nxa_free(marker, sizeof(struct cw_marker));
 
     return FALSE;
 }
@@ -956,8 +956,7 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
 	return;
     }
     buffer = (struct cw_buffer *) nxo_hook_data_get(nxo);
-    marker = (struct cw_marker *) nxa_malloc(nx_nxa_get(nx),
-					     sizeof(struct cw_marker));
+    marker = (struct cw_marker *) nxa_malloc(sizeof(struct cw_marker));
 	
     /* Create a reference to this hook in order to prevent the module from being
      * prematurely unloaded. */
@@ -1045,8 +1044,7 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
     marker = (struct cw_marker *) nxo_hook_data_get(nxo);
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
-    marker_copy = (struct cw_marker *) nxa_malloc(nx_nxa_get(nx),
-						  sizeof(struct cw_marker));
+    marker_copy = (struct cw_marker *) nxa_malloc(sizeof(struct cw_marker));
 
     /* Create a reference to this hook in order to prevent the module from being
      * prematurely unloaded. */
@@ -1854,7 +1852,7 @@ extent_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     buffer_p_lock(buffer);
     ext_delete(&extent->ext);
     buffer_p_unlock(buffer);
-    nxa_free(nx_nxa_get(a_nx), extent, sizeof(struct cw_extent));
+    nxa_free(extent, sizeof(struct cw_extent));
 
     return FALSE;
 }

@@ -23,11 +23,11 @@
  * GC-related initialization, so that this function can be used for the case
  * where a regsub is temporarily constructed for a single subst. */
 static cw_nxn_t
-nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
-		  const cw_uint8_t *a_pattern, cw_uint32_t a_plen,
-		  cw_bool_t a_global, cw_bool_t a_insensitive,
-		  cw_bool_t a_multiline, cw_bool_t a_singleline,
-		  const cw_uint8_t *a_template, cw_uint32_t a_tlen)
+nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, const cw_uint8_t *a_pattern,
+		  cw_uint32_t a_plen, cw_bool_t a_global,
+		  cw_bool_t a_insensitive, cw_bool_t a_multiline,
+		  cw_bool_t a_singleline, const cw_uint8_t *a_template,
+		  cw_uint32_t a_tlen)
 {
     cw_nxn_t retval;
     char *pattern;
@@ -43,7 +43,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
     nxoe_l_new(&a_regsub->nxoe, NXOT_REGSUB, FALSE);
 
     /* Create a '\0'-terminated copy of a_pattern. */
-    pattern = (char *) nxa_malloc(a_nxa, a_plen + 1);
+    pattern = (char *) nxa_malloc(a_plen + 1);
     memcpy(pattern, a_pattern, a_plen);
     pattern[a_plen] = '\0';
 
@@ -71,7 +71,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 
     /* Compile the regex. */
     a_regsub->pcre = pcre_compile(pattern, options, &errptr, &erroffset, NULL);
-    nxa_free(a_nxa, pattern, a_plen + 1);
+    nxa_free(pattern, a_plen + 1);
     if (a_regsub->pcre == NULL)
     {
 	retval = NXN_regexerror;
@@ -113,7 +113,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
     /* Make a copy of a_template. */
     if (a_tlen > 0)
     {
-	a_regsub->template = (cw_uint8_t *) nxa_malloc(a_nxa, a_tlen);
+	a_regsub->template = (cw_uint8_t *) nxa_malloc(a_tlen);
 	memcpy(a_regsub->template, a_template, a_tlen);
     }
     else
@@ -199,8 +199,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
     if (a_regsub->vlen > 0)
     {
 	a_regsub->vec
-	    = (cw_nxoe_regsub_telm_t *) nxa_malloc(a_nxa,
-						   sizeof(cw_nxoe_regsub_telm_t)
+	    = (cw_nxoe_regsub_telm_t *) nxa_malloc(sizeof(cw_nxoe_regsub_telm_t)
 						   * a_regsub->vlen);
     }
     else
@@ -297,7 +296,7 @@ nxo_p_regsub_init(cw_nxoe_regsub_t *a_regsub, cw_nxa_t *a_nxa,
 CW_P_INLINE void
 nxo_p_regsub_append(cw_uint8_t **r_ostr, cw_uint32_t *r_omax,
 		    cw_uint32_t *r_olen, const cw_uint8_t *a_istr,
-		    cw_uint32_t a_ilen, cw_nxa_t *a_nxa)
+		    cw_uint32_t a_ilen)
 {
     cw_uint32_t omax;
 
@@ -308,7 +307,7 @@ nxo_p_regsub_append(cw_uint8_t **r_ostr, cw_uint32_t *r_omax,
     }
     if (omax != *r_omax)
     {
-	*r_ostr = nxa_realloc(a_nxa, *r_ostr, omax, *r_omax);
+	*r_ostr = nxa_realloc(*r_ostr, omax, *r_omax);
 	*r_omax = omax;
     }
 
@@ -324,24 +323,22 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
     cw_bool_t retval = 0;
     cw_nxo_regex_cache_t *cache;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
     cw_uint32_t scnt, ilen, ioff, olen, omax, v;
     cw_uint8_t *istr, *ostr;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
 
     /* Allocate or extend the vector for passing to pcre_exec(), if
      * necessary. */
     if (cache->ovp == NULL)
     {
-	cache->ovp = nxa_malloc(nxa, sizeof(int) * a_regsub->ovcnt);
+	cache->ovp = nxa_malloc(sizeof(int) * a_regsub->ovcnt);
 	cache->ovcnt = a_regsub->ovcnt;
     }
     else if (cache->ovcnt < a_regsub->ovcnt)
     {
-	cache->ovp = nxa_realloc(nxa, cache->ovp, sizeof(int) * a_regsub->ovcnt,
+	cache->ovp = nxa_realloc(cache->ovp, sizeof(int) * a_regsub->ovcnt,
 				 sizeof(int) * cache->ovcnt);
 	cache->ovcnt = a_regsub->ovcnt;
     }
@@ -359,7 +356,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 	omax = 8;
     }
     istr = nxo_string_get(a_input);
-    ostr = nxa_malloc(nxa, omax);
+    ostr = nxa_malloc(omax);
 
     /* Iteratively look for matches. */
     for (scnt = ioff = 0;
@@ -402,7 +399,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 	{
 	    nxo_p_regsub_append(&ostr, &omax, &olen,
 				&istr[ioff],
-				(cw_uint32_t) cache->ovp[0] - ioff, nxa);
+				(cw_uint32_t) cache->ovp[0] - ioff);
 	}
 
 	/* Substitute. */
@@ -412,7 +409,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 	    {
 		/* Copy from template string. */
 		nxo_p_regsub_append(&ostr, &omax, &olen, a_regsub->vec[v].str,
-				    a_regsub->vec[v].len, nxa);
+				    a_regsub->vec[v].len);
 	    }
 	    else
 	    {
@@ -426,8 +423,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
 					&istr
 					[cache->ovp[a_regsub->vec[v].len * 2]],
 					cache->ovp[a_regsub->vec[v].len * 2 + 1]
-					- cache->ovp[a_regsub->vec[v].len * 2],
-					nxa);
+					- cache->ovp[a_regsub->vec[v].len * 2]);
 		}
 	    }
 	}
@@ -439,7 +435,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
     /* If there are trailing bytes after the last match, copy them. */
     if (ioff < ilen)
     {
-	nxo_p_regsub_append(&ostr, &omax, &olen, &istr[ioff], ilen - ioff, nxa);
+	nxo_p_regsub_append(&ostr, &omax, &olen, &istr[ioff], ilen - ioff);
     }
 
     /* Create an Onyx string and copy ostr to it. */
@@ -458,7 +454,7 @@ nxo_p_regsub_subst(cw_nxoe_regsub_t *a_regsub, cw_nxo_t *a_thread,
     }
 
     /* Clean up. */
-    nxa_free(nxa, ostr, omax);
+    nxa_free(ostr, omax);
 
     return retval;
 }
@@ -471,24 +467,21 @@ nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 {
     cw_nxn_t retval;
     cw_nxoe_regsub_t *regsub;
-    cw_nxa_t *nxa;
 
-    nxa = nx_nxa_get(a_nx);
+    regsub = (cw_nxoe_regsub_t *) nxa_malloc(sizeof(cw_nxoe_regsub_t));
 
-    regsub = (cw_nxoe_regsub_t *) nxa_malloc(nxa, sizeof(cw_nxoe_regsub_t));
-
-    retval = nxo_p_regsub_init(regsub, nxa, a_pattern, a_plen, a_global,
+    retval = nxo_p_regsub_init(regsub, a_pattern, a_plen, a_global,
 			       a_insensitive, a_multiline, a_singleline,
 			       a_template, a_tlen);
     if (retval)
     {
-	nxa_free(nxa, regsub, sizeof(cw_nxoe_regsub_t));
+	nxa_free(regsub, sizeof(cw_nxoe_regsub_t));
 	goto RETURN;
     }
 
     /* Tell the GC about the space being taken up by regsub->pcre and
      * regsub->extra. */
-    nxa_l_count_adjust(nxa, (cw_nxoi_t) regsub->size + regsub->studysize);
+    nxa_l_count_adjust((cw_nxoi_t) regsub->size + regsub->studysize);
 
     /* Create a reference to the regsub object. */
     nxo_no_new(a_nxo);
@@ -496,7 +489,7 @@ nxo_regsub_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
     nxo_p_type_set(a_nxo, NXOT_REGSUB);
 
     /* Register the regsub object with the GC. */
-    nxa_l_gc_register(nxa, (cw_nxoe_t *) regsub);
+    nxa_l_gc_register((cw_nxoe_t *) regsub);
 
     retval = NXN_ZERO;
     RETURN:
@@ -535,12 +528,10 @@ nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
     cw_nxn_t retval;
     cw_nxoe_regsub_t regsub;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
 
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
 
-    retval = nxo_p_regsub_init(&regsub, nxa, a_pattern, a_plen, a_global,
+    retval = nxo_p_regsub_init(&regsub, a_pattern, a_plen, a_global,
 			       a_insensitive, a_multiline, a_singleline,
 			       a_template, a_tlen);
     if (retval)
@@ -554,12 +545,12 @@ nxo_regsub_nonew_subst(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 
     if (regsub.vec != NULL)
     {
-	nxa_free(nxa, regsub.vec, sizeof(cw_nxoe_regsub_telm_t) * regsub.vlen);
+	nxa_free(regsub.vec, sizeof(cw_nxoe_regsub_telm_t) * regsub.vlen);
     }
 
     if (regsub.template != NULL)
     {
-	nxa_free(nxa, regsub.template, regsub.tlen);
+	nxa_free(regsub.template, regsub.tlen);
     }
 
     free(regsub.pcre);

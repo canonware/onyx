@@ -110,7 +110,7 @@ display_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 
     mtx_delete(&display->mtx);
     ds_delete(&display->ds);
-    nxa_free(nx_nxa_get(a_nx), display, sizeof(struct cw_display));
+    nxa_free(display, sizeof(struct cw_display));
 
     return FALSE;
 }
@@ -175,8 +175,7 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
 	return;
     }
 
-    display = (struct cw_display *) nxa_malloc(nx_nxa_get(nx),
-					       sizeof(struct cw_display));
+    display = (struct cw_display *) nxa_malloc(sizeof(struct cw_display));
 
     /* Create a reference to this hook in order to prevent the module from being
      * prematurely unloaded. */
@@ -184,9 +183,10 @@ modpane_display(void *a_data, cw_nxo_t *a_thread)
     nxo_dup(&display->hook, nxo_stack_get(estack));
 
     /* Initialize the ds. */
+    /* XXX Use cw_g_nxaa. */
     ds_new(&display->ds, (cw_opaque_alloc_t *) nxa_malloc_e,
 	   (cw_opaque_realloc_t *) nxa_realloc_e,
-	   (cw_opaque_dealloc_t *) nxa_free_e, (void *) nx_nxa_get(nx),
+	   (cw_opaque_dealloc_t *) nxa_free_e, (void *) cw_g_nxa,
 	   nxo_file_fd_get(infile), nxo_file_fd_get(outfile));
 
     /* Initialize the protection mutex; ds's aren't thread-safe. */

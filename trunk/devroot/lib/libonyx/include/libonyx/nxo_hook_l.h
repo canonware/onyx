@@ -15,6 +15,8 @@ typedef struct cw_nxoe_hook_s cw_nxoe_hook_t;
 struct cw_nxoe_hook_s
 {
     cw_nxoe_t nxoe;
+
+    cw_nx_t *nx;
     
     cw_nxo_t tag;
     void *data;
@@ -25,7 +27,7 @@ struct cw_nxoe_hook_s
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -33,7 +35,7 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_HOOK_C_))
 CW_INLINE cw_bool_t
-nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_bool_t retval;
     cw_nxoe_hook_t *hook;
@@ -46,7 +48,7 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
     if (hook->delete_f != NULL)
     {
-	retval = hook->delete_f(hook->data, nxa_nx_get(a_nxa), a_iter);
+	retval = hook->delete_f(hook->data, hook->nx, a_iter);
     }
     else
     {
@@ -55,7 +57,7 @@ nxoe_l_hook_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 
     if (retval == FALSE)
     {
-	nxa_free(a_nxa, hook, sizeof(cw_nxoe_hook_t));
+	nxa_free(hook, sizeof(cw_nxoe_hook_t));
     }
 
     return retval;
@@ -67,9 +69,8 @@ nxoe_l_hook_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     cw_nxoe_t *retval;
     cw_nxoe_hook_t *hook;
     /* Used for remembering the current state of reference iteration.  This
-     * function is only called by the garbage collector, so as long as two
-     * interpreters aren't collecting simultaneously, using a static variable
-     * works fine. */
+     * function is only called by the garbage collector, so using a static
+     * variable works fine. */
     static cw_uint32_t ref_stage;
 
     hook = (cw_nxoe_hook_t *) a_nxoe;

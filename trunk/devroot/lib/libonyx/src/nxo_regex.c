@@ -22,10 +22,10 @@
  * GC-related initialization, so that this function can be used for the case
  * where a regex is temporarily constructed for a single match. */
 static cw_nxn_t
-nxo_p_regex_init(cw_nxoe_regex_t *a_regex, cw_nxa_t *a_nxa,
-		 const cw_uint8_t *a_pattern, cw_uint32_t a_len,
-		 cw_bool_t a_cont, cw_bool_t a_global, cw_bool_t a_insensitive,
-		 cw_bool_t a_multiline, cw_bool_t a_singleline)
+nxo_p_regex_init(cw_nxoe_regex_t *a_regex, const cw_uint8_t *a_pattern,
+		 cw_uint32_t a_len, cw_bool_t a_cont, cw_bool_t a_global,
+		 cw_bool_t a_insensitive, cw_bool_t a_multiline,
+		 cw_bool_t a_singleline)
 {
     cw_nxn_t retval;
     char *pattern;
@@ -35,7 +35,7 @@ nxo_p_regex_init(cw_nxoe_regex_t *a_regex, cw_nxa_t *a_nxa,
     nxoe_l_new(&a_regex->nxoe, NXOT_REGEX, FALSE);
 
     /* Create a '\0'-terminated copy of a_pattern. */
-    pattern = (char *) nxa_malloc(a_nxa, a_len + 1);
+    pattern = (char *) nxa_malloc(a_len + 1);
     memcpy(pattern, a_pattern, a_len);
     pattern[a_len] = '\0';
 
@@ -64,7 +64,7 @@ nxo_p_regex_init(cw_nxoe_regex_t *a_regex, cw_nxa_t *a_nxa,
 
     /* Compile the regex. */
     a_regex->pcre = pcre_compile(pattern, options, &errptr, &erroffset, NULL);
-    nxa_free(a_nxa, pattern, a_len + 1);
+    nxa_free(pattern, a_len + 1);
     if (a_regex->pcre == NULL)
     {
 	retval = NXN_regexerror;
@@ -116,12 +116,10 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     cw_bool_t retval;
     cw_nxo_regex_cache_t *cache;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
     int ioff;
 
     cache = nxo_l_thread_regex_cache_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
 
     if (nxo_string_len_get(a_input) == 0)
     {
@@ -134,12 +132,12 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
      * necessary. */
     if (cache->ovp == NULL)
     {
-	cache->ovp = nxa_malloc(nxa, sizeof(int) * a_regex->ovcnt);
+	cache->ovp = nxa_malloc(sizeof(int) * a_regex->ovcnt);
 	cache->ovcnt = a_regex->ovcnt;
     }
     else if (cache->ovcnt < a_regex->ovcnt)
     {
-	cache->ovp = nxa_realloc(nxa, cache->ovp, sizeof(int) * a_regex->ovcnt,
+	cache->ovp = nxa_realloc(cache->ovp, sizeof(int) * a_regex->ovcnt,
 				 sizeof(int) * cache->ovcnt);
 	cache->ovcnt = a_regex->ovcnt;
     }
@@ -254,7 +252,6 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     cw_nxo_regex_cache_t *cache;
     cw_nxo_t *tstack, *tnxo;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
     cw_uint8_t *istr;
     int ilen, ioff;
     cw_uint32_t i, acnt;
@@ -262,7 +259,6 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     cache = nxo_l_thread_regex_cache_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
 
     istr = nxo_string_get(a_input);
     ilen = (int) nxo_string_len_get(a_input);
@@ -277,12 +273,12 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
      * necessary. */
     if (cache->ovp == NULL)
     {
-	cache->ovp = nxa_malloc(nxa, sizeof(int) * a_regex->ovcnt);
+	cache->ovp = nxa_malloc(sizeof(int) * a_regex->ovcnt);
 	cache->ovcnt = a_regex->ovcnt;
     }
     else if (cache->ovcnt < a_regex->ovcnt)
     {
-	cache->ovp = nxa_realloc(nxa, cache->ovp, sizeof(int) * a_regex->ovcnt,
+	cache->ovp = nxa_realloc(cache->ovp, sizeof(int) * a_regex->ovcnt,
 				 sizeof(int) * cache->ovcnt);
 	cache->ovcnt = a_regex->ovcnt;
     }
@@ -396,23 +392,20 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
 {
     cw_nxn_t retval;
     cw_nxoe_regex_t *regex;
-    cw_nxa_t *nxa;
 
-    nxa = nx_nxa_get(a_nx);
+    regex = (cw_nxoe_regex_t *) nxa_malloc(sizeof(cw_nxoe_regex_t));
 
-    regex = (cw_nxoe_regex_t *) nxa_malloc(nxa, sizeof(cw_nxoe_regex_t));
-
-    retval = nxo_p_regex_init(regex, nxa, a_pattern, a_len, a_cont, a_global,
+    retval = nxo_p_regex_init(regex, a_pattern, a_len, a_cont, a_global,
 			      a_insensitive, a_multiline, a_singleline);
     if (retval)
     {
-	nxa_free(nxa, regex, sizeof(cw_nxoe_regex_t));
+	nxa_free(regex, sizeof(cw_nxoe_regex_t));
 	goto RETURN;
     }
 
     /* Tell the GC about the space being taken up by regex->pcre and
      * regex->extra. */
-    nxa_l_count_adjust(nxa, (cw_nxoi_t) regex->size + regex->studysize);
+    nxa_l_count_adjust((cw_nxoi_t) regex->size + regex->studysize);
 
     /* Create a reference to the regex object. */
     nxo_no_new(a_nxo);
@@ -420,7 +413,7 @@ nxo_regex_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_pattern,
     nxo_p_type_set(a_nxo, NXOT_REGEX);
 
     /* Register the regex object with the GC. */
-    nxa_l_gc_register(nxa, (cw_nxoe_t *) regex);
+    nxa_l_gc_register((cw_nxoe_t *) regex);
 
     retval = NXN_ZERO;
     RETURN:
@@ -458,12 +451,10 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
     cw_nxn_t retval;
     cw_nxoe_regex_t regex;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
 
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
 
-    retval = nxo_p_regex_init(&regex, nxa, a_pattern, a_len, a_cont, a_global,
+    retval = nxo_p_regex_init(&regex, a_pattern, a_len, a_cont, a_global,
 			      a_insensitive, a_multiline, a_singleline);
     if (retval)
     {
@@ -514,12 +505,10 @@ nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
     cw_nxn_t retval;
     cw_nxoe_regex_t regex;
     cw_nx_t *nx;
-    cw_nxa_t *nxa;
 
     nx = nxo_thread_nx_get(a_thread);
-    nxa = nx_nxa_get(nx);
 
-    retval = nxo_p_regex_init(&regex, nxa, a_pattern, a_len, FALSE, FALSE,
+    retval = nxo_p_regex_init(&regex, a_pattern, a_len, FALSE, FALSE,
 			      a_insensitive, a_multiline, a_singleline);
     if (retval)
     {

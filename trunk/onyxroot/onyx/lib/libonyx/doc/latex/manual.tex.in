@@ -58,11 +58,13 @@ main(int argc, char **argv, char **envp)
 }
 \end{verbatim}
 
-In most cases, an application will need to implement additional Onyx operators
-(and make them accessible from within the Onyx interpreter) in order to make the
-application accessible/controllable from the Onyx interpreter.  If the
+In many cases, an application will need to implement additional Onyx operators
+or hooks (and make them accessible from within the Onyx interpreter) in order to
+make the application accessible/controllable from the Onyx interpreter.  If the
 application user interface is to be interaction with the Onyx interpreter, then
-little else needs to be done.
+little else needs to be done.  Note that Onyx supports loadable modules, so it
+is usually possible to extend Onyx via modules, though embedding
+\libname{libonyx} directly into the application also works.
 
 \section{Compilation}
 Use the following compiler command line to compile applications with
@@ -95,6 +97,9 @@ the application:
 \begin{description}
 \item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
 \item[cw\_g\_mema: ] \classname{mema} instance, wraps \cvar{cw\_g\_mem}.
+\item[cw\_g\_nxa: ] \classname{nxa} instance, global allocator that is tied to
+the garbage collector.
+\item[cw\_g\_nxaa: ] \classname{mema} instance, wraps \cvar{cw\_g\_nxa}.
 \end{description}
 
 \section{Threads}

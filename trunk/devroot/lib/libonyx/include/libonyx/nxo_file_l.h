@@ -76,7 +76,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
 #ifndef CW_USE_INLINES
 cw_bool_t
-nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter);
+nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter);
 
 cw_nxoe_t *
 nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -84,7 +84,7 @@ nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 
 #if (defined(CW_USE_INLINES) || defined(CW_NXO_FILE_C_))
 CW_INLINE cw_bool_t
-nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
+nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 {
     cw_nxoe_file_t *file;
 
@@ -97,7 +97,7 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
     nxo_p_file_buffer_flush(file);
     if (file->buffer != NULL)
     {
-	nxa_free(a_nxa, file->buffer, file->buffer_size);
+	nxa_free(file->buffer, file->buffer_size);
     }
 #ifdef CW_THREADS
     if (file->nxoe.locking)
@@ -125,13 +125,13 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 	{
 	    if (file->f.s.delete_f != NULL)
 	    {
-		file->f.s.delete_f(file->f.s.arg, nxa_nx_get(a_nxa));
+		file->f.s.delete_f(file->f.s.arg, file->nx);
 	    }
 	    break;
 	}
     }
 
-    nxa_free(a_nxa, file, sizeof(cw_nxoe_file_t));
+    nxa_free(file, sizeof(cw_nxoe_file_t));
 
     return FALSE;
 }

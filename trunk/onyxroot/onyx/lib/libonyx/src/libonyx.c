@@ -14,8 +14,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
-/* #define CW_MEM_DBG */
-
+/* Prototypes for library-private functions that are only used in this file. */
 #ifdef CW_THREADS
 void
 thd_l_init(void);
@@ -26,21 +25,18 @@ void
 xep_l_init(void);
 void
 xep_l_shutdown(void);
-
-/* Globals. */
-cw_mem_t *cw_g_mem = NULL;
-#ifdef CW_MEM_DBG
-static cw_mem_t *cw_g_mem_mem = NULL;
-#endif
-
-cw_mema_t *cw_g_mema = NULL;
-static cw_mema_t mema;
-
-#if (defined(CW_SOCKET) && defined(CW_THREADS))
-cw_mtx_t cw_g_gethostbyname_mtx;
-cw_mtx_t cw_g_getprotobyname_mtx;
-cw_mtx_t cw_g_getservbyname_mtx;
-#endif
+void
+mem_l_init(void);
+void
+mem_l_shutdown(void);
+void
+nxa_l_init(void);
+void
+nxa_l_shutdown(void);
+void
+systemdict_l_init(void);
+void
+systemdict_l_shutdown(void);
 
 void
 libonyx_init(void)
@@ -56,31 +52,25 @@ libonyx_init(void)
     xep_begin();
     xep_try
     {
-#ifdef CW_MEM_DBG
-	cw_g_mem_mem = mem_new(NULL, NULL);
+	mem_l_init();
 	try_stage = 1;
 
-	cw_g_mem = mem_new(NULL, cw_g_mem_mem);
-	try_stage = 2;
-#else
-	cw_g_mem = mem_new(NULL, NULL);
-	try_stage = 2;
-#endif
+	nxa_l_init();
     }
     xep_catch(CW_ONYXX_OOM)
     {
 	switch (try_stage)
 	{
-	    case 2:
 	    case 1:
 	    {
-#ifdef CW_MEM_DBG
-		mem_delete(cw_g_mem_mem);
-		cw_g_mem_mem = NULL;
-#endif
+		mem_l_shutdown();
 	    }
 	    case 0:
 	    {
+		xep_l_shutdown();
+#ifdef CW_THREADS
+		thd_l_shutdown();
+#endif
 		break;
 	    }
 	    default:
@@ -91,47 +81,16 @@ libonyx_init(void)
     }
     xep_end();
 
-    cw_g_mema = mema_new(&mema,
-			 (cw_opaque_alloc_t *) mem_malloc_e,
-			 (cw_opaque_calloc_t *) mem_calloc_e,
-			 (cw_opaque_realloc_t *) mem_realloc_e,
-			 (cw_opaque_dealloc_t *) mem_free_e,
-			 cw_g_mem);
-
-#ifdef CW_POSIX
-    /* Ignore SIGPIPE, so that writing to a closed socket won't crash the
-     * program. */
-    signal(SIGPIPE, SIG_IGN);
-#endif
-
-#if (defined(CW_SOCKET) && defined(CW_THREADS))
-    /* Initialize mutexes that protect non-reentrant functions. */
-    mtx_new(&cw_g_gethostbyname_mtx);
-    mtx_new(&cw_g_getprotobyname_mtx);
-    mtx_new(&cw_g_getservbyname_mtx);
-#endif
+    systemdict_l_init();
 }
 
 void
 libonyx_shutdown(void)
 {
     /* Shut down global modules in reverse order. */
-#if (defined(CW_SOCKET) && defined(CW_THREADS))
-    mtx_delete(&cw_g_getservbyname_mtx);
-    mtx_delete(&cw_g_getprotobyname_mtx);
-    mtx_delete(&cw_g_gethostbyname_mtx);
-#endif
-
-    mema_delete(cw_g_mema);
-
-    mem_delete(cw_g_mem);
-    cw_g_mem = NULL;
-
-#ifdef CW_MEM_DBG
-    mem_delete(cw_g_mem_mem);
-    cw_g_mem_mem = NULL;
-#endif
-
+    systemdict_l_shutdown();
+    nxa_l_shutdown();
+    mem_l_shutdown();
     xep_l_shutdown();
 #ifdef CW_THREADS
     thd_l_shutdown();
