@@ -23,7 +23,7 @@
     `mark'
     `$foo'
     `null'
-    `$$pop'
+    `~pop'
     `()'
     ``hi''
 ]{

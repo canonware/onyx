@@ -40,13 +40,14 @@
 
 	# name.
 	$foo
+	$foo cve
 	$foo cvx
 
 	# null.
 	null
 
 	# operator.
-	$$pop
+	~pop
 
 	# stack.
 	()

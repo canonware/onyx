@@ -42,7 +42,7 @@ $sprintsdict <
     $arraytype {
 	# #array #depth
 	dup 0 gt {
-	    1 idup dup echeck {
+	    over dup echeck {
 		pop
 		`_{'
 	    }{
@@ -61,7 +61,7 @@ $sprintsdict <
 		    3 idup exch get
 		    2 idup 1 sub
 		    # #array #depth #accum #el #rdepth
-		    1 idup type sprintsdict exch get eval
+		    over type sprintsdict exch get eval
 		    cat
 		    # #array #depth #accum #el #rdepth
 		` ' cat
@@ -73,7 +73,7 @@ $sprintsdict <
 		2 idup dup length 1 sub get
 		2 idup 1 sub
 		# #array #depth #accum #el #rdepth
-		1 idup type sprintsdict exch get eval
+		over type sprintsdict exch get eval
 		cat
 	    } if
 	    # #array #depth #accum
@@ -125,12 +125,12 @@ $sprintsdict <
 		# #dict #rdepth #i #accum #key #value
 		exch 4 idup
 		# #dict #rdepth #i #accum #value #key #rdepth
-		1 idup type sprintsdict exch get eval
+		over type sprintsdict exch get eval
 		` ' cat
 		# #dict #rdepth #accum #i #value #keystr
 		exch 4 idup
 		# #dict #rdepth #i #accum #keystr #value #rdepth
-		1 idup type sprintsdict exch get eval
+		over type sprintsdict exch get eval
 		# #dict #rdepth #i #accum #keystr #valstr
 		cat cat
 		# #dict #rdepth #i #accum
@@ -174,7 +174,7 @@ $sprintsdict <
 	dup type $nulltype ne {
 	    exch 1 sub
 	    # #tag #rdepth
-	    1 idup type sprintsdict exch get eval
+	    over type sprintsdict exch get eval
 	    # #tagstr
 	    `=' exch cat
 	    `=' cat
@@ -202,11 +202,20 @@ $sprintsdict <
 } if
 `
     $nametype {
+	# #name #depth
 	pop
-	dup cvs
-	exch xcheck not {
+	dup cvs exch
+	# #str #name
+	dup xcheck not {
+	    # Literal.
+	    pop
 	    `$' exch cat
+	}{
+	echeck {
+	    # Evaluatable.
+	    `!' exch cat
 	} if
+	} ifelse
     }
     $nulltype {
 	pop pop
@@ -216,7 +225,7 @@ $sprintsdict <
 	pop
 	cvs
 	dup `-operator-' ne {
-	    `--' dup up
+	    `--' tuck
 	    cat cat
 	} if
     }
@@ -248,7 +257,7 @@ $sprintsdict <
 		    3 idup dup dn sidup spop
 		    2 idup 1 sub
 		    # #stack #depth #accum #el #rdepth
-		    1 idup type sprintsdict exch get eval
+		    over type sprintsdict exch get eval
 		    cat
 		    # #stack #depth #accum #el #rdepth
 		` ' cat
@@ -260,7 +269,7 @@ $sprintsdict <
 		2 idup dup sdup spop
 		2 idup 1 sub
 		# #stack #depth #accum #el #rdepth
-		1 idup type sprintsdict exch get eval
+		over type sprintsdict exch get eval
 		cat
 	    } if
 	    # #stack #depth #accum
@@ -287,7 +296,7 @@ $sprintsdict <
 
 # #object #depth sprints #string
 $sprints {
-    1 idup type sprintsdict exch get eval
+    over type sprintsdict exch get eval
 } def
 
 $sprint {
@@ -314,8 +323,8 @@ $outputsdict <
 	# #int #flags #str
 
 	# Prepend the sign if necessary.
-	1 idup $s known {
-	    1 idup $s get $+ eq {
+	over $s known {
+	    over $s get $+ eq {
 		2 idup 0 ge {
 		    `+' exch cat
 		} if
@@ -344,8 +353,8 @@ $outputsdict <
 	# #real #flags #precision
 	
 	# Determine whether to use decimal or exponential notation.
-	1 idup $e known {
-	1 idup $e get
+	over $e known {
+	over $e get
 	}{
 	false
 	} ifelse
@@ -363,8 +372,8 @@ $outputsdict <
 	# #real #flags #str
 
 	# Prepend the sign if necessary.
-	1 idup $s known {
-	1 idup $s get $+ eq {
+	over $s known {
+	over $s get $+ eq {
 	    2 idup 0 ge {
 	    `+' exch cat
 	    } if
@@ -392,7 +401,7 @@ $outputsdict <
 	    } ifelse
 	    # #str #flags #pad
 
-	    1 idup $w get
+	    over $w get
 	    # #str #flags #pad #width
 	    3 idup length
 	    # #str #flags #pad #width #len
@@ -401,12 +410,12 @@ $outputsdict <
 		# Pad string.
 		# #str #flags #pad #width #len
 
-		1 idup string
+		over string
 		# #str #flags #pad #width #len #pstr
 
 		# Fill #pstr with #pad.
 		0 1 4 idup 1 sub {
-		    1 idup exch 5 idup putinterval
+		    over exch 5 idup putinterval
 		} for
 		# #str #flags #pad #width #len #pstr
 		3 ipop
@@ -439,7 +448,7 @@ $outputsdict <
 		} ifelse
 		# #str #flags #pstr #offset
 
-		1 idup exch
+		over exch
 		# #str #flags #pstr #pstr #offset
 		5 ndn
 		# #flags #pstr #pstr #offset #str
@@ -456,8 +465,8 @@ $outputsdict <
 	    # #str #flags
 	    dup $n known {
 		# Truncate the string if it is too long.
-		1 idup length
-		1 idup $n get
+		over length
+		over $n get
 		# #str #flags #len #max
 		dup 2 idup lt {
 		    # Truncate.
@@ -588,7 +597,7 @@ $outputs {
     dup type $dicttype ne {
 	$typecheck throw
     } if
-    1 idup type
+    over type
     # #obj #flags #type
     outputsdict exch get eval
 } def
@@ -620,7 +629,7 @@ $search {
 	$typecheck throw
     } if
     # String.
-    1 idup type $stringtype ne {
+    over type $stringtype ne {
 	$typecheck throw
     } if
 
@@ -781,7 +790,7 @@ $require {
 	    {
 		# #filename #dir
 		`/' cat
-		1 idup cat
+		over cat
 		# #filename #full_path
 		dup `f' test {
 		    # Found.
@@ -806,7 +815,7 @@ $require {
 # #filename #symbol mrequire -
 $mrequire {
     # Make sure the arguments are strings.
-    1 idup type $stringtype ne {
+    over type $stringtype ne {
 	$typecheck throw
     } if
     dup type $stringtype ne {
@@ -848,7 +857,7 @@ $mrequire {
 	    {
 		# #symbol #filename #dir
 		`/' cat
-		1 idup cat
+		over cat
 		# #symbol #filename #full_path
 		dup `f' test {
 		    # Found.
@@ -880,8 +889,8 @@ $throw {
     # in the error handling machinery.
     {
 	{$errordict where {pop true}{false} ifelse}
-	{$errordict load $handleerror known}
-	{$errordict load $stop known}
+	{!errordict $handleerror known}
+	{!errordict $stop known}
 	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
@@ -908,10 +917,10 @@ $throw {
 
     # Make sure the argument is a name.
     dup type $nametype ne {
-	$typecheck $systemdict load $throw get eval
+	$typecheck !throw
     } if
 
-    $currenterror load begin
+    !currenterror begin
 
     # Set newerror to true to indicate there is an error.  It is up to the
     # application to clear this afterwards if it wants to make newerror
@@ -936,7 +945,7 @@ $throw {
     $istack istack dup spop pop def
 
     # Push the offending object onto ostack.
-    $estack load dup sdup spop
+    !estack dup sdup spop
     exch
     # #object #errorname
 
@@ -944,7 +953,7 @@ $throw {
 
     # If there is an error handler for the error name, call it.  Otherwise,
     # call the errordict handleerror, then call the errordict stop.
-    $errordict load
+    !errordict
     # #object #errorname #errordict
     dup 2 idup known {
 	# Call error handler.

@@ -2,9 +2,8 @@ Test begin
 Error $typecheck
 ostack: (-mark-)
 dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..3):
-0:	--eval--
-1: {
+estack/istack trace (0..2):
+0: {
 	{-array- -array- -array- -array-}
 	{--eval-- --not-- -array- --if--}
 	--foreach--
@@ -12,10 +11,9 @@ estack/istack trace (0..3):
 	--type--
 	$nametype
 	--ne--
-	{$typecheck $systemdict --load-- $throw --get-- --eval--}
+	{$typecheck !throw}
   8:--> --if--
-	$currenterror
-	--load--
+	!currenterror
 	--begin--
 	$newerror
 	true
@@ -50,15 +48,13 @@ estack/istack trace (0..3):
 	--spop--
 	--pop--
 	--def--
-	$estack
-	--load--
+	!estack
 	--dup--
 	--sdup--
 	--spop--
 	--exch--
 	--end--
-	$errordict
-	--load--
+	!errordict
 	--dup--
 	2
 	--idup--
@@ -67,5 +63,5 @@ estack/istack trace (0..3):
 	{--nip-- --dup-- $handleerror --get-- --eval-- $stop --get-- --eval--}
 	--ifelse--
 }
-2:	-file-
-3:	--start--
+1:	-file-
+2:	--start--

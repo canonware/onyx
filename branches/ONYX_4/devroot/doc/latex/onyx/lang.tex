@@ -340,9 +340,9 @@ reader an idea of the simplicity of the language syntax.
 CRNL (carriage return, newline) pairs are in all important cases converted to
 newlines during scanning.
 
-The characters \#, \$, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
-special.  In most cases, any of the special characters and whitespace (space,
-tab, newline, formfeed, null) terminate any preceding token.  All other
+The characters \#, !, \$, {\twid}, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and
+{\gt} are special.  In most cases, any of the special characters and whitespace
+(space, tab, newline, formfeed, null) terminate any preceding token.  All other
 characters including non-printing characters are considered regular characters.
 
 A comment starts with a \# character outside of a string context and extends to
@@ -377,17 +377,20 @@ follows:
 \item[{\lt}real{\gt} ::= ] {\lt}dec\_real{\gt} {\pipe} {\lt}exp\_real{\gt}
 
 \item[{\lt}name{\gt} : ] Any token that cannot be interpreted as a number or a
-string is interpreted as an executable name.  There are three syntaxes for
-names: executable, literal and immediately evaluated.  Executable names are
-looked up in the dictionary stack and executed (unless execution is deferred).
-Literal names are simply pushed onto the operand stack.  Immediately evaluated
-names are replaced by their values as defined in the dictionary stack, even if
-execution is deferred.  Examples include:
+string is interpreted as an executable name.  There are four syntaxes for names:
+executable, evaluatable, literal, and immediately evaluated.  Executable and
+evaluatable names are looked up in the dictionary stack and executed (unless
+execution is deferred).  Evaluatable names behave the same as executable names,
+except when bing processed by the \htmlref{\onyxop{}{bind}{}}{systemdict:bind}
+operator.  Literal names are simply pushed onto the operand stack.  Immediately
+evaluated names are replaced by their values as defined in the dictionary stack,
+even if execution is deferred.  Examples include:
 \begin{verbatim}
 foo     # executable
 4noth3r # executable
-$bar    # literal
-$$biz   # immediately evaluated
+!bar    # evaluatable
+$biz    # literal
+~baz    # immediately evaluated
 \end{verbatim}
 
 If the result of an immediately evaluated name is an executable array, the
@@ -2217,7 +2220,7 @@ onyx:0>
 		\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> $$realtime
+onyx:0> ~realtime
 onyx:1> <$w 30 $p `.' $j $c> operatortype print `\n' print flush
 .........--realtime--.........
 onyx:0>
@@ -2249,7 +2252,7 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> { $$x
+onyx:0> { ~x
 Error $undefined
 ostack: (-pmark- $x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
@@ -2950,7 +2953,7 @@ onyx:1>
 		\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> $$realtime
+onyx:0> ~realtime
 onyx:1> dup 0 operatortype print `\n' print flush
 --realtime--
 onyx:1> 1 operatortype print `\n' print flush
@@ -2984,7 +2987,7 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> { $$x
+onyx:0> { ~x
 Error $undefined
 ostack: (-pmark- $x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
@@ -4209,7 +4212,7 @@ onyx:0> <
 onyx:1> $foo `foo'
 onyx:3> $bar `bar'
 onyx:5> $biz `biz'
-onyx:7> $pop $$pop
+onyx:7> $pop ~pop
 onyx:9> >
 onyx:1> pstack
 <$pop --pop-- $biz `biz' $bar `bar' $foo `foo'>
@@ -4659,7 +4662,7 @@ onyx:0>
 		\item{The value is a literal object.}
 		\item{The value is an executable or evaluatable operator.}
 		\item{The value is an executable or evaluatable hook.}
-		\item{The value is an evaluatable array.}
+		\item{The value is an executable or evaluatable array.}
 		\end{itemize}
 
 		Binding has a large positive impact on performance, since name
@@ -4671,12 +4674,16 @@ onyx:0>
 		objects are still available.}
 		\item{Behavior is more dynamic.  It is possible to replace a
 		definition on dstack and have it immediately take effect on
-		unbound procedures.  Note however that great care must be taken
+		unbound procedures.  Note however that care must be taken
 		when relying on this, since binding is recursive, and a lack of
 		complete understanding of what procedures reference each other
 		can result in undesired bound procedures.  For this reason, it
-		is generally best to make dynamic behavior explicit by using the
-		\htmlref{\onyxop{}{load}{}}{systemdict:load} operator.}
+		is generally best to make dynamic behavior explicit by using
+		evaluatable names.}
+		\item{There are situations where a program needs to do some
+		setup before binding a procedure, and providing manual control
+		over when binding happens allows more sophisticated use of
+		binding.}
 		\end{itemize}
 	\item[Example(s): ]\begin{verbatim}
 
@@ -5657,7 +5664,7 @@ onyx:0> $foo cvs 1 sprint
 `foo'
 onyx:0> 42 cvs 1 sprint
 `42'
-onyx:0> $$pop cvs 1 sprint
+onyx:0> ~pop cvs 1 sprint
 `pop'
 onyx:0> 42.0 cvs 1 sprint
 `4.200000e+01'

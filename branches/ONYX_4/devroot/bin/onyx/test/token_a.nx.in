@@ -28,7 +28,7 @@
 	`foo '
 	`foo$foo'
 	`foo$foo '
-	`$$pop$$spop'
+	`~pop~spop'
 	`<>'
 	`<<>>'
 	`()(())'

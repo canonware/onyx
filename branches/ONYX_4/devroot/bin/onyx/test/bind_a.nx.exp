@@ -1,6 +1,6 @@
 Test begin
-{product pop countdstack true globaldict {product pop countdstack true globaldict}}
-{`Canonware Onyx' --pop-- --countdstack-- true <> {`Canonware Onyx' --pop-- --countdstack-- true -dict-}}
-[product pop countdstack true globaldict [product pop countdstack true globaldict]]
-[`Canonware Onyx' --pop-- --countdstack-- true <> [product pop countdstack true globaldict]]
+{product pop countdstack true globaldict !userdict {product pop countdstack true globaldict !userdict}}
+{`Canonware Onyx' --pop-- --countdstack-- true <> !userdict {`Canonware Onyx' --pop-- --countdstack-- true -dict- !userdict}}
+[product pop countdstack true globaldict $userdict {product pop countdstack true globaldict !userdict}]
+[`Canonware Onyx' --pop-- --countdstack-- true <> $userdict {`Canonware Onyx' --pop-- --countdstack-- true -dict- !userdict}]
 Test end

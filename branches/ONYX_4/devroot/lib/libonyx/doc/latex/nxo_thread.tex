@@ -213,7 +213,6 @@ cw\_nxo\_t *a\_thread}}
 		\item[retval: ] The current scanner state of \cvar{a\_nxo}.
 			\begin{description}\item[]
 			\item[THREADTS\_START: ] Start state.
-			\item[THREADTS\_DOLLAR\_CONT: ] One '\$' seen.
 			\item[THREADTS\_COMMENT: ] '\%' seen, but no line break
 				yet.
 			\item[THREADTS\_INTEGER: ] Scanning an integer.
@@ -236,6 +235,8 @@ cw\_nxo\_t *a\_thread}}
 				a string.
 			\item[THREADTS\_STRING\_HEX\_FINISH: ] First hex digit
 				of a ``{\bs}xDD'' string escape sequence seen.
+			\item[THREADTS\_NAME\_START: ] '!', '\$', or '{\twid}'
+				seen.
 			\item[THREADTS\_NAME: ] Scanning a name.
 			\end{description}
 		\end{description}

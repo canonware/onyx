@@ -15,36 +15,62 @@
 ################################################################################
 
 # Create an encoding dictionary for various operators.  The values must not
-# correspond to an existing name in dstack.
+# correspond to an existing name in dstack.  The byte overhead is the length of
+# the name plus three.  So, a name must show up at least as many times as in
+# the following table to bother adding an entry:
+#
+#   Length | Minimum use | Transform
+#   -------+-------------+------------------------------------------------------
+#        2 | 5           | xx xx xx xx --> $X~x x x x x
+#        3 | 4           | xxx xxx xxx --> $X~xxx x x x
+#        4 | 3           | xxxx xxxx xxxx --> $X~xxxx x x x
+#        5 | 3           | xxxxx xxxxx xxxxx --> $X~xxxxx x x x
+#        6 | 2           | xxxxxx xxxxxx --> $X~xxxxxx x x
+#       >7 | 2
+#
 $_encdict <
-	$begin		$/	# 4
-	$cat		$a	# 19
-	$cvx		$b	# 13
-	$def		$c	# ~21
-	$dup		$d	# ~37
-	$eval		$e	# 14
-	$exch		$f	# ~57
-	$false		$g	# 5
-	$flush		$h	# 3
-	$getinterval	$i	# 4
-	$ifelse		$j	# 20
-	$idup		$k	# ~66
-	$known		$l	# 8
-	$length		$m	# 16
-	$load		$n	# 9
-	$ostack		$o	# 3
-	$pop		$p	# ~69
-	$putinterval	$q	# 3
-	$scount		$r	# 3
-	$spop		$s	# 7
-	$stderr		$t	# 10
-	$sub		$u	# 15
-	$systemdict	$v	# 3
-	$true		$w	# 4
-	$type		$x	# >= 17
-	$until		$y	# 10
-	$write		$z	# 10
-	$xcheck		$+	# 3
+	$begin		$A	# 4
+	$cat		$B	# 19
+	$cvs		$C	# 6
+	$cvx		$D	# 13
+	$def		$E	# ~21
+	$dup		$F	# ~37
+	$echeck		$G	# 3
+	$eq		$H	# 6
+	$eval		$I	# 14
+	$exch		$J	# ~57
+	$false		$K	# 5
+	$flush		$L	# 3
+	$foreach	$M	# 9
+	$get		$N	# 32
+	$getinterval	$O	# 4
+	$gt		$P	# 7
+	$if		$Q	# 29
+	$ifelse		$R	# 20
+	$idup		$S	# ~66
+	$known		$T	# 8
+	$length		$U	# 16
+	$load		$V	# 9
+	$ne		$W	# 13
+	$nip		$X	# 4
+	$not		$Y	# 4
+	$ostack		$Z	# 3
+	$pop		$a	# ~69
+	$print		$b	# 3
+	$putinterval	$c	# 3
+	$scount		$d	# 3
+	$spop		$e	# 7
+	$stderr		$f	# 10
+	$stop		$g	# 3
+	$stopped	$h	# 3
+	$string		$i	# 2
+	$sub		$j	# 15
+	$systemdict	$k	# 3
+	$true		$l	# 4
+	$type		$m	# >= 17
+	$until		$n	# 10
+	$write		$o	# 10
+	$xcheck		$p	# 3
 > def
 
 # #proc _encarr -
@@ -54,7 +80,7 @@ $_encarr {
 		1 idup 1 idup get
 		# #proc #i #el
 		dup type $nametype eq {
-			dup xcheck {
+			dup dup xcheck exch echeck not and {
 				# Executable Name.  Try to replace.
 				_encdict 1 idup known {
 					_encdict exch get cvx
@@ -111,7 +137,7 @@ nx_p_nxcode(cw_nx_t *a_nx)
 `<' print
 _encdict {
 	1 sprints print
-	`$' print 1 sprints print
+	`~' print cvx 1 sprints print
 } foreach
 `>begin' print
 
