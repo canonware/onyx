@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2002 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2004 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2003 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2004 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
 = "All rights reserved.";
 $COPYRIGHT{"mordor", 0}
@@ -309,52 +309,60 @@ if ($opt_verbose)
 }
 unless ($opt_noact)
 {
-    finddepth(\&expand_tags, "$expdir/devroot");
+    finddepth(\&expand_tags, "$expdir/$opt_root");
 }
 
 # autogen.
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && ./autogen.sh --with-docs\n";
+    print STDERR "cd $expdir/$opt_root && ./autogen.sh --with-docs\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && ./autogen.sh --with-docs`;
+    `cd $expdir/$opt_root && ./autogen.sh --with-docs`;
 }
 
 # cook release.
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && cook release\n";
+    print STDERR "cd $expdir/$opt_root && cook release\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && cook release`;
+    `cd $expdir/$opt_root && cook release`;
 
     # Sanity check to make sure documentation got built.
-    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
+	unless (-e "$expdir/$opt_root/doc/ps/$opt_pkgname/$opt_pkgname.ps"
+		&& -e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
     }
 }
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && cook distclean\n";
+    print STDERR "cd $expdir/$opt_root && cook distclean\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && cook distclean`;
+    `cd $expdir/$opt_root && cook distclean`;
 
     # Sanity check to make sure documentation is still in the tree.
-    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
+	unless (-e "$expdir/$opt_root/doc/ps/$opt_pkgname/$opt_pkgname.ps"
+		&& -e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
     }
 }
 
@@ -370,20 +378,20 @@ unless ($opt_noact)
 
 if ($opt_verbose)
 {
-    print STDERR "mv $expdir/devroot $opt_pkgname\n";
+    print STDERR "mv $expdir/$opt_root $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `mv $expdir/devroot $opt_pkgname`;
+    `mv $expdir/$opt_root $opt_pkgname`;
 }
 
 if ($opt_verbose)
 {
-    print STDERR "rmdir $expdir\n";
+    print STDERR "rm -rf $expdir\n";
 }
 unless ($opt_noact)
 {
-    `rmdir $expdir`;
+    `rm -rf $expdir`;
 }
 
 # Create the tarball.
