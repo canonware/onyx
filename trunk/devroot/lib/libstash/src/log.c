@@ -14,14 +14,14 @@
  *
  ****************************************************************************/
 
-#include <stdarg.h>
-#include <time.h>
-
 #ifdef _CW_REENTRANT
 #  include "libstash_r.h"
 #else
 #  include "libstash.h"
 #endif
+
+#include <stdarg.h>
+#include <time.h>
 
 #include "log_priv.h"
 

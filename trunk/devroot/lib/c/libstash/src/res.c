@@ -51,8 +51,6 @@
  *
  *****************************************************************************/
 
-#include <stdarg.h>
-
 #define _INC_RES_H_
 #define _INC_OH_H_
 #ifdef _CW_REENTRANT
@@ -60,6 +58,8 @@
 #else
 #  include "libstash.h"
 #endif
+
+#include <stdarg.h>
 
 #include "res_priv.h"
 
