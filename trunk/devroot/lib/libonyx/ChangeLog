@@ -1,3 +1,8 @@
+2001-07-21  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode_gen.nx: Generate a temporary dictionary of short
+	names that is used to compact the onyx bootstrapping code.
+
 2001-07-20  Jason Evans  <jasone@canonware.com>
 
 	* src/nx_nxcode.nx: Implement outputsdict, outputs and output.
