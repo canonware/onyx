@@ -58,18 +58,35 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 #endif
     dict->dicto = NULL;
 
-    /* Don't create a dict smaller than CW_LIBONYX_DICT_SIZE, since rounding
-     * errors for calculating the grow/shrink points can cause severe
-     * performance problems if the dict grows significantly.
-     *
-     * Don't let the table get more than 80% full, or less than 25% full, when
-     * shrinking. */
     if (a_dict_size < CW_LIBONYX_DICT_SIZE)
-    a_dict_size = CW_LIBONYX_DICT_SIZE;
+    {
+#define XXX_NOT_YET
+#ifdef XXX_NOT_YET
+	cw_uint32_t i;
 
-    dch_new(&dict->hash, (cw_opaque_alloc_t *) nxa_malloc_e,
-	    (cw_opaque_dealloc_t *) nxa_free_e, nxa, a_dict_size * 1.25,
-	    a_dict_size, a_dict_size / 4, nxo_p_dict_hash, nxo_p_dict_key_comp);
+	dict->is_hash = FALSE;
+	dict->array_iter = 0;
+	for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
+	{
+	    nxo_no_new(&dict->data.array[i].key);
+	}
+#else
+	a_dict_size = CW_LIBONYX_DICT_SIZE;
+#endif
+    }
+#ifdef XXX_NOT_YET
+    else
+#endif
+    {
+	dict->is_hash = TRUE;
+
+	/* Don't let the table get more than 80% full, or less than 25% full,
+	 * when shrinking. */
+	dch_new(&dict->data.hash, (cw_opaque_alloc_t *) nxa_malloc_e,
+		(cw_opaque_dealloc_t *) nxa_free_e, nxa, a_dict_size * 1.25,
+		a_dict_size, a_dict_size / 4, nxo_p_dict_hash,
+		nxo_p_dict_key_comp);
+    }
 
     nxo_no_new(a_nxo);
     a_nxo->o.nxoe = (cw_nxoe_t *) dict;
@@ -97,14 +114,17 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nxa_t *a_nxa, cw_uint32_t a_iter)
 	mtx_delete(&dict->lock);
     }
 #endif
-    while (dch_remove_iterate(&dict->hash, NULL, (void **) &dicto, &chi)
-	   == FALSE)
+    if (dict->is_hash)
     {
-	nxa_free(a_nxa, dicto, sizeof(cw_nxoe_dicto_t));
-	nxa_free(a_nxa, chi, sizeof(cw_chi_t));
+	while (dch_remove_iterate(&dict->data.hash, NULL, (void **) &dicto,
+				  &chi)
+	       == FALSE)
+	{
+	    nxa_free(a_nxa, dicto, sizeof(cw_nxoe_dicto_t));
+	    nxa_free(a_nxa, chi, sizeof(cw_chi_t));
+	}
+	dch_delete(&dict->data.hash);
     }
-    dch_delete(&dict->hash);
-
     nxa_free(a_nxa, dict, sizeof(cw_nxoe_dict_t));
 
     return FALSE;
@@ -125,20 +145,228 @@ nxoe_l_dict_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     }
 
     retval = NULL;
-    while (retval == NULL && dict->ref_iter < dch_count(&dict->hash))
+    if (dict->is_hash)
     {
-	if (dict->dicto == NULL)
+	while (retval == NULL
+	       && dict->ref_iter < dch_count(&dict->data.hash))
 	{
-	    /* Key. */
-	    dch_get_iterate(&dict->hash, NULL, (void **) &dict->dicto);
-	    retval = nxo_nxoe_get(&dict->dicto->key);
+	    if (dict->dicto == NULL)
+	    {
+		/* Key. */
+		dch_get_iterate(&dict->data.hash, NULL, (void **) &dict->dicto);
+		retval = nxo_nxoe_get(&dict->dicto->key);
+	    }
+	    else
+	    {
+		/* Value. */
+		retval = nxo_nxoe_get(&dict->dicto->val);
+		dict->ref_iter++;
+		dict->dicto = NULL;
+	    }
+	}
+    }
+    else
+    {
+	while (retval == NULL && dict->ref_iter < CW_LIBONYX_DICT_SIZE)
+	{
+	    if (dict->dicto == NULL)
+	    {
+		if (nxo_type_get(&dict->data.array[dict->ref_iter].key)
+		    != NXOT_NO)
+		{
+		    /* Key. */
+		    dict->dicto = &dict->data.array[dict->ref_iter];
+		    retval = nxo_nxoe_get(&dict->dicto->key);
+		}
+		else
+		{
+		    /* Empty slot. */
+		    dict->ref_iter++;
+		}
+	    }
+	    else
+	    {
+		/* Value. */
+		retval = nxo_nxoe_get(&dict->dicto->val);
+		dict->ref_iter++;
+		dict->dicto = NULL;
+	    }
+	}
+    }
+
+    return retval;
+}
+
+CW_P_INLINE void
+nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
+		cw_nxo_t *a_val)
+{
+    cw_nxoe_dicto_t *dicto;
+
+    if (a_dict->is_hash)
+    {
+	if (dch_search(&a_dict->data.hash, (void *) a_key, (void **) &dicto)
+	    == FALSE)
+	{
+	    /* a_key is already defined. */
+	    nxo_dup(&dicto->val, a_val);
+
+	    /* If (a_key == &dicto->val), things will break badly.  However, I
+	     * can't think of a way that this could possibly happen in real use,
+	     * so just assert. */
+	    cw_assert(a_key != &dicto->val);
 	}
 	else
 	{
-	    /* Value. */
-	    retval = nxo_nxoe_get(&dict->dicto->val);
-	    dict->ref_iter++;
-	    dict->dicto = NULL;
+	    cw_chi_t *chi;
+	    cw_nxa_t *nxa;
+
+	    nxa = nx_nxa_get(a_nx);
+
+	    /* Allocate and initialize. */
+	    dicto = (cw_nxoe_dicto_t *) nxa_malloc(nxa,
+						   sizeof(cw_nxoe_dicto_t));
+	    chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
+	    nxo_no_new(&dicto->key);
+	    nxo_dup(&dicto->key, a_key);
+	    nxo_no_new(&dicto->val);
+	    nxo_dup(&dicto->val, a_val);
+
+	    /* Insert. */
+#ifdef CW_THREADS
+	    thd_crit_enter();
+#endif
+	    dch_insert(&a_dict->data.hash, (void *) &dicto->key, (void *) dicto,
+		       chi);
+#ifdef CW_THREADS
+	    thd_crit_leave();
+#endif
+	}
+    }
+    else
+    {
+	cw_bool_t done = FALSE;
+	cw_uint32_t i;
+
+	/* Search for an existing definition.  If one exists, replace the
+	 * value.  Otherwise, insert into the array if there is room, or convert
+	 * to a hash then insert if there is not room. */
+
+	for (i = 0, dicto = NULL; i < CW_LIBONYX_DICT_SIZE; i++)
+	{
+	    if (nxo_type_get(&a_dict->data.array[i].key) != NXOT_NO)
+	    {
+		if (nxo_compare(&a_dict->data.array[i].key, a_key) == 0)
+		{
+		    nxo_dup(&a_dict->data.array[i].val, a_val);
+		    done = TRUE;
+		    break;
+		}
+	    }
+	    else if (dicto == NULL)
+	    {
+		dicto = &a_dict->data.array[i];
+	    }
+	}
+
+	if (done == FALSE)
+	{
+	    if (dicto != NULL)
+	    {
+		nxo_dup(&dicto->key, a_key);
+		nxo_no_new(&dicto->val);
+		nxo_dup(&dicto->val, a_val);
+	    }
+	    else
+	    {
+		cw_nxoe_dicto_t tarray[CW_LIBONYX_DICT_SIZE];
+		cw_chi_t *chi;
+		cw_nxa_t *nxa;
+
+		nxa = nx_nxa_get(a_nx);
+
+		memcpy(tarray, &a_dict->data.array, sizeof(tarray));
+
+#ifdef CW_THREADS
+		thd_crit_enter();
+#endif
+		for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
+		{
+		    if (nxo_type_get(&tarray[i].key) != NXOT_NO)
+		    {
+			/* Allocate and initialize. */
+			dicto = (cw_nxoe_dicto_t *)
+			    nxa_malloc(nxa, sizeof(cw_nxoe_dicto_t));
+			chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
+			nxo_no_new(&dicto->key);
+			nxo_dup(&dicto->key, &tarray[i].key);
+			nxo_no_new(&dicto->val);
+			nxo_dup(&dicto->val, &tarray[i].val);
+
+			/* Insert. */
+			dch_insert(&a_dict->data.hash, (void *) &dicto->key,
+				   (void *) dicto, chi);
+		    }
+		}
+
+		/* The conversion to a hash is complete. */
+		a_dict->is_hash = TRUE;
+
+		/* Finally, do the insertion. */
+
+		/* Allocate and initialize. */
+		dicto = (cw_nxoe_dicto_t *) nxa_malloc(nxa,
+						       sizeof(cw_nxoe_dicto_t));
+		chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
+		nxo_no_new(&dicto->key);
+		nxo_dup(&dicto->key, a_key);
+		nxo_no_new(&dicto->val);
+		nxo_dup(&dicto->val, a_val);
+
+		/* Insert. */
+		dch_insert(&a_dict->data.hash, (void *) &dicto->key,
+			   (void *) dicto, chi);
+
+#ifdef CW_THREADS
+		thd_crit_leave();
+#endif
+	    }
+	}
+    }
+}
+
+CW_P_INLINE cw_nxo_t *
+nxoe_p_dict_lookup(cw_nxoe_dict_t *a_dict, const cw_nxo_t *a_key)
+{
+    cw_nxo_t *retval;
+
+    if (a_dict->is_hash)
+    {
+	cw_nxoe_dicto_t *dicto;
+
+	if (dch_search(&a_dict->data.hash, (void *) a_key, (void **) &dicto)
+	    == FALSE)
+	{
+	    retval = &dicto->val;
+	}
+	else
+	{
+	    retval = NULL;
+	}
+    }
+    else
+    {
+	cw_uint32_t i;
+
+	retval = NULL;
+	for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
+	{
+	    if (nxo_type_get(&a_dict->data.array[i].key) != NXOT_NO
+		&& nxo_compare(&a_dict->data.array[i].key, a_key) == 0)
+	    {
+		retval = &a_dict->data.array[i].val;
+		break;
+	    }
 	}
     }
 
@@ -149,11 +377,8 @@ void
 nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 {
     cw_nxoe_dict_t *to, *from;
-    cw_uint32_t i, count;
-    cw_nxoe_dicto_t *dicto_to, *dicto_from, *dicto_rm;
-    cw_chi_t *chi, *chi_rm;
-    cw_bool_t removed;
-    cw_nxa_t *nxa;
+    cw_uint32_t i;
+    cw_nxoe_dicto_t *dicto_from;
 
     cw_check_ptr(a_to);
     cw_dassert(a_to->magic == CW_NXO_MAGIC);
@@ -171,42 +396,34 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
     cw_dassert(from->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(from->nxoe.type == NXOT_DICT);
 
-    nxa = nx_nxa_get(a_nx);
-
     /* Deep (but not recursive) copy. */
 #ifdef CW_THREADS
     nxoe_p_dict_lock(from);
     nxoe_p_dict_lock(to);
 #endif
-    for (i = 0, count = dch_count(&from->hash); i < count; i++)
+    if (from->is_hash)
     {
-	/* Get a dicto. */
-	dch_get_iterate(&from->hash, NULL, (void **) &dicto_from);
+	cw_uint32_t count;
 
-	/* Allocate and copy. */
-	dicto_to = (cw_nxoe_dicto_t *) nxa_malloc(nxa, sizeof(cw_nxoe_dicto_t));
-	nxo_no_new(&dicto_to->key);
-	nxo_dup(&dicto_to->key, &dicto_from->key);
-	nxo_no_new(&dicto_to->val);
-	nxo_dup(&dicto_to->val, &dicto_from->val);
-	chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
-
-	/* Make sure the key is not defined, then insert. */
-#ifdef CW_THREADS
-	thd_crit_enter();
-#endif
-	removed = dch_remove(&to->hash, (void *) &dicto_to->key, NULL,
-			     (void **) &dicto_rm, &chi_rm);
-	dch_insert(&to->hash, &dicto_to->key, dicto_to, chi);
-#ifdef CW_THREADS
-	thd_crit_leave();
-#endif
-
-	if (removed == FALSE)
+	for (i = 0, count = dch_count(&from->data.hash); i < count; i++)
 	{
-	    nxa_free(nxa, dicto_rm, sizeof(cw_nxoe_dicto_t));
-	    nxa_free(nxa, chi_rm, sizeof(cw_chi_t));
+	    /* Get a dicto. */
+	    dch_get_iterate(&from->data.hash, NULL, (void **) &dicto_from);
+
+	    nxoe_p_dict_def(to, a_nx, &dicto_from->key, &dicto_from->val);
 	}
+    }
+    else
+    {
+	for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
+	{
+	    if (nxo_type_get(&from->data.array[i].key) != NXOT_NO)
+	    {
+		dicto_from = &from->data.array[i];
+		nxoe_p_dict_def(to, a_nx, &dicto_from->key, &dicto_from->val);
+	    }
+	}
+
     }
 #ifdef CW_THREADS
     nxoe_p_dict_unlock(to);
@@ -218,7 +435,6 @@ void
 nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 {
     cw_nxoe_dict_t *dict;
-    cw_nxoe_dicto_t *dicto;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -233,40 +449,7 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
 #endif
-    if (dch_search(&dict->hash, (void *) a_key, (void **) &dicto) == FALSE)
-    {
-	/* a_key is already defined. */
-	nxo_dup(&dicto->val, a_val);
-
-	/* If (a_key == &dicto->val), things will break badly.  However, I can't
-	 * think of a way that this could possibly happen in real use, so just
-	 * assert. */
-	cw_assert(a_key != &dicto->val);
-    }
-    else
-    {
-	cw_chi_t *chi;
-	cw_nxa_t *nxa;
-
-	nxa = nx_nxa_get(a_nx);
-
-	/* Allocate and initialize. */
-	dicto = (cw_nxoe_dicto_t *) nxa_malloc(nxa, sizeof(cw_nxoe_dicto_t));
-	chi = (cw_chi_t *) nxa_malloc(nxa, sizeof(cw_chi_t));
-	nxo_no_new(&dicto->key);
-	nxo_dup(&dicto->key, a_key);
-	nxo_no_new(&dicto->val);
-	nxo_dup(&dicto->val, a_val);
-
-	/* Insert. */
-#ifdef CW_THREADS
-	thd_crit_enter();
-#endif
-	dch_insert(&dict->hash, (void *) &dicto->key, (void *) dicto, chi);
-#ifdef CW_THREADS
-	thd_crit_leave();
-#endif
-    }
+    nxoe_p_dict_def(dict, a_nx, a_key, a_val);
 #ifdef CW_THREADS
     nxoe_p_dict_unlock(dict);
 #endif
@@ -276,9 +459,6 @@ void
 nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 {
     cw_nxoe_dict_t *dict;
-    cw_nxoe_dicto_t *dicto;
-    cw_chi_t *chi;
-    cw_bool_t error;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -292,24 +472,49 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
-    thd_crit_enter();
 #endif
-    error = dch_remove(&dict->hash, (void *) a_key, NULL, (void **) &dicto,
-		       &chi);
-#ifdef CW_THREADS
-    thd_crit_leave();
-    nxoe_p_dict_unlock(dict);
-#endif
-
-    if (error == FALSE)
+    if (dict->is_hash)
     {
-	cw_nxa_t *nxa;
+	cw_nxoe_dicto_t *dicto;
+	cw_chi_t *chi;
+	cw_bool_t error;
 
-	nxa = nx_nxa_get(a_nx);
+#ifdef CW_THREADS
+	thd_crit_enter();
+#endif
+	error = dch_remove(&dict->data.hash, (void *) a_key, NULL,
+			   (void **) &dicto, &chi);
+#ifdef CW_THREADS
+	thd_crit_leave();
+#endif
 
-	nxa_free(nxa, dicto, sizeof(cw_nxoe_dicto_t));
-	nxa_free(nxa, chi, sizeof(cw_chi_t));
+	if (error == FALSE)
+	{
+	    cw_nxa_t *nxa;
+
+	    nxa = nx_nxa_get(a_nx);
+
+	    nxa_free(nxa, dicto, sizeof(cw_nxoe_dicto_t));
+	    nxa_free(nxa, chi, sizeof(cw_chi_t));
+	}
     }
+    else
+    {
+	cw_uint32_t i;
+
+	for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
+	{
+	    if (nxo_type_get(&dict->data.array[i].key) != NXOT_NO
+		&& nxo_compare(&dict->data.array[i].key, a_key) == 0)
+	    {
+		nxo_no_new(&dict->data.array[i].key);
+		break;
+	    }
+	}
+    }
+#ifdef CW_THREADS
+	nxoe_p_dict_unlock(dict);
+#endif
 }
 
 cw_bool_t
@@ -317,7 +522,7 @@ nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
 {
     cw_bool_t retval;
     cw_nxoe_dict_t *dict;
-    cw_nxoe_dicto_t *dicto;
+    cw_nxo_t *nxo;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -332,11 +537,12 @@ nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
 #endif
-    if (dch_search(&dict->hash, (void *) a_key, (void **) &dicto) == FALSE)
+    nxo = nxoe_p_dict_lookup(dict, a_key);
+    if (nxo != NULL)
     {
 	if (r_nxo != NULL)
 	{
-	    nxo_dup(r_nxo, &dicto->val);
+	    nxo_dup(r_nxo, nxo);
 	}
 	retval = FALSE;
     }
@@ -360,7 +566,6 @@ nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 {
     cw_nxo_t *retval;
     cw_nxoe_dict_t *dict;
-    cw_nxoe_dicto_t *dicto;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -375,14 +580,7 @@ nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
 #endif
-    if (dch_search(&dict->hash, (void *) a_key, (void **) &dicto) == FALSE)
-    {
-	retval = &dicto->val;
-    }
-    else
-    {
-	retval = NULL;
-    }
+    retval = nxoe_p_dict_lookup(dict, a_key);
 #ifdef CW_THREADS
     nxoe_p_dict_unlock(dict);
 #endif
@@ -409,7 +607,22 @@ nxo_dict_count(cw_nxo_t *a_nxo)
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
 #endif
-    retval = dch_count(&dict->hash);
+    if (dict->is_hash)
+    {
+	retval = dch_count(&dict->data.hash);
+    }
+    else
+    {
+	cw_uint32_t i;
+
+	for (i = retval = 0; i < CW_LIBONYX_DICT_SIZE; i++)
+	{
+	    if (nxo_type_get(&dict->data.array[i].key) != NXOT_NO)
+	    {
+		retval++;
+	    }
+	}
+    }
 #ifdef CW_THREADS
     nxoe_p_dict_unlock(dict);
 #endif
@@ -422,7 +635,6 @@ nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 {
     cw_bool_t retval;
     cw_nxoe_dict_t *dict;
-    cw_nxo_t *nxo;
 
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
@@ -437,10 +649,32 @@ nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 #ifdef CW_THREADS
     nxoe_p_dict_lock(dict);
 #endif
-    retval = dch_get_iterate(&dict->hash, (void **) &nxo, NULL);
-    if (retval == FALSE)
+    if (dict->is_hash)
     {
-	nxo_dup(r_nxo, nxo);
+	cw_nxo_t *nxo;
+
+	retval = dch_get_iterate(&dict->data.hash, (void **) &nxo, NULL);
+	if (retval == FALSE)
+	{
+	    nxo_dup(r_nxo, nxo);
+	}
+    }
+    else
+    {
+	cw_uint32_t i;
+
+	for (retval = TRUE, i = 0;
+	     retval == TRUE && i < CW_LIBONYX_DICT_SIZE;
+	     i++, dict->array_iter = (dict->array_iter + 1)
+		 % CW_LIBONYX_DICT_SIZE)
+	{
+	    if (nxo_type_get(&dict->data.array[dict->array_iter].key)
+		!= NXOT_NO)
+	    {
+		nxo_dup(r_nxo, &dict->data.array[dict->array_iter].key);
+		retval = FALSE;
+	    }
+	}
     }
 #ifdef CW_THREADS
     nxoe_p_dict_unlock(dict);
