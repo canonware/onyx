@@ -1,0 +1,25 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+pipe
+/outfd exch def
+/infd exch def
+outfd `foo\nbar\nbiz\n' write
+outfd flushfile
+infd readline pop 1 sprint
+infd readline pop 1 sprint
+infd readline pop 1 sprint
+
+`Test end\n' print
+pstack
