@@ -620,7 +620,10 @@ main()
       t_uint32 = ~buf_get_uint32(&buf, i);
       
       _cw_assert(FALSE == buf_set_uint32(&buf, i, t_uint32));
-      
+
+/*        out_put(cw_g_out, "t_uint32: 0x[i|b:16], " */
+/*  	      "buf_get_uint32(&buf, [i]): 0x[i|b:16]\n", */
+/*  	      t_uint32, i, buf_get_uint32(&buf, i)); */
       _cw_assert(t_uint32 == buf_get_uint32(&buf, i));
     }
     
