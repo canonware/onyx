@@ -626,7 +626,7 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
  *
  * <<< Description >>>
  *
- * Set the uint32 at a_offset to a_val.
+ * Set the uint64 at a_offset to a_val.
  *
  ****************************************************************************/
 cw_bool_t
