@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 86 $
- * Last modified: $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * Current revision: $Revision: 103 $
+ * Last modified: $Date: 1998-06-29 21:48:35 -0700 (Mon, 29 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -117,7 +117,7 @@ res_new(cw_res_t * a_res_o)
   rwl_new(&retval->rw_lock);
   /* Non-thread-safe hash table, since we're already taking care of the
    * locking. */
-  oh_new(&retval->hash_o, FALSE, FALSE);
+  oh_new(&retval->hash_o, FALSE);
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
   {
