@@ -3,7 +3,7 @@ Test begin
 `true {\`Got here\n\' print exit} while'
 Got here
 `true {exit \`Got here\n\' print} while'
-`<> begin\n    /foo 0 def\n    {foo 3 lt}{\n\t\`foo: \' print\n\tfoo 1 sprint\n\n\t/foo foo inc def\n    } while\n    end'
+`<> begin\n    $foo 0 def\n    {foo 3 lt}{\n\t\`foo: \' print\n\tfoo 1 sprint\n\n\t$foo foo inc def\n    } while\n    end'
 foo: 0
 foo: 1
 foo: 2

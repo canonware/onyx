@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-</foo>
+<$foo>
 
 `Test end\n' print

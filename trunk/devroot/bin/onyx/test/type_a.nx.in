@@ -15,14 +15,14 @@
 [
 	`[1 2 3]'
 	`true'
-	`</foo `foo' /bar `bar'>'
+	`<$foo `foo' $bar `bar'>'
 	`stdin'
 	`('
 	`42'
 	`mark'
-	`/foo'
+	`$foo'
 	`null'
-	`//pop'
+	`$$pop'
 	`(1 2 3)'
 	``foo''
 ]{

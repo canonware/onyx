@@ -340,7 +340,7 @@ reader an idea of the simplicity of the language syntax.
 CRNL (carriage return, newline) pairs are in all important cases converted to
 newlines during scanning.
 
-The characters \#, /, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
+The characters \#, \$, {\lb}, {\rb}, \{, \}, (, ), `, ', {\lt}, and {\gt} are
 special.  In most cases, any of the special characters and whitespace (space,
 tab, newline, formfeed, null) terminate any preceding token.  All other
 characters including non-printing characters are considered regular characters.
@@ -386,8 +386,8 @@ execution is deferred.  Examples include:
 \begin{verbatim}
 foo     # executable
 4noth3r # executable
-/bar    # literal
-//biz   # immediately evaluated
+$bar    # literal
+$$biz   # immediately evaluated
 \end{verbatim}
 
 If the result of an immediately evaluated name is an executable array, the
@@ -506,7 +506,7 @@ Dictionaries do not have explicit syntactic support, but the {\lt} and
 construction include:
 \begin{verbatim}
 <>
-</answer 42 /question `Who knows' /translate {babelfish} >
+<$answer 42 $question `Who knows' $translate {babelfish} >
 \end{verbatim}
 
 Stacks do not have explicit syntactic support, but the ( and ) operators support
@@ -601,14 +601,14 @@ due to tail recursion.  For example, the following code does not cause the
 execution stack to grow:
 
 \begin{verbatim}
-/foo {foo} def
+$foo {foo} def
 foo
 \end{verbatim}
 
 The following code will result in an execution stack overflow:
 
 \begin{verbatim}
-/foo {foo `filler'} def
+$foo {foo `filler'} def
 foo
 \end{verbatim}
 
@@ -690,8 +690,8 @@ implicitly locked strings to the other string, deadlock can result.
 
 \begin{verbatim}
 # Initialization.
-/A `aaaaaa'
-/B `bbbbbb'
+$A `aaaaaa'
+$B `bbbbbb'
 
 ...
 
@@ -848,7 +848,7 @@ syntax error. \\
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `1 2 3}' cvx eval
-At line 1, column 5: Error /syntaxerror
+At line 1, column 5: Error $syntaxerror
 ostack: (1 2 3 `}')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..3):
@@ -856,7 +856,7 @@ estack/istack trace (0..3):
 1:      --eval--
 2:      -file-
 3:      --start--
-onyx:5> currenterror /column get 1 sprint
+onyx:5> currenterror $column get 1 sprint
 5
 onyx:5>
 		\end{verbatim}
@@ -878,7 +878,7 @@ onyx:5>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -906,7 +906,7 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -914,7 +914,7 @@ estack/istack trace (0..2):
 1:      -file-
 2:      --start--
 onyx:1> currenterror begin errorname end 1 sprint
-/undefined
+$undefined
 onyx:1>
 		\end{verbatim}
 	\end{description}
@@ -935,7 +935,7 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -964,7 +964,7 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -1000,7 +1000,7 @@ onyx:0> currenterror begin
 onyx:0> newerror 1 sprint
 false
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -1009,12 +1009,12 @@ estack/istack trace (0..2):
 2:      --start--
 onyx:1> newerror 1 sprint
 true
-onyx:1> /newerror false def
+onyx:1> $newerror false def
 onyx:1> newerror 1 sprint
 false
 onyx:1> resume
 onyx:1> y
-Error /undefined
+Error $undefined
 ostack: (x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -1043,7 +1043,7 @@ onyx:2>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `1 2 3}' cvx eval
-At line 1, column 5: Error /syntaxerror
+At line 1, column 5: Error $syntaxerror
 ostack: (1 2 3 `}')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..3):
@@ -1051,7 +1051,7 @@ estack/istack trace (0..3):
 1:      --eval--
 2:      -file-
 3:      --start--
-onyx:5> currenterror /line get 1 sprint
+onyx:5> currenterror $line get 1 sprint
 1
 onyx:5>
 		\end{verbatim}
@@ -1073,7 +1073,7 @@ onyx:5>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -1146,7 +1146,7 @@ handling. \\
 
 onyx:0> {true {true 1 sprint x y} if} eval
 true
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..5):
@@ -1163,7 +1163,7 @@ estack/istack trace (0..5):
 4:      -file-
 5:      --start--
 onyx:1> errordict begin handleerror end
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..5):
@@ -1197,9 +1197,9 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> errordict begin
-onyx:0> /stop {`Custom stop\n' print flush quit} def
+onyx:0> $stop {`Custom stop\n' print flush quit} def
 onyx:0> x
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -1560,7 +1560,7 @@ by \htmlref{require}{systemdict:require}. \\
 		listed.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> onyxdict /mpath_post get 1 sprint
+onyx:0> onyxdict $mpath_post get 1 sprint
 [`/usr/local/share/onyx-3.0.0/nxm']
 onyx:0>
 		\end{verbatim}
@@ -1583,7 +1583,7 @@ onyx:0>
 		listed.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> onyxdict /mpath_pre get 1 sprint
+onyx:0> onyxdict $mpath_pre get 1 sprint
 [`' `.']
 onyx:0>
 		\end{verbatim}
@@ -1606,7 +1606,7 @@ onyx:0>
 		listed.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> onyxdict /rpath_post get 1 sprint
+onyx:0> onyxdict $rpath_post get 1 sprint
 [`/usr/local/share/onyx-3.0.0/nx']
 onyx:0>
 		\end{verbatim}
@@ -1629,7 +1629,7 @@ onyx:0>
 		listed.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> onyxdict /rpath_pre get 1 sprint
+onyx:0> onyxdict $rpath_pre get 1 sprint
 [`' `.']
 onyx:0>
 		\end{verbatim}
@@ -1647,45 +1647,45 @@ There is an entry in outputsdict for each Onyx type.  Each entry renders objects
 that correspond to its name using optional flags stored in a dictionary.  The
 following flags are supported for all types:
 \begin{description}
-\item[{\tt /n}: ]
+\item[{\tt \$n}: ]
 	Maximum length, in bytes.  Default: disabled.
-\item[{\tt /w}: ]
+\item[{\tt \$w}: ]
 	Minimum length, in bytes.  Default: disabled.
-\item[{\tt /j}: ]
+\item[{\tt \$j}: ]
 	Justification.  Legal values:
 	\begin{description}
-	\item[{\tt /l}: ]
+	\item[{\tt \$l}: ]
 		Left.
-	\item[{\tt /c}: ]
+	\item[{\tt \$c}: ]
 		Center.
-	\item[{\tt /r}: ]
+	\item[{\tt \$r}: ]
 		Right (default).
 	\end{description}
-\item[{\tt /p}: ]
+\item[{\tt \$p}: ]
 	Padding character.  Default: {\tt ` '}.
-\item[{\tt /r}: ]
+\item[{\tt \$r}: ]
 	Syntactic rendering recursion depth.  Default: 1.
 \end{description}
 
 The following additional flags are supported for integers:
 \begin{description}
-\item[{\tt /b}: ]
+\item[{\tt \$b}: ]
 	Base, from 2 to 36.  Default: 10.
-\item[{\tt /s}: ]
+\item[{\tt \$s}: ]
 	Sign.  Legal values:
 	\begin{description}
-	\item[{\tt /-}: ]
+	\item[{\tt \$-}: ]
 		Only print sign if output is negative (default).
-	\item[{\tt /+}: ]
+	\item[{\tt \$+}: ]
 		Always print sign.
 	\end{description}
 \end{description}
 
 The following additional flags are supported for reals:
 \begin{description}
-\item[{\tt /d}: ]
+\item[{\tt \$d}: ]
 	Digits of precision past decimal point.  Default: 6.
-\item[{\tt /e}: ]
+\item[{\tt \$e}: ]
 	Exponential notation, if true.  Default: false.
 \end{description}
 
@@ -1787,9 +1787,9 @@ Create formatted string from thread. \\
 
 onyx:0> outputsdict begin
 onyx:0> [1 [2 3] 4]
-onyx:1> dup </w 9 /p `_' /r 0> arraytype print `\n' print flush
+onyx:1> dup <$w 9 $p `_' $r 0> arraytype print `\n' print flush
 __-array-
-onyx:1> dup </w 9 /p `_' /r 1> arraytype print `\n' print flush
+onyx:1> dup <$w 9 $p `_' $r 1> arraytype print `\n' print flush
 [1 -array- 4]
 onyx:1>
 		\end{verbatim}
@@ -1821,9 +1821,9 @@ onyx:1>
 
 onyx:0> outputsdict begin
 onyx:0> false
-onyx:1> dup </n 3> booleantype print `\n' print flush
+onyx:1> dup <$n 3> booleantype print `\n' print flush
 fal
-onyx:1> dup </n 7> booleantype print `\n' print flush
+onyx:1> dup <$n 7> booleantype print `\n' print flush
 false
 onyx:1>
 		\end{verbatim}
@@ -1855,7 +1855,7 @@ onyx:1>
 
 onyx:0> outputsdict begin
 onyx:0> condition
-onyx:1> </w 15 /p `_' /j /c> booleantype print `\n' print flush
+onyx:1> <$w 15 $p `_' $j $c> booleantype print `\n' print flush
 __-condition-__
 onyx:0>
 		\end{verbatim}
@@ -1886,8 +1886,8 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> </foo `foo'> </w 30 /p `.' /j /r> dicttype print `\n' print flush
-..................</foo `foo'>
+onyx:0> <$foo `foo'> <$w 30 $p `.' $j $r> dicttype print `\n' print flush
+..................<$foo `foo'>
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -1918,7 +1918,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> stdin
-onyx:1> </w 30 /p `.' /j /c> filetype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> filetype print `\n' print flush
 ............-file-............
 onyx:0>
 		\end{verbatim}
@@ -1950,7 +1950,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> (
-onyx:1> </w 30 /p `.' /j /c> finotype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> finotype print `\n' print flush
 ............-fino-............
 onyx:0>
 		\end{verbatim}
@@ -1987,7 +1987,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> taggedhook
-onyx:1> </w 30 /p `.' /j /l hooktype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $l hooktype print `\n' print flush
 =tagged=......................
 onyx:0>
 		\end{verbatim}
@@ -2018,11 +2018,11 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> 42 </w 6 /p `_' /j /c /s /-> integertype print `\n' print flush
+onyx:0> 42 <$w 6 $p `_' $j $c $s $-> integertype print `\n' print flush
 __42__
-onyx:0> 42 </w 6 /p `_' /j /c /s /+> integertype print `\n' print flush
+onyx:0> 42 <$w 6 $p `_' $j $c $s $+> integertype print `\n' print flush
 _+42__
-onyx:0> `0x' print 42 </w 6 /p `0' /b 16> integertype print `\n' print flush
+onyx:0> `0x' print 42 <$w 6 $p `0' $b 16> integertype print `\n' print flush
 0x00002a
 onyx:0>
 		\end{verbatim}
@@ -2054,7 +2054,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> mark
-onyx:1> </w 30 /p `.' /j /c> marktype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> marktype print `\n' print flush
 ............-mark-............
 onyx:0>
 		\end{verbatim}
@@ -2086,7 +2086,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> mutex
-onyx:1> </w 30 /p `.' /j /c> mutextype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> mutextype print `\n' print flush
 ...........-mutex-............
 onyx:0>
 		\end{verbatim}
@@ -2117,9 +2117,9 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> /foo
-onyx:1> </w 30 /p `.' /j /c> nametype print `\n' print flush
-............./foo.............
+onyx:0> $foo
+onyx:1> <$w 30 $p `.' $j $c> nametype print `\n' print flush
+.............$foo.............
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -2150,7 +2150,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> null
-onyx:1> </w 30 /p `.' /j /c> nulltype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> nulltype print `\n' print flush
 .............null.............
 onyx:0>
 		\end{verbatim}
@@ -2187,8 +2187,8 @@ onyx:0>
 		\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> //realtime
-onyx:1> </w 30 /p `.' /j /c> operatortype print `\n' print flush
+onyx:0> $$realtime
+onyx:1> <$w 30 $p `.' $j $c> operatortype print `\n' print flush
 .........--realtime--.........
 onyx:0>
 		\end{verbatim}
@@ -2219,15 +2219,15 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> { //x
-Error /undefined
-ostack: (-pmark- /x)
+onyx:0> { $$x
+Error $undefined
+ostack: (-pmark- $x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
 estack/istack trace (0..1):
 0:      -file-
 1:      --start--
 onyx:3> pop pop resume
-onyx:1> </w 30 /p `.' /j /c> pmarktype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> pmarktype print `\n' print flush
 ...........-pmark-............
 onyx:0>
 		\end{verbatim}
@@ -2258,13 +2258,13 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> outputsdict begin
-onyx:0> 6.022e23 </d 4> realtype print `\n' print flush
+onyx:0> 6.022e23 <$d 4> realtype print `\n' print flush
 602200000000000027262976.0000
-onyx:0> 6.022e23 </d 4 /e true> realtype print `\n' print flush
+onyx:0> 6.022e23 <$d 4 $e true> realtype print `\n' print flush
 6.0220e+23
-onyx:0> 6.022e23 </d 0 /e true> realtype print `\n' print flush
+onyx:0> 6.022e23 <$d 0 $e true> realtype print `\n' print flush
 6e+23
-onyx:0> 6.022e23 </d 4 /w 40 /p `0'> realtype print `\n' print flush
+onyx:0> 6.022e23 <$d 4 $w 40 $p `0'> realtype print `\n' print flush
 00000000000602200000000000027262976.0000
 onyx:0>
 		\end{verbatim}
@@ -2296,9 +2296,9 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> (1 (2 3) 4)
-onyx:1> dup </w 9 /p `_' /r 0> stacktype print `\n' print flush
+onyx:1> dup <$w 9 $p `_' $r 0> stacktype print `\n' print flush
 __-stack-
-onyx:1> </w 9 /p `_' /r 1> stacktype print `\n' print flush
+onyx:1> <$w 9 $p `_' $r 1> stacktype print `\n' print flush
 (1 -stack- 4)
 onyx:0>
 		\end{verbatim}
@@ -2330,7 +2330,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> `A string'
-onyx:1> </w 30 /p `.' /j /c> stringtype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> stringtype print `\n' print flush
 ...........A string...........
 onyx:0>
 		\end{verbatim}
@@ -2362,7 +2362,7 @@ onyx:0>
 
 onyx:0> outputsdict begin
 onyx:0> () {} thread
-onyx:1> </w 30 /p `.' /j /c> threadtype print `\n' print flush
+onyx:1> <$w 30 $p `.' $j $c> threadtype print `\n' print flush
 ...........-thread-...........
 onyx:0>
 		\end{verbatim}
@@ -2389,8 +2389,8 @@ The implementation of \htmlref{\onyxop{}{sprints}{}}{systemdict:sprints} is
 useful in illustrating a useful method of doing type-dependent operations:
 
 \begin{verbatim}
-/sprints {
-        1 idup type /sprintsdict load exch get eval
+$sprints {
+        1 idup type $sprintsdict load exch get eval
 } def
 \end{verbatim}
 
@@ -2593,13 +2593,13 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> </a `a' /subdict </b `b'>>
+onyx:0> <$a `a' $subdict <$b `b'>>
 onyx:1> dup 0 dicttype print `\n' print flush
 -dict-
 onyx:1> dup 1 dicttype print `\n' print flush
-</subdict -dict- /a `a'>
+<$subdict -dict- $a `a'>
 onyx:1> dup 2 dicttype print `\n' print flush
-</subdict </b `b'> /a `a'>
+<$subdict <$b `b'> $a `a'>
 onyx:1>
 		\end{verbatim}
 	\end{description}
@@ -2845,11 +2845,11 @@ onyx:1>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> /foo
+onyx:0> $foo
 onyx:1> dup 0 nametype print `\n' print flush
-/foo
+$foo
 onyx:1> dup 1 nametype print `\n' print flush
-/foo
+$foo
 onyx:1>
 		\end{verbatim}
 	\end{description}
@@ -2919,7 +2919,7 @@ onyx:1>
 		\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> //realtime
+onyx:0> $$realtime
 onyx:1> dup 0 operatortype print `\n' print flush
 --realtime--
 onyx:1> 1 operatortype print `\n' print flush
@@ -2953,9 +2953,9 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> sprintsdict begin
-onyx:0> { //x
-Error /undefined
-ostack: (-pmark- /x)
+onyx:0> { $$x
+Error $undefined
+ostack: (-pmark- $x)
 dstack: (-dict- -dict- -dict- -dict- -dict-)
 estack/istack trace (0..1):
 0:      -file-
@@ -4077,13 +4077,13 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> <
-onyx:1> /foo `foo'
-onyx:3> /bar `bar'
-onyx:5> /biz `biz'
-onyx:7> /pop //pop
+onyx:1> $foo `foo'
+onyx:3> $bar `bar'
+onyx:5> $biz `biz'
+onyx:7> $pop $$pop
 onyx:9> >
 onyx:1> pstack
-</pop --pop-- /biz `biz' /bar `bar' /foo `foo'>
+<$pop --pop-- $biz `biz' $bar `bar' $foo `foo'>
 onyx:1>
 		\end{verbatim}
 	\end{description}
@@ -4457,7 +4457,7 @@ onyx:4>
 		namespace.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> </foo `foo'> begin
+onyx:0> <$foo `foo'> begin
 onyx:0> foo 1 sprint
 `foo'
 onyx:0>
@@ -4747,11 +4747,11 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/tmp/tdir' 8@755 mkdir 
-onyx:0> `/tmp/tdir' status /mode get 1 sprint
+onyx:0> `/tmp/tdir' status $mode get 1 sprint
 16877
 onyx:0> `/tmp/tdir' `r' open 
 onyx:1> dup 8@555 chmod
-onyx:1> `/tmp/tdir' status /mode get 1 sprint
+onyx:1> `/tmp/tdir' status $mode get 1 sprint
 16749
 onyx:1>
 		\end{verbatim}
@@ -4787,15 +4787,15 @@ onyx:1>
 
 onyx:0> `/tmp/tdir' 8@755 mkdir
 onyx:0> `/tmp/tdir' status 
-onyx:1> dup /uid get 1 sprint
+onyx:1> dup $uid get 1 sprint
 1001
-onyx:1> /gid get 1 sprint
+onyx:1> $gid get 1 sprint
 0
 onyx:0> `/tmp/tdir' 1001 1001 chown
 onyx:0> `/tmp/tdir' status
-onyx:1> dup /uid get 1 sprint
+onyx:1> dup $uid get 1 sprint
 1001
-onyx:1> /gid get 1 sprint
+onyx:1> $gid get 1 sprint
 1001
 onyx:0>
 		\end{verbatim}
@@ -4983,8 +4983,8 @@ onyx:0>
 
 onyx:0> [`a'] [`b' `c'] copy 1 sprint
 [`a']
-onyx:0> </foo `foo'> </bar `bar'> copy 1 sprint
-</bar `bar' /foo `foo'>
+onyx:0> <$foo `foo'> <$bar `bar'> copy 1 sprint
+<$bar `bar' $foo `foo'>
 onyx:1> (1 2) (3 4) copy 1 sprint
 (3 4 1 2)
 onyx:1> `a' `bc' copy 1 sprint
@@ -5141,9 +5141,9 @@ onyx:5>
 		Get the topmost dictionary on dstack.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> </foo `foo'> begin 
+onyx:0> <$foo `foo'> begin 
 onyx:0> currentdict 1 sprint
-</foo `foo'>
+<$foo `foo'>
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -5328,7 +5328,7 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `foo' cvn 1 sprint
-/foo
+$foo
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -5404,11 +5404,11 @@ onyx:0>
 
 onyx:0> true cvs 1 sprint
 `true'
-onyx:0> /foo cvs 1 sprint
+onyx:0> $foo cvs 1 sprint
 `foo'
 onyx:0> 42 cvs 1 sprint
 `42'
-onyx:0> //pop cvs 1 sprint
+onyx:0> $$pop cvs 1 sprint
 `pop'
 onyx:0> 42.0 cvs 1 sprint
 `4.200000e+01'
@@ -5497,10 +5497,10 @@ onyx:0>
 		in that dictionary, the old definition is replaced.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> /foo `foo' def
+onyx:0> $foo `foo' def
 onyx:0> foo 1 sprint
 `foo'
-onyx:0> /foo `FOO' def
+onyx:0> $foo `FOO' def
 onyx:0> foo 1 sprint
 `FOO'
 onyx:0>
@@ -5653,7 +5653,7 @@ onyx:0> 4 2 div 1 sprint
 onyx:0> 5 2.0 div 1 sprint
 2.500000e+00
 onyx:0> 5.0 0 div
-Error /undefinedresult
+Error $undefinedresult
 ostack: (5.000000e+00 0)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -5823,12 +5823,12 @@ onyx:0>
 		contents from the namespace.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> </foo `foo'> begin
+onyx:0> <$foo `foo'> begin
 onyx:0> foo 1 sprint
 `foo'
 onyx:0> end
 onyx:0> foo 1 sprint
-Error /undefined
+Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -5902,7 +5902,7 @@ onyx:0> mutex mutex eq 1 sprint
 false
 onyx:0> mutex dup eq 1 sprint
 true
-onyx:0> /foo `foo' eq 1 sprint
+onyx:0> $foo `foo' eq 1 sprint
 true
 onyx:0> true true eq 1 sprint
 true
@@ -6308,11 +6308,11 @@ onyx:0>
 onyx:0> [1 2] {1 sprint} foreach
 1
 2
-onyx:0> </foo `foo' /bar `bar'> {pstack clear} foreach
+onyx:0> <$foo `foo' $bar `bar'> {pstack clear} foreach
 `bar'
-/bar
+$bar
 `foo'
-/foo
+$foo
 onyx:0> (1 2) {pstack clear} foreach
 2
 1
@@ -6467,7 +6467,7 @@ onyx:0>
 
 onyx:0> [`a' `b' `c'] 1 get 1 sprint
 `b'
-onyx:0> </foo `foo' /bar `bar'> /bar get 1 sprint
+onyx:0> <$foo `foo' $bar `bar'> $bar get 1 sprint
 `bar'
 onyx:0> `abc' 1 get 1 sprint
 98
@@ -6806,7 +6806,7 @@ onyx:0> 4 2 idiv 1 sprint
 onyx:0> 5 2 idiv 1 sprint
 2
 onyx:0> 5 0 idiv
-Error /undefinedresult
+Error $undefinedresult
 ostack: (5 0)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -7074,9 +7074,9 @@ onyx:0>
 		Check whether \oparg{key} is defined in \oparg{dict}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:1> </foo `foo'> /foo known 1 sprint
+onyx:1> <$foo `foo'> $foo known 1 sprint
 true
-onyx:1> </foo `foo'> /bar known 1 sprint
+onyx:1> <$foo `foo'> $bar known 1 sprint
 false
 onyx:1>
 		\end{verbatim}
@@ -7199,9 +7199,9 @@ onyx:0>
 
 onyx:0> [1 2 3] length 1 sprint
 3
-onyx:0> </foo `foo' /bar `bar'> length 1 sprint
+onyx:0> <$foo `foo' $bar `bar'> length 1 sprint
 2
-onyx:0> /foo length 1 sprint
+onyx:0> $foo length 1 sprint
 3
 onyx:0> `foo' length 1 sprint
 3
@@ -7301,9 +7301,9 @@ onyx:0>
 		Get the topmost definition of \oparg{key} in dstack.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:1> </foo `foo'> begin
-onyx:1> </foo `FOO'> begin
-onyx:1> /foo load 1 sprint
+onyx:1> <$foo `foo'> begin
+onyx:1> <$foo `FOO'> begin
+onyx:1> $foo load 1 sprint
 `FOO'
 onyx:1>
 		\end{verbatim}
@@ -7548,7 +7548,7 @@ onyx:0> 4 2 mod 1 sprint
 onyx:0> 5 2 mod 1 sprint
 1
 onyx:0> 5 0 mod
-Error /undefinedresult
+Error $undefinedresult
 ostack: (5 0)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -7887,9 +7887,9 @@ onyx:0> mutex mutex ne 1 sprint
 true
 onyx:0> mutex dup ne 1 sprint
 false
-onyx:0> /foo `foo' ne 1 sprint
+onyx:0> $foo `foo' ne 1 sprint
 false
-onyx:0> /foo /bar ne 1 sprint
+onyx:0> $foo $bar ne 1 sprint
 true
 onyx:0> true false ne 1 sprint
 true
@@ -8140,7 +8140,7 @@ onyx:5>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> onyxdict 1 sprint
-</rpath_pre -array- /rpath_post -array- /mpath_pre -array- /mpath_post -array->
+<$rpath_pre -array- $rpath_post -array- $mpath_pre -array- $mpath_post -array->
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -8281,18 +8281,18 @@ onyx:4>
 		Section~\ref{sec:outputsdict} for format specifier details.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> [1 [2 3] 4] </w 20 /p `_' /j /c /r 1> output `\n' print flush
+onyx:0> [1 [2 3] 4] <$w 20 $p `_' $j $c $r 1> output `\n' print flush
 ___[1 -array- 4]____
-onyx:0> [1 [2 3] 4] </w 20 /p `_' /j /c /r 2> output `\n' print flush
+onyx:0> [1 [2 3] 4] <$w 20 $p `_' $j $c $r 2> output `\n' print flush
 ____[1 [2 3] 4]_____
-onyx:0> 4242 </s /+> output `\n' print flush
+onyx:0> 4242 <$s $+> output `\n' print flush
 +4242
-onyx:0> `0x' print 4242 </b 16> output `\n' print flush
+onyx:0> `0x' print 4242 <$b 16> output `\n' print flush
 0x1092
-onyx:0> `0x' 4242 </b 16> outputs cat </w 10 /p `.'>
+onyx:0> `0x' 4242 <$b 16> outputs cat <$w 10 $p `.'>
 onyx:2>  output `\n' print flush
 ....0x1092
-onyx:0> `0x' print 4242 </w 8 /p `0' /b 16> output `\n' print flush
+onyx:0> `0x' print 4242 <$w 8 $p `0' $b 16> output `\n' print flush
 0x00001092
 onyx:0>
 		\end{verbatim}
@@ -8325,18 +8325,18 @@ onyx:0>
 		Create a formatted string representation of \oparg{obj}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> [1 [2 3] 4] </w 20 /p `_' /j /c /r 1> outputs print `\n' print flush
+onyx:0> [1 [2 3] 4] <$w 20 $p `_' $j $c $r 1> outputs print `\n' print flush
 ___[1 -array- 4]____
-onyx:0> [1 [2 3] 4] </w 20 /p `_' /j /c /r 2> outputs print `\n' print flush
+onyx:0> [1 [2 3] 4] <$w 20 $p `_' $j $c $r 2> outputs print `\n' print flush
 ____[1 [2 3] 4]_____
-onyx:0> 4242 </s /+> outputs print `\n' print flush
+onyx:0> 4242 <$s $+> outputs print `\n' print flush
 +4242
-onyx:0> `0x' print 4242 </b 16> outputs print `\n' print flush
+onyx:0> `0x' print 4242 <$b 16> outputs print `\n' print flush
 0x1092
-onyx:0> `0x' 4242 </b 16> outputs cat </w 10 /p `.'> outputs 
+onyx:0> `0x' 4242 <$b 16> outputs cat <$w 10 $p `.'> outputs 
 onyx:1> print `\n' print flush
 ....0x1092
-onyx:0> `0x' print 4242 </w 8 /p `0' /b 16> outputs print `\n' print flush
+onyx:0> `0x' print 4242 <$w 8 $p `0' $b 16> outputs print `\n' print flush
 0x00001092
 onyx:0>
 		\end{verbatim}
@@ -8441,8 +8441,8 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> pipe
-onyx:2> /wfile exch def
-onyx:1> /rfile exch def
+onyx:2> $wfile exch def
+onyx:1> $rfile exch def
 onyx:0> wfile `foo\n' write
 onyx:0> wfile flushfile
 onyx:0> rfile readline pop 1 sprint
@@ -8496,21 +8496,21 @@ onyx:1>
 				file status attributes to poll.  The following
 				keys are heeded:
 				\begin{description}\item[]
-				\item[/POLLIN: ]
+				\item[\$POLLIN: ]
 					Normal or priority data are available
 					for reading.
-				\item[/POLLRDNORM: ]
+				\item[\$POLLRDNORM: ]
 					Normal data are available for reading.
-				\item[/POLLRDBAND: ]
+				\item[\$POLLRDBAND: ]
 					Priority data are available for reading.
-				\item[/POLLPRI: ]
+				\item[\$POLLPRI: ]
 					High-priority data are available for
 					reading.
-				\item[/POLLOUT: ]
+				\item[\$POLLOUT: ]
 					Normal data can be written.
-				\item[/POLLWRNORM: ]
+				\item[\$POLLWRNORM: ]
 					Normal data can be written.
-				\item[/POLLWRBAND: ]
+				\item[\$POLLWRBAND: ]
 					Priority data can be written.
 				\end{description}
 				The values associated with the keys are
@@ -8544,11 +8544,11 @@ onyx:1>
 			the following keys may defined (if not already defined)
 			with a value of true in the case of errors:
 			\begin{description}\item[]
-			\item[/POLLERR: ]
+			\item[\$POLLERR: ]
 				An error has occurred.
-			\item[/POLLHUP: ]
+			\item[\$POLLHUP: ]
 				Hangup has occurred.
-			\item[/POLLNVAL: ]
+			\item[\$POLLNVAL: ]
 				\oparg{file} is not an open file.
 			\end{description}
 		\end{description}
@@ -8563,10 +8563,10 @@ onyx:1>
 		in \oparg{{\lt}\dots{\gt}} to be true.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> <stdout </POLLOUT null> stderr </POLLWRNORM null>> dup 0 poll
+onyx:0> <stdout <$POLLOUT null> stderr <$POLLWRNORM null>> dup 0 poll
 onyx:2> 2 sprint 2 sprint
 [-file- -file-]
-<-file- </POLLWRNORM true> -file- </POLLOUT true>>
+<-file- <$POLLWRNORM true> -file- <$POLLOUT true>>
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -8651,11 +8651,11 @@ onyx:1>
 		Syntactically print the elements of ostack, one per line.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> `a' 1 mark /foo [1 2 3] (4 5 6)
+onyx:0> `a' 1 mark $foo [1 2 3] (4 5 6)
 onyx:6> pstack
 (4 5 6)
 [1 2 3]
-/foo
+$foo
 -mark-
 1
 `a'
@@ -8703,8 +8703,8 @@ onyx:6>
 
 onyx:0> 3 array dup 1 `a' put 1 sprint
 [null `a' null]
-onyx:0> dict dup /foo `foo' put 1 sprint
-</foo `foo'>
+onyx:0> dict dup $foo `foo' put 1 sprint
+<$foo `foo'>
 onyx:0> 3 string dup 1 97 put 1 sprint
 `\x00a\x00'
 onyx:0>
@@ -9682,13 +9682,13 @@ onyx:0>
 		created in the envdict dictionary.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> /foo `foo' setenv
-onyx:0> envdict /foo known 1 sprint
+onyx:0> $foo `foo' setenv
+onyx:0> envdict $foo known 1 sprint
 true
-onyx:0> envdict /foo get 1 sprint
+onyx:0> envdict $foo get 1 sprint
 `foo'
-onyx:0> /foo unsetenv
-onyx:0> envdict /foo known 1 sprint
+onyx:0> $foo unsetenv
+onyx:0> envdict $foo known 1 sprint
 false
 onyx:0>
 		\end{verbatim}
@@ -10871,9 +10871,9 @@ onyx:0>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/tmp' status 1 sprint
-</dev 134405 /ino 2 /mode 17407 /nlink 5 /uid 0 /gid 0 /rdev 952 /size 3584
-/atime 994883041000000000 /mtime 994883041000000000 /ctime 994883041000000000
-/blksize 0 /blocks 8>
+<$dev 134405 $ino 2 $mode 17407 $nlink 5 $uid 0 $gid 0 $rdev 952 $size 3584
+$atime 994883041000000000 $mtime 994883041000000000 $ctime 994883041000000000
+$blksize 0 $blocks 8>
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -11540,8 +11540,8 @@ onyx:0>
 		\end{enumerate}
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> /unregistered throw
-Error /unregistered
+onyx:0> $unregistered throw
+Error $unregistered
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..1):
@@ -11650,10 +11650,10 @@ onyx:0> `foo  ' token pstack clear
 true
 foo
 ` '
-onyx:0> `foo/bar' token pstack clear
+onyx:0> `foo$bar' token pstack clear
 true
 foo
-`/bar'
+`$bar'
 onyx:0> `foo{}' token pstack clear
 true
 foo
@@ -11919,7 +11919,7 @@ onyx:0>
 		umask.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> 8@777 umask </b 8 /w 3 /p `0'> output `\n' print flush
+onyx:0> 8@777 umask <$b 8 $w 3 $p `0'> output `\n' print flush
 022
 onyx:0>
 		\end{verbatim}
@@ -11945,9 +11945,9 @@ onyx:0>
 		If \oparg{key} is defined in \oparg{dict}, undefine it.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> /foo `foo' def
-onyx:0> currentdict /foo undef
-onyx:0> currentdict /foo undef
+onyx:0> $foo `foo' def
+onyx:0> currentdict $foo undef
+onyx:0> currentdict $foo undef
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -12015,7 +12015,7 @@ onyx:1> dup flushfile
 onyx:1> close
 onyx:0> `/tmp/foo' unlink
 onyx:0> `/tmp/foo' `r' open
-Error /invalidfileaccess
+Error $invalidfileaccess
 ostack: (`/tmp/foo' `r')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
@@ -12069,13 +12069,13 @@ onyx:0>
 		dictionary, if \oparg{key} is defined.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> /foo `foo' setenv
-onyx:0> envdict /foo known 1 sprint
+onyx:0> $foo `foo' setenv
+onyx:0> envdict $foo known 1 sprint
 true
-onyx:0> envdict /foo get 1 sprint
+onyx:0> envdict $foo get 1 sprint
 `foo'
-onyx:0> /foo unsetenv
-onyx:0> envdict /foo known 1 sprint
+onyx:0> $foo unsetenv
+onyx:0> envdict $foo known 1 sprint
 false
 onyx:0>
 		\end{verbatim}
@@ -12272,12 +12272,12 @@ onyx:0>
 		Get the topmost dictionary in dstack that defines \oparg{key}.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> /foo where pstack clear
+onyx:0> $foo where pstack clear
 false
-onyx:0> /threaddict where pstack clear
+onyx:0> $threaddict where pstack clear
 true
-</threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict-
-/resume --stop-->
+<$threaddict -dict- $userdict -dict- $currenterror -dict- $errordict -dict-
+$resume --stop-->
 onyx:0>
 		\end{verbatim}
 	\end{description}

@@ -1,6 +1,6 @@
 Test begin
 Got here
-Error /stackunderflow
+Error $stackunderflow
 ostack: (-array- -array-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

@@ -22,21 +22,21 @@ Test begin
 -->`\`a\'\`b\' '
 `a'
 `b'
--->`/foo'
-/foo
--->`/foo '
-/foo
+-->`$foo'
+$foo
+-->`$foo '
+$foo
 -->`foo'
 foo
 -->`foo '
 foo
--->`foo/foo'
+-->`foo$foo'
 foo
-/foo
--->`foo/foo '
+$foo
+-->`foo$foo '
 foo
-/foo
--->`//pop//spop'
+$foo
+-->`$$pop$$spop'
 --pop--
 --spop--
 -->`<>'

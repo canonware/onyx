@@ -17,12 +17,12 @@
     `{`Got here\n' print exit} true until'
     `{exit `Got here\n' print} true until'
     `<> begin
-    /foo 0 def
+    $foo 0 def
     {
 	`foo: ' print
 	foo 1 sprint
 
-	/foo foo inc def
+	$foo foo inc def
     }{foo 3 lt} until
     end'
 ]{

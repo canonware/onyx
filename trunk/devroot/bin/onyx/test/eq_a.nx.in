@@ -44,19 +44,19 @@
 	# Not equal.
 	`dict dict'
 	`dict stack'
-	`//pop //spop'
-	`//pop //roll'
-	`/foo /bar'
-	`/foo `bar''
+	`$$pop $$spop'
+	`$$pop $$roll'
+	`$foo $bar'
+	`$foo `bar''
 	`true false'
 	`false true'
 
 	# Equal.
 	`stack dup'
-	`//pop //pop'
-	`/foo /foo'
-	`/foo `foo''
-	``foo' /foo'
+	`$$pop $$pop'
+	`$foo $foo'
+	`$foo `foo''
+	``foo' $foo'
 	`true dup'
 	`false dup'
 ]{

@@ -1,5 +1,5 @@
 Test begin
-Error /rangecheck
+Error $rangecheck
 ostack: (-1.500000e+00)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

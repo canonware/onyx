@@ -9,22 +9,22 @@
 # Version: Onyx <Version = onyx>
 #
 # It was discovered in Onyx 3.0.0 that there was a race in the name object code.
-# The following chain of events culminated in sweepin /_s, even though there
+# The following chain of events culminated in sweepin $_s, even though there
 # were valid references to it:
 #
-# 1) /_s is created in the bootstrap code that is embedded in libonyx.
+# 1) $_s is created in the bootstrap code that is embedded in libonyx.
 #
-# 2) All references are discarded, making /_s collectible.
+# 2) All references are discarded, making $_s collectible.
 #
-# 3) The garbage collector runs the mark phase, and /_s is set aside for
+# 3) The garbage collector runs the mark phase, and $_s is set aside for
 #    sweeping.
 #
-# 4) A new /_s object is created, and it uses the existing entry in the name
+# 4) A new $_s object is created, and it uses the existing entry in the name
 #    hash.
 #
-# 5) The garbage collector sweeps /_s.
+# 5) The garbage collector sweeps $_s.
 #
-# 6) The reference to /_s that was created in step 4 is dereferenced, resulting
+# 6) The reference to $_s that was created in step 4 is dereferenced, resulting
 #    in a crash.
 #
 # Unfortunately, the timing conditions that allow this to happen appear to be
@@ -45,39 +45,39 @@
 
 # Create an encoding dictionary for various operators.  The values must not
 # correspond to an existing name in dstack.
-/_encdict <
-	/cat		/a	# 19
-	/cvx		/b	# 13
-	/def		/c	# ~21
-	/dup		/d	# ~37
-	/eval		/e	# 14
-	/exch		/f	# ~57
-	/false		/g	# 5
-	/flush		/h	# 3
-	/getinterval	/i	# 4
-	/ifelse		/j	# 20
-	/idup		/k	# ~57
-	/known		/l	# 8
-	/load		/m	# 9
-	/pop		/n	# ~69
-	/putinterval	/o	# 3
-	/roll		/p	# 16
-	/scount		/q	# 3
-	/spop		/r	# 7
-	/sub		/s	# 15
-	/true		/t	# 4
-	/type		/u	# >= 17
-	/xcheck		/v	# 3
-	/ostack		/w	# 3
+$_encdict <
+	$cat		$a	# 19
+	$cvx		$b	# 13
+	$def		$c	# ~21
+	$dup		$d	# ~37
+	$eval		$e	# 14
+	$exch		$f	# ~57
+	$false		$g	# 5
+	$flush		$h	# 3
+	$getinterval	$i	# 4
+	$ifelse		$j	# 20
+	$idup		$k	# ~57
+	$known		$l	# 8
+	$load		$m	# 9
+	$pop		$n	# ~69
+	$putinterval	$o	# 3
+	$roll		$p	# 16
+	$scount		$q	# 3
+	$spop		$r	# 7
+	$sub		$s	# 15
+	$true		$t	# 4
+	$type		$u	# >= 17
+	$xcheck		$v	# 3
+	$ostack		$w	# 3
 > def
 
 # #proc _encarr -
-/_encarr {
+$_encarr {
 	0 1 2 idup length 1 sub {
 		# #proc #i
 		1 idup 1 idup get
 		# #proc #i #el
-		dup type /nametype eq {
+		dup type $nametype eq {
 			dup xcheck {
 				# Executable Name.  Try to replace.
 				_encdict 1 idup known {
@@ -93,7 +93,7 @@
 				pop pop
 			} ifelse
 		}{
-		dup type /arraytype eq {
+		dup type $arraytype eq {
 			# Array.  Recurse.
 			_encarr
 			pop

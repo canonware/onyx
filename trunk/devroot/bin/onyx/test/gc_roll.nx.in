@@ -28,7 +28,7 @@
 			} for
 		} repeat
 	
-		gcdict /collect get eval
+		gcdict $collect get eval
 	} repeat
 	`.' print flush
 } bind repeat

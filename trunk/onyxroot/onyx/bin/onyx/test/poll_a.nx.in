@@ -13,38 +13,38 @@
 `Test begin\n' print flush
 
 [
-    <stdout </POLLOUT false>>
-    <stdout </POLLOUT false> stderr </POLLOUT false>>
-    <stdout </POLLWRNORM false>>
-    <stdout </POLLOUT true /garbage `ignore me'>>
+    <stdout <$POLLOUT false>>
+    <stdout <$POLLOUT false> stderr <$POLLOUT false>>
+    <stdout <$POLLWRNORM false>>
+    <stdout <$POLLOUT true $garbage `ignore me'>>
     <
 	stdout <
-	    /POLLIN false
-	    /POLLRDNORM false
-	    /POLLOUT false
-	    /POLLWRNORM false
+	    $POLLIN false
+	    $POLLRDNORM false
+	    $POLLOUT false
+	    $POLLWRNORM false
 	>
     >
     <
 	stdout <
-	    /POLLIN true
-	    /POLLRDNORM true
-	    /POLLOUT true
-	    /POLLWRNORM true
+	    $POLLIN true
+	    $POLLRDNORM true
+	    $POLLOUT true
+	    $POLLWRNORM true
 	>
     >
     <
 	stdout <
-	    /POLLIN false
-	    /POLLRDNORM false
-	    /POLLOUT false
-	    /POLLWRNORM false
+	    $POLLIN false
+	    $POLLRDNORM false
+	    $POLLOUT false
+	    $POLLWRNORM false
 	>
 	stderr <
-	    /POLLIN false
-	    /POLLRDNORM false
-	    /POLLOUT false
-	    /POLLWRNORM false
+	    $POLLIN false
+	    $POLLRDNORM false
+	    $POLLOUT false
+	    $POLLWRNORM false
 	>
     >
 ]{

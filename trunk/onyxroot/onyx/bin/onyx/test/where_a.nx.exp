@@ -1,12 +1,12 @@
 Test begin
-`/foo'
+`$foo'
 false
-`/bar'
+`$bar'
 false
-`/threaddict'
+`$threaddict'
 true
-</threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict->
-`/currenterror'
+<$threaddict -dict- $userdict -dict- $currenterror -dict- $errordict -dict->
+`$currenterror'
 true
-</threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict->
+<$threaddict -dict- $userdict -dict- $currenterror -dict- $errordict -dict->
 Test end

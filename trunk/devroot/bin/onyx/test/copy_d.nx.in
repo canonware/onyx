@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-</foo `foo'> (1 2) copy
+<$foo `foo'> (1 2) copy
 
 `Test end\n' print

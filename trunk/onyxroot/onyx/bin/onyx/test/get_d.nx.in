@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-</foo `foo'> /bar get
+<$foo `foo'> $bar get
 
 `Test end\n' print

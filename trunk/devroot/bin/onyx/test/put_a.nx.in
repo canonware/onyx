@@ -20,9 +20,9 @@
 	`3 array dup 1 `a' put'
 	`3 array dup 2 `a' put'
 
-	`dict dup /foo `foo' put'
-	`</foo `foo'> dup /foo `FOO' put'
-	`</foo `foo'> dup /bar `bar' put'
+	`dict dup $foo `foo' put'
+	`<$foo `foo'> dup $foo `FOO' put'
+	`<$foo `foo'> dup $bar `bar' put'
 
 	`` ' dup 0 97 put'
 	``  ' dup 0 97 put'

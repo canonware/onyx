@@ -17,12 +17,12 @@
     `true {`Got here\n' print exit} while'
     `true {exit `Got here\n' print} while'
     `<> begin
-    /foo 0 def
+    $foo 0 def
     {foo 3 lt}{
 	`foo: ' print
 	foo 1 sprint
 
-	/foo foo inc def
+	$foo foo inc def
     } while
     end'
 ]{

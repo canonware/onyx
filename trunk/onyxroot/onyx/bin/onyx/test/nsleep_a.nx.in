@@ -14,7 +14,7 @@
 
 `Test begin\n' print flush
 
-/sleepinterval 100000000 def
+$sleepinterval 100000000 def
 
 10 {
 	realtime

@@ -10,15 +10,15 @@
 #
 ################################################################################
 
-/iterations 25 def
+$iterations 25 def
 
-/thread_entry {
+$thread_entry {
 	{`hello\n' print flush} monitor
 } bind def
 
 mutex
 iterations {
-	dup stack dup 3 2 roll spush /thread_entry load thread exch
+	dup stack dup 3 2 roll spush $thread_entry load thread exch
 } repeat
 pop
 

@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-/fifo_name argv 2 get `/mkfifo_a' cat def
+$fifo_name argv 2 get `/mkfifo_a' cat def
 
 fifo_name `p' test {
     fifo_name unlink

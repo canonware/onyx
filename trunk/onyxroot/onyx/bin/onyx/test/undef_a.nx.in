@@ -12,9 +12,9 @@
 
 `Test begin\n' print flush
 
-currentdict /foo undef
-/foo `foo' def
-currentdict /foo undef
-currentdict /foo undef
+currentdict $foo undef
+$foo `foo' def
+currentdict $foo undef
+currentdict $foo undef
 
 `Test end\n' print

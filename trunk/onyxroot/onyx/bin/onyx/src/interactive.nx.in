@@ -37,20 +37,20 @@
 # Define promptstring in systemdict.
 systemdict begin
 # - promptstring #string
-/promptstring {
+$promptstring {
     count cvs `onyx:' exch cat `> ' cat
 } bind def
 end
 
 # Define resume in threaddict to continue after an error.
 threaddict begin
-/resume /stop load def
+$resume $stop load def
 end
 
 # Do not stop on error.  Instead, recursively evaluate stdin.  File bufferring
 # can cause strange behavior, but at least the error will get handled first.
 errordict begin
-    /stop {
+    $stop {
 	stdin cvx stopped pop
     } bind def
 end

@@ -1,5 +1,5 @@
 Test begin
-Error /unmatchedmark
+Error $unmatchedmark
 ostack: (-fino- null true)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

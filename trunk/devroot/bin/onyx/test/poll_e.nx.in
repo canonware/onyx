@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-<stdout </POLLOUT false>> -2 poll
+<stdout <$POLLOUT false>> -2 poll
 
 `Test end\n' print
 pstack

@@ -23,7 +23,7 @@ typedef struct cw_nxoe_threadts_s cw_nxoe_threadts_t;
 typedef enum
 {
     THREADTS_START,
-    THREADTS_SLASH_CONT,
+    THREADTS_DOLLAR_CONT,
     THREADTS_COMMENT,
     THREADTS_INTEGER,
     THREADTS_INTEGER_RADIX,

@@ -122,7 +122,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	    nxoe_p_thread_reset(thread);
 	    break;
 	}
-	case THREADTS_SLASH_CONT:
+	case THREADTS_DOLLAR_CONT:
 	{
 	    cw_nxoe_thread_t *thread;
 
@@ -133,7 +133,7 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
 	    cw_assert(thread->nxoe.type == NXOT_THREAD);
 
-	    nxoe_p_thread_syntax_error(thread, a_threadp, 0, "/", "", -1);
+	    nxoe_p_thread_syntax_error(thread, a_threadp, 0, "$", "", -1);
 	    break;
 	}
 	case THREADTS_STRING:
@@ -1165,9 +1165,9 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			}
 			break;
 		    }
-		    case '/':
+		    case '$':
 		    {
-			a_thread->state = THREADTS_SLASH_CONT;
+			a_thread->state = THREADTS_DOLLAR_CONT;
 			break;
 		    }
 		    case '#':
@@ -1248,13 +1248,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		}
 		break;
 	    }
-	    case THREADTS_SLASH_CONT:
+	    case THREADTS_DOLLAR_CONT:
 	    {
 		cw_assert(a_thread->index == 0);
 
 		switch (c)
 		{
-		    case '/':
+		    case '$':
 		    {
 			a_thread->state = THREADTS_NAME;
 			a_thread->m.m.action = ACTION_EVALUATE;
@@ -1265,7 +1265,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			CW_NXO_THREAD_NEWLINE();
 
 			nxoe_p_thread_syntax_error(a_thread, a_threadp,
-						   defer_base, "", "/", c);
+						   defer_base, "", "$", c);
 			if (a_token)
 			{
 			    goto RETURN;
@@ -1277,7 +1277,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    case '[': case ']': case '{': case '}': case '#':
 		    {
 			nxoe_p_thread_syntax_error(a_thread, a_threadp,
-						   defer_base, "", "/", c);
+						   defer_base, "", "$", c);
 			if (a_token)
 			{
 			    goto RETURN;
@@ -1438,7 +1438,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '#':
+		    case '[': case ']': case '{': case '}': case '$': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1549,7 +1549,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '#':
+		    case '[': case ']': case '{': case '}': case '$': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1626,7 +1626,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '#':
+		    case '[': case ']': case '{': case '}': case '$': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1721,7 +1721,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '/': case '#':
+		    case '[': case ']': case '{': case '}': case '$': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -2109,7 +2109,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '"': case '<':
-		    case '>': case '[': case ']': case '{': case '}': case '/':
+		    case '>': case '[': case ']': case '{': case '}': case '$':
 		    case '#':
 		    {
 			/* New token. */
@@ -2133,7 +2133,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				{
 				    nxoe_p_thread_syntax_error(a_thread,
 							       a_threadp,
-							       defer_base, "/",
+							       defer_base, "$",
 							       "", c);
 				    break;
 				}
@@ -2141,7 +2141,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				{
 				    nxoe_p_thread_syntax_error(a_thread,
 							       a_threadp,
-							       defer_base, "//",
+							       defer_base, "$$",
 							       "", c);
 				    break;
 				}
@@ -2292,8 +2292,8 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     a_thread->defer_count = 0;
 
     cw_onyx_code(&a_thread->self,
-		 "currenterror begin /column exch def /line exch def end"
-		 " /syntaxerror throw");
+		 "currenterror begin $column exch def $line exch def end"
+		 " $syntaxerror throw");
 
 
     /* Turn deferral back on. */

@@ -12,7 +12,7 @@
 
 `Test begin\n' print flush
 
-/symlink_name argv 2 get `/readlink_a' cat def
+$symlink_name argv 2 get `/readlink_a' cat def
 
 # Remove the symlink if it already exists.
 symlink_name `L' test {

@@ -1,5 +1,5 @@
 Test begin
-Error /typecheck
+Error $typecheck
 ostack: (-mark-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..3):
@@ -10,18 +10,18 @@ estack/istack trace (0..3):
 	--foreach--
 	--dup--
 	--type--
-	/nametype
+	$nametype
 	--ne--
-	{/typecheck /systemdict --load-- /throw --get-- --eval--}
+	{$typecheck $systemdict --load-- $throw --get-- --eval--}
   8:--> --if--
-	/currenterror
+	$currenterror
 	--load--
 	--begin--
-	/newerror
+	$newerror
 	true
 	--def--
 	--dup--
-	/errorname
+	$errorname
 	--exch--
 	--cvlit--
 	--def--
@@ -29,42 +29,42 @@ estack/istack trace (0..3):
 	--dup--
 	--spop--
 	--pop--
-	/ostack
+	$ostack
 	--exch--
 	--def--
-	/dstack
+	$dstack
 	--dstack--
 	--dup--
 	--spop--
 	--pop--
 	--def--
-	/estack
+	$estack
 	--estack--
 	--dup--
 	--spop--
 	--pop--
 	--def--
-	/istack
+	$istack
 	--istack--
 	--dup--
 	--spop--
 	--pop--
 	--def--
-	/estack
+	$estack
 	--load--
 	--dup--
 	--sdup--
 	--spop--
 	--exch--
 	--end--
-	/errordict
+	$errordict
 	--load--
 	--dup--
 	2
 	--idup--
 	--known--
 	{--exch-- --get-- --eval--}
-	{--nip-- --dup-- /handleerror --get-- --eval-- /stop --get-- --eval--}
+	{--nip-- --dup-- $handleerror --get-- --eval-- $stop --get-- --eval--}
 	--ifelse--
 }
 2:	-file-

@@ -13,10 +13,10 @@
 `Test begin\n' print flush
 
 [
-	`/foo'
-	`/bar'
-	`/threaddict'
-	`/currenterror'
+	`$foo'
+	`$bar'
+	`$threaddict'
+	`$currenterror'
 ]{
 	dup 1 sprint cvx eval where pstack clear
 } foreach

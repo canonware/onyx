@@ -21,12 +21,12 @@
     {1 2 3 4 5 6}
     {1 2 3 4 5 6 7}
 ]{
-    /proc exch def
-    /proc load length
+    $proc exch def
+    $proc load length
     dup neg 1 dn {
-	dup </w 2> output
+	dup <$w 2> output
 	` rot: ' print
-	/proc load 1 sprints print
+	$proc load 1 sprints print
 	` --> ' print flush
 
 	proc adn

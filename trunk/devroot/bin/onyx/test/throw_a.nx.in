@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-/unregistered throw
+$unregistered throw
 
 `Test end\n' print

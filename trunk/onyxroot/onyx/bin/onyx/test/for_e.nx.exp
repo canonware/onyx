@@ -1,5 +1,5 @@
 Test begin
-Error /typecheck
+Error $typecheck
 ostack: (1 1 -mark- -array-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

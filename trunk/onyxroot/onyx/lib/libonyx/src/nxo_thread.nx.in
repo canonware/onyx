@@ -36,54 +36,54 @@
 # userdict does not exist yet.  This code pushes it onto dstack, then defines it
 # in threaddict.
 dict begin
-/userdict currentdict
+$userdict currentdict
 dstack dup sbdup dup spop begin pop
-/threaddict currentdict def
+$threaddict currentdict def
 def
 
 # Define and initialize currenterror
-/currenterror <
-    /newerror	false
-    /errorname	`'
-    /estack	stack
-    /istack	stack
-    /ostack	stack
-    /dstack	stack
-    /line	1
-    /column	0
+$currenterror <
+    $newerror	false
+    $errorname	`'
+    $estack	stack
+    $istack	stack
+    $ostack	stack
+    $dstack	stack
+    $line	1
+    $column	0
 > def
 
 # Define and initialize currenterror.
-/errordict <
-    /stop /stop load
+$errordict <
+    $stop $stop load
 
     # - handleerror -
-    /handleerror {
-	/currenterror load begin
+    $handleerror {
+	$currenterror load begin
 
 	# If this is a syntaxerror, print the line and column numbers.
-	/errorname load /syntaxerror eq {
+	$errorname load $syntaxerror eq {
 	    stderr dup `At line ' write
-	    dup /line load cvs write
+	    dup $line load cvs write
 	    dup `, column ' write
-	    dup /column load cvs write
+	    dup $column load cvs write
 	    `: ' write
 	} if
 
 	# Print the errorname.
 	stderr dup `Error ' write
-	dup /errorname load 1 sprints write
+	dup $errorname load 1 sprints write
 
 	# Print ostack and dstack using sprint.
 	dup `\nostack: ' write
-	dup /ostack load 1 sprints write
+	dup $ostack load 1 sprints write
 	dup `\ndstack: ' write
-	dup /dstack load 1 sprints write
+	dup $dstack load 1 sprints write
 	`\n' write
 
 	# Print a stack trace that depicts the currently executing element of
 	# arrays.
-	/estack load scount 1 sub dup 0 gt {
+	$estack load scount 1 sub dup 0 gt {
 	    stderr dup `estack/istack trace (0..' write
 	    1 idup cvs stderr exch write
 	    `):\n' write
@@ -94,22 +94,22 @@ def
 	    # #edepth
 	    # If this element is an array, print it specially.
 	    dup cvs stderr exch write
-	    dup /estack load dup dn sidup spop
+	    dup $estack load dup dn sidup spop
 	    # #edepth #array
 
-	    dup type /arraytype eq {
+	    dup type $arraytype eq {
 		# Array.
 		`: {\n' stderr exch write
 		# #edepth #array
 		dup length 1 sub 0 1 dn {
 		    # #edepth #array #aindex
-		    2 idup /istack load
+		    2 idup $istack load
 		    dup dn sidup spop
 		    # #edepth #array #aindex #iindex
 		    1 idup
 		    # #edepth #array #aindex #iindex #aindex
 		    eq {
-			dup </w 3> outputs
+			dup <$w 3> outputs
 			stderr exch write
 			`:--> '
 		    }{

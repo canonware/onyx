@@ -26,9 +26,9 @@ __42__
 12
 1
 
-__/foo
-_/foo_
-/foo__
+__$foo
+_$foo_
+$foo__
 ___foo
 _foo__
 foo___

@@ -7,9 +7,9 @@ Test begin
 2
 `<>'
 0
-`</foo \`foo\' /bar \`bar\'>'
+`<$foo \`foo\' $bar \`bar\'>'
 2
-`/foo'
+`$foo'
 3
 `\`\''
 0

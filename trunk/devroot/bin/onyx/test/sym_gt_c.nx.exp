@@ -1,6 +1,6 @@
 Test begin
-Error /rangecheck
-ostack: (-mark- /foo)
+Error $rangecheck
+ostack: (-mark- $foo)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
 0:	-->--

@@ -7,9 +7,9 @@ Test begin
 `b'
 `[\`a\' \`b\' \`c\'] 2 get'
 `c'
-`</foo \`foo\' /bar \`bar\'> /foo get'
+`<$foo \`foo\' $bar \`bar\'> $foo get'
 `foo'
-`</foo \`foo\' /bar \`bar\'> /bar get'
+`<$foo \`foo\' $bar \`bar\'> $bar get'
 `bar'
 `\`a\' 0 get'
 97

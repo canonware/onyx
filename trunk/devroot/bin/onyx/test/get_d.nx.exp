@@ -1,6 +1,6 @@
 Test begin
-Error /undefined
-ostack: (-dict- /bar)
+Error $undefined
+ostack: (-dict- $bar)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
 0:	--get--

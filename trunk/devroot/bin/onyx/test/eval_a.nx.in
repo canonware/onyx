@@ -15,11 +15,11 @@
 [
 	`[1]'
 	`true'
-	`</foo `foo'>'
+	`<$foo `foo'>'
 	`42'
 	`mark'
-	`/count'
-	`//count'
+	`$count'
+	`$$count'
 	`(1)'
 	``count''
 ]{

@@ -62,8 +62,8 @@ systemdict begin
 #
 # sprintsdict implements syntactic printing to strings for every type.
 #
-/sprintsdict <
-    /arraytype {
+$sprintsdict <
+    $arraytype {
 	# #array #depth
 	dup 0 gt {
 	    1 idup dup echeck {
@@ -121,21 +121,21 @@ systemdict begin
 	    `-array-'
 	} ifelse
     }
-    /booleantype {
+    $booleantype {
 	pop
 	cvs
     }
 ' cat
 1 1 eq {
     `
-    /conditiontype {
+    $conditiontype {
 	pop pop
 	`-condition-'
     }
     ' cat
 } if
 `
-    /dicttype {
+    $dicttype {
 	# #dict #depth
 	dup 0 gt {
 	    # Update recursion depth.
@@ -183,19 +183,19 @@ systemdict begin
 	    `-dict-'
 	} ifelse
     }
-    /filetype {
+    $filetype {
 	pop pop
 	`-file-'
     }
-    /finotype {
+    $finotype {
 	pop pop
 	`-fino-'
     }
-    /hooktype {
+    $hooktype {
 	# #hook #depth
 	exch hooktag
 	# #depth #tag
-	dup type /nulltype ne {
+	dup type $nulltype ne {
 	    exch 1 sub
 	    # #tag #rdepth
 	    1 idup type sprintsdict exch get eval
@@ -207,36 +207,36 @@ systemdict begin
 	    `-hook-'
 	} ifelse
     }
-    /integertype {
+    $integertype {
 	pop
 	cvs
     }
-    /marktype {
+    $marktype {
 	pop pop
 	`-mark-'
     }
 ' cat
 1 1 eq {
     `
-    /mutextype {
+    $mutextype {
 	pop pop
 	`-mutex-'
     }
     ' cat
 } if
 `
-    /nametype {
+    $nametype {
 	pop
 	dup cvs
 	exch xcheck not {
-	    `/' exch cat
+	    `$' exch cat
 	} if
     }
-    /nulltype {
+    $nulltype {
 	pop pop
 	`null'
     }
-    /operatortype {
+    $operatortype {
 	pop
 	cvs
 	dup `-operator-' ne {
@@ -244,7 +244,7 @@ systemdict begin
 	    cat cat
 	} if
     }
-    /pmarktype {
+    $pmarktype {
 	pop pop
 	`-pmark-'
     }
@@ -252,14 +252,14 @@ systemdict begin
 
 1 1 eq {
     `
-    /realtype {
+    $realtype {
 	pop
 	cvs
     }
     ' cat
 } if
 `
-    /stacktype {
+    $stacktype {
 	# #stack #depth
 	dup 0 gt {
 	    `('
@@ -299,22 +299,22 @@ systemdict begin
 	    `-stack-'
 	} ifelse
     }
-    /stringtype {
+    $stringtype {
 	pop
 	cvs
     }
-    /threadtype {
+    $threadtype {
 	pop pop
 	`-thread-'
     }
 > def
 
 # #object #depth sprints #string
-/sprints {
+$sprints {
     1 idup type sprintsdict exch get eval
 } def
 
-/sprint {
+$sprint {
     sprints print
     `\n' print flush
 } def
@@ -322,13 +322,13 @@ systemdict begin
 #
 # outputsdict implements formatted output to strings for every type.
 #
-/outputsdict <
-    /integertype {
+$outputsdict <
+    $integertype {
 	# #int #flags
 
 	# Get the base.
-	dup /b known {
-	    dup /b get
+	dup $b known {
+	    dup $b get
 	}{
 	    10
 	} ifelse
@@ -338,8 +338,8 @@ systemdict begin
 	# #int #flags #str
 
 	# Prepend the sign if necessary.
-	1 idup /s known {
-	    1 idup /s get /+ eq {
+	1 idup $s known {
+	    1 idup $s get $+ eq {
 		2 idup 0 ge {
 		    `+' exch cat
 		} if
@@ -350,26 +350,26 @@ systemdict begin
 	# #flags #str
 	exch
 	# #str #flags
-	outputsdict /stringtype get eval
+	outputsdict $stringtype get eval
 	# #str
     }
 ' cat
 1 1 eq {
     `
-    /realtype {
+    $realtype {
 	# #real #flags
 
 	# Determine precision past decimal point.
-	dup /d known {
-	dup /d get
+	dup $d known {
+	dup $d get
 	}{
 	6
 	} ifelse
 	# #real #flags #precision
 	
 	# Determine whether to use decimal or exponential notation.
-	1 idup /e known {
-	1 idup /e get
+	1 idup $e known {
+	1 idup $e get
 	}{
 	false
 	} ifelse
@@ -387,8 +387,8 @@ systemdict begin
 	# #real #flags #str
 
 	# Prepend the sign if necessary.
-	1 idup /s known {
-	1 idup /s get /+ eq {
+	1 idup $s known {
+	1 idup $s get $+ eq {
 	    2 idup 0 ge {
 	    `+' exch cat
 	    } if
@@ -398,25 +398,25 @@ systemdict begin
 	3 2 roll pop exch
 	# #str #flags
 
-	outputsdict /stringtype get eval
+	outputsdict $stringtype get eval
 	# #str
     }
     ' cat
 } if
 `
     # Temporarily define.
-    /_s {
-	# Check for /w flag.  /w takes precedence over /n.
-	dup /w known {
+    $_s {
+	# Check for $w flag.  $w takes precedence over $n.
+	dup $w known {
 	    # Get padding character.
-	    dup /p known {
-		dup /p get
+	    dup $p known {
+		dup $p get
 	    }{
 		` '
 	    } ifelse
 	    # #str #flags #pad
 
-	    1 idup /w get
+	    1 idup $w get
 	    # #str #flags #pad #width
 	    3 idup length
 	    # #str #flags #pad #width #len
@@ -437,20 +437,20 @@ systemdict begin
 		# #str #flags #width #len #pstr
 
 		# Get the justification.
-		3 idup /j known {
-		    3 idup /j get
+		3 idup $j known {
+		    3 idup $j get
 		}{
-		    /r
+		    $r
 		} ifelse
 		# #str #flags #width #len #pstr #just
 
-		dup /r eq {
+		dup $r eq {
 		    pop
 		    # Right justify.
 		    # #str #flags #width #len #pstr
 		    3 1 roll sub
 		}{
-		/l eq {
+		$l eq {
 		    # Left justify.
 		    # #str #flags #width #len #pstr
 		    3 1 roll pop pop
@@ -478,10 +478,10 @@ systemdict begin
 	    # #str #flags
 	}{
 	    # #str #flags
-	    dup /n known {
+	    dup $n known {
 		# Truncate the string if it is too long.
 		1 idup length
-		1 idup /n get
+		1 idup $n get
 		# #str #flags #len #max
 		dup 2 idup lt {
 		    # Truncate.
@@ -511,7 +511,7 @@ systemdict begin
 	pop
 	# #str
     } def
-    /stringtype /_s load
+    $stringtype $_s load
 
     # Most types can be handled identically.  The following code uses the
     # same procedure body for all of those types.
@@ -523,48 +523,48 @@ systemdict begin
 	# #object #flags
 
 	# Get recursion depth.
-	/dup cvx /r /known cvx [
-	    /dup cvx /r /get cvx
+	$dup cvx $r $known cvx [
+	    $dup cvx $r $get cvx
 	] cvx [
 	    1
-	] cvx /ifelse cvx
+	] cvx $ifelse cvx
 	# #object #flags #rdepth
 
-	3 2 /roll cvx /exch cvx
+	3 2 $roll cvx $exch cvx
 	# #flags #object #rdepth
-	/sprints cvx /exch cvx
+	$sprints cvx $exch cvx
 	# #str #flags
-	/_s load cve
+	$_s load cve
 	# #str
     ] cvx bind
     [
-	/arraytype
-	/booleantype
+	$arraytype
+	$booleantype
 ' cat
 1 1 eq {
     `
-	/conditiontype
+	$conditiontype
     ' cat
 } if
 `
-	/dicttype
-	/filetype
-	/finotype
-	/hooktype
-	/marktype
+	$dicttype
+	$filetype
+	$finotype
+	$hooktype
+	$marktype
 ' cat
 1 1 eq {
     `
-	/mutextype
+	$mutextype
     ' cat
 } if
 `
-	/nametype
-	/nulltype
-	/operatortype
-	/pmarktype
-	/stacktype
-	/threadtype
+	$nametype
+	$nulltype
+	$operatortype
+	$pmarktype
+	$stacktype
+	$threadtype
     ]{
 	# #proc #name
 	exch dup
@@ -574,7 +574,7 @@ systemdict begin
     pop
 
     # Now that we are done using _s, undef it.
-    currentdict /_s undef
+    currentdict $_s undef
 > def
 
 #
@@ -582,35 +582,35 @@ systemdict begin
 #
 # All types:
 #
-# /n : maximum width
+# $n : maximum width
 #    : #integer
-# /w : minimum width
+# $w : minimum width
 #    : #integer
-# /j : justification
-#    : /l, /c, /r
-# /p : padding character
+# $j : justification
+#    : $l, $c, $r
+# $p : padding character
 #    : `?'
-# /r : recursion depth
+# $r : recursion depth
 #    : 0..n
 #
 # Integers only:
 #
-# /b : base
+# $b : base
 #    : 2..36
-# /s : sign
-#    : /+ /-
+# $s : sign
+#    : $+ $-
 #
 # Reals only:
 #
-# /d : digits of precision past decimal
+# $d : digits of precision past decimal
 #    : #integer (default 6)
-# /e : exponential notation
+# $e : exponential notation
 #    : #boolean (default false)
 #
 # #obj #flags outputs #string
-/outputs {
-    dup type /dicttype ne {
-	/typecheck throw
+$outputs {
+    dup type $dicttype ne {
+	$typecheck throw
     } if
     1 idup type
     # #obj #flags #type
@@ -618,14 +618,14 @@ systemdict begin
 } def
 
 #obj #flags output -
-/output {
+$output {
     outputs print
 } def
 
 # - product #string
-/product `Canonware Onyx' def
+$product `Canonware Onyx' def
 
-/pstack {
+$pstack {
     ostack {
 	1 sprint
     } foreach
@@ -636,15 +636,15 @@ systemdict begin
 # #string #pattern search #post #pattern #pre true
 # #string #pattern search #string false
 #
-/search {
+$search {
     # Make sure the arguments are strings.
     # Pattern.
-    dup type /stringtype ne {
-	/typecheck throw
+    dup type $stringtype ne {
+	$typecheck throw
     } if
     # String.
-    1 idup type /stringtype ne {
-	/typecheck throw
+    1 idup type $stringtype ne {
+	$typecheck throw
     } if
 
     # Make sure substring is not longer than string.
@@ -675,7 +675,7 @@ systemdict begin
 	    } for
 
 	    # Check to see if the substring match failed.
-	    dup type /booleantype eq {
+	    dup type $booleantype eq {
 		# #s #p #s_i #s_sub# false
 		# Failure.  Clean up.
 		pop pop pop
@@ -708,7 +708,7 @@ systemdict begin
 
 	# Check to see if we succeeded.  If not, set up the stack to
 	# return failure.
-	dup type /booleantype ne {
+	dup type $booleantype ne {
 	    # Failure.
 	    pop false
 	} if
@@ -721,31 +721,31 @@ systemdict begin
 1 1 eq {
     `
 # [`<path>' `<args>'...] system #exit_code
-/system {
+$system {
     # Make sure argument is an array.
-    dup type /arraytype ne {
-	/typecheck throw
+    dup type $arraytype ne {
+	$typecheck throw
     } if
     # Make sure array is non-empty.
     dup length 0 eq {
-	/rangecheck throw
+	$rangecheck throw
     } if
     # Make sure array elements are strings.
     dup {
 	{
-	    type /stringtype ne {
+	    type $stringtype ne {
 		stop
 	    } if
 	} foreach
     } stopped {
-	/typecheck throw
+	$typecheck throw
     } if
 
     fork
     dup 0 eq {
 	# Child.
 	systemdict begin
-	/throw {1 die} def
+	$throw {1 die} def
 	end
 	pop exec
     }{
@@ -759,28 +759,28 @@ systemdict begin
 #
 # 1) Absolute path: `'.
 # 2) Relative path: `.'.
-# 3) /ONYX_[MR]PATH: Colon-separated string in envdict.
+# 3) $ONYX_[MR]PATH: Colon-separated string in envdict.
 # 4) `/usr/local/share/3.0.0/nx[m]': Standard installation location.
 onyxdict begin
-/rpath_pre [`' `.'] def
-/rpath_post [`/usr/local/share/onyx-3.0.0/nx'] def
+$rpath_pre [`' `.'] def
+$rpath_post [`/usr/local/share/onyx-3.0.0/nx'] def
 
-/mpath_pre [`' `.'] def
-/mpath_post [`/usr/local/share/onyx-3.0.0/nxm'] def
+$mpath_pre [`' `.'] def
+$mpath_post [`/usr/local/share/onyx-3.0.0/nxm'] def
 end # onyxdict.
 
 # #filename require -
-/require {
+$require {
     # Make sure the argument is a string.
-    dup type /stringtype ne {
-	/typecheck throw
+    dup type $stringtype ne {
+	$typecheck throw
     } if
 
     {
 	[
-	    onyxdict /rpath_pre get
+	    onyxdict $rpath_pre get
 
-	    envdict /ONYX_RPATH 2 ndup known {
+	    envdict $ONYX_RPATH 2 ndup known {
 		get
 
 		# Push mark that denotes start of array.
@@ -803,7 +803,7 @@ end # onyxdict.
 		2 npop
 	    } ifelse
 
-	    onyxdict /rpath_post get
+	    onyxdict $rpath_post get
 	]{
 	    # #filename #path
 	    {
@@ -827,28 +827,28 @@ end # onyxdict.
 	} foreach
     } stopped not {
 	# Failure.
-	/undefinedfilename throw
+	$undefinedfilename throw
     } if
     1 pop # XXX Avoid tail call optimization.
 } def
 
 # #filename #symbol mrequire -
-/mrequire {
+$mrequire {
     # Make sure the arguments are strings.
-    1 idup type /stringtype ne {
-	/typecheck throw
+    1 idup type $stringtype ne {
+	$typecheck throw
     } if
-    dup type /stringtype ne {
-	/typecheck throw
+    dup type $stringtype ne {
+	$typecheck throw
     } if
 
     exch
     # #symbol #filename
     {
 	[
-	    onyxdict /mpath_pre get
+	    onyxdict $mpath_pre get
 
-	    envdict /ONYX_MPATH 2 ndup known {
+	    envdict $ONYX_MPATH 2 ndup known {
 		get
 
 		# Push mark that denotes start of array.
@@ -871,7 +871,7 @@ end # onyxdict.
 		2 npop
 	    } ifelse
 
-	    onyxdict /mpath_post get
+	    onyxdict $mpath_post get
 	]{
 	    # #symbol #filename #path
 	    {
@@ -897,21 +897,21 @@ end # onyxdict.
 	# Failure.
 	# #symbol #filename
 	exch
-	/undefinedfilename throw
+	$undefinedfilename throw
     } if
 } def
     ' cat
 } if
 `
-# /errorname throw -
-/throw {
+# $errorname throw -
+$throw {
     # Do some sanity checking, to try to avoid going infinitely recursive
     # in the error handling machinery.
     {
-	{/errordict where {pop true}{false} ifelse}
-	{/errordict load /handleerror known}
-	{/errordict load /stop known}
-	{/currenterror where {pop true}{false} ifelse}
+	{$errordict where {pop true}{false} ifelse}
+	{$errordict load $handleerror known}
+	{$errordict load $stop known}
+	{$currenterror where {pop true}{false} ifelse}
     }{
 	eval not {
 	    stderr `Onyx: Missing errordict or currenterror defs\n'
@@ -936,36 +936,36 @@ end # onyxdict.
     } foreach
 
     # Make sure the argument is a name.
-    dup type /nametype ne {
-	/typecheck /systemdict load /throw get eval
+    dup type $nametype ne {
+	$typecheck $systemdict load $throw get eval
     } if
 
-    /currenterror load begin
+    $currenterror load begin
 
     # Set newerror to true to indicate there is an error.  It is up to the
     # application to clear this afterwards if it wants to make newerror
     # meaningful in the face of multiple errors.
-    /newerror true def
+    $newerror true def
 
     # Set errorname to the argument passed in.
-    dup /errorname exch cvlit def
+    dup $errorname exch cvlit def
 
-    # ostack.  Get rid of /errorname in the snapshot.  Ordering is important
+    # ostack.  Get rid of $errorname in the snapshot.  Ordering is important
     # to keep from polluting the snapshot.
-    ostack dup spop pop /ostack exch def
+    ostack dup spop pop $ostack exch def
 
     # dstack.  Do not include the top element, which is the copy of
     # currenterror that we pushed.
-    /dstack dstack dup spop pop def
+    $dstack dstack dup spop pop def
 
     # estack.  Remove this procedure from the snapshot.
-    /estack estack dup spop pop def
+    $estack estack dup spop pop def
 
     # istack.  Remove this procedure from the snapshot.
-    /istack istack dup spop pop def
+    $istack istack dup spop pop def
 
     # Push the offending object onto ostack.
-    /estack load dup sdup spop
+    $estack load dup sdup spop
     exch
     # #object #errorname
 
@@ -973,7 +973,7 @@ end # onyxdict.
 
     # If there is an error handler for the error name, call it.  Otherwise,
     # call the errordict handleerror, then call the errordict stop.
-    /errordict load
+    $errordict load
     # #object #errorname #errordict
     dup 2 idup known {
 	# Call error handler.
@@ -981,13 +981,13 @@ end # onyxdict.
     }{
 	# No error handler.
 	exch pop
-	dup /handleerror get eval
-	/stop get eval
+	dup $handleerror get eval
+	$stop get eval
     } ifelse
 } def
 
 # - version #string
-/version `<Version = onyx>' def
+$version `<Version = onyx>' def
 
 end # systemdict.
 ' cat

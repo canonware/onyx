@@ -13,8 +13,8 @@
 `Test begin\n' print flush
 
 pipe
-/wfile exch def
-/rfile exch def
+$wfile exch def
+$rfile exch def
 wfile `foo\nbar\nbiz\n' write
 wfile flushfile
 rfile readline pop 1 sprint

@@ -1,5 +1,5 @@
 Test begin
-At line 1, column 0: Error /syntaxerror
+At line 1, column 0: Error $syntaxerror
 ostack: (`}' `}')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

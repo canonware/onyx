@@ -23,9 +23,9 @@
 
 	# dict.
 	<>
-	</foo /bar>
-	</foo <>>
-	</foo </bar [1]>>
+	<$foo $bar>
+	<$foo <>>
+	<$foo <$bar [1]>>
 
 	# file.
 	stdin
@@ -39,14 +39,14 @@
 	123412341234
 
 	# name.
-	/foo
-	/foo cvx
+	$foo
+	$foo cvx
 
 	# null.
 	null
 
 	# operator.
-	//pop
+	$$pop
 
 	# stack.
 	()

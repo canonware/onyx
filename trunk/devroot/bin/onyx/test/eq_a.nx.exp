@@ -35,13 +35,13 @@ false
 false
 `dict stack'
 false
-`//pop //spop'
+`$$pop $$spop'
 false
-`//pop //roll'
+`$$pop $$roll'
 false
-`/foo /bar'
+`$foo $bar'
 false
-`/foo \`bar\''
+`$foo \`bar\''
 false
 `true false'
 false
@@ -49,13 +49,13 @@ false
 false
 `stack dup'
 true
-`//pop //pop'
+`$$pop $$pop'
 true
-`/foo /foo'
+`$foo $foo'
 true
-`/foo \`foo\''
+`$foo \`foo\''
 true
-`\`foo\' /foo'
+`\`foo\' $foo'
 true
 `true dup'
 true

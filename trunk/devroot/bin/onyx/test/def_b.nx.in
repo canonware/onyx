@@ -12,6 +12,6 @@
 
 `Test begin\n' print flush
 
-/foo def
+$foo def
 
 `Test end\n' print

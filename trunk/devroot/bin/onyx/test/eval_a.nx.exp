@@ -5,19 +5,19 @@ Test begin
 `true'
 true
 true
-`</foo \`foo\'>'
-</foo `foo'>
-</foo `foo'>
+`<$foo \`foo\'>'
+<$foo `foo'>
+<$foo `foo'>
 `42'
 42
 42
 `mark'
 -mark-
 -mark-
-`/count'
-/count
+`$count'
+$count
 0
-`//count'
+`$$count'
 --count--
 0
 `(1)'

@@ -1,4 +1,4 @@
-Error /typecheck
+Error $typecheck
 ostack: (-stack- 1 -mark-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

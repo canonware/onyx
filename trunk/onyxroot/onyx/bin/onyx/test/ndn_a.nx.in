@@ -20,11 +20,11 @@
     {3 2 1 0}
     {4 3 2 1 0}
 ]{
-    /proc exch def
-    0 1 /proc load length {
+    $proc exch def
+    0 1 $proc load length {
 	dup cvs print
 	` ndn: ' print
-	/proc load 1 sprints print
+	$proc load 1 sprints print
 	` --> ' print
 
 	proc

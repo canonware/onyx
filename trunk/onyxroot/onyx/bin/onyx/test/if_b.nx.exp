@@ -1,5 +1,5 @@
 Test begin
-Error /stackunderflow
+Error $stackunderflow
 ostack: (true)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

@@ -1,4 +1,4 @@
-Error /stackunderflow
+Error $stackunderflow
 ostack: (-stack-)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

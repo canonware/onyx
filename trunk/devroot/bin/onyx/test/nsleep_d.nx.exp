@@ -1,4 +1,4 @@
-Error /rangecheck
+Error $rangecheck
 ostack: (0)
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

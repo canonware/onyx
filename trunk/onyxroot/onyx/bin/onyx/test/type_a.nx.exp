@@ -3,7 +3,7 @@ Test begin
 arraytype
 `true'
 booleantype
-`</foo \`foo\' /bar \`bar\'>'
+`<$foo \`foo\' $bar \`bar\'>'
 dicttype
 `stdin'
 filetype
@@ -13,11 +13,11 @@ finotype
 integertype
 `mark'
 marktype
-`/foo'
+`$foo'
 nametype
 `null'
 nulltype
-`//pop'
+`$$pop'
 operatortype
 `(1 2 3)'
 stacktype

@@ -14,8 +14,8 @@
 
 # Add slate paths.
 onyxdict begin
-/rpath_post rpath_post [@slate_rpath_post@] cat def
-/mpath_post mpath_post [@slate_mpath_post@] cat def
+$rpath_post rpath_post [@slate_rpath_post@] cat def
+$mpath_post mpath_post [@slate_mpath_post@] cat def
 end
 
 `modslate/modslate.nx' require
@@ -25,25 +25,25 @@ slatedict begin
 dstack saup
 
 # - hs -
-/hs {
+$hs {
     # ANSI home cursor sequence: `\e[H'
     `\e[H' print
 } def
 
 # - cs -
-/cs {
+$cs {
     # ANSI clear screen sequence: `\e[2J'
     `\e[2J' print
     hs
 } def
 
 # #=buffer= buffer_name #name
-/buffer_name {
-    buffer_aux_get /name get
+$buffer_name {
+    buffer_aux_get $name get
 } def
 
 # - status_line -
-/status_line {
+$status_line {
     # Reverse video.
     `\e[7m' print
 
@@ -101,14 +101,14 @@ dstack saup
 } def
 
 # #=buffer= b2s #string
-/b2s {
-    tmark dup 0 /SEEK_BOB marker_seek pop
-    tpoint dup 0 /SEEK_EOB marker_seek pop
+$b2s {
+    tmark dup 0 $SEEK_BOB marker_seek pop
+    tpoint dup 0 $SEEK_EOB marker_seek pop
     marker_range_get
 } def
 
 # #string srender -
-/srender {
+$srender {
     {
 	dup 16@a eq {
 	    `\r' print
@@ -118,7 +118,7 @@ dstack saup
 } def
 
 # - redisplay -
-/redisplay {
+$redisplay {
     cs
     status_line
 
@@ -128,13 +128,13 @@ dstack saup
 
     hs
     `\r\n' print
-    tpoint dup 0 /SEEK_BOB marker_seek pop bpoint marker_range_get
+    tpoint dup 0 $SEEK_BOB marker_seek pop bpoint marker_range_get
     srender flush
 #    scratch `redisplay ' buffer_dump
 } def
 
 # - getc #string
-/getc {
+$getc {
     stdin ` ' read
     true eq {
 	quit
@@ -142,13 +142,13 @@ dstack saup
 } def
 
 # #string self_insert_char -
-/insert_string {
+$insert_string {
     bpoint exch marker_before_insert
 #    scratch `insert_string ' buffer_dump
 } def
 
 # Undefined characters are inserted literally.
-/keytable <
+$keytable <
     `\b' {
 	bmark dup 0 bpoint marker_seek pop
 	bpoint dup -1 marker_seek pop
@@ -169,7 +169,7 @@ dstack saup
 	`\n' insert_string
     }
     `\cq' {
-	`\r\n' print gcdict /stats get eval 2 sprint flush
+	`\r\n' print gcdict $stats get eval 2 sprint flush
 	quit
     }
     `\cu' {
@@ -218,7 +218,7 @@ dstack saup
 > def
 
 # #string interpc -
-/interpc {
+$interpc {
 #    stderr 1 idup cvs write stderr `\n' write
 #    scratch `interpc ' buffer_dump
     keytable 1 idup known {
@@ -228,17 +228,17 @@ dstack saup
     } ifelse
 } def
 
-/scratch buffer def
-/bpoint scratch marker def
-/tpoint scratch marker def
-/bmark scratch marker def
-/tmark scratch marker def
+$scratch buffer def
+$bpoint scratch marker def
+$tpoint scratch marker def
+$bmark scratch marker def
+$tmark scratch marker def
 
 scratch <
-    /name	`*scratch*'
+    $name	`*scratch*'
 > buffer_aux_set
 
-2 gcdict /setperiod get eval
+2 gcdict $setperiod get eval
 
 scratch true buffer_history_setactive
 

@@ -17,8 +17,8 @@
 	`[1]'
 	`[1 2]'
 	`<>'
-	`</foo `foo' /bar `bar'>'
-	`/foo'
+	`<$foo `foo' $bar `bar'>'
+	`$foo'
 	``''
 	``foo''
 ]{

@@ -1,5 +1,5 @@
 Test begin
-Error /undefinedfilename
+Error $undefinedfilename
 ostack: (`Let us hope that this name does not exist.')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):

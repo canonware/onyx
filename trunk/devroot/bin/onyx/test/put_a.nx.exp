@@ -11,12 +11,12 @@ Test begin
 [null `a' null]
 `3 array dup 2 \`a\' put'
 [null null `a']
-`dict dup /foo \`foo\' put'
-</foo `foo'>
-`</foo \`foo\'> dup /foo \`FOO\' put'
-</foo `FOO'>
-`</foo \`foo\'> dup /bar \`bar\' put'
-</foo `foo' /bar `bar'>
+`dict dup $foo \`foo\' put'
+<$foo `foo'>
+`<$foo \`foo\'> dup $foo \`FOO\' put'
+<$foo `FOO'>
+`<$foo \`foo\'> dup $bar \`bar\' put'
+<$foo `foo' $bar `bar'>
 `\` \' dup 0 97 put'
 `a'
 `\`  \' dup 0 97 put'

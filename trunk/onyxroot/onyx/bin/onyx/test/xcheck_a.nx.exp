@@ -5,7 +5,7 @@ true
 false
 `true'
 false
-`</foo \`foo\' /bar \`bar\'>'
+`<$foo \`foo\' $bar \`bar\'>'
 false
 `stdin'
 false
@@ -15,11 +15,11 @@ false
 false
 `mark'
 false
-`/foo'
+`$foo'
 false
 `null'
 false
-`//pop'
+`$$pop'
 true
 `(1 2 3)'
 false

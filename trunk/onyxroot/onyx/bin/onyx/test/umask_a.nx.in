@@ -14,7 +14,7 @@
 
 8@777 umask
 umask
-</b 8 /w 3 /p `0'> output `\n' print
+<$b 8 $w 3 $p `0'> output `\n' print
 
 `Test end\n' print
 pstack
