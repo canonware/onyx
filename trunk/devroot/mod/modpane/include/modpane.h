@@ -15,6 +15,8 @@
 
 #include <termios.h>
 
+#include "cl.h"
+#include "tm.h"
 #include "ds.h"
 #include "pn.h"
 

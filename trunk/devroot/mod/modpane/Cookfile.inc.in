@@ -20,7 +20,7 @@
 
 /* Source files. */
 MODPANE_SRCS = [addprefix @srcroot@/mod/modpane/src/
-                          display.c ds.c modpane.c pane.c pn.c
+                          cl.c display.c ds.c modpane.c pane.c pn.c tm.c
                           ];
 
 /* Generated source code (created by configure). */
