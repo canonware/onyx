@@ -9,7 +9,7 @@ Version: <Version>
 .Nm libstash_bhp
 .hy 1
 .SH NAME
-bhp - Binomial heap.
+bhp, bhpi - Binomial heap.
 .SH SYNOPSIS
 .SS Single-threaded
 #define _LIBSTASH_USE_BHP
@@ -96,9 +96,7 @@ bhp - Binomial heap.
 .RI ( "const void * a_a" ", " "const void * a_b" )
 
 .SS Debugging (dbg) symbols
-.TP \" XXX
-\*(lq<XXX symbol>\*(rq
-<XXX Symbol description>
+None.
 
 .SH DESCRIPTION
 The bhp and bhpi classes implement binomial heaps.  The bhpi class encapsulates
