@@ -1,5 +1,12 @@
 2003-03-20 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/systemdict.c:systemdict_send() : Loop when short
+	  writes happen until all the data are written.
+
+	  systemdict_recv() : Loop when recv() is interrupted.
+
+	  systemdict_waitpid() : Loop when waitpid() is interrupted.
+
 	* bin/onyx/src/onyx.c:main() : Add a top level exception handler.
 
 	* lib/libonyx/include/libonyx/xep.h : Add xep_filename() and
