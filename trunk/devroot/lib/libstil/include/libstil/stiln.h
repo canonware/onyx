@@ -184,6 +184,7 @@ typedef enum {
 	STILN_sindex,
 	STILN_spop,
 	STILN_sprint,
+	STILN_sprintdict,
 	STILN_spush,
 	STILN_srand,
 	STILN_sroll,

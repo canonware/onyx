@@ -236,6 +236,3 @@ cw_bool_t	stilo_lcheck(cw_stilo_t *a_stilo);
 
 #define		stilo_attrs_get(a_stilo) (a_stilo)->attrs
 #define		stilo_attrs_set(a_stilo, a_attrs) (a_stilo)->attrs = (a_attrs)
-
-cw_stilo_threade_t stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_uint32_t a_depth, cw_bool_t a_newline);

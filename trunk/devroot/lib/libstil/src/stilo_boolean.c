@@ -20,18 +20,33 @@ stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val)
 }
 
 
-cw_stilo_threade_t
-stilo_l_boolean_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
-    a_depth)
+void
+stilo_l_boolean_print(cw_stilo_t *a_thread)
 {
-	cw_stilo_threade_t	retval;
+	cw_stilo_t		*ostack, *depth, *boolean, *stdout_stilo;
+	cw_stilo_threade_t	error;
 
-	if (a_stilo->o.boolean.val)
-		retval = stilo_file_output(a_file, "true");
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(boolean, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(boolean)
+	    != STILOT_BOOLEAN) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
+
+	if (boolean->o.boolean.val)
+		error = stilo_file_output(stdout_stilo, "true");
 	else
-		retval = stilo_file_output(a_file, "false");
+		error = stilo_file_output(stdout_stilo, "false");
 
-	return retval;
+	if (error) {
+		stilo_thread_error(a_thread, error);
+		return;
+	}
+
+	stilo_stack_npop(ostack, 2);
 }
 
 cw_bool_t

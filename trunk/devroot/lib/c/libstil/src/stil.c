@@ -11,6 +11,7 @@
 
 #include "../include/libstil/libstil.h"
 #include "../include/libstil/envdict_l.h"
+#include "../include/libstil/sprintdict_l.h"
 #include "../include/libstil/systemdict_l.h"
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilo_name_l.h"
@@ -94,19 +95,23 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 		    _LIBSTIL_GLOBALDICT_HASH);
 		try_stage = 7;
 
+		/* Initialize sprintdict. */
+		sprintdict_l_populate(&retval->sprintdict, retval);
+		try_stage = 8;
+
 		/* Initialize envdict. */
 		envdict_l_populate(&retval->envdict, retval, a_envp);
-		try_stage = 8;
+		try_stage = 9;
 
 		/* Initialize systemdict. */
 		systemdict_l_populate(&retval->systemdict, retval, a_argc,
 		    a_argv);
-		try_stage = 9;
+		try_stage = 10;
 
 		/* Initialize threadsdict. */
 		stilo_dict_new(&retval->threadsdict, retval, TRUE,
 		    _LIBSTIL_THREADSDICT_HASH);
-		try_stage = 10;
+		try_stage = 11;
 
 		/* Set the thread initialization hook pointer. */
 		retval->thread_init = a_thread_init;
@@ -120,6 +125,7 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 	xep_catch (_CW_STASHX_OOM) {
 		retval = (cw_stil_t *)v_retval;
 		switch (try_stage) {
+		case 11:
 		case 10:
 		case 9:
 		case 8:
@@ -209,12 +215,15 @@ stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
 			retval = stilo_stiloe_get(&a_stil->envdict);
 			break;
 		case 4:
-			retval = stilo_stiloe_get(&a_stil->stdin_stilo);
+			retval = stilo_stiloe_get(&a_stil->sprintdict);
 			break;
 		case 5:
-			retval = stilo_stiloe_get(&a_stil->stdout_stilo);
+			retval = stilo_stiloe_get(&a_stil->stdin_stilo);
 			break;
 		case 6:
+			retval = stilo_stiloe_get(&a_stil->stdout_stilo);
+			break;
+		case 7:
 			retval = stilo_stiloe_get(&a_stil->stderr_stilo);
 			break;
 		default:

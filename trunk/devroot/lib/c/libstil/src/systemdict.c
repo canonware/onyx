@@ -191,7 +191,7 @@ systemdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, int a_argc, char
 	cw_uint32_t	i;
 	cw_stilo_t	name, value;
 
-#define	NEXTRA	11
+#define	NEXTRA	12
 #define NENTRIES							\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
@@ -234,6 +234,12 @@ systemdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, int a_argc, char
 	stilo_name_new(&name, a_stil, stiln_str(STILN_envdict),
 	    stiln_len(STILN_envdict), TRUE);
 	stilo_dup(&value, stil_envdict_get(a_stil));
+	stilo_dict_def(a_dict, a_stil, &name, &value);
+
+	/* sprintdict. */
+	stilo_name_new(&name, a_stil, stiln_str(STILN_sprintdict),
+	    stiln_len(STILN_sprintdict), TRUE);
+	stilo_dup(&value, stil_sprintdict_get(a_stil));
 	stilo_dict_def(a_dict, a_stil, &name, &value);
 
 	/* argv. */
@@ -2582,24 +2588,8 @@ systemdict_print(cw_stilo_t *a_thread)
 void
 systemdict_pstack(cw_stilo_t *a_thread)
 {
-	cw_stilo_t		*ostack;
-	cw_stilo_t		*stilo, *stdout_stilo;
-	cw_stilo_threade_t	error;
-
-	ostack = stilo_thread_ostack_get(a_thread);
-	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
-
-	for (stilo = stilo_stack_down_get(ostack, NULL); stilo != NULL; stilo =
-	     stilo_stack_down_get(ostack, stilo)) {
-		error = stilo_print(stilo, stdout_stilo, 1, TRUE);
-		if (error) {
-			stilo_thread_error(a_thread, error);
-			return;
-		}
-	}
-	error = stilo_file_buffer_flush(stdout_stilo);
-	if (error)
-		stilo_thread_error(a_thread, error);
+	/* XXX Convert to softop. */
+	_cw_stil_code(a_thread, "ostack {1 sprint} foreach flush");
 }
 
 void
@@ -3339,6 +3329,10 @@ systemdict_sprint(cw_stilo_t *a_thread)
 	ostack = stilo_thread_ostack_get(a_thread);
 	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
 
+	/*
+	 * depth and stilo aren't used, but accessing them causes a more
+	 * intelligible error than the embedded stil code would.
+	 */
 	STILO_STACK_GET(depth, ostack, a_thread);
 	STILO_STACK_DOWN_GET(stilo, ostack, a_thread, depth);
 	if (stilo_type_get(depth) != STILOT_INTEGER) {
@@ -3346,8 +3340,9 @@ systemdict_sprint(cw_stilo_t *a_thread)
 		return;
 	}
 
-	error = stilo_print(stilo, stdout_stilo, stilo_integer_get(depth),
-	    TRUE);
+	/* object depth sprint - */
+	_cw_stil_code(a_thread, "1 index type sprintdict exch get eval");
+	error = stilo_file_output(stdout_stilo, "\n");
 	if (error) {
 		stilo_thread_error(a_thread, error);
 		return;

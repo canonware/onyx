@@ -135,66 +135,85 @@ stiloe_l_array_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	return retval;
 }
 
-cw_stilo_threade_t
-stilo_l_array_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
-    a_depth)
+void
+stilo_l_array_print(cw_stilo_t *a_thread)
 {
-	cw_stilo_threade_t	retval;
+	cw_stilo_t		*ostack, *depth, *astilo, *stdout_stilo;
+	cw_stilo_threade_t	error;
 
-	if (a_depth > 0) {
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(astilo, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(astilo)
+	    != STILOT_ARRAY) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
+
+	if (stilo_integer_get(depth) > 0) {
 		cw_stiloe_array_t	*array;
-		cw_stilo_t		el;
+		cw_stilo_t		*stilo;
 		cw_uint32_t		nelms, i;
 
-		if (a_stilo->attrs == STILOA_EXECUTABLE) {
-			retval = stilo_file_output(a_file, "{");
-			if (retval)
-				goto RETURN;
+		if (astilo->attrs == STILOA_EXECUTABLE) {
+			error = stilo_file_output(stdout_stilo, "{");
+			if (error) {
+				stilo_thread_error(a_thread, error);
+				return;
+			}
 		} else {
-			retval = stilo_file_output(a_file, "[[");
-			if (retval)
-				goto RETURN;
+			error = stilo_file_output(stdout_stilo, "[[");
+			if (error) {
+				stilo_thread_error(a_thread, error);
+				return;
+			}
 		}
 
-		array = (cw_stiloe_array_t *)a_stilo->o.stiloe;
+		array = (cw_stiloe_array_t *)astilo->o.stiloe;
 		stiloe_p_array_lock(array);
-		nelms = stilo_array_len_get(a_stilo);
+		nelms = stilo_array_len_get(astilo);
 		for (i = 0; i < nelms; i++) {
-			stilo_array_el_get(a_stilo, i, &el);
-			retval = stilo_print(&el, a_file, a_depth - 1, FALSE);
-			if (retval) {
-				stiloe_p_array_unlock(array);
-				goto RETURN;
-			}
+			stilo = stilo_stack_push(ostack);
+			stilo_array_el_get(astilo, i, stilo);
+			stilo = stilo_stack_push(ostack);
+			stilo_integer_new(stilo, stilo_integer_get(depth) - 1);
+			_cw_stil_code(a_thread,
+			    "1 index type sprintdict exch get eval");
 
 			if (i < nelms - 1) {
-				retval = stilo_file_output(a_file, " ");
-				if (retval) {
+				error = stilo_file_output(stdout_stilo, " ");
+				if (error) {
 					stiloe_p_array_unlock(array);
-					goto RETURN;
+					stilo_thread_error(a_thread, error);
+					return;
 				}
 			}
 		}
 		stiloe_p_array_unlock(array);
 
-		if (a_stilo->attrs == STILOA_EXECUTABLE) {
-			retval = stilo_file_output(a_file, "}");
-			if (retval)
-				goto RETURN;
+		if (astilo->attrs == STILOA_EXECUTABLE) {
+			error = stilo_file_output(stdout_stilo, "}");
+			if (error) {
+				stilo_thread_error(a_thread, error);
+				return;
+			}
 		} else {
-			retval = stilo_file_output(a_file, "]");
-			if (retval)
-				goto RETURN;
+			error = stilo_file_output(stdout_stilo, "]");
+			if (error) {
+				stilo_thread_error(a_thread, error);
+				return;
+			}
 		}
 	} else {
-		retval = stilo_file_output(a_file, "-array-");
-		if (retval)
-			goto RETURN;
+		error = stilo_file_output(stdout_stilo, "-array-");
+		if (error) {
+			stilo_thread_error(a_thread, error);
+			return;
+		}
 	}
 
-	retval = STILO_THREADE_NONE;
-	RETURN:
-	return retval;
+	stilo_stack_npop(ostack, 2);
 }
 
 void

@@ -59,8 +59,6 @@ stilo_threade_stiln(cw_stilo_threade_t a_threade)
 	return threade_stiln[a_threade];
 }
 
-/*  #define	_CW_STILO_THREAD_SCANNER_DBG */
-
 #define _CW_STILO_THREAD_GETC(a_i)					\
 	a_thread->tok_str[(a_i)]
 
@@ -333,19 +331,30 @@ stiloe_l_thread_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	return retval;
 }
 
-cw_stilo_threade_t
-stilo_l_thread_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
-    a_depth)
+void
+stilo_l_thread_print(cw_stilo_t *a_thread)
 {
-	cw_stilo_threade_t	retval;
+	cw_stilo_t		*ostack, *depth, *thread, *stdout_stilo;
+	cw_stilo_threade_t	error;
 
-	retval = stilo_file_output(a_file, "-thread-");
-	if (retval)
-		goto RETURN;
+	ostack = stilo_thread_ostack_get(a_thread);
+	STILO_STACK_GET(depth, ostack, a_thread);
+	STILO_STACK_DOWN_GET(thread, ostack, a_thread, depth);
+	if (stilo_type_get(depth) != STILOT_INTEGER || stilo_type_get(thread)
+	    != STILOT_THREAD) {
+		stilo_thread_error(a_thread, STILO_THREADE_TYPECHECK);
+		return;
+	}
+	stdout_stilo = stil_stdout_get(stilo_thread_stil_get(a_thread));
 
-	retval = STILO_THREADE_NONE;
-	RETURN:
-	return retval;
+	error = stilo_file_output(stdout_stilo, "-thread-");
+
+	if (error) {
+		stilo_thread_error(a_thread, error);
+		return;
+	}
+
+	stilo_stack_npop(ostack, 2);
 }
 
 void
@@ -1127,30 +1136,6 @@ stiloe_p_thread_feed(cw_stiloe_thread_t *a_thread, cw_stilo_threadp_t
 	    a_threadp->column = ((a_threadp->column + 1) * !newline), newline =
 	    0) {
 		c = a_str[i];
-
-#ifdef _CW_STILO_THREAD_SCANNER_DBG
-#define _CW_THREADTS_PRINT(a)						\
-	do {								\
-		if (a_thread->state == (a))				\
-			out_put(out_err, "[s]\n", #a);			\
-	} while (0)
-
-		out_put(out_err, "c: '[c]' ([i]), index: [i] ", c, c,
-		    a_thread->index);
-		_CW_THREADTS_PRINT(THREADTS_START);
-		_CW_THREADTS_PRINT(THREADTS_SLASH_CONT);
-		_CW_THREADTS_PRINT(THREADTS_COMMENT);
-		_CW_THREADTS_PRINT(THREADTS_INTEGER);
-		_CW_THREADTS_PRINT(THREADTS_INTEGER_RADIX);
-		_CW_THREADTS_PRINT(THREADTS_STRING);
-		_CW_THREADTS_PRINT(THREADTS_STRING_NEWLINE_CONT);
-		_CW_THREADTS_PRINT(THREADTS_STRING_PROT_CONT);
-		_CW_THREADTS_PRINT(THREADTS_STRING_CRLF_CONT);
-		_CW_THREADTS_PRINT(THREADTS_STRING_HEX_CONT);
-		_CW_THREADTS_PRINT(THREADTS_STRING_HEX_FINISH);
-		_CW_THREADTS_PRINT(THREADTS_NAME);
-#undef _CW_THREADTS_PRINT
-#endif
 
 		/*
 		 * If a special character causes the end of the previous token,

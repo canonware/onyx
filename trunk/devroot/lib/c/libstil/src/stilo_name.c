@@ -134,10 +134,10 @@ stiloe_l_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 	return NULL;
 }
 
-cw_stilo_threade_t
-stilo_l_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
-    a_depth)
+void
+stilo_l_name_print(cw_stilo_t *a_thread)
 {
+#if (0)
 	cw_stilo_threade_t	retval;
 	cw_stiloe_name_t	*name;
 
@@ -165,6 +165,7 @@ stilo_l_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t
 	retval = STILO_THREADE_NONE;
 	RETURN:
 	return retval;
+#endif
 }
 
 /* Hash {name string, length}. */

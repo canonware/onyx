@@ -14,19 +14,12 @@
 #include "../include/libstil/stila_l.h"
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilo_array_l.h"
-#include "../include/libstil/stilo_boolean_l.h"
 #include "../include/libstil/stilo_condition_l.h"
 #include "../include/libstil/stilo_dict_l.h"
 #include "../include/libstil/stilo_file_l.h"
-#include "../include/libstil/stilo_fino_l.h"
 #include "../include/libstil/stilo_hook_l.h"
-#include "../include/libstil/stilo_integer_l.h"
-#include "../include/libstil/stilo_mark_l.h"
 #include "../include/libstil/stilo_mutex_l.h"
 #include "../include/libstil/stilo_name_l.h"
-#include "../include/libstil/stilo_no_l.h"
-#include "../include/libstil/stilo_null_l.h"
-#include "../include/libstil/stilo_operator_l.h"
 #include "../include/libstil/stilo_stack_l.h"
 #include "../include/libstil/stilo_string_l.h"
 #include "../include/libstil/stilo_thread_l.h"
@@ -40,14 +33,11 @@ typedef cw_stiloe_t	*cw_stilot_ref_iter_t(cw_stiloe_t *a_stiloe,
     cw_bool_t a_reset);
 typedef cw_stilo_threade_t	cw_stilot_copy_t(cw_stilo_t *a_to, cw_stilo_t
     *a_from, cw_stilo_t *a_thread);
-typedef cw_stilo_threade_t	cw_stilot_print_t(cw_stilo_t *a_stilo,
-    cw_stilo_t *a_file, cw_uint32_t a_depth);
 
 typedef struct cw_stilot_vtable_s cw_stilot_vtable_t;
 struct  cw_stilot_vtable_s {
 	cw_stilot_delete_t	*delete_f;
 	cw_stilot_ref_iter_t	*ref_iter_f;
-	cw_stilot_print_t	*print_f;
 };
 
 /*
@@ -58,91 +48,71 @@ struct  cw_stilot_vtable_s {
 static const cw_stilot_vtable_t stilot_vtable[] = {
 	/* STILOT_NO */
 	{NULL,
-	 NULL,
-	 stilo_l_no_print},	/*
-				 * Debugging only, should never end up getting
-				 * called during normal operation.
-				 */
+	 NULL},
 
 	/* STILOT_ARRAY */
 	{stiloe_l_array_delete,
-	 stiloe_l_array_ref_iter,
-	 stilo_l_array_print},
+	 stiloe_l_array_ref_iter},
 
 	/* STILOT_BOOLEAN */
 	{NULL,
-	 NULL,
-	 stilo_l_boolean_print},
+	 NULL},
 
 	/* STILOT_CONDITION */
 	{stiloe_l_condition_delete,
-	 stiloe_l_condition_ref_iter,
-	 stilo_l_condition_print},
+	 stiloe_l_condition_ref_iter},
 	
 	/* STILOT_DICT */
 	{stiloe_l_dict_delete,
-	 stiloe_l_dict_ref_iter,
-	 stilo_l_dict_print},
+	 stiloe_l_dict_ref_iter},
 
 	/* STILOT_FILE */
 	{stiloe_l_file_delete,
-	 stiloe_l_file_ref_iter,
-	 stilo_l_file_print},
+	 stiloe_l_file_ref_iter},
 
 	/* STILOT_FINO */
 	{NULL,
-	 NULL,
-	 stilo_l_fino_print},
+	 NULL},
 
 	/* STILOT_HOOK */
 	{stiloe_l_hook_delete,
-	 stiloe_l_hook_ref_iter,
-	 stilo_l_hook_print},
+	 stiloe_l_hook_ref_iter},
 
 	/* STILOT_INTEGER */
 	{NULL,
-	 NULL,
-	 stilo_l_integer_print},
+	 NULL},
 
 	/* STILOT_MARK */
 	{NULL,
-	 NULL,
-	 stilo_l_mark_print},
+	 NULL},
 
 	/* STILOT_MUTEX */
 	{stiloe_l_mutex_delete,
-	 stiloe_l_mutex_ref_iter,
-	 stilo_l_mutex_print},
+	 stiloe_l_mutex_ref_iter},
 
 	/* STILOT_NAME */
 	{stiloe_l_name_delete,
-	 stiloe_l_name_ref_iter,
-	 stilo_l_name_print},
+	 stiloe_l_name_ref_iter},
 
 	/* STILOT_NULL */
 	{NULL,
-	 NULL,
-	 stilo_l_null_print},
+	 NULL},
 
 	/* STILOT_OPERATOR */
 	{NULL,
-	 NULL,
-	 stilo_l_operator_print},
+	 NULL},
 
 	/* STILOT_STACK */
 	{stiloe_l_stack_delete,
-	 stiloe_l_stack_ref_iter,
-	 stilo_l_stack_print},
+	 stiloe_l_stack_ref_iter},
 
 	/* STILOT_STRING */
 	{stiloe_l_string_delete,
-	 stiloe_l_string_ref_iter,
-	 stilo_l_string_print},
+	 stiloe_l_string_ref_iter},
 
 	/* STILOT_THREAD */
 	{stiloe_l_thread_delete,
-	 stiloe_l_thread_ref_iter,
-	 stilo_l_thread_print}
+	 stiloe_l_thread_ref_iter}
 };
 
 /*
@@ -316,23 +286,6 @@ stilo_lcheck(cw_stilo_t *a_stilo)
 	retval = a_stilo->o.stiloe->locking;
 #endif
 
-	return retval;
-}
-
-cw_stilo_threade_t
-stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_uint32_t a_depth,
-    cw_bool_t a_newline)
-{
-	cw_stilo_threade_t	retval;
-
-	retval = stilot_vtable[a_stilo->type].print_f(a_stilo, a_file, a_depth);
-	if (retval)
-		goto RETURN;
-
-	if (a_newline)
-		retval = stilo_file_output(a_file, "\n");
-
-	RETURN:
 	return retval;
 }
 

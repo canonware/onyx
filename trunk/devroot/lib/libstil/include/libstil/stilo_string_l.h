@@ -37,5 +37,4 @@ struct cw_stiloe_string_s {
 
 void	stiloe_l_string_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
 cw_stiloe_t *stiloe_l_string_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
-cw_stilo_threade_t stilo_l_string_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
-    cw_uint32_t a_depth);
+void	stilo_l_string_print(cw_stilo_t *a_thread);
