@@ -19,14 +19,25 @@ onyx_ops_modload_sym_ref_iter(void *a_data, cw_bool_t a_reset)
 	return NULL;
 }
 
-static void
-onyx_ops_modload_sym_delete(void *a_data, cw_nx_t *a_nx)
+static cw_bool_t
+onyx_ops_modload_sym_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 {
+	cw_bool_t	retval;
+
 	/*
-	 * XXX This seems like the right thing to do, but it causes symbols
-	 * to be unavailable, which can cause crashes.  Think about what to do.
+	 * Don't dlclose() until the second GC sweep iteration, so that other
+	 * objects that are part of the module can be deleted first.
 	 */
-/*  	dlclose(a_data); */
+	if (a_iter != 1) {
+		retval = TRUE;
+		goto RETURN;
+	}
+
+	dlclose(a_data);
+
+	retval = FALSE;
+	RETURN:
+	return retval;
 }
 
 static void
@@ -47,19 +58,9 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 		return;
 	}
 
-	/*
-	 * Create a copy of the path with an extra byte to store a '\0'
-	 * terminator.
-	 */
+	/* Create '\0'-terminated copy of path. */
 	nxo = nxo_stack_push(tstack);
-	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(path) + 1);
-	nxo_string_lock(path);
-	nxo_string_set(nxo, 0, nxo_string_get(path),
-	    nxo_string_len_get(path));
-	nxo_string_el_set(nxo, '\0', nxo_string_len_get(nxo) - 1);
-	nxo_string_unlock(path);
-
+	nxo_string_cstring(nxo, path, a_thread);
 	str = nxo_string_get(nxo);
 
 	/* Try to dlopen(). */
@@ -74,17 +75,8 @@ onyx_ops_modload(cw_nxo_t *a_thread)
 		return;
 	}
 
-	/*
-	 * Create a copy of sym with an extra byte to store a '\0' terminator.
-	 */
-	nxo_string_new(nxo, nxo_thread_nx_get(a_thread),
-	    nxo_thread_currentlocking(a_thread), nxo_string_len_get(sym) + 1);
-	nxo_string_lock(sym);
-	nxo_string_set(nxo, 0, nxo_string_get(sym),
-	    nxo_string_len_get(sym));
-	nxo_string_el_set(nxo, '\0', nxo_string_len_get(nxo) - 1);
-	nxo_string_unlock(sym);
-
+	/* Create '\0'-terminated copy of sym. */
+	nxo_string_cstring(nxo, sym, a_thread);
 	str = nxo_string_get(nxo);
 
 	/* Look up symbol. */

@@ -97,8 +97,14 @@ In addition, the following definitions exist regardless of execution mode:
 	\item[Description: ]
 		Dynamically load a module, create a hook object that
 		encapsulates the handle returned by dlopen(3) (hook data
-		pointer) and the module initialization function (hook
-		evaluation function), and evaluate the hook.
+		pointer) and the module initialization function (hook evaluation
+		function), and evaluate the hook.
+
+		All objects that refer to code and/or data that are part of the
+		module must directly and/or indirectly maintain a reference to
+		the hook that is evaluated by this operator, since failing to do
+		so would allow the garbage collector to unload the module, which
+		could result in dangling pointers to unmapped memory regions.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/usr/local/share/canonware/onyx/nxmod/gtk.nxm' `_cw_modgtk_init'

@@ -1,3 +1,9 @@
+2001-10-07  Jason Evans  <jasone@canonware.com>
+
+	* src/onyx_ops.c (onyx_ops_modload): The hook evaluated by
+	onyx_ops_modload() now calls dlclose() when deleted, which means
+	that all objects in a module must maintain a reference to the hook.
+
 2001-10-04  Jason Evans  <jasone@canonware.com>
 
 	* src/onyx.c (signal_handle): Reset the terminal before exiting
