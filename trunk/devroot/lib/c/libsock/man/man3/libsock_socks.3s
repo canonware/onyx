@@ -56,21 +56,19 @@ Input(s):
 .RS
 Pointer to a socks.
 .RE
-.IR <input> :
-.RS
-<input description>
-.RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+non-NULL: Pointer to a socks.
+.br
+NULL: Memory allocation error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Constructor.
 .RE
 .RE
 
@@ -85,21 +83,14 @@ Input(s):
 .RS
 Pointer to a socks.
 .RE
-.IR <input> :
-.RS
-<input description>
-.RE
 .RE
 Output(s):
 .RS
-.IR retval :
-.RS
-<retval description>
-.RE
+None.
 .RE
 Description:
 .RS
-<description>
+Destructor.
 .RE
 .RE
 
@@ -114,21 +105,34 @@ Input(s):
 .RS
 Pointer to a socks.
 .RE
-.IR <input> :
+.IR a_mask :
 .RS
-<input description>
+Mask of client addresses to listen to (INADDR_ANY, INADDR_LOOPBACK, etc.).
+.RE
+.IR r_port :
+.RS
+Port number to listen on, or 0.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+FALSE: Success.
+.br
+TRUE: \fBsocket\fR() error, \fBbind\fR() error, or \fBgetsockname\fR() error.
+.RE
+.IR *r_port :
+.RS
+If (retval == FALSE), port number that a_socks is listening on.  Otherwise,
+undefined.
 .RE
 .RE
 Description:
 .RS
-<description>
+Do setup and start accepting connections on *r_port.  If *r_port is 0, let the
+OS choose what port number to use, and assign the number to *r_port before
+returning.
 .RE
 .RE
 
@@ -144,21 +148,30 @@ Input(s):
 .RS
 Pointer to a socks.
 .RE
-.IR <input> :
+.IR a_timeout :
 .RS
-<input description>
+Pointer to a timeout value, specified as an absolute time interval, or NULL.  A
+NULL value will cause this function to block indefinitely.
+.RE
+.IR r_sock :
+.RS
+Pointer to a sock that is not connected.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-<retval description>
+non-NULL: r_sock.
+.br
+NULL: Not listening, cannot allocate file descriptor, \fBaccept\fR() error, or
+\fBsock_wrap\fR() error.
 .RE
 .RE
 Description:
 .RS
-<description>
+Accept a connection.  Don't return until someone connects, or the timeout
+expires.
 .RE
 .RE
 
