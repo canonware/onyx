@@ -34,6 +34,7 @@ echo "===> ../$SRCDIR/configure --prefix=$PREFIX"
 ../$SRCDIR/configure --prefix=$PREFIX
 if [ "x$?" != "x0" ] ; then
 	echo "===> Error in configure"
+	echo "configure options: (none, initial test stage)"
 	exit 2
 fi
 # Parallelizable.
@@ -42,6 +43,7 @@ for i in docs ; do
 	$COOK $COOKPAR $i
 	if [ "x$?" != "x0" ] ; then
 		echo "===> Error cooking $i"
+		echo "configure options: (none, initial test stage)"
 		exit 2
 	fi
 done
@@ -51,6 +53,7 @@ for i in install_docs uninstall distclean ; do
 	$COOK $i
 	if [ "x$?" != "x0" ] ; then
 		echo "===> Error cooking $i"
+		echo "configure options: (none, initial test stage)"
 		exit 2
 	fi
 done
@@ -58,6 +61,7 @@ echo "===> find $PREFIX -type f |grep ."
 find $PREFIX -type f |grep .
 if [ "x$?" = "x0" ] ; then
 	echo "===> uninstall didn't clean up well enough"
+	echo "configure options: (none, initial test stage)"
 	exit 2
 fi
 
@@ -66,6 +70,16 @@ bins="onyx"
 #
 # Test everything with every allowable combination of configure options.
 #
+for d in 0 1 ; do
+	case $d in
+	0)
+		conf_d=""
+		;;
+	1)
+		conf_d="--disable-threads"
+		;;
+	esac
+
 for e in 0 1 2 ; do
 	# --enable-debug, --enable-profile
 	case $e in
@@ -79,17 +93,14 @@ for e in 0 1 2 ; do
 		conf_e="--enable-profile"
 		;;
 	esac
-for f in 0 1 2 ; do
-	# --disable-libedit, --disable-threads
+for f in 0 1 ; do
+	# --disable-libedit
 	case $f in
 	0)
 		conf_f=""
 		;;
 	1)
 		conf_f="--disable-libedit"
-		;;
-	2)
-		conf_f="--disable-threads"
 		;;
 	esac
 for g in 0 1 2 ; do
@@ -116,12 +127,13 @@ for h in 0 1 ; do
 		;;
 	esac
 
-	conf="$conf_e $conf_f $conf_g $conf_h"
+	conf="$conf_d $conf_e $conf_f $conf_g $conf_h"
 
   	echo "===> ../$SRCDIR/configure $conf --prefix=$PREFIX"
 	../$SRCDIR/configure $conf --prefix=$PREFIX
 	if [ "x$?" != "x0" ] ; then
 		echo "===> Error in configure"
+		echo "configure options: $conf"
 		exit 2
 	fi
 
@@ -134,6 +146,7 @@ for h in 0 1 ; do
 			$COOK $COOKPAR $j
 			if [ "x$?" != "x0" ] ; then
 				echo "===> Error cooking $j"
+				echo "configure options: $conf"
 				exit 2
 			fi
 		done
@@ -143,6 +156,7 @@ for h in 0 1 ; do
 			$COOK $j
 			if [ "x$?" != "x0" ] ; then
 				echo "===> Error cooking $j"
+				echo "configure options: $conf"
 				exit 2
 			fi
 		done
@@ -150,6 +164,7 @@ for h in 0 1 ; do
 		find $PREFIX -type f |grep .
 		if [ "x$?" = "x0" ] ; then
 			echo "===> uninstall didn't clean up well enough"
+			echo "configure options: $conf"
 			exit 2
 		fi
 	done
@@ -163,6 +178,7 @@ for h in 0 1 ; do
 			$COOK $COOKPAR $j
 			if [ "x$?" != "x0" ] ; then
 				echo "===> Error cooking $j"
+				echo "configure options: $conf"
 				exit 2
 			fi
 		done
@@ -172,6 +188,7 @@ for h in 0 1 ; do
 			$COOK $j
 			if [ "x$?" != "x0" ] ; then
 				echo "===> Error cooking $j"
+				echo "configure options: $conf"
 				exit 2
 			fi
 		done
@@ -181,6 +198,7 @@ for h in 0 1 ; do
 		$PREFIX/bin/$i -h
 		if [ "x$?" != "x0" ] ; then
 			echo "===> Error running $i"
+			echo "configure options: $conf"
 			exit 2
 		fi
 
@@ -189,6 +207,7 @@ for h in 0 1 ; do
 			$COOK $j
 			if [ "x$?" != "x0" ] ; then
 				echo "===> Error cooking $j"
+				echo "configure options: $conf"
 				exit 2
 			fi
 		done
@@ -196,6 +215,7 @@ for h in 0 1 ; do
 		find $PREFIX -type f |grep .
 		if [ "x$?" = "x0" ] ; then
 			echo "===> uninstall didn't clean up well enough"
+			echo "configure options: $conf"
 			exit 2
 		fi
 	done
@@ -207,6 +227,7 @@ for h in 0 1 ; do
 		$COOK $COOKPAR $i
 		if [ "x$?" != "x0" ] ; then
 			echo "===> Error cooking $i"
+			echo "configure options: $conf"
 			exit 2
 		fi
 	done
@@ -216,6 +237,7 @@ for h in 0 1 ; do
 		$COOK $i
 		if [ "x$?" != "x0" ] ; then
 			echo "===> Error cooking $i"
+			echo "configure options: $conf"
 			exit 2
 		fi
 	done
@@ -223,8 +245,10 @@ for h in 0 1 ; do
 	find $PREFIX -type f |grep .
 	if [ "x$?" = "x0" ] ; then
 		echo "===> uninstall didn't clean up well enough"
+		echo "configure options: $conf"
 		exit 2
 	fi
+done
 done
 done
 done
@@ -237,6 +261,7 @@ echo "===> ../$SRCDIR/configure --prefix=$PREFIX"
 ../$SRCDIR/configure --prefix=$PREFIX
 if [ "x$?" != "x0" ] ; then
 	echo "===> Error in configure"
+	echo "configure options: (none, final test stage)"
 	exit 2
 fi
 # Non-parallelizable.
@@ -245,6 +270,7 @@ for i in install_docs uninstall relclean ; do
 	$COOK $i
 	if [ "x$?" != "x0" ] ; then
 		echo "===> Error cooking $i"
+		echo "configure options: (none, final test stage)"
 		exit 2
 	fi
 done
@@ -252,12 +278,14 @@ echo "===> find $PREFIX -type f |grep ."
 find $PREFIX -type f |grep .
 if [ "x$?" = "x0" ] ; then
 	echo "===> uninstall didn't clean up well enough"
+	echo "configure options: (none, final test stage)"
 	exit 2
 fi
 echo "===> find . -type f |grep ."
 find . -type f |grep .
 if [ "x$?" = "x0" ] ; then
 	echo "===> relclean didn't clean up well enough"
+	echo "configure options: (none, final test stage)"
 	exit 2
 fi
 
