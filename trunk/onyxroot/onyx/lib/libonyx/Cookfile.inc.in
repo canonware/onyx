@@ -349,7 +349,7 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 #if [matches elf @abi@]
         -shared
 #elif [matches macho @abi@]
-        -undefined suppress -flat_namespace -dynamiclib -bind_at_load
+        -undefined dynamic_lookup -dynamiclib -prebind
         -compatibility_version [LIBONYX_REV]
         -current_version [LIBONYX_REV]
         -install_name @abs_objroot@/[LIBOONYX_S]
@@ -372,7 +372,7 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 #if [matches elf @abi@]
         -shared
 #elif [matches macho @abi@]
-        -undefined suppress -flat_namespace -dynamiclib -bind_at_load
+        -undefined dynamic_lookup -dynamiclib -prebind
         -compatibility_version [LIBONYX_REV]
         -current_version [LIBONYX_REV]
         -install_name @LIBDIR@/libonyx.[LIBONYX_REV].dylib
