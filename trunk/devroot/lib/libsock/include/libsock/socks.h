@@ -7,11 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Public interface for the socks (socket server) class.  socks is used to
- * accept connections to a port and create a sock instance for each connection.
- *
  ****************************************************************************/
 
 /* Opaque type. */
@@ -109,5 +104,5 @@ cw_bool_t	socks_listen(cw_socks_t *a_socks, cw_uint32_t a_mask, int
  * expires.
  *
  ****************************************************************************/
-cw_sock_t	*socks_accept(cw_socks_t *a_socks, struct timespec * a_timeout,
+cw_sock_t	*socks_accept(cw_socks_t *a_socks, struct timespec *a_timeout,
     cw_sock_t *r_sock);
