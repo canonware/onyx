@@ -12,115 +12,116 @@
 
 typedef struct cw_kasio_s cw_kasio_t;
 
-typedef enum cw_kasio_type_s cw_kasio_type_t;
+typedef struct cw_kasioe_s cw_kasioe_t;
+typedef struct cw_kasioe_array_s cw_kasioe_array_t;
+typedef struct cw_kasioe_condition_s cw_kasioe_condition_t;
+typedef struct cw_kasioe_dict_s cw_kasioe_dict_t;
+typedef struct cw_kasioe_lock_s cw_kasioe_lock_t;
+typedef struct cw_kasioe_mstate_s cw_kasioe_mstate_t;
+typedef struct cw_kasioe_name_s cw_kasioe_name_t;
+typedef struct cw_kasioe_number_s cw_kasioe_number_t;
+typedef struct cw_kasioe_operator_s cw_kasioe_operator_t;
+typedef struct cw_kasioe_packedarray_s cw_kasioe_packedarray_t;
+typedef struct cw_kasioe_string_s cw_kasioe_string_t;
 
-typedef struct cw_kasio_ext_s cw_kasio_ext_t;
-typedef struct cw_arrayext_s cw_arrayext_t;
-typedef struct cw_conditionext_s cw_conditionext_t;
-typedef struct cw_dictext_s cw_dictext_t;
-typedef struct cw_lockext_s cw_lockext_t;
-typedef struct cw_mstateext_s cw_mstateext_t;
-typedef struct cw_nameext_s cw_nameext_t;
-typedef struct cw_numberext_s cw_numberext_t;
-typedef struct cw_operatorext_s cw_operatorext_t;
-typedef struct cw_packedarrayext_s cw_packedarrayext_t;
-typedef struct cw_saveext_s cw_saveext_t;
-typedef struct cw_stringext_s cw_stringext_t;
-
-struct cw_kasio_ext_s
+struct cw_kasioe_s
 {
   void (*dealloc_func)(void *, void *);
   void * dealloc_arg;
+
+  /* If TRUE, then this object must be locked during access. */
+  cw_bool_t is_global;
+  cw_mtx_t lock;
+  
   cw_uint32_t ref_count;
+  cw_dch_t * keyed_refs;
+  enum
+  {
+    _CW_KASIOE_UNLIMITED,
+    _CW_KASIOE_READONLY,
+    _CW_KASIOE_EXECUTEONLY,
+    _CW_KASIOE_NONE
+  } access;
+  cw_bool_t is_watchpoint;
 };
 
-struct cw_arrayext_s
+struct cw_kasioe_array_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
 };
 
-struct cw_conditionext_s
+struct cw_kasioe_condition_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
   cw_cnd_t condition;
 };
 
 /* Defined in kasid.h, in order to resolve a circular dependency. */
 #if (0)
-struct cw_dictext_s
+struct cw_kasioe_dict_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
+  /* Must come last, since its size varies. */
   cw_kasid_t dict;
 };
 #endif
 
-struct cw_lockext_s
+struct cw_kasioe_lock_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
   cw_mtx_t lock;
 };
 
-struct cw_mstateext_s
+struct cw_kasioe_mstate_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
   cw_uint32_t accuracy;
   cw_uint32_t point;
   cw_uint32_t base;
 };
 
-struct cw_nameext_s
+struct cw_kasioe_name_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
+  cw_uint32_t len;
+  cw_uint8_t * name;
 };
 
-struct cw_numberext_s
+struct cw_kasioe_number_s
 {
-  cw_kasio_ext_t ext;
-  cw_uint32_t accuracy;
+  cw_kasioe_t kasioe;
+  /* Offset in val that the "decimal point" precedes. */
   cw_uint32_t point;
+  /* Base.  Can be from 2 to 36, inclusive. */
   cw_uint32_t base;
+  /* Number of bytes that val points to. */
+  cw_uint32_t val_len;
+  /* Offset of most significant non-zero digit. */
+  cw_uint32_t val_msd;
+  /* The least significant digit is at val[0].  Each byte can range in value
+   * from 0 to 35, depending on the base.  This representation is not compact,
+   * but it is easy to work with. */
   cw_uint8_t * val;
 };
 
-struct cw_operatorext_s
+/* Defined here (instead of in kasit.h) to resolve a circular dependency. */
+typedef struct cw_kasit_s cw_kasit_t;
+
+struct cw_kasioe_operator_s
 {
-  cw_kasio_ext_t ext;
-  cw_kasio_t * operator;
+  cw_kasioe_t kasioe;
+  void (*operator)(cw_kasit_t *);
 };
 
-struct cw_packedarrayext_s
+struct cw_kasioe_packedarray_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
 };
 
-struct cw_saveext_s
+struct cw_kasioe_string_s
 {
-  cw_kasio_ext_t ext;
+  cw_kasioe_t kasioe;
 };
-
-struct cw_stringext_s
-{
-  cw_kasio_ext_t ext;
-};
-
-/* Bit flags used in the flags field of cw_kasio_t. */
-#define _CW_KASIO_EXT             0x00000001
-#define _CW_KASIO_ARRAYTYPE       0x00000002
-#define _CW_KASIO_BOOLEANTYPE     0x00000004
-#define _CW_KASIO_CONDITIONTYPE   0x00000008
-#define _CW_KASIO_DICTTYPE        0x00000010
-#define _CW_KASIO_FILETYPE        0x00000020
-#define _CW_KASIO_LOCKTYPE        0x00000040
-#define _CW_KASIO_MARKTYPE        0x00000080
-#define _CW_KASIO_MSTATETYPE      0x00000100
-#define _CW_KASIO_NAMETYPE        0x00000200
-#define _CW_KASIO_NULLTYPE        0x00000400
-#define _CW_KASIO_NUMBERTYPE      0x00000800
-#define _CW_KASIO_OPERATORTYPE    0x00001000
-#define _CW_KASIO_PACKEDARRAYTYPE 0x00002000
-#define _CW_KASIO_PASSTHRUTYPE    0x00004000
-#define _CW_KASIO_SAVETYPE        0x00008000
-#define _CW_KASIO_STRINGTYPE      0x00010000
 
 /*
  * Main object structure.
@@ -131,12 +132,44 @@ struct cw_kasio_s
   cw_uint32_t magic;
 #endif
 
-  cw_uint32_t flags;
+  struct
+  {
+    /* Not an enumerated type, since that would make it a full machine word. */
+#define _CW_KASIO_ARRAYTYPE        1
+#define _CW_KASIO_BOOLEANTYPE      2
+#define _CW_KASIO_CONDITIONTYPE    3
+#define _CW_KASIO_DICTTYPE         4
+#define _CW_KASIO_FILETYPE         5
+#define _CW_KASIO_LOCKTYPE         6
+#define _CW_KASIO_MARKTYPE         7
+#define _CW_KASIO_MSTATETYPE       8
+#define _CW_KASIO_NAMETYPE         9
+#define _CW_KASIO_NULLTYPE        10
+#define _CW_KASIO_NUMBERTYPE      11
+#define _CW_KASIO_OPERATORTYPE    12
+#define _CW_KASIO_PACKEDARRAYTYPE 13
+#define _CW_KASIO_STRINGTYPE      14
+    cw_uint8_t type;
+    /* If non-zero, this is an extended type.  This field is only used for
+     * number and mstate objects, since no other types can switch between simple
+     * and extended. */
+    cw_uint8_t extended;
+    /* If non-zero, there is a breakpoint set on this object.  In general, this
+     * field is not looked at unless the interpreter has been put into debugging
+     * mode. */
+    cw_uint8_t breakpoint;
+    /* If non-zero, there is a watchpoint set on this object.  In general, this
+     * field is not looked at unless the interpreter has been put into debugging
+     * mode.  Note that setting a watchpoint on an extended type only detects
+     * changes that are made via that particular reference to the extension. */
+    cw_uint8_t watchpoint;
+  } flags;
+
   union
   {
     struct
     {
-      cw_arrayext_t * ext;
+      cw_kasioe_array_t * kasioe;
     } array;
     struct
     {
@@ -144,11 +177,11 @@ struct cw_kasio_s
     } boolean;
     struct
     {
-      cw_conditionext_t * ext;
+      cw_kasioe_condition_t * kasioe;
     } condition;
     struct
     {
-      cw_dictext_t * ext;
+      cw_kasioe_dict_t * kasioe;
     } dict;
     struct
     {
@@ -156,7 +189,7 @@ struct cw_kasio_s
     } file;
     struct
     {
-      cw_lockext_t * ext;
+      cw_kasioe_lock_t * kasioe;
     } lock;
     struct
     {
@@ -164,18 +197,18 @@ struct cw_kasio_s
     } mark;
     struct
     {
-      /* If (flags & _CW_KASIO_EXT), the mstate is:
+      /* If (flags.extended), the mstate is:
        *
        * accuracy : 32
        * point    : 0
        * base     : 10
        *
        * Otherwise, the mstate is in ext. */
-      cw_mstateext_t * ext;
+      cw_kasioe_mstate_t * kasioe;
     } mstate;
     struct
     {
-      cw_nameext_t * ext;
+      cw_kasioe_name_t * kasioe;
     } name;
     struct
     {
@@ -183,34 +216,25 @@ struct cw_kasio_s
     } null;
     struct
     {
-      /* If (flags & _CW_KASIO_EXT), this number is representable as a 32 bit
-       * signed integer.  Otherwise the ext contains the value. */
+      /* If (flags.extended), this number is representable as a 32 bit signed
+       * integer.  Otherwise the ext contains the value. */
       union
       {
-	cw_numberext_t * ext;
+	cw_kasioe_number_t * kasioe;
 	cw_sint32_t s32;
       } val;
     } number;
     struct
     {
-      cw_operatorext_t * ext;
+      cw_kasioe_operator_t * kasioe;
     } operator;
-    /* Internal use only. */
     struct
     {
-      cw_kasio_t * object;
-    } passthru;
-    struct
-    {
-      cw_packedarrayext_t * ext;
+      cw_kasioe_packedarray_t * kasioe;
     } packedarray;
     struct
     {
-      cw_saveext_t * ext;
-    } save;
-    struct
-    {
-      cw_stringext_t * ext;
+      cw_kasioe_string_t * kasioe;
     } string;
   } o;
 };

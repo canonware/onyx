@@ -10,7 +10,10 @@
  *
  ****************************************************************************/
 
+/* Defined in kasio.h to resolve a circular dependency. */
+#if (0)
 typedef struct cw_kasit_s cw_kasit_t;
+#endif
 
 struct cw_kasit_s
 {
@@ -47,6 +50,7 @@ struct cw_kasit_s
     _CW_KASIT_STATE_COMMENT,
     _CW_KASIT_STATE_NUMBER,
     _CW_KASIT_STATE_ASCII_STRING,
+    _CW_KASIT_STATE_ASCII_STRING_NEWLINE_CONT,
     _CW_KASIT_STATE_ASCII_STRING_PROT_CONT,
     _CW_KASIT_STATE_ASCII_STRING_CRLF_CONT,
     _CW_KASIT_STATE_ASCII_STRING_HEX_CONT,

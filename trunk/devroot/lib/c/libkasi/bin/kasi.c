@@ -50,8 +50,23 @@ main(int argc, char ** argv)
   kasi_new(&kasi);
   kasit_new(&kasit, NULL, NULL, &kasi);
 
-#if (0)
+#if (1)
   _cw_out_put("sizeof(cw_kasio_t): [i]\n", sizeof(cw_kasio_t));
+  _cw_out_put("sizeof(cw_kasioe_t): [i]\n", sizeof(cw_kasioe_t));
+  _cw_out_put("sizeof(cw_kasioe_t): [i]\n", sizeof(cw_kasioe_t));
+  _cw_out_put("sizeof(cw_kasioe_array_t): [i]\n", sizeof(cw_kasioe_array_t));
+  _cw_out_put("sizeof(cw_kasioe_condition_t): [i]\n",
+	      sizeof(cw_kasioe_condition_t));
+  _cw_out_put("sizeof(cw_kasioe_dict_t): [i]\n", sizeof(cw_kasioe_dict_t));
+  _cw_out_put("sizeof(cw_kasioe_lock_t): [i]\n", sizeof(cw_kasioe_lock_t));
+  _cw_out_put("sizeof(cw_kasioe_mstate_t): [i]\n", sizeof(cw_kasioe_mstate_t));
+  _cw_out_put("sizeof(cw_kasioe_name_t): [i]\n", sizeof(cw_kasioe_name_t));
+  _cw_out_put("sizeof(cw_kasioe_number_t): [i]\n", sizeof(cw_kasioe_number_t));
+  _cw_out_put("sizeof(cw_kasioe_operator_t): [i]\n",
+	      sizeof(cw_kasioe_operator_t));
+  _cw_out_put("sizeof(cw_kasioe_packedarray_t): [i]\n",
+	      sizeof(cw_kasioe_packedarray_t));
+  _cw_out_put("sizeof(cw_kasioe_string_t): [i]\n", sizeof(cw_kasioe_string_t));
   _cw_out_put("\n");
 
   _cw_out_put("sizeof(cw_kasis_t): [i]\n", sizeof(cw_kasis_t));
@@ -73,6 +88,7 @@ main(int argc, char ** argv)
   _cw_out_put("sizeof(cw_chi_t): [i]\n", sizeof(cw_chi_t));
   _cw_out_put("sizeof(cw_ch_t)[[[i]]: [i]\n", 256, _CW_CH_TABLE2SIZEOF(256));
   _cw_out_put("sizeof(cw_ch_t)[[[i]]: [i]\n", 16, _CW_CH_TABLE2SIZEOF(16));
+  _cw_out_put("sizeof(cw_dch_t): [i]\n", sizeof(cw_dch_t));
   _cw_out_put("\n");
 #endif
   
