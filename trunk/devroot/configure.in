@@ -553,8 +553,8 @@ AC_PATH_PROG(AR, ar, , $PATH)
 AC_PATH_PROG(LD, ld, , $PATH)
 AC_PATH_PROG(PERL, perl, , $PATH)
 AC_PATH_PROG(ACLOCAL, aclocal, , $PATH)
-AC_PATH_PROG(AUTOCONF, , autoconf, , $PATH)
-AC_PATH_PROG(AUTOHEADER, , autoheader, , $PATH)
+AC_PATH_PROG(AUTOCONF, autoconf, , $PATH)
+AC_PATH_PROG(AUTOHEADER, autoheader, , $PATH)
 
 dnl Do not build documentaion by default; instead use the prebuilt
 dnl documentation.
