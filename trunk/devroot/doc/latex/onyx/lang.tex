@@ -803,6 +803,134 @@ problem since the program size is not growing.
 Garbage collection is controlled via the \htmlref{gcdict}{systemdict:gcdict}
 dictionary, which is described in Section~\ref{sec:gcdict}.
 
+\section{Regular expressions}
+\label{sec:onyx_regular_expressions}
+
+There are two special Onyx object types that support regular expressions: regex
+and regsub.  Objects of these types are created via the
+\htmlref{\onyxop{}{regex}{}}{systemdict:regex} and
+\htmlref{\onyxop{}{regsub}{}}{systemdict:regsub} operators, respectively.  The
+\htmlref{\onyxop{}{match}{}}{systemdict:match} operator applies a regular
+expression to an input string, and the
+\htmlref{\onyxop{}{offsets}{}}{systemdict:offsets} operator returns the offsets
+of the matches found within the input string.  The
+\htmlref{\onyxop{}{subst}{}}{systemdict:subst} operator finds regular expression
+matches within an input string and applies a substitution template to the
+matches, thereby creating an output string.  See Section~\ref{sec:systemdict}
+for detailed documentation on the above-mentioned operators.  The rest of this
+section documents the syntax and semantics of Onyx's flavor of regular
+expressions.
+
+%\subsection{Special characters, and sequences}
+
+Regular expressions are written as strings in Onyx, so all of the standard
+special sequences within strings are interpreted directly by the Onyx scanner.
+Note that the {\bs} character is only special within strings if it is followed
+by a special sequence.  This allows regular expressions to seamlessly extend the
+set of special sequences within strings while maintaining a reasonably
+consistent syntax.  An introductory summary of the characters that can have
+special meaning within strings that specify regular expressions follows:
+	\begin{description}
+	\item[{\bs}] Begin a special sequence.
+	\item[{\pipe}] Separate alternate patterns.
+	\item[(] Start a group.
+	\item[)] End a group.
+	\item[{\lb}] Start a character class special sequence.
+	\item[\{] Start a count specification.
+	\item[{\carat}] Anchor to the beginning of the input/line.  Negate a
+		character class.
+	\item[\$] Anchor to the beginning of the input/line.
+	\item[*] Match 0 or more times.
+	\item[+] Match 1 or mor times.
+	\item[.] Match any character but {\bs}N ({\bs}r{\bs}n or {\bs}n).
+	\item[@] Match any character.
+	\end{description}
+
+The following sequences have special meaning within strings that specify regular
+expressions:
+	\begin{description}
+	\item[{\lb}\dots{\rb}] Character set.  To include {\rb}, it must be
+		{\bs} protected.  A range is separated by {\tt -} (A-Z, a-f,
+		0-9, etc.), so to include {\tt -} in a character set, place it
+		first. {\carat} must not come first, unless it is the only
+		character in the set.
+	\item[{\lb}{\carat}\dots{\rb}] Inverted character set.
+	\item[(\dots)] Capture/group.
+	\item[(?\dots)] Group, no capture.
+	\item[\dots{\pipe}\dots] Alternation, first match wins, as read left to
+		right.
+	\end{description}
+
+	\begin{description}
+	\item[\{n,m\}] Match at least {\tt n} times, at most {\tt m} times.
+	\item[\{n,\}] Match at least {\tt n} times.
+	\item[\{,m\}] Match at most {\tt m} times: {\tt \{0,m\}}.
+	\item[\{n\}] Match {\tt n} times: {\tt \{n,n\}}.
+	\item[?] Match 0 or 1 times: {\tt \{0,1\}}.
+	\item[*] Match 0 or more times: {\tt \{0,\}}.
+	\item[??] Non-greedy match 0 or 1 times: {\tt \{0,1\}}.
+	\item[*?] Non-greedy match 0 or more times: {\tt \{0,\}}.
+	\item[+?] Non-greedy match 1 or more times: {\tt \{1,\}}.
+	\end{description}
+
+	\begin{description}
+	\item[{\bs}N] Newline: {\tt (?{\bs}r{\bs}n{\pipe}{\bs}n)}.
+	\item[.] Any character but {\tt {\bs}N}.
+	\item[@] Any character.
+	\item[{\carat}] Anchor to beginning of input/line.
+	\item[\$] Anchor to end of input/line.
+	\item[{\bs}A] Anchor to beginning of input.
+	\item[{\bs}Z] Anchor to end of input.
+	\item[{\bs}z] Anchor to end of input, excluding {\bs}N.
+	\item[{\bs}{\lt}] Anchor to beginning of word boundary.
+	\item[{\bs}{\gt}] Anchor to end of word boundary.
+	\item[{\bs}G] Start where the previous match left off (or beginning of
+		input).
+	\end{description}
+
+	\begin{description}
+	\item[{\lb}:alpha:{\rb}] Alphabetic character.
+	\item[{\lb}:alnum:{\rb}] Alphanumeric character.
+	\item[{\lb}:ascii:{\rb}] ASCII character: {\tt
+		{\lb}{\bs}x00-{\bs}x7f{\rb}}.
+	\item[{\lb}:cntrl:{\rb}] Control character: {\tt
+		{\lb}{\bs}x01-{\bs}x1a{\rb}}.
+	\item[{\lb}:digit:{\rb}] Digit character.
+	\item[{\lb}:graph:{\rb}] Alphanumeric or punctuation character.
+	\item[{\lb}:lower:{\rb}] Lowercase character.
+	\item[{\lb}:print:{\rb}] Alphanumeric or punctuation character.
+	\item[{\lb}:punct:{\rb}] Punctuation character.
+	\item[{\lb}:space:{\rb}] Whitespace.
+	\item[{\lb}:upper:{\rb}] Uppercase character.
+	\item[{\lb}:word:{\rb}] Word character.
+	\item[{\lb}:xdigit:{\rb}] Hexadecimal digit: {\tt {\lb}0-9a-fA-F{\rb}}.
+	\item[{\lb}:\{\dots\}:{\rb}] Evaluate Onyx code to determine character
+		class membership.
+	\end{description}
+
+	\begin{description}
+	\item[{\bs}w] Alphanumeric plus \_: {\tt {\lb}A-Za-z0-9\_{\rb}}.
+	\item[{\bs}W] Non-alphanumeric or \_: {\tt
+		{\lb}{\carat}A-Za-z0-9\_{\rb}}.
+	\item[{\bs}s] Whitespace: {\tt {\lb}:space:{\rb}}.
+	\item[{\bs}S] Non-whitespace: {\tt {\lb}:{\carat}space:{\rb}}
+	\item[{\bs}d] Digit: {\tt {\lb}:digit:{\rb}}
+	\item[{\bs}D] Non-digit: {\tt {\lb}:{\carat}digit:{\rb}}
+	\item[{\bs}pP] Character with property {\tt P} (ex: {\tt {\bs}pw}).
+	\item[{\bs}p\{P\}] Character with property {\tt P} (ex: {\tt
+		{\bs}\{xdigit\}}.
+	\item[{\bs}Pp] Character without property {\tt p}.
+	\item[{\bs}P\{p\}] Character without property {\tt p}.
+	\item[{\bs}C] Single 8 bit byte: {\tt {\lb}{\bs}x00-{\bs}x7f{\rb}}.
+	\end{description}
+
+The following sequences have special meaning within strings that specify
+substitution templates:
+	\begin{description}
+	\item[{\bs}1..{\bs}9]: Refer to captured expressions 1 through 9.
+	\item[{\bs}\{n\}] Refer to captured expression {\tt n}.
+	\end{description}
+
 \section{Dictionary reference}
 
 All operators built in to Onyx have corresponding names that are composed
