@@ -426,6 +426,22 @@ The depth of the execution stack directly corresponds to the recursion depth of
 the interpreter.  Execution stack depth is limited in order to catch unbounded
 recursion.
 
+Onyx converts tail calls in order to prevent unbounded execution stack growth
+due to tail recursion.  For example, the following code does not cause the
+execution stack to grow:
+
+\begin{verbatim}
+/foo {foo} def
+foo
+\end{verbatim}
+
+The following code will result in an execution stack overflow:
+
+\begin{verbatim}
+/foo {foo `filler'} def
+foo
+\end{verbatim}
+
 \section{Error handling}
 
 The error handling mechanisms in Onyx are simple but flexible.  When an error

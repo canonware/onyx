@@ -1,3 +1,8 @@
+2001-07-24  Jason Evans  <jasone@canonware.com>
+
+	* doc/latex/onyx.tex (section{Interpreter recursion}): Document
+	tail call conversion.
+
 2001-07-18  Jason Evans  <jasone@canonware.com>
 
 	* doc/Cookfile.inc: Add -local_icons flag to latex2html invocation
