@@ -13,6 +13,7 @@
 
 #include "../include/libonyx/libonyx.h"
 
+#include <unistd.h>
 #include <sys/time.h>	/* For realtime operator. */
 #include <ctype.h>
 #include <errno.h>
@@ -163,6 +164,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(sdup),
 	ENTRY(seek),
 	ENTRY(self),
+	ENTRY(setenv),
 	ENTRY(setlocking),
 	ENTRY(sexch),
 	ENTRY(shift),
@@ -199,6 +201,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(undef),
 	ENTRY(unlink),
 	ENTRY(unlock),
+	ENTRY(unsetenv),
 	ENTRY(wait),
 	ENTRY(waitpid),
 	ENTRY(where),
@@ -3945,6 +3948,64 @@ systemdict_seek(cw_nxo_t *a_thread)
 }
 
 void
+systemdict_setenv(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *tstack, *envdict;
+	cw_nxo_t		*key, *val, *tnxo;
+	cw_nx_t			*nx;
+	cw_uint32_t		klen, vlen;
+	const cw_uint8_t	*str;
+	cw_uint8_t		*tstr;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	nx = nxo_thread_nx_get(a_thread);
+	envdict = nx_envdict_get(nx);
+	NXO_STACK_GET(val, ostack, a_thread);
+	NXO_STACK_DOWN_GET(key, ostack, a_thread, val);
+	if (nxo_type_get(key) != NXOT_NAME) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	if (nxo_type_get(val) != NXOT_STRING) {
+		systemdict_cvs(a_thread);
+		/* Get val again, since it may have changed. */
+		val = nxo_stack_get(ostack);
+	}
+
+	/* Create a new string big enough for: KEY=val\0 */
+	klen = nxo_name_len_get(key);
+	vlen = nxo_string_len_get(val);
+	tnxo = nxo_stack_push(tstack);
+	nxo_string_new(tnxo, nx, nxo_thread_currentlocking(a_thread), klen +
+	    vlen + 2);
+
+	/* Copy the key and value. */
+	tstr = nxo_string_get(tnxo);
+	str = nxo_name_str_get(key);
+	memcpy(tstr, str, klen);
+
+	tstr[klen] = '=';
+
+	str = nxo_string_get(val);
+	nxo_string_lock(val);
+	memcpy(&tstr[klen + 1], str, vlen);
+	nxo_string_unlock(val);
+
+	tstr[klen + vlen + 1] = '\0';
+
+	/* Do the puttenv(). */
+	if (putenv(tstr) == -1)
+		xep_throw(_CW_STASHX_OOM);
+	nxo_stack_pop(tstack);
+
+	/* Insert the key/value pair into envdict. */
+	nxo_dict_def(envdict, nx, key, val);
+
+	nxo_stack_npop(ostack, 2);
+}
+
+void
 systemdict_setlocking(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -5403,6 +5464,44 @@ systemdict_unlock(cw_nxo_t *a_thread)
 	}
 
 	nxo_mutex_unlock(mutex);
+
+	nxo_stack_pop(ostack);
+}
+
+void
+systemdict_unsetenv(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack, *tstack, *envdict;
+	cw_nxo_t		*key, *tkey;
+	cw_nx_t			*nx;
+	cw_uint32_t		len;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	nx = nxo_thread_nx_get(a_thread);
+	envdict = nx_envdict_get(nx);
+	NXO_STACK_GET(key, ostack, a_thread);
+	if (nxo_type_get(key) != NXOT_NAME) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+
+	/*
+	 * Create a copy of the key with an extra byte to store a '\0'
+	 * terminator.
+	 */
+	len = nxo_name_len_get(key);
+	tkey = nxo_stack_push(tstack);
+	nxo_string_new(tkey, nx, nxo_thread_currentlocking(a_thread), len + 1);
+	nxo_string_set(tkey, 0, nxo_name_str_get(key), len);
+	nxo_string_el_set(tkey, '\0', len - 1);
+
+	/* Do the unsetenv(). */
+	unsetenv(nxo_string_get(tkey));
+	nxo_stack_pop(tstack);
+
+	/* Undefine the key/value pair in envdict. */
+	nxo_dict_undef(envdict, nx, key);
 
 	nxo_stack_pop(ostack);
 }

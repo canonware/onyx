@@ -113,19 +113,20 @@ SRCS = [SRCS] [ONYX_SRCS];
                  scount_a.nx.in scount_b.nx.in scount_c.nx.in
                  scounttomark_a.nx.in scounttomark_b.nx.in scounttomark_c.nx.in
                  sdup_a.nx.in sdup_b.nx.in sdup_c.nx.in sdup_d.nx.in
-                 search.nx.in sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in
-                 sexch_d.nx.in shift_a.nx.in shift_b.nx.in shift_c.nx.in
-                 shift_d.nx.in sindex_a.nx.in sindex_b.nx.in sindex_c.nx.in
-                 sindex_d.nx.in sindex_e.nx.in sindex_f.nx.in sindex_g.nx.in
-                 spop_a.nx.in spop_b.nx.in spop_c.nx.in spop_d.nx.in
-                 sprint_a.nx.in spush_a.nx.in spush_b.nx.in spush_c.nx.in
-                 spush_d.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
-                 srand_d.nx.in sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in
-                 sroll_d.nx.in sroll_e.nx.in sroll_f.nx.in sroll_g.nx.in
-                 sroll_h.nx.in sroll_i.nx.in stack_a.nx.in start_a.nx.in
-                 start_b.nx.in stopped_a.nx.in stopped_b.nx.in stopped_c.nx.in
-                 string_a.nx.in string_b.nx.in string_c.nx.in string_d.nx.in
-                 sub_a.nx.in sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
+                 search.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
+                 sexch_a.nx.in sexch_b.nx.in sexch_c.nx.in sexch_d.nx.in
+                 shift_a.nx.in shift_b.nx.in shift_c.nx.in shift_d.nx.in
+                 sindex_a.nx.in sindex_b.nx.in sindex_c.nx.in sindex_d.nx.in
+                 sindex_e.nx.in sindex_f.nx.in sindex_g.nx.in spop_a.nx.in
+                 spop_b.nx.in spop_c.nx.in spop_d.nx.in sprint_a.nx.in
+                 spush_a.nx.in spush_b.nx.in spush_c.nx.in spush_d.nx.in
+                 srand_a.nx.in srand_b.nx.in srand_c.nx.in srand_d.nx.in
+                 sroll_a.nx.in sroll_b.nx.in sroll_c.nx.in sroll_d.nx.in
+                 sroll_e.nx.in sroll_f.nx.in sroll_g.nx.in sroll_h.nx.in
+                 sroll_i.nx.in stack_a.nx.in start_a.nx.in start_b.nx.in
+                 stopped_a.nx.in stopped_b.nx.in stopped_c.nx.in string_a.nx.in
+                 string_b.nx.in string_c.nx.in string_d.nx.in sub_a.nx.in
+                 sub_b.nx.in sub_c.nx.in sub_d.nx.in sym_lp_a.nx.in
                  sym_gt_a.nx.in sym_gt_b.nx.in sym_gt_c.nx.in sym_lt_a.nx.in
                  sym_rp_a.nx.in sym_rp_b.nx.in syntaxerror_a.nx.in
                  syntaxerror_b.nx.in syntaxerror_c.nx.in syntaxerror_d.nx.in
@@ -135,9 +136,10 @@ SRCS = [SRCS] [ONYX_SRCS];
                  throw_d.nx.in token_a.nx.in token_b.nx.in token_c.nx.in
                  truncate_a.nx.in truncate_b.nx.in truncate_c.nx.in
                  truncate_d.nx.in truncate_e.nx.in type_a.nx.in type_b.nx.in
-                 undef_a.nx.in undef_b.nx.in undef_c.nx.in where_a.nx.in
-                 where_b.nx.in xcheck_a.nx.in xcheck_b.nx.in xor_a.nx.in
-                 xor_b.nx.in xor_c.nx.in xor_d.nx.in xor_e.nx.in xor_f.nx.in;
+                 undef_a.nx.in undef_b.nx.in undef_c.nx.in unsetenv_a.nx.in
+                 unsetenv_b.nx.in where_a.nx.in where_b.nx.in xcheck_a.nx.in
+                 xcheck_b.nx.in xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in
+                 xor_e.nx.in xor_f.nx.in;
 
   otests = [fromto % [srcdir]/bin/onyx/test/% [otests]];
 

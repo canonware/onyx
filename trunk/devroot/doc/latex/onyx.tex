@@ -877,10 +877,12 @@ onyx:1>
 \label{sec:envdict}
 
 The envdict dictionary contains keys of type name and values of type string that
-correspond to the environment passed into the program.  The contents of envdict
-are propagated as the environment to sub-processes by
-\htmlref{\onyxop{}{exec}{}}{systemdict:exec}.  All threads share the same
-envdict, which is implicitly locked.
+correspond to the environment passed into the program.  All threads share the
+same envdict, which is implicitly locked.  Modifications to envdict should be
+made via the \htmlref{\onyxop{}{setenv}{}}{systemdict:setenv} and
+\htmlref{\onyxop{}{unsetenv}{}}{systemdict:unsetenv} operators.  If envdict is
+modified directly, the changes will not be visible to programs such as
+\binname{ps}.
 
 \subsection{errordict}
 \label{sec:errordict}
@@ -3206,8 +3208,6 @@ array. \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
--- & {\bf \htmlref{envdict}{systemdict:envdict}} & dict & Get envdict. \\
-\hline
 -- & {\bf \htmlref{gcdict}{systemdict:gcdict}} & dict & Get gcdict. \\
 \hline
 -- & {\bf \htmlref{globaldict}{systemdict:globaldict}} & dict & Get
@@ -3218,6 +3218,14 @@ sprintsdict. \\
 \hline
 -- & {\bf \htmlref{outputsdict}{systemdict:outputsdict}} & dict & Get
 outputsdict. \\
+\hline
+-- & {\bf \htmlref{envdict}{systemdict:envdict}} & dict & Get envdict. \\
+\hline
+key val & {\bf \htmlref{setenv}{systemdict:setenv}} & -- & Set environment
+variable. \\
+\hline
+key & {\bf \htmlref{unsetenv}{systemdict:unsetenv}} & -- & Unset environment
+variable. \\
 \hline
 -- & {\bf \htmlref{{\lt}}{systemdict:sym_lt}} & mark & Begin a dictionary
 declaration. \\
@@ -7367,6 +7375,43 @@ onyx:0> self 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:setenv}
+\index{setenv@\onyxop{}{setenv}{}}
+\item[{\onyxop{key val}{setenv}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[key: ]
+			A name object.
+		\item[val: ]
+			A value to associate with \oparg{key}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set an environment variable named \oparg{key} and associate
+		\oparg{val} with it.  If \oparg{val} is not a string, it is
+		converted to a string using the
+		\htmlref{\onyxop{}{cvs}{}}{systemdict:cvs} operator before the
+		environment variable is set.  An corresponding entry is also
+		created in the envdict dictionary.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> /foo `foo' setenv
+onyx:0> envdict /foo known 1 sprint
+true
+onyx:0> envdict /foo get 1 sprint
+`foo'
+onyx:0> /foo unsetenv
+onyx:0> envdict /foo known 1 sprint
+false
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:setlocking}
 \index{setlocking@\onyxop{}{setlocking}{}}
 \item[{\onyxop{boolean}{setlocking}{--}}: ]
@@ -8675,6 +8720,37 @@ onyx:3>
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> mutex dup lock unlock
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:unsetenv}
+\index{unsetenv@\onyxop{}{unsetenv}{}}
+\item[{\onyxop{key}{unsetenv}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[key: ]
+			A name object.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Unset \oparg{key} in the environment and in the envdict
+		dictionary, if \oparg{key} is defined.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> /foo `foo' setenv
+onyx:0> envdict /foo known 1 sprint
+true
+onyx:0> envdict /foo get 1 sprint
+`foo'
+onyx:0> /foo unsetenv
+onyx:0> envdict /foo known 1 sprint
+false
 onyx:0>
 		\end{verbatim}
 	\end{description}
