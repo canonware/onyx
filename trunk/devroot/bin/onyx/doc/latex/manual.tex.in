@@ -13,7 +13,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearemptydoublepage
-\chapter{onyx}
+\chapter{The onyx program}
 \binname{onyx} is a stand-alone onyx interpreter, with an integrated command
 line editor.  The onyx language is documented in a separate
 \htmlref{chapter}{onyxlang}, so this chapter documents only the differences from

@@ -13,7 +13,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearemptydoublepage
-\chapter{libstash}
+\chapter{The libstash library}
 The \libname{libstash} library defines a number of algorithms and data
 structures that are useful for many purposes.
 

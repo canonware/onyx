@@ -2,7 +2,7 @@
 #
 # Version: <Version>
 #
-# Building and installation instructions for Canonware software distributions.
+# Building and installation instructions for the Canonware Onyx distribution.
 #
 ################################################################################
 
@@ -93,14 +93,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	expense of performance.
 
 --disable-libstash-buf
-	Do not compile in libstash's buf class.  Note that libsock depends on
-	the buf class, so if this feature is disabled, libsock as well as the
-	programs that depend on libsock (ncat and proxy) will be left out of
-	the build, even if present in the source tree.
-
-	The main use of this flag is for statically embedding a minimally
-	small onyx interpreter.  It should not be specified when building
-	and installing libraries meant for general use.
+	Do not compile in libstash's buf class.  The main use of this flag
+	is for statically embedding a minimally small onyx interpreter.  It
+	should not be specified when building and installing libraries
+	meant for general use.
 
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the

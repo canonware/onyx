@@ -29,12 +29,9 @@ dnl ussing CW_BUILD_LIB so that library link order is correct.
 CW_ENABLE_LIBSTASH_BUF()
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
-dnl works on the link line (-lonyx -ledit -lsock -lstash).
+dnl works on the link line (-lonyx -ledit -lstash).
 CW_BUILD_LIB(libonyx, lib_onyx)
 CW_BUILD_LIB(libedit, lib_edit)
-if test "x$enable_libstash_buf" = "x1" ; then
-  CW_BUILD_LIB(libsock, lib_sock)
-fi
 CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for modules.
@@ -43,13 +40,7 @@ CW_BUILD_MOD(modnxgtk, mod_nxgtk)
 
 dnl Look for binaries.
 CW_BUILD_BIN(cover, bin_cover)
-if test "x$enable_libstash_buf" = "x1" ; then
-  CW_BUILD_BIN(ncat, bin_ncat)
-fi
 CW_BUILD_BIN(onyx, bin_onyx)
-if test "x$enable_libstash_buf" = "x1" ; then
-  CW_BUILD_BIN(proxy, bin_proxy)
-fi
 
 AC_CONFIG_HEADER($cfghdrs)
 AC_SUBST(cfghdrs)
@@ -71,7 +62,7 @@ case "${host}" in
 	AC_DEFINE(_CW_OS_SOLARIS, )
 	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
 	RPATH="-Wl,-R,"
-	LIBS="$LIBS -lposix4 -lthread -lsocket -lnsl"
+	LIBS="$LIBS -lposix4 -lthread"
         ;;
 esac
 AC_SUBST(RPATH)
@@ -193,10 +184,6 @@ main()
   rm -f _CW_MAX_IOV
 fi
 
-if test "x$build_libsock" = "xyes" ; then
-  AC_CHECK_FUNCS(poll, , AC_MSG_ERROR(Cannot build without poll))
-fi
-
 if test "x$build_libonyx" = "xyes" ; then
 
 dnl Try to figure out which field of struct dirent contains the entry string
@@ -224,10 +211,6 @@ AC_TRY_LINK([
    AC_MSG_ERROR(struct dirent too deviant)))
 fi
 
-if test "x$build_ncat" = "xyes" -o "x$build_proxy" = "xyes" ; then
-  AC_CHECK_FUNCS(inet_aton, AC_DEFINE(_CW_HAVE_INET_ATON))
-fi
-
 if test "x$build_onyx" = "xyes" ; then
   AC_CHECK_FUNCS(dlopen, , \
     AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl", \
@@ -250,10 +233,6 @@ fi
 
 if test "x$build_modnxgtk" = "xyes" ; then
   AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
-fi
-
-if test "x$build_proxy" = "xyes" ; then
-  AC_CHECK_HEADERS(netinet/ip_nat.h, AC_DEFINE(_CW_IPFILTER))
 fi
 
 dnl Set CFLAGS.

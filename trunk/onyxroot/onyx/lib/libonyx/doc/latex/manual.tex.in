@@ -13,7 +13,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearemptydoublepage
-\chapter{libonyx}
+\chapter{The libonyx library}
 The \libname{libonyx} library implements an embeddable \htmlref{onyx}{onyxlang}
 interpreter.  \libname{libonyx} is designed to allow multiple interpreter
 instances in the same program, though since \htmlref{onyx}{onyxlang} is a
