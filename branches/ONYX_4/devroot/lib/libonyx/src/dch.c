@@ -48,8 +48,8 @@ dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, cw_uint32_t a_base_table,
     }
     else
     {
-	retval = (cw_dch_t *) cw_opaque_calloc(mema_calloc_get(a_mema), 1,
-					       mema_arg_get(a_mema),
+	retval = (cw_dch_t *) cw_opaque_calloc(mema_calloc_get(a_mema),
+					       mema_arg_get(a_mema), 1,
 					       sizeof(cw_dch_t));
 	retval->is_malloced = TRUE;
     }

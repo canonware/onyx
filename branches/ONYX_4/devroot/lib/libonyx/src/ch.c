@@ -39,8 +39,8 @@ ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, cw_uint32_t a_table_size,
     }
     else
     {
-	retval = (cw_ch_t *) cw_opaque_calloc(mema_calloc_get(a_mema), 1,
-					      mema_arg_get(a_mema),
+	retval = (cw_ch_t *) cw_opaque_calloc(mema_calloc_get(a_mema),
+					      mema_arg_get(a_mema), 1,
 					      CW_CH_TABLE2SIZEOF(a_table_size));
 	retval->is_malloced = TRUE;
     }

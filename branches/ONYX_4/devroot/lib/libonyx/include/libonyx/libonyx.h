@@ -290,10 +290,10 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 #ifdef CW_DBG
 #define cw_opaque_alloc(a_func, a_arg, a_size)				\
     (a_func)((void *) (a_arg), (size_t) (a_size), __FILE__, __LINE__)
-#define cw_opaque_calloc(a_func, a_num, a_arg, a_size)			\
+#define cw_opaque_calloc(a_func, a_arg, a_num, a_size)			\
     (a_func)((void *) (a_arg), (size_t) (a_num), (size_t) (a_size),	\
 	     __FILE__, __LINE__)
-#define cw_opaque_realloc(a_func, a_ptr, a_arg, a_size, a_old_size)	\
+#define cw_opaque_realloc(a_func, a_arg, a_ptr, a_size, a_old_size)	\
     (a_func)((void *) (a_arg), (void *) (a_ptr), (size_t) (a_size),	\
 	     (size_t) (a_old_size), __FILE__, __LINE__)
 #define cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)			\
@@ -302,10 +302,10 @@ extern cw_mtx_t cw_g_getservbyname_mtx;
 #else
 #define cw_opaque_alloc(a_func, a_arg, a_size)				\
     (a_func)((void *) (a_arg), (size_t) (a_size), NULL, 0)
-#define cw_opaque_calloc(a_func, a_num, a_arg, a_size)			\
+#define cw_opaque_calloc(a_func, a_arg, a_num, a_size)			\
     (a_func)((void *) (a_arg), (size_t) (a_num), (size_t) (a_size),	\
 	     NULL, 0)
-#define cw_opaque_realloc(a_func, a_ptr, a_arg, a_size, a_old_size)	\
+#define cw_opaque_realloc(a_func, a_arg, a_ptr, a_size, a_old_size)	\
     (a_func)((void *) (a_arg), (void *) (a_ptr), (size_t) (a_size),	\
 	     (size_t) (a_old_size), NULL, 0)
 #define cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)			\
