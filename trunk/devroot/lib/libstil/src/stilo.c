@@ -568,24 +568,6 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	stilot_vtable[a_from->type].copy_f(a_to, a_from, a_stilt);
 }
 
-#if (0)
-void
-stilo_dup(cw_stilo_t *a_to, const cw_stilo_t *a_from, cw_stilt_t *a_stilt)
-{
-	_cw_check_ptr(a_to);
-	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_to->type == STILOT_NO);
-	_cw_check_ptr(a_from);
-	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
-
-	/* Copy. */
-	memcpy(a_to, a_from, sizeof(cw_stilo_t));
-
-	/* Reset debug flags on new copy. */
-	a_to->breakpoint = FALSE;
-	a_to->watchpoint = FALSE;
-}
-#endif
 void
 stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
@@ -2935,12 +2917,6 @@ stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 /*
  * null.
  */
-void
-stilo_null_new(cw_stilo_t *a_stilo)
-{
-	stilo_p_new(a_stilo, STILOT_NULL);
-}
-
 static void
 stilo_p_null_cast(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t a_type)
 {

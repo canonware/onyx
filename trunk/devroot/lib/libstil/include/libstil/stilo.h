@@ -335,7 +335,18 @@ cw_bool_t	stilo_name_key_comp(const void *a_k1, const void *a_k2);
 /*
  * null.
  */
-void		stilo_null_new(cw_stilo_t *a_stilo);
+#ifdef _LIBSTIL_DBG
+#define	stilo_null_new(a_stilo) do {					\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
+	(a_stilo)->type = STILOT_NULL;					\
+	(a_stilo)->magic = _CW_STILO_MAGIC;				\
+} while (0)
+#else
+#define	stilo_null_new(a_stilo) do {					\
+	memset((a_stilo), 0, sizeof(cw_stilo_t));			\
+	(a_stilo)->type = STILOT_NULL;					\
+} while (0)
+#endif
 
 /*
  * operator.
