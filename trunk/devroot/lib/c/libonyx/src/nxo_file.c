@@ -11,11 +11,13 @@
 
 #include "../include/libonyx/libonyx.h"
 
+#ifdef _CW_POSIX_FILE
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <poll.h>
+#endif
 
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
