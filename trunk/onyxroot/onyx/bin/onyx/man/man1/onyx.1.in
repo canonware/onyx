@@ -5,7 +5,7 @@
 
 Version: Onyx <Version = onyx>
 ..
-.TH onyx 1 "onyx, version Onyx <Version = onyx>"
+.TH onyx 1 "onyx, version <Version = onyx>"
 .hy 1
 .SH NAME
 onyx - stand-alone Onyx language interpreter
@@ -36,7 +36,8 @@ line editor.
 This manual page only documents the command line usage for
 .BR onyx ;
 much more extensive documentation is available in HTML, PostScript, and PDF
-formats.  See the FILES section below.
+formats.
+See the FILES section below.
 .SS Command line flags:
 .IP \-e
 .I <expr>
