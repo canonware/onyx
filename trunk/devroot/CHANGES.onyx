@@ -1,5 +1,7 @@
 2003-10-13 : Jason Evans <jasone@canonware.com>
 
+	* bin/onyx_config/src/onyx_config.nx.in : Add --onyx-path.
+
 	* Remove tonyx, and replace it with oonyx (and oonyx_config).  This
 	  makes it possible to run the debugger directly on oonyx (was not
 	  possible with tonyx), and oonyx_config makes it possible for external

@@ -31,7 +31,8 @@
 # - usage_string #string
 $usage_string
 `\
-Usage: onyx_config [--help] [--version] [--features] [--prefix]\n\
+Usage: onyx_config [--help] [--version] [--features]\n\
+                   [--prefix] [--onyx-path]\n\
                    [--cppflags] [--cflags] [--ldflags] [--libs]\n'
 def
 
@@ -73,6 +74,21 @@ $flags <
     `--prefix' {
 	`@prefix@' strip_print
     }
+' cat
+opt_dstdir {
+    `\
+    `--onyx-path' {
+	`@BINDIR@/onyx-@onyx_version@' strip_print
+    }
+' cat
+}{
+    `\
+    `--onyx-path' {
+	`@abs_objroot@/bin/onyx/bin/oonyx' strip_print
+    }
+' cat
+} ifelse
+`\
     `--version' {
 	`Canonware Onyx, version <Version = onyx>.' strip_print
     }

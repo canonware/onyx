@@ -13,6 +13,7 @@ onyx_config - configuration helper for building with libonyx
 .B onyx_config
 .BR [ \-\-help ]
 .BR [ \-\-prefix ]
+.BR [ \-\-onyx\-path ]
 .BR [ \-\-version ]
 .BR [ \-\-features ]
 .BR [ \-\-cppflags ]
@@ -28,6 +29,8 @@ program is a script that aids in building programs with libonyx.
 Display usage information and exit.
 .IP \-\-prefix
 Display the installation prefix.
+.IP \-\-onyx\-path
+Display the absolute path to the onyx binary.
 .IP \-\-version
 Display the release version.
 .IP \-\-features
