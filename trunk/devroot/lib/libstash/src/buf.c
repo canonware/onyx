@@ -236,7 +236,7 @@ buf_out_render(const char *a_format, cw_uint32_t a_len, const void *a_arg,
 	int     iov_cnt, i;
 
 	_cw_check_ptr(a_format);
-	_cw_assert(0 < a_len);
+	_cw_assert(a_len > 0);
 	_cw_check_ptr(a_arg);
 	_cw_check_ptr(r_buf);
 
