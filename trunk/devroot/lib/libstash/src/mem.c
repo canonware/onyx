@@ -87,7 +87,9 @@ mem_delete(cw_mem_t * a_mem)
       }
     }
     oh_delete(&a_mem->addr_hash);
+#ifdef _CW_REENTRANT
     mtx_delete(&a_mem->lock);
+#endif
   }
 #endif
   
