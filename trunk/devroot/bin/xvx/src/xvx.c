@@ -51,7 +51,7 @@ main(int argc, char **argv)
 cw_bool_t
 oom_handler(const void *a_data, cw_uint32_t a_size)
 {
-	if (dbg_is_registered(cw_g_dbg, "ncat_error")) {
+	if (dbg_is_registered(cw_g_dbg, "xvx_error")) {
 		out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 		    "Memory allocation error for size [i]\n", a_size);
 	}
