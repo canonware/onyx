@@ -72,6 +72,7 @@ void
 modslate_init(void *a_arg, cw_nxo_t *a_thread)
 {
     cw_nxo_t *estack;
+    cw_nxmod_t *nxmod;
     struct termios t; /* XXX Temporary hack. */
 
     /* The interpreter is currently executing a hook that holds a reference to
@@ -81,6 +82,10 @@ modslate_init(void *a_arg, cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     nxo_no_new(&hook_data);
     nxo_dup(&hook_data, nxo_stack_get(estack));
+
+    /* Set the GC iteration for module destruction. */
+    nxmod = (cw_nxmod_t *) nxo_hook_data_get(&hook_data);
+    nxmod->iter = 2;
 
     /* Initialize hooks. */
     modslate_buffer_init(a_thread);
