@@ -66,6 +66,9 @@
  
 #ifdef _LIBSOCK_USE_SOCKS
 #  ifndef _SOCKS_H_
+#    include <sys/types.h>
+#    include <sys/socket.h>
+#    include <netinet/in.h>
 #    include "socks.h"
 #    define _SOCKS_H_
 #  endif

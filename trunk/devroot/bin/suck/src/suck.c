@@ -134,7 +134,7 @@ main(int argc, char ** argv)
     _cw_error("Memory allocation error");
   }
   
-  if (TRUE == socks_listen(socks, &opt_port))
+  if (TRUE == socks_listen(socks, INADDR_ANY, &opt_port))
   {
     exit(1);
   }

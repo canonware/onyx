@@ -324,7 +324,8 @@ main(int argc, char ** argv)
   else
   {
     struct timespec timeout, zero;
-    int fd;
+    int fd, fd_sock, fd_sock_stdin;
+    cw_sint32_t bytes_read;
     cw_bool_t done_reading = FALSE;
     char * str = NULL;
     
@@ -333,12 +334,14 @@ main(int argc, char ** argv)
 
     sock_stdin = sock_new(NULL, 16384);
     sock_wrap(sock_stdin, dup(0), FALSE);
-    sockb_in_notify(mq, sock_get_fd(sock_stdin));
+    fd_sock_stdin = sock_get_fd(sock_stdin);
+    sockb_in_notify(mq, fd_sock_stdin);
     
     sock_stdout = sock_new(NULL, 0);
     sock_wrap(sock_stdout, 1, FALSE);
 
-    sockb_in_notify(mq, sock_get_fd(sock));
+    fd_sock = sock_get_fd(sock);
+    sockb_in_notify(mq, fd_sock);
 
     zero.tv_sec = 0;
     zero.tv_nsec = 0;
@@ -376,14 +379,9 @@ main(int argc, char ** argv)
 	}
       }
 
-      if (sock_get_fd(sock_stdin) == fd)
+      if (fd_sock_stdin == fd)
       {
-	if (0 >= sock_read(sock_stdin, buf, 0, &zero))
-	{
-	  sock_flush_out(sock_stdout);
-	  done_reading = TRUE;
-	}
-	else
+	while (0 <= (bytes_read = sock_read(sock_stdin, buf, 0, &zero)))
 	{
 	  if (NULL != opt_log)
 	  {
@@ -418,16 +416,19 @@ main(int argc, char ** argv)
 	  {
 	    sock_flush_out(sock_stdout);
 	    done_reading = TRUE;
+	    break;
 	  }
 	}
-      }
-      else if (sock_get_fd(sock) == fd)
-      {
-	if (0 >= sock_read(sock, buf, 0, &zero))
+
+	if ((FALSE == done_reading) && (0 > bytes_read))
 	{
-	  break;
+	  sock_flush_out(sock_stdout);
+	  done_reading = TRUE;
 	}
-	else
+      }
+      else if (fd_sock == fd)
+      {
+	while (0 <= (bytes_read = sock_read(sock, buf, 0, &zero)))
 	{
 	  if (NULL != opt_log)
 	  {
@@ -559,7 +560,7 @@ server_setup(int a_port, struct timespec * a_timeout)
   socks = socks_new();
 
   port = ask_port = a_port;
-  if (TRUE == socks_listen(socks, &port))
+  if (TRUE == socks_listen(socks, INADDR_ANY, &port))
   {
     retval = NULL;
     goto RETURN;
@@ -598,7 +599,7 @@ char *
 get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 {
   char * retval, * p, * p_a, * p_b, * t_str;
-  char c_trans[4], line_a[81], line_b[81],
+  char * c_trans, line_a[81], line_b[81],
     line_sep[81]
     = "         |                 |                 |                 |\n";
   cw_uint32_t str_len, buf_size, i, j;
@@ -685,399 +686,399 @@ get_out_str_pretty(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
       switch (c)
       {
 	case 0x00:
-	  strcpy(c_trans, "nul");
+	  c_trans = "nul";
 	  break;
 	case 0x01:
-	  strcpy(c_trans, "soh");
+	  c_trans = "soh";
 	  break;
 	case 0x02:
-	  strcpy(c_trans, "stx");
+	  c_trans = "stx";
 	  break;
 	case 0x03:
-	  strcpy(c_trans, "etx");
+	  c_trans = "etx";
 	  break;
 	case 0x04:
-	  strcpy(c_trans, "eot");
+	  c_trans = "eot";
 	  break;
 	case 0x05:
-	  strcpy(c_trans, "enq");
+	  c_trans = "enq";
 	  break;
 	case 0x06:
-	  strcpy(c_trans, "ack");
+	  c_trans = "ack";
 	  break;
 	case 0x07:
-	  strcpy(c_trans, "bel");
+	  c_trans = "bel";
 	  break;
 	case 0x08:
-	  strcpy(c_trans, "bs");
+	  c_trans = "bs";
 	  break;
 	case 0x09:
-	  strcpy(c_trans, "ht");
+	  c_trans = "ht";
 	  break;
 	case 0x0a:
-	  strcpy(c_trans, "lf");
+	  c_trans = "lf";
 	  break;
 	case 0x0b:
-	  strcpy(c_trans, "vt");
+	  c_trans = "vt";
 	  break;
 	case 0x0c:
-	  strcpy(c_trans, "ff");
+	  c_trans = "ff";
 	  break;
 	case 0x0d:
-	  strcpy(c_trans, "cr");
+	  c_trans = "cr";
 	  break;
 	case 0x0e:
-	  strcpy(c_trans, "so");
+	  c_trans = "so";
 	  break;
 	case 0x0f:
-	  strcpy(c_trans, "si");
+	  c_trans = "si";
 	  break;
 	  
 	case 0x10:
-	  strcpy(c_trans, "dle");
+	  c_trans = "dle";
 	  break;
 	case 0x11:
-	  strcpy(c_trans, "dc1");
+	  c_trans = "dc1";
 	  break;
 	case 0x12:
-	  strcpy(c_trans, "dc2");
+	  c_trans = "dc2";
 	  break;
 	case 0x13:
-	  strcpy(c_trans, "dc3");
+	  c_trans = "dc3";
 	  break;
 	case 0x14:
-	  strcpy(c_trans, "dc4");
+	  c_trans = "dc4";
 	  break;
 	case 0x15:
-	  strcpy(c_trans, "ack");
+	  c_trans = "ack";
 	  break;
 	case 0x16:
-	  strcpy(c_trans, "syn");
+	  c_trans = "syn";
 	  break;
 	case 0x17:
-	  strcpy(c_trans, "etb");
+	  c_trans = "etb";
 	  break;
 	case 0x18:
-	  strcpy(c_trans, "can");
+	  c_trans = "can";
 	  break;
 	case 0x19:
-	  strcpy(c_trans, "em");
+	  c_trans = "em";
 	  break;
 	case 0x1a:
-	  strcpy(c_trans, "sub");
+	  c_trans = "sub";
 	  break;
 	case 0x1b:
-	  strcpy(c_trans, "ec");
+	  c_trans = "ec";
 	  break;
 	case 0x1c:
-	  strcpy(c_trans, "fs");
+	  c_trans = "fs";
 	  break;
 	case 0x1d:
-	  strcpy(c_trans, "gs");
+	  c_trans = "gs";
 	  break;
 	case 0x1e:
-	  strcpy(c_trans, "rs");
+	  c_trans = "rs";
 	  break;
 	case 0x1f:
-	  strcpy(c_trans, "us");
+	  c_trans = "us";
 	  break;
 
 	case 0x20:
-	  strcpy(c_trans, "sp");
+	  c_trans = "sp";
 	  break;
 	case 0x21:
-	  strcpy(c_trans, "!");
+	  c_trans = "!";
 	  break;
 	case 0x22:
-	  strcpy(c_trans, "\"");
+	  c_trans = "\"";
 	  break;
 	case 0x23:
-	  strcpy(c_trans, "#");
+	  c_trans = "#";
 	  break;
 	case 0x24:
-	  strcpy(c_trans, "$");
+	  c_trans = "$";
 	  break;
 	case 0x25:
-	  strcpy(c_trans, "%");
+	  c_trans = "%";
 	  break;
 	case 0x26:
-	  strcpy(c_trans, "&");
+	  c_trans = "&";
 	  break;
 	case 0x27:
-	  strcpy(c_trans, "'");
+	  c_trans = "'";
 	  break;
 	case 0x28:
-	  strcpy(c_trans, "(");
+	  c_trans = "(";
 	  break;
 	case 0x29:
-	  strcpy(c_trans, ")");
+	  c_trans = ")";
 	  break;
 	case 0x2a:
-	  strcpy(c_trans, "*");
+	  c_trans = "*";
 	  break;
 	case 0x2b:
-	  strcpy(c_trans, "+");
+	  c_trans = "+";
 	  break;
 	case 0x2c:
-	  strcpy(c_trans, ",");
+	  c_trans = ",";
 	  break;
 	case 0x2d:
-	  strcpy(c_trans, "-");
+	  c_trans = "-";
 	  break;
 	case 0x2e:
-	  strcpy(c_trans, ".");
+	  c_trans = ".";
 	  break;
 	case 0x2f:
-	  strcpy(c_trans, "/");
+	  c_trans = "/";
 	  break;
 
 	case 0x30:
-	  strcpy(c_trans, "0");
+	  c_trans = "0";
 	  break;
 	case 0x31:
-	  strcpy(c_trans, "1");
+	  c_trans = "1";
 	  break;
 	case 0x32:
-	  strcpy(c_trans, "2");
+	  c_trans = "2";
 	  break;
 	case 0x33:
-	  strcpy(c_trans, "3");
+	  c_trans = "3";
 	  break;
 	case 0x34:
-	  strcpy(c_trans, "4");
+	  c_trans = "4";
 	  break;
 	case 0x35:
-	  strcpy(c_trans, "5");
+	  c_trans = "5";
 	  break;
 	case 0x36:
-	  strcpy(c_trans, "6");
+	  c_trans = "6";
 	  break;
 	case 0x37:
-	  strcpy(c_trans, "7");
+	  c_trans = "7";
 	  break;
 	case 0x38:
-	  strcpy(c_trans, "8");
+	  c_trans = "8";
 	  break;
 	case 0x39:
-	  strcpy(c_trans, "9");
+	  c_trans = "9";
 	  break;
 	case 0x3a:
-	  strcpy(c_trans, ":");
+	  c_trans = ":";
 	  break;
 	case 0x3b:
-	  strcpy(c_trans, ";");
+	  c_trans = ";";
 	  break;
 	case 0x3c:
-	  strcpy(c_trans, "<");
+	  c_trans = "<";
 	  break;
 	case 0x3d:
-	  strcpy(c_trans, "=");
+	  c_trans = "=";
 	  break;
 	case 0x3e:
-	  strcpy(c_trans, ">");
+	  c_trans = ">";
 	  break;
 	case 0x3f:
-	  strcpy(c_trans, "?");
+	  c_trans = "?";
 	  break;
 
   	case 0x40:
-	  strcpy(c_trans, "@");
+	  c_trans = "@";
 	  break;
 	case 0x41:
-	  strcpy(c_trans, "A");
+	  c_trans = "A";
 	  break;
 	case 0x42:
-	  strcpy(c_trans, "B");
+	  c_trans = "B";
 	  break;
 	case 0x43:
-	  strcpy(c_trans, "C");
+	  c_trans = "C";
 	  break;
 	case 0x44:
-	  strcpy(c_trans, "D");
+	  c_trans = "D";
 	  break;
 	case 0x45:
-	  strcpy(c_trans, "E");
+	  c_trans = "E";
 	  break;
 	case 0x46:
-	  strcpy(c_trans, "F");
+	  c_trans = "F";
 	  break;
 	case 0x47:
-	  strcpy(c_trans, "G");
+	  c_trans = "G";
 	  break;
 	case 0x48:
-	  strcpy(c_trans, "H");
+	  c_trans = "H";
 	  break;
 	case 0x49:
-	  strcpy(c_trans, "I");
+	  c_trans = "I";
 	  break;
 	case 0x4a:
-	  strcpy(c_trans, "J");
+	  c_trans = "J";
 	  break;
 	case 0x4b:
-	  strcpy(c_trans, "K");
+	  c_trans = "K";
 	  break;
 	case 0x4c:
-	  strcpy(c_trans, "L");
+	  c_trans = "L";
 	  break;
 	case 0x4d:
-	  strcpy(c_trans, "M");
+	  c_trans = "M";
 	  break;
 	case 0x4e:
-	  strcpy(c_trans, "N");
+	  c_trans = "N";
 	  break;
 	case 0x4f:
-	  strcpy(c_trans, "O");
+	  c_trans = "O";
 	  break;
 
   	case 0x50:
-	  strcpy(c_trans, "P");
+	  c_trans = "P";
 	  break;
 	case 0x51:
-	  strcpy(c_trans, "Q");
+	  c_trans = "Q";
 	  break;
 	case 0x52:
-	  strcpy(c_trans, "R");
+	  c_trans = "R";
 	  break;
 	case 0x53:
-	  strcpy(c_trans, "S");
+	  c_trans = "S";
 	  break;
 	case 0x54:
-	  strcpy(c_trans, "T");
+	  c_trans = "T";
 	  break;
 	case 0x55:
-	  strcpy(c_trans, "U");
+	  c_trans = "U";
 	  break;
 	case 0x56:
-	  strcpy(c_trans, "V");
+	  c_trans = "V";
 	  break;
 	case 0x57:
-	  strcpy(c_trans, "W");
+	  c_trans = "W";
 	  break;
 	case 0x58:
-	  strcpy(c_trans, "X");
+	  c_trans = "X";
 	  break;
 	case 0x59:
-	  strcpy(c_trans, "Y");
+	  c_trans = "Y";
 	  break;
 	case 0x5a:
-	  strcpy(c_trans, "Z");
+	  c_trans = "Z";
 	  break;
 	case 0x5b:
-	  strcpy(c_trans, "[");
+	  c_trans = "[";
 	  break;
 	case 0x5c:
-	  strcpy(c_trans, "\\");
+	  c_trans = "\\";
 	  break;
 	case 0x5d:
-	  strcpy(c_trans, "]");
+	  c_trans = "]";
 	  break;
 	case 0x5e:
-	  strcpy(c_trans, "^");
+	  c_trans = "^";
 	  break;
 	case 0x5f:
-	  strcpy(c_trans, "_");
+	  c_trans = "_";
 	  break;
 
   	case 0x60:
-	  strcpy(c_trans, "`");
+	  c_trans = "`";
 	  break;
 	case 0x61:
-	  strcpy(c_trans, "a");
+	  c_trans = "a";
 	  break;
 	case 0x62:
-	  strcpy(c_trans, "b");
+	  c_trans = "b";
 	  break;
 	case 0x63:
-	  strcpy(c_trans, "c");
+	  c_trans = "c";
 	  break;
 	case 0x64:
-	  strcpy(c_trans, "d");
+	  c_trans = "d";
 	  break;
 	case 0x65:
-	  strcpy(c_trans, "e");
+	  c_trans = "e";
 	  break;
 	case 0x66:
-	  strcpy(c_trans, "f");
+	  c_trans = "f";
 	  break;
 	case 0x67:
-	  strcpy(c_trans, "g");
+	  c_trans = "g";
 	  break;
 	case 0x68:
-	  strcpy(c_trans, "h");
+	  c_trans = "h";
 	  break;
 	case 0x69:
-	  strcpy(c_trans, "i");
+	  c_trans = "i";
 	  break;
 	case 0x6a:
-	  strcpy(c_trans, "j");
+	  c_trans = "j";
 	  break;
 	case 0x6b:
-	  strcpy(c_trans, "k");
+	  c_trans = "k";
 	  break;
 	case 0x6c:
-	  strcpy(c_trans, "l");
+	  c_trans = "l";
 	  break;
 	case 0x6d:
-	  strcpy(c_trans, "m");
+	  c_trans = "m";
 	  break;
 	case 0x6e:
-	  strcpy(c_trans, "n");
+	  c_trans = "n";
 	  break;
 	case 0x6f:
-	  strcpy(c_trans, "o");
+	  c_trans = "o";
 	  break;
 
   	case 0x70:
-	  strcpy(c_trans, "p");
+	  c_trans = "p";
 	  break;
 	case 0x71:
-	  strcpy(c_trans, "q");
+	  c_trans = "q";
 	  break;
 	case 0x72:
-	  strcpy(c_trans, "r");
+	  c_trans = "r";
 	  break;
 	case 0x73:
-	  strcpy(c_trans, "s");
+	  c_trans = "s";
 	  break;
 	case 0x74:
-	  strcpy(c_trans, "t");
+	  c_trans = "t";
 	  break;
 	case 0x75:
-	  strcpy(c_trans, "u");
+	  c_trans = "u";
 	  break;
 	case 0x76:
-	  strcpy(c_trans, "v");
+	  c_trans = "v";
 	  break;
 	case 0x77:
-	  strcpy(c_trans, "w");
+	  c_trans = "w";
 	  break;
 	case 0x78:
-	  strcpy(c_trans, "x");
+	  c_trans = "x";
 	  break;
 	case 0x79:
-	  strcpy(c_trans, "y");
+	  c_trans = "y";
 	  break;
 	case 0x7a:
-	  strcpy(c_trans, "z");
+	  c_trans = "z";
 	  break;
 	case 0x7b:
-	  strcpy(c_trans, "{");
+	  c_trans = "{";
 	  break;
 	case 0x7c:
-	  strcpy(c_trans, "|");
+	  c_trans = "|";
 	  break;
 	case 0x7d:
-	  strcpy(c_trans, "}");
+	  c_trans = "}";
 	  break;
 	case 0x7e:
-	  strcpy(c_trans, "~");
+	  c_trans = "~";
 	  break;
 	case 0x7f:
-	  strcpy(c_trans, "del");
+	  c_trans = "del";
 	  break;
 
 	default:
-	  strcpy(c_trans, "---");
+	  c_trans = "---";
 	  break;
       }
 

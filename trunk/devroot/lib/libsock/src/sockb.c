@@ -1020,66 +1020,35 @@ sockb_p_entry_func(void * a_arg)
 	  /* Build up buf_in to be at least large enough for the readv(). */
 	  while (buf_get_size(&buf_in) < max_read)
 	  {
-	    bufc = sockb_get_spare_bufc();
-	    if (NULL == bufc)
+	    while (NULL == (bufc = sockb_get_spare_bufc()))
 	    {
-	      /* There isn't enough free memory to make the incoming buffer as
-	       * big as we would like.  As long as the incoming buffer has at
-	       * least some space though, continue processing.  Otherwise, we
-	       * could loop, trying to allocate buffer space.  For the first
-	       * cut at implementing this though, just abort(). */
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	      {
 		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "Allocation error.  Got [i]/[i] desired bytes"
-			  " buffer space\n",
-			  buf_get_size(&buf_in), max_read);
+			  "Memory allocation error; yielding\n");
 	      }
-	      
-	      if (0 < buf_get_size(&buf_in))
-	      {
-		break;
-	      }
-	      else
-	      {
-		_cw_error("No space in &buf_in");
-	      }
+	      thd_yield();
 	    }
-	    if (TRUE
-		== buf_append_bufc(&buf_in, bufc, 0,
-				   pezz_get_buffer_size(
-				     &g_sockb->buffer_pool)))
+	    
+	    while (TRUE == buf_append_bufc(&buf_in, bufc, 0,
+					   pezz_get_buffer_size(
+					     &g_sockb->buffer_pool)))
 	    {
-	      /* As above, we have a memory allocation problem.  Clean up
-	       * bufc, but otherwise take the same approach. */
-	      bufc_delete(bufc);
-	      
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	      {
 		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "Allocation error.  Got [i]/[i] desired bytes"
-			  " buffer space\n",
-			  buf_get_size(&buf_in), max_read);
+			  "Memory allocation error; yielding\n");
 	      }
-	      
-	      if (0 < buf_get_size(&buf_in))
-	      {
-		break;
-	      }
-	      else
-	      {
-		_cw_error("No space in &buf_in");
-	      }
+	      thd_yield();
 	    }
 	    bufc_delete(bufc);
 	  }
 	  
 	  /* Get an iovec for reading.  This somewhat goes against the idea of
-	     * never writing the internals of a buf after the buffers have been
-	     * inserted.  However, this is quite safe, since as a result of how
-	     * we use buf_in, we know for sure that there are no other
-	     * references to the byte ranges of the buffers we are writing
-	     * to. */
+	   * never writing the internals of a buf after the buffers have been
+	   * inserted.  However, this is quite safe, since as a result of how we
+	   * use buf_in, we know for sure that there are no other references to
+	   * the byte ranges of the buffers we are writing to. */
 	  iov = buf_get_iovec(&buf_in, max_read, TRUE, &iov_cnt);
 
 	  bytes_read = readv(sockfd, iov, iov_cnt);
@@ -1087,74 +1056,43 @@ sockb_p_entry_func(void * a_arg)
 	  out_put(cw_g_out, "([i|s:s])", bytes_read);
 #endif
 
-	  if (bytes_read > 0)
+	  if (0 < bytes_read)
 	  {
+	    cw_uint32_t in_buf_free;
+	    
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 
-	    if (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
+	    while (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
 	    {
 	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
 	      {
 		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
-			  "Memory allocation error.  Closing sockfd [i]\n",
-			  sockfd);
+			  "Memory allocation error; yielding\n");
 	      }
-	      
-	      /* Fill this hole, decrement i, continue. */
-	      nfds--;
-	      if (regs[sockfd].pollfd_pos != nfds)
-	      {
-#ifdef _LIBSOCK_SOCKB_CONFESS
-		out_put(cw_g_out, "h([i]-->[i])", nfds, i);
-#endif
-	      
-		regs[fds[nfds].fd].pollfd_pos = i;
-		memcpy(&fds[i], &fds[nfds], sizeof(struct pollfd));
-		i--;
-	      }
-	      regs[sockfd].pollfd_pos = -1;
-
-	      sock_l_error_callback(regs[sockfd].sock);
+	      thd_yield();
+	    }
 	    
+	    /* Append to the sock's in_buf. */
+	    in_buf_free = sock_l_put_in_data(regs[sockfd].sock, &tmp_buf);
+	    if (0 == in_buf_free)
+	    {
+	      /* Turn off the read bit for this sock.  The sock will send a
+	       * message when there is once again space. */
+#ifdef _LIBSOCK_SOCKB_CONFESS
+	      out_put(cw_g_out, "u");
+#endif
+	      fds[i].events ^= (fds[i].events & POLLIN);
+	    }
+
+	    /* Only send a message if the sock buffer was empty before we put
+	     * data in it. */
+	    if (0 == (max_read - (in_buf_free + bytes_read)))
+	    {
 	      if (NULL != regs[sockfd].notify_mq)
 	      {
 		if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
 		{
 		  regs[sockfd].notify_mq = NULL;
-		}
-	      }
-
-#ifdef _LIBSOCK_SOCKB_CONFESS
-	      out_put(cw_g_out, "\n");
-#endif
-	      continue;
-	    }
-
-	    {
-	      cw_uint32_t in_buf_free;
-	      
-	      /* Append to the sock's in_buf. */
-	      in_buf_free = sock_l_put_in_data(regs[sockfd].sock, &tmp_buf);
-	      if (0 == in_buf_free)
-	      {
-		/* Turn off the read bit for this sock.  The sock will send a
-		 * message when there is once again space. */
-#ifdef _LIBSOCK_SOCKB_CONFESS
-		out_put(cw_g_out, "u");
-#endif
-		fds[i].events ^= (fds[i].events & POLLIN);
-	      }
-
-	      /* Only send a message if the sock buffer was empty before we
-	       * put data in it. */
-	      if (0 == (max_read - (in_buf_free + bytes_read)))
-	      {
-		if (NULL != regs[sockfd].notify_mq)
-		{
-		  if (TRUE == sockb_p_notify(regs[sockfd].notify_mq, sockfd))
-		  {
-		    regs[sockfd].notify_mq = NULL;
-		  }
 		}
 	      }
 	    }
@@ -1210,8 +1148,77 @@ sockb_p_entry_func(void * a_arg)
 	}
 	else if (fds[i].revents & POLLHUP)
 	{
-	  /* Linux (seemingly correctly) sets POLLHUP instead of POLLIN when a
-	   * socket is closed. */
+	  const struct iovec * iov;
+	  int iov_cnt;
+	  ssize_t bytes_read;
+	  cw_bufc_t * bufc = NULL;
+	  cw_uint32_t buffer_size;
+
+	  j++;
+	  
+#ifdef _LIBSOCK_SOCKB_CONFESS
+	  out_put(cw_g_out, "r(");
+#endif
+	  
+	  /* It may be that there are buffered data to be read, even though the
+	   * descriptor has been closed.  If we succeed in reading data, there
+	   * is no choice but to buffer all the read data in the sock's input
+	   * buffer, even if it overfills the buffer.  We must keep reading
+	   * until there are no more data, since this is the last time that this
+	   * descriptor will be paid any attention. */
+
+	  buffer_size = pezz_get_buffer_size(&g_sockb->buffer_pool);
+
+	  _cw_assert(0 == buf_get_size(&buf_in));
+	  do
+	  {
+	    /* Add some more space to &buf_in if necessary. */
+	    if (0 == buf_get_size(&buf_in))
+	    {
+	      while (NULL == (bufc = sockb_get_spare_bufc()))
+	      {
+		if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+		{
+		  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+			    "Memory allocation error; yielding\n");
+		}
+		thd_yield();
+	      }
+
+	      while (TRUE == buf_append_bufc(&buf_in, bufc, 0, buffer_size))
+	      {
+		if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+		{
+		  out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+			    "Memory allocation error; yielding\n");
+		}
+		thd_yield();
+	      }
+	      /* Drop our reference. */
+	      bufc_delete(bufc);
+	    }
+
+	    iov = buf_get_iovec(&buf_in, buffer_size, TRUE, &iov_cnt);
+
+	    bytes_read = readv(sockfd, iov, iov_cnt);
+
+#ifdef _LIBSOCK_SOCKB_CONFESS
+	    out_put(cw_g_out, "[i|s:s][s]",
+		    bytes_read, (0 < bytes_read) ? ", " : ")");
+#endif
+	    _cw_assert(buf_get_size(&tmp_buf) == 0);
+
+	    while (TRUE == buf_split(&tmp_buf, &buf_in, bytes_read))
+	    {
+	      if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	      {
+		out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+			  "Memory allocation error; yielding\n");
+	      }
+	      thd_yield();
+	    }
+	    sock_l_put_in_data(regs[sockfd].sock, &tmp_buf);
+	  } while (0 < bytes_read);
 
 #ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "c");
@@ -1310,7 +1317,7 @@ sockb_p_entry_func(void * a_arg)
 	    buf_release_head_data(&tmp_buf,
 				  buf_get_size(&tmp_buf));
 	    
-	    if (dbg_is_registered(cw_g_dbg, "sockb_error"))
+	    if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
 	    {
 	      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
 			"Error in writev(): [s]\n", strerror(errno));

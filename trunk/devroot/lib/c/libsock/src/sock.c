@@ -843,14 +843,24 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   if (0 < buf_get_size(&a_sock->out_buf))
   {
     /* There are still data in out_buf, so preserve the order. */
-    if (TRUE == buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE))
+    while (TRUE == buf_catenate_buf(a_buf, &a_sock->out_buf, FALSE))
     {
-      goto OOM;
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		  "Memory allocation error; yielding\n");
+      }
+      thd_yield();
     }
   }
-  if (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE))
+  while (TRUE == buf_catenate_buf(&a_sock->out_buf, a_buf, FALSE))
   {
-    goto OOM;
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		"Memory allocation error; yielding\n");
+    }
+    thd_yield();
   }
   _cw_assert(0 == buf_get_size(a_buf));
   
@@ -866,37 +876,27 @@ sock_l_put_back_out_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
   mtx_unlock(&a_sock->out_lock);
 
   return retval;
-  
-  OOM:
-  mtx_unlock(&a_sock->out_lock);
-  buf_release_head_data(a_buf, buf_get_size(a_buf));
-  retval = 0;
-  
-  mtx_lock(&a_sock->state_lock);
-  mtx_lock(&a_sock->lock);
-  mtx_lock(&a_sock->in_lock);
-  mtx_lock(&a_sock->out_lock);
-  a_sock->error = TRUE;
-  mtx_unlock(&a_sock->out_lock);
-  mtx_unlock(&a_sock->in_lock);
-  mtx_unlock(&a_sock->lock);
-  mtx_unlock(&a_sock->state_lock);
-  return retval;
 }
 
 cw_uint32_t
 sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
 {
   cw_uint32_t retval;
+  cw_uint32_t buffered_in;
   
   _cw_check_ptr(a_sock);
   _cw_check_ptr(a_buf);
 
   mtx_lock(&a_sock->in_lock);
 
-  if (TRUE == buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE))
+  while (TRUE == buf_catenate_buf(&a_sock->in_buf, a_buf, FALSE))
   {
-    goto OOM;
+    if (dbg_is_registered(cw_g_dbg, "sock_error"))
+    {
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		"Memory allocation error; yielding\n");
+    }
+    thd_yield();
   }
 
   if (a_sock->in_need_signal_count > 0)
@@ -905,27 +905,21 @@ sock_l_put_in_data(cw_sock_t * a_sock, cw_buf_t * a_buf)
     cnd_signal(&a_sock->in_cnd);
   }
 
-  _cw_assert(a_sock->in_max_buf_size >= buf_get_size(&a_sock->in_buf));
-  retval = a_sock->in_max_buf_size - buf_get_size(&a_sock->in_buf);
+  /* If a socket is closed by the peer, it is possible that the sockb thread
+   * will be forced to over-fill our input buffer.  If we're over-full, avoid
+   * wrapping the retval. */
+  buffered_in = buf_get_size(&a_sock->in_buf);
+  if (a_sock->in_max_buf_size > buffered_in)
+  {
+    retval = a_sock->in_max_buf_size - buffered_in;
+  }
+  else
+  {
+    retval = 0;
+  }
   
   mtx_unlock(&a_sock->in_lock);
 
-  return retval;
-
-  OOM:
-  mtx_unlock(&a_sock->in_lock);
-  buf_release_head_data(a_buf, buf_get_size(a_buf));
-  retval = 0;
-
-  mtx_lock(&a_sock->state_lock);
-  mtx_lock(&a_sock->lock);
-  mtx_lock(&a_sock->in_lock);
-  mtx_lock(&a_sock->out_lock);
-  a_sock->error = TRUE;
-  mtx_unlock(&a_sock->out_lock);
-  mtx_unlock(&a_sock->in_lock);
-  mtx_unlock(&a_sock->lock);
-  mtx_unlock(&a_sock->state_lock);
   return retval;
 }
 

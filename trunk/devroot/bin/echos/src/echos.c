@@ -96,7 +96,7 @@ main(int argc, char ** argv)
 /*    dbg_register(cw_g_dbg, "mem_verbose"); */
   
   socks = socks_new();
-  if (TRUE == socks_listen(socks, &port))
+  if (TRUE == socks_listen(socks, INADDR_ANY, &port))
   {
     out_put(cw_g_out, "[s]: Error listening on port [i]\n", argv[0], port);
     goto RETURN;

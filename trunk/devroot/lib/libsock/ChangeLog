@@ -1,3 +1,13 @@
+1999-09-24  Jason Evans  <jasone@canonware.com>
+
+	* : Make handling of memory errors more consistent.  Never
+	disconnect due to a memory error; instead yield the processor in
+	the hope that memory will become available.
+
+	* src/sockb.c (sockb_p_entry_func): Try to read any remaining
+	buffered data if POLLHUP is set in revents in order to avoid data
+	loss.
+
 1999-09-23  Jason Evans  <jasone@canonware.com>
 
 	* src/sock.c (sock_buffered_in): Add.

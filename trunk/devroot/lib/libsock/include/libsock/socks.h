@@ -61,6 +61,9 @@ socks_delete(cw_socks_t * a_socks);
  *
  * a_socks : Pointer to a socks.
  *
+ * a_mask : Mask of client addresses to listen to (INADDR_ANY, INADDR_LOOPBACK,
+ *          etc.).
+ *
  * r_port : Port number to listen on, or 0.
  *
  * <<< Output(s) >>>
@@ -81,7 +84,7 @@ socks_delete(cw_socks_t * a_socks);
  *
  ****************************************************************************/
 cw_bool_t
-socks_listen(cw_socks_t * a_socks, int * r_port);
+socks_listen(cw_socks_t * a_socks, cw_uint32_t a_mask, int * r_port);
 
 /****************************************************************************
  *

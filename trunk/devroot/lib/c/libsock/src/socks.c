@@ -21,10 +21,7 @@
 
 #include <fcntl.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <poll.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <errno.h>
 #include <limits.h>
@@ -81,7 +78,7 @@ socks_delete(cw_socks_t * a_socks)
 }
 
 cw_bool_t
-socks_listen(cw_socks_t * a_socks, int * r_port)
+socks_listen(cw_socks_t * a_socks, cw_uint32_t a_mask, int * r_port)
 {
   cw_bool_t retval;
   int val;
@@ -119,7 +116,7 @@ socks_listen(cw_socks_t * a_socks, int * r_port)
 
   /* Bind the socket's local address. */
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+  server_addr.sin_addr.s_addr = htonl(a_mask);
   server_addr.sin_port = htons(*r_port);
   
   if (bind(a_socks->sockfd,
