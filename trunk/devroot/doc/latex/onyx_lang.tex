@@ -4739,7 +4739,6 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
@@ -4754,45 +4753,6 @@ onyx:0> 42.3 1 cvds 1 sprint
 `42.3'
 onyx:0> -42.3 4 cvds 1 sprint
 `-42.3000'
-onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:cves}
-\index{cves@\onyxop{}{cves}{}}
-\item[{\onyxop{real precision}{cves}{string}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[real: ]
-			A real.
-		\item[precision: ]
-			Number of digits after the decimal point to show.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[string: ]
-			A string representation of \oparg{real} in exponential
-			form with \oparg{precision} digits of decimal precision.
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{rangecheck}{rangecheck}.]
-		\item[\htmlref{stackunderflow}{stackunderflow}.]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
-	\item[Description: ]
-		Convert \oparg{real} to a string representation in exponential
-		notation, with \oparg{precision} digits of decimal precision.
-	\item[Example(s): ]\begin{verbatim}
-
-onyx:0> 42.3 0 cves 1 sprint
-`4e+01'
-onyx:0> 42.3 1 cves 1 sprint
-`4.2e+01'
-onyx:0> 42.3 2 cves 1 sprint
-`4.23e+01'
-onyx:0> -42.3 5 cves 1 sprint
-`-4.23000e+01'
 onyx:0>
 		\end{verbatim}
 	\end{description}
@@ -4821,6 +4781,44 @@ onyx:0>
 
 onyx:0> [1 2 3] cve 1 sprint
 _{1 2 3}_
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:cves}
+\index{cves@\onyxop{}{cves}{}}
+\item[{\onyxop{real precision}{cves}{string}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[real: ]
+			A real.
+		\item[precision: ]
+			Number of digits after the decimal point to show.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string representation of \oparg{real} in exponential
+			form with \oparg{precision} digits of decimal precision.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Convert \oparg{real} to a string representation in exponential
+		notation, with \oparg{precision} digits of decimal precision.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 42.3 0 cves 1 sprint
+`4e+01'
+onyx:0> 42.3 1 cves 1 sprint
+`4.2e+01'
+onyx:0> 42.3 2 cves 1 sprint
+`4.23e+01'
+onyx:0> -42.3 5 cves 1 sprint
+`-4.23000e+01'
 onyx:0>
 		\end{verbatim}
 	\end{description}

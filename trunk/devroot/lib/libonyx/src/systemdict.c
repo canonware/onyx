@@ -1517,8 +1517,7 @@ systemdict_cvds(cw_nxo_t *a_thread)
 		   nxo_real_get(real));
     if (len == -1)
     {
-	nxo_thread_nerror(a_thread, NXN_rangecheck);
-	return;
+	xep_throw(CW_ONYXX_OOM);
     }
 
     nxo_string_new(real, nxo_thread_nx_get(a_thread),
@@ -1566,8 +1565,7 @@ systemdict_cves(cw_nxo_t *a_thread)
 		   nxo_real_get(real));
     if (len == -1)
     {
-	nxo_thread_nerror(a_thread, NXN_rangecheck);
-	return;
+	xep_throw(CW_ONYXX_OOM);
     }
 
     nxo_string_new(real, nxo_thread_nx_get(a_thread),
