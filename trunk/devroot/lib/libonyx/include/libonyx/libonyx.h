@@ -438,8 +438,6 @@ typedef struct cw_mema_s cw_mema_t;
 	nxo_threadp_delete(&threadp, (a_thread));			\
     } while (0)
 
-#endif	/* CW_LIBONYX_H_ */
-
 /* Global variables, not to be accessed directly. */
 extern cw_nxo_t cw_g_argv;
 #ifdef CW_POSIX
@@ -478,6 +476,8 @@ libonyx_envdict_get(void)
 }
 #endif
 #endif /* (defined(CW_USE_INLINES) || defined(CW_LIBONYX_C_)) */
+
+#endif	/* CW_LIBONYX_H_ */
 
 #ifdef __cplusplus
 };
