@@ -118,14 +118,13 @@ main(int argc, char **argv)
 		stilt_start(&stilt);
 	}
 
-	stilts_delete(&stilts, &stilt);
-	stilt_delete(&stilt);
-	stil_delete(&stil);
-
 	/* XXX Turn off leak warnings until GC works. */
 	dbg_unregister(cw_g_dbg, "mem_error");
 	dbg_unregister(cw_g_dbg, "pool_error");
 
+	stilts_delete(&stilts, &stilt);
+	stilt_delete(&stilt);
+	stil_delete(&stil);
 	libstash_shutdown();
 	return 0;
 }
