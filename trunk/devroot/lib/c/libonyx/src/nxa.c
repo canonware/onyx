@@ -668,7 +668,7 @@ nxa_p_gc_entry(void *a_arg)
 	cw_nxa_t	*nxa = (cw_nxa_t *)a_arg;
 	struct timespec	period;
 	cw_nxam_t	message;
-	cw_nxoi_t	prev_new;	/* Previous number of new objects. */
+	cw_nxoi_t	prev_new;	/* Previous allocation since last GC. */
 	cw_bool_t	shutdown;
 
         /*
