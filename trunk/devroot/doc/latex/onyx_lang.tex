@@ -6539,6 +6539,7 @@ onyx:2>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
@@ -6625,6 +6626,7 @@ onyx:0>
 		\end{description}
 	\item[Errors(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{rangecheck}{rangecheck}.]
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
@@ -7307,7 +7309,8 @@ onyx:4>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{object}.
+		Syntactically print \oparg{object}.  See
+		Section~\ref{sec:outputsdict} for format specifier details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 [2 3] 4] </w 20 /p `_' /j /c /r 1> output `\n' print flush
@@ -8641,7 +8644,8 @@ onyx:2>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Syntactically print \oparg{object}.
+		Syntactically print \oparg{object}.  See
+		Section~\ref{sec:sprintsdict} for printing details.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> [1 [2 3] 4]
