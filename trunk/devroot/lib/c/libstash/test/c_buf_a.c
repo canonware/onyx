@@ -148,7 +148,9 @@ main()
     for (i = 256; i < 512; i += 8)
     {
       t_uint32_a = buf_get_uint32(buf_p, i);
+      t_uint32_a = ntohl(t_uint32_a);
       t_uint32_b = buf_get_uint32(buf_p, i + 4);
+      t_uint32_b = ntohl(t_uint32_b);
       
       out_put(cw_g_out,
 	      "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]:"
@@ -161,6 +163,7 @@ main()
     for (i = 256; i < 512; i += 8)
     {
       t_uint64 = buf_get_uint64(buf_p, i);
+      t_uint64 = _cw_ntohq(t_uint64);
       
       out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 	      i, t_uint64);
@@ -171,6 +174,7 @@ main()
     for (i = 1; i < 4; i++)
     {
       t_uint32_a = buf_get_uint32(buf_p, 256 + i);
+      t_uint32_a = ntohl(t_uint32_a);
       
       out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
 	      256 + i, t_uint32_a);
@@ -179,9 +183,12 @@ main()
     out_put(cw_g_out, "Unaligned buf_get_uint64():\n");
     for (i = 1; i < 8; i++)
     {
+      t_uint64 = buf_get_uint64(buf_p, 256 + i);
+      t_uint64 = _cw_ntohq(t_uint64);
+      
       out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
 	      256 + i,
-	      buf_get_uint64(buf_p, 256 + i));
+	      t_uint64);
     }
     
     buf_delete(buf_p);
@@ -196,6 +203,8 @@ main()
     cw_uint32_t i;
     int iov_count;
     const struct iovec * iov;
+    cw_uint32_t t_uint32;
+    cw_uint64_t t_uint64;
 
     /* a  0,
      * b  1,  2,
@@ -342,16 +351,21 @@ main()
     out_put(cw_g_out, "Hodge podge buf_get_uint32():\n");
     for (i = 0; i <= 20; i++)
     {
+      t_uint32 = buf_get_uint32(&buf, i);
+      t_uint32 = ntohl(t_uint32);
+      
       out_put(cw_g_out, "[i|w:3|p:0]->0x[i|w:8|p:0|b:16]\n",
-	      i, buf_get_uint32(&buf, i));
+	      i, t_uint32);
     }
     
     out_put(cw_g_out, "Hodge podge buf_get_uint64():\n");
     for (i = 0; i <= 16; i++)
     {
+      t_uint64 = buf_get_uint64(&buf, i);
+      t_uint64 = _cw_ntohq(t_uint64);
+      
       out_put(cw_g_out, "[i|w:3|p:0]->0x[q|b:16|w:16|p:0]\n",
-	      i,
-	      buf_get_uint64(&buf, i));
+	      i, t_uint64);
     }
 
     buf_delete(&buf);
