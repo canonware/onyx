@@ -23,7 +23,11 @@
  * number isn't very important to performance, but if it is too high, space may
  * be wasted.
  */
+#ifdef _LIBSTASH_DBG
+#define _LIBSTASH_MQ_ARRAY_MIN_SIZE 1
+#else
 #define _LIBSTASH_MQ_ARRAY_MIN_SIZE 8
+#endif
 
 cw_mq_t *
 mq_new(cw_mq_t *a_mq, cw_mem_t *a_mem, cw_uint32_t a_msg_size)
@@ -313,7 +317,7 @@ mq_put(cw_mq_t *a_mq, ...)
 		retval = 1;
 		goto RETURN;
 	} else {
-		if (a_mq->msg_count > a_mq->msgs_vec_count) {
+		if (a_mq->msg_count >= a_mq->msgs_vec_count) {
 			union {
 				cw_uint8_t	*one;
 				cw_uint16_t	*two;
@@ -370,6 +374,8 @@ mq_put(cw_mq_t *a_mq, ...)
 			default:
 				_cw_error("Programming error");
 			}
+			_cw_free(a_mq->msgs.x);
+			a_mq->msgs.x = t_msgs.x;
 			a_mq->msgs_beg = 0;
 			a_mq->msgs_end = a_mq->msg_count;
 			a_mq->msgs_vec_count *= 2;

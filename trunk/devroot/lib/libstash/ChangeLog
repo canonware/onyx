@@ -1,3 +1,9 @@
+2000-07-26  Jason Evans  <jasone@canonware.com>
+
+	* src/mq.c (mq_put): Correctly expand the message queue when it
+	overflows (off by one error).  Switch to the new queue after
+	copying, and deallocate the old queue.
+
 2000-07-22  Jason Evans  <jasone@canonware.com>
 
 	* : Re-order many funtion name components for consistency.
