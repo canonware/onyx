@@ -384,12 +384,9 @@ error, and virtually every aspect of the error handling machinery can be
 customized, extended, or replaced, since it is all written in Onyx.
 
 Errors have names, with which error handlers can be associated in errordict.
-There is a default set of error names, for which default error handlers are
-provided in errordict.  New error names can be added, and the default error
-handlers can be replaced.  errordict's
-\htmlref{\onyxop{}{handleerror}{}}{systemdict:handleerror} procedure can be
-modified or replaced.  In fact, with some care, an entirely custom errordict can
-be defined, then undefined once it is no longer needed.
+errordict's \htmlref{\onyxop{}{handleerror}{}}{systemdict:handleerror} procedure
+can be modified or replaced.  In fact, with some care, an entirely custom
+errordict can be defined, then undefined once it is no longer needed.
 
 Following is the standard idiom for setting up and tearing down custom error
 handling:
