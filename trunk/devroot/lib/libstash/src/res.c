@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 42 $
- * Last modified: $Date: 1998-04-26 20:07:12 -0700 (Sun, 26 Apr 1998) $
+ * Current revision: $Revision: 46 $
+ * Last modified: $Date: 1998-04-26 22:54:24 -0700 (Sun, 26 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -41,6 +41,7 @@
 
 #define _INC_STDARG_H_
 #define _INC_RES_H_
+#define _INC_OH_H_
 #include <config.h>
 
 cw_res_t *
