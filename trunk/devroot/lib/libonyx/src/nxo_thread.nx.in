@@ -33,8 +33,8 @@
 `{'
 
 `
-# userdict does not exist yet.  This code jumps through some hoops to push it
-# onto dstack, then define it in threaddict, to avoid a dstackunderflow error.
+# userdict does not exist yet.  This code pushes it onto dstack, then defines it
+# in threaddict.
 dict begin
 /userdict currentdict
 dstack dup sbdup dup spop begin pop
@@ -45,10 +45,10 @@ def
 /currenterror <
     /newerror	false
     /errorname	`'
-    /estack	()
-    /istack	()
-    /ostack	()
-    /dstack	()
+    /estack	stack
+    /istack	stack
+    /ostack	stack
+    /dstack	stack
     /line	1
     /column	0
 > def
