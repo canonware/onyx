@@ -17,7 +17,7 @@
 # - usage_string #string
 $usage_string
 `\
-Usage: onyx_config [--help] [--version] [--prefix]\n\
+Usage: onyx_config [--help] [--version] [--features] [--prefix]\n\
                    [--cppflags] [--cflags] [--ldflags] [--libs]\n'
 def
 
@@ -30,12 +30,14 @@ $usage {
     write pop
 } def
 
-# Print a string, after stripping off leading and trailing whitespace.
+# Print a string, after stripping off leading, trailing, and extra internal
+# whitespace.
 #
 # #string strip_print -
 @enable_regex@ 1 eq {
     $strip_print {
 	`^\s*(\S.*\S)\s*$' `\1' <$s true> subst pop
+	`\s+' ` ' <$s true> subst pop
 	print
     } def
 }{
@@ -54,14 +56,46 @@ $flags <
     `--version' {
 	`Canonware Onyx, version <Version = onyx>.' strip_print
     }
+    `--features' {
+	mark # Use for counting number of feature strings on stack.
+	@enable_threads@ 1 eq {
+	    ` threads'
+	} if
+	@enable_real@ 1 eq {
+	    ` real'
+	} if
+	@enable_regex@ 1 eq {
+	    ` regex'
+	} if
+	@enable_posix@ 1 eq {
+	    ` posix'
+	} if
+	@enable_posix_file@ 1 eq {
+	    ` posix_file'
+	} if
+	@enable_socket@ 1 eq {
+	    ` socket'
+	} if
+	@enable_modprompt@ 1 eq {
+	    ` modprompt'
+	} if
+	@enable_inlines@ 1 eq {
+	    ` inlines'
+	} if
+	@enable_debug@ 1 eq {
+	    ` debug'
+	} if
+	counttomark ncat strip_print
+	pop # Remove mark.
+    }
     `--cppflags' {
 	`@CPPFLAGS@'
 	@enable_regex@ 1 eq {
 	    dup `-I@prefix@/include\\b' match not {
-		` -I@prefix@/include' cat
+		`-I@prefix@/include ' exch cat
 	    } if
 	}{
-	    ` -I@prefix@/include' cat
+	    `-I@prefix@/include ' exch cat
 	} ifelse
 	strip_print
     }
@@ -72,10 +106,10 @@ $flags <
 	`@LDFLAGS@'
 	@enable_regex@ 1 eq {
 	    dup `-L@prefix@/lib\\b' match not {
-		` -L@prefix@/lib' cat
+		`-L@prefix@/lib ' exch cat
 	    } if
 	}{
-	    `-L@prefix@/lib' cat
+	    `-L@prefix@/lib ' exch cat
 	} ifelse
 	strip_print
     }
