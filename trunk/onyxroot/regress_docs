@@ -31,7 +31,7 @@ $conf [
 ] def
 
 $COOK `/usr/bin/cook' def
-$COOKOPT [`-ste'] def
+$COOKOPT [`-nte'] def
 #$COOKPAR [`-par' `8'] def
 $COOKPAR [] def
 
