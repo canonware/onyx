@@ -20,7 +20,7 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	cw_stils_t	*tstack;
 	cw_stilo_t	*name, *val;
 
-#define NENTRIES	8	/* Number of entries in currenterror. */
+#define NENTRIES	10	/* Number of entries in currenterror. */
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt),
 	    stilt_currentlocking(a_stilt), NENTRIES);
 
@@ -79,6 +79,16 @@ currenterror_l_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_boolean_new(val, CURRENTERROR_RECORDSTACKS);
 	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, val);
 
+	stilo_name_new(name, stilt_stil_get(a_stilt), stiln_str(STILN_line),
+	    stiln_len(STILN_line), TRUE);
+	stilo_integer_new(val, 1);
+	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, val);
+	
+	stilo_name_new(name, stilt_stil_get(a_stilt), stiln_str(STILN_column),
+	    stiln_len(STILN_column), TRUE);
+	stilo_integer_new(val, 1);
+	stilo_dict_def(a_dict, stilt_stil_get(a_stilt), name, val);
+	
 	stils_npop(tstack, 2);
 
 #ifdef _LIBSTIL_DBG

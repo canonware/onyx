@@ -1,4 +1,4 @@
-Error /syntaxerror in -file-
+At line 3, column 6: Error /syntaxerror in -file-
 ostack: [(<~XXXX=) -file-]
 estack: [-file-]
 dstack: [-dict- -dict- -dict- -dict-]

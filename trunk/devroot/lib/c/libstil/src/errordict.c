@@ -230,6 +230,13 @@ errordict_handleerror(cw_stilt_t *a_stilt)
 {
 	_cw_stil_code(a_stilt, "
 currenterror begin
+errorname /syntaxerror eq {
+	(At line ) print
+	line cvs print
+	(, column ) print
+	column cvs print
+	(: ) print
+} if
 (Error /) print errorname cvs print ( in ) print /command load 1 spop
 recordstacks {
 	(ostack: ) print

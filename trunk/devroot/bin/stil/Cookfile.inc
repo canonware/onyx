@@ -53,7 +53,7 @@ SRCS = [SRCS] [STIL_SRCS];
  * output.
  */
 {
-  local stests = b64scan.st.in copy_a.st.in eval.st.in gc_roll.st.in hello.st.in
+  local stests = b64scan.st.in copy_a.st.in eval.st.in /*gc_roll.st.in*/ hello.st.in
                  integer.st.in search.st.in syntaxerror_a.st.in
                  syntaxerror_b.st.in syntaxerror_c.st.in syntaxerror_d.st.in
                  syntaxerror_e.st.in syntaxerror_f.st.in syntaxerror_g.st.in

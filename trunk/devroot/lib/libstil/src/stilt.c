@@ -106,8 +106,8 @@ static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
 #define			stilt_p_token_print(a, b, c, d)
 #define			stilt_p_syntax_error_print(a, b)
 #endif
-static void		stilt_p_syntax_error(cw_stilt_t *a_stilt,
-    cw_uint8_t *a_prefix, cw_uint8_t *a_suffix, cw_uint8_t a_c);
+static void		stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_stilts_t
+    *a_stilts, cw_uint8_t *a_prefix, cw_uint8_t *a_suffix, cw_uint8_t a_c);
 static void		stilt_p_reset(cw_stilt_t *a_stilt);
 static void		stilt_p_procedure_accept(cw_stilt_t *a_stilt);
 static void		stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t
@@ -1075,7 +1075,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->m.s.p_depth = 1;
 				break;
 			case ')':
-				stilt_p_syntax_error(a_stilt, "", "", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "", "",
+				    c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1121,8 +1122,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					stilt_p_procedure_accept(a_stilt);
 				} else {
 					/* Missing '{'. */
-					stilt_p_syntax_error(a_stilt, "", "",
-					    c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "", "", c);
 					if (a_token)
 						goto RETURN;
 				}
@@ -1201,7 +1202,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->state = STILTTS_HEX_STRING;
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "", "<", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "", "<",
+				    c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1219,7 +1221,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "", ">", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "", ">",
+				    c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1235,7 +1238,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '\n':
 				_CW_STILT_NEWLINE();
 
-				stilt_p_syntax_error(a_stilt, "", "/", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "", "/",
+				    c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1243,7 +1247,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '(': case ')': case '`': case '\'': case '<':
 			case '>': case '[': case ']': case '{': case '}':
 			case '%':
-				stilt_p_syntax_error(a_stilt, "", "/", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "", "/",
+				    c);
 				if (a_token)
 					goto RETURN;
 				break;
@@ -1620,7 +1625,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->m.s.hex_val = c;
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "(", "\\x", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "(",
+				    "\\x", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1670,7 +1676,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				cw_uint8_t	suffix[] = "\\x?";
 
 				suffix[2] = a_stilt->m.s.hex_val;
-				stilt_p_syntax_error(a_stilt, "(", suffix, c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "(",
+				    suffix, c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1810,7 +1817,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "<", "", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "<", "",
+				    c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1854,8 +1862,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					 * We shouldn't have even seen this
 					 * padding character.
 					 */
-					stilt_p_syntax_error(a_stilt, "<~", "",
-					    c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "<~", "", c);
 					if (a_token)
 						goto RETURN;
 					break;
@@ -1874,7 +1882,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				}
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "<~", "", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "<~",
+				    "", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1892,7 +1901,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				/* Ignore. */
 				break;
 			default:
-				stilt_p_syntax_error(a_stilt, "<~", "=", c);
+				stilt_p_syntax_error(a_stilt, a_stilts, "<~",
+				    "=", c);
 				if (a_token)
 					goto RETURN;
 			}
@@ -1912,12 +1922,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			default:
 				switch (a_stilt->index % 4) {
 				case 2:
-					stilt_p_syntax_error(a_stilt, "<~",
-					    "==", c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "<~", "==", c);
 					break;
 				case 3:
-					stilt_p_syntax_error(a_stilt, "<~",
-					    "=", c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "<~", "=", c);
 					break;
 				default:
 					_cw_not_reached();
@@ -2002,16 +2012,16 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 			default:
 				switch (a_stilt->index % 4) {
 				case 0:
-					stilt_p_syntax_error(a_stilt, "<~", "~",
-					    c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "<~", "~", c);
 					break;
 				case 2:
-					stilt_p_syntax_error(a_stilt, "<~",
-					    "==~", c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "<~", "==~", c);
 					break;
 				case 3:
-					stilt_p_syntax_error(a_stilt, "<~",
-					    "=~", c);
+					stilt_p_syntax_error(a_stilt, a_stilts,
+					    "<~", "=~", c);
 					break;
 				default:
 					_cw_not_reached();
@@ -2049,11 +2059,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					switch (a_stilt->m.m.action) {
 					case ACTION_LITERAL:
 						stilt_p_syntax_error(a_stilt,
-						    "/", "", c);
+						    a_stilts, "/", "", c);
 						break;
 					case ACTION_EVALUATE:
 						stilt_p_syntax_error(a_stilt,
-						    "//", "", c);
+						    a_stilts, "//", "", c);
 						break;
 					default:
 						_cw_not_reached();
@@ -2140,10 +2150,11 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
  * this, the invalid code gets lost forever.
  */
 static void
-stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t *a_prefix, cw_uint8_t
-    *a_suffix, cw_uint8_t a_c)
+stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint8_t
+    *a_prefix, cw_uint8_t *a_suffix, cw_uint8_t a_c)
 {
-	cw_stilo_t	*stilo;
+	cw_stilo_t	*stilo, *currenterror, *key, *val;
+	cw_uint32_t	line, column;
 
 	stilo = stils_push(&a_stilt->ostack);
 
@@ -2168,6 +2179,46 @@ stilt_p_syntax_error(cw_stilt_t *a_stilt, cw_uint8_t *a_prefix, cw_uint8_t
 
 	stilt_p_syntax_error_print(a_stilt, a_c);
 	stilt_p_reset(a_stilt);
+
+	/*
+	 * Set line and column in currenterror.  Look up currenterror on dstack,
+	 * since there is the possibility that the user has done something silly
+	 * like undef it.
+	 */
+	stilts_position_get(a_stilts, &line, &column);
+
+	currenterror = stils_push(&a_stilt->tstack);
+	key = stils_push(&a_stilt->tstack);
+	val = stils_push(&a_stilt->tstack);
+
+	stilo_name_new(key, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_currenterror), stiln_len(STILN_currenterror), TRUE);
+	if (stilt_dict_stack_search(a_stilt, key, currenterror)) {
+		/* Couldn't find currenterror.  Don't record line and column. */
+		goto ERROR;
+	}
+
+	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(STILN_line),
+	    stiln_len(STILN_line), TRUE);
+	stilo_integer_new(val, (cw_stiloi_t)line);
+	stilo_dict_def(currenterror, stilt_stil_get(a_stilt), key, val);
+
+	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(STILN_column),
+	    stiln_len(STILN_column), TRUE);
+	/*
+	 * If the syntax error happened at a newline, the column number won't
+	 * be correct, so use 0.
+	 */
+	if (column == -1)
+		stilo_integer_new(val, 0);
+	else
+		stilo_integer_new(val, (cw_stiloi_t)column);
+	stilo_dict_def(currenterror, stilt_stil_get(a_stilt), key, val);
+
+	ERROR:
+	stils_npop(&a_stilt->tstack, 3);
+
+	/* Finally, throw a syntaxerror. */
 	stilt_error(a_stilt, STILTE_SYNTAXERROR);
 }
 
