@@ -15,42 +15,55 @@ typedef struct cw_treen_s cw_treen_t;
 
 struct cw_treen_s
 {
-#ifdef _CW_REENTRANT
-  cw_bool_t is_thread_safe;
-  cw_mtx_t lock;
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t magic_a;
 #endif
+
+  /* Automatic deallocation hooks. */
+  void (*dealloc_func)(void *, void *);
+  void * dealloc_arg;
+
+  /* Pointer to the parent. */
+  cw_treen_t * parent;
+  
+  /* Pointer to one child.  Getting to other children is achieved by iterating
+   * on the child's sibling ring. */
+  cw_treen_t * child;
+
+  /* Linkage for the sibling ring. */
+  cw_ring_t siblings;
+
+  /* The payload. */
   void * data;
-  cw_uint32_t num_children;
-  cw_treen_t ** children;
+  
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t size_of;
+  cw_uint32_t magic_b;
+#endif
 };
 
 cw_treen_t *
-treen_new(void);
-#ifdef _CW_REENTRANT
-cw_treen_t *
-treen_new_r(void);
-#endif
+treen_new(cw_treen_t * a_treen,
+	  void (*a_dealloc_func)(void * dealloc_arg, void * treen),
+	  void * a_dealloc_arg);
 
 void
 treen_delete(cw_treen_t * a_treen);
 
-cw_uint32_t
-treen_get_num_children(cw_treen_t * a_treen);
+void
+treen_link(cw_treen_t * a_treen, cw_treen_t * a_parent);
 
-cw_bool_t
-treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
-		 cw_uint32_t a_position);
+cw_treen_t *
+treen_get_parent(cw_treen_t * a_treen);
 
-cw_bool_t
-treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
-		   cw_treen_t ** r_child);
+cw_treen_t *
+treen_get_child(cw_treen_t * a_treen);
 
-cw_bool_t
-treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
-		    cw_treen_t ** r_child);
+cw_treen_t *
+treen_get_sibling(cw_treen_t * a_treen);
 
 void *
 treen_get_data_ptr(cw_treen_t * a_treen);
 
-void *
+void
 treen_set_data_ptr(cw_treen_t * a_treen, void * a_data);

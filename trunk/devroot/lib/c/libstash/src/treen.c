@@ -19,321 +19,186 @@
 #include "libstash/treen_p.h"
 
 cw_treen_t *
-treen_new(void)
+treen_new(cw_treen_t * a_treen,
+	  void (*a_dealloc_func)(void * dealloc_arg, void * move),
+	  void * a_dealloc_arg)
 {
-  return treen_p_new(FALSE);
-}
+  cw_treen_t * retval;
 
-cw_treen_t *
-treen_new_r(void)
-{
-  return treen_p_new(FALSE);
+  if (NULL != a_treen)
+  {
+    retval = a_treen;
+    bzero(retval, sizeof(cw_treen_t));
+    retval->dealloc_func = a_dealloc_func;
+    retval->dealloc_arg = a_dealloc_arg;
+  }
+  else
+  {
+    retval = (cw_treen_t *) _cw_malloc(sizeof(cw_treen_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
+    bzero(retval, sizeof(cw_treen_t));
+    retval->dealloc_func = mem_dealloc;
+    retval->dealloc_arg = cw_g_mem;
+  }
+  
+  ring_new(&retval->siblings, NULL, NULL);
+  ring_set_data(&retval->siblings, (void *) retval);
+
+#ifdef _LIBSTASH_DBG
+  retval->magic_a = _CW_TREEN_MAGIC;
+  retval->size_of = sizeof(cw_treen_t);
+  retval->magic_b = _CW_TREEN_MAGIC;
+#endif
+
+  RETURN:
+  return retval;
 }
 
 void
 treen_delete(cw_treen_t * a_treen)
 {
-  if (a_treen == NULL)
-  {
-    /* Non-existent node.  Do nothing. */
-  }
-  else
-  {
-    cw_uint32_t i;
-
-    /* Recursively delete all subtrees. */
-    for (i = 0;
-	 i < a_treen->num_children;
-	 i++)
-    {
-      treen_delete(a_treen->children[i]);
-    }
-    if (0 < a_treen->num_children)
-    {
-      _cw_free(a_treen->children);
-    }
-
-    /* Delete self. */
-#ifdef _CW_REENTRANT
-    if (a_treen->is_thread_safe == TRUE)
-    {
-      mtx_delete(&a_treen->lock);
-    }
-#endif
-
-    _cw_free(a_treen);
-  }
-}
-
-cw_uint32_t
-treen_get_num_children(cw_treen_t * a_treen)
-{
-  cw_uint32_t retval;
-  
-  _cw_check_ptr(a_treen);
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_lock(&a_treen->lock);
-  }
-#endif
-
-  retval = a_treen->num_children;
-  
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_unlock(&a_treen->lock);
-  }
-#endif
-  return retval;
-}
-
-cw_bool_t
-treen_link_child(cw_treen_t * a_treen, cw_treen_t * a_child,
-		 cw_uint32_t a_position)
-{
-  cw_bool_t retval;
+  cw_treen_t * child;
 
   _cw_check_ptr(a_treen);
-  _cw_check_ptr(a_child);
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
+  
+  /* Recursively delete all subtrees. */
+  while (NULL != (child = treen_get_child(a_treen)))
   {
-    mtx_lock(&a_treen->lock);
+    treen_delete(child);
   }
-#endif
 
-  if (a_position > a_treen->num_children)
+  /* Delete self. */
+  treen_link(a_treen, NULL);
+  if (NULL != a_treen->dealloc_func)
   {
-    /* More than one position past the end of the child array. */
-    retval = TRUE;
+    a_treen->dealloc_func(a_treen->dealloc_arg, (void *) a_treen);
   }
+#ifdef _LIBSTASH_DBG
   else
   {
-    cw_uint32_t i;
-    
-    retval = FALSE;
-    
-    a_treen->num_children++;
+    memset(a_treen, 0x5a, sizeof(cw_treen_t));
+  }
+#endif
+}
 
-    /* Extend the array. */
-    if (a_treen->children == NULL)
-    {
-      a_treen->children = _cw_malloc(a_treen->num_children
-				     * sizeof(cw_treen_t *));
-      if (NULL == a_treen->children)
-      {
-	retval = TRUE;
-	goto RETURN;
-      }
-    }
-    else
-    {
-      void * t_ptr;
+void
+treen_link(cw_treen_t * a_treen, cw_treen_t * a_parent)
+{
+  _cw_check_ptr(a_treen);
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
 
-      
-      t_ptr = _cw_realloc(a_treen->children,
-			  a_treen->num_children
-			  * sizeof(cw_treen_t *));
-      if (NULL == t_ptr)
+  /* Extract ourselves from any current linkage before linking somewhere
+   * else. */
+  if (NULL != a_treen->parent)
+  {
+    if (a_treen == a_treen->parent->child)
+    {
+      if (treen_get_sibling(a_treen) != a_treen)
       {
-	retval = TRUE;
-	goto RETURN;
+	/* The parent's child pointer points to a_treen, and this isn't the only
+	 * child, so parent's child pointer needs to be changed to another
+	 * child. */
+	a_treen->parent->child = treen_get_sibling(a_treen);
       }
       else
       {
-	a_treen->children = (cw_treen_t **) t_ptr;
+	/* Last child. */
+	a_treen->parent->child = NULL;
       }
     }
     
-    /* Shuffle things forward to make room. */
-    for (i = (a_treen->num_children - 1); i > a_position; i--)
-    {
-      a_treen->children[i] = a_treen->children[i - 1];
-    }
+    a_treen->parent = NULL;
 
-    /* Plop the new child pointer in place. */
-    a_treen->children[a_position] = a_child;
+    ring_cut(&a_treen->siblings);
   }
 
-  RETURN:
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
+  if (NULL != a_parent)
   {
-    mtx_unlock(&a_treen->lock);
-  }
-#endif
-  return retval;
-}
+    _cw_assert(_CW_TREEN_MAGIC == a_parent->magic_a);
+    _cw_assert(a_parent->size_of == sizeof(cw_treen_t));
+    _cw_assert(_CW_TREEN_MAGIC == a_parent->magic_b);
 
-cw_bool_t
-treen_unlink_child(cw_treen_t * a_treen, cw_uint32_t a_position,
-		   cw_treen_t ** r_child)
-{
-  cw_bool_t retval;
-
-  if (a_position >= a_treen->num_children)
-  {
-    /* More than one position past the end of the child array. */
-    retval = TRUE;
-  }
-  else
-  {
-    cw_uint32_t i;
-
-#ifdef _CW_REENTRANT
-    if (a_treen->is_thread_safe)
+    a_treen->parent = a_parent;
+  
+    if (NULL == a_parent->child)
     {
-      mtx_lock(&a_treen->lock);
-    }
-#endif
-
-    retval = FALSE;
-    
-    *r_child = a_treen->children[a_position];
-
-    /* Shuffle things backward to fill the gap. */
-    for (i = a_position + 1; i < a_treen->num_children; i++)
-    {
-      a_treen->children[i - 1] = a_treen->children[i];
-    }
-
-    a_treen->num_children--;
-
-    /* Truncate the array. */
-    if (a_treen->num_children == 0)
-    {
-      _cw_free(a_treen->children);
-      a_treen->children = NULL;
+      /* The parent has no children yet. */
+      a_parent->child = a_treen;
     }
     else
     {
-      a_treen->children = _cw_realloc(a_treen->children,
-				      a_treen->num_children
-				      * sizeof(cw_treen_t *));
-      /* Shrinking, so there should be no error. */
-      _cw_check_ptr(a_treen->children);
-    }
+      cw_treen_t * sibling = treen_get_child(a_parent);
 
-#ifdef _CW_REENTRANT
-    if (a_treen->is_thread_safe)
-    {
-      mtx_unlock(&a_treen->lock);
+      ring_meld(&sibling->siblings, &a_treen->siblings);
     }
-#endif
   }
-
-  return retval;
 }
 
-cw_bool_t
-treen_get_child_ptr(cw_treen_t * a_treen, cw_uint32_t a_position,
-		    cw_treen_t ** r_child)
+cw_treen_t *
+treen_get_parent(cw_treen_t * a_treen)
 {
-  cw_bool_t retval;
+  _cw_check_ptr(a_treen);
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
+
+  return a_treen->parent;
+}
+
+cw_treen_t *
+treen_get_child(cw_treen_t * a_treen)
+{
+  _cw_check_ptr(a_treen);
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
+
+  return a_treen->child;
+}
+
+cw_treen_t *
+treen_get_sibling(cw_treen_t * a_treen)
+{
+  cw_treen_t * retval;
+  cw_ring_t * t_ring;
   
   _cw_check_ptr(a_treen);
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_lock(&a_treen->lock);
-  }
-#endif
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
 
-  if (a_position < a_treen->num_children)
-  {
-    retval = FALSE;
-    *r_child = a_treen->children[a_position];
-  }
-  else
-  {
-    /* Past end of child pointer array. */
-    retval = TRUE;
-  }
-  
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_unlock(&a_treen->lock);
-  }
-#endif
+  t_ring = ring_next(&a_treen->siblings);
+  retval = (cw_treen_t *) ring_get_data(t_ring);
+
   return retval;
 }
 
 void *
 treen_get_data_ptr(cw_treen_t * a_treen)
 {
-  void * retval;
-  
   _cw_check_ptr(a_treen);
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_lock(&a_treen->lock);
-  }
-#endif
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
 
-  retval = a_treen->data;
-  
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_unlock(&a_treen->lock);
-  }
-#endif
-  return retval;
+  return a_treen->data;
 }
 
-void *
+void
 treen_set_data_ptr(cw_treen_t * a_treen, void * a_data)
 {
-  void * retval;
-  
   _cw_check_ptr(a_treen);
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_lock(&a_treen->lock);
-  }
-#endif
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_a);
+  _cw_assert(a_treen->size_of == sizeof(cw_treen_t));
+  _cw_assert(_CW_TREEN_MAGIC == a_treen->magic_b);
 
-  retval = a_treen->data;
   a_treen->data = a_data;
-  
-#ifdef _CW_REENTRANT
-  if (a_treen->is_thread_safe)
-  {
-    mtx_unlock(&a_treen->lock);
-  }
-#endif
-  return retval;
-}
-
-static cw_treen_t *
-treen_p_new(cw_bool_t a_is_thread_safe)
-{
-  cw_treen_t * retval;
-
-  retval = (cw_treen_t *) _cw_malloc(sizeof(cw_treen_t));
-  if (NULL == retval)
-  {
-    goto RETURN;
-  }
-  bzero(retval, sizeof(cw_treen_t));
-  
-#ifdef _CW_REENTRANT
-  if (a_is_thread_safe == TRUE)
-  {
-    mtx_new(&retval->lock);
-    retval->is_thread_safe = TRUE;
-  }
-  else
-  {
-    retval->is_thread_safe = FALSE;
-  }
-#endif
-
-  RETURN:
-  return retval;
 }

@@ -60,6 +60,7 @@ main()
     cw_uint32_t i;
 
     ring_a = ring_new(NULL, NULL, NULL);
+    _cw_assert(ring_a == ring_cut(ring_a));
 
     for (i = 0; i < 10; i++)
     {

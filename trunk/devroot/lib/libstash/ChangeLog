@@ -1,3 +1,8 @@
+2000-01-02  Jason Evans  <jasone@canonware.com>
+
+	* : Redesign and rewrite the treen code.  The API is substantially
+	different.
+
 1999-12-28  Jason Evans  <jasone@canonware.com>
 
 	* man/man3/libstash_out.3s: Document that the out_put_s*()

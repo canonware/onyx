@@ -8,11 +8,8 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- *
- *
  ****************************************************************************/
 
-static cw_treen_t *
-treen_p_new(cw_bool_t a_is_thread_safe);
+#ifdef _LIBSTASH_DBG
+#  define _CW_TREEN_MAGIC 0x34561278
+#endif
