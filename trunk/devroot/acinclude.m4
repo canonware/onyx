@@ -37,8 +37,10 @@ if test -d "$srcroot/mod/$1" ; then
     mkdir -p "$objroot/mod/$1/doc/latex"
     cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"
   fi
-  mkdir -p "$objroot/mod/$1/include"
-  cfghdrs="$cfghdrs $objroot/mod/$1/include/$1_defs.h"
+  if test -f "$srcroot/mod/$1/include/$1_defs.h.in" ; then
+    mkdir -p "$objroot/mod/$1/include"
+    cfghdrs="$cfghdrs $objroot/mod/$1/include/$1_defs.h"
+  fi
   mods="$mods $1"
 else
   build_$1="no"

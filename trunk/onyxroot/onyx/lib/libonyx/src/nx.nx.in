@@ -1043,7 +1043,7 @@ dup <
     #
     #modname #instance :unload_notify -
     $unload_notify {
-	data $modules get exch get pop
+	data $modules get exch undef
     }
 
     #instance :modules #<modules>

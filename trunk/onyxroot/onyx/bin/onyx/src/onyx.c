@@ -174,13 +174,14 @@ main(int argc, char **argv, char **envp)
 		    if (opt_ninit == 1)
 		    {
 			opt_init
-			    = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+			    = (cw_nxinit_t *) cw_malloc(sizeof(cw_nxinit_t));
 		    }
 		    else
 		    {
-			opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
-							     sizeof(cw_nxinit_t)
-							     * opt_ninit);
+			opt_init
+			    = (cw_nxinit_t *) cw_realloc(opt_init,
+							 sizeof(cw_nxinit_t)
+							 * opt_ninit);
 		    }
 		    opt_init[opt_ninit - 1].is_expr = TRUE;
 		    opt_init[opt_ninit - 1].str = optarg;
@@ -193,13 +194,14 @@ main(int argc, char **argv, char **envp)
 		    if (opt_ninit == 1)
 		    {
 			opt_init
-			    = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+			    = (cw_nxinit_t *) cw_malloc(sizeof(cw_nxinit_t));
 		    }
 		    else
 		    {
-			opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
-							     sizeof(cw_nxinit_t)
-							     * opt_ninit);
+			opt_init
+			    = (cw_nxinit_t *) cw_realloc(opt_init,
+							 sizeof(cw_nxinit_t)
+							 * opt_ninit);
 		    }
 		    opt_init[opt_ninit - 1].is_expr = FALSE;
 		    opt_init[opt_ninit - 1].str = optarg;

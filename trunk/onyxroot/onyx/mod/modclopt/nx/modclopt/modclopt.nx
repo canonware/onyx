@@ -1,0 +1,94 @@
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+#module
+
+`modprompt/modprompt_defs.nx' require
+
+$clopt class systemdict 3 idup :def
+clopt vclass setsuper
+clopt $clopt setclassname
+clopt <
+> setdata
+clopt <
+    # Constructor.
+    #
+    #class :new #instance
+    $new {
+	:rnew
+	#instance
+
+	<
+	    $packing true
+	    # Dictionary of the format:
+	    #
+	    #   `--flag' --> [arg? handler]
+	    $handlers dict
+	    $index 0
+	    $arg null
+	> over data copy pop
+    } bind
+
+    # Get the packing mode for single character options.
+    #
+    #instance :packing_get #packing?
+    $packing_get {
+	data $packing get
+    } bind
+
+    # Set the packing mode for single character options.
+    #
+    #packing? #instance :packing_set -
+    $packing_set {
+	data $packing dn put
+    } bind
+
+    # Add an option handler.
+    #
+    #opt #arg? #handler #instance :handler_add -
+    $handler_add {
+	data $handlers get 4 nup
+	#handlers #opt #arg? #handler
+	[ up ]
+	#handlers #opt [#arg? #handler]
+	put
+    } bind
+
+    # Remove an option handler.
+    #
+    #opt #instance :handler_remove -
+    $handler_remove {
+	data $handlers get exch
+    } bind
+
+    # Parse #argv.
+    #
+    #argv #instance :parse #remainder
+    $parse {
+	# Iterate over #argv.  If a string starts with `--', split on `='.  If a
+	# string starts with only one `-', use the packing mode to decide how to
+	# parse the string.
+	# XXX
+    } bind
+
+    # Return the current argv index.  This is provided to aid option handlers.
+    #
+    #instance :index_get #index
+    $index_get {
+    } bind
+
+    # Return the current option argument.  This is provided to aid option
+    # handlers.
+    #
+    #instance :arg_get #arg
+    $arg_get {
+    } bind
+> setmethods

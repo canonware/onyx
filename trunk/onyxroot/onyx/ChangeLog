@@ -1,5 +1,7 @@
 2003-08-07 : Jason Evans <jasone@canonware.com>
 
+	* Add the clopt (command line option parsing) module.
+
 	* lib/libonyx/src/nx.nx.in : Remove the search procedure, since the
           regular expression facilities offer superior functionality.
 
@@ -7,6 +9,8 @@
           options.
 
 	  Update to autoconf 2.57.
+
+	  Add --disable-clopt.
 
 2003-07-29 : Jason Evans <jasone@canonware.com>
 

@@ -518,53 +518,56 @@ dnl Look for libraries.
 CW_BUILD_LIB([libonyx], [lib_onyx])
 
 dnl Look for modules.
+if test "x$enable_modules" = "x0" ; then
+  AC_MSG_RESULT([Modules disabled; not doing module configuration])
+fi
+
+dnl modprompt.
 if test "x$enable_modules" = "x1" ; then
-  dnl modprompt.
-  if test "x$enable_posix" = "x1" ; then
-    AC_ARG_WITH([libedit-prefix],
-                [  --with-libedit-prefix   Prefix for libedit],
+  AC_ARG_WITH([libedit-prefix],
+              [  --with-libedit-prefix   Prefix for libedit],
 [
-    if test "x$with_libedit_prefix" = "xno" ; then
-      LIBEDIT_PREFIX=
-    else
-      LIBEDIT_PREFIX="$with_libedit_prefix"
-    fi
-    ],
-    [LIBEDIT_PREFIX=]
-    )
-    if test "x$LIBEDIT_PREFIX" != "x" ; then
-      LIBEDIT_CPPFLAGS="-I$LIBEDIT_PREFIX/include"
-      LIBEDIT_LDFLAGS="-L$LIBEDIT_PREFIX/lib"
-    else
-      LIBEDIT_CPPFLAGS=
-      LIBEDIT_LDFLAGS=
-    fi
-    AC_SUBST([LIBEDIT_PREFIX])
-    AC_SUBST([LIBEDIT_LDFLAGS])
-    AC_SUBST([LIBEDIT_CPPFLAGS])
+  if test "x$with_libedit_prefix" = "xno" ; then
+    LIBEDIT_PREFIX=
+  else
+    LIBEDIT_PREFIX="$with_libedit_prefix"
+  fi
+  ],
+  [LIBEDIT_PREFIX=]
+  )
+  if test "x$LIBEDIT_PREFIX" != "x" ; then
+    LIBEDIT_CPPFLAGS="-I$LIBEDIT_PREFIX/include"
+    LIBEDIT_LDFLAGS="-L$LIBEDIT_PREFIX/lib"
+  else
+    LIBEDIT_CPPFLAGS=
+    LIBEDIT_LDFLAGS=
+  fi
+  AC_SUBST([LIBEDIT_PREFIX])
+  AC_SUBST([LIBEDIT_LDFLAGS])
+  AC_SUBST([LIBEDIT_CPPFLAGS])
 
-    AC_ARG_ENABLE([modprompt],
-                  [  --disable-modprompt     Do not use modprompt],
+  AC_ARG_ENABLE([modprompt],
+                [  --disable-modprompt     Do not use modprompt],
 [
-    if test "x$enable_modprompt" = "xno" ; then
-      enable_modprompt="0"
-    else
-      enable_modprompt="1"
-    fi
-    ],
-    [enable_modprompt="1"]
-    )
-    if test "x$enable_modprompt" = "x1" ; then
-      MODPROMPT_CPPFLAGS=
+  if test "x$enable_modprompt" = "xno" ; then
+    enable_modprompt="0"
+  else
+    enable_modprompt="1"
+  fi
+  ],
+  [enable_modprompt="1"]
+  )
+  if test "x$enable_modprompt" = "x1" ; then
+    MODPROMPT_CPPFLAGS=
 
-      TEMP_CPPFLAGS="$CPPFLAGS"
-      CPPFLAGS="$LIBEDIT_CPPFLAGS $CPPFLAGS"
-      AC_CHECK_HEADERS([histedit.h], , [enable_modprompt="0"])
-      dnl Check if this version of libedit is known to be compatible.
-      LIBEDIT_MAJOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $1}'`
-      LIBEDIT_MINOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $2}'`
-      AC_MSG_CHECKING([for libedit >= $LIBEDIT_MAJOR_MIN.$LIBEDIT_MINOR_MIN])
-      AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+    TEMP_CPPFLAGS="$CPPFLAGS"
+    CPPFLAGS="$LIBEDIT_CPPFLAGS $CPPFLAGS"
+    AC_CHECK_HEADERS([histedit.h], , [enable_modprompt="0"])
+    dnl Check if this version of libedit is known to be compatible.
+    LIBEDIT_MAJOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $1}'`
+    LIBEDIT_MINOR_MIN=`echo $LIBEDIT_VERSION_MIN | tr . " " | awk '{print $2}'`
+    AC_MSG_CHECKING([for libedit >= $LIBEDIT_MAJOR_MIN.$LIBEDIT_MINOR_MIN])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 [[
 #include <histedit.h>
 #if (defined(LIBEDIT_MAJOR) && defined(LIBEDIT_MINOR))
@@ -577,60 +580,68 @@ if test "x$enable_modules" = "x1" ; then
 #error Unknown libedit
 #endif
 ]])],
-                        [enable_modprompt="1"; AC_MSG_RESULT([yes])],
-                        [enable_modprompt="0"; AC_MSG_RESULT([no])])
+                      [enable_modprompt="1"; AC_MSG_RESULT([yes])],
+                      [enable_modprompt="0"; AC_MSG_RESULT([no])])
 
-      CPPFLAGS="$TEMP_CPPFLAGS"
+    CPPFLAGS="$TEMP_CPPFLAGS"
 
-      TEMP_LIBS="$LIBS"
-      LIBS="$LIBEDIT_LDFLAGS $LIBS"
-      AC_CHECK_LIB([termcap], [tgetent], [MODPROMPT_LDFLAGS="-ltermcap"],
-        [AC_CHECK_LIB([tinfo], [tgetent], [MODPROMPT_LDFLAGS="-ltinfo"],
-          [AC_CHECK_LIB([curses], [tgetent], [MODPROMPT_LDFLAGS="-lcurses"],
-            [AC_CHECK_LIB([ncurses], [tgetent],
-                          [MODPROMPT_LDFLAGS="-lncurses"])])])],
-        [enable_modprompt="0"])
-      LIBS="$LIBS $MODPROMPT_LDFLAGS"
-      AC_CHECK_LIB([edit], [el_init],
-        [MODPROMPT_LDFLAGS="$MODPROMPT_LDFLAGS -ledit"], [enable_modprompt="0"])
-      LIBS="$TEMP_LIBS"
-      AC_SUBST([MODPROMPT_CPPFLAGS])
-      AC_SUBST([MODPROMPT_LDFLAGS])
-      if test "x$enable_modprompt" = "x1" ; then
-        CW_BUILD_MOD([modprompt], [enable_modprompt])
-      fi
-    fi
+    TEMP_LIBS="$LIBS"
+    LIBS="$LIBEDIT_LDFLAGS $LIBS"
+    AC_CHECK_LIB([termcap], [tgetent], [MODPROMPT_LDFLAGS="-ltermcap"],
+      [AC_CHECK_LIB([tinfo], [tgetent], [MODPROMPT_LDFLAGS="-ltinfo"],
+        [AC_CHECK_LIB([curses], [tgetent], [MODPROMPT_LDFLAGS="-lcurses"],
+          [AC_CHECK_LIB([ncurses], [tgetent],
+                        [MODPROMPT_LDFLAGS="-lncurses"])])])],
+      [enable_modprompt="0"])
+    LIBS="$LIBS $MODPROMPT_LDFLAGS"
+    AC_CHECK_LIB([edit], [el_init],
+      [MODPROMPT_LDFLAGS="$MODPROMPT_LDFLAGS -ledit"], [enable_modprompt="0"])
+    LIBS="$TEMP_LIBS"
+    AC_SUBST([MODPROMPT_CPPFLAGS])
+    AC_SUBST([MODPROMPT_LDFLAGS])
     if test "x$enable_modprompt" = "x1" ; then
-      AC_DEFINE([CW_USE_MODPROMPT])
+      CW_BUILD_MOD([modprompt], [enable_modprompt])
     fi
-  else
-    enable_modprompt="0"
+  fi
+  if test "x$enable_modprompt" = "x1" ; then
+    AC_DEFINE([CW_USE_MODPROMPT])
   fi
   if test "x$enable_modprompt" = "x0" ; then
     AC_MSG_RESULT([Missing features or configuration options necessary for modprompt])
   fi
 else
-  AC_MSG_RESULT([Modules disabled; not doing module configuration])
   enable_modprompt="0"
 fi
 AC_SUBST([enable_modprompt])
 
+dnl modclopt.
+if test "x$enable_modules" = "x1" ; then
+  AC_ARG_ENABLE([modclopt],
+                [  --disable-modclopt      Do not use modclopt],
+[
+  if test "x$enable_modclopt" = "xno" ; then
+    enable_modclopt="0"
+  else
+    enable_modclopt="1"
+  fi
+  ],
+  [enable_modclopt="1"]
+  )
+
+  if test "x$enable_modclopt" = "x1" ; then
+    CW_BUILD_MOD([modclopt], [enable_modclopt])
+  fi
+  if test "x$enable_modclopt" = "x1" ; then
+    AC_DEFINE([CW_USE_MODCLOPT])
+  fi
+else
+  enable_clopt="0"
+fi
+AC_SUBST([enable_modclopt])
+
 dnl Look for binaries.
 CW_BUILD_BIN([onyx], [bin_onyx])
 CW_BUILD_BIN([onyx_config], [bin_onyx_config])
-
-dnl Configure settings for the onyx binary.
-if echo "<Version = onyx>" | grep Version >/dev/null ; then
-  onyx_version=devel
-else
-  onyx_version="<Version = onyx>"
-fi
-AC_SUBST([onyx_version])
-ONYX="$abs_objroot/bin/onyx/bin/onyx"
-AC_SUBST([ONYX])
-TONYX="$abs_objroot/bin/onyx/bin/tonyx"
-AC_CHECK_DECL([optreset])
-AC_SUBST([TONYX])
 
 AC_SUBST([bins])
 AC_SUBST([mods])
@@ -789,6 +800,19 @@ dnl
 dnl onyx configuration.
 dnl 
 if test "x$bin_onyx" = "x1" ; then
+  if echo "<Version = onyx>" | grep Version >/dev/null ; then
+    onyx_version=devel
+  else
+    onyx_version="<Version = onyx>"
+  fi
+  AC_SUBST([onyx_version])
+
+  ONYX="$abs_objroot/bin/onyx/bin/onyx"
+  AC_SUBST([ONYX])
+
+  TONYX="$abs_objroot/bin/onyx/bin/tonyx"
+  AC_SUBST([TONYX])
+
   AC_DEFINE_UNQUOTED([CW_TONYX_ONYX], ["$abs_objroot/bin/onyx/bin/onyx"])
 
   tmpath=ONYX_MPATH=
@@ -802,6 +826,8 @@ if test "x$bin_onyx" = "x1" ; then
   trpath=`echo $trpath | sed s/://`
   AC_DEFINE_UNQUOTED([CW_TONYX_MPATH], ["$tmpath"])
   AC_DEFINE_UNQUOTED([CW_TONYX_RPATH], ["$trpath"])
+
+  AC_CHECK_DECL([optreset])
 fi
 
 dnl Process .in files.

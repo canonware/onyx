@@ -215,6 +215,10 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	onyx (less than 50 bytes).  The documentation does not mention the
 	effects of this option.
 
+--disable-modclopt
+	Do not build the clopt module, which provides command line option
+	parsing.  The documentation does not mention the effects of this option.
+
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the CW_ASSERT
 	cpp macro).  The resulting libraries and modules will not be binary

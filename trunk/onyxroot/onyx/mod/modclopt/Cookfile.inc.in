@@ -1,0 +1,73 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ * Cookfile for modclopt.
+ *
+ ******************************************************************************/
+
+/* Include generated dependency files. */
+#include-cooked [glob @objroot@/mod/modclopt/src/"*.d_*"]
+
+/*
+ * File lists.
+ */
+
+/* Source files. */
+/* Generated source code (created by configure). */
+MODCLOPT_NX_GEN = [fromto %.nx.in @objroot@/mod/modclopt/nx/modclopt/%.nx
+                          modclopt_defs.nx.in
+                          ];
+
+MODCLOPT_NX = [addprefix @srcroot@/mod/modclopt/nx/modclopt/
+                         modclopt.nx
+                         ];
+
+/*
+ * User cook'ables.
+ */
+
+modclopt :
+{
+}
+
+modclopt_mods_tests :
+{
+}
+
+modclopt_mods_check :
+{
+}
+
+modclopt_mods_check_update :
+{
+}
+
+modclopt_mods_install :
+{
+  @INSTALL@ -d [DATADIR]/onyx-@onyx_version@/nx/modclopt;
+
+  loop local f = [MODCLOPT_NX] [MODCLOPT_NX_GEN]
+  {
+    @INSTALL@ -m 0644 [f] [DATADIR]/onyx-@onyx_version@/nx/modclopt/;
+  }
+}
+
+modclopt_mods_uninstall :
+{
+  rm -f [DATADIR]/onyx-@onyx_version@/nxm/modclopt.nxm;
+  rm -rf [DATADIR]/onyx-@onyx_version@/nx/modclopt;
+}
+
+modclopt_mods_clean :
+{
+}
+
+modclopt_mods_distclean :
+{
+}
