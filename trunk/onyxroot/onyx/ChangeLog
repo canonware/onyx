@@ -1,3 +1,7 @@
+2004-01-03 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.0 released.
+
 2003-12-31  Jason Evans  <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_{send,recv}() : Fix
