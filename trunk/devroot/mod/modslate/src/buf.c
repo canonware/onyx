@@ -2566,7 +2566,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 		    mmkr = ql_prev(&bufp->mlist, mkr, mlink);
 
 		    /* Move mkr. */
-		    mkr_dup(mkr, a_mkr);
+		    mkr_p_dup(mkr, a_mkr, mkr->order);
 		}
 	    }
 	}
@@ -2599,7 +2599,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 		mmkr = ql_next(&bufp->mlist, mkr, mlink);
 
 		/* Move mkr. */
-		mkr_dup(mkr, a_mkr);
+		mkr_p_dup(mkr, a_mkr, mkr->order);
 	    }
 
 	    /* Iterate backward. */
@@ -2613,7 +2613,7 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 		mmkr = ql_prev(&bufp->mlist, mkr, mlink);
 
 		/* Move mkr. */
-		mkr_dup(mkr, a_mkr);
+		mkr_p_dup(mkr, a_mkr, mkr->order);
 	    }
 	}
     }
@@ -2768,13 +2768,11 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 
 	/* Adjust pline for mkr's at or after end. */
 	nlines = end->pline;
-	bufp->nlines -= nlines;
-	buf->nlines -= (cw_uint64_t) nlines;
-	bufp->line -= (cw_uint64_t) nlines;
 	if (nlines > 0)
 	{
 	    bufp->nlines -= nlines;
 	    buf->nlines -= (cw_uint64_t) nlines;
+	    bufp->line -= (cw_uint64_t) nlines;
 
 	    for (mkr = ql_last(&bufp->mlist, mlink);
 		 mkr != NULL && mkr->ppos >= end->ppos;
@@ -2797,10 +2795,11 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	 * Intermediate bufp's.
 	 */
 	for (bufp = ql_prev(&buf->plist, bufp, plink);
-	     /* bufp != NULL && */ bufp != start->bufp;
+	     bufp != start->bufp;
 	     bufp = prevp)
-	
 	{
+	    cw_check_ptr(bufp);
+
 	    /* Get the previous bufp before deleting this one. */
 	    prevp = ql_prev(&buf->plist, bufp, plink);
 
@@ -2809,7 +2808,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 		 mkr != NULL;
 		 mkr = ql_first(&bufp->mlist))
 	    {
-		mkr_dup(mkr, end);
+		mkr_p_dup(mkr, end, mkr->order);
 	    }
 
 	    buf->len -= (cw_uint64_t) bufp->len;
@@ -2838,7 +2837,7 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 	     mkr != NULL && mkr->ppos >= bufp->gap_off;
 	     mkr = ql_last(&bufp->mlist, mlink))
 	{
-	    mkr_dup(mkr, end);
+	    mkr_p_dup(mkr, end, mkr->order);
 	}
     }
 
