@@ -40,6 +40,27 @@ if test "x$enable_inlines" = "x1" ; then
 fi
 ])
 
+AC_DEFUN(CW_ENABLE_LIBSTASH_BUF,
+[
+AC_MSG_CHECKING(whether to include libstash's buf class in build)
+AC_ARG_ENABLE(libstash-buf, [  --disable-libstash-buf  Do not compile in libstash's buf class],
+if test -d "$srcdir/lib/c/$1" -a "x$enable_libstash_buf" != "xno" ; then
+  enable_libstash_buf="1"
+  AC_MSG_RESULT("yes")
+else
+  enable_libstash_buf="0"
+  AC_MSG_RESULT("no")
+fi
+,
+enable_libstash_buf="1"
+AC_MSG_RESULT("yes")
+)
+if test "x$enable_libstash_buf" = "x1" ; then
+  AC_DEFINE(_CW_HAVE_LIBSTASH_BUF)
+fi
+AC_SUBST(enable_libstash_buf)
+])
+
 dnl CW_BUILD_LIB(lib, var)
 dnl lib : Name of library.
 dnl var : Name of variable to substitute in configure output.
