@@ -1,3 +1,10 @@
+2001-11-04  Jason Evans  <jasone@canonware.com>
+
+	* Cookfile.in: Allow CC, CPPFLAGS, CFLAGS, and LDFLAGS to be
+	overridden on the command line.  Also protect cook-special
+	characters such as '=' so that, for example, CFLAGS can contain
+	-march=i386.
+
 2001-10-31  Jason Evans  <jasone@canonware.com>
 
 	* : Port to Darwin (Apple OS X).
