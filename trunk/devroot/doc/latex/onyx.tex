@@ -2343,11 +2343,7 @@ declaration. \\
 mark objects & {\bf \htmlref{]}{systemdict:sym_rb}} & array & Construct an
 array. \\
 \hline
-& {\bf \htmlref{aload}{systemdict:aload}} & & \\
-\hline
 length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
-\hline
-& {\bf \htmlref{astore}{systemdict:astore}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Dictionary and dictionary stack operators} \\
 \hline \hline
@@ -2356,6 +2352,8 @@ length & {\bf \htmlref{array}{systemdict:array}} & array & Create an array. \\
 & {\bf \htmlref{gcdict}{systemdict:gcdict}} & & \\
 \hline
 & {\bf \htmlref{globaldict}{systemdict:globaldict}} & & \\
+\hline
+& {\bf \htmlref{sprintdict}{systemdict:sprintdict}} & & \\
 \hline
 & {\bf \htmlref{where}{systemdict:where}} & & \\
 \hline
@@ -2829,27 +2827,6 @@ onyx:0> -1 3 add 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{systemdict:aload}
-\index{aload@\onyxop{}{aload}{}}
-\item[{\onyxop{--}{aload}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{systemdict:and}
 \index{and@\onyxop{}{and}{}}
 \item[{\onyxop{a b}{and}{r}}: ]
@@ -2939,27 +2916,6 @@ onyx:0> 3 array 1 sprint
 onyx:0> 0 array 1 sprint
 []
 onyx:0>
-		\end{verbatim}
-	\end{description}
-\label{systemdict:astore}
-\index{astore@\onyxop{}{astore}{}}
-\item[{\onyxop{--}{astore}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
 		\end{verbatim}
 	\end{description}
 \label{systemdict:begin}

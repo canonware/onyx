@@ -297,11 +297,13 @@ nxo_array_len_get(cw_nxo_t *a_nxo)
 	return retval;
 }
 
+#ifdef _CW_USE_INLINES
 void
 nxo_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {
 	nxo_l_array_el_get(a_nxo, a_offset, r_el);
 }
+#endif
 
 void
 nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
@@ -328,36 +330,4 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 		    array->e.i.beg_offset);
 	}
 	nxoe_p_array_unlock(array);
-}
-
-/*
- * This function is unsafe to use for arrays with locking, so the public API
- * forces the use of nxo_array_el_get() instead.
- * However, the GC needs to cache pointers to the arrays in gcdict for
- * performance reasons, so it uses this function.
- */
-cw_nxo_t *
-nxo_l_array_get(cw_nxo_t *a_nxo)
-{
-	cw_nxo_t	*retval;
-	cw_nxoe_array_t	*array;
-
-	_cw_check_ptr(a_nxo);
-	_cw_dassert(a_nxo->magic == _CW_NXO_MAGIC);
-	_cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
-
-	array = (cw_nxoe_array_t *)a_nxo->o.nxoe;
-
-	_cw_check_ptr(array);
-	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
-	_cw_assert(array->nxoe.type == NXOT_ARRAY);
-
-	if (array->nxoe.indirect == FALSE)
-		retval = array->e.a.arr;
-	else {
-		retval = &nxo_l_array_get(&array->e.i.nxo)
-		    [array->e.i.beg_offset];
-	}
-
-	return retval;
 }

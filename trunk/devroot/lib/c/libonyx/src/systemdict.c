@@ -67,10 +67,8 @@ static const struct cw_systemdict_entry systemdict_fastops[] = {
  */
 static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(abs),
-	ENTRY(aload),
 	ENTRY(and),
 	ENTRY(array),
-	ENTRY(astore),
 	ENTRY(begin),
 	ENTRY(bind),
 	ENTRY(broadcast),
@@ -398,27 +396,6 @@ systemdict_add(cw_nxo_t *a_thread)
 #endif
 
 void
-systemdict_aload(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack;
-	cw_nxo_t	*array, *nxo;
-	cw_uint32_t	i, len;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-
-	NXO_STACK_GET(array, ostack, a_thread);
-	if (nxo_type_get(array) != NXOT_ARRAY) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-
-	for (i = 0, len = nxo_array_len_get(array); i < len; i++) {
-		nxo = nxo_stack_under_push(ostack, array);
-		nxo_array_el_set(array, nxo, i);
-	}
-}
-
-void
 systemdict_and(cw_nxo_t *a_thread)
 {
 	cw_nxo_t	*ostack;
@@ -472,45 +449,6 @@ systemdict_array(cw_nxo_t *a_thread)
 
 	nxo_array_new(nxo, nxo_thread_nx_get(a_thread),
 	    nxo_thread_currentlocking(a_thread), len);
-}
-
-void
-systemdict_astore(cw_nxo_t *a_thread)
-{
-	cw_nxo_t	*ostack, *tstack;
-	cw_nxo_t	*array, *nxo;
-	cw_sint32_t	i, len;
-
-	ostack = nxo_thread_ostack_get(a_thread);
-	tstack = nxo_thread_tstack_get(a_thread);
-
-	NXO_STACK_GET(array, ostack, a_thread);
-	if (nxo_type_get(array) != NXOT_ARRAY) {
-		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
-		return;
-	}
-	/* Make sure there will be enough objects to fill the array. */
-	len = nxo_array_len_get(array);
-	if (len > nxo_stack_count(ostack) - 1) {
-		nxo_thread_error(a_thread, NXO_THREADE_STACKUNDERFLOW);
-		return;
-	}
-
-	nxo = nxo_stack_push(tstack);
-	nxo_dup(nxo, array);
-	nxo_stack_pop(ostack);
-	array = nxo;
-
-	/* Move ostack objects to the array. */
-	for (i = len - 1; i >= 0; i--) {
-		nxo_array_el_set(array, nxo_stack_get(ostack), i);
-		nxo_stack_pop(ostack);
-	}
-
-	/* Push the array back onto ostack. */
-	nxo = nxo_stack_push(ostack);
-	nxo_dup(nxo, array);
-	nxo_stack_pop(tstack);
 }
 
 void
@@ -584,7 +522,8 @@ systemdict_bind(cw_nxo_t *a_thread)
 		return;
 	}
 
-	systemdict_p_bind(array, a_thread);
+	if (nxo_l_array_bound_get(array) == FALSE)
+		systemdict_p_bind(array, a_thread);
 }
 
 void
