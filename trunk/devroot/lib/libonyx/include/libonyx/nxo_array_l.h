@@ -10,6 +10,8 @@
  *
  ******************************************************************************/
 
+#include "origin_l.h"
+
 /* This is private, but is exposed here to make inlining nxo_l_array_el_get()
  * possible.  nxo_thread_loop() calls nxo_l_array_el_get() a lot, so this is
  * critical to performance. */
@@ -86,6 +88,11 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
     if (array->nxoe.indirect == FALSE && array->e.a.alloc_len > 0)
     {
 	nxa_free(array->e.a.arr, array->e.a.alloc_len * sizeof(cw_nxo_t));
+    }
+
+    if (array->nxoe.origin)
+    {
+	origin_l_remove(array);
     }
 
 #ifdef CW_THREADS

@@ -533,6 +533,7 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
     nxo_file_fd_wrap(file, src_fd, TRUE);
+    nxo_file_origin_set(file, a_filename, strlen(a_filename));
 
     retval = FALSE;
     RETURN:
@@ -570,6 +571,7 @@ file_setup(cw_nxo_t *a_thread, const char *a_filename)
 
     nxo_file_synthetic(file, nx_read, NULL, NULL, nx_read_shutdown,
 		       (void *) src_arg);
+    nxo_file_origin_set(file, a_filename, strlen(a_filename));
 
     retval = FALSE;
     RETURN:
@@ -599,6 +601,7 @@ stdin_init(cw_nxo_t *a_thread, cw_nx_t *a_nx, cw_bool_t a_interactive)
     nxo_file_new(nxo, TRUE);
     nxo_file_synthetic(nxo, nx_read, NULL, NULL, nx_read_shutdown,
 		       (void *) stdin_arg);
+    nxo_file_origin_set(nxo, "*stdin*", sizeof("*stdin*") - 1);
 }
 
 cw_sint32_t
@@ -747,6 +750,7 @@ stdout_init(cw_nx_t *a_nx)
     nxo = nx_stdout_get(a_nx);
     nxo_file_new(nxo, TRUE);
     nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stdout_arg);
+    nxo_file_origin_set(nxo, "*stdout*", sizeof("*stdout*") - 1);
 }
 
 void
@@ -761,6 +765,7 @@ stderr_init(cw_nx_t *a_nx)
     nxo = nx_stderr_get(a_nx);
     nxo_file_new(nxo, TRUE);
     nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void *) &stderr_arg);
+    nxo_file_origin_set(nxo, "*stderr*", sizeof("*stderr*") - 1);
 }
 
 cw_bool_t

@@ -44,6 +44,14 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 cw_nxn_t
 nxo_file_close(cw_nxo_t *a_nxo);
 
+void
+nxo_file_origin_get(const cw_nxo_t *a_nxo, const cw_uint8_t **r_origin,
+		    cw_uint32_t *r_olen);
+
+void
+nxo_file_origin_set(cw_nxo_t *a_nxo, const cw_uint8_t *a_origin,
+		    cw_uint32_t a_olen);
+
 #ifdef CW_POSIX_FILE
 cw_sint32_t
 nxo_file_fd_get(const cw_nxo_t *a_nxo);

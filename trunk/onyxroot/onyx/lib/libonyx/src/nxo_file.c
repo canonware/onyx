@@ -63,6 +63,10 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_bool_t a_locking)
 	mtx_new(&file->lock);
     }
 #endif
+
+    file->origin = NULL;
+    file->olen = 0;
+
     file->mode = FILE_NONE;
 #ifdef CW_POSIX_FILE
     file->nonblocking = FALSE;
@@ -385,6 +389,59 @@ nxo_file_close(cw_nxo_t *a_nxo)
     nxoe_p_file_unlock(file);
 #endif
     return retval;
+}
+
+void
+nxo_file_origin_get(const cw_nxo_t *a_nxo, const cw_uint8_t **r_origin,
+		    cw_uint32_t *r_olen)
+{
+    cw_nxoe_file_t *file;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+
+    file = (cw_nxoe_file_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(file);
+    cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(file->nxoe.type == NXOT_FILE);
+
+    *r_origin = file->origin;
+    *r_olen = file->olen;
+}
+
+void
+nxo_file_origin_set(cw_nxo_t *a_nxo, const cw_uint8_t *a_origin,
+		    cw_uint32_t a_olen)
+{
+    cw_nxoe_file_t *file;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_FILE);
+
+    file = (cw_nxoe_file_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(file);
+    cw_dassert(file->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(file->nxoe.type == NXOT_FILE);
+
+    /* Clean up if origin was previously set. */
+    if (file->origin != NULL)
+    {
+	nxa_free(file->origin, file->olen);
+	file->origin = NULL;
+	file->olen = 0;
+    }
+
+    /* Allocate a copy of the origin. */
+    if (a_origin != NULL)
+    {
+	file->origin = (cw_uint8_t *) nxa_malloc(a_olen);
+	memcpy(file->origin, a_origin, a_olen);
+	file->olen = a_olen;
+    }
 }
 
 #ifdef CW_POSIX_FILE

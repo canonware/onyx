@@ -124,6 +124,10 @@ struct cw_nxo_s
 	} real;
 	struct
 	{
+	    cw_uint32_t line;
+	} pmark;
+	struct
+	{
 	    cw_op_t *f;
 	} oper;
 	cw_nxoe_t *nxoe;
@@ -148,6 +152,9 @@ struct cw_nxoe_s
      * functions access nxoe's directly, rather than going through a referring
      * nxo. */
     cw_nxot_t type:5;
+
+    /* If TRUE, the origin of this object has been recorded. */
+    cw_bool_t origin:1;
 
     /* If TRUE, the string in the key is statically allocated, and should not be
      * deallocated during destruction. */

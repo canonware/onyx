@@ -58,7 +58,7 @@ LIBONYX_COMMON_SRCS = [addprefix @srcroot@/lib/libonyx/src/
                                  nxo_dict.c nxo_file.c nxo_fino.c nxo_integer.c
                                  nxo_mark.c nxo_name.c nxo_null.c nxo_operator.c
                                  nxo_pmark.c nxo_stack.c nxo_string.c
-                                 nxo_thread.c systemdict.c xep.c
+                                 nxo_thread.c origin.c systemdict.c xep.c
 #if @enable_oop@
                                  nxo_class.c nxo_instance.c
 #endif

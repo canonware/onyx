@@ -454,6 +454,7 @@ typedef enum
 #endif
     NXN_ENTRY(operatortype),
     NXN_ENTRY(or),
+    NXN_ENTRY(origin),
     NXN_ENTRY(ostack),
     NXN_ENTRY(over),
 #ifdef CW_SOCKET

@@ -8066,6 +8066,45 @@ onyx:0> 5 3 or 1 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:origin}
+\index{origin@\onyxop{}{origin}{}}
+\item[{\onyxop{array}{origin}{false}}: ]
+\item[{\onyxop{array}{origin}{string line true}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string: ]
+			A string (typically a filename) that tells what the
+			origin of \oparg{array} was.
+		\item[line: ]
+			An integer that represents the line within
+			\oparg{string} that \oparg{array} started at.
+		\item[false/true: ]
+			If false, no origin is recorded for \oparg{array}.  If
+			true, the origin is recorded for \oparg{array}, and
+			\oparg{string} and \oparg{line} are also returned.
+		\end{description}
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		If the origin of \oparg{array} is recorded, return the
+		\oparg{string} and \oparg{line} that represent the origin.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> {} origin {exch 1 sprint 1 sprint} if
+`*stdin*'
+1
+onyx:0> [] origin {exch 1 sprint 1 sprint} if
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:ostack}
 \index{ostack@\onyxop{}{ostack}{}}
 \item[{\onyxop{--}{ostack}{stack}}: ]

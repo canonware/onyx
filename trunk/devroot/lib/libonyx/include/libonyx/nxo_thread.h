@@ -47,8 +47,11 @@ struct cw_nxo_threadp_s
     cw_uint32_t magic;
 #endif
 
-    /* Current line number (counting starts at 1 by convention) and column
-     * number (counting starts at 0). */
+    /* Current origin/length, line number (counting starts at 1 by convention)
+     * and column number (counting starts at 0). */
+    const cw_uint8_t *origin;
+    cw_uint32_t olen;
+
     cw_uint32_t line;
     cw_sint32_t column;
 };
@@ -232,6 +235,14 @@ nxo_threadp_new(cw_nxo_threadp_t *a_threadp);
 
 void
 nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread);
+
+void
+nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
+		       const cw_uint8_t **r_origin, cw_uint32_t *r_olen);
+
+void
+nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
+		       const cw_uint8_t *a_origin, cw_uint32_t a_olen);
 
 void
 nxo_threadp_position_get(const cw_nxo_threadp_t *a_threadp, cw_uint32_t *r_line,

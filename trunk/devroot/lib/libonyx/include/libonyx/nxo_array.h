@@ -28,3 +28,11 @@ nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el);
 
 void
 nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset);
+
+cw_bool_t
+nxo_array_origin_get(cw_nxo_t *a_nxo, const cw_uint8_t **r_origin,
+		     cw_uint32_t *r_olen, cw_uint32_t *r_line_num);
+
+void
+nxo_array_origin_set(cw_nxo_t *a_nxo, const cw_uint8_t *a_origin,
+		     cw_uint32_t a_olen, cw_uint32_t a_line_num);

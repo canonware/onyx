@@ -102,6 +102,8 @@ modprompt_init(void *a_arg, cw_nxo_t *a_thread)
     nxo_file_new(file, TRUE);
     nxo_file_synthetic(file, modprompt_read, NULL, modprompt_synth_ref_iter,
 		       modprompt_synth_delete, synth);
+    nxo_file_origin_set(file, "*stdin*", sizeof("*stdin*") - 1);
+
     nxo_attr_set(file, NXOA_EXECUTABLE);
 
     /* The interpreter is currently executing a handle that holds a reference to

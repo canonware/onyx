@@ -1,3 +1,21 @@
+2003-09-18 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_thread.nx.in : Modify errordict's handleerror
+	  procedure to report the origins of arrays for which the origins have
+	  been recorded.
+
+	  Add $origin to currenterror.
+
+	* Add the origin operator.
+
+	* lib/libonyx/src/nxo_array.c:nxo_array_origin_[gs]et() : Add.
+
+	* lib/libonyx/src/nxo_file.c:nxo_file_origin_[gs]et() : Add.
+
+	* lib/libonyx/src/nxo_thread.c:nxo_threadp_origin_[gs]et() : Add.
+
+	* lib/libonyx/include/libonyx/nxo_pmark.h:nxo_pmark_line_[gs]et() : Add.
+
 2003-09-11 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/thd.c:thd_single_{enter,leave}() : Unlock

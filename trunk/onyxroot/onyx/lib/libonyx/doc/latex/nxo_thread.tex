@@ -55,6 +55,53 @@ cw\_nxo\_t *a\_thread}}
 	\item[Description: ]
 		Destructor.
 	\end{capilist}
+\label{nxo_threadp_origin_get}
+\index{nxo_threadp_origin_get@\cfunc{nxo\_threadp\_origin\_get}{}}
+\citem{\cfunc[void]{nxo\_threadp\_origin\_get}{const cw\_nxo\_threadp\_t
+*a\_threadp, const cw\_uint8\_t **r\_origin, cw\_uint32\_t *r\_olen}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\item[r\_origin: ] Pointer to a string pointer.
+		\item[r\_olen: ] Pointer to an unsigned integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[*r\_origin: ]
+			A pointer to a string that represents the origin of
+			\cvar{a\_nxo}.
+		\item[*r\_olen: ]
+			The length of the string pointed to by
+			\cvar{*r\_origin}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Retrieve the origin.
+	\end{capilist}
+\label{nxo_threadp_origin_set}
+\index{nxo_threadp_origin_set@\cfunc{nxo\_threadp\_origin\_set}{}}
+\citem{\cfunc[void]{nxo\_threadp\_origin\_set}{cw\_nxo\_threadp\_t
+*a\_threadp, const cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\item[a\_origin: ]
+			Pointer to a string that represents the origin of
+			\cvar{a\_nxo}.
+		\item[a\_olen: ]
+			The length of the string pointed to by\cvar{a\_origin}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the origin.  This function does not make a copy of
+		\cvar{a\_origin}, so the string must exist for the entire time
+		that \cvar{a\_threadp} retains a reference to the string.
+	\end{capilist}
 \label{nxo_threadp_position_get}
 \index{nxo_threadp_position_get@\cfunc{nxo\_threadp\_position\_get}{}}
 \citem{\cfunc[void]{nxo\_threadp\_position\_get}{const cw\_nxo\_threadp\_t

@@ -389,6 +389,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(open),
 #endif
     ENTRY(or),
+    ENTRY(origin),
     ENTRY(ostack),
     ENTRY(over),
 #ifdef CW_SOCKET
@@ -968,6 +969,7 @@ systemdict_accept(cw_nxo_t *a_thread)
 
     nxo_file_new(sock, nxo_thread_currentlocking(a_thread));
     nxo_file_fd_wrap(sock, sockfd, TRUE);
+    nxo_file_origin_set(sock, "*socket*", sizeof("*socket*") - 1);
 }
 #endif
 
@@ -7838,6 +7840,7 @@ systemdict_open(cw_nxo_t *a_thread)
     error = nxo_file_open(file, nxo_string_get(name),
 			  nxo_string_len_get(name), nxo_string_get(flags),
 			  nxo_string_len_get(flags), mode);
+    nxo_file_origin_set(file, nxo_string_get(name), nxo_string_len_get(name));
     nxo_string_unlock(name);
     if (error)
     {
@@ -7887,6 +7890,38 @@ systemdict_or(cw_nxo_t *a_thread)
     }
 
     nxo_stack_pop(ostack);
+}
+
+void
+systemdict_origin(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo;
+    const cw_uint8_t *filename;
+    cw_uint32_t fnlen, line;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_ARRAY)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }	
+
+    if (nxo_array_origin_get(nxo, &filename, &fnlen, &line) == FALSE)
+    {
+	nxo_string_new(nxo, nxo_thread_currentlocking(a_thread), fnlen);
+	nxo_string_set(nxo, 0, filename, fnlen);
+
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, line);
+
+	nxo = nxo_stack_push(ostack);
+	nxo_boolean_new(nxo, TRUE);
+    }
+    else
+    {
+	nxo_boolean_new(nxo, FALSE);
+    }
 }
 
 void
@@ -8136,11 +8171,13 @@ systemdict_pipe(cw_nxo_t *a_thread)
     nxo = nxo_stack_push(ostack);
     nxo_file_new(nxo, nxo_thread_currentlocking(a_thread));
     nxo_file_fd_wrap(nxo, filedes[0], TRUE);
+    nxo_file_origin_set(nxo, "*pipe(r)*", sizeof("*pipe(r)*") - 1);
 
     /* Write fd. */
     nxo = nxo_stack_push(ostack);
     nxo_file_new(nxo, nxo_thread_currentlocking(a_thread));
     nxo_file_fd_wrap(nxo, filedes[1], TRUE);
+    nxo_file_origin_set(nxo, "*pipe(w)*", sizeof("*pipe(w)*") - 1);
 }
 #endif
 
@@ -11565,6 +11602,7 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	nxo_stack_roll(ostack, npop + 1, 1);
 	nxo_file_new(nxo, nxo_thread_currentlocking(a_thread));
 	nxo_file_fd_wrap(nxo, sockfd, TRUE);
+	nxo_file_origin_set(nxo, "*socket*", sizeof("*socket*") - 1);
     }
     else
     {
@@ -11579,10 +11617,12 @@ systemdict_p_socket(cw_nxo_t *a_thread, cw_bool_t a_pair)
 	nxo = nxo_stack_push(ostack);
 	nxo_file_new(nxo, nxo_thread_currentlocking(a_thread));
 	nxo_file_fd_wrap(nxo, sockfds[0], TRUE);
+	nxo_file_origin_set(nxo, "*socket*", sizeof("*socket*") - 1);
 
 	nxo = nxo_stack_push(ostack);
 	nxo_file_new(nxo, nxo_thread_currentlocking(a_thread));
 	nxo_file_fd_wrap(nxo, sockfds[1], TRUE);
+	nxo_file_origin_set(nxo, "*socket*", sizeof("*socket*") - 1);
 
 	nxo_stack_roll(ostack, npop + 2, 2);
     }

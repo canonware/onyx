@@ -340,3 +340,54 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
     }
 #endif
 }
+
+cw_bool_t
+nxo_array_origin_get(cw_nxo_t *a_nxo, const cw_uint8_t **r_origin,
+		     cw_uint32_t *r_olen, cw_uint32_t *r_line_num)
+{
+    cw_bool_t retval;
+    cw_nxoe_array_t *array;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
+
+    array = (cw_nxoe_array_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(array);
+    cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(array->nxoe.type == NXOT_ARRAY);
+
+    if (array->nxoe.origin)
+    {
+	retval = origin_l_lookup(array, r_origin, r_olen, r_line_num);
+    }
+    else
+    {
+	retval = TRUE;
+    }
+
+    return retval;
+}
+
+void
+nxo_array_origin_set(cw_nxo_t *a_nxo, const cw_uint8_t *a_origin,
+		     cw_uint32_t a_olen, cw_uint32_t a_line_num)
+{
+    cw_nxoe_array_t *array;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
+
+    array = (cw_nxoe_array_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(array);
+    cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(array->nxoe.type == NXOT_ARRAY);
+
+    cw_assert(array->nxoe.origin == FALSE);
+
+    origin_l_insert(array, a_origin, a_olen, a_line_num);
+    array->nxoe.origin = TRUE;
+}

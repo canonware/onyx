@@ -77,7 +77,8 @@ static cw_bool_t
 nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread);
 #endif
 static void
-nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread);
+nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread,
+			       cw_nxo_threadp_t *a_threadp);
 static void
 nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread);
 
@@ -90,6 +91,9 @@ void
 nxo_threadp_new(cw_nxo_threadp_t *a_threadp)
 {
     cw_check_ptr(a_threadp);
+
+    a_threadp->origin = NULL;
+    a_threadp->olen = 0;
 
     a_threadp->line = 1;
     a_threadp->column = 0;
@@ -221,6 +225,28 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 #ifdef CW_DBG
     memset(a_threadp, 0x5a, sizeof(cw_nxo_threadp_t));
 #endif
+}
+
+void
+nxo_threadp_origin_get(const cw_nxo_threadp_t *a_threadp,
+		       const cw_uint8_t **r_origin, cw_uint32_t *r_olen)
+{
+    cw_check_ptr(a_threadp);
+    cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
+
+    *r_origin = a_threadp->origin;
+    *r_olen = a_threadp->olen;
+}
+
+void
+nxo_threadp_origin_set(cw_nxo_threadp_t *a_threadp,
+			 const cw_uint8_t *a_origin, cw_uint32_t a_olen)
+{
+    cw_check_ptr(a_threadp);
+    cw_dassert(a_threadp->magic == CW_NXO_THREADP_MAGIC);
+
+    a_threadp->origin = a_origin;
+    a_threadp->olen = a_olen;
 }
 
 void
@@ -765,6 +791,14 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 				}
 #endif
 				nxo_threadp_new(&threadp);
+				{
+				    const cw_uint8_t *origin;
+				    cw_uint32_t olen;
+
+				    nxo_file_origin_get(el, &origin, &olen);
+				    nxo_threadp_origin_set(&threadp, origin,
+							   olen);
+				}
 				/* Read data from the file and interpret it
 				 * until an EOF (0 byte read). */
 				for (nread = nxo_file_read(el,
@@ -993,6 +1027,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		    cw_uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
 		    nxo_threadp_new(&threadp);
+		    {
+			const cw_uint8_t *origin;
+			cw_uint32_t olen;
+
+			nxo_file_origin_get(nxo, &origin, &olen);
+			nxo_threadp_origin_set(&threadp, origin, olen);
+		    }
 		    /* Read data from the file and interpret it until an EOF (0
 		     * byte read). */
 		    for (nread = nxo_file_read(nxo,
@@ -1685,9 +1726,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    }
 		    case '{':
 		    {
+			cw_uint32_t line, column;
+
 			a_thread->defer_count++;
 			nxo = nxo_stack_push(&a_thread->ostack);
 			nxo_pmark_new(nxo);
+			nxo_threadp_position_get(a_threadp, &line, &column);
+			nxo_pmark_line_set(nxo, line);
 			break;
 		    }
 		    case '}':
@@ -1696,8 +1741,7 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			{
 			    token = TRUE;
 			    a_thread->defer_count--;
-			    nxoe_p_thread_procedure_accept(
-				a_thread);
+			    nxoe_p_thread_procedure_accept(a_thread, a_threadp);
 			}
 			else
 			{
@@ -2882,7 +2926,8 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 			   cw_uint8_t *a_suffix, cw_sint32_t a_c)
 {
     cw_nxo_t *nxo;
-    cw_uint32_t defer_count, line, column;
+    const cw_uint8_t *origin;
+    cw_uint32_t defer_count, olen, line, column;
 
     nxo = nxo_stack_push(&a_thread->ostack);
 
@@ -2919,9 +2964,26 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 
     nxoe_p_thread_reset(a_thread);
 
-    /* Push line and column onto ostack.  They are used in the embedded onyx
-     * code below to set line and column in currenterror. */
+    /* Push origin, line and column onto ostack.  They are used in the embedded
+     * onyx code below to set origin, line, and column in currenterror. */
+    nxo_threadp_origin_get(a_threadp, &origin, &olen);
     nxo_threadp_position_get(a_threadp, &line, &column);
+
+    /* origin. */
+    nxo = nxo_stack_push(&a_thread->ostack);
+    if (origin != NULL)
+    {
+#ifdef CW_THREADS
+	nxo_string_new(nxo, a_thread->locking, olen);
+#else
+	nxo_string_new(nxo, FALSE, olen);
+#endif
+	nxo_string_set(nxo, 0, origin, olen);
+    }
+    else
+    {
+	nxo_null_new(nxo);
+    }
 
     /* line. */
     nxo = nxo_stack_push(&a_thread->ostack);
@@ -2948,9 +3010,9 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
     a_thread->defer_count = 0;
 
     cw_onyx_code(&a_thread->self,
-		 "currenterror begin $column exch def $line exch def end"
+		 "currenterror begin"
+		 " $column exch def $line exch def $origin exch def end"
 		 " $syntaxerror throw");
-
 
     /* Turn deferral back on. */
     a_thread->defer_count = defer_count;
@@ -3106,7 +3168,8 @@ nxoe_p_thread_real_accept(cw_nxoe_thread_t *a_thread)
 #endif
 
 static void
-nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
+nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread,
+			       cw_nxo_threadp_t *a_threadp)
 {
     cw_nxo_t *tnxo, *nxo;
     cw_uint32_t nelements, i, depth;
@@ -3135,6 +3198,17 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 #else
     nxo_array_new(tnxo, FALSE, nelements);
 #endif
+    {
+	const cw_uint8_t *origin;
+	cw_uint32_t olen;
+
+	/* Set source origin information. */
+	nxo_threadp_origin_get(a_threadp, &origin, &olen);
+	if (origin != NULL)
+	{
+	    nxo_array_origin_set(tnxo, origin, olen, nxo_pmark_line_get(nxo));
+	}
+    }
     nxo_attr_set(tnxo, NXOA_EXECUTABLE);
 
     /* Iterate up the stack, dup'ing nxo's to the array. */

@@ -27,7 +27,9 @@ struct cw_nxoe_file_s
     /* Access is locked if this object has the locking bit set. */
     cw_mtx_t lock;
 #endif
-    cw_nx_t *nx;
+
+    cw_uint8_t *origin;
+    cw_uint32_t olen;
 
     enum
     {
@@ -105,6 +107,10 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_uint32_t a_iter)
 	mtx_delete(&file->lock);
     }
 #endif
+    if (file->origin != NULL)
+    {
+	nxa_free(file->origin, file->olen);
+    }
     switch (file->mode)
     {
 	case FILE_NONE:

@@ -56,6 +56,12 @@ handling machinery to store error state.
 \hline
 \optableent
 	{--}
+	{{\bf \htmlref{origin}{currenterror:origin}}}
+	{string/null}
+	{Get origin of syntax error.}
+\hline
+\optableent
+	{--}
 	{{\bf \htmlref{line}{currenterror:line}}}
 	{number}
 	{Get line number of syntax error.}
@@ -358,6 +364,35 @@ estack/istack trace (0..3):
 3:      --start--
 onyx:5> currenterror $line get 1 sprint
 1
+onyx:5>
+		\end{verbatim}
+	\end{description}
+\label{currenterror:origin}
+\index{origin@\onyxop{}{origin}{}}
+\item[{\onyxop{--}{origin}{string/null}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[string/null: ]
+			Origin string if the error was a syntaxerror, null
+			otherwise.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the origin of a syntaxerror.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> 1 2 3}
+At *stdin*:1:5: Error $syntaxerror
+ostack: (1 2 3 `}')
+dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
+estack/istack trace (0..1):
+0:      -file-
+1:      --start--
+onyx:5> currenterror $origin get 1 sprint
+`*stdin*'
 onyx:5>
 		\end{verbatim}
 	\end{description}

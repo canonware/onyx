@@ -645,6 +645,9 @@ void
 systemdict_or(cw_nxo_t *a_thread);
 
 void
+systemdict_origin(cw_nxo_t *a_thread);
+
+void
 systemdict_ostack(cw_nxo_t *a_thread);
 
 void

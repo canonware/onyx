@@ -56,6 +56,7 @@ $currenterror <
     ' cat
 } if
 `
+    $origin	null
     $line	1
     $column	0
 > def
@@ -70,11 +71,19 @@ $errordict <
 
 	# If this is a syntaxerror, print the line and column numbers.
 	!errorname $syntaxerror eq {
-	    `At line ' {stderr exch write}{} until
-	    !line cvs {stderr exch write}{} until
-	    `, column ' {stderr exch write}{} until
-	    !column cvs {stderr exch write}{} until
-	    `: ' {stderr exch write}{} until
+	    `At '
+	    !origin null ne {
+		!origin
+		`:'
+		3 ncat
+	    } if
+	    !line cvs
+	    `:'
+	    !column cvs
+	    `: '
+	    5 ncat
+	    
+	    {stderr exch write}{} until
 	} if
 
 	# Print the errorname.
@@ -116,6 +125,15 @@ $errordict <
 
 	    dup type $arraytype eq {
 		# Array.
+		dup origin {
+		    # Print origin of array.
+		    `:' up
+		    `:' exch
+		    cvs
+		    4 ncat
+
+		    {stderr exch write}{} until
+		} if
 		`: {\n' {stderr exch write}{} until
 		#edepth #array
 		dup length 1 sub 0 1 dn {

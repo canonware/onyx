@@ -94,6 +94,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stdin_nxo, 0, FALSE);
 #endif
+	nxo_file_origin_set(&retval->stdin_nxo,
+			    "*stdin*", sizeof("*stdin*") - 1);
+	
 	nxo_file_buffer_size_set(&retval->stdin_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
@@ -102,6 +105,8 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stdout_nxo, 1, FALSE);
 #endif
+	nxo_file_origin_set(&retval->stdout_nxo,
+			    "*stdout*", sizeof("*stdout*") - 1);
 	nxo_file_buffer_size_set(&retval->stdout_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
@@ -110,6 +115,8 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 #ifdef CW_POSIX_FILE
 	nxo_file_fd_wrap(&retval->stderr_nxo, 2, FALSE);
 #endif
+	nxo_file_origin_set(&retval->stderr_nxo,
+			    "*stderr*", sizeof("*stderr*") - 1);
 
 	/* Do soft operator initialization. */
 	nx_p_nxcode(retval);

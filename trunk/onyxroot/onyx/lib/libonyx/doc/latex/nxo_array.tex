@@ -148,4 +148,62 @@ cw\_nxoi\_t a\_offset}}
 		Dup \cvar{a\_el} into the element of \cvar{a\_nxo} at offset
 		\cvar{a\_offset}.
 	\end{capilist}
+\label{nxo_array_origin_get}
+\index{nxo_array_origin_get@\cfunc{nxo\_array\_origin\_get}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_array\_origin\_get}{cw\_nxo\_t *a\_nxo,
+const cw\_uint8\_t **r\_origin, cw\_uint32\_t *r\_olen, cw\_uint32\_t
+*r\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an array \classname{nxo}.
+		\item[r\_origin: ] Pointer to a string pointer.
+		\item[r\_olen: ] Pointer to an unsigned integer.
+		\item[r\_line\_num: ] Pointer to an unsigned integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ] If FALSE, success, otherwise no origin found.
+		\item[*r\_origin: ]
+			If \cvar{retval} is FALSE, a pointer to a string that
+			represents the origin of \cvar{a\_nxo}.
+		\item[*r\_olen: ]
+			If \cvar{retval} is FALSE, the length of the string
+			pointed to by \cvar{*r\_origin}.
+		\item[*r\_line\_num: ]
+			If \cvar{retval} is FALSE, the line within
+			\cvar{*r\_origin} that \cvar{a\_nxo} started at.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Get the origin of \cvar{a\_nxo}, if known.
+	\end{capilist}
+\label{nxo_array_origin_set}
+\index{nxo_array_origin_set@\cfunc{nxo\_array\_origin\_set}{}}
+\citem{\cfunc[void]{nxo\_array\_origin\_set}{cw\_nxo\_t *a\_nxo, const
+cw\_uint8\_t *a\_origin, cw\_uint32\_t a\_olen, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an array \classname{nxo}.
+		\item[a\_origin: ]
+			Pointer to a string that represents the origin of
+			\cvar{a\_nxo}.
+		\item[a\_olen: ]
+			The length of the string pointed to by\cvar{a\_origin}.
+		\item[a\_line\_num: ]
+			The line within \cvar{a\_origin} that \cvar{a\_nxo}
+			started at.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Set the origin of \cvar{a\_nxo}.  A copy of \cvar{a\_origin} is
+		made and managed internally.
+	\end{capilist}
 \end{capi}

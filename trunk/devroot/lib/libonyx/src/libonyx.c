@@ -43,6 +43,10 @@ void
 systemdict_l_init(void);
 void
 systemdict_l_shutdown(void);
+void
+origin_l_init(void);
+void
+origin_l_shutdown(void);
 
 /* Global variables. */
 cw_nxo_t cw_g_argv;
@@ -63,6 +67,7 @@ libonyx_init(int a_argc, char **a_argv, char **a_envp)
 #endif
     xep_l_init();
     mem_l_init();
+    origin_l_init();
     nxa_l_init();
     systemdict_l_init();
 
@@ -112,6 +117,7 @@ libonyx_shutdown(void)
     /* Shut down global modules in reverse order. */
     systemdict_l_shutdown();
     nxa_l_shutdown();
+    origin_l_shutdown();
     mem_l_shutdown();
     xep_l_shutdown();
 #ifdef CW_THREADS
