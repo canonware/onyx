@@ -6871,7 +6871,7 @@ systemdict_sibdup(cw_nxo_t *a_thread)
 void
 systemdict_sibpop(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo, *stack;
+    cw_nxo_t *ostack, *nxo, *stack, *inxo;
     cw_nxoi_t index;
 
     ostack = nxo_thread_ostack_get(a_thread);
@@ -6889,10 +6889,11 @@ systemdict_sibpop(cw_nxo_t *a_thread)
 	return;
     }
 
-    NXO_STACK_NBGET(nxo, stack, a_thread, index);
-    nxo_stack_remove(stack, nxo);
+    NXO_STACK_NBGET(inxo, stack, a_thread, index);
+    nxo_dup(nxo, inxo);
+    nxo_stack_remove(stack, inxo);
 
-    nxo_stack_npop(ostack, 2);
+    nxo_stack_remove(ostack, stack);
 }
 
 void
@@ -6979,7 +6980,7 @@ systemdict_sin(cw_nxo_t *a_thread)
 void
 systemdict_sipop(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo, *stack;
+    cw_nxo_t *ostack, *nxo, *stack, *inxo;
     cw_nxoi_t index;
 
     ostack = nxo_thread_ostack_get(a_thread);
@@ -6997,16 +6998,17 @@ systemdict_sipop(cw_nxo_t *a_thread)
 	return;
     }
 
-    NXO_STACK_NGET(nxo, stack, a_thread, index);
-    nxo_stack_remove(stack, nxo);
+    NXO_STACK_NGET(inxo, stack, a_thread, index);
+    nxo_dup(nxo, inxo);
+    nxo_stack_remove(stack, inxo);
 
-    nxo_stack_npop(ostack, 2);
+    nxo_stack_remove(ostack, stack);
 }
 
 void
 systemdict_snbpop(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo, *stack, *snxo, *sdup;
+    cw_nxo_t *ostack, *nxo, *stack, *snxo;
     cw_nxoi_t count;
     cw_uint32_t i;
 
@@ -7030,15 +7032,14 @@ systemdict_snbpop(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxo_stack_new(nxo, nxo_thread_nx_get(a_thread),
-		  nxo_thread_currentlocking(a_thread));
+    nxo_array_new(nxo, nxo_thread_nx_get(a_thread),
+		  nxo_thread_currentlocking(a_thread), count);
 
     /* Iteratively create dup's and bpop.. */
-    for (i = 0, snxo = NULL, sdup = NULL; i < count; i++)
+    for (i = 0, snxo = NULL; i < count; i++)
     {
 	snxo = nxo_stack_bget(stack);
-	sdup = nxo_stack_push(nxo);
-	nxo_dup(sdup, snxo);
+	nxo_array_el_set(nxo, snxo, i);
 	nxo_stack_bpop(stack);
     }
 
@@ -7135,7 +7136,7 @@ systemdict_snip(cw_nxo_t *a_thread)
 void
 systemdict_snpop(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *nxo, *stack, *snxo, *sdup;
+    cw_nxo_t *ostack, *nxo, *stack, *snxo;
     cw_nxoi_t count;
     cw_uint32_t i;
 
@@ -7159,16 +7160,14 @@ systemdict_snpop(cw_nxo_t *a_thread)
 	return;
     }
 
-    nxo_stack_new(nxo, nxo_thread_nx_get(a_thread),
-		  nxo_thread_currentlocking(a_thread));
+    nxo_array_new(nxo, nxo_thread_nx_get(a_thread),
+		  nxo_thread_currentlocking(a_thread), count);
 
-    /* Iteratively create dup's and pop.  Since we're going down, it's necessary
-     * to use nxo_stack_under_push() to preserve order. */
-    for (i = 0, snxo = NULL, sdup = NULL; i < count; i++)
+    /* Iteratively create dup's and pop. */
+    for (i = 0, snxo = NULL; i < count; i++)
     {
 	snxo = nxo_stack_get(stack);
-	sdup = nxo_stack_under_push(nxo, sdup);
-	nxo_dup(sdup, snxo);
+	nxo_array_el_set(nxo, snxo, count - 1 - i);
 	nxo_stack_pop(stack);
     }
 
