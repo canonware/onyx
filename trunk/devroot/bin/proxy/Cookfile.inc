@@ -115,7 +115,7 @@ proxy_install_self : [PROXY]
   [INSTALL] -d [PREFIX]/bin;
   [CC] [A_CFLAGS] -o [PREFIX]/bin/proxy
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-       -rpath [PREFIX]/lib
+       -Wl,-rpath,[PREFIX]/lib
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
   [CHMOD] 0755 [PREFIX]/bin/proxy;
 }
@@ -146,7 +146,7 @@ proxy_distclean :
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [PROXY_SRCS]]
-       -rpath [abs_objdir]/lib/c/libsock/lib
-       -rpath [abs_objdir]/lib/c/libstash/lib
+       -Wl,-rpath,[abs_objdir]/lib/c/libsock/lib
+       -Wl,-rpath,[abs_objdir]/lib/c/libstash/lib
        [LDFLAGS] -lsock -lstash [EXTRALIBS];
 }
