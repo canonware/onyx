@@ -1146,16 +1146,19 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 		case FILE_POSIX:
 		{
 		    struct iovec iov[2];
+		    cw_uint32_t remcount;
 
 		    /* a_str won't fit.  Do a writev(). */
 
 		    retcount = 0;
 		    do
 		    {
+			remcount = a_len - retcount;
+
 			iov[0].iov_base = file->buffer;
 			iov[0].iov_len = file->buffer_offset;
 			iov[1].iov_base = (char *) &a_str[retcount];
-			iov[1].iov_len = a_len - retcount;
+			iov[1].iov_len = remcount;
 
 			while ((count = writev(file->f.p.fd, iov, 2)) == -1)
 			{
@@ -1171,30 +1174,34 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 			    /* At least the buffer got written. */
 			    count -= file->buffer_offset;
 
-			    if (count == a_len)
+			    if (count == remcount)
 			    {
 				/* a_str got written too. */
 				file->buffer_mode = BUFFER_EMPTY;
 				file->buffer_offset = 0;
+				retcount += count;
 			    }
 			    else
 			    {
 				/* a_str didn't get completely written.  Copy of
 				 * much of it as possible to the buffer. */
-				if (a_len - count <= file->buffer_size)
+				if (remcount - count <= file->buffer_size)
 				{
-				    memcpy(&file->buffer[0], &a_str[count],
-					   a_len - count);
-				    file->buffer_offset = a_len - count;
+				    memcpy(&file->buffer[0],
+					   &a_str[retcount + count],
+					   remcount - count);
+				    file->buffer_offset = remcount - count;
+				    retcount += remcount;
 				}
 				else
 				{
-				    memcpy(&file->buffer[0], &a_str[count],
+				    memcpy(&file->buffer[0],
+					   &a_str[retcount + count],
 					   file->buffer_size);
 				    file->buffer_offset = file->buffer_size;
+				    retcount += count + file->buffer_size;
 				}
 			    }
-			    retcount += count;
 			}
 			else
 			{
