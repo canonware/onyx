@@ -87,7 +87,7 @@ main()
   {
     cw_bufc_t bufc;
     cw_buf_t * buf_p;
-    cw_uint32_t i, j, t_uint32_a, t_uint32_b;
+    cw_uint32_t i, /*  j,  */t_uint32_a, t_uint32_b;
     cw_uint64_t t_uint64;
     char * buffer;
     cw_uint32_t * buffer_cast;
@@ -111,12 +111,17 @@ main()
       buffer[i] = i;
     }
 
+    for (i = 0; i < 256; i++)
+    {
+      buffer[511 - i] = buffer[i];
+    }
+    
     /* Copy the bytes from the lower 256 bytes into the upper 256 bytes,
      * but reverse them, and make them host byte order on long boundaries. */
-    for (i = j = 0; i < 256; i += 4, j++)
-    {
-      buffer_cast[128 - 1 - j] = ntohl(buffer_cast[j]);
-    }
+/*      for (i = j = 0; i < 256; i += 4, j++) */
+/*      { */
+/*        buffer_cast[128 - 1 - j] = ntohl(buffer_cast[j]); */
+/*      } */
 
     buf_append_bufc(buf_p, &bufc, 0, 512);
     bufc_delete(&bufc);
