@@ -2195,7 +2195,6 @@ systemdict_foreach(cw_nxo_t *a_thread)
 	}
 	xep_end();
 
-	/* XXX Doesn't this re-do the xep_catch cleanup? */
 	nxo_stack_npop(tstack, nxo_stack_count(tstack) - tdepth);
 }
 
@@ -4224,7 +4223,175 @@ systemdict_start(cw_nxo_t *a_thread)
 void
 systemdict_status(cw_nxo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_nx_t		*nx;
+	cw_nxo_t	*ostack, *tstack, *file;
+	cw_nxo_t	*dict, *name, *value;
+	int		error;
+	struct stat	sb;
+
+	nx = nxo_thread_nx_get(a_thread);
+	ostack = nxo_thread_ostack_get(a_thread);
+	tstack = nxo_thread_tstack_get(a_thread);
+	NXO_STACK_GET(file, ostack, a_thread);
+	if (nxo_type_get(file) != NXOT_FILE && nxo_type_get(file) !=
+	    NXOT_STRING) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+
+	if (nxo_type_get(file) == NXOT_FILE) {
+		int	fd;
+
+		fd = nxo_file_fd_get(file);
+		if (fd < 0) {
+			nxo_thread_error(a_thread,
+			    NXO_THREADE_INVALIDFILEACCESS);
+			return;
+		}
+
+		error = fstat(fd, &sb);
+	} else {
+		cw_nxo_t	*tfile;
+
+		/*
+		 * Create a copy of file with an extra byte to store a '\0'
+		 * terminator.
+		 */
+		tfile = nxo_stack_push(tstack);
+		nxo_string_new(tfile, nx, nxo_thread_currentlocking(a_thread),
+		    nxo_string_len_get(file) + 1);
+		nxo_string_lock(file);
+		nxo_string_lock(tfile);
+		nxo_string_set(tfile, 0, nxo_string_get(file),
+		    nxo_string_len_get(file));
+		nxo_string_el_set(tfile, '\0', nxo_string_len_get(tfile) - 1);
+		nxo_string_unlock(file);
+
+		error = stat(nxo_string_get(tfile), &sb);
+
+		nxo_string_unlock(tfile);
+
+		nxo_stack_pop(tstack);
+	}
+
+	if (error == -1) {
+		switch (errno) {
+		case EIO:
+			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			break;
+		case EACCES:
+		case ELOOP:
+		case ENAMETOOLONG:
+		case ENOENT:
+		case ENOTDIR:
+			nxo_thread_error(a_thread,
+			    NXO_THREADE_INVALIDFILEACCESS);
+			break;
+		case EBADF:
+		case EFAULT:
+		default:
+			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+		}
+		return;
+	}
+
+	nxo_stack_pop(ostack);
+
+	/*
+	 * We now have a valid stat buffer.  Create a dictionary that represents
+	 * it.
+	 */
+	dict = nxo_stack_push(ostack);
+	nxo_dict_new(dict, nx, nxo_thread_currentlocking(a_thread), 13);
+
+	name = nxo_stack_push(tstack);
+	value = nxo_stack_push(tstack);
+
+	/* dev. */
+	nxo_name_new(name, nx, nxn_str(NXN_dev), nxn_len(NXN_dev), TRUE);
+	nxo_integer_new(value, sb.st_dev);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* ino. */
+	nxo_name_new(name, nx, nxn_str(NXN_ino), nxn_len(NXN_ino), TRUE);
+	nxo_integer_new(value, sb.st_ino);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* mode. */
+	nxo_name_new(name, nx, nxn_str(NXN_mode), nxn_len(NXN_mode), TRUE);
+	nxo_integer_new(value, sb.st_mode);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* nlink. */
+	nxo_name_new(name, nx, nxn_str(NXN_nlink), nxn_len(NXN_nlink), TRUE);
+	nxo_integer_new(value, sb.st_nlink);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* uid. */
+	nxo_name_new(name, nx, nxn_str(NXN_uid), nxn_len(NXN_uid), TRUE);
+	nxo_integer_new(value, sb.st_uid);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* gid. */
+	nxo_name_new(name, nx, nxn_str(NXN_gid), nxn_len(NXN_gid), TRUE);
+	nxo_integer_new(value, sb.st_gid);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* rdev. */
+	nxo_name_new(name, nx, nxn_str(NXN_rdev), nxn_len(NXN_rdev), TRUE);
+	nxo_integer_new(value, sb.st_rdev);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* size. */
+	nxo_name_new(name, nx, nxn_str(NXN_size), nxn_len(NXN_size), TRUE);
+	nxo_integer_new(value, sb.st_size);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* atime. */
+	nxo_name_new(name, nx, nxn_str(NXN_atime), nxn_len(NXN_atime), TRUE);
+#ifdef _CW_OS_FREEBSD
+	nxo_integer_new(value, ((cw_nxoi_t)sb.st_atimespec.tv_sec *
+	    (cw_nxoi_t)1000000000) + (cw_nxoi_t)sb.st_atimespec.tv_nsec);
+#else
+	nxo_integer_new(value, ((cw_nxoi_t)sb.st_atime *
+	    (cw_nxoi_t)1000000000));
+#endif
+	nxo_dict_def(dict, nx, name, value);
+
+	/* mtime. */
+	nxo_name_new(name, nx, nxn_str(NXN_mtime), nxn_len(NXN_mtime), TRUE);
+#ifdef _CW_OS_FREEBSD
+	nxo_integer_new(value, ((cw_nxoi_t)sb.st_mtimespec.tv_sec *
+	    (cw_nxoi_t)1000000000) + (cw_nxoi_t)sb.st_mtimespec.tv_nsec);
+#else
+	nxo_integer_new(value, ((cw_nxoi_t)sb.st_mtime *
+	    (cw_nxoi_t)1000000000));
+#endif
+	nxo_dict_def(dict, nx, name, value);
+
+	/* ctime. */
+	nxo_name_new(name, nx, nxn_str(NXN_ctime), nxn_len(NXN_ctime), TRUE);
+#ifdef _CW_OS_FREEBSD
+	nxo_integer_new(value, ((cw_nxoi_t)sb.st_ctimespec.tv_sec *
+	    (cw_nxoi_t)1000000000) + (cw_nxoi_t)sb.st_ctimespec.tv_nsec);
+#else
+	nxo_integer_new(value, ((cw_nxoi_t)sb.st_ctime *
+	    (cw_nxoi_t)1000000000));
+#endif
+	nxo_dict_def(dict, nx, name, value);
+
+	/* blksize. */
+	nxo_name_new(name, nx, nxn_str(NXN_blksize), nxn_len(NXN_blksize),
+	    TRUE);
+	nxo_integer_new(value, sb.st_blksize);
+	nxo_dict_def(dict, nx, name, value);
+
+	/* blocks. */
+	nxo_name_new(name, nx, nxn_str(NXN_blocks), nxn_len(NXN_blocks), TRUE);
+	nxo_integer_new(value, sb.st_blocks);
+	nxo_dict_def(dict, nx, name, value);
+
+	nxo_stack_npop(tstack, 2);
 }
 
 void
@@ -4637,7 +4804,186 @@ systemdict_tell(cw_nxo_t *a_thread)
 void
 systemdict_test(cw_nxo_t *a_thread)
 {
-	_cw_error("XXX Not implemented");
+	cw_nxo_t	*ostack, *file, *test;
+	cw_uint8_t	c;
+	cw_bool_t	result, fd = -1;
+	int		error;
+	struct stat	sb;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	NXO_STACK_GET(test, ostack, a_thread);
+	NXO_STACK_DOWN_GET(file, ostack, a_thread, test);
+	if ((nxo_type_get(file) != NXOT_FILE && nxo_type_get(file) !=
+	    NXOT_STRING) || nxo_type_get(test) != NXOT_STRING) {
+		nxo_thread_error(a_thread, NXO_THREADE_TYPECHECK);
+		return;
+	}
+	if (nxo_string_len_get(test) != 1) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+	nxo_string_el_get(test, 0, &c);
+	switch (c) {
+	case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'k':
+	case 'p': case 'r': case 's': case 't': case 'u': case 'w': case 'x':
+	case 'L': case 'O': case 'G': case 'S':
+		break;
+	default:
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	/*
+	 * We haven't determined which test to perform yet, but in any case, we
+	 * will need the results of a stat()/fstat() call.  Do this first, then
+	 * use the data as appropriate later.
+	 */
+	if (nxo_type_get(file) == NXOT_FILE) {
+		fd = nxo_file_fd_get(file);
+		if (fd < 0) {
+			nxo_thread_error(a_thread,
+			    NXO_THREADE_INVALIDFILEACCESS);
+			return;
+		}
+
+		error = fstat(fd, &sb);
+	} else {
+		cw_nxo_t	*tstack, *tfile;
+
+		tstack = nxo_thread_tstack_get(a_thread);
+
+		/*
+		 * Create a copy of file with an extra byte to store a '\0'
+		 * terminator.
+		 */
+		tfile = nxo_stack_push(tstack);
+		nxo_string_new(tfile, nxo_thread_nx_get(a_thread),
+		    nxo_thread_currentlocking(a_thread),
+		    nxo_string_len_get(file) + 1);
+		nxo_string_lock(file);
+		nxo_string_lock(tfile);
+		nxo_string_set(tfile, 0, nxo_string_get(file),
+		    nxo_string_len_get(file));
+		nxo_string_el_set(tfile, '\0', nxo_string_len_get(tfile) - 1);
+		nxo_string_unlock(file);
+
+		error = stat(nxo_string_get(tfile), &sb);
+
+		nxo_string_unlock(tfile);
+
+		nxo_stack_pop(tstack);
+	}
+
+	if (error == -1) {
+		/*
+		 * There was a stat error.  If this is because the file doesn't
+		 * exist, set result to FALSE.  Otherwise, throw an error.
+		 */
+		switch (errno) {
+		case EACCES:
+		case ENOENT:
+		case ENOTDIR:
+			result = FALSE;
+			break;
+		case EIO:
+			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
+			return;
+		case ELOOP:
+		case ENAMETOOLONG:
+			nxo_thread_error(a_thread,
+			    NXO_THREADE_INVALIDFILEACCESS);
+			return;
+		case EBADF:
+		case EFAULT:
+			nxo_thread_error(a_thread, NXO_THREADE_UNREGISTERED);
+			return;
+		}
+	} else {
+		switch (c) {
+		case 'b':
+			/* Block special device? */
+			result = (sb.st_mode & S_IFBLK) ? TRUE : FALSE;
+			break;
+		case 'c':
+			/* Character special device? */
+			result = (sb.st_mode & S_IFCHR) ? TRUE : FALSE;
+			break;
+		case 'd':
+			/* Directory? */
+			result = (sb.st_mode & S_IFDIR) ? TRUE : FALSE;
+			break;
+		case 'e':
+			/* Exists? */
+			/* There was no stat error, so the file must exist. */
+			result = TRUE;
+			break;
+		case 'f':
+			/* Regular file? */
+			result = (sb.st_mode & S_IFREG) ? TRUE : FALSE;
+			break;
+		case 'g':
+			/* Setgid? */
+			result = (sb.st_mode & S_ISGID) ? TRUE : FALSE;
+			break;
+		case 'k':
+			/* Sticky? */
+			result = (sb.st_mode & S_ISVTX) ? TRUE : FALSE;
+			break;
+		case 'p':
+			/* Named pipe? */
+			result = (sb.st_mode & S_IFIFO) ? TRUE : FALSE;
+			break;
+		case 'r':
+			/* Readable? */
+			result = (sb.st_mode & S_IRUSR) ? TRUE : FALSE;
+			break;
+		case 's':
+			/* Size greater than 0? */
+			result = (sb.st_size > 0) ? TRUE : FALSE;
+			break;
+		case 't':
+			/* tty? */
+			/* fd only.  If a string was passed in, return false. */
+			if (fd == -1)
+				result = FALSE;
+			else
+				result = (isatty(fd)) ? TRUE : FALSE;
+			break;
+		case 'u':
+			/* Setuid? */
+			result = (sb.st_mode & S_ISUID) ? TRUE : FALSE;
+			break;
+		case 'w':
+			/* Write bit set? */
+			result = (sb.st_mode & S_IWUSR) ? TRUE : FALSE;
+			break;
+		case 'x':
+			/* Executable bit set? */
+			result = (sb.st_mode & S_IXUSR) ? TRUE : FALSE;
+			break;
+		case 'L':
+			/* Symbolic link? */
+			result = (sb.st_mode & S_IFLNK) ? TRUE : FALSE;
+			break;
+		case 'O':
+			/* Owner matches effective uid? */
+			result = (geteuid() == sb.st_uid) ? TRUE : FALSE;
+			break;
+		case 'G':
+			/* Group matches effective gid? */
+			result = (getegid() == sb.st_gid) ? TRUE : FALSE;
+			break;
+		case 'S':
+			/* Socket? */
+			result = (sb.st_mode & S_IFSOCK) ? TRUE : FALSE;
+			break;
+		default:
+			_cw_not_reached();
+		}
+	}
+
+	nxo_stack_pop(ostack);
+	nxo_boolean_new(file, result);
 }
 
 void
