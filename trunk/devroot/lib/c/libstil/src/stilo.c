@@ -102,6 +102,12 @@ stilo_type(cw_stilo_t *a_stilo)
 	return a_stilo->type;
 }
 
+cw_stiloe_t *
+stilo_get_extended(cw_stilo_t *a_stilo)
+{
+	return NULL;	/* XXX */
+}
+
 void
 stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
@@ -109,6 +115,12 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from)
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
 	_cw_check_ptr(a_from);
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
+}
+
+void
+stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
+{
+	/* XXX */
 }
 
 cw_bool_t
