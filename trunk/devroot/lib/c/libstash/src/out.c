@@ -134,7 +134,8 @@ out_register(cw_out_t * a_out,
     }
     a_out->extensions = t_ptr;
   }
-  
+
+  /* XXX This has the potential to cause all sorts of cache thrashing. */
   a_out->extensions[a_out->nextensions].type
     = (char *) _cw_malloc(strlen(a_type) + 1);
   if (NULL == a_out->extensions[a_out->nextensions].type)
@@ -203,8 +204,9 @@ out_merge(cw_out_t * a_a, cw_out_t * a_b)
     /* Make copies of the type strings. */
     for (i = 0; i < a_b->nextensions; i++)
     {
+      /* XXX This has the potential to cause all sorts of cache thrashing. */
       a_a->extensions[i + a_a->nextensions].type
-	= (char *) _cw_malloc(strlen(a_b->extensions[i].type) + 1);
+	= (char *) _cw_malloc(a_b->extensions[i].len + 1);
       if (NULL == a_a->extensions[i + a_a->nextensions].type)
       {
 	/* Back out all the typ string allocations we just did. */
@@ -944,7 +946,7 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   }
   else
   {
-    if (_LIBSTASH_OUT_PRINT_BUF > /* XXX */ a_size)
+    if (_LIBSTASH_OUT_PRINT_BUF >= a_size)
     {
       malloced_output = FALSE;
       output = output_buf;
@@ -996,7 +998,7 @@ out_p_put_fvn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
   retval = i;
   
   RETURN:
-  if ((NULL != output) && (TRUE == malloced_output))
+  if ((TRUE == malloced_output) && (NULL != output))
   {
     _cw_free(output);
   }
@@ -1177,6 +1179,7 @@ out_p_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 
 	    if (NULL == ent->render_func(&a_format[i], spec_len, arg, t_buf))
 	    {
+	      _cw_free(t_buf);
 	      retval = -1;
 	      goto RETURN;
 	    }
@@ -1242,14 +1245,14 @@ out_p_metric(cw_out_t * a_out, const char * a_format,
        * face cold hard reality, get the specifier length, allocate a buffer,
        * and copy the static buffer's contents over. */
       format_len = strlen(a_format);
-      a_key->format_key = (char *) _cw_malloc(format_len + 1 /* XXX */);
+      a_key->format_key = (char *) _cw_malloc(format_len);
       if (NULL == a_key->format_key)
       {
 	retval = -1;
 	goto RETURN;
       }
 #ifdef _LIBSTASH_DBG
-      bzero(a_key->format_key, format_len + 1);
+      bzero(a_key->format_key, format_len);
 #endif
       memcpy(a_key->format_key, a_key->format_key_buf, _LIBSTASH_OUT_SPEC_BUF);
 #ifdef _LIBSTASH_DBG
@@ -1412,23 +1415,11 @@ out_p_metric(cw_out_t * a_out, const char * a_format,
     goto RETURN;
   }
 
+  a_key->metric = metric;
+  a_key->format_len = i;
   retval = metric;
   
   RETURN:
-  if (0 > retval)
-  {
-    if ((NULL != a_key->format_key)
-	&& (a_key->format_key_buf != a_key->format_key))
-    {
-      _cw_free(a_key->format_key);
-      a_key->format_key = a_key->format_key_buf;
-    }
-  }
-  else
-  {
-    a_key->metric = metric;
-    a_key->format_len = i;
-  }
   return retval;
 }
 
@@ -2037,7 +2028,7 @@ out_p_metric_pointer(const char * a_format, cw_uint32_t a_len,
 		     const void * a_arg)
 {
   cw_sint32_t retval;
-  /* XXX Assumes 32 bit pointer. */
+  /* Assumes 32 bit pointer. */
   cw_uint64_t arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
   
   retval = out_p_metric_int(a_format, a_len, arg, 32, 16);
@@ -2050,7 +2041,7 @@ out_p_render_pointer(const char * a_format, cw_uint32_t a_len,
 		     const void * a_arg, char * r_buf)
 {
   char * retval;
-  /* XXX Assumes 32 bit pointer. */
+  /* Assumes 32 bit pointer. */
   cw_uint64_t arg = (cw_uint64_t) (cw_uint32_t) *(const void **) a_arg;
 
   retval = out_p_render_int(a_format, a_len, arg, r_buf, 32, 16);
