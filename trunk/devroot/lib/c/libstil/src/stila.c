@@ -299,12 +299,6 @@ stila_active_set(cw_stila_t *a_stila, cw_bool_t a_active)
 	_cw_check_ptr(a_stila);
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 
-	/*
-	 * Under normal circumstances, calling stilo_dict_def() while holding
-	 * the stila lock would be very dangerous, but since we know that we're
-	 * just replacing the value of an existing definition, there will be no
-	 * new allocation, which would cause GC deadlock.
-	 */
 	mtx_lock(&a_stila->lock);
 	a_stila->gcdict_active = a_active;
 	mq_put(&a_stila->gc_mq, STILAM_RECONFIGURE);
@@ -333,12 +327,6 @@ stila_period_set(cw_stila_t *a_stila, cw_stiloi_t a_period)
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 	_cw_assert(a_period >= 0);
 
-	/*
-	 * Under normal circumstances, calling stilo_dict_def() while holding
-	 * the stila lock would be very dangerous, but since we know that we're
-	 * just replacing the value of an existing definition, there will be no
-	 * new allocation, which would cause GC deadlock.
-	 */
 	mtx_lock(&a_stila->lock);
 	a_stila->gcdict_period = a_period;
 	mq_put(&a_stila->gc_mq, STILAM_RECONFIGURE);
@@ -367,12 +355,6 @@ stila_threshold_set(cw_stila_t *a_stila, cw_stiloi_t a_threshold)
 	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
 	_cw_assert(a_threshold >= 0);
 
-	/*
-	 * Under normal circumstances, calling stilo_dict_def() while holding
-	 * the stila lock would be very dangerous, but since we know that we're
-	 * just replacing the value of an existing definition, there will be no
-	 * new allocation, which would cause GC deadlock.
-	 */
 	mtx_lock(&a_stila->lock);
 	a_stila->gcdict_threshold = a_threshold;
 	if (a_threshold <= a_stila->gcdict_new)
