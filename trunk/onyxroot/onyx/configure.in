@@ -146,7 +146,7 @@ if test "x$enable_threads" = "x1" ; then
   AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
     AC_CHECK_LIB(c_r, pthread_create, \
       LIBS="$LIBS -pthread", enable_threads="0"))
-  if test "x$enable_threads" = "x1" -a "x$unsupported_cpu" != "x1" ; then
+  if test "x$enable_threads" = "x1" ; then
     AC_DEFINE(CW_THREADS)
     AC_DEFINE(CW_PTHREADS)
   fi
