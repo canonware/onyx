@@ -42,6 +42,9 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
  * Onyx tests.
  */
 ONYX_OTESTS =
+#if [and @enable_threads@ @enable_posix@]
+              name_unsweep.nx.in
+#endif
 #if @enable_threads@
               gc_roll.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
 #endif

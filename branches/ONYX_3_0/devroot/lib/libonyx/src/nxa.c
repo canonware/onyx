@@ -586,6 +586,30 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 #endif
 }
 
+void
+nxa_l_gc_reregister(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
+{
+    cw_check_ptr(a_nxa);
+    cw_dassert(a_nxa->magic == CW_NXA_MAGIC);
+
+#ifdef CW_THREADS
+    mtx_lock(&a_nxa->seq_mtx);
+#endif
+    cw_assert(nxoe_l_registered_get(a_nxoe));
+
+    /* This is only called in nxo_name_new() in the case that a name object is
+     * already registered.  By setting the color to white, the collector thread
+     * will notice that this object has been re-registered in
+     * nxoe_l_name_delete(), and will finish the normal registration process.
+     * If the object is not being swept, its color is already white, and this
+     * function has no effect. */
+    nxoe_l_color_set(a_nxoe, a_nxa->white);
+
+#ifdef CW_THREADS
+    mtx_unlock(&a_nxa->seq_mtx);
+#endif
+}
+
 cw_bool_t
 nxa_l_white_get(cw_nxa_t *a_nxa)
 {
