@@ -58,7 +58,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	/usr/local/include, and /usr/local/lib.
 
 --enable-shared
-	Build and install shared libraries.
+	Build and install shared libraries.  If this option is specified,
+	binaries will also be linked with the resulting shared libraries.
 
 Optionally, define environment variables, including (not exclusively):
 
