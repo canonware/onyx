@@ -48,7 +48,7 @@ void
 systemdict_bytesavailable(cw_nxo_t *a_thread);
 
 void
-systemdict_catenate(cw_nxo_t *a_thread);
+systemdict_cat(cw_nxo_t *a_thread);
 
 #ifdef CW_POSIX
 void

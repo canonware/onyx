@@ -3300,8 +3300,7 @@ stack. \\
 stack & {\bf \htmlref{scleartomark}{systemdict:scleartomark}} & -- & Remove
 objects from stack down through topmost mark. \\
 \hline
-(a) (b) & {\bf \htmlref{catenate}{systemdict:catenate}} & (a b) & Catenate two
-stacks. \\
+(a) (b) & {\bf \htmlref{cat}{systemdict:cat}} & (a b) & Catenate two stacks. \\
 \hline
 srcstack dststack & {\bf \htmlref{copy}{systemdict:copy}} & dststack & Copy
 stack contents. \\
@@ -3375,8 +3374,7 @@ substring & Get a string interval. \\
 string index substring & {\bf \htmlref{putinterval}{systemdict:putinterval}} &
 -- & Copy substring into string. \\
 \hline
-`a' `b' & {\bf \htmlref{catenate}{systemdict:catenate}} & `ab' & Catenate two
-strings. \\
+`a' `b' & {\bf \htmlref{cat}{systemdict:cat}} & `ab' & Catenate two strings. \\
 \hline
 srcstring dststring & {\bf \htmlref{copy}{systemdict:copy}} & dstsubstring &
 Copy string. \\
@@ -3422,8 +3420,7 @@ subarray & Get an array interval. \\
 array index subarray & {\bf \htmlref{putinterval}{systemdict:putinterval}} & --
 & Copy subarray into array. \\
 \hline
-[a] [b] & {\bf \htmlref{catenate}{systemdict:catenate}} & [a b] & Catenate two
-arrays. \\
+[a] [b] & {\bf \htmlref{cat}{systemdict:cat}} & [a b] & Catenate two arrays. \\
 \hline
 srcarray dstarray & {\bf \htmlref{copy}{systemdict:copy}} & dstsubarray & Copy
 array. \\
@@ -4306,11 +4303,11 @@ onyx:1> dup bytesavailable 1 sprint
 onyx:1>
 	\end{verbatim}
 	\end{description}
-\label{systemdict:catenate}
-\index{catenate@\onyxop{}{catenate}{}}
-\item[{\onyxop{[a] [b]}{catenate}{[a b]}}: ]
-\item[{\onyxop{(a) (b)}{catenate}{(a b)}}: ]
-\item[{\onyxop{`a' `b'}{catenate}{`ab'}}: ]
+\label{systemdict:cat}
+\index{cat@\onyxop{}{cat}{}}
+\item[{\onyxop{[a] [b]}{cat}{[a b]}}: ]
+\item[{\onyxop{(a) (b)}{cat}{(a b)}}: ]
+\item[{\onyxop{`a' `b'}{cat}{`ab'}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -4333,13 +4330,13 @@ onyx:1>
 		Catenate two arrays, strings, or stacks.
 	\item[Example(s): ]\begin{verbatim}
 
-onyx:0> [`a'] [`b'] catenate
+onyx:0> [`a'] [`b'] cat
 onyx:1> 1 sprint
 [`a' `b']
-onyx:0> (`a') (`b') catenate
+onyx:0> (`a') (`b') cat
 onyx:1> 1 sprint
 (`a' `b')
-onyx:0> `a' `b' catenate
+onyx:0> `a' `b' cat
 onyx:1> 1 sprint
 `ab'
 onyx:0>
@@ -7517,7 +7514,7 @@ onyx:0> 4242 </s /+> output `\n' print flush
 +4242
 onyx:0> `0x' print 4242 </b 16> output `\n' print flush
 0x1092
-onyx:0> `0x' 4242 </b 16> outputs catenate </w 10 /p `.'>
+onyx:0> `0x' 4242 </b 16> outputs cat </w 10 /p `.'>
 onyx:2>  output `\n' print flush
 ....0x1092
 onyx:0> `0x' print 4242 </w 8 /p `0' /b 16> output `\n' print flush
@@ -7561,7 +7558,7 @@ onyx:0> 4242 </s /+> outputs print `\n' print flush
 +4242
 onyx:0> `0x' print 4242 </b 16> outputs print `\n' print flush
 0x1092
-onyx:0> `0x' 4242 </b 16> outputs catenate </w 10 /p `.'> outputs 
+onyx:0> `0x' 4242 </b 16> outputs cat </w 10 /p `.'> outputs 
 onyx:1> print `\n' print flush
 ....0x1092
 onyx:0> `0x' print 4242 </w 8 /p `0' /b 16> outputs print `\n' print flush

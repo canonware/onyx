@@ -14,7 +14,7 @@
 
 % Open file for writing.
 argv 2 get
-`/truncate_a_tmp.out' catenate
+`/truncate_a_tmp.out' cat
 dup `w+' open
 
 dup `Hello\n' write

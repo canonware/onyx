@@ -2,6 +2,6 @@ Error /stackunderflow
 ostack: (`a')
 dstack: (-dict- -dict- -dict- -dict-)
 estack/istack trace (0..2):
-0:	--catenate--
+0:	--cat--
 1:	-file-
 2:	--start--

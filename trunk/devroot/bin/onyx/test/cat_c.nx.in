@@ -10,19 +10,4 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-[] [] catenate
-() () catenate
-`' `' catenate
-
-[] [`b'] catenate
-() (`b') catenate
-`' `b' catenate
-
-[`a'] [] catenate
-(`a') () catenate
-`a' `' catenate
-
-[`a'] [`b'] catenate
-(`a') (`b') catenate
-`a' `b' catenate
-pstack
+mark mark cat

@@ -10,16 +10,19 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-`Test begin\n' print flush
+[] [] cat
+() () cat
+`' `' cat
 
-argv 2 get
-`/truncate_e_tmp.out' cat
-dup `w+' open
+[] [`b'] cat
+() (`b') cat
+`' `b' cat
 
-dup close
+[`a'] [] cat
+(`a') () cat
+`a' `' cat
 
-exch unlink
-
-0 truncate
-
-`Test end\n' print
+[`a'] [`b'] cat
+(`a') (`b') cat
+`a' `b' cat
+pstack

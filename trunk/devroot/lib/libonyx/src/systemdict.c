@@ -83,7 +83,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(broadcast),
 #endif
     ENTRY(bytesavailable),
-    ENTRY(catenate),
+    ENTRY(cat),
 #ifdef CW_POSIX
     ENTRY(cd),
 #endif
@@ -825,7 +825,7 @@ systemdict_bytesavailable(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_catenate(cw_nxo_t *a_thread)
+systemdict_cat(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *a, *b, *r;
     cw_uint32_t i, len_a, len_b;

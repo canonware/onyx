@@ -17,7 +17,7 @@
 % Create an encoding dictionary for various operators.  The values must not
 % correspond to an existing name in dstack.
 /_encdict <
-	/catenate	/a	% 19
+	/cat		/a	% 19
 	/cvx		/b	% 13
 	/def		/c	% ~21
 	/dup		/d	% ~37

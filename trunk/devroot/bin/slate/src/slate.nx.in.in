@@ -13,8 +13,8 @@
 
 % Add slate paths.
 onyxdict begin
-/rpath_post rpath_post [@slate_rpath_post@] catenate def
-/mpath_post mpath_post [@slate_mpath_post@] catenate def
+/rpath_post rpath_post [@slate_rpath_post@] cat def
+/mpath_post mpath_post [@slate_mpath_post@] cat def
 end
 
 `modslate/modslate.nx' require
@@ -159,7 +159,7 @@ userdict begin
 		bmark dup 0 bpoint marker_seek pop
 		bpoint dup -1 marker_seek pop
 		marker_range_cut pop
-%		`Cut -->' exch catenate `<--\n' catenate stderr exch write
+%		`Cut -->' exch cat `<--\n' cat stderr exch write
 	}
 	`' {
 		bmark dup 0 bpoint marker_seek pop

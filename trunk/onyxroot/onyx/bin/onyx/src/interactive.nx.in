@@ -38,7 +38,7 @@
 systemdict begin
 % - promptstring %string
 /promptstring {
-    count cvs `onyx:' exch catenate `> ' catenate
+    count cvs `onyx:' exch cat `> ' cat
 } bind def
 end
 
@@ -57,18 +57,18 @@ end
 
 % Print the product and version info.
 product print `, version ' print version print `.\n' print flush
-' catenate
+' cat
 @enable_modprompt@ 1 eq {
     `
     `modprompt/modprompt.nx' require
-    ' catenate
+    ' cat
 } if
 `
 % Push an executable stdin on ostack to prepare for the start operator.  This
 % must be done after loading modprompt, so that if stdin was replaced, we will
 % get the new version.
 stdin cvx
-' catenate
+' cat
 
 % Final closing brace.
-`}' catenate cvx eval
+`}' cat cvx eval
