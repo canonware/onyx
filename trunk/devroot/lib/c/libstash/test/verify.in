@@ -146,7 +146,7 @@ foreach $test (@STESTS)
 	    $okay = 0;
 	    if ($opt_verbose)
 	    {
-		print STDERR "Malformed 1..n line\n";
+		print STDERR "Malformed 1..n line: \"$_\"\n";
 	    }
 	}
 	for ($subtest = 1; $subtest <= $num_subtests; $subtest++)
