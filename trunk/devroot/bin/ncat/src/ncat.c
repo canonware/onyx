@@ -171,8 +171,9 @@ main(int argc, char **argv)
 
 				if (inet_aton(optarg, &addr) == 0) {
 					/* Conversion error. */
-					_cw_out_put("Invalid IP address "
-					    "specified with \"-i\" flag\n");
+					_cw_out_put("[s]: Invalid IP address "
+					    "specified with \"-i\" flag\n",
+					    g_progname);
 					usage();
 					retval = 1;
 					goto RETURN;
@@ -237,7 +238,7 @@ main(int argc, char **argv)
 		if (fd == -1) {
 			if (dbg_is_registered(cw_g_dbg, "ncat_verbose")) {
 				_cw_out_put("[s]: Unable to open log file"
-				    " \"[s]\"\n", opt_log);
+				    " \"[s]\"\n", g_progname, opt_log);
 			}
 			retval = 1;
 			goto RETURN;

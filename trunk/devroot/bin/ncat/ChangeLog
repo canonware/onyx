@@ -1,3 +1,10 @@
+2001-01-29  Jason Evans  <jasone@canonware.com>
+
+	* src/ncat.c: Fix a call to _cw_out_put() that was missing one of
+	its string pointer arguments.
+
+	Consistently prefix error/diagnostic messages with "ncat: ".
+
 2000-12-01  Jason Evans  <jasone@canonware.com>
 
 	* src/ncat.c: Add the -i flag.
