@@ -21,17 +21,30 @@ To install, do the above, then type:
 
 	cook install
 
-Optionally, you may only want to install parts of the software with any of:
+Additional build targets of finer granularity include:
 
-	cook install_bins
-	cook install_libs
+	bins
+	bins_[daps]
+	libs
+	libs_[daps]
+	lib<libname>
+	tests
 
-To run regression tests, if any, type:
+Additional install targets of finer granularity include:
 
-	cook check
+	install_{bins,libs}
+	lib<libname>_install
+	lib<libname>_install_[daps]
 
-There are additional targets that allow finer-grain control, so if these targets
-don't meet your needs, take a look at Howto.cook.in.
+Miscellaneous targets include:
+
+	check
+	etags
+	uninstall
+	uninstall_{bins,libs}
+	lib<libname>_uninstall
+	clean
+	distclean
 
 Optionally, pass any of the following (not a definitive list) arguments to
 'configure':
