@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include <libstash/libstash.h>
+#include "../include/libstash/libstash.h"
 
 int
 main()

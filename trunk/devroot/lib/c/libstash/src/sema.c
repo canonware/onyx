@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 #include <sys/time.h>
 #include <errno.h>

@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include <libstash/libstash_r.h>
+#include "../include/libstash/libstash.h"
 
 #define _ARR_SIZE 64
 

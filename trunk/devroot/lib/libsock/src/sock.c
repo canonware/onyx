@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#include "libsock/libsock.h"
+#include "../include/libsock/libsock.h"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -22,9 +22,9 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "libsock/sock_p.h"
-#include "libsock/sock_l.h"
-#include "libsock/sockb_l.h"
+#include "../include/libsock/sock_p.h"
+#include "../include/libsock/sock_l.h"
+#include "../include/libsock/sockb_l.h"
 
 cw_sock_t *
 sock_new(cw_sock_t * a_sock, cw_uint32_t a_in_max_buf_size)

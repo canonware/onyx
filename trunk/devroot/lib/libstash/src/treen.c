@@ -10,8 +10,8 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/treen_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/treen_p.h"
 
 cw_treen_t *
 treen_new(cw_treen_t * a_treen,

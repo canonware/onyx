@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 #ifdef _LIBSTASH_DBG
 #  define _CW_PEZZ_MAGIC 0x4e224e22

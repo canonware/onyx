@@ -10,9 +10,9 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/mem_l.h"
-#include "libstash/oh_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/mem_l.h"
+#include "../include/libstash/oh_p.h"
 
 cw_oh_t *
 oh_new(cw_oh_t * a_oh)

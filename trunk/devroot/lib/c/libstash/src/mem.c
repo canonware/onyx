@@ -13,9 +13,9 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/mem_p.h"
-#include "libstash/mem_l.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/mem_p.h"
+#include "../include/libstash/mem_l.h"
 
 cw_mem_t *
 mem_new(void)

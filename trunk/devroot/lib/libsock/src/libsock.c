@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#include "libsock/libsock.h"
+#include "../include/libsock/libsock.h"
 
 #include <sys/types.h>
 #include <poll.h>
@@ -24,9 +24,9 @@
 #include <arpa/inet.h>
 #include <signal.h>
 
-#include "libsock/sockb_p.h"
-#include "libsock/sockb_l.h"
-#include "libsock/sock_l.h"
+#include "../include/libsock/sockb_p.h"
+#include "../include/libsock/sockb_l.h"
+#include "../include/libsock/sock_l.h"
 
 /* Global. */
 cw_sockb_t * g_sockb = NULL;

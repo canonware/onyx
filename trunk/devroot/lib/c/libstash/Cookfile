@@ -1,0 +1,158 @@
+/****************************************************************************
+ *
+ * <Copyright = "jasone">
+ * <License>
+ *
+ ****************************************************************************
+ *
+ * Version: <Version>
+ *
+ * cook file for libstash.
+ *
+ ****************************************************************************/
+
+/* Include generated dependency files. */
+#include-cooked [glob [objdir]/lib/c/libstash/src/"*.d_*"]
+#include-cooked [glob [objdir]/lib/c/libstash/bin/"*.d_*"]
+#include-cooked [glob [objdir]/lib/c/libstash/test/"*.d_*"]
+
+/*
+ * File lists.
+ */
+
+/* Include files that _are_ installed. */
+{
+  local incs = libstash.h libstash_incs.h arena.h bhp.h buf.h cnd.h dbg.h jtl.h
+               list.h mem.h mq.h mtx.h oh.h out.h pezz.h res.h ring.h rwl.h
+               sem.h thd.h treen.h tsd.h;
+  incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
+  incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
+
+  INCS = [INCS] [incs];
+}
+
+/* Include files that are _not_ installed. */
+{
+  local priv_incs = arena_p.h bhp_p.h buf_p.h dbg_p.h jtl_p.h list_p.h mem_l.h
+                    mem_p.h oh_p.h out_p.h res_p.h treen_p.h;
+  priv_incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [priv_incs]];
+
+  PRIV_INCS = [PRIV_INCS] [priv_incs];
+}
+
+/* Source files. */
+LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c cnd.c dbg.c jtl.c list.c mem.c
+                mq.c mtx.c oh.c out.c pezz.c res.c ring.c rwl.c sem.c thd.c
+                treen.c tsd.c;
+LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
+SRCS = [SRCS] [LIBSTASH_SRCS];
+
+/* Executables. */
+{
+  local bins = ;
+  bins = [fromto % [srcdir]/lib/c/libstash/bin/% [bins]];
+
+  BINS = [BINS] [bins];
+}
+
+/* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
+{
+  local ctests = c_arena_a.c c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c 
+                 c_buf_d.c c_buf_e.c c_cnd_a.c c_jtl_a.c c_libstash_a.c
+                 c_list_a.c c_mq_a.c c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c
+                 c_out_a.c c_pezz_a.c c_res_a.c c_ring_a.c c_rwl_a.c c_sem_a.c
+                 c_thd_a.c c_treen_a.c;
+  ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
+
+  CTESTS = [CTESTS] [ctests];
+}
+
+/* Perl scripts that drive the BTESTS. */
+{
+  local ptests = p_res_a.pl.in;
+  ptests = [fromto % [srcdir]/lib/c/libstash/test/% [ptests]];
+
+  PTESTS = [PTESTS] [ptests];
+}
+
+/* Backend test programs that are driven by the PTESTS. */
+{
+  local btests = b_res_a.c;
+  btests = [fromto % [srcdir]/lib/c/libstash/test/% [btests]];
+
+  BTESTS = [BTESTS] [btests];
+}
+
+/* Man pages. */
+{
+  local manpages_3 = libstash.3s libstash_arena.3s libstash_bhp.3s
+                     libstash_buf.3s libstash_cnd.3s libstash_dbg.3s
+                     libstash_list.3s libstash_mem.3s libstash_mq.3s
+                     libstash_mtx.3s libstash_oh.3s libstash_out.3s
+                     libstash_pezz.3s libstash_res.3s libstash_ring.3s
+                     libstash_rwl.3s libstash_sem.3s libstash_thd.3s
+                     libstash_tsd.3s libstash_treen.3s;
+  manpages_3 = [fromto % [srcdir]/lib/c/libstash/man/man3/% [manpages_3]];
+
+  MANPAGES_3 = [MANPAGES_3] [manpages_3];
+}
+
+/* Libraries. */
+LIBSTASH_REV = 0.0;
+
+LIBSTASH_D = [objdir]/lib/c/libstash/lib/libstash_d.a;
+LIBSTASH_A = [objdir]/lib/c/libstash/lib/libstash.a;
+LIBSTASH_S = [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_REV];
+LIBSTASH_P = [objdir]/lib/c/libstash/lib/libstash_p.a;
+
+LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libstash/lib;
+LIBS = [LIBS] -lstash;
+D_LIBS = [D_LIBS] [LIBSTASH_D];
+A_LIBS = [A_LIBS] [LIBSTASH_A];
+P_LIBS = [P_LIBS] [LIBSTASH_P];
+S_LIBS = [S_LIBS] [LIBSTASH_S];
+
+/*
+ * User cook'ables.
+ */
+
+libstash : [LIBSTASH_D] [LIBSTASH_A] [LIBSTASH_P] [LIBSTASH_S];
+
+/*
+ * Various flags.
+ */
+
+CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libstash/include
+                      -I[objdir]/lib/c/libstash/include/libstash;
+D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTASH_DBG;
+
+/*
+ * Dependencies.
+ */
+
+[LIBSTASH_D] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_d [LIBSTASH_SRCS]]
+  set mkdir
+{
+  [AR] cru [target] [younger];
+  [RANLIB] [target];
+}
+
+[LIBSTASH_A] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [LIBSTASH_SRCS]]
+  set mkdir
+{
+  [AR] cru [target] [younger];
+  [RANLIB] [target];
+}
+
+[LIBSTASH_P] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_p [LIBSTASH_SRCS]]
+  set mkdir
+{
+  [AR] cru [target] [younger];
+  [RANLIB] [target];
+}
+
+[LIBSTASH_S] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_s [LIBSTASH_SRCS]]
+  set mkdir
+{
+  [CC] -shared -o [target] [need];
+}

@@ -10,8 +10,8 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/buf_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/buf_p.h"
 
 #ifdef _CW_OS_FREEBSD
 #  include <sys/types.h>
@@ -428,9 +428,9 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
     a_buf->iov[i - 1].iov_len -= (num_bytes - a_max_data);
   }
 
-  if ((TRUE == a_is_sys_iovec) && (i > _LIBSTASH_MAX_IOV))
+  if ((TRUE == a_is_sys_iovec) && (i > _CW_MAX_IOV))
   {
-    *r_iovec_count = _LIBSTASH_MAX_IOV;
+    *r_iovec_count = _CW_MAX_IOV;
   }
   else
   {

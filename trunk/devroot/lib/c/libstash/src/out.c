@@ -10,15 +10,15 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 #include <stdarg.h>
 #include <time.h>
 #include <errno.h>
 #include <ctype.h>
 
-#include "libstash/out_p.h"
-#include "libstash/mem_l.h"
+#include "../include/libstash/out_p.h"
+#include "../include/libstash/mem_l.h"
 
 cw_out_t *
 out_new(cw_out_t * a_out)

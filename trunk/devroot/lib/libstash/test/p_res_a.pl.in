@@ -17,21 +17,24 @@
 select(STDOUT);
 $| = 1;
 
+$testdir = "./lib/c/libstash/test";
+$srcdir = $ARGV[0];
+$srcdir = "$srcdir/$testdir";
+
 print "1..1\n";
 
-chdir('test');
-`./b_res_a > ./p_res_a.out 2>&1`;
-`diff b_res_a.res b_res_a.dump > b_res_a.diff 2>&1`;
-`diff p_res_a.out p_res_a.exp > p_res_a.diff 2>&1`;
+`$testdir/b_res_a $srcdir/b_res_a.res $testdir/b_res_a.dump > $testdir/p_res_a.out 2>&1`;
+`diff $srcdir/b_res_a.res $testdir/b_res_a.dump > $testdir/b_res_a.diff 2>&1`;
+`diff $testdir/p_res_a.out $srcdir/p_res_a.exp > $testdir/p_res_a.diff 2>&1`;
 
-if ((-s "./b_res_a.diff") || (-s "./p_res_a.diff"))
+if ((-s "$testdir/b_res_a.diff") || (-s "$testdir/p_res_a.diff"))
 {
     print "not ok 1\n";
 }
 else
 {
     print "ok 1\n";
-    unlink("./p_res_a.diff");
+    unlink("$testdir/p_res_a.diff");
 }
 #unlink("./b_res_a.diff");
-unlink("./b_res_a.dump");
+unlink("$testdir/b_res_a.dump");

@@ -13,10 +13,11 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob [objdir]/lib/c/libstash/src/"*.d_*"]
+#include-cooked [glob [objdir]/lib/c/libstash/bin/"*.d_*"]
 #include-cooked [glob [objdir]/lib/c/libstash/test/"*.d_*"]
 
 /*
- * Set file lists. 
+ * File lists.
  */
 
 /* Include files that _are_ installed. */
@@ -45,6 +46,14 @@ LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c cnd.c dbg.c jtl.c list.c mem.c
                 treen.c tsd.c;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
+
+/* Executables. */
+{
+  local bins = ;
+  bins = [fromto % [srcdir]/lib/c/libstash/bin/% [bins]];
+
+  BINS = [BINS] [bins];
+}
 
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
@@ -96,19 +105,25 @@ LIBSTASH_A = [objdir]/lib/c/libstash/lib/libstash.a;
 LIBSTASH_S = [objdir]/lib/c/libstash/lib/libstash.so.[LIBSTASH_REV];
 LIBSTASH_P = [objdir]/lib/c/libstash/lib/libstash_p.a;
 
+LDFLAGS = [LDFLAGS] -L[objdir]/lib/c/libstash/lib;
+LIBS = [LIBS] -lstash;
+D_LIBS = [D_LIBS] [LIBSTASH_D];
+A_LIBS = [A_LIBS] [LIBSTASH_A];
+P_LIBS = [P_LIBS] [LIBSTASH_P];
+S_LIBS = [S_LIBS] [LIBSTASH_S];
+
 /*
  * User cook'ables.
  */
 
 libstash : [LIBSTASH_D] [LIBSTASH_A] [LIBSTASH_P] [LIBSTASH_S];
-libs :: [LIBSTASH_D] [LIBSTASH_A] [LIBSTASH_P] [LIBSTASH_S];
 
 /*
  * Various flags.
  */
 
 CPPFLAGS = [CPPFLAGS] -I[srcdir]/lib/c/libstash/include
-                      -I[objdir]/lib/c/libstash/include;
+                      -I[objdir]/lib/c/libstash/include/libstash;
 D_CPPFLAGS = [D_CPPFLAGS] -D_LIBSTASH_DBG;
 
 /*

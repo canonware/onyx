@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 /* Globals. */
 cw_mem_t * cw_g_mem = NULL;

@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 #ifdef _LIBSTASH_DBG
 #  define _CW_RING_MAGIC 0x410ff014

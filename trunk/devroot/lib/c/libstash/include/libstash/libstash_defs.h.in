@@ -22,7 +22,7 @@
 #undef _POSIX_PTHREAD_SEMANTICS
 
 /* Largest iovec compatible with readv()/writev(). */
-#undef _LIBSTASH_MAX_IOV
+#undef _CW_MAX_IOV
  
 #undef WORDS_BIGENDIAN
 

@@ -10,8 +10,8 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/jtl_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/jtl_p.h"
 
 cw_jtl_t *
 jtl_new(cw_jtl_t * a_jtl)

@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include <libstash/libstash_r.h>
+#include "../include/libstash/libstash.h"
 
 #define NUM_STRINGS 5000
 

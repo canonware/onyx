@@ -26,7 +26,7 @@ extern "C" {
 #  define _REENTRANT
 #endif
 
-#include "libstash/libstash_defs.h"
+#include "libstash_defs.h"
 
 /*
  * Global typedefs.
@@ -139,7 +139,7 @@ typedef enum
  * Project headers to always be included.
  */
 
-#include "libstash/libstash_incs.h"
+#include "libstash_incs.h"
 
 /*
  * libstash initialization and shutdown function prototypes.

@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include <libstash/libstash_r.h>
+#include "../include/libstash/libstash.h"
 
 void *
 thread_entry_func(void * a_arg)

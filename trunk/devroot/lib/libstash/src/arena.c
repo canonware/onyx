@@ -15,8 +15,8 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/arena_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/arena_p.h"
 
 #ifdef _LIBSTASH_DBG
 #  define _CW_ARENA_MAGIC 0xa430a155

@@ -10,8 +10,8 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/bhp_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/bhp_p.h"
 
 cw_bhpi_t *
 bhpi_new(cw_bhpi_t * a_bhpi, const void * a_priority, const void * a_data,

@@ -10,12 +10,12 @@
  *
  *****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 #include <stdarg.h>
 #include <fcntl.h>
 
-#include "libstash/res_p.h"
+#include "../include/libstash/res_p.h"
 
 /* Initcial size of buffer to use for name/value parsing. */
 #define _LIBSTASH_RES_BUFFSIZE 8192

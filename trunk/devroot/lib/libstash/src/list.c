@@ -10,8 +10,8 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/list_p.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/list_p.h"
 
 cw_list_item_t *
 list_item_new(void)

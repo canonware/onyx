@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include <libstash/libstash_r.h>
+#include "../include/libstash/libstash.h"
 
 /* Make sure that nums is at least as large. */
 #define _LIBSTASH_TEST_NUM_NODES 100

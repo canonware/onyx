@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 cw_rwl_t *
 rwl_new(cw_rwl_t * a_rwl)

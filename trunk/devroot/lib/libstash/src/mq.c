@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
+#include "../include/libstash/libstash.h"
 
 #ifdef _LIBSTASH_DBG
 #  define _LIBSTASH_MQ_MAGIC 0xab01cd23

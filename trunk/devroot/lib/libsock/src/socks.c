@@ -15,8 +15,8 @@
  *
  ****************************************************************************/
 
-#include "libsock/libsock.h"
-#include "libsock/socks_p.h"
+#include "../include/libsock/libsock.h"
+#include "../include/libsock/socks_p.h"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -25,7 +25,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#include "libsock/sockb_l.h"
+#include "../include/libsock/sockb_l.h"
 
 cw_socks_t *
 socks_new(void)

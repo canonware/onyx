@@ -1,3 +1,16 @@
+/****************************************************************************
+ *
+ * <Copyright = "jasone">
+ * <License>
+ *
+ ****************************************************************************
+ *
+ * Version: <Version>
+ *
+ * Master Canonware cook file.
+ *
+ ****************************************************************************/
+
 /*
  * Standard definitions.
  */
@@ -5,7 +18,7 @@
 srcdir = @top_srcdir@;
 objdir = @objdir@;
 
-
+SHELL = /bin/sh;
 PREFIX = @prefix@;
 CC = @CC@;
 AR = @AR@;
@@ -19,16 +32,22 @@ VERIFY = @VERIFY@;
 INCS = ;
 PRIV_INCS = ;
 SRCS = ;
+LIBS = ;
+D_LIBS = ;
+A_LIBS = ;
+P_LIBS = ;
+S_LIBS = ;
+BINS = ;
 CTESTS = ;
 PTESTS = ;
 BTESTS = ;
 MANPAGES_3 = ;
 
-CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
-D_CPPFLAGS = ;
-A_CPPFLAGS = ;
-P_CPPFLAGS = ;
-S_CPPFLAGS = ;
+CPPFLAGS = ;
+D_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
+A_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
+P_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
+S_CPPFLAGS = -D_REENTRANT @CPPFLAGS@;
 
 CFLAGS = -Wall -pipe -g3 @CFLAGS@;
 D_CFLAGS = [CFLAGS];
@@ -36,68 +55,141 @@ A_CFLAGS = [CFLAGS] -O2;
 P_CFLAGS = [CFLAGS] -O2 -pg;
 S_CFLAGS = [CFLAGS] -fPIC -DPIC;
 
+LDFLAGS = @LDFLAGS@;
+EXTRALIBS = @LIBS@;
+
 /*
  * User targets.
  */
 
-all : libs
+all : libs;
+
+libs_d : [D_LIBS];
+libs_a : [A_LIBS];
+libs_p : [P_LIBS];
+libs_s : [S_LIBS];
+libs : libs_d libs_a libs_p libs_s;
+
+tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [BTESTS]]
+        [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]
+        libs_d;
+
+check : tests
+{
+  [VERIFY] -s [srcdir] --
+           -d [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]
+           -s [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]];
+}
 
 clean :
 {
-  [print Would rm -rf [objdir]];
-  /* rm -rf [objdir]; */
+  rm -f core *.core;
+  rm -rf bin lib test;
+  [srcdir]/configure;
 }
 
-%0%.pl : %0%.pl.in
+distclean :
+{
+  rm -rf [objdir]"/*";
+}
+
+[objdir]/%0%.pl : [srcdir]/%0%.pl.in
   set mkdir
 {
-  echo '#!"[PERL]" -w' > [target];
-  [CAT] [need] >> [target];
-  chmod u+x [target];
+  [SHELL] -e;
+data
+#![SHELL]
+
+echo \"[srcdir]/%0%.pl.in --> [target]\"
+
+echo \"#![PERL] -w\" > [target]
+[CAT] [srcdir]/%0%.pl.in >> [target];
+chmod u+x [target];
+dataend
+}
+
+[objdir]/%0bin/%1.dbg : [objdir]/%0bin/%1.o_d
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -o [target] [objdir]/%0bin/%1.o_d
+       [D_LIBS] [LDFLAGS] [EXTRALIBS];
+}
+
+[objdir]/%0bin/%1.o_d : [srcdir]/%0bin/%1.c
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0bin/%1.c -o [target];
+
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/%0bin/%1.c
+         "--prefix='"[target]" : "[srcdir]/%0bin/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0bin/%.o_d %0bin/%.d_d [target]];
+}
+
+[objdir]/%0test/%1 : [objdir]/%0test/%1.o_d
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -o [target] [objdir]/%0test/%1.o_d
+       [D_LIBS] [LDFLAGS] [EXTRALIBS];
+}
+
+[objdir]/%0test/%.o_d : [srcdir]/%0test/%.c
+  set mkdir
+{
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0test/%.c -o [target];
+
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System 
+         [srcdir]/%0test/%.c
+         "--prefix='"[target]" : "[srcdir]/%0test/%.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0test/%.o_d %0test/%.d_d [target]];
 }
 
 [objdir]/%0%.o_d : [srcdir]/%0%.c
   set mkdir
 {
-  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [need] -o [target];
+  [CC] [D_CFLAGS] [CPPFLAGS] [D_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
 
-  c_incl --no-cache [need]
-       "--prefix='"[target]" : "[need]"'"
-       "--suffix='set nodefault;'"
-       -o [fromto %0%.o_d %0%.d_d [target]];
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System
+         [srcdir]/%0%.c
+         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0%.o_d %0%.d_d [target]];
 }
 
 [objdir]/%0%.o_a : [srcdir]/%0%.c
   set mkdir
 {
-  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [need] -o [target];
+  [CC] [A_CFLAGS] [CPPFLAGS] [A_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
 
-  c_incl --no-cache [need]
-       "--prefix='"[target]" : "[need]"'"
-       "--suffix='set nodefault;'"
-       -o [fromto %0%.o_a %0%.d_a [target]];
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System [srcdir]/%0%.c
+         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0%.o_a %0%.d_a [target]];
 }
 
 [objdir]/%0%.o_p : [srcdir]/%0%.c
   set mkdir
 {
-  [CC] [P_CFLAGS] [CPPFLAGS] [P_CPPFLAGS] -c [need] -o [target];
+  [CC] [P_CFLAGS] [CPPFLAGS] [P_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
 
-  c_incl --no-cache [need]
-       "--prefix='"[target]" : "[need]"'"
-       "--suffix='set nodefault;'"
-       -o [fromto %0%.o_p %0%.d_p [target]];
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System [srcdir]/%0%.c
+         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0%.o_p %0%.d_p [target]];
 }
 
 [objdir]/%0%.o_s : [srcdir]/%0%.c
   set mkdir
 {
-  [CC] [S_CFLAGS] [CPPFLAGS] [S_CPPFLAGS] -c [need] -o [target];
+  [CC] [S_CFLAGS] [CPPFLAGS] [S_CPPFLAGS] -c [srcdir]/%0%.c -o [target];
 
-  c_incl --no-cache [need]
-       "--prefix='"[target]" : "[need]"'"
-       "--suffix='set nodefault;'"
-       -o [fromto %0%.o_s %0%.d_s [target]];
+  c_incl [CPPFLAGS] --no-cache -Absent_Local_Ignore -No_System [srcdir]/%0%.c
+         "--prefix='"[target]" : "[srcdir]/%0%.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto %0%.o_s %0%.d_s [target]];
 }
 
-#include-cooked-nowarn [objdir]/lib/c/libstash/Howto.cook
+#include-cooked-nowarn [srcdir]/lib/c/libstash/Howto.cook
+#include-cooked-nowarn [srcdir]/lib/c/libsock/Howto.cook

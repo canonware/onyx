@@ -29,12 +29,14 @@ Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 $opt_help = 0;
 $opt_verbose = 0;
 $opt_quiet = 0;
+$opt_srcdir = ".";
 $opt_ustats = 0;
 
 $opt_retval = 
 &GetOptions("h|help" => \$opt_help,
 	    "v|verbose" => \$opt_verbose,
 	    "q|quiet" => \$opt_quiet,
+            "s|srcdir=s" => \$opt_srcdir,
 	    "u|ustats" => \$opt_ustats
 	    );
 
@@ -101,9 +103,9 @@ if ($opt_verbose)
 #
 @TSTATS =
 (
- "----------------------------------------------------------------\n",
- "Test                            c_user c_system c_total     chng\n",
- " passed/FAILED                  h_user h_system h_total   %% chng\n"
+ "--------------------------------------------------------------------------\n",
+ "Test                                      c_user c_system c_total     chng\n",
+ " passed/FAILED                            h_user h_system h_total   %% chng\n"
  );
 
 if (!$opt_quiet)
@@ -234,9 +236,9 @@ foreach $test (@DTESTS)
 
     ($okay, $utime, $stime) = &run_test($test);
 
-    if (-e "./$test.out" && -e "./$test.exp")
+    if (-e "./$test.out" && -e "$opt_srcdir/$test.exp")
     {
-	`diff ./$test.out ./$test.exp > ./$test.diff 2>&1`;
+	`diff ./$test.out $opt_srcdir/$test.exp > ./$test.diff 2>&1`;
 	if ($?)
 	{
 	    # diff returns non-zero if there is a difference.
@@ -248,7 +250,9 @@ foreach $test (@DTESTS)
 	$okay = 0;
 	if ($opt_verbose)
 	{
-	    print STDERR "Nonexistent expected output file \"$test.exp\"\n";
+	    print STDERR
+		"Nonexistent expected output file \"$opt_srcdir/$test.exp\"\n";
+            print STDERR "\$opt_srcdir is \"$opt_srcdir\"\n";
 	}
     }
 
@@ -281,20 +285,21 @@ $tt_str = sprintf ("%d / %d passed (%5.2f%%%%)",
 		   (($#STESTS + $#DTESTS + 2) - ($#FAILED_TESTS + 1)) 
 		   / ($#STESTS + $#DTESTS + 2) * 100);
 
-$t_str = sprintf ("Totals                         %7.2f  %7.2f %7.2f  %7.2f\n"
+$t_str = sprintf ("Totals                                   %7.2f  %7.2f %7.2f"
+                  . "  %7.2f\n"
 		  . " %s %7.2f  %7.2f %7.2f %7.2f%%%%\n",
 		  $total_utime, $total_stime, $total_utime + $total_stime,
 		  ($total_ntime - ($total_hutime + $total_hstime)),
-		  $tt_str . ' ' x (30 - length($tt_str)),
+		  $tt_str . ' ' x (40 - length($tt_str)),
 		  $total_hutime, $total_hstime, $total_hutime + $total_hstime,
 		  ($total_hutime + $total_hstime == 0.0) ? 0.0 :
 		  (($total_ntime
 		    - ($total_hutime + $total_hstime))
 		   / ($total_hutime + $total_hstime) * 100));
 
-@TSTATS = ("----------------------------------------------------------------\n",
+@TSTATS = ("--------------------------------------------------------------------------\n",
 	   $t_str,
-	   "----------------------------------------------------------------\n"
+	   "--------------------------------------------------------------------------\n"
 	   );
 if (!$opt_quiet)
 {
@@ -315,9 +320,9 @@ sub run_test
     my (@TSTATS);
     my ($t_str);
 
-    @TSTATS = ("----------------------------------------------------------------\n");
+    @TSTATS = ("--------------------------------------------------------------------------\n");
 
-    $t_str = sprintf ("%s%s", $test, ' ' x (30 - length($test)));
+    $t_str = sprintf ("%s%s", $test, ' ' x (40 - length($test)));
     @TSTATS = (@TSTATS, $t_str);
     @STATS = (@STATS, @TSTATS);
     if (!$opt_quiet)
@@ -329,7 +334,7 @@ sub run_test
     }
 
     ($utime, $stime, $cutime, $cstime) = times;
-    `./$test > ./$test.out 2>&1`;
+    `./$test $opt_srcdir > ./$test.out 2>&1`;
     ($utime, $stime, $tutime, $tstime) = times;
 
     # Subtract the before time from the after time.
@@ -361,7 +366,7 @@ sub print_stats
     {
 	$pass_str = $pass_str . " ($failed_subtests/$subtests failed)";
     }
-    $pass_str = $pass_str . ' ' x (29 - length($pass_str));
+    $pass_str = $pass_str . ' ' x (39 - length($pass_str));
     
     if (-r "$test.perf")
     {
@@ -434,6 +439,7 @@ $0 usage:
     -h --help     | Print usage and exit.
     -v --verbose  | Verbose (incompatible with quiet).
     -q --quiet    | Quiet (incompatible with verbose).
+    -s --srcdir   | Path to source tree (default is ".").
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
     --------------+-------------------------------------------------------------
 

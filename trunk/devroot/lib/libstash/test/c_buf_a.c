@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include <libstash/libstash_r.h>
+#include "../include/libstash/libstash.h"
 
 #ifdef _CW_OS_SOLARIS
 /* For ntohl(). */

@@ -10,9 +10,9 @@
  *
  ****************************************************************************/
 
-#include "libstash/libstash.h"
-#include "libstash/dbg_p.h"
-#include "libstash/mem_l.h"
+#include "../include/libstash/libstash.h"
+#include "../include/libstash/dbg_p.h"
+#include "../include/libstash/mem_l.h"
 
 cw_dbg_t *
 dbg_new(void)
