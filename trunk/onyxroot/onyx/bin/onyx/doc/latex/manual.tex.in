@@ -40,9 +40,14 @@ the main onyx language documentation.
 \item[ONYX\_EDITOR: ] By default, the command line editor uses emacs key
 bindings.  Use this variable to explicitly set the key bindings to either
 ``emacs'' or ``vi''.
+\item[ONYX\_MPATH: ] A colon-separated list of additional paths that are
+searched by mrequire (documented in Section~\ref{sec:onyx_lang_diffs}).
+\item[ONYX\_RPATH: ] A colon-separated list of additional paths that are
+searched by require (documented in Section~\ref{sec:onyx_lang_diffs}).
 \end{description}
 
 \section{Language differences}
+\label{sec:onyx_lang_diffs}
 If \binname{onyx} is being run interactively:
 \begin{itemize}
 \item{The name ``stop'' is redefined in the initial thread's errordict to
@@ -64,3 +69,122 @@ If \binname{onyx} is being run non-interactively:
 \item{The name ``stop'' in errordict is redefined to call the die operator
 with an argument of 1.}
 \end{itemize}
+
+In addition, the following definitions exist regardless of execution mode:
+\begin{description}
+\label{onyx:modload}
+\index{modload@\onyxop{}{modload}{}}
+\item[{\onyxop{path symbol}{modload}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[path: ]
+			A string that represents a module filename.
+		\item[symbol: ]
+			A string that represents the symbol name of a
+			module initialization function to be executed.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
+		\end{description}
+	\item[Description: ]
+		Dynamically load a module, create a hook object that
+		encapsulates the handle returned by dlopen(3) (hook data
+		pointer) and the module initialization function (hook
+		evaluation function), and evaluate the hook.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `/usr/local/share/canonware/onyx/nxmod/nxgtk.nxm' `_cw_modnxgtk_init'
+onyx:2> modload
+onyx:0>
+	\end{verbatim}
+	\end{description}
+\label{onyx:mrequire}
+\index{mrequire@\onyxop{}{mrequire}{}}
+\item[{\onyxop{module symbol}{mrequire}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[module: ]
+			A string that represents a module filename.  The
+			module is searched for in the directories listed in
+			the ONYX\_MPATH environment variable.
+		\item[symbol: ]
+			A string that represents the symbol name of a
+			module initialization function to be executed.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefined}{undefined}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\end{description}
+	\item[Description: ]
+		Load a module using the ONYX\_MPATH environment variable.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `nxgtk.nxm' `_cw_modnxgtk_init' mrequire
+onyx:0>
+	\end{verbatim}
+	\end{description}
+\label{onyx:require}
+\index{require@\onyxop{}{require}{}}
+\item[{\onyxop{file}{require}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[file: ]
+			A string that represents an onyx source filename.  The
+			file is searched for in the directories listed in
+			the ONYX\_RPATH environment variable.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
+		\end{description}
+	\item[Description: ]
+		Execute an onyx source file using the ONYX\_RPATH
+		environment variable.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> `ls.nx' require flush
+1001 1001 512 994886434000000000 .
+1001 1001 512 994848629000000000 ..
+1001 1001 512 994884381000000000 CVS
+1001 1001 512 994884387000000000 bin
+1001 1001 66 981033481000000000 .cvsignore
+1001 1001 300 992069954000000000 COPYING
+1001 1001 435 994831422000000000 ChangeLog
+1001 1001 5084 994839465000000000 Cookfile.in
+1001 1001 3633 993470163000000000 INSTALL
+1001 1001 501 991968935000000000 README
+1001 1001 3778 993470163000000000 aclocal.m4
+1001 1001 26702 949579579000000000 config.guess
+1001 1001 19814 949579579000000000 config.sub
+1001 1001 101712 994840482000000000 configure
+1001 1001 7812 994840477000000000 configure.in
+1001 1001 5585 949579579000000000 install-sh
+1001 1001 512 994845044000000000 doc
+1001 1001 512 994754556000000000 lib
+1001 1001 512 994830956000000000 mod
+1001 1001 512 994884962000000000 test
+1001 1001 3271 994884963000000000 config.log
+1001 1001 3448 994884961000000000 config.cache
+1001 1001 16934 994884961000000000 config.status
+1001 1001 64838 994884988000000000 Cookfile.list
+1001 1001 5985 994884961000000000 Cookfile
+onyx:0>
+	\end{verbatim}
+	\end{description}
+\end{description}
