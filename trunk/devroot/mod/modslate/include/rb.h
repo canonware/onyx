@@ -75,7 +75,7 @@ struct									\
 /* Operations. */
 #define rb_root(a_tree) (a_tree)->rbt_root
 
-#define rb_first(a_tree, a_root, a_field, r_node)			\
+#define rb_p_first(a_tree, a_root, a_field, r_node)			\
     do									\
     {									\
 	for ((r_node) = (a_root);					\
@@ -85,7 +85,7 @@ struct									\
 	}								\
     } while (0)
 
-#define rb_last(a_tree, a_root, a_field, r_node)			\
+#define rb_p_last(a_tree, a_root, a_field, r_node)			\
     do									\
     {									\
 	for ((r_node) = (a_root);					\
@@ -95,12 +95,18 @@ struct									\
 	}								\
     } while (0)
 
+#define rb_first(a_tree, a_field, r_node)				\
+    rb_p_first(a_tree, rb_root(a_tree), a_field, r_node)
+
+#define rb_last(a_tree, a_field, r_node)				\
+    rb_p_last(a_tree, rb_root(a_tree), a_field, r_node)
+
 #define rb_next(a_tree, a_node, a_type, a_field, r_node)		\
     do									\
     {									\
 	if ((a_node)->a_field.rbn_right != &(a_tree)->rbt_nil)		\
 	{								\
-	    rb_first(a_tree, (a_node)->a_field.rbn_right, a_field,	\
+	    rb_p_first(a_tree, (a_node)->a_field.rbn_right, a_field,	\
 		     r_node);						\
 	}								\
 	else								\
@@ -121,7 +127,7 @@ struct									\
     {									\
 	if ((a_node)->a_field.rbn_left != &(a_tree)->rbt_nil)		\
 	{								\
-	    rb_last(a_tree, (a_node)->a_field.rbn_left, a_field,	\
+	    rb_p_last(a_tree, (a_node)->a_field.rbn_left, a_field,	\
 		    r_node);						\
 	}								\
 	else								\
@@ -216,10 +222,12 @@ struct									\
 	/* Insert. */							\
 	a_type *x = &(a_tree)->rbt_nil;					\
 	a_type *y = (a_tree)->rbt_root;					\
+	cw_sint32_t c;							\
 	while (y != &(a_tree)->rbt_nil)					\
 	{								\
 	    x = y;							\
-	    if ((a_comp)((a_node), y) == -1)				\
+	    c = (a_comp)((a_node), y);					\
+	    if (c == -1)						\
 	    {								\
 		y = y->a_field.rbn_left;				\
 	    }								\
@@ -233,7 +241,7 @@ struct									\
 	{								\
 	    (a_tree)->rbt_root = (a_node);				\
 	}								\
-	else if ((a_comp)((a_node), x) == -1)				\
+	else if (c == -1)						\
 	{								\
 	    x->a_field.rbn_left = (a_node);				\
 	}								\
@@ -242,9 +250,9 @@ struct									\
 	    x->a_field.rbn_right = (a_node);				\
 	}								\
 	/* Fix up. */							\
+	x = (a_node);							\
 	x->a_field.rbn_red = TRUE;					\
 	while (x != (a_tree)->rbt_root					\
-	       && x != &(a_tree)->rbt_nil				\
 	       && x->a_field.rbn_par->a_field.rbn_red)			\
 	{								\
 	    y = x->a_field.rbn_par;					\

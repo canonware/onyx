@@ -115,7 +115,7 @@ main()
     }
 
     /* rb_first(). */
-    rb_first(&tree, rb_root(&tree), link, node_a);
+    rb_first(&tree, link, node_a);
     if (node_a == rb_tree_nil(&tree, link))
     {
 	fprintf(stderr, "rb_first() --> nil\n");
@@ -126,7 +126,7 @@ main()
     }
 
     /* rb_last(). */
-    rb_last(&tree, rb_root(&tree), link, node_a);
+    rb_last(&tree, link, node_a);
     if (node_a == rb_tree_nil(&tree, link))
     {
 	fprintf(stderr, "rb_last() --> nil\n");
@@ -137,7 +137,7 @@ main()
     }
 
     /* rb_next(). */
-    rb_first(&tree, rb_root(&tree), link, node_b);
+    rb_first(&tree, link, node_b);
     rb_next(&tree, node_b, node_t, link, node_a);
     if (node_a == rb_tree_nil(&tree, link))
     {
@@ -149,7 +149,7 @@ main()
     }
 
     /* rb_prev(). */
-    rb_first(&tree, rb_root(&tree), link, node_b);
+    rb_first(&tree, link, node_b);
     rb_prev(&tree, node_b, node_t, link, node_a);
     if (node_a == rb_tree_nil(&tree, link))
     {
@@ -197,7 +197,7 @@ main()
 
 	/* Print in order. */
 	fprintf(stderr, "rb_first()/rb_next():");
-	rb_first(&tree, rb_root(&tree), link, node_b);
+	rb_first(&tree, link, node_b);
 	do
 	{
 	    /* Test rb_search(). */
@@ -214,7 +214,7 @@ main()
 
 	/* Print in reverse order. */
 	fprintf(stderr, "rb_last()/rb_prev():");
-	rb_last(&tree, rb_root(&tree), link, node_b);
+	rb_last(&tree, link, node_b);
 	do
 	{
 	    /* Test rb_search(). */
