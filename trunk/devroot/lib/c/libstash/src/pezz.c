@@ -345,7 +345,7 @@ pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
     cw_pezz_item_t * old_allocation;
     
     if (FALSE == oh_item_search(&a_pezz->addr_hash,
-				a_pezz,
+				retval,
 				(void **) &old_allocation))
     {
       if (dbg_is_registered(cw_g_dbg, "pezz_error"))
@@ -378,6 +378,8 @@ pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
       }
       else
       {
+	cw_sint32_t error;
+	
 	memset(retval, 0xa5, a_pezz->buffer_size);
 	
 	allocation->filename = a_filename;
@@ -390,7 +392,8 @@ pezz_get_e(cw_pezz_t * a_pezz, const char * a_filename, cw_uint32_t a_line_num)
 		    retval, a_pezz->buffer_size, a_filename, a_line_num);
 	}
 
-	if (-1 == oh_item_insert(&a_pezz->addr_hash, retval, allocation))
+	error = oh_item_insert(&a_pezz->addr_hash, retval, allocation);
+	if (-1 == error)
 	{
 	  if (dbg_is_registered(cw_g_dbg, "pezz_error"))
 	  {

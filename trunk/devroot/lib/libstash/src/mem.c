@@ -137,7 +137,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
     mtx_lock(&a_mem->lock);
 #endif
     if (FALSE == oh_item_search(&a_mem->addr_hash,
-				a_mem,
+				retval,
 				(void **) &old_allocation))
     {
       if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -215,10 +215,11 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	    out_put(cw_g_out, buf);
 	  }
 	}
+#if (0)
         else if (1 == error)
         {
 	  if (FALSE == oh_item_search(&a_mem->addr_hash,
-				      a_mem,
+				      retval,
 				      (void **) &old_allocation))
 	  {
 	    if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -244,6 +245,7 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
 	    }
 	  }
         }
+#endif
       }
     }
 #ifdef _CW_REENTRANT
@@ -299,7 +301,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 #endif
     
     if (FALSE == oh_item_search(&a_mem->addr_hash,
-				a_mem,
+				retval,
 				(void **) &old_allocation))
     {
       if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -378,10 +380,11 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	    out_put(cw_g_out, buf);
 	  }
 	}
+#if (0)
 	else if (1 == error)
 	{
 	  if (FALSE == oh_item_search(&a_mem->addr_hash,
-				      a_mem,
+				      retval,
 				      (void **) &old_allocation))
 	  {
 	    if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -407,6 +410,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 	    }
 	  }
 	}
+#endif
       }
     }
 #ifdef _CW_REENTRANT
@@ -507,6 +511,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	  out_put(cw_g_out, buf);
 	}
       }
+#if (0)
       else if (1 == error)
       {
 	if (dbg_is_registered(cw_g_dbg, "mem_error"))
@@ -529,6 +534,7 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
 	  out_put(cw_g_out, buf);
 	}
       }
+#endif
 
       if (old_size < a_size)
       {
