@@ -91,9 +91,14 @@ $COPYRIGHT{"toshok", 1}
  );
 
 #
-# Name to use for a temporary directory.
+# Name to use for a temporary directory during checkout and tagging.
 #
-$tmpdir = "tmpdir";
+$tagdir = "tagdir";
+
+#
+# Name to use for a temporary directory during export.
+#
+$expdir = "expdir";
 
 #
 # Parse command-line arguments.
@@ -108,6 +113,7 @@ $opt_retval =
 		"V|version=s%" => \%OPT_VERSION,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
+		"b|branchpoint=s" => \$opt_branchpoint,
 		"T|tagprefix=s" => \$opt_tagprefix,
 		"t|tag=s" => \$opt_tag,
 		"f|filetree=s@" => \@OPT_FILETREES
@@ -136,6 +142,15 @@ while ($opt_root =~ /\/$/)
 
 $pkgname_base = $opt_pkgname;
 
+if (defined($opt_branchpoint))
+{
+    $branchpoint_cvs = "-r $opt_branchpoint";
+}
+else
+{
+    $branchpoint_cvs = "";
+}
+
 if (defined($opt_tag) && !defined($opt_cvsnotag))
 {
     if (!defined($opt_tagprefix))
@@ -146,22 +161,23 @@ if (defined($opt_tag) && !defined($opt_cvsnotag))
     $tag_cvs = $opt_tag;
     $tag_cvs =~ s/\./_/g;
     $tag_cvs = "$opt_tagprefix$tag_cvs";
-    $tag_cmd = "-r $tag_cvs";
+    $exp_cvs = "-r $tag_cvs";
 }
 elsif (defined($opt_tag) && defined($opt_cvsnotag))
 {
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = "";
-    $tag_cmd = "-r HEAD";
+    $exp_cvs = "-r HEAD";
 }
 else
 {
     $tag_cvs = "";
-    $tag_cmd = "-r HEAD";
+    $exp_cvs = "-r HEAD";
 }
 
 if ($opt_verbose)
 {
+    print STDERR "branch point   : $opt_branchpoint\n";
     print STDERR "tag            : $opt_tag\n";
     print STDERR "cvs tag        : $tag_cvs\n";
     print STDERR "Tree root      : $opt_root\n";
@@ -181,34 +197,66 @@ foreach $dir (@OPT_FILETREES)
     @TREES = (@TREES, "$opt_root/$dir");
 }
 
+# Remove the temporary directory if it is already there.
+if ($opt_verbose)
+{
+    print STDERR "rm -rf $tagdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -rf $tagdir`;
+}
+
+# Check out on the appropriate tag, if specified.
+if ($opt_verbose)
+{
+    print STDERR "cvs co $branchpoint_cvs -d $tagdir @TREES\n";
+}
+unless ($opt_noact)
+{
+    `cvs co $branchpoint_cvs -d $tagdir @TREES`;
+}
+
+# Create the branch point and branch tags.
 if (defined($opt_tag) && !defined($opt_cvsnotag))
 {
     if ($opt_verbose)
     {
-	print STDERR "cvs tag $tag_cvs @TREES\n";
+	print STDERR "cd $tagdir && cvs tag -b $tag_cvs\_BP @TREES\n";
     }
     unless ($opt_noact)
     {
-	`cvs tag $tag_cvs @TREES`;
+	`cd $tagdir && cvs tag -b $tag_cvs\_BP @TREES`;
+    }
+
+    if ($opt_verbose)
+    {
+	print STDERR "cd $tagdir && cvs tag -b $tag_cvs @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $tag_cvs @TREES`;
     }
 }
 
+# Remove the export directory if it is already there.
 if ($opt_verbose)
 {
-    print STDERR "rm -rf $tmpdir\n";
+    print STDERR "rm -rf $expdir\n";
 }
 unless ($opt_noact)
 {
-    `rm -rf $tmpdir`;
+    `rm -rf $expdir`;
 }
 
+# Export.
 if ($opt_verbose)
 {
-    print STDERR "cvs export $tag_cmd -d $tmpdir @TREES\n";
+    print STDERR "cvs export $exp_cvs -d $expdir @TREES\n";
 }
 unless ($opt_noact)
 {
-    `cvs export $tag_cmd -d $tmpdir @TREES`;
+    `cvs export $exp_cvs -d $expdir @TREES`;
 }
 
 # Find all the files that need the copyright tag expanded.
@@ -218,40 +266,32 @@ if ($opt_verbose)
 }
 unless ($opt_noact)
 {
-    finddepth(\&expand_tags, "$tmpdir/devroot");
+    finddepth(\&expand_tags, "$expdir/devroot");
 }
 
 # autogen.
 if ($opt_verbose)
 {
-    print STDERR "cd $tmpdir/devroot && ./autogen.sh --with-docs\n";
+    print STDERR "cd $expdir/devroot && ./autogen.sh --with-docs\n";
 }
 unless ($opt_noact)
 {
-    `cd $tmpdir/devroot && ./autogen.sh --with-docs`;
-}
-if ($opt_verbose)
-{
-    print STDERR "rm $tmpdir/devroot/autogen.sh\n";
-}
-unless ($opt_noact)
-{
-    `cd $tmpdir/devroot/autogen.sh`;
+    `cd $expdir/devroot && ./autogen.sh --with-docs`;
 }
 
 # cook release.
 if ($opt_verbose)
 {
-    print STDERR "cd $tmpdir/devroot && cook release\n";
+    print STDERR "cd $expdir/devroot && cook release\n";
 }
 unless ($opt_noact)
 {
-    `cd $tmpdir/devroot && cook release`;
+    `cd $expdir/devroot && cook release`;
 
     # Sanity check to make sure documentation got built.
-    unless (-e "$tmpdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$tmpdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$tmpdir/devroot/doc/html/onyx/onyx.html")
+    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
+	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
+	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
     {
 	print STDERR "'cook release' seems to have failed\n";
 	exit 1;
@@ -259,16 +299,16 @@ unless ($opt_noact)
 }
 if ($opt_verbose)
 {
-    print STDERR "cd $tmpdir/devroot && cook distclean\n";
+    print STDERR "cd $expdir/devroot && cook distclean\n";
 }
 unless ($opt_noact)
 {
-    `cd $tmpdir/devroot && cook distclean`;
+    `cd $expdir/devroot && cook distclean`;
 
     # Sanity check to make sure documentation is still in the tree.
-    unless (-e "$tmpdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$tmpdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$tmpdir/devroot/doc/html/onyx/onyx.html")
+    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
+	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
+	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
     {
 	print STDERR "'cook release' seems to have failed\n";
 	exit 1;
@@ -287,30 +327,30 @@ unless ($opt_noact)
 
 if ($opt_verbose)
 {
-    print STDERR "mv $tmpdir/devroot $opt_pkgname\n";
+    print STDERR "mv $expdir/devroot $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `mv $tmpdir/devroot $opt_pkgname`;
+    `mv $expdir/devroot $opt_pkgname`;
 }
 
 if ($opt_verbose)
 {
-    print STDERR "rmdir $tmpdir\n";
+    print STDERR "rmdir $expdir\n";
 }
 unless ($opt_noact)
 {
-    `rmdir $tmpdir`;
+    `rmdir $expdir`;
 }
 
 # Create the tarball.
 if ($opt_verbose)
 {
-    print STDERR "tar cvzf $opt_pkgname.tar.gz $opt_pkgname\n";
+    print STDERR "tar czf $opt_pkgname.tar.gz $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `tar cvzf $opt_pkgname.tar.gz $opt_pkgname`;
+    `tar czf $opt_pkgname.tar.gz $opt_pkgname`;
 }
 
 # Create symlinks to the directory and tarball.
@@ -335,7 +375,9 @@ sub print_usage
 {
     print STDERR <<EOF;
 $0 usage:
-$0 [-chnv --cvsnotag --help --noact --verbose] [--tag=<tag> | -t <tag>]
+$0 [-chnv --cvsnotag --help --noact --verbose]
+       [--branchpoint <revision> | -b <revision>]
+       [--tag=<tag> | -t <tag>]
        [--tagprefix=<prefix> | -T <prefix>]
        {--version <key>=<version> | -V <key>=<version>}*
        {--pkgname=<name> | -p <pkgname>}
