@@ -1,17 +1,33 @@
+2002-03-22 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_rand() : Fix the way random()
+          is used and really generate 63 bits of randomness for the rand
+          operator.
+
+2002-03-17 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_name.c : Re-register name objects that are already
+          registered, in order to remove a race condition.
+
+	* lib/libonyx/include/libonyx/mb.h : Implement write memory barriers.
+          Memory barriers are critical for threaded versions of Onyx, and they
+          are used in nxo_dup(), nxo_p_new(), nxo_p_type_set(), and
+          nxo_stack_roll().
+
 2002-03-16 : Jason Evans <jasone@canonware.com>
 
-	* lib/libonyx/src/thd.c: Significantly rework the generic suspend/resume
-          code to use two signals (SIGUSR1 and SIGUSR2) rather than just one.
-          This allows the removal of some questionable code that may not work on
-          loosely coupled MP systems, and also removes the need for resume
-          interlocking.
+	* lib/libonyx/src/thd.c : Significantly rework the generic
+          suspend/resume code to use two signals (SIGUSR1 and SIGUSR2) rather
+          than just one.  This allows the removal of some questionable code that
+          may not work on MP systems that use partial store ordering, and also
+          removes the need for resume interlocking.
 
 	  Fix lock order reversal deadlock potential in thd_suspend() and
 	  thd_trysuspend().
 
 2002-03-09 : Jason Evans <jasone@canonware.com>
 
-	* lib/libonyx/src/thd.c:thd_p_start_func(): Set the thd->pthread field
+	* lib/libonyx/src/thd.c:thd_p_start_func() : Set the thd->pthread field
           before inserting the thd into the ring.  pthread_create() also sets
           it, but if only one place sets it, then there is a race between one
           thread setting thd->pthread and the other using it.
