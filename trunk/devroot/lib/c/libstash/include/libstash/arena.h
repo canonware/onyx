@@ -168,30 +168,9 @@ arena_get_max_chunks(cw_arena_t * a_arena);
  ****************************************************************************/
 void *
 arena_malloc(cw_arena_t * a_arena, cw_uint32_t a_size);
-
 void *
 arena_malloc_e(cw_arena_t * a_arena, cw_uint32_t a_size,
 	      const char * a_filename, cw_uint32_t a_line_num);
 
 #define _cw_arena_malloc(a_arena, a_size) \
   arena_alloc_e((a_arena), (a_size), __FILE__, __LINE__)
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_arena : Pointer to an arena .
- *
- * a_prefix : Pointer to a string which is used as a prefix for all output.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Dump the internal state of a_arena to cw_g_out.
- *
- ****************************************************************************/
-void
-arena_dump(cw_arena_t * a_arena, const char * a_prefix);
