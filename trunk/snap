@@ -26,17 +26,14 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 # DAMAGE.
-#############################################################################
 #
-# $Source$
-# $Author: jasone $
-# $Revision: 253 $
-# $Date: 1998-10-28 13:40:44 -0800 (Wed, 28 Oct 1998) $
+#############################################################################
 #
 # <<< Description >>>
 #
 # This script does all the necessary work to create a snapshot release of a 
-# source tree that is under cvs control.
+# source tree that is under cvs control.  It also does string substitution 
+# for certain tags, such as <Copyright = "Author">, <License>, and <Version>.
 #
 #############################################################################
 
@@ -47,7 +44,7 @@ use Getopt::Long;
 
 # XXX The following variable(s) should be set according to the needs of the
 # project.
-$dot = "stashmaster";
+$dot = "lib_master";
 
 $COPYRIGHT{"jasone", 0} 
 = "Copyright (C) 1996-1998 Jason Evans <jasone\@canonware.com>.";
