@@ -144,7 +144,7 @@ stil_delete(cw_stil_t *a_stil)
 }
 
 cw_stil_bufc_t *
-stil_get_stil_bufc(cw_stil_t *a_stil)
+stil_stil_bufc_get(cw_stil_t *a_stil)
 {
 	cw_stil_bufc_t *retval;
 
@@ -303,7 +303,7 @@ stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln, const void
 }
 
 const cw_stilnk_t *
-stiln_get_stilnk(const cw_stiln_t *a_stiln)
+stiln_stilnk_get(const cw_stiln_t *a_stiln)
 {
 	_cw_check_ptr(a_stiln);
 	_cw_assert(a_stiln->magic == _CW_STILN_MAGIC);
@@ -332,7 +332,7 @@ stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from)
 }
 
 const cw_uint8_t *
-stilnk_get_val(cw_stilnk_t *a_stilnk)
+stilnk_val_get(cw_stilnk_t *a_stilnk)
 {
 	_cw_check_ptr(a_stilnk);
 
@@ -340,7 +340,7 @@ stilnk_get_val(cw_stilnk_t *a_stilnk)
 }
 
 cw_uint32_t
-stilnk_get_len(cw_stilnk_t *a_stilnk)
+stilnk_len_get(cw_stilnk_t *a_stilnk)
 {
 	_cw_check_ptr(a_stilnk);
 
@@ -421,8 +421,8 @@ stil_p_stiln_kref(cw_stil_t *a_stil, cw_stiln_t *a_stiln, const void *a_key,
 			goto RETURN;
 		}
 	}
-	if (dch_insert(a_stiln->keyed_refs, a_key, a_data,
-	    (cw_chi_t *)_cw_pool_get(&a_stil->chi_pool))) {
+	if (dch_insert(a_stiln->keyed_refs, a_key, a_data, (cw_chi_t
+	    *)_cw_pool_get(&a_stil->chi_pool))) {
 		if (is_new_dch) {
 			dch_delete(a_stiln->keyed_refs);
 			a_stiln->keyed_refs = NULL;

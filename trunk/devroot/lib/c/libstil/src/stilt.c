@@ -1070,7 +1070,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 		if (a_stilt->index == _CW_STIL_BUFC_SIZE) {
 			cw_stil_bufc_t	*kbufc;
 
-			kbufc = stil_get_stil_bufc(a_stilt->stil);
+			kbufc = stil_stil_bufc_get(a_stilt->stil);
 			memcpy(kbufc->buffer, a_stilt->tok_buffer.str,
 			    _CW_STIL_BUFC_SIZE);
 			buf_new(&a_stilt->tok_buffer.buf);
@@ -1085,7 +1085,7 @@ stilt_p_putc(cw_stilt_t *a_stilt, cw_uint32_t a_c)
 		if (buf_get_size(&a_stilt->tok_buffer.buf) == a_stilt->index) {
 			cw_stil_bufc_t	*kbufc;
 
-			kbufc = stil_get_stil_bufc(a_stilt->stil);
+			kbufc = stil_stil_bufc_get(a_stilt->stil);
 			if (buf_append_bufc(&a_stilt->tok_buffer.buf,
 			    &kbufc->bufc, 0, _CW_STIL_BUFC_SIZE)) {
 				bufc_delete(&kbufc->bufc);

@@ -15,12 +15,6 @@
 typedef struct cw_stil_s cw_stil_t;
 typedef struct cw_stilnk_s cw_stilnk_t;
 
-/* Defined in stilo.h to avoid a circular dependency. */
-#if (0)
-typedef struct cw_stiln_s cw_stiln_t;
-
-#endif
-
 struct cw_stil_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -110,7 +104,7 @@ struct cw_stiln_s {
 cw_stil_t	*stil_new(cw_stil_t *a_stil);
 void		stil_delete(cw_stil_t *a_stil);
 
-cw_stil_bufc_t	*stil_get_stil_bufc(cw_stil_t *a_stil);
+cw_stil_bufc_t	*stil_stil_bufc_get(cw_stil_t *a_stil);
 
 #define stil_chi_pool_get(a_stil) (&(a_stil)->chi_pool)
 #define stil_stilsc_pool_get(a_stil) (&(a_stil)->stilsc_pool)
@@ -124,7 +118,7 @@ void		stil_stiln_unref(cw_stil_t *a_stil, const cw_stiln_t *a_stiln,
     const void *a_key);
 
 /* stiln. */
-const cw_stilnk_t *stiln_get_stilnk(const cw_stiln_t *a_stiln);
+const cw_stilnk_t *stiln_stilnk_get(const cw_stiln_t *a_stiln);
 
 /* stilnk. */
 void		stilnk_init(cw_stilnk_t *a_stilnk, const cw_uint8_t *a_name,
@@ -132,6 +126,6 @@ void		stilnk_init(cw_stilnk_t *a_stilnk, const cw_uint8_t *a_name,
 
 void		stilnk_copy(cw_stilnk_t *a_to, const cw_stilnk_t *a_from);
 
-const cw_uint8_t *stilnk_get_val(cw_stilnk_t *a_stilnk);
+const cw_uint8_t *stilnk_val_get(cw_stilnk_t *a_stilnk);
 
-cw_uint32_t	stilnk_get_len(cw_stilnk_t *a_stilnk);
+cw_uint32_t	stilnk_len_get(cw_stilnk_t *a_stilnk);
