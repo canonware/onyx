@@ -239,9 +239,9 @@ unless ($opt_noact)
     `cd $tmpdir/devroot && cook release`;
 
     # Sanity check to make sure documentation got built.
-    unless (-e "$tmpdir/devroot/doc/ps/onyx.ps"
-	    && -e "$tmpdir/devroot/doc/pdf/onyx.pdf"
-	    && -e "$tmpdir/devroot/doc/html/onyx.html")
+    unless (-e "$tmpdir/devroot/doc/ps/onyx/onyx.ps"
+	    && -e "$tmpdir/devroot/doc/pdf/onyx/onyx.pdf"
+	    && -e "$tmpdir/devroot/doc/html/onyx/onyx.html")
     {
 	print STDERR "'cook release' seems to have failed\n";
 	exit 1;
@@ -256,9 +256,9 @@ unless ($opt_noact)
     `cd $tmpdir/devroot && cook distclean`;
 
     # Sanity check to make sure documentation is still in the tree.
-    unless (-e "$tmpdir/devroot/doc/ps/onyx.ps"
-	    && -e "$tmpdir/devroot/doc/pdf/onyx.pdf"
-	    && -e "$tmpdir/devroot/doc/html/onyx.html")
+    unless (-e "$tmpdir/devroot/doc/ps/onyx/onyx.ps"
+	    && -e "$tmpdir/devroot/doc/pdf/onyx/onyx.pdf"
+	    && -e "$tmpdir/devroot/doc/html/onyx/onyx.html")
     {
 	print STDERR "'cook release' seems to have failed\n";
 	exit 1;
@@ -354,16 +354,17 @@ sub expand_tags
 #	    print STDERR "  $File::Find::dir/$name...";
 	}
 
-	$ifh = new FileHandle $name, "r";
+	`cp $name $name.tmp`;
+	$ifh = new FileHandle "$name.tmp", "r";
 	unless (defined $ifh)
 	{
-	    print STDERR "Error opening $name for reading\n";
+	    print STDERR "Error opening $name.tmp for reading\n";
 	    exit(1);
 	}
-	$ofh = new FileHandle "$name.tmp", "w";
+	$ofh = new FileHandle "$name", "w";
 	unless (defined $ofh)
 	{
-	    print STDERR "Error opening $name.tmp for writing\n";
+	    print STDERR "Error opening $name for writing\n";
 	    exit(1);
 	}
 
@@ -408,8 +409,8 @@ sub expand_tags
 		}
 		else
 		{
-		    print STDERR "Missing Version tag value for \"$3\"\n";
-		    exit(1);
+		    print STDERR "Missing Version tag value for \"$3\""
+			. " in $File::Find::dir/$name\n";
 		}
 	    }
 	    else
@@ -421,14 +422,7 @@ sub expand_tags
 	$ifh->close;
 	$ofh->close;
 
-	if ($did_subst)
-	{
-	    `mv $name.tmp $name`;
-	}
-	else
-	{
-	    `rm $name.tmp`
-	    }
+	`rm $name.tmp`;
 
 	if ($opt_verbose)
 	{
