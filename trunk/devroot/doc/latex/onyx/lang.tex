@@ -9782,12 +9782,12 @@ onyx:3>
 		modules, there is no reasonable solution except to explicitly
 		order the destruction of objects.  Therefore, by default, the
 		hook that is evaluated by modload is destroyed during the second
-		sweep pass.  It is possible for a module to override what sweep
-		pass the hook is destroyed on, in cases where there are
-		additional ordering constraints for the objects created by a
-		module.  This isn't important from the Onyx language
-		perspective, but is important to understand when implementing
-		modules.
+		sweep pass (count starts at 0).  It is possible for a module to
+		override what sweep pass the hook is destroyed on, in cases
+		where there are additional ordering constraints for the objects
+		created by a module.  This isn't important from the Onyx
+		language perspective, but is important to understand when
+		implementing modules.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `/usr/local/share/onyx/nxmod/mdprompt.nxm' `modprompt_init'
