@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 41 $
- * Last modified: $Date: 1998-04-26 20:06:13 -0700 (Sun, 26 Apr 1998) $
+ * Current revision: $Revision: 44 $
+ * Last modified: $Date: 1998-04-26 22:52:47 -0700 (Sun, 26 Apr 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -54,15 +54,13 @@
  * Always include these once per run.
  */
 
-#if (defined(_INC_THREAD_H_) || defined(_INC_ALL_))
-#  ifndef _THREAD_H_
-#    ifndef _LIST_H_
-#      include <list.h>
-#      define _LIST_H_
-#    endif
-#    include <thread.h>
-#    define _THREAD_H_
+#ifndef _THREAD_H_
+#  ifndef _LIST_H_
+#    include <list.h>
+#    define _LIST_H_
 #  endif
+#  include <thread.h>
+#  define _THREAD_H_
 #endif
 
 #ifndef _DBG_H_
@@ -80,7 +78,7 @@
 #  define _MEM_H_
 #endif
 
-/* 
+/*
  * Other project headers we don't always want to include.
  */
 
@@ -149,6 +147,10 @@
 
 #if (defined(_INC_RES_H_) || defined(_INC_ALL_))
 #  ifndef _RES_H_
+#    ifndef _OH_H_
+#      include <oh.h>
+#      define _OH_H_
+#    endif
 #    include <res.h>
 #    define _RES_H_
 #  endif
