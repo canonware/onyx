@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 17 $
- * Last modified: $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
+ * Current revision: $Revision: 23 $
+ * Last modified: $Date: 1998-04-12 01:42:02 -0700 (Sun, 12 Apr 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -77,6 +77,13 @@
 /* 
  * Other project headers we don't always want to include.
  */
+
+#if (defined(_INC_GLOB_H_) || defined(_INC_ALL_))
+#  ifndef _GLOB_H_
+#    include <glob.h>
+#    define _GLOB_H_
+#  endif
+#endif
 
 #if (defined(_INC_LIST_H_) || defined(_INC_ALL_))
 #  ifndef _LIST_H_
