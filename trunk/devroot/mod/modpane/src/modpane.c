@@ -18,8 +18,8 @@
 /* Refers to a hook that holds a reference to the dynamically loaded module. */
 static cw_nxo_t hook_data;
 
-cw_nxoe_t *
-pane_hook_ref_iter(void *a_data, cw_bool_t a_reset)
+static cw_nxoe_t *
+modpane_p_hook_ref_iter(void *a_data, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     cw_nxo_t *hook = (cw_nxo_t *) a_data;
@@ -37,17 +37,17 @@ pane_hook_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 void
-pane_hooks_init(cw_nxo_t *a_thread, const struct cw_pane_entry *a_entries,
-		cw_uint32_t a_nentries)
+modpane_hooks_init(cw_nxo_t *a_thread, const struct cw_modpane_entry *a_entries,
+		   cw_uint32_t a_nentries)
 {
     cw_nxo_t *tstack;
-    cw_nxo_t *globaldict, *name, *value;
+    cw_nxo_t *currentdict, *name, *value;
     cw_nx_t *nx;
     cw_uint32_t i;
 
     tstack = nxo_thread_tstack_get(a_thread);
     nx = nxo_thread_nx_get(a_thread);
-    globaldict = nx_globaldict_get(nx);
+    currentdict = nxo_stack_get(nxo_thread_dstack_get(a_thread));
 
     name = nxo_stack_push(tstack);
     value = nxo_stack_push(tstack);
@@ -57,11 +57,11 @@ pane_hooks_init(cw_nxo_t *a_thread, const struct cw_pane_entry *a_entries,
 	nxo_name_new(name, nx, a_entries[i].name, strlen(a_entries[i].name),
 		     FALSE);
 	nxo_hook_new(value, nx, (void *) &hook_data, a_entries[i].eval_f,
-		     pane_hook_ref_iter, NULL);
+		     modpane_p_hook_ref_iter, NULL);
 	nxo_dup(nxo_hook_tag_get(value), name);
 	nxo_attr_set(value, NXOA_EXECUTABLE);
 
-	nxo_dict_def(globaldict, nx, name, value);
+	nxo_dict_def(currentdict, nx, name, value);
     }
 
     nxo_stack_npop(tstack, 2);
@@ -79,4 +79,9 @@ modpane_init(void *a_arg, cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     nxo_no_new(&hook_data);
     nxo_dup(&hook_data, nxo_stack_get(estack));
+
+    /* Initialize hooks. */
+    modpane_display_init(a_thread);
+    modpane_cell_init(a_thread);
+    modpane_pane_init(a_thread);
 }

@@ -20,7 +20,7 @@
 
 /* Include files (not installed). */
 {
-  local incs = modpane.h;
+  local incs = cell.h cl.h display.h ds.h modpane.h pane.h pn.h;
   incs = [fromto % [srcdir]/mod/modpane/include/% [incs]];
   incs = [incs] [objdir]/mod/modpane/include/modpane_defs.h;
 
@@ -29,7 +29,7 @@
 }
 
 /* Source files. */
-MODPANE_MSRCS = modpane.c;
+MODPANE_MSRCS = cell.c cl.c display.c ds.c modpane.c pane.c pn.c;
 
 MODPANE_MSRCS = [fromto % [srcdir]/mod/modpane/src/% [MODPANE_MSRCS]];
 MSRCS = [MSRCS] [MODPANE_MSRCS];

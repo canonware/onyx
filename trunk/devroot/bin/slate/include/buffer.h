@@ -14,6 +14,8 @@
 void
 slate_buffer_init(cw_nxo_t *a_thread);
 
+/* Predicates. */
+
 cw_nxn_t
 buffer_type(cw_nxo_t *a_nxo);
 

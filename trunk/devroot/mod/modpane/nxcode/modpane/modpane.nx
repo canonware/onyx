@@ -9,8 +9,20 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% Make sure that implicit locking is on.
+currentlocking true setlocking
+% %currentlocking
+
+% Define panedict in globaldict, and push it onto dstack.
+globaldict /panedict dict dup begin put
+
+% Initialize hooks.
 `modpane.nxm' `modpane_init' mrequire
 
 `modpane/modpane_defs.nx' require
 `modpane/terminfo.nx' require
 `modpane/widget.nx' require
+
+% Pop panedict off dstack and restore currentlocking.
+setlocking
+end
