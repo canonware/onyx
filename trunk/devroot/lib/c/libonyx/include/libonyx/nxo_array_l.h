@@ -56,6 +56,8 @@ cw_nxo_t *nxo_l_array_get(cw_nxo_t *a_nxo);
 
 #ifndef _CW_USE_INLINES
 void	nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el);
+cw_bool_t nxo_l_array_bound_get(cw_nxo_t *a_nxo);
+void	nxo_l_array_bound_set(cw_nxo_t *a_nxo);
 #endif
 
 #if (defined(_CW_USE_INLINES) || defined(_NXO_ARRAY_C_))
