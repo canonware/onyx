@@ -526,11 +526,13 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
      * it can get at the noroll region. */
 #ifdef CW_THREADS
     stack->noroll = noroll;
+    mb_write();
 #endif
     qr_split(ql_first(&stack->stack), noroll, link);
     ql_first(&stack->stack) = top;
     qr_meld(top, noroll, link);
 #ifdef CW_THREADS
+    mb_write();
     stack->noroll = NULL;
     nxoe_p_stack_unlock(stack);
 #endif
