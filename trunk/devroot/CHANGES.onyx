@@ -1,3 +1,22 @@
+2002-04-17 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c :
+
+	  Add operators:
+	  + rot, srot
+	  + adn, aup
+	  + saup, sadn
+
+	  Rename/replace operators:
+	  + push --> adn
+	  + npush/nbpush --> rot
+	  + snpush/snbpush --> srot
+
+	  Remove operators:
+	  + push
+
+	* lib/libonyx/include/libonyx/nxo_stack.h: Add nxo_stack_rot().
+
 2002-04-06 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c : Add operators:
