@@ -69,12 +69,12 @@ qs - Stack macros
 None.
 
 .SH DESCRIPTION
-The qs macros implement operations on a stack.  The type of the stack elements
-and which field of the elements to use are determined by arguments that are
-passed into the macros.  The macros are optimized for speed and code size, which
-means that there is minimal error checking built in.  As a result, care must be
-taken to assure that these macros are used as intended, or strange things can
-happen.
+The \fBqs\fR macros implement operations on a stack.  The type of the stack
+elements and which field of the elements to use are determined by arguments that
+are passed into the macros.  The macros are optimized for speed and code size,
+which means that there is minimal error checking built in.  As a result, care
+must be taken to assure that these macros are used as intended, or strange
+things can happen.
 
 .SH USAGE
 .SS Data structures
@@ -85,16 +85,16 @@ Input(s):
 .RS
 .IR a_type :
 .RS
-Data type for the qs.
+Data type for the \fBqs\fR.
 .RE
 .RE
 Output(s):
 .RS
-A data structure that can be used as a qs head.
+A data structure that can be used as a \Bqs\fR head.
 .RE
 Description:
 .RS
-Generate code for a qs head data structure.
+Generate code for a \fBqs\fR head data structure.
 .RE
 .RE
 
@@ -105,7 +105,7 @@ Input(s):
 .RS
 .IR a_head :
 .RS
-Pointer to a qs head
+Pointer to a \fBqs\fR head
 .RE
 .RE
 Output(s):
@@ -114,7 +114,7 @@ None.
 .RE
 Description:
 .RS
-Statically initialize a qs head.
+Statically initialize a \fBqs\fR head.
 .RE
 .RE
 
@@ -125,16 +125,16 @@ Input(s):
 .RS
 .IR a_type :
 .RS
-Data type for the qs elements.
+Data type for the \fBqs\fR elements.
 .RE
 .RE
 Output(s):
 .RS
-A data structure that can be used as a qs element.
+A data structure that can be used as a \fBqs\fR element.
 .RE
 Description:
 .RS
-Generate code for a qs element data structure.
+Generate code for a \fBqs\fR element data structure.
 .RE
 .RE
 
@@ -148,7 +148,7 @@ Input(s):
 .RS
 .IR a_head :
 .RS
-Pointer to a qs head.
+Pointer to a \fBqs\fR head.
 .RE
 .RE
 Output(s):
@@ -170,11 +170,11 @@ Input(s):
 .RS
 .IR a_head :
 .RS
-Pointer to a qs element.
+Pointer to a \fBqs\fR element.
 .RE
 .IR a_field :
 .RS
-Field within the qs element to use.
+Field within the \fBqs\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -196,19 +196,19 @@ Input(s):
 .RS
 .IR a_head :
 .RS
-Pointer to a qs head.
+Pointer to a \fBqs\fR head.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-Pointer to the top element in the qs.
+Pointer to the top element in the \fBqs\fR.
 .RE
 .RE
 Description:
 .RS
-Return a pointer to the top element in the qs.
+Return a pointer to the top element in the \fBqs\fR.
 .RE
 .RE
 
@@ -221,25 +221,25 @@ Input(s):
 .RS
 .IR a_elm :
 .RS
-Pointer to a qs element.
+Pointer to a \fBqs\fR element.
 .RE
 .IR a_field :
 .RS
-Field within the qs element to use.
+Field within the \fBqs\fR elements to use.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to the next element in the qs.
+non-NULL: Pointer to the next element in the \fBqs\fR.
 .br
-NULL: a_elm is the bottom element in the qs.
+NULL: a_elm is the bottom element in the \fBqs\fR.
 .RE
 .RE
 Description:
 .RS
-Return a pointer to the next element in the qs below a_elm.
+Return a pointer to the next element in the \fBqs\fR below a_elm.
 .RE
 .RE
 
@@ -253,7 +253,7 @@ Input(s):
 .RS
 .IR a_head :
 .RS
-Pointer to a qs head.
+Pointer to a \fBqs\fR head.
 .RE
 .IR a_elm :
 .RS
@@ -261,7 +261,7 @@ Pointer to an element.
 .RE
 .IR a_field :
 .RS
-Field within the qs element to use.
+Field within the \fBqs\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -270,7 +270,7 @@ None.
 .RE
 Description:
 .RS
-Push a_elm onto the qs.
+Push a_elm onto the \fBqs\fR.
 .RE
 .RE
 
@@ -284,7 +284,7 @@ Input(s):
 .RS
 .IR a_qselm :
 .RS
-Pointer to a qs element.
+Pointer to a \fBqs\fR element.
 .RE
 .IR a_elm :
 .RS
@@ -292,7 +292,7 @@ Pointer to an element.
 .RE
 .IR a_field :
 .RS
-Field within the qs element to use.
+Field within the \fBqs\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -314,18 +314,18 @@ Input(s):
 .RS
 .IR a_head :
 .RS
-Pointer to a qs head.
+Pointer to a \fBqs\fR head.
 .RE
 .IR a_field :
 .RS
-Field within the qs element to use.
+Field within the \fBqs\fR elements to use.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-non-NULL: Pointer to a qs element.
+non-NULL: Pointer to a \fBqs\fR element.
 .br
 NULL: a_head is empty.
 .RE
@@ -348,11 +348,11 @@ The name of a temporary variable to use for iteration.
 .RE
 .IR a_head :
 .RS
-Pointer to a qs head.
+Pointer to a \fBqs\fR head.
 .RE
 .IR a_field :
 .RS
-Field within the qs element to use.
+Field within the \fBqs\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -361,7 +361,8 @@ None.
 .RE
 Description:
 .RS
-Iterate down the qs, storing a pointer to each element in a_var along the way.
+Iterate down the \fBqs\fR, storing a pointer to each element in a_var along the
+way.
 .RE
 .RE
 

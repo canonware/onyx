@@ -74,12 +74,12 @@ qr - Ring macros
 None.
 
 .SH DESCRIPTION
-The qr macros implement operations on a ring.  The type of the ring elements
-and which field of the elements to use are determined by arguments that are
-passed into the macros.  The macros are optimized for speed and code size, which
-means that there is minimal error checking built in.  As a result, care must be
-taken to assure that these macros are used as intended, or strange things can
-happen.
+The \fBqr\fR macros implement operations on a ring.  The type of the ring
+elements and which field of the elements to use are determined by arguments that
+are passed into the macros.  The macros are optimized for speed and code size,
+which means that there is minimal error checking built in.  As a result, care
+must be taken to assure that these macros are used as intended, or strange
+things can happen.
 
 .SH USAGE
 .SS Data structures
@@ -90,16 +90,16 @@ Input(s):
 .RS
 .IR a_type :
 .RS
-Data type for the qr.
+Data type for the \fBqr\fR.
 .RE
 .RE
 Output(s):
 .RS
-A data structure that can be used as a qr.
+A data structure that can be used as a \fBqr\fR.
 .RE
 Description:
 .RS
-Generate code for a qr data structure.
+Generate code for a \fBqr\fR data structure.
 .RE
 .RE
 
@@ -113,11 +113,11 @@ Input(s):
 .RS
 .IR a_qr :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -139,23 +139,23 @@ Input(s):
 .RS
 .IR a_qr :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-Pointer to the next element in the qr.
+Pointer to the next element in the \fBqr\fR.
 .RE
 .RE
 Description:
 .RS
-Return a pointer to the next element in the qr.
+Return a pointer to the next element in the \fBqr\fR.
 .RE
 .RE
 
@@ -168,23 +168,23 @@ Input(s):
 .RS
 .IR a_qr :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
 .RS
 .IR retval :
 .RS
-Pointer to the previous element in the qr.
+Pointer to the previous element in the \fBqr\fR.
 .RE
 .RE
 Description:
 .RS
-Return a pointer to the previous element in the qr.
+Return a pointer to the previous element in the \fBqr\fR.
 .RE
 .RE
 
@@ -198,7 +198,7 @@ Input(s):
 .RS
 .IR a_qrelm :
 .RS
-Pointer to an element in a qr.
+Pointer to an element in a \fBqr\fR.
 .RE
 .IR a_qr :
 .RS
@@ -206,7 +206,7 @@ Pointer to an element that is the only element in its ring.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -229,7 +229,7 @@ Input(s):
 .RS
 .IR a_qrelm :
 .RS
-Pointer to an element in a qr.
+Pointer to an element in a \fBqr\fR.
 .RE
 .IR a_qr :
 .RS
@@ -237,7 +237,7 @@ Pointer to an element that is the only element in its ring.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -260,15 +260,15 @@ Input(s):
 .RS
 .IR a_qr_a :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_qr_b :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -291,15 +291,15 @@ Input(s):
 .RS
 .IR a_qr_a :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_qr_b :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -321,11 +321,11 @@ Input(s):
 .RS
 .IR a_qr :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -350,11 +350,11 @@ The name of a temporary variable to use for iteration.
 .RE
 .IR a_qr :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -363,8 +363,8 @@ None.
 .RE
 Description:
 .RS
-Iterate through the qr, storing a pointer to each element in a_var along the
-way.
+Iterate through the \fBqr\fR, storing a pointer to each element in a_var along
+the way.
 .RE
 .RE
 
@@ -380,11 +380,11 @@ The name of a temporary variable to use for iteration.
 .RE
 .IR a_qr :
 .RS
-Pointer to a qr.
+Pointer to a \fBqr\fR.
 .RE
 .IR a_field :
 .RS
-Field within the qr element to use.
+Field within the \fBqr\fR elements to use.
 .RE
 .RE
 Output(s):
@@ -393,7 +393,7 @@ None.
 .RE
 Description:
 .RS
-Iterate through the qr in the reverse direction, storing a pointer to each
+Iterate through the \fBqr\fR in the reverse direction, storing a pointer to each
 element in a_var along the way.
 .RE
 .RE
