@@ -977,50 +977,10 @@ dup $vclass setclassname
 dup <
 > setdata
 <
-    #class #instance :init #instance
-    $init {
-	# Do nothing.
-	nip
-    }
-
     #class :new #instance
     $new {
 	# Create instance.
-	instance 2 ndup exch setisa
-
-	# XXX Hard-code to avoid lookup?
-	:init
-    }
-
-    # Typically called at the beginning of :new or :init in subclasses.
-    # Recursively invokes :init, and sets isa.
-    #
-    #class #instance :rinit #instance
-    $rinit {
-	exch super
-	#instance #super
-	dup type $classtype eq {
-	    tuck methods
-	    #super #instance #methods
-	    dup type $dicttype eq {
-		dup $init known {
-		    # Call super:init.
-		    $init get eval
-		}{
-		    # :init not defined.
-		    pop
-		    $undefined throw
-		} ifelse
-	    }{
-		# No methods.
-		pop
-		$undefined throw
-	    } ifelse
-	}{
-	    # No superclass.
-	    pop
-	    $undefined throw
-	} ifelse
+	instance dup dn setisa
     }
 
     # Typically called at the beginning of :new in subclasses.  Recursively
@@ -1028,8 +988,6 @@ dup <
     #
     #class :rnew #instance
     $rnew {
-	#class
-
 	dup super
 	dup type $classtype eq {
 	    dup methods
@@ -1055,7 +1013,6 @@ dup <
 	#class #instance
 
 	dup dn setisa
-	#instance
     }
 
     #class :classname #name/null
