@@ -236,11 +236,23 @@ dch_p_shrink(cw_dch_t *a_dch)
 
 	count = ch_count(a_dch->ch);
 
-	if ((count - 1) < (a_dch->grow_factor > 1) && ((a_dch->grow_factor *
-	    a_dch->base_shrink))) {
-		/* Too big.  Create a new ch half as large and populate it. */
-		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table *
-		    a_dch->grow_factor / 2, a_dch->hash, a_dch->key_comp);
+	if ((count - 1 < a_dch->base_shrink * a_dch->grow_factor) &&
+	    (a_dch->grow_factor > 1)) {
+		cw_uint32_t	new_factor;
+
+		/*
+		 * Too big.  Create a new ch with the smallest grow factor that
+		 * does not cause the ch to be overflowed.
+		 */
+		for (new_factor = 1; new_factor * a_dch->base_grow <= count - 1;
+		     new_factor *= 2) {
+			_cw_assert(new_factor < a_dch->grow_factor);
+		}
+		_cw_assert(new_factor > 0);
+		_cw_assert(new_factor < a_dch->grow_factor);
+
+		t_ch = ch_new(NULL, a_dch->mem, a_dch->base_table * new_factor,
+		    a_dch->hash, a_dch->key_comp);
 		for (i = 0; i < count; i++) {
 			chi = ql_first(&a_dch->ch->chi_ql);
 			ql_remove(&a_dch->ch->chi_ql, chi, ch_link);
@@ -248,7 +260,7 @@ dch_p_shrink(cw_dch_t *a_dch)
 			dch_p_insert(t_ch, chi);
 		}
 
-		a_dch->grow_factor /= 2;
+		a_dch->grow_factor = new_factor;
 #ifdef _LIBSTASH_DBG
 		a_dch->num_shrinks++;
 		t_ch->num_collisions += a_dch->ch->num_collisions;
