@@ -11,12 +11,14 @@ Required: This software depends on the excellent 'cook' program for building.
 	  more information, see:
 
 		http://www.canb.auug.org.au/~millerp/cook/cook.html
+		http://www.canonware.com/download/cook/
 
 Optional: Regular expression support in Onyx depends on the pcre library.  pcre
 	  is distributed separately, and needs to be installed before building
 	  this software:
 
 		ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/
+		http://www.canonware.com/download/pcre/
 
 Optional: Interactive command line editing is implemented in modprompt, which
 	  relies on libedit.  libedit is distributed separately, and needs to be
