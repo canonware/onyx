@@ -222,7 +222,7 @@ nxo_type_get(const cw_nxo_t *a_nxo)
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
-    return ((cw_nxot_t)(a_nxo->flags & 0x1f));
+    return ((cw_nxot_t) (a_nxo->flags & 0x1f));
 }
 
 CW_INLINE cw_nxoa_t
@@ -231,7 +231,7 @@ nxo_attr_get(const cw_nxo_t *a_nxo)
     cw_check_ptr(a_nxo);
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
 
-    return ((cw_nxoa_t)(((a_nxo)->flags >> 6) & 3));
+    return ((cw_nxoa_t) (((a_nxo)->flags >> 6) & 3));
 }
 
 CW_INLINE void
