@@ -1,5 +1,9 @@
 2003-12-29  Jason Evans  <jasone@canonware.com>
 
+	* lib/libonyx/src/systemdict.c:systemdict_localtime() : Use tzname
+	  and altzone if (struct tm).tm_{zone,gmtoff} are missing, as on
+	  Solaris 9.
+
 	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Revise string
 	  hashing to marginally improve performance.
 

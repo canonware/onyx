@@ -36,6 +36,10 @@
 /* socklen_t is missing on Mac OS X <= 10.2. */
 typedef int socklen_t;
 #endif
+#ifndef AF_LOCAL
+/* AF_LOCAL is not defined on Solaris 9. */
+#define AF_LOCAL AF_UNIX
+#endif
 #endif
 #ifdef CW_REAL
 #ifndef HAVE_ASPRINTF
@@ -6646,15 +6650,27 @@ systemdict_localtime(cw_nxo_t *a_thread)
     nxo_dict_def(nxo, name, value);
 
     /* zone. */
+#ifdef CW_LIBONYX_USE_TM_ZONE
+#define CW_LIBONYX_ZONE tm.tm_zone
+#elif defined(CW_LIBONYX_USE_TZNAME)
+#define CW_LIBONYX_ZONE tzname
+#endif
     nxo_name_new(name, nxn_str(NXN_zone), nxn_len(NXN_zone), true);
-    nxo_string_new(value, currentlocking, strlen(tm.tm_zone));
-    nxo_string_set(value, 0, tm.tm_zone, nxo_string_len_get(value));
+    nxo_string_new(value, currentlocking, strlen(CW_LIBONYX_ZONE));
+    nxo_string_set(value, 0, CW_LIBONYX_ZONE, nxo_string_len_get(value));
     nxo_dict_def(nxo, name, value);
+#undef CW_LIBONYX_ZONE
 
     /* gmtoff. */
+#ifdef CW_LIBONYX_USE_TM_GMTOFF
+#define CW_LIBONYX_GMTOFF tm.tm_gmtoff
+#elif defined (CW_LIBONYX_USE_ALTZONE)
+#define CW_LIBONYX_GMTOFF altzone
+#endif
     nxo_name_new(name, nxn_str(NXN_gmtoff), nxn_len(NXN_gmtoff), true);
     nxo_integer_new(value, tm.tm_gmtoff);
     nxo_dict_def(nxo, name, value);
+#undef CW_LIBONYX_GMTOFF
 
     nxo_stack_npop(tstack, 2);
 }
