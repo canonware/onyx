@@ -17,14 +17,6 @@ out_put_n()
 out_put_f()
 16 Bytes output
 [s]
-out_put_fe()
-At <file>, line 42: <function>(): Extended output with filename and funcname
-At <file>, line 42: Extended output with filename
-<function>(): Extended output with funcname
-Extended output, NULL args
-Extended output, NULL args, [s]
-out_put_fl()
-out_put_fle()
 out_put_fn()
 012345678901234567890123456789012345678901234567890123456789:
 0123456789012345678901234567890123456789012345678901234567890123456789:

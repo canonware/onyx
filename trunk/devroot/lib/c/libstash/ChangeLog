@@ -4,6 +4,7 @@
 	(out_put_le): Remove.
 	(out_put_fl): Remove.
 	(out_put_fle): Remove.
+	(out_put_fe): Remove.
 
 2001-04-19  Jason Evans  <jasone@canonware.com>
 

@@ -137,60 +137,6 @@ main()
 		out_delete(out_p);
 	}
 
-	/* out_put_fe(). */
-	out_put(out_err, "out_put_fe()\n");
-	{
-		cw_out_t	*out_p;
-
-		out_p = out_new(NULL, cw_g_mem);
-		_cw_check_ptr(out_p);
-
-		_cw_assert(out_put_fe(out_p, 2, "<file>", 42, "<function>",
-			"Extended output with filename and funcname\n") > 0);
-		_cw_assert(out_put_fe(out_p, 2, "<file>", 42, NULL,
-			"Extended output with filename\n") > 0);
-		_cw_assert(out_put_fe(out_p, 2, NULL, 42, "<function>",
-			"Extended output with funcname\n") > 0);
-		_cw_assert(out_put_fe(out_p, 2, NULL, 42, NULL,
-			"Extended output, NULL args\n") > 0);
-		_cw_assert(out_put_fe(out_p, 2, NULL, 42, NULL,
-			"Extended output, NULL args, [s]\n",
-			"[s]"));
-		_cw_assert(out_put_fe(out_p, 2, NULL, 42, NULL, "") == 0);
-
-		out_delete(out_p);
-	}
-
-	/* out_put_fl(). */
-	out_put(out_err, "out_put_fl()\n");
-	{
-		cw_out_t	*out_p;
-
-		out_p = out_new(NULL, cw_g_mem);
-		_cw_check_ptr(out_p);
-
-/*  		_cw_assert(out_put_fl(out_p, 2, "Timestamped output [s]\n", */
-/*  		    "[s]") > 0); */
-/*  		_cw_assert(out_put_fl(out_p, 2, "\n") > 0); */
-
-		out_delete(out_p);
-	}
-
-	/* out_put_fle(). */
-	out_put(out_err, "out_put_fle()\n");
-	{
-		cw_out_t	*out_p;
-
-		out_p = out_new(NULL, cw_g_mem);
-		_cw_check_ptr(out_p);
-
-/*  		_cw_assert(out_put_fle(out_p, 2, "<file>", 42, "<function>", */
-/*  		    "Timestamped output [s]\n", "[s]") > 0); */
-/*  		_cw_assert(out_put_fle(out_p, 2, NULL, 42, NULL, "\n") > 0); */
-
-		out_delete(out_p);
-	}
-
 	/* out_put_fn(). */
 	out_put(out_err, "out_put_fn()\n");
 	{

@@ -77,9 +77,6 @@ typedef struct {
 	cw_out_el_t	*key_els;
 }       cw_out_key_t;
 
-static cw_sint32_t 	out_p_put_fve(cw_out_t *a_out, cw_sint32_t a_fd,
-    const char *a_file_name, cw_uint32_t a_line_num, const char
-    *a_func_name, const char *a_format, va_list a_p);
 static cw_sint32_t	out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd,
     cw_uint32_t a_size, const char *a_format, va_list
     a_p);
@@ -291,21 +288,49 @@ out_put_e(cw_out_t *a_out, const char *a_file_name, cw_uint32_t a_line_num,
     const char *a_func_name, const char *a_format, ...)
 {
 	cw_sint32_t	retval, fd;
+	char		*format = NULL;
 	va_list		ap;
 
 	_cw_check_ptr(a_format);
 
 	if (a_out != NULL) {
-		_cw_assert(_CW_OUT_MAGIC == a_out->magic);
+		_cw_assert(a_out->magic == _CW_OUT_MAGIC);
 		fd = a_out->fd;
 	} else
 		fd = 2;
 
+	if (a_file_name != NULL) {
+		if (a_func_name != NULL) {
+			/* Print filename, line number, and function name. */
+			if ((retval = out_put_sa(a_out, &format,
+			    "At [s], line [i]: [s](): [s]", a_file_name,
+			    a_line_num, a_func_name, a_format)) < 0)
+				goto RETURN;
+		} else {
+			/* Print filename and line number. */
+			if ((retval = out_put_sa(a_out, &format,
+			    "At [s], line [i]: [s]", a_file_name,
+			    a_line_num, a_format)) < 0)
+				goto RETURN;
+		}
+	} else if (a_func_name != NULL) {
+		/* Print function name. */
+		if ((retval = out_put_sa(a_out, &format, "[s](): [s]",
+		    a_func_name, a_format)) < 0)
+			goto RETURN;
+	} else {
+		/* Make no modifications. */
+		if ((retval = out_put_sa(a_out, &format, "[s]", a_format)) < 0)
+			goto RETURN;
+	}
+
 	va_start(ap, a_format);
-	retval = out_p_put_fve(a_out, fd, a_file_name, a_line_num,
-	    a_func_name, a_format, ap);
+	retval = out_put_fv(a_out, fd, format, ap);
 	va_end(ap);
 
+	RETURN:
+	if (format != NULL)
+		mem_free((a_out != NULL) ? a_out->mem : NULL, format);
 	return retval;
 }
 
@@ -341,24 +366,6 @@ out_put_f(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_format,...)
 
 	va_start(ap, a_format);
 	retval = out_put_fv(a_out, a_fd, a_format, ap);
-	va_end(ap);
-
-	return retval;
-}
-
-cw_sint32_t
-out_put_fe(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_file_name,
-    cw_uint32_t a_line_num, const char *a_func_name, const char *a_format, ...)
-{
-	cw_sint32_t	retval;
-	va_list		ap;
-
-	_cw_assert(a_fd >= 0);
-	_cw_check_ptr(a_format);
-
-	va_start(ap, a_format);
-	retval = out_p_put_fve(a_out, a_fd, a_file_name, a_line_num,
-	    a_func_name, a_format, ap);
 	va_end(ap);
 
 	return retval;
@@ -606,50 +613,6 @@ spec_val_get(const char *a_spec, cw_uint32_t a_spec_len, const char *a_name,
 
 	retval = -1;
 	RETURN:
-	return retval;
-}
-
-static cw_sint32_t
-out_p_put_fve(cw_out_t *a_out, cw_sint32_t a_fd, const char *a_file_name,
-    cw_uint32_t a_line_num, const char *a_func_name, const char *a_format,
-    va_list a_p)
-{
-	cw_sint32_t	retval;
-	char		*format = NULL;
-
-	_cw_assert(a_fd >= 0);
-	_cw_check_ptr(a_format);
-
-	if (a_file_name != NULL) {
-		if (a_func_name != NULL) {
-			/* Print filename, line number, and function name. */
-			if ((retval = out_put_sa(a_out, &format,
-			    "At [s], line [i]: [s](): [s]", a_file_name,
-			    a_line_num, a_func_name, a_format)) < 0)
-				goto RETURN;
-		} else {
-			/* Print filename and line number. */
-			if ((retval = out_put_sa(a_out, &format,
-			    "At [s], line [i]: [s]", a_file_name,
-			    a_line_num, a_format)) < 0)
-				goto RETURN;
-		}
-	} else if (a_func_name != NULL) {
-		/* Print function name. */
-		if ((retval = out_put_sa(a_out, &format, "[s](): [s]",
-		    a_func_name, a_format)) < 0)
-			goto RETURN;
-	} else {
-		/* Make no modifications. */
-		if ((retval = out_put_sa(a_out, &format, "[s]", a_format)) < 0)
-			goto RETURN;
-	}
-
-	retval = out_put_fv(a_out, a_fd, format, a_p);
-
-	RETURN:
-	if (format != NULL)
-		mem_free((a_out != NULL) ? a_out->mem : NULL, format);
 	return retval;
 }
 
