@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 17 $
- * $Date: 1998-03-31 00:26:46 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 26 $
+ * $Date: 1998-04-12 04:09:42 -0700 (Sun, 12 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -43,7 +43,7 @@
 
 struct cw_log_s
 {
-  pthread_mutexattr_t mutex;
+/*   pthread_mutexattr_t mutex; */
   cw_bool_t is_logfile_open;
   char * logfile_name;
   FILE * log_fp;

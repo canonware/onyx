@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 23 $
- * Last modified: $Date: 1998-04-12 01:42:02 -0700 (Sun, 12 Apr 1998) $
+ * Current revision: $Revision: 26 $
+ * Last modified: $Date: 1998-04-12 04:09:42 -0700 (Sun, 12 Apr 1998) $
  *
  * Description: The idea here is to keep cpp from having to process a header
  *              file more than once.  The tradeoff is that every header gets
@@ -131,6 +131,20 @@
 #  ifndef _MEM_PRIV_H_
 #    include <mem_priv.h>
 #    define _MEM_PRIV_H_
+#  endif
+#endif
+
+#if (defined(_INC_THREAD_H_) || defined(_INC_ALL_))
+#  ifndef _THREAD_H_
+#    include <thread.h>
+#    define _THREAD_H_
+#  endif
+#endif
+
+#if (defined(_INC_THREAD_PRIV_H_) || defined(_INC_ALL_))
+#  ifndef _THREAD_PRIV_H_
+#    include <thread_priv.h>
+#    define _THREAD_PRIV_H_
 #  endif
 #endif
 

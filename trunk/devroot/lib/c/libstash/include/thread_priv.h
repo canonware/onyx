@@ -1,7 +1,7 @@
 /* -*-mode:c-*-
  ****************************************************************************
  *
- * Copyright (c) 1996-1998
+ * Copyright (c) 1998
  * Jason Evans <jasone@canonware.com>.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,16 +38,7 @@
  *
  ****************************************************************************/
 
-#ifndef _LOG_PRIV_H_
-#define _LOG_PRIV_H_
+#ifndef _THREAD_PRIV_H_
+#define _THREAD_PRIV_H_
 
-struct cw_log_s
-{
-/*   pthread_mutexattr_t mutex; */
-  cw_bool_t is_logfile_open;
-  char * logfile_name;
-  FILE * log_fp;
-};
-
-
-#endif /* _LOG_PRIV_H_ */
+#endif /* _THREAD_PRIV_H_ */

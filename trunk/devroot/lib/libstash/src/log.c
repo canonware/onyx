@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 18 $
- * $Date: 1998-03-31 00:27:07 -0800 (Tue, 31 Mar 1998) $
+ * $Revision: 26 $
+ * $Date: 1998-04-12 04:09:42 -0700 (Sun, 12 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -50,7 +50,7 @@ log_new()
 
   retval = (cw_log_t *) _cw_malloc(sizeof(cw_log_t));
   
-  pthread_mutexattr_init(&retval->mutex);
+/*   pthread_mutexattr_init(&retval->mutex); */
   retval->is_logfile_open = FALSE;
   retval->logfile_name = NULL;
   retval->log_fp = NULL;
