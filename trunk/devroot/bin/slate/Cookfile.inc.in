@@ -20,14 +20,14 @@
 
 /* Source files. */
 SLATE_SRCS = buf.c buffer.c hist.c slate.c slate_ops.c;
-SLATE_SRCS = [fromto % @srcroot@/bin/slate/src/% [SLATE_SRCS]];
+SLATE_SRCS = [addprefix @srcroot@/bin/slate/src/ [SLATE_SRCS]];
 
 TSLATE_SRCS = tslate.c;
-TSLATE_SRCS = [fromto % @srcroot@/bin/slate/src/% [TSLATE_SRCS]];
+TSLATE_SRCS = [addprefix @srcroot@/bin/slate/src/ [TSLATE_SRCS]];
 
 /* LaTeX source files. */
 SLATE_TEX_SRCS = ;
-SLATE_TEX_SRCS = [fromto % @srcroot@/bin/slate/doc/latex/% [SLATE_TEX_SRCS]];
+SLATE_TEX_SRCS = [addprefix @srcroot@/bin/slate/doc/latex/ [SLATE_TEX_SRCS]];
 /* SLATE_TEX_SRCS = [SLATE_TEX_SRCS] @objroot@/bin/slate/doc/latex/manual.tex; */
 
 /* Binaries. */

@@ -23,11 +23,11 @@
 
 /* LaTeX source files. */
 ONYX_TEX_SRCS = front.tex back.tex lang.tex tut.tex ex.tex;
-ONYX_TEX_SRCS = [fromto % @srcroot@/doc/latex/% [ONYX_TEX_SRCS]];
+ONYX_TEX_SRCS = [addprefix @srcroot@/doc/latex/ [ONYX_TEX_SRCS]];
 
 /* xfig source files. */
 ONYX_FIG_SRCS = ;
-ONYX_FIG_SRCS = [fromto % @srcroot@/doc/latex/% [ONYX_FIG_SRCS]];
+ONYX_FIG_SRCS = [addprefix @srcroot@/doc/latex/ [ONYX_FIG_SRCS]];
 
 /*
  * Targets.
@@ -107,22 +107,23 @@ onyx_docs_relclean :
  * Dependencies.
  */
 @objroot@/%0ps/onyx/%.ps : @objroot@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
-                          [fromto @srcroot@/%0latex/onyx/%.fig
-                                  @objroot@/%0latex/onyx/%.ps
-                                  [ONYX_FIG_SRCS]];
+                           [fromto @srcroot@/%0latex/onyx/%.fig
+                                   @objroot@/%0latex/onyx/%.ps
+                                   [ONYX_FIG_SRCS]];
 
 /*
  * This depends on the PostScript version of the manual so that the two rules
  * will not run in parallel.  This is necessary in order to keep them from
  * stomping all over each others' temporory files.
  */
-@objroot@/%0pdf/onyx/%.pdf : @objroot@/%0latex/onyx/%.tex @objroot@/%0ps/onyx/%.ps
-                            [ONYX_TEX_SRCS]
-                            [fromto @srcroot@/%0latex/onyx/%.fig
-                                    @objroot@/%0latex/onyx/%.ps
-                                    [ONYX_FIG_SRCS]];
+@objroot@/%0pdf/onyx/%.pdf : @objroot@/%0latex/onyx/%.tex
+                             @objroot@/%0ps/onyx/%.ps
+                             [ONYX_TEX_SRCS]
+                             [fromto @srcroot@/%0latex/onyx/%.fig
+                                     @objroot@/%0latex/onyx/%.ps
+                                     [ONYX_FIG_SRCS]];
 
 @objroot@/%0html/onyx/%.html : @objroot@/%0latex/onyx/%.tex [ONYX_TEX_SRCS]
-                              [fromto @srcroot@/%0latex/onyx/%.fig
-                                      @objroot@/%0latex/onyx/%.ps
-                                      [ONYX_FIG_SRCS]];
+                               [fromto @srcroot@/%0latex/onyx/%.fig
+                                       @objroot@/%0latex/onyx/%.ps
+                                       [ONYX_FIG_SRCS]];

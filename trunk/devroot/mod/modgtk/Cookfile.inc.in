@@ -20,7 +20,7 @@
 
 /* Source files. */
 MODGTK_SRCS = modgtk.c;
-MODGTK_SRCS = [fromto % @srcroot@/mod/modgtk/src/% [MODGTK_SRCS]];
+MODGTK_SRCS = [fromto @srcroot@/mod/modgtk/src/ [MODGTK_SRCS]];
 
 /* Generated source code (created by configure). */
 MODGTK_NX_GEN = modgtk_defs.nx.in;
@@ -28,7 +28,7 @@ MODGTK_NX_GEN = [fromto %.nx.in @objroot@/mod/modgtk/nx/modgtk/%.nx
                         [MODGTK_NX_GEN]];
 
 MODGTK_NX = modgtk.nx;
-MODGTK_NX = [fromto % @srcroot@/mod/modgtk/nx/modgtk/% [MODGTK_NX]];
+MODGTK_NX = [addprefix @srcroot@/mod/modgtk/nx/modgtk/ [MODGTK_NX]];
 
 /* Modules. */
 MODGTK = @objroot@/mod/modgtk/nxm/modgtk.nxm;

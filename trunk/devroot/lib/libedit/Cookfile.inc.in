@@ -24,7 +24,7 @@
 LIBEDIT_SRCS = chared.c common.c edit.c emacs.c hist.c history.c key.c map.c
              parse.c prompt.c read.c refresh.c search.c term.c
              tokenizer.c tty.c vi.c fcns.c help.c;
-LIBEDIT_SRCS = [fromto % @srcroot@/lib/libedit/src/% [LIBEDIT_SRCS]];
+LIBEDIT_SRCS = [addprefix @srcroot@/lib/libedit/src/ [LIBEDIT_SRCS]];
 
 /* Libraries. */
 LIBEDIT_A = @objroot@/lib/libedit/lib/libedit.a;

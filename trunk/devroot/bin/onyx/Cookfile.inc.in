@@ -20,10 +20,10 @@
 
 /* Source files. */
 ONYX_SRCS = onyx.c;
-ONYX_SRCS = [fromto % @srcroot@/bin/onyx/src/% [ONYX_SRCS]];
+ONYX_SRCS = [addprefix @srcroot@/bin/onyx/src/ [ONYX_SRCS]];
 
 TONYX_SRCS = tonyx.c;
-TONYX_SRCS = [fromto % @srcroot@/bin/onyx/src/% [TONYX_SRCS]];
+TONYX_SRCS = [addprefix @srcroot@/bin/onyx/src/ [TONYX_SRCS]];
 
 /*
  * Onyx tests.
@@ -144,11 +144,11 @@ ONYX_OTESTS =
 #endif
               ;
 
-ONYX_OTESTS = [fromto % @srcroot@/bin/onyx/test/% [ONYX_OTESTS]];
+ONYX_OTESTS = [addprefix @srcroot@/bin/onyx/test/ [ONYX_OTESTS]];
 
 /* LaTeX source files. */
 ONYX_TEX_SRCS = ;
-ONYX_TEX_SRCS = [fromto % @srcroot@/bin/onyx/doc/latex/% [ONYX_TEX_SRCS]];
+ONYX_TEX_SRCS = [addprefix @srcroot@/bin/onyx/doc/latex/ [ONYX_TEX_SRCS]];
 ONYX_TEX_SRCS = [ONYX_TEX_SRCS] @objroot@/bin/onyx/doc/latex/manual.tex;
 
 /* Binaries. */
