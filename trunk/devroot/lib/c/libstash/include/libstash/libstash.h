@@ -105,13 +105,13 @@ typedef long double cw_float16_t;
 
 /* Grossness to make sure things still work, even if TRUE and/or FALSE are/is
  * defined. */
-#  ifdef TRUE
-#    define _CW_TRUE_DEFINED TRUE
-#    undef TRUE
-#  endif
 #  ifdef FALSE
-#    define _CW_FALSE_DEFINED FALSE
+#    define _CW_FALSE_DEFINED
 #    undef FALSE
+#  endif
+#  ifdef TRUE
+#    define _CW_TRUE_DEFINED
+#    undef TRUE
 #  endif
   
 typedef enum
@@ -122,13 +122,13 @@ typedef enum
 
 /* More grossness to make sure things still work, even if TRUE and/or FALSE
  * are/is defined. */
-#  ifdef _CW_TRUE_DEFINED
-#    define TRUE _CW_TRUE_DEFINED
-#    undef _CW_TRUE_DEFINED
-#  endif
 #  ifdef _CW_FALSE_DEFINED
-#    define FALSE _CW_FALSE_DEFINED
+#    define FALSE (0)
 #    undef _CW_FALSE_DEFINED
+#  endif
+#  ifdef _CW_TRUE_DEFINED
+#    define TRUE (1)
+#    undef _CW_TRUE_DEFINED
 #  endif
   
 /*
