@@ -82,7 +82,7 @@ tests_distclean :
 /*
  * Build rules for tests.
  */
-[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a [S_LIBS]
+[objdir]/%0test/%1 : [objdir]/%0test/%1.o_a libs_s
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
@@ -93,7 +93,7 @@ tests_distclean :
                        "/lib"
                        [libs]]]
 #endif
-       [LDFLAGS] [LIBS] [EXTRALIBS];
+       [LDFLAGS] [addprefix -l [fromto lib% % @libs@]] [EXTRALIBS];
 }
 
 [objdir]/%0test/%1.o_a : [srcdir]/%0test/%1.c

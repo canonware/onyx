@@ -262,8 +262,6 @@ dnl
 dnl onyx configuration.
 dnl 
 if test "x$build_onyx" = "xyes" ; then
-  cfgoutputs="$cfgoutputs doc/latex/onyx.tex"
-
   if test "x$prefix" = "xNONE" ; then
     CW_ONYX_RPATH="/usr/local/share/onyx/nx"
     CW_ONYX_MPATH="/usr/local/share/onyx/nxm"

@@ -25,14 +25,12 @@ SLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [SLATE_SRCS]];
 TSLATE_SRCS = tslate.c;
 TSLATE_SRCS = [fromto % [srcdir]/bin/slate/src/% [TSLATE_SRCS]];
 
-SRCS = [SRCS] [SLATE_SRCS] [TSLATE_SRCS];
-
 /* LaTeX source files. */
 {
   local tex_srcs = ;
   tex_srcs = [fromto % [srcdir]/bin/slate/doc/latex/% [tex_srcs]];
 
-  SLATE_TEX_SRCS = [SLATE_TEX_SRCS] [tex_srcs];
+  SLATE_TEX_SRCS = [tex_srcs];
 }
 
 /* Binaries. */
@@ -54,8 +52,8 @@ slate_bins_bootstrap : [ONYX]
     > [srcdir]/bin/slate/src/slate_nxcode.c;
 }
 
-slate_install : [SLATE]
-#if [enable_libonyx]
+slate_bins_install : [SLATE]
+#if @enable_libonyx@
                 libonyx_libs_install_s
 #endif
 {
@@ -63,7 +61,7 @@ slate_install : [SLATE]
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/slate
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
-#if [enable_libonyx]
+#if @enable_libonyx@
 #if [matches elf [abi]]
        [RPATH][PREFIX]/lib
 #endif
@@ -76,17 +74,17 @@ slate_install : [SLATE]
   [INSTALL] -m 0444 [objdir]/bin/slate/man/man1/slate.1 [PREFIX]/man/man1;
 }
 
-slate_uninstall :
+slate_bins_uninstall :
 {
   rm -f [PREFIX]/bin/slate;
   rm -f [PREFIX]/man/man1/slate.1;
 }
 
-slate_clean :
+slate_bins_clean :
 {
 }
 
-slate_distclean :
+slate_bins_distclean :
 {
 }
 
@@ -102,14 +100,14 @@ slate_distclean :
 }
 
 [SLATE] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
-#if [enable_libonyx]
+#if @enable_libonyx@
           libonyx_libs_s
 #endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [SLATE_SRCS]]
-#if [enable_libonyx]
+#if @enable_libonyx@
 #if [matches elf [abi]]
        [RPATH][abs_objdir]/lib/libonyx/lib
 #endif

@@ -85,8 +85,6 @@ all : libs mods bins examples tests docs
   set default
 ;
 
-mods : [MODS];
-
 bootstrap : [addsuffix _bootstrap bins libs];
 
 release : docs;
@@ -99,11 +97,6 @@ uninstall : [addsuffix _uninstall bins mods libs docs];
 
 clean : [addsuffix _clean docs tests bins mods libs]
 {
-  rm -f core *.core;
-  rm -f *.gmon;
-
-  rm -f [MODS];
-
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_d [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_a [SRCS]];
   rm -f [fromto [srcdir]/%0%.c [objdir]/%0%.d_p [SRCS]];

@@ -11,7 +11,7 @@
  *
  ******************************************************************************/
 
-#if [@with_docs@]
+#if @with_docs@
   ONYX_PS = [objdir]/doc/ps/onyx.ps;
   ONYX_PDF = [objdir]/doc/pdf/onyx.pdf;
   ONYX_HTML = [objdir]/doc/html/onyx/onyx.html;
@@ -42,7 +42,7 @@
  * Targets.
  */
 onyx_docs_install_ps :
-#if [with_docs]
+#if @with_docs@
                        [ONYX_PS]
 #endif
 {
@@ -51,7 +51,7 @@ onyx_docs_install_ps :
 }
 
 onyx_docs_install_pdf :
-#if [with_docs]
+#if @with_docs@
                         [ONYX_PDF]
 #endif
 {
@@ -60,7 +60,7 @@ onyx_docs_install_pdf :
 }
 
 onyx_docs_install_html :
-#if [with_docs]
+#if @with_docs@
                          [ONYX_HTML]
 #endif
 {

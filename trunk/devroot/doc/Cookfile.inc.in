@@ -12,7 +12,7 @@
  *
  ******************************************************************************/
 
-#include-cooked [fromto % [objdir]/lib/%/Cookfile.inc @docs@]
+#include-cooked [fromto % [objdir]/doc/latex/%/Cookfile.inc @docs@]
 
 /* Paths to programs. */
 LATEX = @LATEX@;

@@ -30,11 +30,11 @@ TONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [TONYX_SRCS]];
  */
 {
   local otests =
-#if [enable_posix_file]
-#if [enable_threads]
+#if @enable_posix_file@
+#if @enable_threads@
                  monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
 #endif
-#if [enable_real]
+#if @enable_real@
 
                  abs_d.nx.in add_e.nx.in atan_a.nx.in atan_b.nx.in atan_c.nx.in
                  atan_d.nx.in ceiling_a.nx.in ceiling_b.nx.in ceiling_c.nx.in
@@ -52,7 +52,7 @@ TONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [TONYX_SRCS]];
                  trunc_c.nx.in
 
 #endif
-#if [enable_posix]
+#if @enable_posix@
 
                  nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in
                  rand_a.nx.in setenv_a.nx.in setenv_b.nx.in setenv_c.nx.in
@@ -189,8 +189,8 @@ onyx_bins_bootstrap : [ONYX]
     > [srcdir]/bin/onyx/src/interactive_nxcode.c;
 }
 
-onyx_install : [ONYX]
-#if [enable_libonyx]
+onyx_bins_install : [ONYX]
+#if @enable_libonyx@
                libonyx_libs_install_s
 #endif
 {
@@ -198,10 +198,10 @@ onyx_install : [ONYX]
 
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-#if [enable_libedit]
+#if @enable_libedit@
        [LIBEDIT_A]
 #endif
-#if [enable_libonyx]
+#if @enable_libonyx@
 #if [matches elf [abi]]
        [RPATH][PREFIX]/lib
 #endif
@@ -214,17 +214,17 @@ onyx_install : [ONYX]
   [INSTALL] -m 0444 [objdir]/bin/onyx/man/man1/onyx.1 [PREFIX]/man/man1;
 }
 
-onyx_uninstall :
+onyx_bins_uninstall :
 {
   rm -f [PREFIX]/bin/onyx;
   rm -f [PREFIX]/man/man1/onyx.1;
 }
 
-onyx_clean :
+onyx_bins_clean :
 {
 }
 
-onyx_distclean :
+onyx_bins_distclean :
 {
 }
 
@@ -240,20 +240,20 @@ onyx_distclean :
 }
 
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-#if [enable_libonyx]
+#if @enable_libonyx@
           libonyx_libs_s
 #endif
-#if [enable_libedit]
+#if @enable_libedit@
           [LIBEDIT_A]
 #endif
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]
        [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
-#if [enable_libedit]
+#if @enable_libedit@
        [LIBEDIT_A]
 #endif
-#if [enable_libonyx]
+#if @enable_libonyx@
 #if [matches elf [abi]]
        [RPATH][abs_objdir]/lib/libonyx/lib
 #endif

@@ -8555,8 +8555,6 @@ fi
 fi
 
 if test "x$build_onyx" = "xyes" ; then
-  cfgoutputs="$cfgoutputs doc/latex/onyx.tex"
-
   if test "x$prefix" = "xNONE" ; then
     CW_ONYX_RPATH="/usr/local/share/onyx/nx"
     CW_ONYX_MPATH="/usr/local/share/onyx/nxm"
@@ -8632,61 +8630,61 @@ if test "x$build_modgtk" = "xyes" ; then
   cfgoutputs="$cfgoutputs mod/modgtk/nx/modgtk/modgtk_defs.nx"
 fi
 
-echo "$as_me:8635: result: ===============================================================================" >&5
+echo "$as_me:8633: result: ===============================================================================" >&5
 echo "${ECHO_T}===============================================================================" >&6
-echo "$as_me:8637: result: CFLAGS       : ${CFLAGS}" >&5
+echo "$as_me:8635: result: CFLAGS       : ${CFLAGS}" >&5
 echo "${ECHO_T}CFLAGS       : ${CFLAGS}" >&6
-echo "$as_me:8639: result: CPPFLAGS     : ${CPPFLAGS}" >&5
+echo "$as_me:8637: result: CPPFLAGS     : ${CPPFLAGS}" >&5
 echo "${ECHO_T}CPPFLAGS     : ${CPPFLAGS}" >&6
-echo "$as_me:8641: result: LDFLAGS      : ${LDFLAGS}" >&5
+echo "$as_me:8639: result: LDFLAGS      : ${LDFLAGS}" >&5
 echo "${ECHO_T}LDFLAGS      : ${LDFLAGS}" >&6
-echo "$as_me:8643: result: LIBS         : ${LIBS}" >&5
+echo "$as_me:8641: result: LIBS         : ${LIBS}" >&5
 echo "${ECHO_T}LIBS         : ${LIBS}" >&6
-echo "$as_me:8645: result: " >&5
+echo "$as_me:8643: result: " >&5
 echo "${ECHO_T}" >&6
-echo "$as_me:8647: result: objdir       : ${objdir}" >&5
+echo "$as_me:8645: result: objdir       : ${objdir}" >&5
 echo "${ECHO_T}objdir       : ${objdir}" >&6
-echo "$as_me:8649: result: abs_objdir   : ${abs_objdir}" >&5
+echo "$as_me:8647: result: abs_objdir   : ${abs_objdir}" >&5
 echo "${ECHO_T}abs_objdir   : ${abs_objdir}" >&6
-echo "$as_me:8651: result: srcdir       : ${srcdir}" >&5
+echo "$as_me:8649: result: srcdir       : ${srcdir}" >&5
 echo "${ECHO_T}srcdir       : ${srcdir}" >&6
-echo "$as_me:8653: result: abs_srcdir   : ${abs_srcdir}" >&5
+echo "$as_me:8651: result: abs_srcdir   : ${abs_srcdir}" >&5
 echo "${ECHO_T}abs_srcdir   : ${abs_srcdir}" >&6
-echo "$as_me:8655: result: prefix       : ${prefix}" >&5
+echo "$as_me:8653: result: prefix       : ${prefix}" >&5
 echo "${ECHO_T}prefix       : ${prefix}" >&6
-echo "$as_me:8657: result: " >&5
+echo "$as_me:8655: result: " >&5
 echo "${ECHO_T}" >&6
-echo "$as_me:8659: result: libs         :${libs}" >&5
+echo "$as_me:8657: result: libs         :${libs}" >&5
 echo "${ECHO_T}libs         :${libs}" >&6
-echo "$as_me:8661: result: mods         :${mods}" >&5
+echo "$as_me:8659: result: mods         :${mods}" >&5
 echo "${ECHO_T}mods         :${mods}" >&6
-echo "$as_me:8663: result: bins         :${bins}" >&5
+echo "$as_me:8661: result: bins         :${bins}" >&5
 echo "${ECHO_T}bins         :${bins}" >&6
-echo "$as_me:8665: result: docs         :${docs}" >&5
+echo "$as_me:8663: result: docs         :${docs}" >&5
 echo "${ECHO_T}docs         :${docs}" >&6
-echo "$as_me:8667: result: " >&5
+echo "$as_me:8665: result: " >&5
 echo "${ECHO_T}" >&6
-echo "$as_me:8669: result: threads      : ${enable_threads}" >&5
+echo "$as_me:8667: result: threads      : ${enable_threads}" >&5
 echo "${ECHO_T}threads      : ${enable_threads}" >&6
-echo "$as_me:8671: result: real         : ${enable_real}" >&5
+echo "$as_me:8669: result: real         : ${enable_real}" >&5
 echo "${ECHO_T}real         : ${enable_real}" >&6
-echo "$as_me:8673: result: posix        : ${enable_posix}" >&5
+echo "$as_me:8671: result: posix        : ${enable_posix}" >&5
 echo "${ECHO_T}posix        : ${enable_posix}" >&6
-echo "$as_me:8675: result: posix-file   : ${enable_posix_file}" >&5
+echo "$as_me:8673: result: posix-file   : ${enable_posix_file}" >&5
 echo "${ECHO_T}posix-file   : ${enable_posix_file}" >&6
-echo "$as_me:8677: result: inlines      : ${enable_inlines}" >&5
+echo "$as_me:8675: result: inlines      : ${enable_inlines}" >&5
 echo "${ECHO_T}inlines      : ${enable_inlines}" >&6
-echo "$as_me:8679: result: libedit      : ${enable_libedit}" >&5
+echo "$as_me:8677: result: libedit      : ${enable_libedit}" >&5
 echo "${ECHO_T}libedit      : ${enable_libedit}" >&6
-echo "$as_me:8681: result: libonyx      : ${enable_libonyx}" >&5
+echo "$as_me:8679: result: libonyx      : ${enable_libonyx}" >&5
 echo "${ECHO_T}libonyx      : ${enable_libonyx}" >&6
-echo "$as_me:8683: result: debug        : ${enable_debug}" >&5
+echo "$as_me:8681: result: debug        : ${enable_debug}" >&5
 echo "${ECHO_T}debug        : ${enable_debug}" >&6
-echo "$as_me:8685: result: profile      : ${enable_profile}" >&5
+echo "$as_me:8683: result: profile      : ${enable_profile}" >&5
 echo "${ECHO_T}profile      : ${enable_profile}" >&6
-echo "$as_me:8687: result: docs         : ${with_docs}" >&5
+echo "$as_me:8685: result: docs         : ${with_docs}" >&5
 echo "${ECHO_T}docs         : ${with_docs}" >&6
-echo "$as_me:8689: result: ===============================================================================" >&5
+echo "$as_me:8687: result: ===============================================================================" >&5
 echo "${ECHO_T}===============================================================================" >&6
 
 mkdir -p $objdir/doc/latex
@@ -8771,7 +8769,7 @@ DEFS=-DHAVE_CONFIG_H
 : ${CONFIG_STATUS=./config.status}
 ac_clean_files_save=$ac_clean_files
 ac_clean_files="$ac_clean_files $CONFIG_STATUS"
-{ echo "$as_me:8774: creating $CONFIG_STATUS" >&5
+{ echo "$as_me:8772: creating $CONFIG_STATUS" >&5
 echo "$as_me: creating $CONFIG_STATUS" >&6;}
 cat >$CONFIG_STATUS <<_ACEOF
 #! $SHELL
@@ -8944,7 +8942,7 @@ cat >>$CONFIG_STATUS <<\EOF
     echo "$ac_cs_version"; exit 0 ;;
   --he | --h)
     # Conflict between --help and --header
-    { { echo "$as_me:8947: error: ambiguous option: $1
+    { { echo "$as_me:8945: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: ambiguous option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -8963,7 +8961,7 @@ Try \`$0 --help' for more information." >&2;}
     ac_need_defaults=false;;
 
   # This is an error.
-  -*) { { echo "$as_me:8966: error: unrecognized option: $1
+  -*) { { echo "$as_me:8964: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&5
 echo "$as_me: error: unrecognized option: $1
 Try \`$0 --help' for more information." >&2;}
@@ -9000,7 +8998,7 @@ do
   # Handling of arguments.
   "$cfgoutputs" ) CONFIG_FILES="$CONFIG_FILES $cfgoutputs" ;;
   "$cfghdrs" ) CONFIG_HEADERS="$CONFIG_HEADERS $cfghdrs" ;;
-  *) { { echo "$as_me:9003: error: invalid argument: $ac_config_target" >&5
+  *) { { echo "$as_me:9001: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
   esac
@@ -9264,7 +9262,7 @@ done; }
   esac
 
   if test x"$ac_file" != x-; then
-    { echo "$as_me:9267: creating $ac_file" >&5
+    { echo "$as_me:9265: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
     rm -f "$ac_file"
   fi
@@ -9282,7 +9280,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:9285: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:9283: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -9295,7 +9293,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:9298: error: cannot find input file: $f" >&5
+           { { echo "$as_me:9296: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -9356,7 +9354,7 @@ for ac_file in : $CONFIG_HEADERS; do test "x$ac_file" = x: && continue
   * )   ac_file_in=$ac_file.in ;;
   esac
 
-  test x"$ac_file" != x- && { echo "$as_me:9359: creating $ac_file" >&5
+  test x"$ac_file" != x- && { echo "$as_me:9357: creating $ac_file" >&5
 echo "$as_me: creating $ac_file" >&6;}
 
   # First look for the input files in the build tree, otherwise in the
@@ -9367,7 +9365,7 @@ echo "$as_me: creating $ac_file" >&6;}
       -) echo $tmp/stdin ;;
       [\\/$]*)
          # Absolute (can't be DOS-style, as IFS=:)
-         test -f "$f" || { { echo "$as_me:9370: error: cannot find input file: $f" >&5
+         test -f "$f" || { { echo "$as_me:9368: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          echo $f;;
@@ -9380,7 +9378,7 @@ echo "$as_me: error: cannot find input file: $f" >&2;}
            echo $srcdir/$f
          else
            # /dev/null tree
-           { { echo "$as_me:9383: error: cannot find input file: $f" >&5
+           { { echo "$as_me:9381: error: cannot find input file: $f" >&5
 echo "$as_me: error: cannot find input file: $f" >&2;}
    { (exit 1); exit 1; }; }
          fi;;
@@ -9497,7 +9495,7 @@ cat >>$CONFIG_STATUS <<\EOF
   rm -f $tmp/in
   if test x"$ac_file" != x-; then
     if cmp -s $ac_file $tmp/config.h 2>/dev/null; then
-      { echo "$as_me:9500: $ac_file is unchanged" >&5
+      { echo "$as_me:9498: $ac_file is unchanged" >&5
 echo "$as_me: $ac_file is unchanged" >&6;}
     else
       ac_dir=`$as_expr X"$ac_file" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
