@@ -3574,13 +3574,7 @@ systemdict_forkexec(cw_nxo_t *a_thread)
     if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
     {
 	pid = fork();
-	if (pid == -1)
-	{
-	    /* Error, related to some form of resource exhaustion. */
-	    nxo_thread_nerror(a_thread, NXN_limitcheck);
-	    return;
-	}
-	else if (pid == 0)
+	if (pid == 0)
 	{
 	    /* Child. */
 	    execve(path, argv, envp);
@@ -3591,9 +3585,6 @@ systemdict_forkexec(cw_nxo_t *a_thread)
 	else
 	{
 	    /* Parent. */
-	    ostack = nxo_thread_ostack_get(a_thread);
-	    nxo = nxo_stack_get(ostack);
-	    nxo_integer_new(nxo, pid);
 
 	    /* Clean up memory allocation. */
 	    for (i = 0; envp[i] != NULL; i++)
@@ -3609,6 +3600,17 @@ systemdict_forkexec(cw_nxo_t *a_thread)
 	    cw_free(argv);
 
 	    cw_free(path);
+
+	    if (pid == -1)
+	    {
+		/* Error, related to some form of resource exhaustion. */
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
+		return;
+	    }
+
+	    ostack = nxo_thread_ostack_get(a_thread);
+	    nxo = nxo_stack_get(ostack);
+	    nxo_integer_new(nxo, pid);
 	}
     }
 }
