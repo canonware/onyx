@@ -3465,7 +3465,11 @@ systemdict_gid(cw_nxo_t *a_thread)
 void
 systemdict_gstderr(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nx_stderr_get(nxo_thread_nx_get(a_thread)));
 }
 #endif
 
@@ -3473,7 +3477,11 @@ systemdict_gstderr(cw_nxo_t *a_thread)
 void
 systemdict_gstdin(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nx_stdin_get(nxo_thread_nx_get(a_thread)));
 }
 #endif
 
@@ -3481,7 +3489,11 @@ systemdict_gstdin(cw_nxo_t *a_thread)
 void
 systemdict_gstdout(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    nxo = nxo_stack_push(ostack);
+    nxo_dup(nxo, nx_stdout_get(nxo_thread_nx_get(a_thread)));
 }
 #endif
 
