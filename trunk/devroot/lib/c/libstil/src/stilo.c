@@ -721,12 +721,9 @@ stilo_p_hash(const void *a_key)
 	if (key->type == _CW_STILOT_NAMETYPE) {
 		cw_stiloe_name_t	*name;
 
-		/* Chase down the name. */
 		name = (cw_stiloe_name_t *)key->o.stiloe;
-		name = name->val;
-		_cw_assert(name == name->val);
-
-		retval = stilo_name_hash((void *)name);
+		/* XXX Assumes 32 bit architecture. */
+		retval = (cw_uint32_t)name->val;
 	} else {
 		/* XXX Implement. */
 		_cw_error("Unimplemented");
@@ -755,12 +752,10 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 		/* Chase down the names. */
 		n1 = (cw_stiloe_name_t *)k1->o.stiloe;
 		n1 = n1->val;
-		_cw_assert(n1 == n1->val);
 		n2 = (cw_stiloe_name_t *)k2->o.stiloe;
 		n2 = n2->val;
-		_cw_assert(n2 == n2->val);
 
-		retval = stilo_name_key_comp((void *)n1, (void *)n2);
+		retval = (n1 == n2) ? TRUE : FALSE;
 	} else {
 		/* XXX Implement. */
 		_cw_error("Unimplemented");
