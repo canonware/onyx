@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 91 $
- * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 94 $
+ * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -36,7 +36,7 @@
  *
  ****************************************************************************/
 cw_brblk_t *
-brblk_new(cw_brblk_t * a_brblk_o)
+brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size)
 {
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBLK_FUNC))
   {

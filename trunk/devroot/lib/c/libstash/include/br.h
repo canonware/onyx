@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 93 $
- * $Date: 1998-06-26 01:34:33 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 94 $
+ * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -78,4 +78,8 @@ cw_bool_t br_block_slock(cw_br_t * a_br_o,
 cw_bool_t br_block_tlock(cw_br_t * a_br_o,
 			 cw_uint64_t a_logical_addr,
 			 cw_brblk_t ** a_brblk_o);
+/* Must already hold an s or t lock before calling this. */
+cw_bool_t br_block_flush(cw_br_t * a_br_o, cw_uint64_t a_logical_addr,
+			 cw_brblk_t * a_brblk_o);
+
 #endif /* _BR_H_ */

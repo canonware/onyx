@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 91 $
- * $Date: 1998-06-24 23:46:00 -0700 (Wed, 24 Jun 1998) $
+ * $Revision: 94 $
+ * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -29,7 +29,8 @@ struct cw_brblk_s
   cw_bool_t is_valid;
   cw_bool_t is_dirty;
   cw_uint64_t logical_addr;
-  cw_uint8_t * block;
+  cw_uint8_t * buf;
+  cw_uint64_t buf_size;
 };
 
 /* Namespace definition. */
@@ -58,7 +59,7 @@ struct cw_brblk_s
 /* #define brblk_ _CW_NS_CMN(brblk_) */
 
 /* Function prototypes. */
-cw_brblk_t * brblk_new(cw_brblk_t * a_brblk_o);
+cw_brblk_t * brblk_new(cw_brblk_t * a_brblk_o, cw_uint32_t a_block_size);
 void brblk_delete(cw_brblk_t * a_brblk_o);
 
 void brblk_slock(cw_brblk_t * a_brblk_o);
@@ -86,7 +87,9 @@ cw_bool_t brblk_get_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
 cw_bool_t brblk_set_byte(cw_brblk_t * a_brblk_o, cw_uint32_t a_offset,
 			 cw_uint8_t a_byte);
 
-cw_bool_t brblk_is_dirty(cw_brblk_t * a_brblk_o);
-cw_bool_t brblk_flush(cw_brblk_t * a_brblk_o);
+cw_uint8_t * brblk_get_buf_p(cw_brblk_t * a_brblk_o);
+
+cw_bool_t brblk_get_is_dirty(cw_brblk_t * a_brblk_o);
+cw_bool_t brblk_set_is_dirty(cw_brblk_t * a_brblk_o);
 
 #endif /* _BRBLK_H_ */

@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 92 $
- * $Date: 1998-06-26 01:34:11 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 94 $
+ * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -26,9 +26,14 @@ struct cw_brbs_s
 {
   cw_bool_t is_malloced;
   cw_rwl_t rw_lock;
+
   cw_bool_t is_open;
   char * filename;
+  int fd;
+
   cw_bool_t is_raw; /* Is this a raw device? */
+  cw_uint32_t sect_size;
+
   cw_bool_t is_dynamic; /* Does this backing store grow and shrink? */
   cw_uint64_t max_size; /* Maximum size in bytes to expand to if
 			 * is_dynamic. */
@@ -67,8 +72,8 @@ cw_uint64_t brbs_get_max_size(cw_brbs_t * a_brbs_o);
 cw_bool_t brbs_set_max_size(cw_brbs_t * a_brbs_o, cw_uint64_t a_max_size);
 
 cw_bool_t brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
-			  cw_brblk_t ** a_block);
+			  cw_brblk_t * a_brblk_o);
 cw_bool_t brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
-			   cw_brblk_t * a_block);
+			   cw_brblk_t * a_brblk_o);
 
 #endif /* _BRBS_H_ */
