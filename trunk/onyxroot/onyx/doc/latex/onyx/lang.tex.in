@@ -1005,4 +1005,4 @@ name lookups.
 
 The following documents the classes that are built into Onyx.
 
-\input{/home/jasone/cw/devroot/doc/latex/onyx/lang_class_vclass}
+\input{@abs_srcroot@/doc/latex/onyx/lang_class_vclass}
