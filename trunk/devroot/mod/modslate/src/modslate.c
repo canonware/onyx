@@ -109,37 +109,6 @@ modslate_class_init(cw_nxo_t *a_thread, const cw_uint8_t *a_name,
     nxo_stack_npop(tstack, 4);
 }
 
-// XXX
-void
-modslate_handles_init(cw_nxo_t *a_thread,
-		      const struct cw_modslate_entry *a_entries,
-		      cw_uint32_t a_nentries)
-{
-    cw_nxo_t *tstack;
-    cw_nxo_t *currentdict, *name, *value;
-    cw_uint32_t i;
-
-    tstack = nxo_thread_tstack_get(a_thread);
-    currentdict = nxo_stack_get(nxo_thread_dstack_get(a_thread));
-
-    name = nxo_stack_push(tstack);
-    value = nxo_stack_push(tstack);
-
-    for (i = 0; i < a_nentries; i++)
-    {
-	nxo_name_new(name, a_entries[i].name,
-		     strlen((char *) a_entries[i].name), FALSE);
-	nxo_handle_new(value, NULL, a_entries[i].eval_f,
-		       modslate_p_ref_iter, NULL);
-	nxo_dup(nxo_handle_tag_get(value), name);
-	nxo_attr_set(value, NXOA_EXECUTABLE);
-
-	nxo_dict_def(currentdict, name, value);
-    }
-
-    nxo_stack_npop(tstack, 2);
-}
-
 /* Verify that a_nxo has a_class in its inheritance hierarchy. */
 cw_nxn_t
 modslate_instance_kind(cw_nxo_t *a_instance, cw_nxo_t *a_class)
@@ -167,57 +136,6 @@ modslate_instance_kind(cw_nxo_t *a_instance, cw_nxo_t *a_class)
     retval = NXN_typecheck;
     RETURN:
     return retval;
-}
-
-// XXX
-/* Verify that a_nxo is a =a_type=. */
-cw_nxn_t
-modslate_handle_type(cw_nxo_t *a_handle, const cw_uint8_t *a_type)
-{
-    cw_nxn_t retval;
-    cw_nxo_t *tag;
-    cw_uint32_t name_len;
-    const cw_uint8_t *name;
-
-    if (nxo_type_get(a_handle) != NXOT_HANDLE)
-    {
-	retval = NXN_typecheck;
-	goto RETURN;
-    }
-
-    tag = nxo_handle_tag_get(a_handle);
-    if (nxo_type_get(tag) != NXOT_NAME)
-    {
-	retval = NXN_typecheck;
-	goto RETURN;
-    }
-
-    name_len = nxo_name_len_get(tag);
-    name = nxo_name_str_get(tag);
-    if ((name_len != strlen((char *) a_type))
-	|| strncmp(a_type, name, name_len))
-    {
-	retval = NXN_typecheck;
-	goto RETURN;
-    }
-
-    retval = NXN_ZERO;
-    RETURN:
-    return retval;
-}
-
-/* #object a_type? #boolean */
-void
-modslate_handle_p(void *a_data, cw_nxo_t *a_thread, const cw_uint8_t *a_type)
-{
-    cw_nxo_t *ostack, *nxo;
-    cw_nxn_t error;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_GET(nxo, ostack, a_thread);
-    error = modslate_handle_type(nxo, a_type);
-
-    nxo_boolean_new(nxo, error ? FALSE : TRUE);
 }
 
 void

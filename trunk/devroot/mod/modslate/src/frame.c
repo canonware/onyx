@@ -11,6 +11,7 @@
  ******************************************************************************/
 
 #include "../include/modslate.h"
+#include "modpane.h"
 
 /* This is used to assure that methods are actually passed the correct class.
  * It is not reported to the GC, so can not safely be used for any other
@@ -173,15 +174,19 @@ modslate_frame_frame(void *a_data, cw_nxo_t *a_thread)
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
     NXO_STACK_GET(instance, ostack, a_thread);
+    if (nxo_type_get(instance) != NXOT_INSTANCE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
     NXO_STACK_DOWN_GET(display, ostack, a_thread, instance);
-#if (0) /* XXX Enable. */
-    error = modpane_display_p(display);
+    error = modpane_display_p(display, a_thread);
     if (error)
     {
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
-#endif
+
     frame = (struct cw_frame *) nxa_malloc(sizeof(struct cw_frame));
 
     /* Create a reference to the display. */

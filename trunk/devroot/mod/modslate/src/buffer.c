@@ -1012,6 +1012,7 @@ modslate_marker_marker(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
+
     marker = (struct cw_marker *) nxa_malloc(sizeof(struct cw_marker));
 
     /* Reference the associated buffer. */

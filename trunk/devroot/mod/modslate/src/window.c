@@ -235,7 +235,13 @@ modslate_window_window(void *a_data, cw_nxo_t *a_thread)
     estack = nxo_thread_estack_get(a_thread);
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
-    NXO_STACK_GET(parent, ostack, a_thread);
+    NXO_STACK_GET(instance, ostack, a_thread);
+    if (nxo_type_get(instance) != NXOT_INSTANCE)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    NXO_STACK_DOWN_GET(parent, ostack, a_thread, instance);
     if ((error = modslate_window_p(parent, a_thread)))
     {
 	frame = parent;
@@ -250,6 +256,7 @@ modslate_window_window(void *a_data, cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, error);
 	return;
     }
+
     window = (struct cw_window *) nxa_malloc(sizeof(struct cw_window));
 
     /* Initialize position and size. */
