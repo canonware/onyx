@@ -42,6 +42,9 @@ handle_client(void * a_arg)
     }
 
 /*      buf_dump(&buf, __FUNCTION__ "(1) "); */
+/*      log_printf(cw_g_log, "read %u bytes\n", */
+/*  	       buf_get_size(&buf)); */
+    
     iovec = buf_get_iovec(&buf, buf_get_size(&buf), &iovec_count);
 /*      log_printf(cw_g_log, "iovec_count == %lu\n", iovec_count); */
 

@@ -79,7 +79,6 @@ sockb_init(cw_uint32_t a_bufel_size, cw_uint32_t a_max_spare_bufels)
   /* Create a pipe that will be used in conjunction with the message queues to
    * make the back end thread return from the select() call. */
   {
-/*      int filedes[2], val; */
     int filedes[2];
 
     if (-1 == pipe(filedes))
@@ -389,8 +388,6 @@ sockb_p_entry_func(void * a_arg)
   cw_uint64_t num_msgs, i;
   cw_sint32_t j;
   cw_buf_t tmp_buf, buf_in;
-/*    cw_bufel_t * bufel; */
-/*    void * buffer; */
 
   /* Initialize data structures. */
   FD_ZERO(&fd_m_read_set);
@@ -507,13 +504,15 @@ sockb_p_entry_func(void * a_arg)
 	abort();
       }
     }
+#if (0)
     else if (num_ready == 0)
     {
-      /* XXX This should never happen when there is no timeout. */
+      /* This should never happen when there is no timeout. */
       /* Timeout expired.  Oh well. */
       log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
 		  "select() timeout expired\n");
     }
+#endif
     else
     {
       cw_sint32_t i, j;
@@ -563,7 +562,7 @@ sockb_p_entry_func(void * a_arg)
 	  const struct iovec * iovec;
 	  int iovec_count;
 	  ssize_t bytes_read;
-	  cw_uint32_t bytes_buffered, max_in_buf;
+	  cw_uint32_t max_read;
 	  cw_bufel_t * bufel;
 	  
 	  j++;
@@ -572,11 +571,11 @@ sockb_p_entry_func(void * a_arg)
 
 	  /* Figure out how much data we're willing to shove into this sock's
 	   * incoming buffer. */
-	  bytes_buffered = sock_l_get_in_size(socks[i]);
-	  max_in_buf = sock_l_get_in_max_buf_size(socks[i]);
+	  max_read = (sock_l_get_in_max_buf_size(socks[i])
+		      - sock_l_get_in_size(socks[i]));
 
 	  /* Build up buf_in to be at least large enough for the readv(). */
-	  while (buf_get_size(&buf_in) < (max_in_buf - bytes_buffered))
+	  while (buf_get_size(&buf_in) < max_read)
 	  {
 	    bufel = sockb_get_spare_bufel();
 	    buf_append_bufel(&buf_in, bufel);
@@ -588,9 +587,7 @@ sockb_p_entry_func(void * a_arg)
 	   * inserted.  However, this is quite safe, since as a result of how we
 	   * use buf_in, we know for sure that there are no other references to
 	   * the byte ranges of the buffers we are writing to. */
-	  iovec = buf_get_iovec(&buf_in,
-				max_in_buf - bytes_buffered,
-				&iovec_count);
+	  iovec = buf_get_iovec(&buf_in, max_read, &iovec_count);
 
 	  bytes_read = readv(i, iovec, iovec_count);
 	  if (bytes_read >= 0)
@@ -598,6 +595,10 @@ sockb_p_entry_func(void * a_arg)
 	    _cw_assert(buf_get_size(&tmp_buf) == 0);
 	    
 	    buf_split(&tmp_buf, &buf_in, bytes_read);
+
+	    /* XXX Hack to make a bug go away? */
+/*  	    buf_release_head_data(&buf_in, */
+/*  				  buf_get_size(&buf_in)); */
 	    /* Append to the sock's in_buf. */
 	    sock_l_put_in_data(socks[i], &tmp_buf);
 	  }
@@ -622,33 +623,20 @@ sockb_p_entry_func(void * a_arg)
 	  /* Ready for writing. */
 
 	  /* Get the socket's buf. */
+	  _cw_assert(0 == buf_get_size(&tmp_buf));
 	  sock_l_get_out_data(socks[i], &tmp_buf);
 
 	  /* Build an iovec for writing. */
 	  iovec = buf_get_iovec(&tmp_buf,
 				buf_get_size(&tmp_buf),
 				&iovec_count);
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "buf_get_size(&tmp_buf) == %lu\n",
-		      buf_get_size(&tmp_buf));
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		      "iovec_count == %d\n", iovec_count);
-/*  	  buf_dump(&tmp_buf, "tmp_buf "); */
 
 	  bytes_written = writev(i, iovec, iovec_count);
 
 	  if (bytes_written >= 0)
 	  {
-	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-			"bytes_written == %d\n", bytes_written);
-/*  	    buf_dump(&tmp_buf, "tmp_buf "); */
-	    
 	    buf_release_head_data(&tmp_buf, bytes_written);
-/*  	    buf_dump(&tmp_buf, "tmp_buf' "); */
 	    
-/*  	    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
-/*  			"(0)buf_get_size(&tmp_buf) == %lu\n", */
-/*  			buf_get_size(&tmp_buf)); */
 	    if (0 == sock_l_put_back_out_data(socks[i], &tmp_buf))
 	    {
 	      /* The socket has no more outgoing data, so turn the write bit
@@ -665,6 +653,7 @@ sockb_p_entry_func(void * a_arg)
 	    sock_l_error_callback(socks[i]);
 	  }
 	}
+#if (0)
 	if (FD_ISSET(i, &fd_exception_set))
 	{
 	  j++;
@@ -672,6 +661,7 @@ sockb_p_entry_func(void * a_arg)
 	  /* XXX If we ever need to use out of band data, this must be
 	   * implemented. */
 	}
+#endif
       }
     }
   }
