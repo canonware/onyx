@@ -13,7 +13,6 @@
 
 /* Include generated dependency files. */
 #include-cooked [glob @objroot@/mod/modpane/src/"*.d_*"]
-#include-cooked [glob @objroot@/mod/modpane/test/"*.d_*"]
 
 /*
  * File lists.
