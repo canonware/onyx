@@ -217,8 +217,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(exec),
 #endif
     ENTRY(exit),
-    ENTRY(exp),
 #ifdef CW_REAL
+    ENTRY(exp),
     ENTRY(floor),
 #endif
     ENTRY(flush),
@@ -328,9 +328,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(poll),
 #endif
     ENTRY(pop),
-#ifdef CW_REAL
     ENTRY(pow),
-#endif
 #ifdef CW_POSIX
     ENTRY(ppid),
 #endif
@@ -5767,6 +5765,7 @@ systemdict_mod(cw_nxo_t *a_thread)
 		    nxo_integer_set(a, nxo_integer_get(a) % nxo_integer_get(b));
 		    break;
 		}
+#ifdef CW_REAL
 		case NXOT_REAL:
 		{
 		    if (nxo_real_get(b) == 0.0)
@@ -5777,6 +5776,7 @@ systemdict_mod(cw_nxo_t *a_thread)
 		    nxo_real_new(a, fmod(nxo_integer_get(a), nxo_real_get(b)));
 		    break;
 		}
+#endif
 		default:
 		{
 		    nxo_thread_nerror(a_thread, NXN_typecheck);
@@ -5785,6 +5785,7 @@ systemdict_mod(cw_nxo_t *a_thread)
 	    }
 	    break;
 	}
+#ifdef CW_REAL
 	case NXOT_REAL:
 	{
 	    switch (nxo_type_get(b))
@@ -5817,6 +5818,7 @@ systemdict_mod(cw_nxo_t *a_thread)
 	    }
 	    break;
 	}
+#endif
 	default:
 	{
 	    nxo_thread_nerror(a_thread, NXN_typecheck);
