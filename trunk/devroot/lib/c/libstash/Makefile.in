@@ -7,10 +7,7 @@
 #
 #############################################################################
 #
-# $Source$
-# $Author: jasone $
-# Current revision: $Revision: 237 $
-# Last modified: $Date: 1998-10-15 21:11:13 -0700 (Thu, 15 Oct 1998) $
+# Version: <Version>
 #
 # Description: Master Makefile for libstash.
 #              
@@ -269,27 +266,27 @@ install_common :
 	'@INSTALL@ -d @prefix@/lib; \
 	@INSTALL@ -d @prefix@/include/libstash; \
 	for i in libstash.h $(INCS); do \
-	@INSTALL@ $$i @prefix@/include/libstash/; \
+	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
 	done; \
 	'
 
 install_stat_dbg : stat_dbg install_common
-	@INSTALL@ $(LIB_ST_D) @prefix@/lib
+	@INSTALL@ -m 0444 $(LIB_ST_D) @prefix@/lib
 
 install_shar_dbg : shar_dbg install_common
-	@INSTALL@ $(LIB_SH_D) @prefix@/lib
+	@INSTALL@ -m 0444 $(LIB_SH_D) @prefix@/lib
 
 install_stat_opt : stat_opt install_common
-	@INSTALL@ $(LIB_ST_O) @prefix@/lib
+	@INSTALL@ -m 0444 $(LIB_ST_O) @prefix@/lib
 
 install_shar_opt : shar_opt install_common
-	@INSTALL@ $(LIB_SH_O) @prefix@/lib
+	@INSTALL@ -m 0444 $(LIB_SH_O) @prefix@/lib
 
 install_stat_prof : stat_prof install_common
-	@INSTALL@ $(LIB_ST_P) @prefix@/lib
+	@INSTALL@ -m 0444 $(LIB_ST_P) @prefix@/lib
 
 install_shar_prof : shar_prof install_common
-	@INSTALL@ $(LIB_SH_P) @prefix@/lib
+	@INSTALL@ -m 0444 $(LIB_SH_P) @prefix@/lib
 
 uninstall :
 	rm -f @prefix@/lib/lib$(strip $(LIB))*
