@@ -615,6 +615,9 @@ stilo_thread_loop(cw_stilo_t *a_stilo)
 	cw_stiloe_thread_t	*thread;
 	cw_stilo_t		*stilo, *tstilo;
 	cw_uint32_t		sdepth, cdepth;
+#ifdef _LIBSTIL_DBG
+	cw_uint32_t		tdepth;
+#endif
 
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
@@ -622,6 +625,14 @@ stilo_thread_loop(cw_stilo_t *a_stilo)
 	thread = (cw_stiloe_thread_t *)a_stilo->o.stiloe;
 	_cw_assert(thread->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(thread->stiloe.type == STILOT_THREAD);
+
+#ifdef _LIBSTIL_DBG
+	/*
+	 * The assertions about stack depth in this function check for tstack
+	 * leaks in operators.
+	 */
+	tdepth = stilo_stack_count(&thread->tstack);
+#endif
 
 	for (sdepth = cdepth = stilo_stack_count(&thread->estack);
 	     cdepth >= sdepth; cdepth = stilo_stack_count(&thread->estack)) {
@@ -746,6 +757,8 @@ stilo_thread_loop(cw_stilo_t *a_stilo)
 					stilo_dup(tstilo, el);
 					stilo_thread_loop(a_stilo);
 				}
+				_cw_assert(stilo_stack_count(&thread->tstack) ==
+				    tdepth + 1);
 			}
 
 			/*
@@ -875,6 +888,7 @@ stilo_thread_loop(cw_stilo_t *a_stilo)
 		default:
 			_cw_not_reached();
 		}
+		_cw_assert(stilo_stack_count(&thread->tstack) == tdepth);
 	}
 }
 
