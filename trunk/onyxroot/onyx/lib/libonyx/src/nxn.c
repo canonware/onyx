@@ -132,7 +132,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"mkdir",
 	"mod",
 	"mode",
-	"modload",
 	"monitor",
 	"mtime",
 	"mul",

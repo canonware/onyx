@@ -194,11 +194,11 @@ fi
 
 if test "x$build_onyx" = "xyes" ; then
   if test "x$prefix" = "xNONE" ; then
-    _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/onyx"
-    _CW_ONYX_MPATH="/usr/local/share/canonware/onyx/mod"
+    _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/nxcode"
+    _CW_ONYX_MPATH="/usr/local/share/canonware/onyx/nxmod"
   else
-    _CW_ONYX_RPATH="$prefix/share/canonware/onyx/onyx"
-    _CW_ONYX_MPATH="$prefix/share/canonware/onyx/mod"
+    _CW_ONYX_RPATH="$prefix/share/canonware/onyx/nxcode"
+    _CW_ONYX_MPATH="$prefix/share/canonware/onyx/nxmod"
   fi
   AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
   AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")

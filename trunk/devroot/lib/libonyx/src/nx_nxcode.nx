@@ -12,7 +12,7 @@
 % done automatically as part of the build process.  In order to make changes to
 % this file take effect, either type:
 %
-%   cook onyx_bootstrap
+%   cook bootstrap
 %
 % or
 %

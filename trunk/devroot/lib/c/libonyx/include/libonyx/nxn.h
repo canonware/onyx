@@ -130,7 +130,6 @@ typedef enum {
 	NXN_mkdir,
 	NXN_mod,
 	NXN_mode,
-	NXN_modload,
 	NXN_monitor,
 	NXN_mtime,
 	NXN_mul,

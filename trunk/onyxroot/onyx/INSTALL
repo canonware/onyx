@@ -102,7 +102,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	Build debugging code and turn assertions on (controlled by the
 	_CW_ASSERT cpp macro).  The resulting libraries and modules will not be
 	binary compatible with ones that were compiled without this option, so
-	specifying this option and installing the results is not recommended.
+	specifying this option and installing the results for general use is not
+	recommended.
 
 --enable-profile
 	Instrument binaries, libraries, and modules for profiling.

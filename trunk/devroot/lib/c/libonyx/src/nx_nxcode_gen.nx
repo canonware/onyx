@@ -8,9 +8,9 @@
 % Version: <Version>
 %
 % Read onyx code from stdin and output a compacted version to stdout.  The
-% output code defines the C function nx_p_nxcode_init().
+% output code defines the C function nx_p_nxcode().
 %
-% This program is run by the 'onyx_bootstrap' build system target.
+% This program is run by the 'bootstrap' build system target.
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

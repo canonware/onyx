@@ -44,7 +44,7 @@
   priv_incs = [fromto % [srcdir]/lib/c/libonyx/include/libonyx/% [priv_incs]];
 
   local priv_cincs = nx_nxcode.c nxo_thread_nxcode.c;
-  prix_cincs = [fromto % [srcdir]/lib/c/libonyx/src/% [priv_incs]];
+  prix_cincs = [fromto % [srcdir]/lib/c/libonyx/src/% [priv_cincs]];
 
   PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
 }

@@ -121,7 +121,7 @@ if test -d "$srcdir/mod/$1" ; then
   fi
   cfghdrs="$cfghdrs $objdir/mod/$1/include/$1_defs.h"
   mods="$mods $1"
-  mkdir -p $objdir/mod/$1/include/$1
+  mkdir -p $objdir/mod/$1/include
   mkdir -p $objdir/mod/$1/doc/latex
 else
   build_$1="no"

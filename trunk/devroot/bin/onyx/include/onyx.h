@@ -10,21 +10,9 @@
  ******************************************************************************/
 
 #include <libonyx/libonyx.h>
+#include <libedit/libedit.h>
+#include <libstash/libstash.h>
 
-void
-_cw_modncurses_init(void *a_arg, cw_nxo_t *a_thread)
-{
-	_cw_out_put_e("Got here\n");
-}
+#include "onyx_defs.h"
 
-void
-modncurses_init(void *a_arg, cw_nxo_t *a_thread)
-{
-	_cw_out_put_e("Got here\n");
-}
-
-void
-modncurses_init_2(void *a_arg, cw_nxo_t *a_thread)
-{
-	_cw_out_put_e("Got here\n");
-}
+#include "onyx_ops.h"

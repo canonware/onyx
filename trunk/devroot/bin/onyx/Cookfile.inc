@@ -28,15 +28,18 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = ;
+  local priv_incs = onyx.h onyx_ops.h;
   priv_incs = [fromto % [srcdir]/bin/onyx/include/% [priv_incs]];
   priv_incs = [priv_incs] [objdir]/bin/onyx/include/onyx_defs.h;
 
-  PRIV_INCS = [PRIV_INCS] [priv_incs];
+  local priv_cincs = onyx_nxcode.c;
+  prix_cincs = [fromto % [srcdir]/bin/onyx/src/% [priv_cincs]];
+
+  PRIV_INCS = [PRIV_INCS] [priv_incs] [priv_cincs];
 }
 
 /* Source files. */
-ONYX_SRCS = onyx.c;
+ONYX_SRCS = onyx.c onyx_ops.c;
 ONYX_SRCS = [fromto % [srcdir]/bin/onyx/src/% [ONYX_SRCS]];
 SRCS = [SRCS] [ONYX_SRCS];
 
@@ -170,6 +173,15 @@ BINS = [BINS] [ONYX];
  * User cook'ables.
  */
 
+BOOTSTRAP = [BOOTSTRAP] onyx_bootstrap;
+
+onyx_bootstrap : [ONYX]
+{
+  cat [srcdir]/bin/onyx/src/onyx_nxcode.nx
+    | [ONYX] [srcdir]/bin/onyx/src/onyx_nxcode_gen.nx
+    > [srcdir]/bin/onyx/src/onyx_nxcode.c;
+}
+
 onyx : [ONYX];
 
 onyx_install_self : [ONYX]
@@ -205,6 +217,7 @@ onyx_distclean :
 
 [ONYX] : [fromto [srcdir]/%0%.c [objdir]/%0%.o_a [ONYX_SRCS]]
          [LIBONYX_S] [LIBEDIT_S] [LIBSTASH_S]
+         [MODS]
   set mkdir
 {
   [CC] [A_CFLAGS] -o [target]

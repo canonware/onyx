@@ -680,7 +680,7 @@ if test -d "$srcdir/mod/modncurses" ; then
   fi
   cfghdrs="$cfghdrs $objdir/mod/modncurses/include/modncurses_defs.h"
   mods="$mods modncurses"
-  mkdir -p $objdir/mod/modncurses/include/modncurses
+  mkdir -p $objdir/mod/modncurses/include
   mkdir -p $objdir/mod/modncurses/doc/latex
 else
   build_modncurses="no"
@@ -2878,11 +2878,11 @@ fi
 
 if test "x$build_onyx" = "xyes" ; then
   if test "x$prefix" = "xNONE" ; then
-    _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/onyx"
-    _CW_ONYX_MPATH="/usr/local/share/canonware/onyx/mod"
+    _CW_ONYX_RPATH="/usr/local/share/canonware/onyx/nxcode"
+    _CW_ONYX_MPATH="/usr/local/share/canonware/onyx/nxmod"
   else
-    _CW_ONYX_RPATH="$prefix/share/canonware/onyx/onyx"
-    _CW_ONYX_MPATH="$prefix/share/canonware/onyx/mod"
+    _CW_ONYX_RPATH="$prefix/share/canonware/onyx/nxcode"
+    _CW_ONYX_MPATH="$prefix/share/canonware/onyx/nxmod"
   fi
   cat >> confdefs.h <<EOF
 #define _CW_ONYX_RPATH "$_CW_ONYX_RPATH"

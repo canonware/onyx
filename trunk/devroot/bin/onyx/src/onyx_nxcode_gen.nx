@@ -8,7 +8,7 @@
 % Version: <Version>
 %
 % Read onyx code from stdin and output a compacted version to stdout.  The
-% output code defines the C function nx_p_nxcode().
+% output code defines the C function onyx_nxcode_init().
 %
 % This program is run by the 'bootstrap' build system target.
 %
@@ -27,17 +27,19 @@
  *
  ******************************************************************************/
 
-#ifdef _CW_USE_INLINES
-_CW_INLINE void
-#else
 static void
-#endif
-nx_p_nxcode(cw_nx_t *a_nx)
+onyx_nxcode(cw_nxo_t *a_thread)
 {
-	cw_nxo_t	thread;
-
-	nxo_thread_new(&thread, a_nx);
-	_cw_onyx_code(&thread, "' print
+	/*
+	 * Push strings onto ostack before running the rest of the code.  This
+	 * hackery is necessary since there is no simple way to make the build
+	 * system embed cpp macros into onyx code files.
+	 */
+	_cw_onyx_code(a_thread, "`"
+	_CW_ONYX_RPATH
+	"'`"
+	_CW_ONYX_MPATH
+	"'' print
 
 % Read in the code.
 stdin cvx eval
@@ -48,6 +50,5 @@ stdin cvx eval
 
 % Output the footer.
 ` bind eval");
-	nxo_thread_exit(&thread);
 }
 ' print

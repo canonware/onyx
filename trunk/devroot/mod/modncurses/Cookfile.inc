@@ -79,7 +79,7 @@ MSRCS = [MSRCS] [MODNCURSES_MSRCS];
 }
 
 /* Modules. */
-MODNCURSES = [objdir]/mod/modncurses/mod/ncurses.nxm;
+MODNCURSES = [objdir]/mod/modncurses/nxmod/ncurses.nxm;
 
 MODS = [MODS] [MODNCURSES];
 
@@ -91,12 +91,12 @@ modncurses : [MODNCURSES];
 
 modncurses_install : [MODNCURSES]
 {
-  [INSTALL] -m 0444 [MODNCURSES] [PREFIX]/share/canonware/onyx/mod;
+  [INSTALL] -m 0444 [MODNCURSES] [PREFIX]/share/canonware/onyx/nxmod;
 }
 
 modncurses_uninstall :
 {
-  rm -f [PREFIX]/share/canonware/onyx/mod/modncurses.nxm;
+  rm -f [PREFIX]/share/canonware/onyx/nxmod/modncurses.nxm;
 }
 
 modncurses_clean :

@@ -15,11 +15,10 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <libonyx/libonyx.h>
-#include <libedit/libedit.h>
-#include <libstash/libstash.h>
+#include "onyx.h"
 
-#include "onyx_defs.h"
+/* Include generated code. */
+#include "onyx_nxcode.c"
 
 #define	_PROMPT_STRLEN	  80
 
@@ -189,6 +188,12 @@ stdin cvx\n\
 	/* Create the initial thread. */
 	nxo_thread_new(&thread, &nx);
 	nxo_threadp_new(&threadp);
+
+	/*
+	 * Install custom operators and run embedded initialization code.
+	 */
+	onyx_ops_init(&thread);
+	onyx_nxcode(&thread);
 
 	/*
 	 * Run embedded initialization code.
@@ -537,7 +542,14 @@ end\n\
 	nxo_threadp_new(&threadp);
 
 	/*
-	 * Run embedded initialization code.
+	 * Install custom operators and run embedded initialization code.
+	 */
+	onyx_ops_init(&thread);
+	onyx_nxcode(&thread);
+
+	/*
+	 * Run embedded initialization code specific to non-interactive
+	 * execution.
 	 */
 	nxo_thread_interpret(&thread, &threadp, code, sizeof(code) - 1);
 	nxo_thread_flush(&thread, &threadp);
