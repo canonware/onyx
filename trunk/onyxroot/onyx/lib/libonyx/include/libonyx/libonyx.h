@@ -232,8 +232,8 @@ typedef void *cw_opaque_alloc_t (const void *, size_t, const char *,
  * Generic typedef used for memory reallocation hooks.  This typedef is
  * compatible with functions such as mem_realloc_e().
  */
-typedef void *cw_opaque_realloc_t (const void *, void *, size_t, const char *,
-    cw_uint32_t);
+typedef void *cw_opaque_realloc_t (const void *, void *, size_t, size_t, const
+    char *, cw_uint32_t);
 
 /*
  * Generic typedef used for memory deallocation hooks.  This typedef is
@@ -278,9 +278,9 @@ extern cw_mem_t	*cw_g_mem;
 #ifdef _CW_DBG
 #define	_cw_opaque_alloc(a_func, a_arg, a_size)				\
 	(a_func)((void *)(a_arg), (size_t)(a_size), __FILE__, __LINE__)
-#define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size)		\
+#define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size, a_old_size)	\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
-	    __FILE__, __LINE__)
+	    (size_t)(a_old_size), __FILE__, __LINE__)
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)		\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
 	    __FILE__, __LINE__)
@@ -289,7 +289,7 @@ extern cw_mem_t	*cw_g_mem;
 	(a_func)((void *)(a_arg), (size_t)(a_size), NULL, 0)
 #define	_cw_opaque_realloc(a_func, a_ptr, a_arg, a_size)		\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
-	    NULL, 0)
+	    (size_t)(a_old_size), NULL, 0)
 #define _cw_opaque_dealloc(a_func, a_arg, a_ptr, a_size)		\
 	(a_func)((void *)(a_arg), (void *)(a_ptr), (size_t)(a_size),	\
 	    NULL, 0)

@@ -257,8 +257,8 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 }
 
 void *
-mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
-    *a_filename, cw_uint32_t a_line_num)
+mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
+    const char *a_filename, cw_uint32_t a_line_num)
 {
 	void	*retval;
 
@@ -303,6 +303,13 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 			if (a_size > old_size) {
 				memset(((cw_uint8_t *)retval) + old_size,
 				    0xa5, a_size - old_size);
+			}
+			if (a_old_size != 0 && a_old_size != old_size) {
+				fprintf(stderr, "%s(%p): Wrong size %u for %p "
+				    "at %s:%u (size %u, allocated at %s:%u)\n",
+				    __FUNCTION__, a_mem, a_old_size, a_ptr,
+				    a_filename, a_line_num, old_size,
+				    old_filename, old_line_num);
 			}
 #ifdef _CW_MEM_VERBOSE
 			fprintf(stderr, "%s(%p): %p <-- realloc(%p, %u) at "
