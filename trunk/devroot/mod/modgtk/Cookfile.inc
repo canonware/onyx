@@ -30,7 +30,8 @@
 
 /* Source files. */
 MODGTK_MSRCS = gtkbutton.c gtkcontainer.c gtkdict.c gtklabel.c
-               gtkmain.c gtksignal.c gtkwidget.c gtkwindow.c modgtk.c;
+               gtkmain.c gtkobject.c gtksignal.c gtkwidget.c \
+	       gtkwindow.c modgtk.c;
 
 MODGTK_MSRCS = [fromto % [srcdir]/mod/modgtk/src/% [MODGTK_MSRCS]];
 MSRCS = [MSRCS] [MODGTK_MSRCS];
