@@ -14,9 +14,9 @@
  ******************************************************************************/
 
 /* Include generated dependency files. */
-#include-cooked [glob [objdir]/lib/c/libcl/src/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libcl/bin/"*.d_*"]
-#include-cooked [glob [objdir]/lib/c/libcl/test/"*.d_*"]
+#include-cooked [glob [objdir]/lib/c/libedit/src/"*.d_*"]
+#include-cooked [glob [objdir]/lib/c/libedit/bin/"*.d_*"]
+#include-cooked [glob [objdir]/lib/c/libedit/test/"*.d_*"]
 
 /*
  * File lists.
