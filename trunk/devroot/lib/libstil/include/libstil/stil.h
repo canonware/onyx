@@ -25,6 +25,8 @@ struct cw_stil_s {
 
 	/* Global name cache. */
 	cw_stilng_t	stilng;
+
+	cw_stilo_t	systemdict;
 };
 
 /* Not opaque. */
@@ -43,3 +45,4 @@ cw_stil_bufc_t	*stil_stil_bufc_get(cw_stil_t *a_stil);
 
 #define stil_stilag_get(a_stil) (&(a_stil)->stilag)
 #define stil_stilng_get(a_stil) (&(a_stil)->stilng)
+#define stil_systemdict_get(a_stil) (&(a_stil)->systemdict)

@@ -13,6 +13,9 @@ typedef struct cw_stilo_s cw_stilo_t;
 typedef struct cw_stiloe_s cw_stiloe_t;
 typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 
+/* Declared here to avoid a circular header dependency. */
+typedef void cw_op_t(cw_stilt_t *);
+
 typedef enum {
 	_CW_STILOT_NOTYPE = 0,
 	_CW_STILOT_ARRAYTYPE = 1,
@@ -99,7 +102,7 @@ struct cw_stilo_s {
 			cw_sint32_t	s32;
 		}	number;
 		struct {
-			void	(*f)(cw_stilt_t *);
+			cw_op_t		*f;
 		}	operator;
 		cw_stiloe_t	*stiloe;
 	}	o;
@@ -112,7 +115,7 @@ struct cw_stiloe_dicto_s {
 };
 
 /*
- * The ... arg is only used for array, dict, name, and string construction.
+ * The ... arg is used for array, dict, name, operator, and string construction.
  */
 void		stilo_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
     a_type, ...);

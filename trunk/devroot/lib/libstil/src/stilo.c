@@ -386,6 +386,8 @@ static void	stilo_p_number_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
 
 /* operator. */
+static void	stilo_p_operator_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    va_list a_p);
 static void	stilo_p_operator_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type);
 static void	stilo_p_operator_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
@@ -539,7 +541,7 @@ static cw_stilot_vtable_t stilot_vtable[] = {
 	 stilo_p_number_print},
 
 	/* _CW_STILOT_OPERATORTYPE */
-	{NULL,
+	{stilo_p_operator_new,
 	 NULL,
 	 NULL,
 	 stilo_p_operator_cast,
@@ -593,7 +595,8 @@ stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 	_cw_check_ptr(a_stilo);
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 
-	stilot_vtable[a_stilo->type].delete_f(a_stilo, a_stilt);
+	if (stilot_vtable[a_stilo->type].delete_f != NULL)
+		stilot_vtable[a_stilo->type].delete_f(a_stilo, a_stilt);
 
 	stilo_p_clobber(a_stilo);
 }
@@ -751,9 +754,9 @@ stilo_l_stiloe_get(cw_stilo_t *a_stilo)
 static void
 stilo_p_clobber(cw_stilo_t *a_stilo)
 {
-	thd_crit_enter();
+/*  	thd_crit_enter(); */
 	memset(a_stilo, 0, sizeof(cw_stilo_t));
-	thd_crit_leave();
+/*  	thd_crit_leave(); */
 }
 
 /*
@@ -1083,6 +1086,12 @@ stilo_p_condition_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 /*
  * dict.
  */
+
+/*
+ * The argument contained in a_p is:
+ *
+ *   cw_uint32_t dict_size
+ */
 static void
 stilo_p_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 {
@@ -1116,6 +1125,8 @@ stilo_p_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 		dch_new(&dict->e.d.hash, stilt_mem_get(a_stilt), 20, 16, 4,
 		    ch_direct_hash, ch_direct_key_comp);
 	}
+
+	a_stilo->o.stiloe = (cw_stiloe_t *)dict;
 
 	stiloe_p_new(a_stilo->o.stiloe, _CW_STILOT_DICTTYPE);
 }
@@ -1689,9 +1700,9 @@ stilo_p_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 	} else
 		name = stilo_p_name_gref(a_stilt, name_str, len, is_static);
 
-	thd_crit_enter();
+/*  	thd_crit_enter(); */
 	a_stilo->o.stiloe = &name->stiloe;
-	thd_crit_leave();
+/*  	thd_crit_leave(); */
 }
 
 static void
@@ -1973,6 +1984,21 @@ stilo_p_number_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 /*
  * operator.
  */
+
+/*
+ * The argument contained in a_p is:
+ *
+ *   cw_op_t op
+ */
+static void
+stilo_p_operator_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
+{
+	cw_op_t	*op;
+
+	op = (cw_op_t *)va_arg(a_p, cw_op_t *);
+	a_stilo->o.operator.f = op;
+}
+
 static void
 stilo_p_operator_cast(cw_stilo_t *a_stilo, cw_stilot_t a_type)
 {

@@ -34,6 +34,7 @@ cw_stil_t *
 stil_new(cw_stil_t *a_stil)
 {
 	cw_stil_t	*retval;
+	cw_stilt_t	stilt;
 
 	if (a_stil != NULL) {
 		retval = a_stil;
@@ -51,6 +52,23 @@ stil_new(cw_stil_t *a_stil)
 		goto OOM_2;
 	if (stilng_l_new(&retval->stilng, stilag_mem_get(&retval->stilag)))
 		goto OOM_3;
+
+	/*
+	 * Create a temporary thread in order to be able to initialize
+	 * systemdict, and destroy the thread as soon as we're done.
+	 */
+
+	/* Initialize systemdict, since stilt_new() will access it. */
+	stilo_new(&retval->systemdict, NULL, _CW_STILOT_NOTYPE);
+
+	if (stilt_new(&stilt, retval) == NULL)
+		goto OOM_4;
+
+	op_setglobal(&stilt);
+	/* XXX No way to catch OOM here. */
+	stil_op_systemdict_populate(&retval->systemdict, &stilt);
+	stilt_delete(&stilt);
+
 	mtx_new(&retval->lock);
 
 #ifdef _LIBSTIL_DBG
@@ -58,6 +76,8 @@ stil_new(cw_stil_t *a_stil)
 #endif
 
 	return retval;
+	OOM_4:
+	stilng_l_delete(&retval->stilng);
 	OOM_3:
 	stilag_delete(&retval->stilag);
 	OOM_2:

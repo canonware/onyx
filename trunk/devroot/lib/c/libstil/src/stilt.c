@@ -113,6 +113,7 @@ cw_stilt_t *
 stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 {
 	cw_stilt_t	*retval;
+	cw_stilo_t	*stilo;
 
 	if (a_stilt != NULL) {
 		retval = a_stilt;
@@ -144,6 +145,10 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	if (stils_new(&retval->dict_stils,
 	    stilat_stilsc_pool_get(&a_stilt->stilat)) == NULL)
 		goto OOM_6;
+
+	/* Push systemdict onto the dictionary stack. */
+	stilo = stils_push(&retval->dict_stils, retval, _CW_STILOT_NOTYPE);
+	stilo_dup(stilo, stil_systemdict_get(a_stil));
 
 	retval->stdout_fd = 1;
 	retval->stil = a_stil;
