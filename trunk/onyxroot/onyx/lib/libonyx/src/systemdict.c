@@ -5382,8 +5382,8 @@ systemdict_match(cw_nxo_t *a_thread)
 	    nxo_string_lock(pattern);
 	    error = nxo_regex_new(regex, nxo_thread_nx_get(a_thread),
 				  nxo_string_get(pattern),
-				  nxo_string_len_get(pattern), multiline,
-				  insensitive, singleline, (cw_uint32_t) limit);
+				  nxo_string_len_get(pattern), insensitive,
+				  multiline, singleline, (cw_uint32_t) limit);
 	    nxo_string_unlock(pattern);
 	    if (error)
 	    {
@@ -7648,7 +7648,7 @@ systemdict_rename(cw_nxo_t *a_thread)
 void
 systemdict_regex(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack, *pattern, *flags, *nxo;
+    cw_nxo_t *ostack, *pattern, *nxo;
     cw_nxn_t error;
     cw_uint32_t npop;
     cw_bool_t insensitive, multiline, singleline;
@@ -7661,6 +7661,8 @@ systemdict_regex(cw_nxo_t *a_thread)
     {
 	case NXOT_DICT:
 	{
+	    cw_nxo_t *flags;
+
 	    flags = pattern;
 	    npop = 2;
 	    NXO_STACK_DOWN_GET(pattern, ostack, a_thread, pattern);
@@ -7669,12 +7671,25 @@ systemdict_regex(cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, NXN_typecheck);
 		return;
 	    }
+
+	    error = systemdict_p_regex_flags_get(flags, a_thread, &insensitive,
+						 &multiline, &singleline,
+						 &limit);
+	    if (error)
+	    {
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
 	    break;
 	}
 	case NXOT_STRING:
 	{
 	    npop = 1;
-	    flags = NULL;
+
+	    insensitive = FALSE;
+	    multiline = FALSE;
+	    singleline = FALSE;
+	    limit = 1;
 	    break;
 	}
 	default:
@@ -7684,23 +7699,12 @@ systemdict_regex(cw_nxo_t *a_thread)
 	}
     }
 
-    if (flags != NULL)
-    {
-	error = systemdict_p_regex_flags_get(flags, a_thread, &insensitive,
-					     &multiline, &singleline, &limit);
-	if (error)
-	{
-	    nxo_thread_nerror(a_thread, error);
-	    return;
-	}
-    }
-
     /* Create the regex object. */
     nxo = nxo_stack_under_push(ostack, pattern);
     nxo_string_lock(pattern);
     error = nxo_regex_new(nxo, nxo_thread_nx_get(a_thread),
 			  nxo_string_get(pattern),
-			  nxo_string_len_get(pattern), multiline, insensitive,
+			  nxo_string_len_get(pattern), insensitive, multiline,
 			  singleline, (cw_uint32_t) limit);
     nxo_string_unlock(pattern);
     if (error)
