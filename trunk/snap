@@ -180,11 +180,29 @@ if (defined($opt_tag))
 
 if ($opt_verbose)
 {
+    print STDERR "rm -rf $tmpdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -rf $tmpdir`;
+}
+
+if ($opt_verbose)
+{
     print STDERR "cvs export $tag_cmd -d $tmpdir @TREES\n";
 }
 unless ($opt_noact)
 {
     `cvs export $tag_cmd -d $tmpdir @TREES`;
+}
+
+if ($opt_verbose)
+{
+    print STDERR "rm -rf $opt_pkgname\n";
+}
+unless ($opt_noact)
+{
+    `rm -rf $opt_pkgname`;
 }
 
 if ($opt_verbose)
