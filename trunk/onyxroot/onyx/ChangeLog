@@ -1,3 +1,8 @@
+2002-08-11 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config : Add onyx_config, which aids in building software
+	  that uses libonyx.
+
 2002-08-04 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_string.c:nxo_string_cstring() : Handle name

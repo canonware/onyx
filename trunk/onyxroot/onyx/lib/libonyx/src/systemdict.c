@@ -1721,6 +1721,9 @@ systemdict_connect(cw_nxo_t *a_thread)
 	    break;
 	}
 	case AF_LOCAL:
+	{
+	    cw_error("XXX Not implemented");
+	}
 	case AF_ROUTE:
 	{
 	    cw_error("XXX Not implemented");

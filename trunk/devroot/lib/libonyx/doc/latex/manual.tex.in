@@ -68,7 +68,7 @@ little else needs to be done.
 Use the following compiler command line to compile applications with
 \libname{libonyx}.
 \begin{verbatim}
-cc <file> -lonyx -lpthread
+cc `onyx_config --cppflags` <file> `onyx_config --ldflags --libs`
 \end{verbatim}
 
 \section{Types}

@@ -266,6 +266,7 @@ fi
 AC_SUBST(enable_libonyx)
 if test "x$enable_libonyx" = "x1" ; then
   cfgoutputs="$cfgoutputs lib/libonyx/src/nx.nx lib/libonyx/src/nxo_thread.nx"
+  cfgoutputs="$cfgoutputs bin/onyx_config/src/onyx_config.nx.in"
   AC_DEFINE(CW_USE_LIBONYX)
 fi
 
@@ -506,6 +507,7 @@ AC_SUBST(enable_modprompt)
 dnl Look for binaries.
 if test "x$enable_onyx" = "x1" ; then
   CW_BUILD_BIN(onyx, bin_onyx)
+  CW_BUILD_BIN(onyx_config, bin_onyx_config)
 fi
 if test "x$enable_slate" = "x1" ; then
   CW_BUILD_BIN(slate, bin_slate)
