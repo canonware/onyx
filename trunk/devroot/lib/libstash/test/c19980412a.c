@@ -14,10 +14,9 @@
  *
  ****************************************************************************/
 
-#define _INC_OH_H_
-#define _INC_GLOB_H_
-#define _INC_THREAD_H_
-#include <libstash_r.h>
+#define _STASH_USE_OH
+#define _STASH_USE_THREAD
+#include <libstash/libstash_r.h>
 
 /* XXX This test leaks memory, but it doesn't affect the results. */
 
@@ -60,7 +59,7 @@ main()
   struct foo_s * foo_var;
   cw_rwl_t lock;
 
-  glob_new();
+  libstash_init();
   hash_o = oh_new(NULL, TRUE);
   rwl_new(&lock);
 
@@ -90,7 +89,7 @@ main()
 
   rwl_delete(&lock);
   oh_delete(hash_o);
-  glob_delete();
+  libstash_shutdown();
   
   return 0;
 }

@@ -15,14 +15,14 @@
  *
  ****************************************************************************/
 
-#define _INC_LEX_H_
+#define _STASH_USE_LEX
 #ifdef _CW_REENTRANT
-#  include "libstash_r.h"
+#  include "libstash/libstash_r.h"
 #else
-#  include "libstash.h"
+#  include "libstash/libstash.h"
 #endif
 
-#include "lex_priv.h"
+#include "libstash/lex_priv.h"
 
 /****************************************************************************
  *

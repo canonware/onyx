@@ -14,9 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#define _INC_RES_H_
-#include <libstash_r.h>
+#define _STASH_USE_RES
+#include <libstash/libstash_r.h>
 
 int
 main()
@@ -49,7 +48,7 @@ main()
     es15[80] = "name:value\\.",
     es16[80] = "name:value\\:";
 
-  glob_new();
+  libstash_init();
 
 /*   dbg_register(g_dbg_o, "res_state"); */
   
@@ -86,7 +85,7 @@ main()
   _cw_assert(TRUE == res_merge_list(&res_o, es16, NULL));
   
   res_delete(&res_o);
-  glob_delete();
+  libstash_shutdown();
 
   return 0;
 }

@@ -14,16 +14,15 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#define _INC_RES_H_
-#include <libstash_r.h>
+#define _STASH_USE_RES
+#include <libstash/libstash_r.h>
 
 int
 main()
 {
   cw_res_t res_o;
   
-  glob_new();
+  libstash_init();
   dbg_register(g_dbg_o, "res_error");
   
   res_new(&res_o);
@@ -31,6 +30,6 @@ main()
   _cw_assert(FALSE == res_dump(&res_o, "b19980828a.dump"));
   res_delete(&res_o);
       
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

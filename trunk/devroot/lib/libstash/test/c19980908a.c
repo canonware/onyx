@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 #define _STASH_TEST_NUM_THREADS 10
 
@@ -37,7 +36,7 @@ main()
   cw_thd_t threads[_STASH_TEST_NUM_THREADS];
   cw_uint32_t i;
   
-  glob_new();
+  libstash_init();
 
   sem_b = sem_new(NULL, 0);
   _cw_check_ptr(sem_b);
@@ -87,6 +86,6 @@ main()
   
   sem_delete(&sem_a);
 
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

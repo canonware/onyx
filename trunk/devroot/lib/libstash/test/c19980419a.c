@@ -14,9 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#define _INC_LIST_H_
-#include <libstash_r.h>
+#define _STASH_USE_LIST
+#include <libstash/libstash_r.h>
 
 #define NUM_ITEMS 50
 
@@ -27,7 +26,7 @@ main()
   cw_list_t * list1, list2;
   int i;
   
-  glob_new();
+  libstash_init();
 
   for (i = 0; i < NUM_ITEMS; i++)
   {
@@ -97,7 +96,7 @@ main()
   list_delete(list1);
   list_delete(&list2);
     
-  glob_delete();
+  libstash_shutdown();
   
   return 0;
 }

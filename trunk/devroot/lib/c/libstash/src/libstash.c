@@ -10,12 +10,11 @@
  *
  * <<< Description >>>
  *
- *
+ * Initialization and shutdown functions for the whole library.
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include "libstash.h"
+#include "libstash/libstash.h"
 
 /* Globals. */
 cw_mem_t * g_mem_o = NULL;
@@ -23,7 +22,7 @@ cw_dbg_t * g_dbg_o = NULL;
 cw_log_t * g_log_o = NULL;
 
 void
-glob_new()
+libstash_init()
 {
   /* Start up global modules. */
   g_mem_o = mem_new();
@@ -32,7 +31,7 @@ glob_new()
 }
 
 void
-glob_delete()
+libstash_shutdown()
 {
   /* Shut down global modules in reverse order. */
   log_delete(g_log_o);

@@ -14,16 +14,15 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 int
 main()
 {
 
-  glob_new();
+  libstash_init();
 
 
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 void *
 thread_entry_func(void * a_arg)
@@ -33,7 +32,7 @@ main()
 {
   cw_thd_t * thread_a, thread_b;
   
-  glob_new();
+  libstash_init();
 
   thread_a = thd_new(NULL, thread_entry_func, (void *) "Thread A argument");
   _cw_assert(NULL == thd_join(thread_a));
@@ -44,7 +43,7 @@ main()
   _cw_assert(NULL == thd_join(&thread_b));
   thd_delete(&thread_b);
 
-  glob_delete();
+  libstash_shutdown();
 
   return 0;
 }

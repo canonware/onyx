@@ -14,9 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_BUF_H_
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#define _STASH_USE_BUF
+#include <libstash/libstash_r.h>
 
 int
 main()
@@ -24,7 +23,7 @@ main()
   cw_buf_t * buf_a, buf_b;
   cw_bufel_t * bufel_a, bufel_b;
 
-  glob_new();
+  libstash_init();
 
   buf_a = buf_new(NULL, FALSE);
   _cw_check_ptr(buf_a);
@@ -143,6 +142,6 @@ main()
   buf_delete(buf_a);
   buf_delete(&buf_b);
 
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

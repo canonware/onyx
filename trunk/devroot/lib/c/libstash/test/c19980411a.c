@@ -14,9 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_OH_H_
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#define _STASH_USE_OH
+#include <libstash/libstash_r.h>
 
 #define NUM_STRINGS 5000
 
@@ -29,7 +28,7 @@ main()
   int i;
   cw_bool_t error;
 
-  glob_new();
+  libstash_init();
   
   oh_new(&hash_o, FALSE);
 /*   dbg_register(g_dbg_o, "oh_slot"); */
@@ -115,7 +114,7 @@ main()
   }
 
   oh_delete(&hash_o);
-  glob_delete();
+  libstash_shutdown();
   
   return 0;
 }

@@ -26,7 +26,7 @@
  *
  ****************************************************************************/
 
-#include "libstash_r.h"
+#include "libstash/libstash_r.h"
 
 #include <errno.h>
 

@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 int
 main()
@@ -23,7 +22,7 @@ main()
   cw_uint64_t i, j, k, l;
   char a[65], b[65];
     
-  glob_new();
+  libstash_init();
 
   /* The following grossness shuts the compiler up.  IMO the compiler is
    * out of line in generating warnings on these. */
@@ -46,7 +45,7 @@ main()
   log_printf(g_log_o, "42 --> %s (10)\n",
 	     log_print_uint64(l, 10, a));
 
-  glob_delete();
+  libstash_shutdown();
 
   return 0;
 }

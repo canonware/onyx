@@ -18,7 +18,7 @@
 #
 
 # Include files that _are_ installed.
-INCS := libstash_r.h stash_incs.h bhp.h buf.h dbg.h glob.h \
+INCS := libstash.h libstash_r.h stash_incs.h bhp.h buf.h dbg.h \
 	lex.h list.h locks.h log.h matrix.h mem.h oh.h res.h thread.h treen.h
 
 # Include files that are _not_ installed.
@@ -26,8 +26,8 @@ PRIV_INCS := bhp_priv.h lex_priv.h list_priv.h \
 	locks_priv.h log_priv.h mem_priv.h oh_priv.h res_priv.h
 
 # Source files.
-SRCS := bhp.c buf.c dbg.c \
-	glob.c lex.c list.c locks.c log.c matrix.c mem.c oh.c res.c \
+SRCS := libstash.c bhp.c buf.c dbg.c \
+	lex.c list.c locks.c log.c matrix.c mem.c oh.c res.c \
 	thread.c treen.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
@@ -47,8 +47,8 @@ BTESTS := b19980828a.c
 # Munge the filename lists so that they are prefixed by the directory they're
 # in, relative to @top_srcdir@.  Also, convert the test names to their final
 # names.
-INCS := $(addprefix include/,$(INCS))
-PRIV_INCS := $(addprefix include/,$(P_INCS))
+INCS := $(addprefix include/libstash/,$(INCS))
+PRIV_INCS := $(addprefix include/libstash/,$(P_INCS))
 SRCS := $(addprefix src/,$(SRCS))
 override CTESTS := $(addprefix test/,$(CTESTS:.c=))
 override BTESTS := $(addprefix test/,$(BTESTS:.c=))
@@ -93,7 +93,7 @@ PSTUB   := @top_srcdir@/bin/pstub
 
 LIBPATH := -L@top_srcdir@/lib
 EXTRALIBS := @LIBS@
-INCPATH := -I@top_srcdir@ -I@top_srcdir@/include
+INCPATH := -I@top_srcdir@/include
 
 DEFINES := @DEFS@
 ST_DEFINES := 
@@ -140,7 +140,7 @@ all : default
 # This rule is used to build the tests.
 % : %.c $(LIB_ST_R_D)
 	$(CC) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(R_CFLAGS) $(INCPATH) $(DEFINES) $(R_DEFINES) $(TEST_DEFINES) -c $< -o $(@:=.o)
-	$(CC) -o $@ $(@:=.o) $(LIBPATH) $(LIB_ST_R_D) -dynamic $(EXTRALIBS)
+	$(CC) -o $@ $(@:=.o) $(LIB_ST_R_D) $(LIBPATH) -dynamic $(EXTRALIBS)
 
 obj/st_d/%.o_st_d : src/%.c
 	$(CC) $(INCPATH) $(CFLAGS) $(ST_CFLAGS) $(D_CFLAGS) $(DEFINES) $(ST_DEFINES) $(D_DEFINES) -c $< -o $@
@@ -268,6 +268,9 @@ FORCE :
 default : stat_dbg stat_opt shar_opt stat_prof \
 	stat_dbg_r stat_opt_r shar_opt_r stat_prof_r
 
+# Empty target, but make still creates all the dependency files.
+depend:
+
 check : $(CTESTS) $(PTESTS) $(BTESTS)
 	@$(SHELL) -c \
 	'echo Running regression tests: ; \
@@ -305,7 +308,7 @@ install_common :
 	$(SHELL) -c \
 	'@INSTALL@ -d @prefix@/lib; \
 	@INSTALL@ -d @prefix@/include/libstash; \
-	for i in libstash.h $(INCS); do \
+	for i in $(INCS); do \
 	@INSTALL@ -m 0644 $$i @prefix@/include/libstash/; \
 	done; \
 	'
@@ -354,10 +357,10 @@ clean : FORCE
 distclean : clean
 	rm -f "#"*"#" bin/"#"*"#" src/"#"*"#" include/"#"*"#"
 	rm -f Makefile
-	rm -f config.cache config.log config.status libstash.h
+	rm -f config.cache config.log config.status include/libstash/libstash.h
 	rm -f TAGS
 	rm -f $(PMERGE)
 	rm -f $(PSTUB)
 
-etags : $(INCS) $(PRIV_INCS) $(SRCS) libstash.h
+etags : $(INCS) $(PRIV_INCS) $(SRCS)
 	@ETAGS@ $(INCS) $(PRIV_INCS) $(SRCS)

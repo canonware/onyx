@@ -159,6 +159,15 @@ typedef enum
 #  define _LIBSTASH_H_B_
 
 /*
+ * libstash initialization and shutdown function prototypes.
+ */
+#  define libstash_init _CW_NS_STASH(libstash_init)
+#  define libstash_shutdown _CW_NS_STASH(libstash_shutdown)
+
+void libstash_init();
+void libstash_shutdown();
+  
+/*
  * Global variables.
  */
 extern cw_mem_t * g_mem_o;

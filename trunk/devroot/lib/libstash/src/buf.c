@@ -16,11 +16,11 @@
  *
  ****************************************************************************/
 
-#define _INC_BUF_H_
+#define _STASH_USE_BUF
 #ifdef _CW_REENTRANT
-#  include "libstash_r.h"
+#  include "libstash/libstash_r.h"
 #else
-#  include "libstash.h"
+#  include "libstash/libstash.h"
 #endif
 
 #include <netinet/in.h>

@@ -14,14 +14,14 @@
  *
  ****************************************************************************/
 
-#define _INC_LIST_H_
+#define _STASH_USE_LIST
 #ifdef _CW_REENTRANT
-#  include "libstash_r.h"
+#  include "libstash/libstash_r.h"
 #else
-#  include "libstash.h"
+#  include "libstash/libstash.h"
 #endif
 
-#include "list_priv.h"
+#include "libstash/list_priv.h"
 
 /****************************************************************************
  *

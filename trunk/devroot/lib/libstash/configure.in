@@ -5,8 +5,8 @@ dnl
 dnl Version: <Version>
 dnl
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(libstash.h.in)
-AC_CONFIG_HEADER(libstash.h)
+AC_INIT(include/libstash/libstash.h.in)
+AC_CONFIG_HEADER(include/libstash/libstash.h)
 
 AC_CANONICAL_HOST
 
@@ -34,9 +34,6 @@ AC_PATH_PROG(BASENAME, basename, , $PATH)
 AC_PATH_PROG(DIFF, diff, , $PATH)
 AC_PATH_PROG(CAT, cat, , $PATH)
 AC_PATH_PROG(ETAGS, etags, , $PATH)
-dnl AC_CHECK_PROG(MAKE, make, , $PATH,
-dnl  AC_CHECK_PROG(MAKE, gmake, , $PATH,
-dnl    AC_MSG_ERROR(Cannot find GNU make anywhere)))
 
 dnl Check for libraries.
 AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
@@ -68,28 +65,10 @@ AC_CHECK_SIZEOF(double, 8)
 AC_CHECK_SIZEOF(long double, 12)
 AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
 
-dnl Check for system services.
-AC_SYS_LONG_FILE_NAMES
-
 dnl AC_MSG_RESULT(Extra libraries to link in: $LIBS)
-dnl AC_MSG_RESULT(Defines: ${DEFS})
-
-dnl Create @DIRLIST@.
-dnl DIRLIST=\
-dnl "include \
-dnl src \
-dnl test \
-dnl obj/stat_dbg \
-dnl obj/shar_dbg \
-dnl obj/stat_opt \
-dnl obj/shar_opt \
-dnl obj/stat_prof \
-dnl obj/shar_prof"
-
-dnl AC_SUBST(DIRLIST)dnl
+dnl AC_MSG_RESULT(Extra defines: ${DEFS})
 
 dnl Process the following files.
 AC_OUTPUT(Makefile \
 bin/pmerge \
 bin/pstub)
-dnl Makefile.common \

@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 #include <sys/time.h>
 
@@ -54,7 +53,7 @@ main()
   struct timezone tz;
   cw_uint32_t i;
   
-  glob_new();
+  libstash_init();
 
   mtx_new(&mutex);
   
@@ -111,6 +110,6 @@ main()
   cnd_delete(&cond_a);
   mtx_delete(&mutex);
   
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 #define _STASH_TEST_NUM_THREADS 100
 
@@ -86,7 +85,7 @@ main()
   struct foo_var_s * foo_var;
   cw_uint32_t i;
   
-  glob_new();
+  libstash_init();
 
   _cw_assert(&jtl_a == jtl_new(&jtl_a));
   jtl_slock(&jtl_a);
@@ -142,6 +141,6 @@ main()
 
   jtl_delete(jtl_b);
   
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

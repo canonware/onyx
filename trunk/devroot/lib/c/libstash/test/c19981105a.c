@@ -14,9 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#define _INC_TREEN_H_
-#include <libstash_r.h>
+#define _STASH_USE_TREEN
+#include <libstash/libstash_r.h>
 
 int
 main()
@@ -24,7 +23,7 @@ main()
   cw_treen_t * treen_a, * treen_b, * treens[7];
   cw_uint32_t i;
   
-  glob_new();
+  libstash_init();
 
 
   treen_a = treen_new(FALSE);
@@ -69,6 +68,6 @@ main()
 
   treen_delete(treens[0]);
 
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

@@ -14,8 +14,7 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#include <libstash_r.h>
+#include <libstash/libstash_r.h>
 
 #define _STASH_TEST_COUNT 50
 
@@ -46,7 +45,7 @@ main()
   cw_thd_t thread_a, thread_b;
   cw_mtx_t mutex_a, * mutex_b;
   
-  glob_new();
+  libstash_init();
 
   _cw_assert(&mutex_a == mtx_new(&mutex_a));
   /* Unlocked. */
@@ -86,6 +85,6 @@ main()
 
   log_printf(g_log_o, "g_count: %u\n", g_count);
   
-  glob_delete();
+  libstash_shutdown();
   return 0;
 }

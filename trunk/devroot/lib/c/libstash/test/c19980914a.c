@@ -14,9 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_GLOB_H_
-#define _INC_MATRIX_H_
-#include <libstash_r.h>
+#define _STASH_USE_MATRIX
+#include <libstash/libstash_r.h>
 
 #include <limits.h>
 
@@ -40,7 +39,7 @@ main(int argc, char * argv[])
   cw_uint32_t num_nodes, num_graphs, num_edges, num_min_graphs;
   map_el_t * map;
 
-  glob_new();
+  libstash_init();
 
 #if (0)
   if (argc != 2)
@@ -212,7 +211,7 @@ main(int argc, char * argv[])
   matrix_delete(&graph);
   matrix_delete(&cover);
   _cw_free(map);
-  glob_delete();
+  libstash_shutdown();
   return 0;
   /* End of main(). */
 }

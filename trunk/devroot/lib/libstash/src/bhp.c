@@ -14,14 +14,14 @@
  *
  ****************************************************************************/
 
-#define _INC_BHP_H_
+#define _STASH_USE_BHP
 #ifdef _CW_REENTRANT
-#  include "libstash_r.h"
+#  include "libstash/libstash_r.h"
 #else
-#  include "libstash.h"
+#  include "libstash/libstash.h"
 #endif
 
-#include "bhp_priv.h"
+#include "libstash/bhp_priv.h"
 
 /****************************************************************************
  * <<< Description >>>

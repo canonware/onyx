@@ -14,8 +14,8 @@
  *
  ****************************************************************************/
 
-#define _INC_MATRIX_H_
-#include "libstash.h"
+#define _STASH_USE_MATRIX
+#include "libstash/libstash.h"
 
 #include <limits.h>
 
