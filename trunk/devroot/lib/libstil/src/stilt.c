@@ -752,9 +752,11 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * Use the string as a source of code.
 			 */
 			stilts_new(&stilts);
+			stilo_string_lock(stilo);
 			stilt_interpret(a_stilt, &stilts,
 			    stilo_string_get(stilo),
 			    stilo_string_len_get(stilo));
+			stilo_string_unlock(stilo);
 			stilt_flush(a_stilt, &stilts);
 			stilts_delete(&stilts, a_stilt);
 			stils_pop(&a_stilt->estack);
@@ -1751,6 +1753,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->tok_str[a_stilt->index] = '0';
 
 				str = stilo_string_get(stilo);
+				stilo_string_lock(stilo);
 				for (j = 0; j < (a_stilt->index + 1) >> 1;
 				     j++) {
 					switch (a_stilt->tok_str[2 * j]) {
@@ -1785,6 +1788,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 						_cw_not_reached();
 					}
 				}
+				stilo_string_unlock(stilo);
 				stilt_p_reset(a_stilt);
 				break;
 			}
@@ -1933,6 +1937,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    a_stilt->m.b.nodd);
 
 				str = stilo_string_get(stilo);
+				stilo_string_lock(stilo);
 				for (j = 0; j < ngroups; j++) {
 					/* Accumulate the bits. */
 					bits = stilt_p_b64b(a_stilt->tok_str[j *
@@ -1949,6 +1954,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					str[j * 3 + 1] = (bits >> 8) & 0xff;
 					str[j * 3 + 2] = bits & 0xff;
 				}
+				stilo_string_unlock(stilo);
 
 				switch (a_stilt->m.b.nodd) {
 				case 0:

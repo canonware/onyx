@@ -234,7 +234,9 @@ systemdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, int a_argc, char
 			len = strlen(a_argv[i]);
 			stilo_string_new(&str_stilo, a_stil, TRUE, len);
 			t_str = stilo_string_get(&str_stilo);
+			stilo_string_lock(&str_stilo);
 			memcpy(t_str, a_argv[i], len);
+			stilo_string_unlock(&str_stilo);
 
 			stilo_array_el_set(&argv_stilo, &str_stilo, i);
 		}
@@ -731,7 +733,6 @@ systemdict_copy(cw_stilt_t *a_stilt)
 		break;
 	}
 	case STILOT_ARRAY: {
-		cw_stilte_t	error;
 		cw_stilo_t	*orig;
 
 		STILS_DOWN_GET(orig, ostack, a_stilt, stilo);
@@ -739,18 +740,18 @@ systemdict_copy(cw_stilt_t *a_stilt)
 			stilt_error(a_stilt, STILTE_TYPECHECK);
 			return;
 		}
-
-		error = stilo_array_copy(stilo, orig);
-		if (error) {
-			stilt_error(a_stilt, error);
+		if (stilo_array_len_get(stilo) < stilo_array_len_get(orig)) {
+			stilt_error(a_stilt, STILTE_RANGECHECK);
 			return;
 		}
+
+		stilo_array_copy(stilo, orig);
+
 		stils_roll(ostack, 2, 1);
 		stils_pop(ostack);
 		break;
 	}
 	case STILOT_DICT: {
-		cw_stilte_t	error;
 		cw_stilo_t	*orig;
 
 		STILS_DOWN_GET(orig, ostack, a_stilt, stilo);
@@ -759,16 +760,11 @@ systemdict_copy(cw_stilt_t *a_stilt)
 			return;
 		}
 
-		error = stilo_dict_copy(stilo, orig, stilt_stil_get(a_stilt),
+		stilo_dict_copy(stilo, orig, stilt_stil_get(a_stilt),
 		    stilt_currentlocking(a_stilt));
-		if (error) {
-			stilt_error(a_stilt, error);
-			return;
-		}
 		break;
 	}
 	case STILOT_STRING: {
-		cw_stilte_t	error;
 		cw_stilo_t	*orig;
 
 		STILS_DOWN_GET(orig, ostack, a_stilt, stilo);
@@ -776,12 +772,13 @@ systemdict_copy(cw_stilt_t *a_stilt)
 			stilt_error(a_stilt, STILTE_TYPECHECK);
 			return;
 		}
-
-		error = stilo_string_copy(stilo, orig);
-		if (error) {
-			stilt_error(a_stilt, error);
+		if (stilo_string_len_get(stilo) < stilo_string_len_get(orig)) {
+			stilt_error(a_stilt, STILTE_RANGECHECK);
 			return;
 		}
+
+		stilo_string_copy(stilo, orig);
+
 		stils_roll(ostack, 2, 1);
 		stils_pop(ostack);
 		break;
@@ -930,8 +927,10 @@ systemdict_cvn(cw_stilt_t *a_stilt)
 	tstilo = stils_push(tstack);
 	stilo_dup(tstilo, stilo);
 
+	stilo_string_lock(tstilo);
 	stilo_name_new(stilo, stilt_stil_get(a_stilt), stilo_string_get(tstilo),
 	    stilo_string_len_get(tstilo), FALSE);
+	stilo_string_unlock(tstilo);
 	stilo_attrs_set(stilo, stilo_attrs_get(tstilo));
 
 	stils_pop(tstack);
@@ -992,7 +991,9 @@ systemdict_cvrs(cw_stilt_t *a_stilt)
 	    stilt_currentlocking(a_stilt), rlen);
 
 	str = stilo_string_get(num);
+	stilo_string_lock(num);
 	memcpy(str, result, rlen);
+	stilo_string_unlock(num);
 
 	stils_pop(ostack);
 }
@@ -1018,7 +1019,9 @@ systemdict_cvs(cw_stilt_t *a_stilt)
 		    stilo_integer_get(stilo));
 		stilo_string_new(stilo, stilt_stil_get(a_stilt),
 		    stilt_currentlocking(a_stilt), len);
+		stilo_string_lock(stilo);
 		stilo_string_set(stilo, 0, result, len);
+		stilo_string_unlock(stilo);
 		break;
 	}
 	case STILOT_NAME: {
@@ -1031,8 +1034,10 @@ systemdict_cvs(cw_stilt_t *a_stilt)
 
 		stilo_string_new(stilo, stilt_stil_get(a_stilt),
 		    stilt_currentlocking(a_stilt), stilo_name_len_get(tstilo));
+		stilo_string_lock(stilo);
 		stilo_string_set(stilo, 0, stilo_name_str_get(tstilo),
 		    stilo_name_len_get(tstilo));
+		stilo_string_unlock(stilo);
 
 		stils_pop(tstack);
 		break;
@@ -1053,8 +1058,10 @@ systemdict_cvs(cw_stilt_t *a_stilt)
 
 			stilo_string_new(stilo, stilt_stil_get(a_stilt),
 			    stilt_currentlocking(a_stilt), stiln_len(stiln));
+			stilo_string_lock(stilo);
 			stilo_string_set(stilo, 0, stiln_str(stiln),
 			    stiln_len(stiln));
+			stilo_string_unlock(stilo);
 
 			stils_pop(tstack);
 		}
@@ -1725,7 +1732,6 @@ systemdict_getinterval(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*from, *with, *count;
-	cw_stilte_t	error;
 	cw_sint64_t	index, len;
 
 	ostack = stilt_ostack_get(a_stilt);
@@ -1743,19 +1749,23 @@ systemdict_getinterval(cw_stilt_t *a_stilt)
 
 	switch (stilo_type_get(from)) {
 	case STILOT_ARRAY:
-		error = stilo_array_subarray_new(count, from,
-		    stilt_stil_get(a_stilt), index, len);
+		if (index + len > stilo_array_len_get(from)) {
+			stilt_error(a_stilt, STILTE_RANGECHECK);
+			return;
+		}
+		stilo_array_subarray_new(count, from, stilt_stil_get(a_stilt),
+		    index, len);
 		break;
 	case STILOT_STRING:
-		error = stilo_string_substring_new(count, from,
-		    stilt_stil_get(a_stilt), index, len);
+		if (index + len > stilo_string_len_get(from)) {
+			stilt_error(a_stilt, STILTE_RANGECHECK);
+			return;
+		}
+		stilo_string_substring_new(count, from, stilt_stil_get(a_stilt),
+		    index, len);
 		break;
 	default:
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-		return;
-	}
-	if (error) {
-		stilt_error(a_stilt, error);
 		return;
 	}
 
@@ -2358,9 +2368,11 @@ systemdict_open(cw_stilt_t *a_stilt)
 	file = stils_push(tstack);
 	stilo_file_new(file, stilt_stil_get(a_stilt),
 	    stilt_currentlocking(a_stilt));
+	stilo_string_lock(name);
 	error = stilo_file_open(file, stilo_string_get(name),
 	    stilo_string_len_get(name), stilo_string_get(flags),
 	    stilo_string_len_get(flags));
+	stilo_string_unlock(name);
 	if (error) {
 		stilt_error(a_stilt, error);
 		return;
@@ -2457,8 +2469,10 @@ systemdict_print(cw_stilt_t *a_stilt)
 		return;
 	}
 
+	stilo_string_lock(stilo);
 	error = stilo_file_write(stdout_stilo, stilo_string_get(stilo),
 	    stilo_string_len_get(stilo));
+	stilo_string_unlock(stilo);
 	if (error) {
 		stilt_error(a_stilt, error);
 		return;
@@ -2563,7 +2577,6 @@ systemdict_putinterval(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
 	cw_stilo_t	*into, *with, *what;
-	cw_stilte_t	error;
 	cw_sint64_t	index;
 
 	ostack = stilt_ostack_get(a_stilt);
@@ -2604,11 +2617,16 @@ systemdict_putinterval(cw_stilt_t *a_stilt)
 
 		str = stilo_string_get(what);
 		len = stilo_string_len_get(what);
-		error = stilo_string_set(into, index, str, len);
-		if (error) {
-			stilt_error(a_stilt, error);
+		if (index + len > stilo_string_len_get(into)) {
+			stilt_error(a_stilt, STILTE_RANGECHECK);
 			return;
 		}
+
+		stilo_string_lock(what);
+		stilo_string_lock(into);
+		stilo_string_set(into, index, str, len);
+		stilo_string_unlock(into);
+		stilo_string_unlock(what);
 		break;
 	}
 	default:
@@ -2723,8 +2741,10 @@ systemdict_readstring(cw_stilt_t *a_stilt)
 		return;
 	}
 
+	stilo_string_lock(string);
 	nread = stilo_file_read(file, stilo_string_len_get(string),
 	    stilo_string_get(string));
+	stilo_string_unlock(string);
 	if (nread == -1) {
 		stilt_error(a_stilt, STILTE_IOERROR);
 		return;
@@ -2793,7 +2813,9 @@ systemdict_renamefile(cw_stilt_t *a_stilt)
 		return;
 	}
 	nbytes = stilo_string_len_get(string_from);
+	stilo_string_lock(string_from);
 	memcpy(str_from, stilo_string_get(string_from), nbytes);
+	stilo_string_unlock(string_from);
 	str_from[nbytes] = '\0';
 
 	if (stilo_string_len_get(string_to) >= sizeof(str_to)) {
@@ -2801,7 +2823,9 @@ systemdict_renamefile(cw_stilt_t *a_stilt)
 		return;
 	}
 	nbytes = stilo_string_len_get(string_to);
+	stilo_string_lock(string_to);
 	memcpy(str_to, stilo_string_get(string_to), nbytes);
+	stilo_string_unlock(string_to);
 	str_to[nbytes] = '\0';
 
 	if (rename(str_from, str_to) == -1) {
@@ -2948,8 +2972,10 @@ systemdict_run(cw_stilt_t *a_stilt)
 	tfile = stils_push(tstack);
 	stilo_file_new(tfile, stilt_stil_get(a_stilt),
 	    stilt_currentlocking(a_stilt));
+	stilo_string_lock(stilo);
 	error = stilo_file_open(tfile, stilo_string_get(stilo),
 	    stilo_string_len_get(stilo), "r", 1);
+	stilo_string_unlock(stilo);
 	if (error) {
 		stils_pop(tstack);
 		stilt_error(a_stilt, error);
@@ -3441,7 +3467,9 @@ systemdict_system(cw_stilt_t *a_stilt)
 	}
 	slen = stilo_string_len_get(el);
 	path = (char *)_cw_malloc(slen + 1);
+	stilo_string_lock(el);
 	memcpy(path, stilo_string_get(el), slen);
+	stilo_string_unlock(el);
 	path[slen] = '\0';
 
 	/*
@@ -3456,7 +3484,9 @@ systemdict_system(cw_stilt_t *a_stilt)
 		}
 		slen = stilo_string_len_get(el);
 		argv[i] = (char *)_cw_malloc(slen + 1);
+		stilo_string_lock(el);
 		memcpy(argv[i], stilo_string_get(el), slen);
+		stilo_string_unlock(el);
 		argv[i][slen] = '\0';
 	}
 	argv[i] = NULL;
@@ -3492,8 +3522,10 @@ systemdict_system(cw_stilt_t *a_stilt)
 
 			memcpy(entry, stilo_name_str_get(key), key_len);
 			entry[key_len] = '=';
+			stilo_string_lock(val);
 			memcpy(&entry[key_len + 1], stilo_string_get(val),
 			    val_len);
+			stilo_string_lock(val);
 			entry[key_len + 1 + val_len] = '\0';
 
 			envp[i] = entry;
@@ -3695,8 +3727,10 @@ systemdict_token(cw_stilt_t *a_stilt)
 		/* Reset the error value. */
 		stilt_error_set(a_stilt, STILTE_NONE);
 
+		stilo_string_lock(tstilo);
 		nscanned = stilt_token(a_stilt, &stilts,
 		    stilo_string_get(tstilo), stilo_string_len_get(tstilo));
+		stilo_string_unlock(tstilo);
 		if (stilt_error_get(a_stilt)) {
 			stils_pop(tstack);
 			stilts_delete(&stilts, a_stilt);
@@ -3906,7 +3940,9 @@ systemdict_unlink(cw_stilt_t *a_stilt)
 		nbytes = stilo_string_len_get(string);
 	else
 		nbytes = sizeof(str) - 1;
+	stilo_string_lock(string);
 	memcpy(str, stilo_string_get(string), nbytes);
+	stilo_string_unlock(string);
 	str[nbytes] = '\0';
 
 	stils_pop(ostack);
@@ -4045,8 +4081,10 @@ systemdict_writestring(cw_stilt_t *a_stilt)
 		return;
 	}
 
+	stilo_string_lock(string);
 	error = stilo_file_write(file, stilo_string_get(string),
 	    stilo_string_len_get(string));
+	stilo_string_unlock(string);
 	if (error) {
 		stilt_error(a_stilt, error);
 		return;

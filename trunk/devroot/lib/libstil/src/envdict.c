@@ -43,7 +43,9 @@ envdict_l_populate(cw_stilo_t *a_dict, cw_stil_t *a_stil, char **a_envp)
 			/* Create value. */
 			stilo_string_new(&val_stilo, a_stil, TRUE, val_len);
 			t_str = stilo_string_get(&val_stilo);
+			stilo_string_lock(&val_stilo);
 			memcpy(t_str, val_str, val_len);
+			stilo_string_unlock(&val_stilo);
 
 			/* Insert into dictionary. */
 			stilo_dict_def(a_dict, a_stil, &key_stilo, &val_stilo);
