@@ -22,7 +22,7 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstash.h libstash_incs.h arena.h bhp.h buf.h cnd.h dbg.h jtl.h
+  local incs = libstash.h libstash_incs.h arena.h bhp.h buf.h cnd.h dbg.h
                list.h mem.h mq.h mtx.h oh.h out.h pezz.h res.h ring.h rwl.h
                sem.h thd.h treen.h tsd.h;
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
@@ -33,7 +33,7 @@
 
 /* Include files that are _not_ installed. */
 {
-  local priv_incs = arena_p.h bhp_p.h buf_p.h dbg_p.h jtl_p.h list_p.h mem_l.h
+  local priv_incs = arena_p.h bhp_p.h buf_p.h dbg_p.h list_p.h mem_l.h
                     mem_p.h oh_p.h out_p.h res_p.h treen_p.h;
   priv_incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [priv_incs]];
 
@@ -41,7 +41,7 @@
 }
 
 /* Source files. */
-LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c cnd.c dbg.c jtl.c list.c mem.c
+LIBSTASH_SRCS = libstash.c arena.c bhp.c buf.c cnd.c dbg.c list.c mem.c
                 mq.c mtx.c oh.c out.c pezz.c res.c ring.c rwl.c sem.c thd.c
                 treen.c tsd.c;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
@@ -58,7 +58,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
 /* Simple tests.  Output is diff'ed with the expected (.exp file) output. */
 {
   local ctests = c_arena_a.c c_bhp_a.c c_bhp_b.c c_buf_a.c c_buf_b.c c_buf_c.c 
-                 c_buf_d.c c_buf_e.c c_cnd_a.c c_jtl_a.c c_libstash_a.c
+                 c_buf_d.c c_buf_e.c c_cnd_a.c c_libstash_a.c
                  c_list_a.c c_mq_a.c c_mtx_a.c c_oh_a.c c_oh_b.c c_oh_c.c
                  c_out_a.c c_pezz_a.c c_res_a.c c_ring_a.c c_rwl_a.c c_sem_a.c
                  c_thd_a.c c_treen_a.c;

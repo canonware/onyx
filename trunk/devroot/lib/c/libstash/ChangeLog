@@ -1,3 +1,7 @@
+2000-02-05  Jason Evans  <jasone@canonware.com>
+
+	* : Remove the jtl class.
+
 2000-02-04  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/ring.h: Remove automatic deallocation code for
