@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#include "libsock/libsock.h"
+#include <libsock/libsock.h>
 
 /* Command line defaults. */
 #define _LIBSOCK_BLOW_DEFAULT_NSOCKS 1

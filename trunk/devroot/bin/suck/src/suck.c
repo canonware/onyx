@@ -13,7 +13,7 @@
  *
  ****************************************************************************/
 
-#include "libsock/libsock.h"
+#include <libsock/libsock.h>
 
 #define _LIBSOCK_SUCK_MAX_CONNS 100000
 

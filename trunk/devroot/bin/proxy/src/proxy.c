@@ -13,7 +13,7 @@
  *
  ****************************************************************************/
 
-#include "libsock/libsock.h"
+#include <libsock/libsock.h>
 
 #include <signal.h>
 #include <sys/stat.h>

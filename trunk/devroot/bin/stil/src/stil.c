@@ -9,7 +9,7 @@
  *
  ****************************************************************************/
 
-#include "../include/libstil/libstil.h"
+#include <libstil/libstil.h>
 #include <libstash/libstash.h>
 
 #include <sys/types.h>

@@ -22,7 +22,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include "libsock/libsock.h"
+#include <libsock/libsock.h>
 
 typedef enum {
 	NONE, PRETTY, HEX, ASCII
