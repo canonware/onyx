@@ -762,6 +762,8 @@ protected, but element reads are not protected.
 deadlocks due to implicit file locking.
 \item[hook: ] No implicit locking is done for hooks.
 \item[mutex: ] No implicit locking is done for mutexes.
+\item[regex: ] No implicit locking is done for regexes.
+\item[regsub: ] No implicit locking is done for regsubs.
 \item[stack: ] All stack operations are protected.  There are no potential
 deadlocks due to implicit stack locking.  However, there are races in stack
 copying, such that the results of copying a stack that is concurrently being
