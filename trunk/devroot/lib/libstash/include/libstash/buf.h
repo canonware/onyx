@@ -16,7 +16,7 @@
  *
  ****************************************************************************/
 
-#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
 #define _CW_BUF_MAGIC 0xb00f0001
 #define _CW_BUFEL_MAGIC 0xb00f0002
 #define _CW_BUFC_MAGIC 0xb00f0003
@@ -32,7 +32,7 @@ typedef struct cw_bufel_s cw_bufel_t;
 struct cw_bufpool_s
 {
   cw_bool_t is_malloced;
-#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
 #ifdef _CW_REENTRANT
@@ -45,7 +45,7 @@ struct cw_bufpool_s
 
 typedef struct
 {
-#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
 #ifdef _CW_REENTRANT
@@ -60,7 +60,7 @@ typedef struct
 
 struct cw_bufel_s
 {
-#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
   cw_bool_t is_malloced;
@@ -77,7 +77,7 @@ typedef struct
 
 struct cw_buf_s
 {
-#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
   cw_uint32_t magic;
 #endif
   cw_bool_t is_malloced;
@@ -115,7 +115,7 @@ struct cw_buf_s
  * Constructor.
  *
  ****************************************************************************/
-#define bufpool_new _CW_NS_STASH(bufpool_new)
+#define bufpool_new _CW_NS_LIBSTASH(bufpool_new)
 cw_bufpool_t *
 bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
 	    cw_uint32_t a_max_spare_buffers);
@@ -135,7 +135,7 @@ bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
  * Destructor.
  *
  ****************************************************************************/
-#define bufpool_delete _CW_NS_STASH(bufpool_delete)
+#define bufpool_delete _CW_NS_LIBSTASH(bufpool_delete)
 void
 bufpool_delete(cw_bufpool_t * a_bufpool);
 
@@ -154,7 +154,7 @@ bufpool_delete(cw_bufpool_t * a_bufpool);
  * Return the size of the buffers that a_bufpool is using.
  *
  ****************************************************************************/
-#define bufpool_get_buffer_size _CW_NS_STASH(bufpool_get_buffer_size)
+#define bufpool_get_buffer_size _CW_NS_LIBSTASH(bufpool_get_buffer_size)
 cw_uint32_t
 bufpool_get_buffer_size(cw_bufpool_t * a_bufpool);
 
@@ -174,7 +174,7 @@ bufpool_get_buffer_size(cw_bufpool_t * a_bufpool);
  *
  ****************************************************************************/
 #define bufpool_get_max_spare_buffers \
-        _CW_NS_STASH(bufpool_get_max_spare_buffers)
+        _CW_NS_LIBSTASH(bufpool_get_max_spare_buffers)
 cw_uint32_t
 bufpool_get_max_spare_buffers(cw_bufpool_t * a_bufpool);
 
@@ -196,7 +196,7 @@ bufpool_get_max_spare_buffers(cw_bufpool_t * a_bufpool);
  *
  ****************************************************************************/
 #define bufpool_set_max_spare_buffers \
-        _CW_NS_STASH(bufpool_set_max_spare_buffers)
+        _CW_NS_LIBSTASH(bufpool_set_max_spare_buffers)
 void
 bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
 			      cw_uint32_t a_max_spare_buffers);
@@ -216,7 +216,7 @@ bufpool_set_max_spare_buffers(cw_bufpool_t * a_bufpool,
  * Return a buffer of size bufpool_get_buffer_size(a_bufpool).
  *
  ****************************************************************************/
-#define bufpool_get_buffer _CW_NS_STASH(bufpool_get_buffer)
+#define bufpool_get_buffer _CW_NS_LIBSTASH(bufpool_get_buffer)
 void *
 bufpool_get_buffer(cw_bufpool_t * a_bufpool);
 
@@ -237,7 +237,7 @@ bufpool_get_buffer(cw_bufpool_t * a_bufpool);
  * Release a_buffer and let a_bufpool deal with it.
  *
  ****************************************************************************/
-#define bufpool_put_buffer _CW_NS_STASH(bufpool_put_buffer)
+#define bufpool_put_buffer _CW_NS_LIBSTASH(bufpool_put_buffer)
 void
 bufpool_put_buffer(void * a_bufpool, void * a_buffer);
 
@@ -258,7 +258,7 @@ bufpool_put_buffer(void * a_bufpool, void * a_buffer);
  * Constructor.
  *
  ****************************************************************************/
-#define buf_new _CW_NS_STASH(buf_new)
+#define buf_new _CW_NS_LIBSTASH(buf_new)
 #ifdef _CW_REENTRANT
 cw_buf_t *
 buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe);
@@ -282,7 +282,7 @@ buf_new(cw_buf_t * a_buf);
  * Destructor.
  *
  ****************************************************************************/
-#define buf_delete _CW_NS_STASH(buf_delete)
+#define buf_delete _CW_NS_LIBSTASH(buf_delete)
 void
 buf_delete(cw_buf_t * a_buf);
 
@@ -301,7 +301,7 @@ buf_delete(cw_buf_t * a_buf);
  * Return the amount of valid data in bytes.
  *
  ****************************************************************************/
-#define buf_get_size _CW_NS_STASH(buf_get_size)
+#define buf_get_size _CW_NS_LIBSTASH(buf_get_size)
 cw_uint32_t
 buf_get_size(cw_buf_t * a_buf);
 
@@ -326,7 +326,7 @@ buf_get_size(cw_buf_t * a_buf);
  * buffers and return a pointer to it.
  *
  ****************************************************************************/
-#define buf_get_iovec _CW_NS_STASH(buf_get_iovec)
+#define buf_get_iovec _CW_NS_LIBSTASH(buf_get_iovec)
 const struct iovec *
 buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count);
 
@@ -354,7 +354,7 @@ buf_get_iovec(cw_buf_t * a_buf, int * a_iovec_count);
  * Catenate two bufs.  a_b is left unmodified if a_preserve is TRUE.
  *
  ****************************************************************************/
-#define buf_append_buf _CW_NS_STASH(buf_append_buf)
+#define buf_append_buf _CW_NS_LIBSTASH(buf_append_buf)
 void
 buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
 
@@ -378,7 +378,7 @@ buf_catenate_buf(cw_buf_t * a_a, cw_buf_t * a_b, cw_bool_t a_preserve);
  * leave the remainder in a_b.
  *
  ****************************************************************************/
-#define buf_split _CW_NS_STASH(buf_split)
+#define buf_split _CW_NS_LIBSTASH(buf_split)
 void
 buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
 
@@ -399,7 +399,7 @@ buf_split(cw_buf_t * a_a, cw_buf_t * a_b, cw_uint32_t a_offset);
  * Prepend the data from a_bufel to a_buf.  a_bufel is not modified.
  *
  ****************************************************************************/
-#define buf_prepend_bufel _CW_NS_STASH(buf_prepend_bufel)
+#define buf_prepend_bufel _CW_NS_LIBSTASH(buf_prepend_bufel)
 void
 buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
@@ -420,7 +420,7 @@ buf_prepend_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
  * Append the data from a_bufel to a_buf.  a_bufel is not modified.
  *
  ****************************************************************************/
-#define buf_append_bufel _CW_NS_STASH(buf_append_bufel)
+#define buf_append_bufel _CW_NS_LIBSTASH(buf_append_bufel)
 void
 buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
 
@@ -441,7 +441,7 @@ buf_append_bufel(cw_buf_t * a_buf, cw_bufel_t * a_bufel);
  * Release a_amount bytes from the head of a_buf.
  *
  ****************************************************************************/
-#define buf_release_head_data _CW_NS_STASH(buf_release_head_data)
+#define buf_release_head_data _CW_NS_LIBSTASH(buf_release_head_data)
 cw_bool_t
 buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount);
 
@@ -462,7 +462,7 @@ buf_release_head_data(cw_buf_t * a_buf, cw_uint32_t a_amount);
  * Release a_amount bytes from the tail of a_buf.
  *
  ****************************************************************************/
-#define buf_release_tail_data _CW_NS_STASH(buf_release_tail_data)
+#define buf_release_tail_data _CW_NS_LIBSTASH(buf_release_tail_data)
 cw_bool_t
 buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount);
 
@@ -483,7 +483,7 @@ buf_release_tail_data(cw_buf_t * a_buf, cw_uint32_t a_amount);
  * Return the uint8 at offset a_offset.
  *
  ****************************************************************************/
-#define buf_get_uint8 _CW_NS_STASH(buf_get_uint8)
+#define buf_get_uint8 _CW_NS_LIBSTASH(buf_get_uint8)
 cw_uint8_t
 buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset);
 
@@ -506,7 +506,7 @@ buf_get_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset);
  * Set the uint8 at offset a_offset to a_val.
  *
  ****************************************************************************/
-#define buf_set_uint8 _CW_NS_STASH(buf_set_uint8)
+#define buf_set_uint8 _CW_NS_LIBSTASH(buf_set_uint8)
 void
 buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val);
 
@@ -527,7 +527,7 @@ buf_set_uint8(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint8_t a_val);
  * Return the uint32 at offset a_offset.
  *
  ****************************************************************************/
-#define buf_get_uint32 _CW_NS_STASH(buf_get_uint32)
+#define buf_get_uint32 _CW_NS_LIBSTASH(buf_get_uint32)
 cw_uint32_t
 buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset);
 
@@ -550,7 +550,7 @@ buf_get_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset);
  * Set the uint32 at offset a_offset to a_val.
  *
  ****************************************************************************/
-#define buf_set_uint32 _CW_NS_STASH(buf_set_uint32)
+#define buf_set_uint32 _CW_NS_LIBSTASH(buf_set_uint32)
 void
 buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
 
@@ -571,7 +571,7 @@ buf_set_uint32(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint32_t a_val);
  * Return the uint64 at offset a_offset.
  *
  ****************************************************************************/
-#define buf_get_uint64 _CW_NS_STASH(buf_get_uint64)
+#define buf_get_uint64 _CW_NS_LIBSTASH(buf_get_uint64)
 cw_uint64_t
 buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
 
@@ -594,7 +594,7 @@ buf_get_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset);
  * Set the uint64 at offset a_offset to a_val.
  *
  ****************************************************************************/
-#define buf_set_uint64 _CW_NS_STASH(buf_set_uint64)
+#define buf_set_uint64 _CW_NS_LIBSTASH(buf_set_uint64)
 void
 buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
 
@@ -613,7 +613,7 @@ buf_set_uint64(cw_buf_t * a_buf, cw_uint32_t a_offset, cw_uint64_t a_val);
  * bufel constructor.
  *
  ****************************************************************************/
-#define bufel_new _CW_NS_STASH(bufel_new)
+#define bufel_new _CW_NS_LIBSTASH(bufel_new)
 cw_bufel_t *
 bufel_new(cw_bufel_t * a_bufel);
 
@@ -632,7 +632,7 @@ bufel_new(cw_bufel_t * a_bufel);
  * bufel destructor.
  *
  ****************************************************************************/
-#define bufel_delete _CW_NS_STASH(bufel_delete)
+#define bufel_delete _CW_NS_LIBSTASH(bufel_delete)
 void
 bufel_delete(cw_bufel_t * a_bufel);
 
@@ -651,7 +651,7 @@ bufel_delete(cw_bufel_t * a_bufel);
  * Return the total size of a_bufel's buffer.
  * 
  ****************************************************************************/
-#define bufel_get_size _CW_NS_STASH(bufel_get_size)
+#define bufel_get_size _CW_NS_LIBSTASH(bufel_get_size)
 cw_uint32_t
 bufel_get_size(cw_bufel_t * a_bufel);
 
@@ -671,7 +671,7 @@ bufel_get_size(cw_bufel_t * a_bufel);
  * Return the offset to the begin pointer.
  *
  ****************************************************************************/
-#define bufel_get_beg_offset _CW_NS_STASH(bufel_get_beg_offset)
+#define bufel_get_beg_offset _CW_NS_LIBSTASH(bufel_get_beg_offset)
 cw_uint32_t
 bufel_get_beg_offset(cw_bufel_t * a_bufel);
 
@@ -695,7 +695,7 @@ bufel_get_beg_offset(cw_bufel_t * a_bufel);
  * Set the begin pointer offset.
  *
  ****************************************************************************/
-#define bufel_set_beg_offset _CW_NS_STASH(bufel_set_beg_offset)
+#define bufel_set_beg_offset _CW_NS_LIBSTASH(bufel_set_beg_offset)
 cw_bool_t
 bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
 
@@ -714,7 +714,7 @@ bufel_set_beg_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
  * Return the offset to the end pointer.
  *
  ****************************************************************************/
-#define bufel_get_end_offset _CW_NS_STASH(bufel_get_end_offset)
+#define bufel_get_end_offset _CW_NS_LIBSTASH(bufel_get_end_offset)
 cw_uint32_t
 bufel_get_end_offset(cw_bufel_t * a_bufel);
 
@@ -738,7 +738,7 @@ bufel_get_end_offset(cw_bufel_t * a_bufel);
  * Set the end pointer offset.
  *
  ****************************************************************************/
-#define bufel_set_end_offset _CW_NS_STASH(bufel_set_end_offset)
+#define bufel_set_end_offset _CW_NS_LIBSTASH(bufel_set_end_offset)
 cw_bool_t
 bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
 
@@ -759,7 +759,7 @@ bufel_set_end_offset(cw_bufel_t * a_bufel, cw_uint32_t a_offset);
  * offset marker.
  *
  ****************************************************************************/
-#define bufel_get_valid_data_size _CW_NS_STASH(bufel_get_valid_data_size)
+#define bufel_get_valid_data_size _CW_NS_LIBSTASH(bufel_get_valid_data_size)
 cw_uint32_t
 bufel_get_valid_data_size(cw_bufel_t * a_bufel);
 
@@ -778,7 +778,7 @@ bufel_get_valid_data_size(cw_bufel_t * a_bufel);
  * Return a pointer to the internal buffer.
  *
  ****************************************************************************/
-#define bufel_get_data_ptr _CW_NS_STASH(bufel_get_data_ptr)
+#define bufel_get_data_ptr _CW_NS_LIBSTASH(bufel_get_data_ptr)
 const void *
 bufel_get_data_ptr(cw_bufel_t * a_bufel);
 
@@ -807,7 +807,7 @@ bufel_get_data_ptr(cw_bufel_t * a_bufel);
  * already an internal buffer, unreference the old one.
  *
  ****************************************************************************/
-#define bufel_set_data_ptr _CW_NS_STASH(bufel_set_data_ptr)
+#define bufel_set_data_ptr _CW_NS_LIBSTASH(bufel_set_data_ptr)
 void
 bufel_set_data_ptr(cw_bufel_t * a_bufel, void * a_buf, cw_uint32_t a_size,
 		   void (*a_free_func)(void * free_arg, void * buffer_p),

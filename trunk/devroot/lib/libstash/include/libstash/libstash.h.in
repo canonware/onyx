@@ -135,13 +135,13 @@ typedef enum
  * Namespace setup.
  */
 
-#  define _CW_STASH_PREFIX _libstash_
+#  define _CW_LIBSTASH_PREFIX _libstash_
 
 #  define _cw_ns_glue(x,y,z) x##y##z
 #  define _cw_ns_xglue(x,y,z) _cw_ns_glue(x,y,z)
 
 /* Create one of these for each namespace. */
-#  define _CW_NS_STASH(x) _cw_ns_xglue(_CW_STASH_PREFIX,,x)
+#  define _CW_NS_LIBSTASH(x) _cw_ns_xglue(_CW_LIBSTASH_PREFIX,,x)
 
 /*
  * Project headers to always be included.
@@ -153,7 +153,7 @@ typedef enum
  * libstash.h and, say, libsqrl.h are included.  Unfortunately, it has to be in
  * the middle of this file because what follows depends on stuff that is
  * included in/by stash_incs.h. */
-#include "stash_incs.h"
+#include "libstash_incs.h"
 
 #ifndef _LIBSTASH_H_B_
 #  define _LIBSTASH_H_B_
@@ -161,24 +161,24 @@ typedef enum
 /*
  * libstash initialization and shutdown function prototypes.
  */
-#  define libstash_init _CW_NS_STASH(libstash_init)
+#  define libstash_init _CW_NS_LIBSTASH(libstash_init)
 void
 libstash_init(void);
   
-#  define libstash_shutdown _CW_NS_STASH(libstash_shutdown)
+#  define libstash_shutdown _CW_NS_LIBSTASH(libstash_shutdown)
 void
 libstash_shutdown(void);
   
 /*
  * Global variables.
  */
-#define g_mem _CW_NS_STASH(g_mem)
+#define g_mem _CW_NS_LIBSTASH(g_mem)
 extern cw_mem_t * g_mem;
 
-#define g_dbg _CW_NS_STASH(g_dbg)
+#define g_dbg _CW_NS_LIBSTASH(g_dbg)
 extern cw_dbg_t * g_dbg;
 
-#define g_log _CW_NS_STASH(g_log)
+#define g_log _CW_NS_LIBSTASH(g_log)
 extern cw_log_t * g_log;
 
 /*

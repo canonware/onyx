@@ -43,7 +43,7 @@ struct cw_lexertok_s
  * Constructor.
  *
  ****************************************************************************/
-#define lex_new _CW_NS_STASH(lex_new)
+#define lex_new _CW_NS_LIBSTASH(lex_new)
 cw_lex_t *
 lex_new();
 
@@ -52,7 +52,7 @@ lex_new();
  * Destructor.
  *
  ****************************************************************************/
-#define lex_delete _CW_NS_STASH(lex_delete)
+#define lex_delete _CW_NS_LIBSTASH(lex_delete)
 void
 lex_delete(cw_lex_t * a_lex);
 
@@ -183,7 +183,7 @@ lex_delete(cw_lex_t * a_lex);
  * ----------------+---------------------------------------------------------
  *
  ****************************************************************************/
-#define lex_insert_regex _CW_NS_STASH(lex_insert_regex)
+#define lex_insert_regex _CW_NS_LIBSTASH(lex_insert_regex)
 cw_bool_t
 lex_insert_regex(cw_lex_t * a_lex, const char * a_regex, cw_uint32_t a_tok_val);
 
@@ -193,7 +193,7 @@ lex_insert_regex(cw_lex_t * a_lex, const char * a_regex, cw_uint32_t a_tok_val);
  * until lex_build_table() is called.
  *
  ****************************************************************************/
-#define lex_delete_regex _CW_NS_STASH(lex_delete_regex)
+#define lex_delete_regex _CW_NS_LIBSTASH(lex_delete_regex)
 const char *
 lex_delete_regex(cw_lex_t * a_lex, const char * a_regex);
 
@@ -202,7 +202,7 @@ lex_delete_regex(cw_lex_t * a_lex, const char * a_regex);
  * Compiles the regexes into a useable state table.
  *
  ****************************************************************************/
-#define lex_build_table _CW_NS_STASH(lex_build_table)
+#define lex_build_table _CW_NS_LIBSTASH(lex_build_table)
 cw_bool_t
 lex_build_table(cw_lex_t * a_lex);
 
@@ -211,7 +211,7 @@ lex_build_table(cw_lex_t * a_lex);
  * Constructor.
  *
  ****************************************************************************/
-#define lexer_new _CW_NS_STASH(lexer_new)
+#define lexer_new _CW_NS_LIBSTASH(lexer_new)
 cw_lexer_t *
 lexer_new(cw_lexer_t * a_lexer);
 
@@ -220,7 +220,7 @@ lexer_new(cw_lexer_t * a_lexer);
  * Destructor.
  *
  ****************************************************************************/
-#define lexer_delete _CW_NS_STASH(lexer_delete)
+#define lexer_delete _CW_NS_LIBSTASH(lexer_delete)
 void
 lexer_delete(cw_lexer_t * a_lexer);
 
@@ -229,7 +229,7 @@ lexer_delete(cw_lexer_t * a_lexer);
  * Set the lex state machine to be used.
  *
  ****************************************************************************/
-#define lexer_set_lex _CW_NS_STASH(lexer_set_lex)
+#define lexer_set_lex _CW_NS_LIBSTASH(lexer_set_lex)
 void
 lexer_set_lex(cw_lexer_t * a_lexer, cw_lex_t * a_lex);
 
@@ -240,7 +240,7 @@ lexer_set_lex(cw_lexer_t * a_lexer, cw_lex_t * a_lex);
  * the current buf.
  *
  ****************************************************************************/
-#define lexer_connect_buf _CW_NS_STASH(lexer_connect_buf)
+#define lexer_connect_buf _CW_NS_LIBSTASH(lexer_connect_buf)
 cw_bool_t
 lexer_connect_buf(cw_lexer_t * a_lexer, cw_buf_t * a_buf);
 
@@ -249,7 +249,7 @@ lexer_connect_buf(cw_lexer_t * a_lexer, cw_buf_t * a_buf);
  * Gets a token, as recognized by the internal buf instance.
  *
  ****************************************************************************/
-#define lexer_get_token _CW_NS_STASH(lexer_get_token)
+#define lexer_get_token _CW_NS_LIBSTASH(lexer_get_token)
 cw_lexertok_t *
 lexer_get_token(cw_lexer_t * a_lexer);
 
@@ -261,7 +261,7 @@ lexer_get_token(cw_lexer_t * a_lexer);
  * immediately following the previous token match.
  *
  ****************************************************************************/
-#define lexer_get_line_num _CW_NS_STASH(lexer_get_line_num)
+#define lexer_get_line_num _CW_NS_LIBSTASH(lexer_get_line_num)
 cw_uint32_t
 lexer_get_line_num(cw_lexer_t * a_lexer, cw_bool_t a_last_or_next_tok);
 
@@ -271,7 +271,7 @@ lexer_get_line_num(cw_lexer_t * a_lexer, cw_bool_t a_last_or_next_tok);
  * token match).
  *
  ****************************************************************************/
-#define lexer_set_line_num _CW_NS_STASH(lexer_set_line_num)
+#define lexer_set_line_num _CW_NS_LIBSTASH(lexer_set_line_num)
 cw_bool_t
 lexer_set_line_num(cw_lexer_t * a_lexer, cw_uint32_t a_line_num);
 
@@ -283,7 +283,7 @@ lexer_set_line_num(cw_lexer_t * a_lexer, cw_uint32_t a_line_num);
  * following the previous token match.
  *
  ****************************************************************************/
-#define lexer_get_col_num _CW_NS_STASH(lexer_get_col_num)
+#define lexer_get_col_num _CW_NS_LIBSTASH(lexer_get_col_num)
 cw_uint32_t
 lexer_get_col_num(cw_lexer_t * a_lexer, cw_bool_t a_last_or_next_tok);
 
@@ -297,7 +297,7 @@ lexer_get_col_num(cw_lexer_t * a_lexer, cw_bool_t a_last_or_next_tok);
  * successive calls to lexer_reject() fast.
  *
  ****************************************************************************/
-#define lexer_reject _CW_NS_STASH(lexer_reject)
+#define lexer_reject _CW_NS_LIBSTASH(lexer_reject)
 cw_bool_t
 lexer_reject(cw_lexer_t * a_lexer);
 
@@ -309,7 +309,7 @@ lexer_reject(cw_lexer_t * a_lexer);
  * much more efficient.
  *
  ****************************************************************************/
-#define lexer_push_text _CW_NS_STASH(lexer_push_text)
+#define lexer_push_text _CW_NS_LIBSTASH(lexer_push_text)
 cw_bool_t
 lexer_push_text(cw_lexer_t * a_lexer, cw_uint32_t a_strlen,
 		const char * a_text);
@@ -319,7 +319,7 @@ lexer_push_text(cw_lexer_t * a_lexer, cw_uint32_t a_strlen,
  * Backs up the input by a_num_chars characters.
  *
  ****************************************************************************/
-#define lexer_less _CW_NS_STASH(lexer_less)
+#define lexer_less _CW_NS_LIBSTASH(lexer_less)
 cw_bool_t
 lexer_less(cw_lexer_t * a_lexer, cw_uint32_t a_num_chars);
 
@@ -328,7 +328,7 @@ lexer_less(cw_lexer_t * a_lexer, cw_uint32_t a_num_chars);
  * Tells the lexer to prepend the previous match to the next match.
  *
  ****************************************************************************/
-#define lexer_more _CW_NS_STASH(lexer_more)
+#define lexer_more _CW_NS_LIBSTASH(lexer_more)
 cw_bool_t
 lexer_more(cw_lexer_t * a_lexer);
 
@@ -337,7 +337,7 @@ lexer_more(cw_lexer_t * a_lexer);
  * Constructor.
  *
  ****************************************************************************/
-#define lexertok_new _CW_NS_STASH(lexertok_new)
+#define lexertok_new _CW_NS_LIBSTASH(lexertok_new)
 cw_lexertok_t *
 lexertok_new(cw_lexertok_t * a_lexertok);
 
@@ -346,7 +346,7 @@ lexertok_new(cw_lexertok_t * a_lexertok);
  * Destructor.
  *
  ****************************************************************************/
-#define lexertok_delete _CW_NS_STASH(lexertok_delete)
+#define lexertok_delete _CW_NS_LIBSTASH(lexertok_delete)
 void
 lexertok_delete(cw_lexertok_t * a_lexertok);
 
@@ -355,7 +355,7 @@ lexertok_delete(cw_lexertok_t * a_lexertok);
  * Returns the token value.
  *
  ****************************************************************************/
-#define lexertok_get_tok_val _CW_NS_STASH(lexertok_get_tok_val)
+#define lexertok_get_tok_val _CW_NS_LIBSTASH(lexertok_get_tok_val)
 cw_uint32_t
 lexertok_get_tok_val(cw_lexertok_t * a_lexertok);
 
@@ -367,6 +367,6 @@ lexertok_get_tok_val(cw_lexertok_t * a_lexertok);
  * discarded, resulting in undefined behavior for this function.
  *
  ****************************************************************************/
-#define lexertok_get_str _CW_NS_STASH(lexertok_get_str)
+#define lexertok_get_str _CW_NS_LIBSTASH(lexertok_get_str)
 const char *
 lexertok_get_str(cw_lexertok_t * a_lexertok);

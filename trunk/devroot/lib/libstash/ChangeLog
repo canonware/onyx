@@ -1,3 +1,7 @@
+1999-02-18  Jason Evans  <jasone@canonware.com>
+
+	* Makefile: Change _STASH_* to _LIBSTASH_*.
+
 1999-02-15  Jason Evans  <jasone@canonware.com>
 
 	* Makefile.bsd.in : Add Makefile for BSD make.

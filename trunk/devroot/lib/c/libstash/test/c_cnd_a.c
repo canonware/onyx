@@ -18,7 +18,7 @@
 
 #include <sys/time.h>
 
-#define _STASH_TEST_NUM_THREADS 10
+#define _LIBSTASH_TEST_NUM_THREADS 10
 
 struct cw_foo_s
 {
@@ -50,7 +50,7 @@ main()
 {
   cw_cnd_t cond_a, * cond_b;
   cw_mtx_t mutex;
-  cw_thd_t threads[_STASH_TEST_NUM_THREADS], thread;
+  cw_thd_t threads[_LIBSTASH_TEST_NUM_THREADS], thread;
   struct cw_foo_s foo_var;
   struct timeval now;
   struct timespec timeout;
@@ -106,14 +106,14 @@ main()
 
   /* Test cnd_broadcast. */
   num_waiting = 0;
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_new(&threads[i], thread_entry_func, (void *) &foo_var);
   }
 
   /* Bad programming practice, but it works for this test. */
   mtx_lock(&mutex);
-  while (num_waiting < _STASH_TEST_NUM_THREADS)
+  while (num_waiting < _LIBSTASH_TEST_NUM_THREADS)
   {
     mtx_unlock(&mutex);
     usleep(10000);
@@ -123,7 +123,7 @@ main()
   cnd_broadcast(&cond_a);
   mtx_unlock(&mutex);
 
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
     thd_delete(&threads[i]);

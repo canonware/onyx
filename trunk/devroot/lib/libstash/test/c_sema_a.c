@@ -16,7 +16,7 @@
 
 #include <libstash/libstash_r.h>
 
-#define _STASH_TEST_NUM_THREADS 10
+#define _LIBSTASH_TEST_NUM_THREADS 10
 
 void *
 thread_entry_func(void * a_arg)
@@ -33,7 +33,7 @@ int
 main()
 {
   cw_sem_t sem_a, * sem_b;
-  cw_thd_t threads[_STASH_TEST_NUM_THREADS];
+  cw_thd_t threads[_LIBSTASH_TEST_NUM_THREADS];
   cw_uint32_t i;
   
   libstash_init();
@@ -55,30 +55,30 @@ main()
   
   _cw_assert(&sem_a == sem_new(&sem_a, 0));
 
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_new(&threads[i], thread_entry_func, (void *) &sem_a);
   }
 
-  sem_adjust(&sem_a, _STASH_TEST_NUM_THREADS);
+  sem_adjust(&sem_a, _LIBSTASH_TEST_NUM_THREADS);
   
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
     thd_delete(&threads[i]);
   }
   
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_new(&threads[i], thread_entry_func, (void *) &sem_a);
   }
 
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     sem_post(&sem_a);
   }
   
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&threads[i]);
     thd_delete(&threads[i]);

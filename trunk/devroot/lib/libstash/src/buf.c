@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_BUF
+#define _LIBSTASH_USE_BUF
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else
@@ -39,7 +39,7 @@ bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
     retval->is_malloced = FALSE;
   }
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   retval->magic = _CW_BUFPOOL_MAGIC;
 #endif
 
@@ -68,7 +68,7 @@ bufpool_delete(cw_bufpool_t * a_bufpool)
   _cw_check_ptr(a_bufpool);
   _cw_assert(a_bufpool->magic == _CW_BUFPOOL_MAGIC);
   
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   a_bufpool->magic = 0;
 #endif
 
@@ -224,7 +224,7 @@ buf_new(cw_buf_t * a_buf, cw_bool_t a_is_threadsafe)
     retval->is_malloced = FALSE;
   }
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   retval->magic = _CW_BUF_MAGIC;
 #endif
 
@@ -272,7 +272,7 @@ buf_delete(cw_buf_t * a_buf)
 			      % a_buf->array_size].bufel);
   }
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   a_buf->magic = 0;
 #endif
 
@@ -1338,7 +1338,7 @@ bufel_new(cw_bufel_t * a_bufel)
     retval->is_malloced = FALSE;
   }
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   retval->magic = _CW_BUFEL_MAGIC;
 #endif
   
@@ -1355,7 +1355,7 @@ bufel_delete(cw_bufel_t * a_bufel)
     bufc_ref_decrement(a_bufel->bufc);
   }
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   a_bufel->magic = 0;
 #endif
 
@@ -1519,7 +1519,7 @@ bufc_new(void * a_buffer, cw_uint32_t a_size,
 
   retval = (cw_bufc_t *) _cw_malloc(sizeof(cw_bufc_t));
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   retval->magic = _CW_BUFC_MAGIC;
 #endif
 
@@ -1547,7 +1547,7 @@ bufc_delete(cw_bufc_t * a_bufc)
   _cw_check_ptr(a_bufc);
   _cw_assert(a_bufc->magic == _CW_BUFC_MAGIC);
   
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
   a_bufc->magic = 0;
 #endif
 

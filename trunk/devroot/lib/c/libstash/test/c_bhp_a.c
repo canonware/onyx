@@ -14,11 +14,11 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_BHP
+#define _LIBSTASH_USE_BHP
 #include <libstash/libstash_r.h>
 
 /* Make sure that nums is at least as large. */
-#define _STASH_TEST_NUM_NODES 10
+#define _LIBSTASH_TEST_NUM_NODES 10
 
 /****************************************************************************
  *
@@ -76,15 +76,15 @@ main()
 
   bhp_set_priority_compare(h, prio_comp);
 
-  /* Insert all _STASH_TEST_NUM_NODES numbers into the heap. */
-  for (i = 0; i < _STASH_TEST_NUM_NODES; i++)
+  /* Insert all _LIBSTASH_TEST_NUM_NODES numbers into the heap. */
+  for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
   {
     bhp_insert(h, &(nums[i]), &(nums[i]));
     bhp_dump(h);
     log_printf(g_log, "===========================\n");
   }
 
-  for (i = 0; i < _STASH_TEST_NUM_NODES; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
   {
     _cw_assert(FALSE == bhp_del_min(h, (void **) &a, (void **) &b));
     log_printf(g_log, "i == %d, size == %d: %d, %d\n",

@@ -15,7 +15,7 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_LEX
+#define _LIBSTASH_USE_LEX
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else

@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_LIST
+#define _LIBSTASH_USE_LIST
 #include <libstash/libstash_r.h>
 
 int

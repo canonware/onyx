@@ -81,7 +81,7 @@ struct cw_res_s
  *
  *
  ****************************************************************************/
-#define res_new _CW_NS_STASH(res_new)
+#define res_new _CW_NS_LIBSTASH(res_new)
 cw_res_t *
 res_new(cw_res_t * a_res);
 
@@ -100,7 +100,7 @@ res_new(cw_res_t * a_res);
  *
  *
  ****************************************************************************/
-#define res_delete _CW_NS_STASH(res_delete)
+#define res_delete _CW_NS_LIBSTASH(res_delete)
 void
 res_delete(cw_res_t * a_res);
 
@@ -110,7 +110,7 @@ res_delete(cw_res_t * a_res);
  * Clears out all resources.
  *
  ****************************************************************************/
-#define res_clear _CW_NS_STASH(res_clear)
+#define res_clear _CW_NS_LIBSTASH(res_clear)
 void
 res_clear(cw_res_t * a_res);
 
@@ -129,7 +129,7 @@ res_clear(cw_res_t * a_res);
  *
  *
  ****************************************************************************/
-#define res_is_equal _CW_NS_STASH(res_is_equal)
+#define res_is_equal _CW_NS_LIBSTASH(res_is_equal)
 cw_bool_t
 res_is_equal(cw_res_t * a_res, cw_res_t * a_resther);
 
@@ -143,7 +143,7 @@ res_is_equal(cw_res_t * a_res, cw_res_t * a_resther);
  * Merges the resources contained in a_filename into the resource database.
  *
  ****************************************************************************/
-#define res_merge_file _CW_NS_STASH(res_merge_file)
+#define res_merge_file _CW_NS_LIBSTASH(res_merge_file)
 cw_bool_t
 res_merge_file(cw_res_t * a_res, const char * a_filename);
 
@@ -161,7 +161,7 @@ res_merge_file(cw_res_t * a_res, const char * a_filename);
  * Merges the resources into the resource database.
  *
  ****************************************************************************/
-#define res_merge_list _CW_NS_STASH(res_merge_list)
+#define res_merge_list _CW_NS_LIBSTASH(res_merge_list)
 cw_bool_t
 res_merge_list(cw_res_t * a_res, ...);
 
@@ -175,7 +175,7 @@ res_merge_list(cw_res_t * a_res, ...);
  * Returns the value associated with a_res_name if it exists.
  *
  ****************************************************************************/
-#define res_get_res_val _CW_NS_STASH(res_get_res_val)
+#define res_get_res_val _CW_NS_LIBSTASH(res_get_res_val)
 const char *
 res_get_res_val(cw_res_t * a_res, const char * a_res_name);
 
@@ -187,7 +187,7 @@ res_get_res_val(cw_res_t * a_res, const char * a_res_name);
  * found, return TRUE.
  *
  ****************************************************************************/
-#define res_extract_res _CW_NS_STASH(res_extract_res)
+#define res_extract_res _CW_NS_LIBSTASH(res_extract_res)
 cw_bool_t
 res_extract_res(cw_res_t * a_res, char * a_res_key,
 		char ** a_res_name, char ** a_res_val);
@@ -199,6 +199,6 @@ res_extract_res(cw_res_t * a_res, char * a_res_key,
  * the specified file and write to it.  Otherwise, use g_log.
  *
  ****************************************************************************/
-#define res_dump _CW_NS_STASH(res_dump)
+#define res_dump _CW_NS_LIBSTASH(res_dump)
 cw_bool_t
 res_dump(cw_res_t * a_res, char * a_filename);

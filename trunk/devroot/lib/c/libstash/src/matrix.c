@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_MATRIX
+#define _LIBSTASH_USE_MATRIX
 #include "libstash/libstash.h"
 
 #include <limits.h>
@@ -174,7 +174,7 @@ matrix_rebuild(cw_matrix_t * a_matrix)
   }
 }
 
-#ifdef _STASH_DBG
+#ifdef _LIBSTASH_DBG
 cw_sint32_t
 matrix_get_element(cw_matrix_t * a_matrix, cw_uint32_t a_x_pos,
 		   cw_uint32_t a_y_pos)

@@ -14,8 +14,8 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_OH
-#define _STASH_USE_THREAD
+#define _LIBSTASH_USE_OH
+#define _LIBSTASH_USE_THREAD
 #include <libstash/libstash_r.h>
 
 /* XXX This test leaks memory, but it doesn't affect the results. */

@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_MATRIX
+#define _LIBSTASH_USE_MATRIX
 #include <libstash/libstash_r.h>
 
 #include <limits.h>

@@ -23,7 +23,7 @@ typedef struct cw_log_s cw_log_t;
  * log constructor.
  *
  ****************************************************************************/
-#define log_new _CW_NS_STASH(log_new)
+#define log_new _CW_NS_LIBSTASH(log_new)
 cw_log_t *
 log_new();
 
@@ -33,7 +33,7 @@ log_new();
  * log destructor.
  *
  ****************************************************************************/
-#define log_delete _CW_NS_STASH(log_delete)
+#define log_delete _CW_NS_LIBSTASH(log_delete)
 void
 log_delete(cw_log_t * a_log);
 
@@ -44,7 +44,7 @@ log_delete(cw_log_t * a_log);
  * first closed.
  *
  ****************************************************************************/
-#define log_set_logfile _CW_NS_STASH(log_set_logfile)
+#define log_set_logfile _CW_NS_LIBSTASH(log_set_logfile)
 cw_bool_t
 log_set_logfile(cw_log_t * a_log, const char * a_logfile,
 		cw_bool_t a_overwrite);
@@ -55,7 +55,7 @@ log_set_logfile(cw_log_t * a_log, const char * a_logfile,
  * Run-of-the-mill printf()-alike.
  *
  ****************************************************************************/
-#define log_printf _CW_NS_STASH(log_printf)
+#define log_printf _CW_NS_LIBSTASH(log_printf)
 int
 log_printf(cw_log_t * a_log, const char * a_format, ...);
 
@@ -66,7 +66,7 @@ log_printf(cw_log_t * a_log, const char * a_format, ...);
  * Otherwise, this still acts like printf().
  *
  ****************************************************************************/
-#define log_eprintf _CW_NS_STASH(log_eprintf)
+#define log_eprintf _CW_NS_LIBSTASH(log_eprintf)
 int
 log_eprintf(cw_log_t * a_log, 
 	    const char * a_filename, /* Optional, pass NULL if not used. */
@@ -90,7 +90,7 @@ log_eprintf(cw_log_t * a_log,
  *
  *
  ****************************************************************************/
-#define log_nprintf _CW_NS_STASH(log_nprintf)
+#define log_nprintf _CW_NS_LIBSTASH(log_nprintf)
 int
 log_nprintf(cw_log_t * a_log,
 	    cw_uint32_t a_size,
@@ -103,7 +103,7 @@ log_nprintf(cw_log_t * a_log,
  * printf()-alike that prepends log message foo.
  *
  ****************************************************************************/
-#define log_lprintf _CW_NS_STASH(log_lprintf)
+#define log_lprintf _CW_NS_LIBSTASH(log_lprintf)
 int
 log_lprintf(cw_log_t * a_log, const char * a_format, ...);
 
@@ -114,7 +114,7 @@ log_lprintf(cw_log_t * a_log, const char * a_format, ...);
  * number, and function name.
  *
  ****************************************************************************/
-#define log_leprintf _CW_NS_STASH(log_leprintf)
+#define log_leprintf _CW_NS_LIBSTASH(log_leprintf)
 int
 log_leprintf(cw_log_t * a_log,
 	     const char * a_filename, /* Optional, pass NULL if not used. */
@@ -137,7 +137,7 @@ log_leprintf(cw_log_t * a_log,
  * into *a_buf.
  *
  ****************************************************************************/
-#define log_print_uint64 _CW_NS_STASH(log_print_uint64)
+#define log_print_uint64 _CW_NS_LIBSTASH(log_print_uint64)
 char *
 log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
 
@@ -151,7 +151,7 @@ log_print_uint64(cw_uint64_t a_val, cw_uint32_t a_base, char * a_buf);
     abort(); \
   }
 
-#if (defined(_STASH_DBG) || defined(_STASH_DEBUG))
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
 #define _cw_assert(a) \
   { \
     if (!(a)) \

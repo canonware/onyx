@@ -18,8 +18,8 @@
 #
 
 # Include files that _are_ installed.
-INCS := libstash.h stash_incs.h bhp.h buf.h dbg.h lex.h list.h log.h matrix.h \
-	mem.h oh.h res.h treen.h
+INCS := libstash.h libstash_incs.h bhp.h buf.h dbg.h lex.h list.h log.h \
+	matrix.h mem.h oh.h res.h treen.h
 
 INCS_R := libstash_r.h locks.h thread.h
 
@@ -107,11 +107,11 @@ INCPATH := -I$(.CURDIR)/include @CPPFLAGS@
 DEFINES := @DEFS@
 ST_DEFINES := 
 SH_DEFINES := 
-D_DEFINES := -D_STASH_DBG
+D_DEFINES := -D_LIBSTASH_DBG
 O_DEFINES := 
 P_DEFINES := 
 R_DEFINES := -D_CW_REENTRANT
-TEST_DEFINES := -D_STASH_DEBUG
+TEST_DEFINES := -D_LIBSTASH_DEBUG
 
 CFLAGS := -Wall -pipe @CFLAGS@
 ST_CFLAGS := 

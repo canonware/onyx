@@ -10,7 +10,7 @@
  *
  ****************************************************************************/
 
-#define _STASH_USE_TREEN
+#define _LIBSTASH_USE_TREEN
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else

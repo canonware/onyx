@@ -16,7 +16,7 @@
 
 #include <libstash/libstash_r.h>
 
-#define _STASH_TEST_NUM_THREADS 100
+#define _LIBSTASH_TEST_NUM_THREADS 100
 
 struct foo_var_s
 {
@@ -77,9 +77,9 @@ thread_entry_func(void * a_arg)
 int
 main()
 {
-  cw_thd_t tl_threads[_STASH_TEST_NUM_THREADS],
-    sl_threads[_STASH_TEST_NUM_THREADS];
-  cw_jtl_tq_el_t * tq_els[_STASH_TEST_NUM_THREADS];
+  cw_thd_t tl_threads[_LIBSTASH_TEST_NUM_THREADS],
+    sl_threads[_LIBSTASH_TEST_NUM_THREADS];
+  cw_jtl_tq_el_t * tq_els[_LIBSTASH_TEST_NUM_THREADS];
   cw_jtl_t jtl_a, * jtl_b;
   cw_jtl_tq_el_t * tq_el;
   struct foo_var_s * foo_var;
@@ -112,12 +112,12 @@ main()
 
   jtl_b = jtl_new(NULL);
 
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     tq_els[i] = jtl_get_tq_el(jtl_b);
   }
   
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     foo_var = (struct foo_var_s *) _cw_malloc(sizeof(struct foo_var_s));
     foo_var->is_tlock = TRUE;
@@ -133,7 +133,7 @@ main()
     thd_new(&sl_threads[i], thread_entry_func, (void *) foo_var);
   }
 
-  for (i = 0; i < _STASH_TEST_NUM_THREADS; i++)
+  for (i = 0; i < _LIBSTASH_TEST_NUM_THREADS; i++)
   {
     thd_join(&tl_threads[i]);
     thd_join(&sl_threads[i]);

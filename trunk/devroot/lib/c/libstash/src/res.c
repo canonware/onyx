@@ -10,8 +10,8 @@
  *
  *****************************************************************************/
 
-#define _STASH_USE_RES
-#define _STASH_USE_OH
+#define _LIBSTASH_USE_RES
+#define _LIBSTASH_USE_OH
 #ifdef _CW_REENTRANT
 #  include "libstash/libstash_r.h"
 #else
@@ -24,35 +24,35 @@
 
 /* Size of buffer to use for name/value parsing.  In practice, this is
  * probably plenty, but in theory, any arbitrary limitation is bad. */
-#define _STASH_RES_BUFFSIZE 8192
+#define _LIBSTASH_RES_BUFFSIZE 8192
 
 /* Character types for state machine. */
-#define _STASH_RES_CHAR_CAP 0
-#define _STASH_RES_CHAR_LOWER 1
-#define _STASH_RES_CHAR_NUMBER 2
-#define _STASH_RES_CHAR_UNDER 3
-#define _STASH_RES_CHAR_PERIOD 4
-#define _STASH_RES_CHAR_HASH 5
-#define _STASH_RES_CHAR_WHITESPACE 6
-#define _STASH_RES_CHAR_COLON 7
-#define _STASH_RES_CHAR_BACKSLASH 8
-#define _STASH_RES_CHAR_NEWLINE 9
-#define _STASH_RES_CHAR_NULL 10
-#define _STASH_RES_CHAR_VALID_IN_VAL 11
-#define _STASH_RES_CHAR_OTHER 12
+#define _LIBSTASH_RES_CHAR_CAP 0
+#define _LIBSTASH_RES_CHAR_LOWER 1
+#define _LIBSTASH_RES_CHAR_NUMBER 2
+#define _LIBSTASH_RES_CHAR_UNDER 3
+#define _LIBSTASH_RES_CHAR_PERIOD 4
+#define _LIBSTASH_RES_CHAR_HASH 5
+#define _LIBSTASH_RES_CHAR_WHITESPACE 6
+#define _LIBSTASH_RES_CHAR_COLON 7
+#define _LIBSTASH_RES_CHAR_BACKSLASH 8
+#define _LIBSTASH_RES_CHAR_NEWLINE 9
+#define _LIBSTASH_RES_CHAR_NULL 10
+#define _LIBSTASH_RES_CHAR_VALID_IN_VAL 11
+#define _LIBSTASH_RES_CHAR_OTHER 12
 
 /* State machine states. */
-#define _STASH_RES_STATE_START 0
-#define _STASH_RES_STATE_BEGIN_WHITESPACE 1
-#define _STASH_RES_STATE_BEGIN_COMMENT 2
-#define _STASH_RES_STATE_NAME 3
-#define _STASH_RES_STATE_POST_NAME_WHITESPACE 4
-#define _STASH_RES_STATE_POST_COLON_WHITESPACE 5
-#define _STASH_RES_STATE_VALUE 6
-#define _STASH_RES_STATE_VALUE_BACKSLASH 7
-#define _STASH_RES_STATE_BACKSLASH_WHITESPACE 8
-#define _STASH_RES_STATE_TRAILING_COMMENT 9
-#define _STASH_RES_STATE_FINISH 10
+#define _LIBSTASH_RES_STATE_START 0
+#define _LIBSTASH_RES_STATE_BEGIN_WHITESPACE 1
+#define _LIBSTASH_RES_STATE_BEGIN_COMMENT 2
+#define _LIBSTASH_RES_STATE_NAME 3
+#define _LIBSTASH_RES_STATE_POST_NAME_WHITESPACE 4
+#define _LIBSTASH_RES_STATE_POST_COLON_WHITESPACE 5
+#define _LIBSTASH_RES_STATE_VALUE 6
+#define _LIBSTASH_RES_STATE_VALUE_BACKSLASH 7
+#define _LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE 8
+#define _LIBSTASH_RES_STATE_TRAILING_COMMENT 9
+#define _LIBSTASH_RES_STATE_FINISH 10
 
 cw_res_t *
 res_new(cw_res_t * a_res)
@@ -376,17 +376,17 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 {
   cw_bool_t retval = FALSE;
   size_t i, name_pos = 0, val_pos = 0;
-  cw_uint32_t state = _STASH_RES_STATE_START, col_num, line_num = 1;
-  char c, name[_STASH_RES_BUFFSIZE], val[_STASH_RES_BUFFSIZE];
+  cw_uint32_t state = _LIBSTASH_RES_STATE_START, col_num, line_num = 1;
+  char c, name[_LIBSTASH_RES_BUFFSIZE], val[_LIBSTASH_RES_BUFFSIZE];
 
   for (i = 0, col_num = 1;
-       ((state != _STASH_RES_STATE_FINISH) && (retval != TRUE));
+       ((state != _LIBSTASH_RES_STATE_FINISH) && (retval != TRUE));
        i++, col_num++)
   {
     /* XXX Check whether we overflowed the buffers.  Perhaps we should move
      * to extensible buffers, once they're written for the socket code. */
-    _cw_assert(name_pos < _STASH_RES_BUFFSIZE);
-    _cw_assert(val_pos < _STASH_RES_BUFFSIZE);
+    _cw_assert(name_pos < _LIBSTASH_RES_BUFFSIZE);
+    _cw_assert(val_pos < _LIBSTASH_RES_BUFFSIZE);
     
     /* Read the next character in. */
     if (a_is_file)
@@ -422,7 +422,7 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
     switch (state)
     {
       /* Starting state. */
-      case _STASH_RES_STATE_START:
+      case _LIBSTASH_RES_STATE_START:
       {
 	/* Initialize counters, buffers, etc. */
 	name_pos = 0;
@@ -434,51 +434,51 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
 	  {
 	    /* First character of the name. */
 	    name[name_pos] = c;
 	    name_pos++;
-	    state = _STASH_RES_STATE_NAME;
+	    state = _LIBSTASH_RES_STATE_NAME;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_HASH:
 	  {
 	    /* Beginning of comment.  Throw the character away. */
-	    state = _STASH_RES_STATE_BEGIN_COMMENT;
+	    state = _LIBSTASH_RES_STATE_BEGIN_COMMENT;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* Leading whitespace.  Swallow it. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* Leading whitespace.  Swallow it. */
 	    line_num++;
 	    col_num = 1;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_NULL:
 	  {
 	    /* Completely empty string or file. */
-	    state = _STASH_RES_STATE_FINISH;
+	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
-			"Illegal character while in _STASH_RES_STATE_START,"
+			"Illegal character while in _LIBSTASH_RES_STATE_START,"
 			" line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -488,57 +488,57 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Whitespace that precedes the resource name. */
-      case _STASH_RES_STATE_BEGIN_WHITESPACE:
+      case _LIBSTASH_RES_STATE_BEGIN_WHITESPACE:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
 	  {
 	    /* First character of the name. */
 	    name[name_pos] = c;
 	    name_pos++;
-	    state = _STASH_RES_STATE_NAME;
+	    state = _LIBSTASH_RES_STATE_NAME;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_HASH:
 	  {
 	    /* Beginning of a comment. */
-	    state = _STASH_RES_STATE_BEGIN_COMMENT;
+	    state = _LIBSTASH_RES_STATE_BEGIN_COMMENT;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* More whitespace.  Swallow it. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* Blank line.  Jump back to the start state to make sure all
 	     * counters are correctly reset. */
 	    line_num++;
 	    col_num = 1;
-	    state = _STASH_RES_STATE_START;
+	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_NULL:
 	  {
 	    /* String is legal, but contains no resource. */
-	    state = _STASH_RES_STATE_START;
+	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_BEGIN_WHITESPACE,"
+			"_LIBSTASH_RES_STATE_BEGIN_WHITESPACE,"
 			" line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -548,45 +548,45 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Comment that was preceded only by whitespace characters. */
-      case _STASH_RES_STATE_BEGIN_COMMENT:
+      case _LIBSTASH_RES_STATE_BEGIN_COMMENT:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_HASH:
-	  case _STASH_RES_CHAR_WHITESPACE:
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
 	  {
 	    /* Swallow the character. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* Go back to the initial state. */
 	    line_num++;
 	    col_num = 1;
-	    state = _STASH_RES_STATE_START;
+	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_NULL:
 	  {
 	    /* String is legal, but contains no resource. */
-	    state = _STASH_RES_STATE_FINISH;
+	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_BEGIN_COMMENT, line %d, column %d\n",
+			"_LIBSTASH_RES_STATE_BEGIN_COMMENT, line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
 	    break;
@@ -595,48 +595,48 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Resource name state. */
-      case _STASH_RES_STATE_NAME:
+      case _LIBSTASH_RES_STATE_NAME:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
 	  {
 	    /* Character of the resource name. */
 	    name[name_pos] = c;
 	    name_pos++;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* End of name.  Jump to a state that can deal with additional
 	     * whitespace. */
 	    name[name_pos] = '\0';
-	    state = _STASH_RES_STATE_POST_NAME_WHITESPACE;
+	    state = _LIBSTASH_RES_STATE_POST_NAME_WHITESPACE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_COLON:
 	  {
 	    /* Okay, here's the colon.  Terminate the name and jump to a
 	     * state that can deal with whitespace leading the value. */
 	    name[name_pos] = '\0';
-	    state = _STASH_RES_STATE_POST_COLON_WHITESPACE;
+	    state = _LIBSTASH_RES_STATE_POST_COLON_WHITESPACE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_HASH:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_NEWLINE:
-	  case _STASH_RES_CHAR_NULL:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
-			"Illegal character while in _STASH_RES_STATE_NAME, "
+			"Illegal character while in _LIBSTASH_RES_STATE_NAME, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -646,39 +646,39 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Swallow whitespace following the resource name. */
-      case _STASH_RES_STATE_POST_NAME_WHITESPACE:
+      case _LIBSTASH_RES_STATE_POST_NAME_WHITESPACE:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_COLON:
 	  {
 	    /* Here's the colon.  Jump to a state that can deal with
 	     * whitespace leading the value. */
-	    state = _STASH_RES_STATE_POST_COLON_WHITESPACE;
+	    state = _LIBSTASH_RES_STATE_POST_COLON_WHITESPACE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* Additional whitespace.  Swallow it. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_HASH:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_NEWLINE:
-	  case _STASH_RES_CHAR_NULL:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_POST_NAME_WHITESPACE, "
+			"_LIBSTASH_RES_STATE_POST_NAME_WHITESPACE, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -688,70 +688,70 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Swallow whitespace following the colon. */
-      case _STASH_RES_STATE_POST_COLON_WHITESPACE:
+      case _LIBSTASH_RES_STATE_POST_COLON_WHITESPACE:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
 	  {
 	    /* Beginning of value. */
 	    val[val_pos] = c;
 	    val_pos++;
-	    state = _STASH_RES_STATE_VALUE;
+	    state = _LIBSTASH_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* More whitespace.  Swallow it. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_HASH:
 	  {
 	    /* Empty value.  NULL-terminate the string and jump to the
 	     * trailing comment state. */
 	    val[val_pos] = '\0';
 	    res_p_merge_res(a_res, name, val);
-	    state = _STASH_RES_STATE_TRAILING_COMMENT;
+	    state = _LIBSTASH_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
 	  {
 	    /* Beginning of value, but it's a backslash, so jump to the
 	     * backslash handling state. */
-	    state = _STASH_RES_STATE_VALUE_BACKSLASH;
+	    state = _LIBSTASH_RES_STATE_VALUE_BACKSLASH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* Empty value.  Insert it though. */
 	    line_num++;
 	    col_num = 1;
 	    val[val_pos] = '\0';
 	    res_p_merge_res(a_res, name, val);
-	    state = _STASH_RES_STATE_START;
+	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_NULL:
 	  {
 	    /* Empty value, and end of input.  Insert the resource. */
 	    val[val_pos] = '\0';
 	    res_p_merge_res(a_res, name, val);
-	    state = _STASH_RES_STATE_FINISH;
+	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_POST_COLON_WHITESPACE, "
+			"_LIBSTASH_RES_STATE_POST_COLON_WHITESPACE, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -761,42 +761,42 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Resource value. */
-      case _STASH_RES_STATE_VALUE:
+      case _LIBSTASH_RES_STATE_VALUE:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_WHITESPACE: /* Allow whitespace in value. */
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE: /* Allow whitespace in value. */
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
 	  {
 	    /* More of the value. */
 	    val[val_pos] = c;
 	    val_pos++;
-	    state = _STASH_RES_STATE_VALUE;
+	    state = _LIBSTASH_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_HASH:
 	  {
 	    /* Beginning of comment, and therefore the end of the value.
 	     * NULL-terminate the string, insert the resource, and jump to
 	     * the trailing comment state. */
 	    val[val_pos] = '\0';
 	    res_p_merge_res(a_res, name, val);
-	    state = _STASH_RES_STATE_TRAILING_COMMENT;
+	    state = _LIBSTASH_RES_STATE_TRAILING_COMMENT;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
 	  {
 	    /* Backslash.  Jump to the backslash state. */
-	    state = _STASH_RES_STATE_VALUE_BACKSLASH;
+	    state = _LIBSTASH_RES_STATE_VALUE_BACKSLASH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* End of line, and therefore the end of the value.
 	     * NULL-terminate the string, insert the resource in the hash
@@ -805,24 +805,24 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	    col_num = 1;
 	    val[val_pos] = '\0';
 	    res_p_merge_res(a_res, name, val);
-	    state = _STASH_RES_STATE_START;
+	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_NULL:
 	  {
 	    /* Do the same thing as for a newline, except that we want the
 	     * state machine to exit. */
 	    val[val_pos] = '\0';
 	    res_p_merge_res(a_res, name, val);
-	    state = _STASH_RES_STATE_FINISH;
+	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
-			"Illegal character while in _STASH_RES_STATE_VALUE, "
+			"Illegal character while in _LIBSTASH_RES_STATE_VALUE, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -832,45 +832,45 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Backslash within the resource value. */
-      case _STASH_RES_STATE_VALUE_BACKSLASH:
+      case _LIBSTASH_RES_STATE_VALUE_BACKSLASH:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
 	  {
 	    /* Insert a backslash and jump back to the value state. */
 	    val[val_pos] = '\\';
 	    val_pos++;
-	    state = _STASH_RES_STATE_VALUE;
+	    state = _LIBSTASH_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_HASH:
 	  {
 	    /* Insert a hash and jump back to the value state. */
 	    val[val_pos] = '#';
 	    val_pos++;
-	    state = _STASH_RES_STATE_VALUE;
+	    state = _LIBSTASH_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* We need to make sure that what follows is whitespace
 	     * followed by a newline, but we can't do that if we stay in
 	     * this state, since we woudn't notice '\\' and '#' later on in
 	     * the stream. */
-	    state = _STASH_RES_STATE_BACKSLASH_WHITESPACE;
+	    state = _LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* \ continuation.  Swallow this and jump back to the value
 	     * state. */
 	    line_num++;
 	    col_num = 1;
-	    state = _STASH_RES_STATE_VALUE;
+	    state = _LIBSTASH_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_LOWER:
 	  {
 	    if (c == 'n')
 	    {
@@ -882,26 +882,26 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	       * understandable. */
 	      val[val_pos] = '\n';
 	      val_pos++;
-	      state = _STASH_RES_STATE_VALUE;
+	      state = _LIBSTASH_RES_STATE_VALUE;
 	      break;
 	    }
 	    /* Note that if it's not an 'n', we fall through to the error
 	     * case. */
 	  }
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_NULL:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_VALUE_BACKSLASH, "
+			"_LIBSTASH_RES_STATE_VALUE_BACKSLASH, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -910,41 +910,41 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	}
 	break;
       }
-      case _STASH_RES_STATE_BACKSLASH_WHITESPACE:
+      case _LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
 	  {
 	    /* Swallow the character. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* \ continuation.  Swallow this and jump back to the value
 	     * state. */
 	    line_num++;
 	    col_num = 1;
-	    state = _STASH_RES_STATE_VALUE;
+	    state = _LIBSTASH_RES_STATE_VALUE;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_HASH:
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
-	  case _STASH_RES_CHAR_NULL:
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_BACKSLASH_WHITESPACE, "
+			"_LIBSTASH_RES_STATE_BACKSLASH_WHITESPACE, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -954,45 +954,45 @@ res_p_parse_res(cw_res_t * a_res, cw_bool_t a_is_file)
 	break;
       }
       /* Comment at end of resource. */
-      case _STASH_RES_STATE_TRAILING_COMMENT:
+      case _LIBSTASH_RES_STATE_TRAILING_COMMENT:
       {
 	switch (res_p_char_type(c))
 	{
-	  case _STASH_RES_CHAR_CAP:
-	  case _STASH_RES_CHAR_LOWER:
-	  case _STASH_RES_CHAR_NUMBER:
-	  case _STASH_RES_CHAR_UNDER:
-	  case _STASH_RES_CHAR_PERIOD:
-	  case _STASH_RES_CHAR_HASH:
-	  case _STASH_RES_CHAR_WHITESPACE:
-	  case _STASH_RES_CHAR_COLON:
-	  case _STASH_RES_CHAR_BACKSLASH:
-	  case _STASH_RES_CHAR_VALID_IN_VAL:
+	  case _LIBSTASH_RES_CHAR_CAP:
+	  case _LIBSTASH_RES_CHAR_LOWER:
+	  case _LIBSTASH_RES_CHAR_NUMBER:
+	  case _LIBSTASH_RES_CHAR_UNDER:
+	  case _LIBSTASH_RES_CHAR_PERIOD:
+	  case _LIBSTASH_RES_CHAR_HASH:
+	  case _LIBSTASH_RES_CHAR_WHITESPACE:
+	  case _LIBSTASH_RES_CHAR_COLON:
+	  case _LIBSTASH_RES_CHAR_BACKSLASH:
+	  case _LIBSTASH_RES_CHAR_VALID_IN_VAL:
 	  {
 	    /* Swallow the character. */
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NEWLINE:
+	  case _LIBSTASH_RES_CHAR_NEWLINE:
 	  {
 	    /* Okay, end of comment.  Jump back to the starting state. */
 	    line_num++;
 	    col_num = 1;
-	    state = _STASH_RES_STATE_START;
+	    state = _LIBSTASH_RES_STATE_START;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_NULL:
+	  case _LIBSTASH_RES_CHAR_NULL:
 	  {
 	    /* End of input.  Finish. */
-	    state = _STASH_RES_STATE_FINISH;
+	    state = _LIBSTASH_RES_STATE_FINISH;
 	    break;
 	  }
-	  case _STASH_RES_CHAR_OTHER:
+	  case _LIBSTASH_RES_CHAR_OTHER:
 	  default:
 	  {
 	    /* Error. */
 	    log_eprintf(g_log, NULL, 0, __FUNCTION__,
 			"Illegal character while in "
-			"_STASH_RES_STATE_TRAILING_COMMENT, "
+			"_LIBSTASH_RES_STATE_TRAILING_COMMENT, "
 			"line %d, column %d\n",
 			line_num, col_num);
 	    retval = TRUE;
@@ -1028,7 +1028,7 @@ res_p_char_type(char a_char)
     case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U':
     case 'V': case 'W': case 'X': case 'Y': case 'Z':
     {
-      retval = _STASH_RES_CHAR_CAP;
+      retval = _LIBSTASH_RES_CHAR_CAP;
       break;
     }
     
@@ -1038,7 +1038,7 @@ res_p_char_type(char a_char)
     case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u':
     case 'v': case 'w': case 'x': case 'y': case 'z':
     {
-      retval = _STASH_RES_CHAR_LOWER;
+      retval = _LIBSTASH_RES_CHAR_LOWER;
       break;
     }
 
@@ -1046,63 +1046,63 @@ res_p_char_type(char a_char)
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
     {
-      retval = _STASH_RES_CHAR_NUMBER;
+      retval = _LIBSTASH_RES_CHAR_NUMBER;
       break;
     }
     
     /* Underscore. */
     case '_':
     {
-      retval = _STASH_RES_CHAR_UNDER;
+      retval = _LIBSTASH_RES_CHAR_UNDER;
       break;
     }
     
     /* Period. */
     case '.':
     {
-      retval = _STASH_RES_CHAR_PERIOD;
+      retval = _LIBSTASH_RES_CHAR_PERIOD;
       break;
     }
     
     /* Start comment. */
     case '#':
     {
-      retval = _STASH_RES_CHAR_HASH;
+      retval = _LIBSTASH_RES_CHAR_HASH;
       break;
     }
     
     /* Whitespace. */
     case '\t': case ' ':
     {
-      retval = _STASH_RES_CHAR_WHITESPACE;
+      retval = _LIBSTASH_RES_CHAR_WHITESPACE;
       break;
     }
     
     /* Colon. */
     case ':':
     {
-      retval = _STASH_RES_CHAR_COLON;
+      retval = _LIBSTASH_RES_CHAR_COLON;
       break;
     }
     
     /* Backslash. */
     case '\\':
     {
-      retval = _STASH_RES_CHAR_BACKSLASH;
+      retval = _LIBSTASH_RES_CHAR_BACKSLASH;
       break;
     }
 
     /* Carriage return. */
     case '\n':
     {
-      retval = _STASH_RES_CHAR_NEWLINE;
+      retval = _LIBSTASH_RES_CHAR_NEWLINE;
       break;
     }
     
     /* Null terminator. */
     case '\0':
     {
-      retval = _STASH_RES_CHAR_NULL;
+      retval = _LIBSTASH_RES_CHAR_NULL;
       break;
     }
 
@@ -1112,14 +1112,14 @@ res_p_char_type(char a_char)
     case '<': case '=': case '>': case '?': case '@': case '[': case ']':
     case '^': case '`': case '{': case '|': case '}': case '~':
     {
-      retval = _STASH_RES_CHAR_VALID_IN_VAL;
+      retval = _LIBSTASH_RES_CHAR_VALID_IN_VAL;
       break;
     }
     
     /* Something we're not expecting at all. */
     default:
     {
-      retval = _STASH_RES_CHAR_OTHER;
+      retval = _LIBSTASH_RES_CHAR_OTHER;
       break;
     }
   }
