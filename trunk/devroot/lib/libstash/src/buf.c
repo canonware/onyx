@@ -41,7 +41,7 @@ buf_new(cw_buf_t * a_buf)
 #endif
 {
   cw_buf_t * retval;
-  void * t_ptr;
+/*    void * t_ptr; */
 
   if (a_buf == NULL)
   {
@@ -80,53 +80,56 @@ buf_new(cw_buf_t * a_buf)
   retval->is_cached_bufel_valid = FALSE;
 /*    retval->cached_bufel = 0; */
 
-  t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_bufel_t));
-  if (NULL == t_ptr)
-  {
-    if (retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
-  }
-  else
-  {
-    retval->bufel_array = (cw_bufel_t *) t_ptr;
-  }
+  retval->bufel_array = retval->static_bufel_array;
+/*    t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_bufel_t)); */
+/*    if (NULL == t_ptr) */
+/*    { */
+/*      if (retval->is_malloced) */
+/*      { */
+/*        _cw_free(retval); */
+/*      } */
+/*      retval = NULL; */
+/*      goto RETURN; */
+/*    } */
+/*    else */
+/*    { */
+/*      retval->bufel_array = (cw_bufel_t *) t_ptr; */
+/*    } */
 
-  t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_uint32_t));
-  if (NULL == t_ptr)
-  {
-    _cw_free(retval->bufel_array);
-    if (retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
-  }
-  else
-  {
-    retval->cumulative_index = (cw_uint32_t *) t_ptr;
-  }
+  retval->cumulative_index = retval->static_cumulative_index;
+/*    t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(cw_uint32_t)); */
+/*    if (NULL == t_ptr) */
+/*    { */
+/*      _cw_free(retval->bufel_array); */
+/*      if (retval->is_malloced) */
+/*      { */
+/*        _cw_free(retval); */
+/*      } */
+/*      retval = NULL; */
+/*      goto RETURN; */
+/*    } */
+/*    else */
+/*    { */
+/*      retval->cumulative_index = (cw_uint32_t *) t_ptr; */
+/*    } */
 
-  t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(struct iovec));
-  if (NULL == t_ptr)
-  {
-    _cw_free(retval->cumulative_index);
-    _cw_free(retval->bufel_array);
-    if (retval->is_malloced)
-    {
-      _cw_free(retval);
-    }
-    retval = NULL;
-    goto RETURN;
-  }
-  else
-  {
-    retval->iov = (struct iovec *) t_ptr;
-  }
+  retval->iov = retval->static_iov;
+/*    t_ptr = _cw_calloc(_LIBSTASH_BUF_ARRAY_MIN_SIZE, sizeof(struct iovec)); */
+/*    if (NULL == t_ptr) */
+/*    { */
+/*      _cw_free(retval->cumulative_index); */
+/*      _cw_free(retval->bufel_array); */
+/*      if (retval->is_malloced) */
+/*      { */
+/*        _cw_free(retval); */
+/*      } */
+/*      retval = NULL; */
+/*      goto RETURN; */
+/*    } */
+/*    else */
+/*    { */
+/*      retval->iov = (struct iovec *) t_ptr; */
+/*    } */
 
 #ifdef _LIBSTASH_DBG
   bzero(retval->bufel_array,
@@ -166,20 +169,32 @@ buf_delete(cw_buf_t * a_buf)
 				    & (a_buf->array_size - 1)].bufc);
     }
 #ifdef _LIBSTASH_DBG
+/*      memset(&a_buf->bufel_array[(i + a_buf->array_start) */
+/*  			     & (a_buf->array_size - 1)], */
+/*  	   0x5a, */
+/*  	   sizeof(cw_bufel_t)); */
     bzero(&a_buf->bufel_array[(i + a_buf->array_start)
 			     & (a_buf->array_size - 1)], sizeof(cw_bufel_t));
 #endif
   }
 
-  _cw_free(a_buf->bufel_array);
-  _cw_free(a_buf->cumulative_index);
-  _cw_free(a_buf->iov);
+  if (a_buf->bufel_array != a_buf->static_bufel_array)
+  {
+    _cw_free(a_buf->bufel_array);
+  }
+  
+  if (a_buf->cumulative_index != a_buf->static_cumulative_index)
+  {
+    _cw_free(a_buf->cumulative_index);
+  }
+
+  if (a_buf->iov != a_buf->static_iov)
+  {
+    _cw_free(a_buf->iov);
+  }
   
   if (a_buf->is_malloced)
   {
-#ifdef _LIBSTASH_DBG
-    bzero(a_buf, sizeof(cw_buf_t));
-#endif
     _cw_free(a_buf);
   }
 }
@@ -1718,38 +1733,82 @@ buf_p_fit_array(cw_buf_t * a_buf, cw_uint32_t a_min_array_size)
 	 i < a_min_array_size;
 	 i <<= 1);
 
-    t_ptr = _cw_realloc(a_buf->bufel_array, i * sizeof(cw_bufel_t));
-    if (NULL == t_ptr)
+    if (a_buf->bufel_array != a_buf->static_bufel_array)
     {
-      retval = TRUE;
-      goto RETURN;
+      t_ptr = _cw_realloc(a_buf->bufel_array, i * sizeof(cw_bufel_t)); /* XXX */
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
     }
     else
     {
-      a_buf->bufel_array = (cw_bufel_t *) t_ptr;
+      t_ptr = _cw_calloc(i, sizeof(cw_bufel_t));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
+      
+      memcpy(t_ptr, a_buf->bufel_array,
+	     (size_t) (a_buf->array_size * sizeof(cw_bufel_t)));
+#ifdef _LIBSTASH_DBG
+	memset(a_buf->bufel_array, 0x5a,
+	       (a_buf->array_size * sizeof(cw_bufel_t)));
+#endif
     }
+    a_buf->bufel_array = (cw_bufel_t *) t_ptr;
 
-    t_ptr = _cw_realloc(a_buf->cumulative_index, i * sizeof(cw_uint32_t));
-    if (NULL == t_ptr)
+    if (a_buf->cumulative_index != a_buf->static_cumulative_index)
     {
-      retval = TRUE;
-      goto RETURN;
+      t_ptr = _cw_realloc(a_buf->cumulative_index, i * sizeof(cw_uint32_t));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
     }
     else
     {
-      a_buf->cumulative_index = (cw_uint32_t *) t_ptr;
+      t_ptr = _cw_calloc(i, sizeof(cw_uint32_t));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
+      memcpy(t_ptr, a_buf->cumulative_index,
+	     (a_buf->array_size * sizeof(cw_uint32_t)));
+#ifdef _LIBSTASH_DBG
+      memset(a_buf->cumulative_index, 0x5a,
+	     (a_buf->array_size * sizeof(cw_uint32_t)));
+#endif
     }
+    a_buf->cumulative_index = (cw_uint32_t *) t_ptr;
 
-    t_ptr = _cw_realloc(a_buf->iov, i * sizeof(struct iovec));
-    if (NULL == t_ptr)
+    if (a_buf->iov != a_buf->static_iov)
     {
-      retval = TRUE;
-      goto RETURN;
+      t_ptr = _cw_realloc(a_buf->iov, i * sizeof(struct iovec));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
     }
     else
     {
-      a_buf->iov = (struct iovec *) t_ptr;
+      t_ptr = _cw_calloc(i, sizeof(struct iovec));
+      if (NULL == t_ptr)
+      {
+	retval = TRUE;
+	goto RETURN;
+      }
+#ifdef _LIBSTASH_DBG
+      memset(a_buf->iov, 0x5a,
+	     (a_buf->array_size * sizeof(struct iovec)));
+#endif
     }
+    a_buf->iov = (struct iovec *) t_ptr;
     
 #ifdef _LIBSTASH_DBG
     bzero(&a_buf->bufel_array[a_buf->array_size],

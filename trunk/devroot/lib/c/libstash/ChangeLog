@@ -1,8 +1,23 @@
 1999-06-17  Jason Evans  <jasone@canonware.com>
 
-	* src/bhp.c: Binomial heaps are now functional.  Some interface
-	changes were made in order to facilitate cached allocation of heap
-	node containers (cw_bhpi_t).
+	* include/libstash/buf.h : Modify the buf structure to include
+	static arrays that are used unless the number of bufel's excedes
+	the static arrays' size.  This makes buf_new() faster, since three
+	malloc() calls are avoided.  It also avoids additional memory
+	allocation for typical buf's, and improves cache locality.
+	Finally, buf_new() cannot fail if space for the buf is passed in,
+	which simplifies error handling.
+
+	* src/mem.c (mem_calloc): Set the allocation size correctly, so
+	that when setting "uninitialized" memory to 0xa5 bytes, valid data
+	isn't overwritten.  This bug only occurred in the debug versions
+	of libstash.
+
+	* src/bhp.c: Binomial heaps are now functional.  Add bhpi_*()
+	methods to facilitate cached allocation of heap node containers.
+	Fix a number of locking bugs and convert from read/write locks to
+	mutexes.  Completely rewrite bhp_p_merge().  Fix a recursion bug
+	in bhp_p_dump().
 
 	* src/mq.c: Add the mq (message queue) class.
 

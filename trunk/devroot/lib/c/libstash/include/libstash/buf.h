@@ -26,11 +26,16 @@
  *
  ****************************************************************************/
 
+/* Minimum size for buf's internal bufel array.  This must be a power of two,
+ * since bit masks are used to wrap around the end of the circular
+ * bufel_array.  Note also that static arrays are included in the buf structure
+ * for this number of elements, so the higher this number, the larger cw_buf_t.
+ */
+#define _LIBSTASH_BUF_ARRAY_MIN_SIZE 4
+
 /* Pseudo-opaque typedefs. */
 typedef struct cw_buf_s cw_buf_t;
 typedef struct cw_bufc_s cw_bufc_t;
-
-/* Opaque typedef. */
 typedef struct cw_bufel_s cw_bufel_t;
 
 /* The following data types should be considered opaque. */
@@ -50,6 +55,16 @@ struct cw_bufc_s
   cw_bool_t is_writeable;
   cw_uint32_t buf_size;
   cw_uint8_t * buf;
+};
+
+struct cw_bufel_s
+{
+#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
+  cw_uint32_t magic;
+#endif
+  cw_uint32_t beg_offset;
+  cw_uint32_t end_offset;
+  cw_bufc_t * bufc;
 };
 
 struct cw_buf_s
@@ -74,6 +89,9 @@ struct cw_buf_s
   cw_bufel_t * bufel_array;
   cw_uint32_t * cumulative_index;
   struct iovec * iov;
+  cw_bufel_t static_bufel_array[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
+  cw_uint32_t static_cumulative_index[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
+  struct iovec static_iov[_LIBSTASH_BUF_ARRAY_MIN_SIZE];
 };
 
 /****************************************************************************
@@ -87,7 +105,7 @@ struct cw_buf_s
  * <<< Output(s) >>>
  *
  * retval : Pointer to a buf, or NULL.
- *          NULL : Memory allocation error.
+ *          NULL : Memory allocation error.  Can only occur if (NULL == a_buf).
  *
  * <<< Description >>>
  *

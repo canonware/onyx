@@ -255,7 +255,7 @@ main()
     iov = buf_get_iovec(&buf, 0, FALSE, &iov_count);
     _cw_assert(iov_count == 0);
     _cw_assert(6 == buf_get_num_bufels(&buf));
-    
+
     iov = buf_get_iovec(&buf, buf_get_size(&buf), FALSE, &iov_count);
     _cw_assert(iov_count == 6);
     _cw_assert(6 == buf_get_num_bufels(&buf));

@@ -240,7 +240,7 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
       {
 	memset(retval, 0xa5, a_number * a_size);
 	
-	allocation->size = a_size;
+	allocation->size = a_number * a_size;
 	allocation->filename = a_filename;
 	allocation->line_num = a_line_num;
       
