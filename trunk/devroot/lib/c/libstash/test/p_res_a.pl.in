@@ -17,9 +17,13 @@
 select(STDOUT);
 $| = 1;
 
-$testdir = "./lib/c/libstash/test";
+$testdir = "lib/c/libstash/test";
 $srcdir = $ARGV[0];
 $srcdir = "$srcdir/$testdir";
+$objdir = $ARGV[1];
+$objdir = "$objdir/$testdir";
+
+print "\$srcdir: \"$srcdir\", \$objdir: \"$objdir\"\n";
 
 print "1..1\n";
 

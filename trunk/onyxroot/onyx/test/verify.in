@@ -28,6 +28,7 @@ $opt_help = 0;
 $opt_verbose = 0;
 $opt_quiet = 0;
 $opt_rootdir = ".";
+$opt_objdir = ".";
 $opt_ustats = 0;
 $opt_zero = 0;
 
@@ -36,6 +37,7 @@ $opt_retval =
 	    "v|verbose" => \$opt_verbose,
 	    "q|quiet" => \$opt_quiet,
             "r|rootdir=s" => \$opt_rootdir,
+            "o|objdir=s" => \$opt_objdir,
 	    "u|ustats" => \$opt_ustats,
 	    "z|zero" => \$opt_zero,
 	    "d|difftest=s@" => \@OPT_DTESTS,
@@ -71,7 +73,8 @@ if ($#OPT_STESTS + $#OPT_DTESTS + 2 == 0)
 if ($opt_verbose)
 {
     print STDERR "Option values: h:$opt_help, v:$opt_verbose, "
-	. "r:\"$opt_rootdir\", q:$opt_quiet, u:$opt_ustats, z:$opt_zero\n";
+	. "r:\"$opt_rootdir\", r:\"$opt_objdir\", q:$opt_quiet, u:$opt_ustats, "
+	. "z:$opt_zero\n";
     printf STDERR "Sequence tests (%d total): @OPT_STESTS\n", $#OPT_STESTS + 1;
     printf STDERR "Diff tests (%d total): @OPT_DTESTS\n", $#OPT_DTESTS + 1;
 }
@@ -114,7 +117,7 @@ foreach $test (@OPT_STESTS)
 
     ($okay, $utime, $stime) = &run_test($test);
 
-    if (open (STEST_OUT, "<$opt_rootdir/$test.out"))
+    if (open (STEST_OUT, "<$opt_objdir/$test.out"))
     {
 	$num_subtests = 0;
 	$num_failed_subtests = 0;
@@ -188,7 +191,7 @@ foreach $test (@OPT_STESTS)
     {
 	if (!$opt_quiet)
 	{
-	    print STDERR "Cannot open output file \"$opt_rootdir/$test.out\"\n";
+	    print STDERR "Cannot open output file \"$opt_objdir/$test.out\"\n";
 	}
 	exit 1;
     }
@@ -227,9 +230,9 @@ foreach $test (@OPT_DTESTS)
 
     ($okay, $utime, $stime) = &run_test($test);
 
-    if (-e "$opt_rootdir/$test.out" && -e "$opt_rootdir/$test.exp")
+    if (-e "$opt_objdir/$test.out" && -e "$opt_rootdir/$test.exp")
     {
-	`diff $opt_rootdir/$test.out $opt_rootdir/$test.exp > $opt_rootdir/$test.diff 2>&1`;
+	`diff $opt_objdir/$test.out $opt_rootdir/$test.exp > $opt_objdir/$test.diff 2>&1`;
 	if ($?)
 	{
 	    # diff returns non-zero if there is a difference.
@@ -324,7 +327,7 @@ sub run_test
     }
 
     ($utime, $stime, $cutime, $cstime) = times;
-    `$opt_rootdir/$test $opt_rootdir > $opt_rootdir/$test.out 2>&1`;
+    `$opt_objdir/$test $opt_rootdir $opt_objdir > $opt_objdir/$test.out 2>&1`;
     ($utime, $stime, $tutime, $tstime) = times;
 
     # Subtract the before time from the after time.
@@ -339,7 +342,7 @@ sub run_test
 	    if ($opt_verbose)
 	    {
 		print STDERR
-		    "\"$opt_rootdir/$test > $opt_rootdir/$test.out 2>&1\""
+		    "\"$opt_objdir/$test > $opt_objdir/$test.out 2>&1\""
 			. " returned $?\n";
 	    }
 	}
@@ -365,9 +368,9 @@ sub print_stats
     
     if (-r "$test.perf")
     {
-	if (!open (TEST_PERF, "<$opt_rootdir/$test.perf"))
+	if (!open (TEST_PERF, "<$opt_objdir/$test.perf"))
 	{
-	    print STDERR "Unable to open \"$opt_rootdir/$test.perf\"\n";
+	    print STDERR "Unable to open \"$opt_objdir/$test.perf\"\n";
 	    exit 1;
 	}
 	$_ = <TEST_PERF>;
@@ -406,11 +409,11 @@ sub print_stats
 
     if ($okay && $opt_ustats)
     {
-	if (!open (TEST_PERF, ">$opt_rootdir/$test.perf"))
+	if (!open (TEST_PERF, ">$opt_objdir/$test.perf"))
 	{
 	    if (!$opt_quiet)
 	    {
-		print STDERR "Unable to update \"$opt_rootdir/$test.perf\"\n";
+		print STDERR "Unable to update \"$opt_objdir/$test.perf\"\n";
 	    }
 	}
 	else
@@ -435,6 +438,7 @@ $0 usage:
     -v --verbose  | Verbose (incompatible with quiet).
     -q --quiet    | Quiet (incompatible with verbose).
     -r --rootdir  | Path to source tree (default is ".").
+    -o --objdir   | Path to object tree (default is ".").
     -u --ustats   | Update historical statistics (stored in "<test>.perf".
     -z --zero     | Consider non-zero exit code to be an error.
     --------------+-------------------------------------------------------------
