@@ -18,7 +18,7 @@ nx_gtk_window_new (cw_nxo_t *a_thread)
 {
   cw_nx_t     *nx;
   cw_nxo_t    *ostack;
-  cw_nxo_t    *t, *w_hook;
+  cw_nxo_t    *t;
   GtkWidget   *w;
 
   nx = nxo_thread_nx_get(a_thread);

@@ -14,6 +14,9 @@
 
 #include "gtk/gtk.h"
 
+/* XXX Rename. */
+void gtkdict_l_populate (cw_nxo_t *gtk_dict, cw_nx_t *a_nx, cw_nxo_t *a_thread);
+
 void nx_gtk_button_new (cw_nxo_t *a_thread);
 void nx_gtk_button_new_with_label (cw_nxo_t *a_thread);
 void nx_gtk_container_add(cw_nxo_t *a_thread);

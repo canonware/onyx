@@ -15,11 +15,20 @@
 static void
 nx_gtk_object_destroyed (GtkObject *o, gpointer user_data)
 {
-  cw_nxo_t *hook = gtk_object_get_data (o, "_cw_hook_object");
+  cw_nxoe_t *hook = gtk_object_get_data (o, "_cw_hook_object");
+  cw_nxo_t nxo;
 
   printf ("destroyed GtkObject %p [%p]\n", o, hook);
+
+  /*
+   * XXX This is a gross hack, and a violation of the libonyx API.  This needs
+   * to be fixed by using a malloced structure as the hook data and the gtk
+   * object data.
+   */
+  nxo_p_new(&nxo, NXOT_HOOK);
+  nxo.o.nxoe = (cw_nxoe_t *)hook;
   
-  nxo_hook_data_set (hook, NULL);
+  nxo_hook_data_set (&nxo, NULL);
 }
 
 static void
@@ -50,9 +59,9 @@ nx_gtk_object_ref_iter (void *a_data, cw_bool_t a_reset)
     
     parent = gtk_object_get_data (o, "_cw_gtk_container_iter");
     if (parent) {
-      cw_nxo_t *hook = gtk_object_get_data (GTK_OBJECT(parent), "_cw_hook_object");
+      cw_nxoe_t *hook = gtk_object_get_data (GTK_OBJECT(parent), "_cw_hook_object");
       gtk_object_set_data (o, "_cw_gtk_container_iter", NULL);
-      return nxo_nxoe_get(hook);
+      return hook;
     }
     else {
       return NULL;
@@ -72,12 +81,11 @@ nx_gtk_object_attach_hook (cw_nx_t *nx, cw_nxo_t *stack, GtkObject *o)
 
   hook = nxo_stack_push (stack);
 
-  printf ("attaching hook to GtkObject %p [%p]\n", o, hook);
-
-  gtk_object_set_data (o, "_cw_hook_object", hook);
-
   nxo_hook_new (hook, nx, o, NULL, nx_gtk_object_ref_iter, nx_gtk_object_delete);
+
+  gtk_object_set_data (o, "_cw_hook_object", nxo_nxoe_get(hook));
+
+  printf ("attaching hook to GtkObject %p [%p]\n", o, nxo_nxoe_get(hook));
 
   return hook;
 }
-

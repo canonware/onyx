@@ -34,7 +34,7 @@ nx_gtk_button_new_with_label (cw_nxo_t *a_thread)
 {
   cw_nx_t     *nx;
   cw_nxo_t    *ostack;
-  cw_nxo_t    *s, *w_hook;
+  cw_nxo_t    *s;
   GtkWidget   *w;
   char        *str;
   cw_uint32_t  len;
