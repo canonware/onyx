@@ -21,13 +21,6 @@
 #include "../include/libstil/stil_l.h"
 #include "../include/libstil/stilo_l.h"
 
-#ifndef QUAD_MIN
-#define	QUAD_MIN (-0x7fffffffffffffffLL - 1)
-#endif
-#ifndef QUAD_MAX
-#define	QUAD_MAX (0x7fffffffffffffffLL)
-#endif
-
 cw_stiln_t
 stilte_stiln(cw_stilte_t a_stilte)
 {
@@ -1361,13 +1354,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					 */
 					a_stilt->tok_str[a_stilt->index] = '\0';
 					errno = 0;
-					val = strtoq(a_stilt->tok_str, NULL,
+					val = strtoll(a_stilt->tok_str, NULL,
 					    10);
 
 					if ((errno == ERANGE) &&
 #if (_CW_STILOI_SIZEOF == 8)
-					    ((val == QUAD_MIN) || (val ==
-					    QUAD_MAX))
+					    ((val == LLONG_MIN) || (val ==
+					    LLONG_MAX))
 #else
 					    ((val == LONG_MIN) || (val ==
 					    LONG_MAX))
@@ -1461,13 +1454,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 					a_stilt->tok_str[a_stilt->index] = '\0';
 					errno = 0;
 					val =
-					    strtoq(&a_stilt->tok_str[a_stilt->m.n.b_off],
+					    strtoll(&a_stilt->tok_str[a_stilt->m.n.b_off],
 					    NULL,
 					    a_stilt->m.n.base);
 					if ((errno == ERANGE) &&
 #if (_CW_STILOI_SIZEOF == 8)
-					    ((val == QUAD_MIN) || (val ==
-					    QUAD_MAX))
+					    ((val == LLONG_MIN) || (val ==
+					    LLONG_MAX))
 #else
 					    ((val == LONG_MIN) || (val ==
 					    LONG_MAX))
