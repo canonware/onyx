@@ -199,10 +199,8 @@ void		stilo_literal_set(cw_stilo_t *a_stilo, cw_bool_t a_literal);
 void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
     *a_stilt);
-void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
-    *a_stilt);
-void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
-    *a_stilt);
+void		stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from);
+void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
 void		stilo_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline);

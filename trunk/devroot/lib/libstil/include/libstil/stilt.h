@@ -135,6 +135,7 @@ cw_bool_t	stilt_detach_str(cw_stilt_t *a_stilt, const char *a_str,
 cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 
 #define		stilt_stil_get(a_stilt) (a_stilt)->stil
+#define		stilt_stilnt_get(a_stilt) &(a_stilt)->stilnt
 #define		stilt_stdout_get(a_stilt) (a_stilt)->stdout_fd
 #define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
 

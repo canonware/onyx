@@ -49,7 +49,7 @@ stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 }
 
 void
-stils_delete(cw_stils_t *a_stils)
+stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 {
 	cw_stilsc_t	*stilsc;
 
@@ -61,7 +61,7 @@ stils_delete(cw_stils_t *a_stils)
 	 * stilsc's.
 	 */
 	if (a_stils->count > 0)
-		stils_pop(a_stils, a_stils->count);
+		stils_pop(a_stils, a_stilt, a_stils->count);
 
 	while (ql_first(&a_stils->chunks) != NULL) {
 		stilsc = ql_first(&a_stils->chunks);
@@ -159,7 +159,7 @@ stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilot_t a_type, ...)
 }
 
 cw_bool_t
-stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count)
+stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 {
 	cw_bool_t	retval;
 	cw_stilso_t	*stilso;
@@ -179,7 +179,7 @@ stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	 * stilo's on the way down.
 	 */
 	for (i = 0, stilso = a_stils->stack; i < a_count; i++) {
-		stilo_delete(&stilso->stilo);
+		stilo_delete(&stilso->stilo, a_stilt);
 		stilso = qr_next(stilso, link);
 	}
 

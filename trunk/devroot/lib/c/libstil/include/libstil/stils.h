@@ -73,29 +73,20 @@ struct cw_stils_s {
 };
 
 cw_stils_t	*stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
-
-void		stils_delete(cw_stils_t *a_stils);
-
+void		stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
 void		stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
     (void *add_root_arg, cw_stilo_t *root), void *a_add_root_arg);
 
 cw_stilo_t	*stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt,
     cw_stilot_t a_type, ...);
-
-cw_bool_t	stils_pop(cw_stils_t *a_stils, cw_uint32_t a_count);
-
+cw_bool_t	stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t
+    a_count);
 cw_bool_t	stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t
     a_amount);
-
 cw_bool_t	stils_dup(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t
     a_count, cw_uint32_t a_index);
-
 cw_uint32_t	stils_count(cw_stils_t *a_stils);
-
 cw_stilo_t	*stils_get(cw_stils_t *a_stils, cw_uint32_t a_index);
-
 cw_stilo_t	*stils_get_down(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
-
 cw_stilo_t	*stils_get_up(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
-
 cw_uint32_t	stils_get_index(cw_stils_t *a_stils, cw_stilo_t *a_stilo);

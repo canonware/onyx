@@ -164,6 +164,10 @@ struct cw_stiloe_string_s {
 /*
  * Prototypes for private methods.
  */
+
+/* stilo. */
+static void	stilo_p_clobber(cw_stilo_t *a_stilo);
+
 /* stiloe. */
 static void	stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type);
 static void	stiloe_p_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
@@ -510,9 +514,7 @@ stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
 
 	stilot_vtable[a_stilo->type].delete_f(a_stilo, a_stilt);
 
-	thd_crit_enter();
-	memset(a_stilo, 0, sizeof(cw_stilo_t));
-	thd_crit_leave();
+	stilo_p_clobber(a_stilo);
 }
 
 cw_stilot_t
@@ -582,7 +584,7 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 }
 
 void
-stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
+stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
 	cw_stilot_t	type;
 
@@ -592,7 +594,7 @@ stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
 
 	/* Clean up before stomping on the destination stilo. */
-	stilo_delete(a_to, a_stilt);
+	stilo_p_clobber(a_to);
 
 	/* Mark the stilo as invalid. */
 	type = a_from->type;
@@ -616,7 +618,7 @@ stilo_dup(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 }
 
 void
-stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
+stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from)
 {
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_STILO_MAGIC);
@@ -624,7 +626,7 @@ stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	_cw_assert(a_from->magic == _CW_STILO_MAGIC);
 
 	/* Clean up before stomping on the destination stilo. */
-	stilo_delete(a_to, a_stilt);
+	stilo_p_clobber(a_to);
 	
 	memcpy(a_to, a_from, sizeof(cw_stilo_t));
 
@@ -663,6 +665,14 @@ stilo_l_stiloe_get(cw_stilo_t *a_stilo)
 	}
 
 	return retval;
+}
+
+static void
+stilo_p_clobber(cw_stilo_t *a_stilo)
+{
+	thd_crit_enter();
+	memset(a_stilo, 0, sizeof(cw_stilo_t));
+	thd_crit_leave();
 }
 
 /*
@@ -1129,9 +1139,9 @@ stilo_p_dict_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 		/* Allocate and copy. */
 		dicto_to = _cw_stilt_dicto_get(a_stilt);
 		stilo_new(&dicto_to->key, a_stilt, _CW_STILOT_NOTYPE);
-		stilo_dup(&dicto_to->key, &dicto_from->key, a_stilt);
+		stilo_dup(&dicto_to->key, &dicto_from->key);
 		stilo_new(&dicto_to->val, a_stilt, _CW_STILOT_NOTYPE);
-		stilo_dup(&dicto_to->val, &dicto_from->val, a_stilt);
+		stilo_dup(&dicto_to->val, &dicto_from->val);
 		chi = _cw_stilt_chi_get(a_stilt);
 
 		/* Insert. */
@@ -1174,7 +1184,7 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 		if (dch_search(&dict->e.d.hash, (void *)a_key, (void **)&dicto)
 		    == FALSE) {
 			/* a_key is already defined. */
-			stilo_move(&dicto->val, a_val, a_stilt);
+			stilo_move(&dicto->val, a_val);
 
 			/*
 			 * If (a_key == &dicto->val), things will break badly.
@@ -1190,9 +1200,9 @@ stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 			dicto = _cw_stilt_dicto_get(a_stilt);
 			chi = _cw_stilt_chi_get(a_stilt);
 			stilo_new(&dicto->key, a_stilt, _CW_STILOT_NOTYPE);
-			stilo_move(&dicto->key, a_key, a_stilt);
+			stilo_move(&dicto->key, a_key);
 			stilo_new(&dicto->val, a_stilt, _CW_STILOT_NOTYPE);
-			stilo_move(&dicto->val, a_val, a_stilt);
+			stilo_move(&dicto->val, a_val);
 
 			/* Insert. */
 			dch_insert(&dict->e.d.hash, (void *)&dicto->key,
@@ -1255,7 +1265,7 @@ stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_stilo_t
 		if (dch_search(&dict->e.d.hash, (void *)a_key, (void **)&dicto)
 		    == FALSE) {
 			stilo_new(r_stilo, a_stilt, _CW_STILOT_NOTYPE);
-			stilo_dup(r_stilo, &dicto->val, a_stilt);
+			stilo_dup(r_stilo, &dicto->val);
 			retval = FALSE;
 		} else
 			retval = TRUE;
@@ -1307,7 +1317,7 @@ stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	else {
 		dch_get_iterate(&dict->e.d.hash, (void **)&stilo, NULL);
 		stilo_new(r_stilo, a_stilt, _CW_STILOT_NOTYPE);
-		stilo_dup(r_stilo, stilo, a_stilt);
+		stilo_dup(r_stilo, stilo);
 		retval = FALSE;
 	}
 	stiloe_p_unlock(&dict->stiloe);
@@ -1545,11 +1555,11 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
     a_syntactic, cw_bool_t a_newline)
 {
 	cw_stiloe_name_t	*stiloe;
-	const char		*name;
+	const cw_uint8_t	*name;
 	cw_uint32_t		len;
 
 	/* Chase down the stiln. */
-	stiloe = (cw_stiloe_name_t *)a_stilo->o.stiloe;
+	stiloe = (cw_stiloe_name_t *)&a_stilo->o.stiloe;
 	stiloe = (cw_stiloe_name_t *)stiloe->val;
 	
 	name = stiln_l_val_get(&stiloe->e.n.key);
@@ -1561,7 +1571,7 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	_cw_out_put_fn(a_fd, len, "[s]", name);
 
 	if (a_newline)
-		_cw_output_f(a_fd, "\n");
+		_cw_out_put_f(a_fd, "\n");
 }
 
 /*

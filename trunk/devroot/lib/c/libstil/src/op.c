@@ -834,14 +834,14 @@ op_sym_rb(cw_stilt_t *a_stilt)
 		stilo_move(&arr[i], stilo);
 
 	/* Pop the stilo's off the stack now. */
-	stils_pop(&a_stilt->data_stils, nelements + 1);
+	stils_pop(&a_stilt->data_stils, a_stilt, nelements + 1);
 
 	/* Push the array onto the stack. */
 	stilo = stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_NOTYPE);
 	stilo_move(stilo, &t_stilo);
 
 	/* Clean up. */
-	stilo_delete(&t_stilo);
+	stilo_delete(&t_stilo, a_stilt);
 }
 
 void

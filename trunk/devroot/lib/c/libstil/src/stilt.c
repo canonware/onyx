@@ -151,9 +151,9 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 
 	return retval;
 	OOM_6:
-	stils_delete(&retval->data_stils);
+	stils_delete(&retval->data_stils, retval);
 	OOM_5:
-	stils_delete(&retval->exec_stils);
+	stils_delete(&retval->exec_stils, retval);
 	OOM_4:
 	stilnt_delete(&retval->stilnt);
 	OOM_3:
@@ -171,9 +171,9 @@ stilt_delete(cw_stilt_t *a_stilt)
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
-	stils_delete(&a_stilt->dict_stils);
-	stils_delete(&a_stilt->data_stils);
-	stils_delete(&a_stilt->exec_stils);
+	stils_delete(&a_stilt->dict_stils, a_stilt);
+	stils_delete(&a_stilt->data_stils, a_stilt);
+	stils_delete(&a_stilt->exec_stils, a_stilt);
 	stilnt_delete(&a_stilt->stilnt);
 	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)
@@ -1221,12 +1221,12 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 		stilo_move(&arr[i], stilo);
 
 	/* Pop the stilo's off the stack now. */
-	stils_pop(&a_stilt->data_stils, nelements + 1);
+	stils_pop(&a_stilt->data_stils, a_stilt, nelements + 1);
 
 	/* Push the array onto the stack. */
 	stilo = stils_push(&a_stilt->data_stils, a_stilt, _CW_STILOT_NOTYPE);
 	stilo_move(stilo, &t_stilo);
 
 	/* Clean up. */
-	stilo_delete(&t_stilo);
+	stilo_delete(&t_stilo, a_stilt);
 }
