@@ -1072,8 +1072,7 @@ systemdict_copy(cw_nxo_t *a_thread)
 			return;
 		}
 
-		nxo_dict_copy(nxo, orig, nxo_thread_nx_get(a_thread),
-		    nxo_thread_currentlocking(a_thread));
+		nxo_dict_copy(nxo, orig, nxo_thread_nx_get(a_thread));
 		break;
 	}
 	case NXOT_STACK: {

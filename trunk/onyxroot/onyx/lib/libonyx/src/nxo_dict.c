@@ -203,31 +203,33 @@ nxo_l_dict_print(cw_nxo_t *a_thread)
 }
 
 void
-nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx, cw_bool_t
-    a_locking)
+nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 {
 	cw_nxoe_dict_t	*to, *from;
 	cw_uint32_t	i, count;
-	cw_nxoe_dicto_t	*dicto_to, *dicto_from;
-	cw_chi_t	*chi;
+	cw_nxoe_dicto_t	*dicto_to, *dicto_from, *dicto_rm;
+	cw_chi_t	*chi, *chi_rm;
+	cw_bool_t	removed;
 
 	_cw_check_ptr(a_to);
 	_cw_assert(a_to->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_to) == NXOT_DICT);
-	_cw_assert(nxo_dict_count(a_to) == 0);
+	to = (cw_nxoe_dict_t *)a_to->o.nxoe;
+	_cw_check_ptr(to);
+	_cw_assert(to->nxoe.magic == _CW_NXOE_MAGIC);
+	_cw_assert(to->nxoe.type == NXOT_DICT);
 
+	_cw_check_ptr(a_from);
+	_cw_assert(a_from->magic == _CW_NXO_MAGIC);
+	_cw_assert(nxo_type_get(a_from) == NXOT_DICT);
 	from = (cw_nxoe_dict_t *)a_from->o.nxoe;
-
 	_cw_check_ptr(from);
 	_cw_assert(from->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(from->nxoe.type == NXOT_DICT);
 
 	/* Deep (but not recursive) copy. */
-	count = dch_count(&from->hash);
-	nxo_dict_new(a_to, a_nx, a_locking, count);
-	to = (cw_nxoe_dict_t *)a_to->o.nxoe;
-
 	nxoe_p_dict_lock(from);
+	nxoe_p_dict_lock(to);
 	for (i = 0, count = dch_count(&from->hash); i < count; i++) {
 		/* Get a dicto. */
 		dch_get_iterate(&from->hash, NULL, (void **)&dicto_from);
@@ -240,9 +242,23 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx, cw_bool_t
 		nxo_dup(&dicto_to->val, &dicto_from->val);
 		chi = nxa_l_chi_get(nx_nxa_get(a_nx));
 
-		/* Insert. */
+		/* Make sure the key is not defined, then insert. */
+		thd_crit_enter();
+		removed = dch_remove(&to->hash, (void *)&dicto_to->key, NULL,
+		    (void **)&dicto_rm, &chi_rm);
 		dch_insert(&to->hash, &dicto_to->key, dicto_to, chi);
+		thd_crit_leave();
+
+		if (removed == FALSE) {
+			cw_nxa_t	*nxa;
+
+			nxa = nx_nxa_get(a_nx);
+
+			nxa_l_dicto_put(nxa, dicto_rm);
+			nxa_l_chi_put(nxa, chi_rm);
+		}
 	}
+	nxoe_p_dict_unlock(to);
 	nxoe_p_dict_unlock(from);
 }
 
@@ -265,7 +281,6 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	nxoe_p_dict_lock(dict);
 	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto) == FALSE) {
 		/* a_key is already defined. */
-		nxo_no_new(&dicto->val);
 		nxo_dup(&dicto->val, a_val);
 
 		/*
@@ -320,8 +335,12 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 	nxoe_p_dict_unlock(dict);
 
 	if (error == FALSE) {
-		nxa_l_dicto_put(nx_nxa_get(a_nx), dicto);
-		nxa_l_chi_put(nx_nxa_get(a_nx), chi);
+		cw_nxa_t	*nxa;
+
+		nxa = nx_nxa_get(a_nx);
+
+		nxa_l_dicto_put(nxa, dicto);
+		nxa_l_chi_put(nxa, chi);
 	}
 }
 
@@ -410,12 +429,13 @@ nxo_dict_count(cw_nxo_t *a_nxo)
 	return retval;
 }
 
-void
+cw_bool_t
 nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 {
+	cw_bool_t	retval;
 	cw_nxoe_dict_t	*dict;
 	cw_nxo_t	*nxo;
-	
+
 	_cw_check_ptr(a_nxo);
 	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
 	_cw_assert(nxo_type_get(a_nxo) == NXOT_DICT);
@@ -427,9 +447,12 @@ nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
 	nxoe_p_dict_lock(dict);
-	dch_get_iterate(&dict->hash, (void **)&nxo, NULL);
-	nxo_dup(r_nxo, nxo);
+	retval = dch_get_iterate(&dict->hash, (void **)&nxo, NULL);
+	if (retval == FALSE)
+		nxo_dup(r_nxo, nxo);
 	nxoe_p_dict_unlock(dict);
+
+	return retval;
 }
 
 /* Hash any nxo, but optimize for name hashing. */
