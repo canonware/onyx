@@ -13,15 +13,15 @@
 `Test begin\n' print flush
 
 {
-	product pop countdstack true globaldict
-	{product pop countdstack true globaldict}
+	product pop countdstack true globaldict !userdict
+	{product pop countdstack true globaldict !userdict}
 }
 dup 2 sprint
 bind 2 sprint
 
 {
-	product pop countdstack true globaldict
-	{product pop countdstack true globaldict}
+	product pop countdstack true globaldict !userdict
+	{product pop countdstack true globaldict !userdict}
 }
 dup dup 5 get cvlit 5 exch put
 cvlit

@@ -122,7 +122,8 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 		     CW_LIBONYX_THREADSDICT_HASH);
 	try_stage = 11;
 
-	/* Now that we have an initial thread, activate the GC. */
+	/* Now that all root set objects that nx is responsible for are
+	 * initialized, activate the GC. */
 	nxa_active_set(&retval->nxa, TRUE);
 
 	/* Do soft operator initialization. */

@@ -17,7 +17,7 @@ marktype
 nametype
 `null'
 nulltype
-`$$pop'
+`~pop'
 operatortype
 `(1 2 3)'
 stacktype

@@ -59,33 +59,33 @@ $errordict <
 
     # - handleerror -
     $handleerror {
-	$currenterror load begin
+	!currenterror begin
 
 	# If this is a syntaxerror, print the line and column numbers.
-	$errorname load $syntaxerror eq {
+	!errorname $syntaxerror eq {
 	    stderr dup `At line ' {write}{} until
-	    dup $line load cvs {write}{} until
+	    dup !line cvs {write}{} until
 	    dup `, column ' {write}{} until
-	    dup $column load cvs {write}{} until
+	    dup !column cvs {write}{} until
 	    `: ' {write}{} until
 	} if
 
 	# Print the errorname.
 	stderr dup `Error ' {write}{} until
-	dup $errorname load 1 sprints {write}{} until
+	dup !errorname 1 sprints {write}{} until
 
 	# Print ostack and dstack using sprint.
 	dup `\nostack: ' {write}{} until
-	dup $ostack load 1 sprints {write}{} until
+	dup !ostack 1 sprints {write}{} until
 	dup `\ndstack: ' {write}{} until
-	dup $dstack load 1 sprints {write}{} until
+	dup !dstack 1 sprints {write}{} until
 	`\n' {write}{} until
 
 	# Print a stack trace that depicts the currently executing element of
 	# arrays.
-	$estack load scount 1 sub dup 0 gt {
+	!estack scount 1 sub dup 0 gt {
 	    stderr dup `estack/istack trace (0..' {write}{} until
-	    1 idup cvs stderr exch {write}{} until
+	    over cvs stderr exch {write}{} until
 	    `):\n' {write}{} until
 	} if
 
@@ -94,7 +94,7 @@ $errordict <
 	    # #edepth
 	    # If this element is an array, print it specially.
 	    dup cvs stderr exch {write}{} until
-	    dup $estack load dup dn sidup spop
+	    dup !estack dup dn sidup spop
 	    # #edepth #array
 
 	    dup type $arraytype eq {
@@ -103,10 +103,10 @@ $errordict <
 		# #edepth #array
 		dup length 1 sub 0 1 dn {
 		    # #edepth #array #aindex
-		    2 idup $istack load
+		    2 idup !istack
 		    dup dn sidup spop
 		    # #edepth #array #aindex #iindex
-		    1 idup
+		    over
 		    # #edepth #array #aindex #iindex #aindex
 		    eq {
 			dup <$w 3> outputs
@@ -117,7 +117,7 @@ $errordict <
 		    } ifelse
 		    stderr exch {write}{} until
 		    # #edepth #array #aindex
-		    1 idup exch get 1 sprints
+		    over exch get 1 sprints
 		    stderr exch {write}{} until
 		    stderr `\n' {write}{} until
 		    # #edepth #array

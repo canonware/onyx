@@ -122,20 +122,6 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	    nxoe_p_thread_reset(thread);
 	    break;
 	}
-	case THREADTS_DOLLAR_CONT:
-	{
-	    cw_nxoe_thread_t *thread;
-
-	    cw_check_ptr(a_thread);
-	    cw_dassert(a_thread->magic == CW_NXO_MAGIC);
-
-	    thread = (cw_nxoe_thread_t *) a_thread->o.nxoe;
-	    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
-	    cw_assert(thread->nxoe.type == NXOT_THREAD);
-
-	    nxoe_p_thread_syntax_error(thread, a_threadp, 0, "$", "", -1);
-	    break;
-	}
 	case THREADTS_STRING:
 	case THREADTS_STRING_NEWLINE_CONT:
 	case THREADTS_STRING_PROT_CONT:
@@ -154,6 +140,49 @@ nxo_threadp_delete(cw_nxo_threadp_t *a_threadp, cw_nxo_t *a_thread)
 	    cw_assert(thread->nxoe.type == NXOT_THREAD);
 
 	    nxoe_p_thread_syntax_error(thread, a_threadp, 0, "`", "", -1);
+	    break;
+	}
+	case THREADTS_NAME_START:
+	{
+	    cw_nxoe_thread_t *thread;
+	    cw_uint8_t suffix[2] = "?";
+
+	    cw_check_ptr(a_thread);
+	    cw_dassert(a_thread->magic == CW_NXO_MAGIC);
+
+	    thread = (cw_nxoe_thread_t *) a_thread->o.nxoe;
+	    cw_dassert(thread->nxoe.magic == CW_NXOE_MAGIC);
+	    cw_assert(thread->nxoe.type == NXOT_THREAD);
+
+	    switch (thread->m.m.action)
+	    {
+		case ACTION_EXECUTE:
+		{
+		    suffix[0] = '\0';
+		    break;
+		}
+		case ACTION_EVALUATE:
+		{
+		    suffix[0] = '!';
+		    break;
+		}
+		case ACTION_LITERAL:
+		{
+		    suffix[0] = '$';
+		    break;
+		}
+		case ACTION_IMMEDIATE:
+		{
+		    suffix[0] = '~';
+		    break;
+		}
+		default:
+		{
+		    cw_not_reached();
+		}
+	    }
+
+	    nxoe_p_thread_syntax_error(thread, a_threadp, 0, "", suffix, -1);
 	    break;
 	}
 	case THREADTS_INTEGER:
@@ -526,7 +555,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	nxo = nxo_stack_get(&thread->estack);
 	if (nxo_attr_get(nxo) == NXOA_LITERAL)
 	{
-	    /* Always push literal objects onto the data stack. */
+	    /* Always push literal objects onto the operand stack. */
 	    tnxo = nxo_stack_push(&thread->ostack);
 	    nxo_dup(tnxo, nxo);
 	    nxo_stack_pop(&thread->estack);
@@ -550,7 +579,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    case NXOT_STACK:
 	    case NXOT_THREAD:
 	    {
-		/* Always push the object onto the data stack, even though it
+		/* Always push the object onto the operand stack, even though it
 		 * isn't literal. */
 		tnxo = nxo_stack_push(&thread->ostack);
 		nxo_dup(tnxo, nxo);
@@ -589,7 +618,8 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		    attr = nxo_attr_get(el);
 		    if (attr == NXOA_LITERAL)
 		    {
-			/* Always push literal objects onto the data stack. */
+			/* Always push literal objects onto the operand
+			 * stack. */
 			tnxo = nxo_stack_push(&thread->ostack);
 			nxo_dup(tnxo, el);
 			continue;
@@ -648,7 +678,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			&& attr == NXOA_EXECUTABLE))
 		{
 		    /* Always push literal objects and nested executable (not
-		     * evaluatable) arrays onto the data stack. */
+		     * evaluatable) arrays onto the operand stack. */
 		    tnxo = nxo_stack_push(&thread->ostack);
 		    nxo_dup(tnxo, el);
 		    nxo_stack_pop(&thread->estack);
@@ -686,7 +716,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		cw_nxo_t *name;
 
 		/* Search for a value associated with the name in the dictionary
-		 * stack, put it on the execution stack, and execute it. */
+		 * stack, and put it on the execution stack, in preparation for
+		 * the next iteration through the execution loop.  Thus, nested
+		 * name lookups work correctly. */
 		name = nxo_stack_push(&thread->tstack);
 		nxo_dup(name, nxo);
 		if (nxo_thread_dstack_search(a_nxo, name, nxo))
@@ -1073,9 +1105,22 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			}
 			break;
 		    }
+		    case '!':
+		    {
+			a_thread->state = THREADTS_NAME_START;
+			a_thread->m.m.action = ACTION_EVALUATE;
+			break;
+		    }
 		    case '$':
 		    {
-			a_thread->state = THREADTS_DOLLAR_CONT;
+			a_thread->state = THREADTS_NAME_START;
+			a_thread->m.m.action = ACTION_LITERAL;
+			break;
+		    }
+		    case '~':
+		    {
+			a_thread->state = THREADTS_NAME_START;
+			a_thread->m.m.action = ACTION_IMMEDIATE;
 			break;
 		    }
 		    case '#':
@@ -1150,52 +1195,6 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    {
 			a_thread->state = THREADTS_NAME;
 			a_thread->m.m.action = ACTION_EXECUTE;
-			CW_NXO_THREAD_PUTC(c);
-			break;
-		    }
-		}
-		break;
-	    }
-	    case THREADTS_DOLLAR_CONT:
-	    {
-		cw_assert(a_thread->index == 0);
-
-		switch (c)
-		{
-		    case '$':
-		    {
-			a_thread->state = THREADTS_NAME;
-			a_thread->m.m.action = ACTION_EVALUATE;
-			break;
-		    }
-		    case '\n':
-		    {
-			CW_NXO_THREAD_NEWLINE();
-
-			nxoe_p_thread_syntax_error(a_thread, a_threadp,
-						   defer_base, "", "$", c);
-			if (a_token)
-			{
-			    goto RETURN;
-			}
-			break;
-		    }
-		    case '\0': case '\t': case '\f': case '\r': case ' ':
-		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '#':
-		    {
-			nxoe_p_thread_syntax_error(a_thread, a_threadp,
-						   defer_base, "", "$", c);
-			if (a_token)
-			{
-			    goto RETURN;
-			}
-			break;
-		    }
-		    default:
-		    {
-			a_thread->state = THREADTS_NAME;
-			a_thread->m.m.action = ACTION_LITERAL;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -1346,7 +1345,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '$': case '#':
+		    case '[': case ']': case '{': case '}': case '!': case '$':
+		    case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1376,8 +1376,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    default:
 		    {
 			/* Not a number character. */
-			a_thread->m.m.action = ACTION_EXECUTE;
 			a_thread->state = THREADTS_NAME;
+			a_thread->m.m.action = ACTION_EXECUTE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -1457,7 +1457,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '$': case '#':
+		    case '[': case ']': case '{': case '}': case '!': case '$':
+		    case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1488,8 +1489,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    default:
 		    {
 			/* Not a number character. */
-			a_thread->m.m.action = ACTION_EXECUTE;
 			a_thread->state = THREADTS_NAME;
+			a_thread->m.m.action = ACTION_EXECUTE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -1534,7 +1535,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '$': case '#':
+		    case '[': case ']': case '{': case '}': case '!': case '$':
+		    case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1564,8 +1566,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    default:
 		    {
 			/* Not a number character. */
-			a_thread->m.m.action = ACTION_EXECUTE;
 			a_thread->state = THREADTS_NAME;
+			a_thread->m.m.action = ACTION_EXECUTE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -1599,8 +1601,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			else
 			{
 			    /* Sign specified more than once. */
-			    a_thread->m.m.action = ACTION_EXECUTE;
 			    a_thread->state = THREADTS_NAME;
+			    a_thread->m.m.action = ACTION_EXECUTE;
 			}
 			CW_NXO_THREAD_PUTC(c);
 			break;
@@ -1616,8 +1618,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			else
 			{
 			    /* Sign specified more than once. */
-			    a_thread->m.m.action = ACTION_EXECUTE;
 			    a_thread->state = THREADTS_NAME;
+			    a_thread->m.m.action = ACTION_EXECUTE;
 			}
 			CW_NXO_THREAD_PUTC(c);
 			break;
@@ -1629,7 +1631,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			/* Fall through. */
 		    }
 		    case '(': case ')': case '`': case '\'': case '<': case '>':
-		    case '[': case ']': case '{': case '}': case '$': case '#':
+		    case '[': case ']': case '{': case '}': case '!': case '$':
+		    case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -1660,8 +1663,8 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		    default:
 		    {
 			/* Not a number character. */
-			a_thread->m.m.action = ACTION_EXECUTE;
 			a_thread->state = THREADTS_NAME;
+			a_thread->m.m.action = ACTION_EXECUTE;
 			CW_NXO_THREAD_PUTC(c);
 			break;
 		    }
@@ -2004,6 +2007,69 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 		}
 		break;
 	    }
+	    case THREADTS_NAME_START:
+	    {
+		cw_assert(a_thread->index == 0);
+
+		switch (c)
+		{
+		    case '\n':
+		    {
+			CW_NXO_THREAD_NEWLINE();
+			/* Fall through. */
+		    }
+		    case '\0': case '\t': case '\f': case '\r': case ' ':
+		    case '(': case ')': case '`': case '\'': case '<': case '>':
+		    case '[': case ']': case '{': case '}': case '!': case '$':
+		    case '~': case '#':
+		    {
+			cw_uint8_t suffix[2] = "?";
+
+			switch (a_thread->m.m.action)
+			{
+			    case ACTION_EXECUTE:
+			    {
+				suffix[0] = '\0';
+				break;
+			    }
+			    case ACTION_EVALUATE:
+			    {
+				suffix[0] = '!';
+				break;
+			    }
+			    case ACTION_LITERAL:
+			    {
+				suffix[0] = '$';
+				break;
+			    }
+			    case ACTION_IMMEDIATE:
+			    {
+				suffix[0] = '~';
+				break;
+			    }
+			    default:
+			    {
+				cw_not_reached();
+			    }
+			}
+
+			nxoe_p_thread_syntax_error(a_thread, a_threadp,
+						   defer_base, "", suffix, c);
+			if (a_token)
+			{
+			    goto RETURN;
+			}
+			break;
+		    }
+		    default:
+		    {
+			a_thread->state = THREADTS_NAME;
+			CW_NXO_THREAD_PUTC(c);
+			break;
+		    }
+		}
+		break;
+	    }
 	    case THREADTS_NAME:
 	    {
 		cw_bool_t restart = FALSE;
@@ -2016,9 +2082,9 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			CW_NXO_THREAD_NEWLINE();
 			/* Fall through. */
 		    }
-		    case '(': case ')': case '`': case '\'': case '"': case '<':
-		    case '>': case '[': case ']': case '{': case '}': case '$':
-		    case '#':
+		    case '(': case ')': case '`': case '\'': case '<': case '>':
+		    case '[': case ']': case '{': case '}': case '!': case '$':
+		    case '~': case '#':
 		    {
 			/* New token. */
 			/* Invert, in case we fell through from above. */
@@ -2035,22 +2101,28 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 			}
 			else
 			{
+			    cw_uint8_t suffix[2] = "?";
+
 			    switch (a_thread->m.m.action)
 			    {
-				case ACTION_LITERAL:
+				case ACTION_EXECUTE:
 				{
-				    nxoe_p_thread_syntax_error(a_thread,
-							       a_threadp,
-							       defer_base, "$",
-							       "", c);
+				    suffix[0] = '\0';
 				    break;
 				}
 				case ACTION_EVALUATE:
 				{
-				    nxoe_p_thread_syntax_error(a_thread,
-							       a_threadp,
-							       defer_base, "$$",
-							       "", c);
+				    suffix[0] = '!';
+				    break;
+				}
+				case ACTION_LITERAL:
+				{
+				    suffix[0] = '$';
+				    break;
+				}
+				case ACTION_IMMEDIATE:
+				{
+				    suffix[0] = '~';
 				    break;
 				}
 				default:
@@ -2058,6 +2130,10 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				    cw_not_reached();
 				}
 			    }
+
+			    nxoe_p_thread_syntax_error(a_thread, a_threadp,
+						       defer_base, "", suffix,
+						       c);
 			    if (a_token)
 			    {
 				goto RETURN;
@@ -2130,9 +2206,8 @@ nxoe_p_thread_tok_str_expand(cw_nxoe_thread_t *a_thread)
 static void
 nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread,
 			   cw_nxo_threadp_t *a_threadp,
-			   cw_uint32_t a_defer_base,
-			   cw_uint8_t *a_prefix, cw_uint8_t *a_suffix,
-			   cw_sint32_t a_c)
+			   cw_uint32_t a_defer_base, cw_uint8_t *a_prefix,
+			   cw_uint8_t *a_suffix, cw_sint32_t a_c)
 {
     cw_nxo_t *nxo;
     cw_uint32_t defer_count, line, column;
@@ -2414,6 +2489,7 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
     switch (a_thread->m.m.action)
     {
 	case ACTION_EXECUTE:
+	case ACTION_EVALUATE:
 	{
 	    if (a_thread->defer_count == 0)
 	    {
@@ -2423,37 +2499,37 @@ nxoe_p_thread_name_accept(cw_nxoe_thread_t *a_thread)
 		nxo = nxo_stack_push(&a_thread->estack);
 		nxo_name_new(nxo, a_thread->nx, a_thread->tok_str,
 			     a_thread->index, FALSE);
-		nxo_attr_set(nxo, NXOA_EXECUTABLE);
+		nxo_attr_set(nxo, a_thread->m.m.action);
 
 		nxoe_p_thread_reset(a_thread);
 		nxo_thread_loop(&a_thread->self);
 	    }
 	    else
 	    {
-		/* Push the name object onto the data stack. */
+		/* Push the name object onto the operand stack. */
 		nxo = nxo_stack_push(&a_thread->ostack);
 		nxo_name_new(nxo, a_thread->nx, a_thread->tok_str,
 			     a_thread->index, FALSE);
-		nxo_attr_set(nxo, NXOA_EXECUTABLE);
+		nxo_attr_set(nxo, a_thread->m.m.action);
 		nxoe_p_thread_reset(a_thread);
 	    }
 	    break;
 	}
 	case ACTION_LITERAL:
 	{
-	    /* Push the name object onto the data stack. */
+	    /* Push the name object onto the operand stack. */
 	    nxo = nxo_stack_push(&a_thread->ostack);
 	    nxo_name_new(nxo, a_thread->nx, a_thread->tok_str, a_thread->index,
 			 FALSE);
 	    nxoe_p_thread_reset(a_thread);
 	    break;
 	}
-	case ACTION_EVALUATE:
+	case ACTION_IMMEDIATE:
 	{
 	    cw_nxo_t *key;
 
 	    /* Find the value associated with the name in the dictionary stack
-	     * and push the value onto the data stack. */
+	     * and push the value onto the operand stack. */
 	    key = nxo_stack_push(&a_thread->tstack);
 	    nxo_name_new(key, a_thread->nx, a_thread->tok_str, a_thread->index,
 			 FALSE);

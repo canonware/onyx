@@ -19,7 +19,7 @@
 	`42'
 	`mark'
 	`$count'
-	`$$count'
+	`~count'
 	`(1)'
 	``count''
 ]{

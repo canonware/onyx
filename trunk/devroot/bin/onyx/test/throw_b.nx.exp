@@ -11,10 +11,9 @@ estack/istack trace (0..2):
 	--type--
 	$nametype
 	--ne--
-	{$typecheck $systemdict --load-- $throw --get-- --eval--}
+	{$typecheck !throw}
 	--if--
-	$currenterror
-	--load--
+	!currenterror
 	--begin--
 	$newerror
 	true
@@ -49,15 +48,13 @@ estack/istack trace (0..2):
 	--spop--
 	--pop--
 	--def--
-	$estack
-	--load--
+	!estack
 	--dup--
 	--sdup--
 	--spop--
 	--exch--
 	--end--
-	$errordict
-	--load--
+	!errordict
 	--dup--
 	2
 	--idup--

@@ -23,7 +23,6 @@ typedef struct cw_nxoe_threadts_s cw_nxoe_threadts_t;
 typedef enum
 {
     THREADTS_START,
-    THREADTS_DOLLAR_CONT,
     THREADTS_COMMENT,
     THREADTS_INTEGER,
     THREADTS_INTEGER_RADIX,
@@ -38,6 +37,7 @@ typedef enum
     THREADTS_STRING_CTRL_CONT,
     THREADTS_STRING_HEX_CONT,
     THREADTS_STRING_HEX_FINISH,
+    THREADTS_NAME_START,
     THREADTS_NAME
 } cw_nxo_threadts_t;
 
@@ -180,11 +180,15 @@ struct cw_nxoe_thread_s
 	/* name. */
 	struct
 	{
+	    /* The values of the first three actions must correspond to the
+	     * values of the attributes in cw_nxoa_t, since the two enumerations
+	     * are used interchangeably in nxoe_p_thread_name_accept(). */
 	    enum
 	    {
-		ACTION_EXECUTE,
-		ACTION_LITERAL,
-		ACTION_EVALUATE
+		ACTION_LITERAL = NXOA_LITERAL,
+		ACTION_EXECUTE = NXOA_EXECUTABLE,
+		ACTION_EVALUATE = NXOA_EVALUATABLE,
+		ACTION_IMMEDIATE
 	    } action;
 	} m;	
     } m;

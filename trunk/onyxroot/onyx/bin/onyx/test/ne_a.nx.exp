@@ -35,9 +35,9 @@ true
 true
 `dict stack'
 true
-`$$pop $$spop'
+`~pop ~spop'
 true
-`$$pop $$roll'
+`~pop ~roll'
 true
 `$foo $bar'
 true
@@ -49,7 +49,7 @@ true
 true
 `stack dup'
 false
-`$$pop $$pop'
+`~pop ~pop'
 false
 `$foo $foo'
 false

@@ -17,7 +17,7 @@ true
 `$count'
 $count
 0
-`$$count'
+`~count'
 --count--
 0
 `(1)'

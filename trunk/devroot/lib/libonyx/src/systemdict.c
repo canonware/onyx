@@ -1102,6 +1102,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
     cw_nxo_t *el, *val;
     cw_uint32_t i, count;
     cw_nxot_t type;
+    cw_nxoa_t attr;
 
     tstack = nxo_thread_tstack_get(a_thread);
 
@@ -1113,7 +1114,8 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
     for (i = 0, count = nxo_array_len_get(a_proc); i < count; i++)
     {
 	nxo_array_el_get(a_proc, i, el);
-	if (nxo_attr_get(el) == NXOA_LITERAL)
+	attr = nxo_attr_get(el);
+	if (attr == NXOA_LITERAL)
 	{
 	    continue;
 	}
@@ -1130,6 +1132,12 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	    }
 	    case NXOT_NAME:
 	    {
+		if (attr == NXOA_EVALUATABLE)
+		{
+		    /* Do not bind evaluatable names. */
+		    continue;
+		}
+
 		if (nxo_thread_dstack_search(a_thread, el, val) == FALSE)
 		{
 		    type = nxo_type_get(val);

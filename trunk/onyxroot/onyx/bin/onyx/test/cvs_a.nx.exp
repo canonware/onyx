@@ -9,7 +9,7 @@ Test begin
 `-55'
 `$foo'
 `foo'
-`$$pop'
+`~pop'
 `pop'
 `\`foo\''
 `\`foo\''

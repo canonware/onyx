@@ -1,3 +1,17 @@
+2002-09-07 : Jason Evans <jasone@canonware.com>
+
+	* Treat evaluatable names specially when binding (don't bind them), in
+	  order to make it possible to force dynamic lookup of names, without
+	  having to resort to using the load operator on literal names.
+
+	  This required a language syntax change so that evaluatable names can
+	  be created in deferred execution mode.  The possibilities for
+	  specifying an evaluatable name were $$$name, $#name, or adding a new
+	  special character.  Since neither of the backward compatible syntax
+	  changes were very palatable, two new special characters were added.
+	  !name creates an evaluatable name, and the former $$name syntax is now
+	  written as ~name for consistency.
+
 2002-09-06 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.0.0 released.
