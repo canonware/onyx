@@ -985,9 +985,10 @@ stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset, cw_stilo_t *a_arr,
  * boolean.
  */
 void
-stilo_boolean_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt)
+stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val)
 {
 	stilo_p_new(a_stilo, _CW_STILOT_BOOLEANTYPE);
+	a_stilo->o.boolean.val = a_val;
 }
 
 
@@ -1006,6 +1007,26 @@ stilo_p_boolean_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 		_cw_out_put_f(a_fd, "true[c]", newline);
 	else
 		_cw_out_put_f(a_fd, "false[c]", newline);
+}
+
+cw_bool_t
+stilo_boolean_get(cw_stilo_t *a_stilo)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == _CW_STILOT_BOOLEANTYPE);
+
+	return a_stilo->o.boolean.val;
+}
+
+void
+stilo_boolean_set(cw_stilo_t *a_stilo, cw_bool_t a_val)
+{
+	_cw_check_ptr(a_stilo);
+	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
+	_cw_assert(a_stilo->type == _CW_STILOT_BOOLEANTYPE);
+
+	a_stilo->o.boolean.val = a_val;
 }
 
 /*

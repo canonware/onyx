@@ -124,7 +124,7 @@ struct cw_stiloe_dicto_s {
 void		stilo_no_new(cw_stilo_t *a_stilo);
 void		stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_len);
-void		stilo_boolean_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+void		stilo_boolean_new(cw_stilo_t *a_stilo, cw_bool_t a_val);
 void		stilo_condition_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 void		stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_dict_size);
@@ -140,8 +140,6 @@ void		stilo_number_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 void		stilo_operator_new(cw_stilo_t *a_stilo, cw_op_t *a_op);
 void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_uint32_t a_len);
-
-
 
 void		stilo_clobber(cw_stilo_t *a_stilo);
 void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
@@ -176,6 +174,12 @@ cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_uint32_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
 void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
     cw_stilo_t *a_arr, cw_uint32_t a_len, cw_stilt_t *a_stilt);
+
+/*
+ * boolean.
+ */
+cw_bool_t	stilo_boolean_get(cw_stilo_t *a_stilo);
+void		stilo_boolean_set(cw_stilo_t *a_stilo, cw_bool_t a_val);
 
 /*
  * dict.
