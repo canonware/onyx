@@ -116,7 +116,7 @@ main(int argc, char ** argv)
 
   if ((TRUE == cl_error) || (optind < argc))
   {
-    log_printf(cw_g_log, "Unrecognized option(s)\n");
+    out_put(cw_g_out, "Unrecognized option(s)\n");
     usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
@@ -136,28 +136,28 @@ main(int argc, char ** argv)
 
   if (NULL == opt_rhost)
   {
-    log_printf(cw_g_log, "Remote host:port not specified\n");
+    out_put(cw_g_out, "Remote host:port not specified\n");
     retval = 1;
     goto CLERROR;
   }
 
   if (0 == opt_bsize)
   {
-    log_printf(cw_g_log, "Invalid block size\n");
+    out_put(cw_g_out, "Invalid block size\n");
     retval = 1;
     goto CLERROR;
   }
     
   if (0 == opt_nsocks)
   {
-    log_printf(cw_g_log, "Invalid number of connections\n");
+    out_put(cw_g_out, "Invalid number of connections\n");
     retval = 1;
     goto CLERROR;
   }
     
   if (0 == opt_nblocks)
   {
-    log_printf(cw_g_log, "Invalid number of blocks\n");
+    out_put(cw_g_out, "Invalid number of blocks\n");
     retval = 1;
     goto CLERROR;
   }
@@ -181,8 +181,8 @@ main(int argc, char ** argv)
     timeout.tv_usec = 0;
     if (TRUE == sock_connect(&sock_array[i], opt_rhost, opt_rport, &timeout))
     {
-      log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		  "Error in sock_connect()\n");
+      out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		"Error in sock_connect()\n");
       retval = 1;
       for (j = 0; j < i; j++)
       {
@@ -192,7 +192,7 @@ main(int argc, char ** argv)
     }
     else
     {
-      log_lprintf(cw_g_log, "New connection (%lu)\n", i);
+      out_put_l(cw_g_out, "New connection ([i32])\n", i);
     }
   }
 
@@ -222,8 +222,8 @@ main(int argc, char ** argv)
       {
 	if (TRUE == sock_flush_out(&sock_array[j]))
 	{
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
-		      "Error in sock_flush_out() for connection %lu\n", j);
+	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+		    "Error in sock_flush_out() for connection [i32]\n", j);
 	  goto SHUTDOWN;
 	}
 	if (TRUE == buf_catenate_buf(&t_buf, &buf, TRUE))
@@ -232,8 +232,8 @@ main(int argc, char ** argv)
 	}
 	if (TRUE == sock_write(&sock_array[j], &t_buf))
 	{
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
-		      "Error in sock_write() for connection %lu\n", j);
+	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+		    "Error in sock_write() for connection [i32]\n", j);
 	  goto SHUTDOWN;
 	}
       }
@@ -248,8 +248,8 @@ main(int argc, char ** argv)
 	}
 	if (TRUE == sock_write(&sock_array[j], &t_buf))
 	{
-	  log_eprintf(cw_g_log, __FILE__, __LINE__, NULL,
-		      "Error in sock_write() for connection %lu\n", j);
+	  out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+		    "Error in sock_write() for connection [i32]\n", j);
 	  goto SHUTDOWN;
 	}
       }
@@ -263,7 +263,7 @@ main(int argc, char ** argv)
   {
     sock_flush_out(&sock_array[i]);
     sock_delete(&sock_array[i]);
-    log_lprintf(cw_g_log, "Connection closed (%lu)\n", i);
+    out_put_l(cw_g_out, "Connection closed ([i32])\n", i);
   }
   
   RETURN:
@@ -282,24 +282,24 @@ main(int argc, char ** argv)
 void
 usage(const char * a_progname)
 {
-  log_printf
-    (cw_g_log,
-     "%s usage:\n"
-     "    %s -h\n"
-     "    %s -V\n"
-     "    %s [-n <nsocks>] [-b <bsize>] [-c <nblocks>] -r [<rhost>:]<rport>\n"
+  out_put
+    (cw_g_out,
+     "[s] usage:\n"
+     "    [s] -h\n"
+     "    [s] -V\n"
+     "    [s] [[-n <nsocks>] [[-b <bsize>] [[-c <nblocks>] -r [[<rhost>:]<rport>\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+------------------------------------------\n"
      "    -h                   | Print usage and exit.\n"
      "    -V                   | Print version information and exit.\n"
      "    -n <nsocks>          | Number of connections to open.\n"
-     "                         | (Defaults to %lu.)\n"
+     "                         | (Defaults to [i32].)\n"
      "    -b <bsize>           | Send blocks of size <bsize>.\n"
-     "                         | (Defaults to %lu.)\n"
+     "                         | (Defaults to [i32].)\n"
      "    -c <nblocks>         | Number of blocks to send over each socket.\n"
-     "                         | (Defaults to %d.)\n"
-     "    -r [<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
+     "                         | (Defaults to [i32].)\n"
+     "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
      "                         | port <rport>.\n",
      a_progname, a_progname, a_progname, a_progname,
      _LIBSOCK_BLOW_DEFAULT_NSOCKS,
@@ -311,9 +311,9 @@ usage(const char * a_progname)
 void
 version(const char * a_progname)
 {
-  log_printf(cw_g_log,
-	     "%s, version %s\n",
-	     a_progname, _LIBSOCK_VERSION);
+  out_put(cw_g_out,
+	  "[s], version [s]\n",
+	  a_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

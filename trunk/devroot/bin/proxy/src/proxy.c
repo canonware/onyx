@@ -22,6 +22,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <limits.h>
+#include <fcntl.h>
 
 struct handler_s
 {
@@ -35,7 +36,7 @@ typedef struct
   cw_thd_t recv_thd;
   cw_mtx_t lock;
   cw_bool_t should_quit;
-  cw_log_t * log;
+  cw_out_t * out;
   cw_sock_t client_sock;
   cw_sock_t remote_sock;
 
@@ -51,7 +52,7 @@ cw_bool_t should_quit = FALSE;
 void *
 sig_handler(void * a_arg);
 char *
-get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
+get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
 void *
 handle_client_send(void * a_arg);
 void *
@@ -169,7 +170,7 @@ main(int argc, char ** argv)
 
   if ((TRUE == cl_error) || (optind < argc))
   {
-    log_printf(cw_g_log, "Unrecognized option(s)\n");
+    out_put(cw_g_out, "Unrecognized option(s)\n");
     usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
@@ -190,7 +191,7 @@ main(int argc, char ** argv)
   /* Check validity of command line options. */
   if ((TRUE == opt_verbose) && (TRUE == opt_quiet))
   {
-    log_printf(cw_g_log, "\"-v\" and \"-q\" are incompatible\n");
+    out_put(cw_g_out, "\"-v\" and \"-q\" are incompatible\n");
     usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
@@ -198,7 +199,7 @@ main(int argc, char ** argv)
   
   if ((TRUE == opt_log) && (NULL != opt_dirname))
   {
-    log_printf(cw_g_log, "\"-l\" and \"-d\" are incompatible\n");
+    out_put(cw_g_out, "\"-l\" and \"-d\" are incompatible\n");
     usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
@@ -206,8 +207,8 @@ main(int argc, char ** argv)
 
   if ((NULL != opt_dirname) && (512 < strlen(opt_dirname)))
   {
-    log_printf(cw_g_log,
-	       "Argument to \"-d\" flag is too long (512 bytes max)\n");
+    out_put(cw_g_out,
+	    "Argument to \"-d\" flag is too long (512 bytes max)\n");
     usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
@@ -225,27 +226,27 @@ main(int argc, char ** argv)
   
   if (NULL != opt_dirname)
   {
-#ifdef _CW_OS_SOLARIS
-    sprintf(logfile, "%s/%s.pid_%lu.log",
-	    opt_dirname, basename(argv[0]), getpid());
-#else
-    sprintf(logfile, "%s/%s.pid_%u.log",
-	    opt_dirname, basename(argv[0]), getpid());
-#endif
+    cw_sint32_t fd;
     
-    if (log_set_logfile(cw_g_log, logfile, TRUE))
+    out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i32].log",
+	      opt_dirname, basename(argv[0]), getpid());
+    
+    fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
+    if (-1 == fd)
     {
       if (dbg_is_registered(cw_g_dbg, "prog_error"))
       {
-	log_printf(cw_g_log, "Error setting logfile to \"%s\"\n",
-		   logfile);
+	out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		  "Error opening \"[s]\": [s]\n", logfile,
+		  strerror(errno));
       }
     }
+    out_set_default_fd(cw_g_out, fd);
   }
   
   if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
   {
-    log_printf(cw_g_log, "pid: %d\n", getpid());
+    out_put(cw_g_out, "pid: [i32]\n", getpid());
   }
 
   if (sockb_init(2048, 4096))
@@ -260,7 +261,7 @@ main(int argc, char ** argv)
   }
   if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
   {
-    log_lprintf(cw_g_log, "%s: Listening on port %d\n", argv[0], opt_port);
+    out_put_l(cw_g_out, "[s]: Listening on port [i32]\n", argv[0], opt_port);
   }
 
   for (conn_num = 0; should_quit == FALSE; conn_num++)
@@ -268,7 +269,7 @@ main(int argc, char ** argv)
     conn = _cw_malloc(sizeof(connection_t));
     if (NULL == conn)
     {
-      log_printf(cw_g_log, "malloc() error\n");
+      out_put(cw_g_out, "malloc() error\n");
       exit(1);
     }
     
@@ -288,27 +289,33 @@ main(int argc, char ** argv)
     {
       if (NULL != opt_dirname)
       {
+	cw_sint32_t fd;
+	
 	conn->is_verbose = TRUE;
 	
-	conn->log = log_new();
+	conn->out = out_new(NULL);
+	if (NULL == conn->out)
+	{
+	  out_put(cw_g_out, "malloc() error\n");
+	  exit(1);
+	}
 
-#ifdef _CW_OS_SOLARIS
-	sprintf(logfile, "%s/%s.pid_%lu.conn%u",
-		opt_dirname, basename(argv[0]), getpid(), conn_num);
-#else
-	sprintf(logfile, "%s/%s.pid_%u.conn%u",
-		opt_dirname, basename(argv[0]), getpid(), conn_num);
-#endif	
-	if (log_set_logfile(conn->log, logfile, TRUE))
+	out_put_s(cw_g_out, logfile, "[s]/[s].pid_[i32].conn[i32]",
+		  opt_dirname, basename(argv[0]), getpid(), conn_num);
+
+	fd = (cw_sint32_t) open(logfile, O_RDWR | O_CREAT | O_TRUNC, 0644);
+	if (-1 == fd)
 	{
 	  if (dbg_is_registered(cw_g_dbg, "prog_error"))
 	  {
-	    log_printf(cw_g_log, "Error opening logfile \"%s\"\n",
-		       logfile);
+	    out_put_e(cw_g_out, __FILE__, __LINE__, __FUNCTION__,
+		      "Error opening \"[s]\": [s]\n", logfile,
+		      strerror(errno));
 	  }
-	  log_delete(conn->log);
-	  conn->log = NULL;
+	  out_delete(conn->out);
+	  conn->out = NULL;
 	}
+	out_set_default_fd(conn->out, fd);
       }
 
       conn->rhost = opt_rhost;
@@ -346,7 +353,7 @@ sig_handler(void * a_arg)
   }
   if (dbg_is_registered(cw_g_dbg, "prog_verbose"))
   {
-    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__, "Caught signal\n");
+    out_put_e(cw_g_out, NULL, 0, __FUNCTION__, "Caught signal\n");
   }
   
   should_quit = TRUE;
@@ -355,7 +362,7 @@ sig_handler(void * a_arg)
 }
 
 char *
-get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
+get_out_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 {
   char * retval;
   char c_trans[4], line_a[81], line_b[81],
@@ -368,7 +375,7 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 
   buf_size = buf_get_size(a_buf);
 
-  /* Re-alloc enough space to hold the log string. */
+  /* Re-alloc enough space to hold the out string. */
   str_len = (81 /* First dashed line. */
 	     + 35 /* Header. */
 	     + 1 /* Blank line. */
@@ -383,7 +390,7 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     retval = _cw_malloc(str_len);
     if (NULL == retval)
     {
-      log_printf(cw_g_log, "malloc() error\n");
+      out_put(cw_g_out, "malloc() error\n");
       exit(1);
     }
   }
@@ -393,7 +400,7 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
     retval = _cw_realloc(a_str, str_len);
     if (NULL == retval)
     {
-      log_printf(cw_g_log, "malloc() error\n");
+      out_put(cw_g_out, "malloc() error\n");
       exit(1);
     }
   }
@@ -405,11 +412,11 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	 "----------------------------------------"
 	 "----------------------------------------\n");
 
-  sprintf(line_a, "%s:0x%x (%d) byte%s\n",
-	  (TRUE == is_send) ? "send" : "recv",
-	  buf_size,
-	  buf_size,
-	  (buf_size != 1) ? "s" : "");
+  out_put_s(cw_g_out, line_a, "[s]:0x[i32|b:16] ([i32]) byte[s]\n",
+	    (TRUE == is_send) ? "send" : "recv",
+	    buf_size,
+	    buf_size,
+	    (buf_size != 1) ? "s" : "");
   strcat(retval, line_a);
 
   /* Blank line. */
@@ -421,10 +428,10 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
      * translations. */
     line_a[0] = '\0';
     line_b[0] = '\0';
-    sprintf(line_a, "%08x", i);
+    out_put_s(cw_g_out, line_a, "[i32|b:16|w:8|p:0]", i);
     strcat(line_b, "        ");
     
-    /* Each iteration generates log text for 16 bytes of data. */
+    /* Each iteration generates out text for 16 bytes of data. */
     for (j = 0; (j < 16) && ((i + j) < buf_size); j++)
     {
       if ((j % 4) == 0)
@@ -834,10 +841,9 @@ get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str)
 	  strcpy(c_trans, "---");
 	  break;
       }
-      
-      sprintf(line_a + strlen(line_a), "  %02x", c);
-      sprintf(line_b + strlen(line_b), " %3s", c_trans);
 
+      out_put_s(cw_g_out, line_a + strlen(line_a), "  [i8|b:16|w:2|p:0]", c);
+      out_put_s(cw_g_out, line_b + strlen(line_b), " [s|w:3]", c_trans);
     }
     /* Actually copy the strings to the final output string. */
     strcat(retval, line_a);
@@ -873,7 +879,7 @@ handle_client_send(void * a_arg)
 /*    char * hostname = NULL, * port_str = NULL; */
 /*    cw_bool_t parse_error = TRUE; */
 
-  log_printf(conn->log, "New connection\n");
+  out_put(conn->out, "New connection\n");
   
   buf_new(&buf, FALSE);
 
@@ -891,16 +897,16 @@ handle_client_send(void * a_arg)
     goto OPTERROR;
   }
 
-  log_printf(conn->log, "Connecting to \"%s\" on port %d\n",
-	     conn->rhost, conn->rport);
+  out_put(conn->out, "Connecting to \"[s]\" on port [i32]\n",
+	  conn->rhost, conn->rport);
       
   /* Connect to the remote end. */
   sock_new(&conn->remote_sock, 4096);
   if (TRUE == sock_connect(&conn->remote_sock, conn->rhost, conn->rport, NULL))
   {
-    log_eprintf(conn->log, __FILE__, __LINE__, __FUNCTION__,
-		"Error in sock_connect(&conn->remote_sock, \"%s\", %d)\n",
-		conn->rhost, conn->rport);
+    out_put_e(conn->out, __FILE__, __LINE__, __FUNCTION__,
+	      "Error in sock_connect(&conn->remote_sock, \"[s]\", [i32])\n",
+	      conn->rhost, conn->rport);
     goto RETURN;
   }
   
@@ -910,8 +916,8 @@ handle_client_send(void * a_arg)
    * than polling. */
   thd_new(&conn->recv_thd, handle_client_recv, (void *) conn);
 
-  /* Continually read data from the socket, create a log string, print to the
-   * log, then send the data on. */
+  /* Continually read data from the socket, create a out string, print to out,
+   * then send the data on. */
   while (FALSE == conn->should_quit)
   {
     if (-1 == sock_read(&conn->client_sock, &buf, 0, NULL))
@@ -929,8 +935,8 @@ handle_client_send(void * a_arg)
     {
       if (conn->is_verbose)
       {
-	str = get_log_str(&buf, TRUE, str);
-	log_printf(conn->log, "%s", str);
+	str = get_out_str(&buf, TRUE, str);
+	out_put(conn->out, "[s]", str);
       }
       
       if ((TRUE == sock_write(&conn->remote_sock, &buf))
@@ -972,10 +978,10 @@ handle_client_send(void * a_arg)
 
   buf_delete(&buf);
 
-  log_printf(conn->log, "Connection closed\n");
-  if (NULL != conn->log)
+  out_put(conn->out, "Connection closed\n");
+  if (NULL != conn->out)
   {
-    log_delete(conn->log);
+    out_delete(conn->out);
   }
   _cw_free(conn);
   
@@ -991,8 +997,8 @@ handle_client_recv(void * a_arg)
 
   buf_new(&buf, FALSE);
   
-  /* Continually read data from the socket, create a log string, print to the
-   * log, then send the data on. */
+  /* Continually read data from the socket, create a string, print to the log,
+   * then send the data on. */
   while (FALSE == conn->should_quit)
   {
     if ((-1 == sock_read(&conn->remote_sock, &buf, 0, NULL))
@@ -1007,8 +1013,8 @@ handle_client_recv(void * a_arg)
     {
       if (conn->is_verbose)
       {
-	str = get_log_str(&buf, FALSE, str);
-	log_printf(conn->log, "%s", str);
+	str = get_out_str(&buf, FALSE, str);
+	out_put(conn->out, "[s]", str);
       }
       
       if ((TRUE == sock_write(&conn->client_sock, &buf))
@@ -1034,12 +1040,12 @@ handle_client_recv(void * a_arg)
 void
 usage(const char * a_progname)
 {
-  log_printf
-    (cw_g_log,
-     "%s usage:\n"
-     "    %s -h\n"
-     "    %s -V\n"
-     "    %s [-v | -q] [-l | -d <dirpath>] -p <port> -r [<rhost>:]<rport>\n"
+  out_put
+    (cw_g_out,
+     "[s] usage:\n"
+     "    [s] -h\n"
+     "    [s] -V\n"
+     "    [s] [[-v | -q] [[-l | -d <dirpath>] -p <port> -r [[<rhost>:]<rport>\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+------------------------------------------\n"
@@ -1050,7 +1056,7 @@ usage(const char * a_progname)
      "    -l                   | Write logs to stderr.\n"
      "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
      "    -p <port>            | Listen on port <port>.\n"
-     "    -r [<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
+     "    -r [[<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
      "                         | port <rport>.\n",
      a_progname, a_progname, a_progname, a_progname
      );
@@ -1059,9 +1065,9 @@ usage(const char * a_progname)
 void
 version(const char * a_progname)
 {
-  log_printf(cw_g_log,
-	     "%s, version %s\n",
-	     a_progname, _LIBSOCK_VERSION);
+  out_put(cw_g_out,
+	  "[s], version [s]\n",
+	  a_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

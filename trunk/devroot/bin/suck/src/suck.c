@@ -87,7 +87,7 @@ main(int argc, char ** argv)
       }
       default:
       {
-	log_printf(cw_g_log, "Unrecognized option '%c'\n", c);
+	out_put(cw_g_out, "Unrecognized option '[c]'\n", c);
 	cl_error = TRUE;
 	break;
       }
@@ -96,7 +96,7 @@ main(int argc, char ** argv)
 
   if ((TRUE == cl_error) || (optind < argc))
   {
-    log_printf(cw_g_log, "Unrecognized option(s)\n");
+    out_put(cw_g_out, "Unrecognized option(s)\n");
     usage(basename(argv[0]));
     retval = 1;
     goto CLERROR;
@@ -116,7 +116,7 @@ main(int argc, char ** argv)
 
   if (0 == opt_bsize)
   {
-    log_printf(cw_g_log, "Invalid block size\n");
+    out_put(cw_g_out, "Invalid block size\n");
     retval = 1;
     goto CLERROR;
   }
@@ -136,8 +136,8 @@ main(int argc, char ** argv)
   {
     exit(1);
   }
-  log_printf(cw_g_log, "%s: Listening on port %d\n",
-	     basename(argv[0]), opt_port);
+  out_put(cw_g_out, "[s]: Listening on port [i32]\n",
+	  basename(argv[0]), opt_port);
 
   tout.tv_sec = 0;
   tout.tv_nsec = 0;
@@ -181,7 +181,7 @@ main(int argc, char ** argv)
 	  sock_delete(sock_vec[sockfd]);
 	  sock_vec[sockfd] = NULL;
 
-	  log_lprintf(cw_g_log, "Connection closed\n");
+	  out_put_l(cw_g_out, "Connection closed\n");
 	}
       }
     }
@@ -211,7 +211,7 @@ accept_entry_func(void * a_arg)
   {
     if (sock == socks_accept(socks, NULL, sock))
     {
-      log_lprintf(cw_g_log, "New connection\n");
+      out_put_l(cw_g_out, "New connection\n");
       
       sock_vec[sock_get_fd(sock)] = sock;
 
@@ -236,19 +236,19 @@ accept_entry_func(void * a_arg)
 void
 usage(const char * a_progname)
 {
-  log_printf
-    (cw_g_log,
-     "%s usage:\n"
-     "    %s -h\n"
-     "    %s -V\n"
-     "    %s [-b <bsize>] [-p <port>]\n"
+  out_put
+    (cw_g_out,
+     "[s] usage:\n"
+     "    [s] -h\n"
+     "    [s] -V\n"
+     "    [s] [[-b <bsize>] [[-p <port>]\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+------------------------------------------\n"
      "    -h                   | Print usage and exit.\n"
      "    -V                   | Print version information and exit.\n"
      "    -b <bsize>           | Send blocks of size <bsize>.\n"
-     "                         | (Defaults to %lu.)\n"
+     "                         | (Defaults to [i32].)\n"
      "    -p <port>            | Port to listen on.\n",
      a_progname, a_progname, a_progname, a_progname,
      _LIBSOCK_BLOW_DEFAULT_BSIZE
@@ -258,9 +258,9 @@ usage(const char * a_progname)
 void
 version(const char * a_progname)
 {
-  log_printf(cw_g_log,
-	     "%s, version %s\n",
-	     a_progname, _LIBSOCK_VERSION);
+  out_put(cw_g_out,
+	  "[s], version [s]\n",
+	  a_progname, _LIBSOCK_VERSION);
 }
 
 /* Doesn't strip trailing '/' characters. */

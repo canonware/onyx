@@ -7,7 +7,3 @@ c_*_c
 p*.pl
 *.core
 core
-b_echos
-b_proxy
-pmerge
-pstub

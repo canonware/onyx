@@ -18,8 +18,6 @@
 #define _LIBSOCK_USE_SOCKS
 #include <libsock/libsock.h>
 
-/*  #include <libstash/libstash_r.h> */
-
 void *
 handle_client(void * a_arg)
 {
@@ -29,33 +27,27 @@ handle_client(void * a_arg)
   int iovec_count;
   cw_uint32_t i;
 
-  log_printf(cw_g_log, "New connection\n");
+  out_put(cw_g_out, "New connection\n");
 
   buf_new(&buf, FALSE);
   
   while (1)
   {
-/*      buf_dump(&buf, __FUNCTION__ "(0) "); */
-    if (-1 == sock_read_block(sock, &buf))
+    if (-1 == sock_read(sock, &buf, 0, NULL))
     {
       break;
     }
 
-/*      buf_dump(&buf, __FUNCTION__ "(1) "); */
-/*      log_printf(cw_g_log, "read %u bytes\n", */
-/*  	       buf_get_size(&buf)); */
-    
-    iovec = buf_get_iovec(&buf, buf_get_size(&buf), &iovec_count);
-/*      log_printf(cw_g_log, "iovec_count == %lu\n", iovec_count); */
+    iovec = buf_get_iovec(&buf, 0xffffffff, buf_get_size(&buf), &iovec_count);
 
-    log_printf(cw_g_log, "Got :");
+    out_put(cw_g_out, "Got :");
     for (i = 0; i < iovec_count; i++)
     {
-      log_nprintf(cw_g_log, iovec[i].iov_len,
-		  "%s",
-		  iovec[i].iov_base);
+      out_put_n(cw_g_out, iovec[i].iov_len,
+		"[s]",
+		iovec[i].iov_base);
     }
-    log_printf(cw_g_log, ":\n");
+    out_put(cw_g_out, ":\n");
     
     if (-1 == sock_write(sock, &buf))
     {
@@ -68,7 +60,7 @@ handle_client(void * a_arg)
   buf_delete(&buf);
   sock_delete(sock);
 
-  log_printf(cw_g_log, "Connection closed\n");
+  out_put(cw_g_out, "Connection closed\n");
   
   return NULL;
 }
@@ -80,7 +72,7 @@ main(int argc, char ** argv)
   cw_sock_t * sock, * sock_ptr;
   int port;
 
-  log_printf(cw_g_log, "%s: pid %d\n", argv[0], getpid());
+  out_put(cw_g_out, "[s]: pid [i32]\n", argv[0], getpid());
 
   if (argc != 2)
   {
@@ -93,24 +85,23 @@ main(int argc, char ** argv)
   
   libstash_init();
   sockb_init(512, 0);
-/*    sockb_init(512, 1000000); */
   
-/*    dbg_register(cw_g_dbg, "sockb_verbose"); */
+  dbg_register(cw_g_dbg, "sockb_verbose");
   dbg_register(cw_g_dbg, "sockb_error");
-/*    dbg_register(cw_g_dbg, "socks_verbose"); */
+  dbg_register(cw_g_dbg, "socks_verbose");
   dbg_register(cw_g_dbg, "socks_error");
-/*    dbg_register(cw_g_dbg, "sock_verbose"); */
+  dbg_register(cw_g_dbg, "sock_verbose");
   dbg_register(cw_g_dbg, "sock_error");
-  dbg_register(cw_g_dbg, "mem_verbose");
+/*    dbg_register(cw_g_dbg, "mem_verbose"); */
   
   socks = socks_new();
   _cw_assert(FALSE == socks_listen(socks, &port));
-  log_printf(cw_g_log, "%s: Listening on port %d\n", argv[0], port);
+  out_put(cw_g_out, "[s]: Listening on port [i32]\n", argv[0], port);
 
   for (sock_ptr = NULL; sock_ptr == NULL; sock_ptr = NULL)
   {
     sock = sock_new(NULL, 1024);
-    _cw_assert(NULL != (sock_ptr = socks_accept_block(socks, sock)));
+    _cw_assert(NULL != (sock_ptr = socks_accept(socks, NULL, sock)));
     thd_new(NULL, handle_client, (void *) sock);
   }
 
