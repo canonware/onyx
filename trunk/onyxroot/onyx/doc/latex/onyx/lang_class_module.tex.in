@@ -16,7 +16,10 @@
 \label{sec:module}
 \index{systemdict@\onyxop{}{module}{}}
 
-The \classname{module} class XXX
+The \classname{module} class works in conjunction with the
+\htmlref{\classname{mclass}}{sec:mclass} class to encapsulate loaded modules.
+Each loaded module has a corresponding \classname{module} instance, which can be
+used to query, configure, or unload modules.
 
 \begin{longtable}{\optableformat{4.10}}
 \caption{module summary}
@@ -52,144 +55,165 @@ The \classname{module} class XXX
 \multicolumn{2}{|l|}{Instance-context methods} \\
 \hline \hline
 \optableent
-	{XXX}
+	{--}
 	{{\bf \htmlref{version\_get}{module:version_get}}}
-	{XXX}
-	{XXX.}
+	{version}
+	{Get module version.}
 \hline
 \optableent
-	{XXX}
+	{version}
 	{{\bf \htmlref{version\_set}{module:version_set}}}
-	{XXX}
-	{XXX.}
+	{--}
+	{Set module version.}
 \hline
 \optableent
-	{XXX}
+	{--}
 	{{\bf \htmlref{deps\_get}{module:deps_get}}}
-	{XXX}
-	{XXX.}
+	{deps}
+	{Get module dependencies.}
 \hline
 \optableent
-	{XXX}
+	{--}
 	{{\bf \htmlref{mdefs\_get}{module:mdefs_get}}}
-	{XXX}
-	{XXX.}
+	{mdefs}
+	{Get module definitions.}
 \hline
 \optableent
-	{XXX}
+	{defname defval defdict}
 	{{\bf \htmlref{mdef}{module:mdef}}}
-	{XXX}
-	{XXX.}
+	{--}
+	{Create module definition defname as defval in defdict.}
 \hline
 \optableent
-	{XXX}
+	{depname}
 	{{\bf \htmlref{dep\_load}{module:dep_load}}}
-	{XXX}
-	{XXX.}
+	{--}
+	{Load a dependency module.}
 \hline
 \optableent
-	{XXX}
+	{hook}
 	{{\bf \htmlref{pre\_unload\_hook\_set}{module:pre_unload_hook_set}}}
-	{XXX}
-	{XXX.}
+	{--}
+	{Store pre-unload hook.}
 \hline
 \optableent
-	{XXX}
+	{hook}
 	{{\bf \htmlref{post\_unload\_hook\_set}{module:post_unload_hook_set}}}
-	{XXX}
-	{XXX.}
+	{--}
+	{Store post-unload hook.}
 \hline
 \optableent
-	{XXX}
+	{--}
 	{{\bf \htmlref{unload}{module:unload}}}
-	{XXX}
-	{XXX.}
+	{--}
+	{Unload module.}
 \end{longtable}
 
 \begin{description}
 \label{module:dep_load}
 \index{dep_load@\onyxop{}{dep\_load}{}}
-\item[{\onyxop{METHODINS}{dep\_load}{METHODOUTS}}: ]
+\item[{\onyxop{depname}{dep\_load}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[depname: ]
+			The name of a module that this module depends on.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
+		\item[\htmlref{invalidfileaccess}{invalidfileaccess}.]
+		\item[\htmlref{ioerror}{ioerror}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{undefinedfilename}{undefinedfilename}.]
 		\end{description}
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Load the module named \oparg{depname}, and record that this
+		module depends on it.
+	\item[Example(s): ]
+		\example
+		    {modfoo/modfoo.nx}
+		    {@abs_srcroot@/doc/latex/onyx/modfoo.nx}
+		    {@abs_srcroot@/doc/latex/onyx/module_dep_load.out}
 	\end{description}
 \label{module:deps_get}
 \index{deps_get@\onyxop{}{deps\_get}{}}
-\item[{\onyxop{METHODINS}{deps\_get}{METHODOUTS}}: ]
+\item[{\onyxop{--}{deps\_get}{deps}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[deps: ]
+			A dictionary of module names associated with
+			\classname{module} instances.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
+		Get a dictionary of modules that this module depends on.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $modclopt mclass:singleton:load
+onyx:0> modclopt:deps_get 1 sprint
+<>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{module:mdefs_get}
 \index{mdefs_get@\onyxop{}{mdefs\_get}{}}
-\item[{\onyxop{METHODINS}{mdefs\_get}{METHODOUTS}}: ]
+\item[{\onyxop{--}{mdefs\_get}{mdefs}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[mdefs: ]
+			A dictionary of array keys, associated with the
+			dictionaries in which the definitions reside.  Each
+			array key is a tuple; the first array element is the
+			definition key, and the second array element is the
+			definition value.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
+		Get a dictionary of definitions associated with this module.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $modclopt mclass:singleton:load
+onyx:0> modclopt:mdefs_get 2 sprint
+<[$clopt -class=$clopt-] <$modprompt -instance=$module- $clopt -class=$clopt-
+$modclopt -instance=$module-> [$modclopt -instance=$module-] <$modprompt
+-instance=$module- $clopt -class=$clopt- $modclopt -instance=$module->>
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{module:mdef}
 \index{mdef@\onyxop{}{mdef}{}}
-\item[{\onyxop{METHODINS}{mdef}{METHODOUTS}}: ]
+\item[{\onyxop{defname defval}{mdef}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[defname: ]
+			A definition key.
+		\item[defval: ]
+			A value to be associated with \oparg{defname}.
+		\item[defdict: ]
+			A dictionary in which to define \oparg{defname} as
+			\oparg{defval}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
+		Define \oparg{defname} as \oparg{defval} in \oparg{defdict}.
+	\item[Example(s): ]
+		\example
+		    {modfoo/modfoo.nx}
+		    {@abs_srcroot@/doc/latex/onyx/modfoo.nx}
+		    {@abs_srcroot@/doc/latex/onyx/module_mdef.out}
 	\end{description}
 \label{module:new}
 \index{new@\onyxop{}{new}{}}
@@ -216,107 +240,118 @@ onyx:0>
 	\end{description}
 \label{module:post_unload_hook_set}
 \index{post_unload_hook_set@\onyxop{}{post\_unload\_hook\_set}{}}
-\item[{\onyxop{METHODINS}{post\_unload\_hook\_set}{METHODOUTS}}: ]
+\item[{\onyxop{hook}{post\_unload\_hook\_set}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[hook: ]
+			An object to evaluate after unloading this module.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Register a post-unload hook, which is evaluated after this
+		module is unloaded.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $modclopt mclass:singleton:load
+onyx:0> {`Post-unload' 1 sprint} modclopt:post_unload_hook_set
+onyx:0> modclopt:unload
+`Post-unload'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{module:pre_unload_hook_set}
 \index{pre_unload_hook_set@\onyxop{}{pre\_unload\_hook\_set}{}}
-\item[{\onyxop{METHODINS}{pre\_unload\_hook\_set}{METHODOUTS}}: ]
+\item[{\onyxop{hook}{pre\_unload\_hook\_set}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[hook: ]
+			An object to evaluate before unloading this module.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Register a pre-unload hook, which is evaluated before this
+		module is unloaded.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {`Pre-unload' 1 sprint} modclopt:pre_unload_hook_set
+onyx:0> modclopt:unload
+`Pre-unload'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{module:unload}
 \index{unload@\onyxop{}{unload}{}}
-\item[{\onyxop{METHODINS}{unload}{METHODOUTS}}: ]
+\item[{\onyxop{--}{unload}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
 	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+		None, except errors caused by the evaluation of the pre- and
+		post-unload hooks.
 	\item[Description: ]
+		Unload this module.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $modclopt mclass:singleton:load
+onyx:0> modclopt:unload
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{module:version_get}
 \index{version_get@\onyxop{}{version\_get}{}}
-\item[{\onyxop{METHODINS}{version\_get}{METHODOUTS}}: ]
+\item[{\onyxop{--}{version\_get}{version}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[version: ]
+			The version of this module.
 		\end{description}
-	\item[Error(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
-		\end{description}
+	\item[Error(s): ] None.
 	\item[Description: ]
+		Get the version of this module.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $modclopt mclass:singleton:load
+onyx:0> modclopt:version_get 1 sprint
+0
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{module:version_set}
 \index{version_set@\onyxop{}{version\_set}{}}
-\item[{\onyxop{METHODINS}{version\_set}{METHODOUTS}}: ]
+\item[{\onyxop{version}{version\_set}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[version: ]
+			The version of this module.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Error(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> $modclopt mclass:singleton:load
+onyx:0> modclopt:version_get 1 sprint
+0
+onyx:0> 1 modclopt:version_set
+onyx:0> modclopt:version_get 1 sprint
+1
+onyx:0> 
 		\end{verbatim}
 	\end{description}
 \end{description}

@@ -700,6 +700,7 @@ dnl These tests are orthogonal to the tests above.
 CW_BUILD_DOC([onyx], [doc_onyx])
 if test "x$doc_onyx" = "x1" ; then
   cfgoutputs="$cfgoutputs doc/latex/onyx/lang.tex"
+  cfgoutputs="$cfgoutputs doc/latex/onyx/lang_class_module.tex"
 fi
 
 VERIFY="$objroot/test/verify"

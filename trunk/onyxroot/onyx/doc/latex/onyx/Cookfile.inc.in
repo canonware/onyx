@@ -30,7 +30,7 @@ ONYX_TEX_SRCS = [addprefix @srcroot@/doc/latex/onyx/
                            lang_dict_outputsdict.tex lang_dict_sprintsdict.tex
                            lang_dict_systemdict.tex lang_dict_threaddict.tex
                            lang_dict_threadsdict.tex lang_dict_userdict.tex
-                           tut.tex
+                           modfoo.nx module_dep_load.out module_mdef.out tut.tex
 
                 ]
                 [addprefix @objroot@/doc/latex/onyx/
