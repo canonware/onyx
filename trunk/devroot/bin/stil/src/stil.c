@@ -98,19 +98,35 @@ main(int argc, char **argv, char **envp)
 	 */
 	if (isatty(0) && argc == 1) {
 		/*
-		 * Quit on estackoverflow in order to avoid an infinite loop,
-		 * since we redefine the stop operator so that we won't exit
-		 * on other errors.
+		 * Quit on estackoverflow in order to avoid an infinite loop.
 		 */
-		static const cw_uint8_t	code[] =
-		    " errordict begin"
-		    " /estackoverflow {/stop {quit} def //estackoverflow} def"
-		    " end"
-		    " /stop {} def"
-		    " /promptstring {count cvs dup length 4 add string"
-		    " dup 0 (s:) putinterval dup dup length 2 sub (> )"
-		    " putinterval dup 3 2 roll 2 exch putinterval} bind def"
-		    ;
+		static const cw_uint8_t	code[] = "
+errordict begin
+	/handleerror {
+		currenterror begin
+		(Error /) print errorname cvs print ( in ) print
+		    /command load 1 spop
+		(Thread ) print self 1 spop
+		recordstacks {
+			(ostack: ) print
+			ostack 1 spop
+			(estack: ) print
+			estack 1 spop
+			(dstack: ) print
+			dstack 1 spop
+		} if
+		end
+	} def
+	/estackoverflow {
+		//estackoverflow quit
+	} def
+end
+/promptstring {
+	count cvs dup length 4 add string
+	dup 0 (s:) putinterval dup dup length 2 sub (> )
+	putinterval dup 3 2 roll 2 exch putinterval
+} bind def
+";
 		struct stil_arg_s	arg = {NULL, 0, 0};
 
 		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void

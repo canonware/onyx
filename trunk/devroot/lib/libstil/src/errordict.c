@@ -234,7 +234,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 	}
 	stils_npop(tstack, 3);
 
-	_cw_stil_code(a_stilt, "handleerror stop");
+	_cw_stil_code(a_stilt, "handleerror");
 }
 
 void
@@ -242,7 +242,8 @@ errordict_handleerror(cw_stilt_t *a_stilt)
 {
 	_cw_stil_code(a_stilt, "
 currenterror begin
-(Error /) print errorname cvs print ( in ) print //command 1 spop
+(Error /) print errorname cvs print ( in ) print /command load 1 spop
+(Thread ) print self 1 spop
 recordstacks {
 	(ostack: ) print
 	ostack 1 spop
@@ -252,5 +253,6 @@ recordstacks {
 	dstack 1 spop
 } if
 end
+stop
 ");
 }
