@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 94 $
- * $Date: 1998-06-26 17:18:43 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 97 $
+ * $Date: 1998-06-26 23:48:56 -0700 (Fri, 26 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -163,8 +163,11 @@ brbs_open(cw_brbs_t * a_brbs_o)
       {
 	/* We're not allowed to do the operation.  Return an error. */
 	retval = TRUE;
-	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_open",
-		     "open() error: %s\n", strerror(errno));
+	if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+	{
+	  log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_open",
+		       "open() error: %s\n", strerror(errno));
+	}
       }
       else if (errno == ENOENT)
       {
@@ -173,8 +176,11 @@ brbs_open(cw_brbs_t * a_brbs_o)
 	if (a_brbs_o->fd == -1)
 	{
 	  retval = TRUE;
-	  log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_open",
-		       "open() error: %s\n", strerror(errno));
+	  if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+	  {
+	    log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_open",
+			 "open() error: %s\n", strerror(errno));
+	  }
 	}
 	else
 	{
@@ -246,8 +252,11 @@ brbs_close(cw_brbs_t * a_brbs_o)
     if (close(a_brbs_o->fd) == -1)
     {
       retval = TRUE;
-      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_close",
-		   "close() error: %s\n", strerror(errno));
+      if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+      {
+	log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_close",
+		     "close() error: %s\n", strerror(errno));
+      }
     }
     else
     {
@@ -517,6 +526,7 @@ brbs_block_read(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   {
     _cw_marker("Exit brbs_block_read()");
   }
+  return TRUE; /* XXX */
 }
 
 /****************************************************************************
@@ -552,6 +562,7 @@ brbs_block_write(cw_brbs_t * a_brbs_o, cw_uint64_t a_offset,
   {
     _cw_marker("Exit brbs_block_write()");
   }
+  return TRUE; /* XXX */
 }
 
 /****************************************************************************
@@ -566,6 +577,11 @@ brbs_p_get_sector_size(cw_brbs_t * a_brbs_o)
 {
   struct disklabel dlp;
 
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_p_get_sector_size()");
+  }
+
   a_brbs_o->sect_size = 0;
   
   if (ioctl(a_brbs_o->fd, DIOCGDINFO, &dlp) < 0)
@@ -574,8 +590,11 @@ brbs_p_get_sector_size(cw_brbs_t * a_brbs_o)
     cw_uint8_t buf[1 << _CW_BUF_POWER];
     int i;
     
-    log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_sector_size",
-		 "ioctl() error: %s\n", strerror(errno));
+    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    {
+      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_sector_size",
+		   "ioctl() error: %s\n", strerror(errno));
+    }
 
     /* Try to find the sector size the gross way. */
     for (i = 1; (i <= _CW_BUF_POWER); i++)
@@ -594,6 +613,10 @@ brbs_p_get_sector_size(cw_brbs_t * a_brbs_o)
   }
   
   _cw_assert(a_brbs_o->sect_size > 0);
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_p_get_sector_size()");
+  }
 }
 
 /****************************************************************************
@@ -608,10 +631,17 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
 {
   struct stat sb;
 
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Enter brbs_p_get_is_raw()");
+  }
   if (-1 == fstat(a_brbs_o->fd, &sb))
   {
-    log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_is_raw",
-		 "fstat() error: %s\n", strerror(errno));
+    if (dbg_fmatch(g_dbg_o, _CW_DBG_R_BRBS_ERROR))
+    {
+      log_leprintf(g_log_o, __FILE__, __LINE__, "brbs_p_get_is_raw",
+		   "fstat() error: %s\n", strerror(errno));
+    }
   }
   else
   {
@@ -627,5 +657,9 @@ brbs_p_get_is_raw(cw_brbs_t * a_brbs_o)
     {
       a_brbs_o->is_raw = FALSE;
     }
+  }
+  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_BRBS_FUNC))
+  {
+    _cw_marker("Exit brbs_p_get_is_raw()");
   }
 }
