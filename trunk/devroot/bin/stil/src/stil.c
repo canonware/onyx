@@ -46,30 +46,37 @@ main(int argc, char **argv)
 		    "See http://www.canonware.com/stil/ for information.\n");
 	}
 	if (stil_new(&stil) == NULL) {
-		_cw_out_put("Error in stil_new()\n");
+		_cw_out_put_e("Error in stil_new()\n");
 		exit(1);
 	}
 	if (stilt_new(&stilt, &stil) == NULL) {
-		_cw_out_put("Error in stilt_new()\n");
+		_cw_out_put_e("Error in stilt_new()\n");
 		exit(1);
 	}
 
-#if (1)
-	_cw_out_put("sizeof(cw_stila_t): [i]\n", sizeof(cw_stila_t));
-	_cw_out_put("sizeof(cw_stilag_t): [i]\n", sizeof(cw_stilag_t));
-	_cw_out_put("sizeof(cw_stilat_t): [i]\n", sizeof(cw_stilat_t));
-	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));
-	_cw_out_put("sizeof(cw_stiloe_dicto_t): [i]\n",
-	    sizeof(cw_stiloe_dicto_t));
-	_cw_out_put("\n");
-
+#if (0)
 	_cw_out_put("sizeof(cw_stil_t): [i]\n", sizeof(cw_stil_t));
-	_cw_out_put("sizeof(cw_stilnk_t): [i]\n", sizeof(cw_stilnk_t));
-	_cw_out_put("sizeof(cw_stiln_t): [i]\n", sizeof(cw_stiln_t));
 	_cw_out_put("\n");
 
 	_cw_out_put("sizeof(cw_stilt_t): [i]\n", sizeof(cw_stilt_t));
-	_cw_out_put("sizeof(cw_stiltn_t): [i]\n", sizeof(cw_stiltn_t));
+	_cw_out_put("\n");
+
+	_cw_out_put("sizeof(cw_stiln_t): [i]\n", sizeof(cw_stiln_t));
+	_cw_out_put("sizeof(cw_stilng_t): [i]\n", sizeof(cw_stilng_t));
+	_cw_out_put("sizeof(cw_stilnt_t): [i]\n", sizeof(cw_stilnt_t));
+	_cw_out_put("\n");
+	
+	_cw_out_put("sizeof(cw_stila_t): [i]\n", sizeof(cw_stila_t));
+	_cw_out_put("sizeof(cw_stilag_t): [i]\n", sizeof(cw_stilag_t));
+	_cw_out_put("sizeof(cw_stilat_t): [i]\n", sizeof(cw_stilat_t));
+	_cw_out_put("\n");
+
+	_cw_out_put("sizeof(cw_stilo_t): [i]\n", sizeof(cw_stilo_t));
+	_cw_out_put("sizeof(cw_stiloe_t): [i]\n", sizeof(cw_stiloe_t));
+	_cw_out_put("sizeof(cw_stiloe_name_t): [i]\n",
+	    sizeof(cw_stiloe_name_t));
+	_cw_out_put("sizeof(cw_stiloe_dicto_t): [i]\n",
+	    sizeof(cw_stiloe_dicto_t));
 	_cw_out_put("\n");
 
 	_cw_out_put("sizeof(cw_stils_t): [i]\n", sizeof(cw_stils_t));

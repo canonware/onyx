@@ -34,7 +34,6 @@
 
 typedef struct cw_stils_s cw_stils_t;
 typedef struct cw_stilso_s cw_stilso_t;
-typedef struct cw_stilsc_s cw_stilsc_t;
 
 struct cw_stilso_s {
 	cw_stilo_t	stilo;		/* Payload.  Must be first field. */

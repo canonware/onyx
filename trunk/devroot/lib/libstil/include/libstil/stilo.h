@@ -12,13 +12,7 @@
 typedef struct cw_stilo_s cw_stilo_t;
 typedef struct cw_stiloe_s cw_stiloe_t;
 typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
-
-/* Defined here to resolve circular dependencies. */
-typedef struct cw_stila_s cw_stila_t;
-typedef struct cw_stilag_s cw_stilag_t;
-typedef struct cw_stilat_s cw_stilat_t;
-typedef struct cw_stiln_s cw_stiln_t;
-typedef struct cw_stilt_s cw_stilt_t;
+typedef struct cw_stiloe_name_s cw_stiloe_name_t;
 
 typedef enum {
 	_CW_STILOT_NOTYPE = 0,
@@ -81,18 +75,6 @@ struct cw_stilo_s {
 	 */
 	cw_bool_t	extended:1;
 	/*
-	 * Name objects use this bit to indicate if a name is an indirect
-	 * reference.  Each stilt maintains a cache of stiln pointers, each
-	 * holding a single reference to the names hash in stil.  If this is an
-	 * indirect reference, the unreferencing operation should actually be
-	 * done with the stilt's stiln cache.  Note that this is the (very)
-	 * common case.  Only global dictionaries have direct references.  Use
-	 * the stiln pointer to get the actual name "value" for the
-	 * unreferencing operation.  This is safe, because this stilt is
-	 * guaranteed to be holding a reference to the stiln.
-	 */
-	cw_bool_t	indirect_name:1;
-	/*
 	 * If TRUE, there is a breakpoint set on this object.  In general, this
 	 * field is not looked at unless the interpreter has been put into
 	 * debugging mode.
@@ -128,6 +110,71 @@ struct cw_stilo_s {
 struct cw_stiloe_dicto_s {
 	cw_stilo_t	key;
 	cw_stilo_t	val;
+};
+
+/*
+ * All extended type objects contain a stiloe.  This provides a poor man's
+ * inheritance.  Since stil's type system is static, this idiom is adequate.
+ *
+ * This is private, but stiln needs to know its size.
+ */
+struct cw_stiloe_s {
+#ifdef _LIBSTIL_DBG
+	cw_uint32_t	magic;
+#endif
+
+	cw_stilot_t	type:4;
+	/*
+	 * If TRUE, there is a watchpoint set on this object.  In general, this
+	 * field is not looked at unless the interpreter has been put into
+	 * debugging mode. Note that setting a watchpoint on an extended type
+	 * causes modification via *any* reference to be watched.
+	 */
+	cw_bool_t	watchpoint:1;
+	/* If TRUE, this object is black (or gray).  Otherwise it is white. */
+	cw_bool_t	black:1;
+	/* Allocated locally or globally? */
+	cw_bool_t	global:1;
+	/*
+	 * If TRUE, this object cannot be modified, which means it need not be
+	 * locked, even if global.
+	 */
+	cw_bool_t	immutable:1;
+	/*
+	 * If TRUE, this stiloe is a reference to another stiloe.
+	 */
+	cw_bool_t	indirect:1;
+
+	/*
+	 * Modifications must be locked if this is a globally allocated
+	 * object.
+	 */
+	cw_mtx_t	lock;
+};
+
+/* This is private, but stiln needs to know its size. */
+struct cw_stiloe_name_s {
+	cw_stiloe_t	stiloe;
+	/*
+	 * Always the value of the root name stiloe, regardless of whether this
+	 * is a reference (local) or the root (global).  This allows fast access
+	 * to what is effectively the key for name comparisions.
+	 */
+	cw_stiloe_t	*val;
+	union {
+		/* Thread-specific (local) name.  Indirect object. */
+		struct {
+			cw_stilo_t	stilo;
+		}	i;
+		/* Root (global) name.  Direct object. */
+		struct {
+			/*
+			 * Key.  The value is a pointer to this stiloe, and is
+			 * always available via val (above).
+			 */
+			cw_stiln_t	key;
+		}	n;
+	}	e;
 };
 
 /*
@@ -179,10 +226,11 @@ void		stilo_dict_def(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_stilo_t *a_key, cw_stilo_t *a_val);
 void		stilo_dict_undef(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
     cw_stilo_t *a_key);
-const cw_stilo_t *stilo_dict_lookup(cw_stilo_t *a_stilo, const cw_stilo_t
-    *a_key);
+cw_bool_t	stilo_dict_lookup(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    const cw_stilo_t *a_key, cw_stilo_t *r_stilo);
 cw_uint32_t	stilo_dict_count(cw_stilo_t *a_stilo);
-const cw_stilo_t *stilo_dict_iterate(cw_stilo_t *a_stilo);
+cw_bool_t	stilo_dict_iterate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_stilo_t *r_stilo);
 
 /*
  * string.

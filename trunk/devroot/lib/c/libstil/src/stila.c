@@ -151,10 +151,9 @@ stilat_malloc(cw_stilat_t *a_stilat, size_t a_size, const char *a_filename,
 
 	retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
 	    a_line_num);
-	
+
 	while (retval == NULL) {
-		/* Throw memory error. */
-		/* XXX */
+		/* XXX Throw memory error. */
 
 		retval = stilag_malloc(a_stilat->stilag, a_size, a_filename,
 		    a_line_num);
@@ -186,6 +185,106 @@ stilat_free(cw_stilat_t *a_stilat, void *a_ptr, const char *a_filename,
 	stilag_free(a_stilat->stilag, a_ptr, a_filename, a_line_num);
 }
 
+cw_stil_bufc_t *
+stilat_stil_bufc_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	cw_stil_bufc_t	*retval;
+
+	retval = (cw_stil_bufc_t *)pool_get(&a_stilat->stilag->stil_bufc_pool,
+	    a_filename, a_line_num);
+
+	while (retval == NULL) {
+		/* XXX Throw memory error. */
+
+		retval = (cw_stil_bufc_t
+		    *)pool_get(&a_stilat->stilag->stil_bufc_pool, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
+}
+
+cw_chi_t *
+stilat_chi_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	cw_chi_t	*retval;
+
+	retval = (cw_chi_t *)pool_get(&a_stilat->stilag->chi_pool, a_filename,
+	    a_line_num);
+
+	while (retval == NULL) {
+		/* XXX Throw memory error. */
+
+		retval = (cw_chi_t
+		    *)pool_get(&a_stilat->stilag->chi_pool, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
+}
+
+cw_stiln_t *
+stilat_stiln_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	cw_stiln_t	*retval;
+
+	retval = (cw_stiln_t *)pool_get(&a_stilat->stilag->stiln_pool,
+	    a_filename, a_line_num);
+
+	while (retval == NULL) {
+		/* XXX Throw memory error. */
+
+		retval = (cw_stiln_t
+		    *)pool_get(&a_stilat->stilag->stiln_pool, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
+}
+
+cw_stilsc_t *
+stilat_stilsc_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	cw_stilsc_t	*retval;
+
+	retval = (cw_stilsc_t *)pool_get(&a_stilat->stilag->stilsc_pool,
+	    a_filename, a_line_num);
+
+	while (retval == NULL) {
+		/* XXX Throw memory error. */
+
+		retval = (cw_stilsc_t
+		    *)pool_get(&a_stilat->stilag->stilsc_pool, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
+}
+
+cw_stiloe_dicto_t *
+stilat_dicto_get(cw_stilat_t *a_stilat, const char *a_filename, cw_uint32_t
+    a_line_num)
+{
+	cw_stiloe_dicto_t	*retval;
+
+	retval = (cw_stiloe_dicto_t *)pool_get(&a_stilat->stilag->dicto_pool,
+	    a_filename, a_line_num);
+
+	while (retval == NULL) {
+		/* XXX Throw memory error. */
+
+		retval = (cw_stiloe_dicto_t
+		    *)pool_get(&a_stilat->stilag->dicto_pool, a_filename,
+		    a_line_num);
+	}
+
+	return retval;
+}
+
 /* stila. */
 static cw_bool_t
 stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem)
@@ -203,6 +302,7 @@ stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem)
 static void
 stila_p_delete(cw_stila_t *a_stila)
 {
+	/* XXX Check whether the sequence set is empty. */
 	dch_delete(&a_stila->seq_set);
 }
 

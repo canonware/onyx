@@ -125,10 +125,8 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	if (stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil)))
 		goto OOM_2;
 
-	if (dch_new(&retval->stiln_dch, stilt_mem_get(retval),
-	    _CW_STILT_STILN_BASE_TABLE, _CW_STILT_STILN_BASE_GROW,
-	    _CW_STILT_STILN_BASE_SHRINK, ch_hash_direct, ch_key_comp_direct) ==
-	    NULL)
+	if (stilnt_new(&retval->stilnt, stilat_mem_get(&retval->stilat),
+	    stil_stilng_get(a_stil)))
 		goto OOM_3;
 
 	if (stils_new(&retval->exec_stils,
@@ -157,7 +155,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	OOM_5:
 	stils_delete(&retval->exec_stils);
 	OOM_4:
-	dch_delete(&retval->stiln_dch);
+	stilnt_delete(&retval->stilnt);
 	OOM_3:
 	stilat_delete(&retval->stilat);
 	OOM_2:
@@ -176,7 +174,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->dict_stils);
 	stils_delete(&a_stilt->data_stils);
 	stils_delete(&a_stilt->exec_stils);
-	dch_delete(&a_stilt->stiln_dch);
+	stilnt_delete(&a_stilt->stilnt);
 	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);
@@ -765,6 +763,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->state =
 				    _CW_STILT_STATE_ASCII_STRING_NEWLINE_CONT;
 				break;
+			case '\n':
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
 			default:
 				_CW_STILT_PUTC(c);
 				break;
@@ -1117,7 +1118,7 @@ stilt_p_print_token(cw_stilt_t *a_stilt, cw_uint32_t a_length, const char
 		_cw_out_put_n(a_length, "[b]", &a_stilt->tok_buffer.buf);
 	_cw_out_put("<-- [s] ([i]:[i] [[--> [i]:[i])\n", a_note,
 	    a_stilt->tok_line, a_stilt->tok_column, a_stilt->line,
-	    a_stilt->column);
+	    (a_stilt->column != -1) ? a_stilt->column : 0);
 #endif
 }
 

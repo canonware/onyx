@@ -9,8 +9,6 @@
  *
  ****************************************************************************/
 
-typedef struct cw_stiltn_s cw_stiltn_t;
-
 struct cw_stilt_s {
 #if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
 	cw_uint32_t	magic;
@@ -24,11 +22,8 @@ struct cw_stilt_s {
 	/* Allocator. */
 	cw_stilat_t	stilat;
 
-	/*
-	 * Hash of cached stiln references.  Keys are (cw_stilnk_t *), direct
-	 * hashed; values are (cw_stiltn_t *).
-	 */
-	cw_dch_t	stiln_dch;
+	/* Thread-specific name cache. */
+	cw_stilnt_t	stilnt;
 
 	/*
 	 * Stacks.
@@ -121,21 +116,6 @@ struct cw_stilt_s {
 	cw_bool_t	procedure_depth;
 };
 
-struct cw_stiltn_s {
-#if (defined(_LIBSTIL_DBG) || defined(_LIBSTIL_DEBUG))
-	cw_uint32_t	magic;
-#endif
-
-	/* Number of simple references to this object. */
-	cw_uint32_t	ref_count;
-
-	/*
-	 * Key.  This is a copy of the stilnk in the main stil's names hash.
-	 * The value is stored as the data pointer in the hash table.
-	 */
-	cw_stilnk_t	key;
-};
-
 cw_stilt_t	*stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil);
 void		stilt_delete(cw_stilt_t *a_stilt);
 
@@ -194,8 +174,3 @@ cw_bool_t	stilt_detach_buf(cw_stilt_t *a_stilt, cw_buf_t *a_buf);
 	_cw_stilat_dicto_get(&(a_stilt)->stilat)
 #define		_cw_stilt_dicto_put(a_stilt, a_dicto)			\
 	_cw_stilat_dicto_put(&(a_stilt)->stilat, (a_dicto))
-
-/* stiltn. */
-const cw_stiln_t	*stiltn_ref(cw_stilt_t *a_stilt, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, cw_bool_t a_force);
-void		stiltn_unref(cw_stilt_t *a_stilt, const cw_stiln_t *a_stiln);
