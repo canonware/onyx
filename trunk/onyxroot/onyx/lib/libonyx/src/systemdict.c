@@ -3656,11 +3656,16 @@ systemdict_repeat(cw_nxo_t *a_thread)
 		return;
 	}
 
+	cnt = nxo_integer_get(count);
+	if (cnt < 0) {
+		nxo_thread_error(a_thread, NXO_THREADE_RANGECHECK);
+		return;
+	}
+
+	nxo_stack_npop(ostack, 2);
+
 	tnxo = nxo_stack_push(tstack);
 	nxo_dup(tnxo, exec);
-
-	cnt = nxo_integer_get(count);
-	nxo_stack_npop(ostack, 2);
 
 	/* Record stack depths so that we can clean up if necessary. */
 	edepth = nxo_stack_count(estack);

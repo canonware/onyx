@@ -56,6 +56,7 @@ collector.}
 \end{itemize}
 
 \section{Objects}
+\label{sec:onyx_objects}
 
 An onyx object has three aspects: type, attribute, and value.
 
@@ -127,7 +128,9 @@ After the code executes, the array left on the operand stack looks like:
 \end{verbatim}
 
 Executable arrays are in effect procedures.  When an array is executed, its
-elements are sequentially interpreted.
+elements are sequentially interpreted.  Executable arrays are uniquely handled
+in comparison to other executable objects, in that they are only executed when
+evaluated.
 
 \item[boolean: ] A boolean can have two values: true or false.
 
@@ -172,7 +175,8 @@ for equality.  Names are typically used as keys in dictionaries.
 When an executable name is executed, the topmost value in the dictionary stack
 associated with the name is evaluated.
 
-\item[null: ] A null has no significance other than its existence.
+\item[null: ] A null has no significance other than its existence.  When
+an executable null is executed, it does nothing.
 
 \item[operator: ] An operator is an operation that is built in to the
 interpreter.  Operators can be executed.
@@ -393,7 +397,7 @@ Each onyx thread has four program-visible stacks associated with it:
 The application can also create additional stacks and manipulate them in much
 the same way as the operand stack can be manipulated.
 
-\section{Execution}
+\section{Interpretation, execution and evaluation}
 
 During onyx interpreter initialization, an object file object corresponding to
 stdin is usually pushed onto the execution stack.  However, depending on how the
@@ -2180,51 +2184,56 @@ objects from ostack through topmost mark. \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
-& {\bf \htmlref{waitpid}{systemdict:waitpid}} & & \\
+object & {\bf \htmlref{eval}{systemdict:eval}} & -- & Evaluate object. \\
 \hline
-& {\bf \htmlref{system}{systemdict:system}} & & \\
+boolean object & {\bf \htmlref{if}{systemdict:if}} & -- & Conditionally evaluate
+object. \\
 \hline
-& {\bf \htmlref{stopped}{systemdict:stopped}} & & \\
+boolean a b & {\bf \htmlref{ifelse}{systemdict:ifelse}} & -- & Conditionally
+evaluate one of two objects. \\
 \hline
-& {\bf \htmlref{start}{systemdict:start}} & & \\
+init inc limit proc & {\bf \htmlref{for}{systemdict:for}} & -- & Iterate with a
+control variable. \\
 \hline
-& {\bf \htmlref{stop}{systemdict:stop}} & & \\
+count proc & {\bf \htmlref{repeat}{systemdict:repeat}} & -- & Iterate a set
+number of times. \\
+\hline
+proc & {\bf \htmlref{loop}{systemdict:loop}} & -- &  Iterate indefinitely. \\
+\hline
+-- & {\bf \htmlref{exit}{systemdict:exit}} & -- & Terminate innermost looping
+context. \\
 \hline
 & {\bf \htmlref{run}{systemdict:run}} & & \\
 \hline
-& {\bf \htmlref{repeat}{systemdict:repeat}} & & \\
-\hline
-& {\bf \htmlref{realtime}{systemdict:realtime}} & & \\
+& {\bf \htmlref{start}{systemdict:start}} & & \\
 \hline
 & {\bf \htmlref{quit}{systemdict:quit}} & & \\
 \hline
 & {\bf \htmlref{die}{systemdict:die}} & & \\
 \hline
-nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
+& {\bf \htmlref{stopped}{systemdict:stopped}} & & \\
 \hline
-& {\bf \htmlref{loop}{systemdict:loop}} & & \\
+& {\bf \htmlref{stop}{systemdict:stop}} & & \\
 \hline
-& {\bf \htmlref{if}{systemdict:if}} & & \\
-\hline
-& {\bf \htmlref{ifelse}{systemdict:ifelse}} & & \\
+& {\bf \htmlref{throw}{systemdict:throw}} & & \\
 \hline
 & {\bf \htmlref{fork}{systemdict:fork}} & & \\
 \hline
-& {\bf \htmlref{for}{systemdict:for}} & & \\
-\hline
-& {\bf \htmlref{exit}{systemdict:exit}} & & \\
-\hline
 & {\bf \htmlref{exec}{systemdict:exec}} & & \\
+\hline
+& {\bf \htmlref{waitpid}{systemdict:waitpid}} & & \\
+\hline
+& {\bf \htmlref{system}{systemdict:system}} & & \\
+\hline
+& {\bf \htmlref{realtime}{systemdict:realtime}} & & \\
+\hline
+nanoseconds & {\bf \htmlref{nsleep}{systemdict:nsleep}} & -- & Nanosleep. \\
 \hline
 & {\bf \htmlref{estack}{systemdict:estack}} & & \\
 \hline
-& {\bf \htmlref{istack}{systemdict:istack}} & & \\
-\hline
-& {\bf \htmlref{eval}{systemdict:eval}} & & \\
-\hline
 & {\bf \htmlref{countestack}{systemdict:countestack}} & & \\
 \hline
-& {\bf \htmlref{throw}{systemdict:throw}} & & \\
+& {\bf \htmlref{istack}{systemdict:istack}} & & \\
 \hline \hline
 \multicolumn{4}{|l|}{Stack operators} \\
 \hline \hline
@@ -3704,10 +3713,8 @@ onyx:0>
 	\item[Description: ]
 		For each entry in the directory represented by \oparg{path},
 		push a string that represents the entry onto ostack and
-		execute \oparg{proc}.
-
-		\onyxop{}{dirforeach}{} catches \onyxop{}{exit}{}, so that the
-		loop can be cleanly terminated prematurely.
+		execute \oparg{proc}.  This operator supports the
+		\htmlref{\onyxop{}{exit}{}}{systemdict:exit} operator.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> pwd {1 sprint} dirforeach
@@ -3947,23 +3954,26 @@ onyx:0>
 	\end{description}
 \label{systemdict:eval}
 \index{eval@\onyxop{}{eval}{}}
-\item[{\onyxop{--}{eval}{--}}: ]
+\item[{\onyxop{object}{eval}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[object: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{object}.  See Section~\ref{sec:onyx_objects} for
+		details on object evaluation.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> ``hi' 1 sprint' cvx eval
+`hi'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exch}
@@ -4026,21 +4036,22 @@ onyx:2>
 \index{exit@\onyxop{}{exit}{}}
 \item[{\onyxop{--}{exit}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Exit the innermost enclosing looping context immediately.
+		This operator can be called within the looping context of
+		\htmlref{\onyxop{}{for}{}}{systemdict:for},
+		\htmlref{\onyxop{}{repeat}{}}{systemdict:repeat},
+		\htmlref{\onyxop{}{loop}{}}{systemdict:loop},
+		\htmlref{\onyxop{}{foreach}{}}{systemdict:foreach}, and
+		\htmlref{\onyxop{}{dirforeach}{}}{systemdict:dirforeach}.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> {`hi' 1 sprint exit `bye' 1 sprint} loop
+`hi'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:exp}
@@ -4152,23 +4163,58 @@ onyx:0>
 	\end{description}
 \label{systemdict:for}
 \index{for@\onyxop{}{for}{}}
-\item[{\onyxop{--}{for}{--}}: ]
+\item[{\onyxop{init inc limit proc}{for}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[init: ]
+			Initial value of control variable.
+		\item[inc: ]
+			Amount to increment control variable by at the end of
+			each iteration.
+		\item[limit: ]
+			Inclusive upper bound for control variable if less than
+			or equal to \oparg{init}, otherwise inclusive lower
+			bound for control variable.
+		\item[proc: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ]  At the beginning of each iteration, the current
+		value of the control variable is pushed onto ostack.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Iteratively evaluate \oparg{proc}, pushing a control variable
+		onto ostack at the beginning of each iteration, until the
+		control variable has exceeded \oparg{limit}.  This operator
+		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
+		operator.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 1 3 {1 sprint} for
+0
+1
+2
+3
+onyx:0> 0 -1 -3 {1 sprint} for
+0
+-1
+-2
+-3
+onyx:0> 0 2 7 {1 sprint} for
+0
+2
+4
+6
+onyx:0> 0 1 1000 {dup 1 sprint 3 eq {exit} if} for
+0
+1
+2
+3
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:foreach}
@@ -4356,44 +4402,61 @@ onyx:0>
 	\end{description}
 \label{systemdict:if}
 \index{if@\onyxop{}{if}{}}
-\item[{\onyxop{--}{if}{--}}: ]
+\item[{\onyxop{boolean object}{if}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			A boolean.
+		\item[object: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{object} if \oparg{boolean} is true.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true {`yes' 1 sprint} if
+`yes'
+onyx:0> false {`yes' 1 sprint} if
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:ifelse}
 \index{ifelse@\onyxop{}{ifelse}{}}
-\item[{\onyxop{--}{ifelse}{--}}: ]
+\item[{\onyxop{boolean a b}{ifelse}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			A boolean.
+		\item[a: ]
+			An object.
+		\item[b: ]
+			An object.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{a} if \oparg{boolean} is true, evaluate
+		\oparg{b} otherwise.  See Section~\ref{sec:onyx_objects} for
+		details on object evaluation.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> true {`yes'}{`no'} ifelse 1 sprint
+`yes'
+onyx:0> false {`yes'}{`no'} ifelse 1 sprint
+`no'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:index}
@@ -4660,23 +4723,29 @@ onyx:0>
 	\end{description}
 \label{systemdict:loop}
 \index{loop@\onyxop{}{loop}{}}
-\item[{\onyxop{--}{loop}{--}}: ]
+\item[{\onyxop{proc}{loop}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[proc: ]
+			An object to evaluate.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
+		Iteratively evaluate \oparg{proc} indefinitely.  This operator
+		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
+		operator.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 0 {1 add dup 1 sprint dup 3 eq {pop exit} if} loop
+1
+2
+3
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:lt}
@@ -5394,23 +5463,33 @@ onyx:0>
 	\end{description}
 \label{systemdict:repeat}
 \index{repeat@\onyxop{}{repeat}{}}
-\item[{\onyxop{--}{repeat}{--}}: ]
+\item[{\onyxop{count proc}{repeat}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			Number of times to evaluate \oparg{proc} (non-negative).
+		\item[proc: ]
+			An object to evaluate.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Evaluate \oparg{proc} \oparg{count} times.  This operator
+		supports the \htmlref{\onyxop{}{exit}{}}{systemdict:exit}
+		operator.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> 3 {`hi' 1 sprint} repeat
+`hi'
+`hi'
+`hi'
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:rmdir}
