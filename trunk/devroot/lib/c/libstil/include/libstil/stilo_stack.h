@@ -205,8 +205,6 @@ stilo_stack_npop(cw_stilo_t *a_stilo, cw_uint32_t a_count)
 	_cw_assert(stack->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(stack->stiloe.type == STILOT_STACK);
 
-	_cw_assert(a_count > 0);
-
 	stiloe_p_stack_lock(stack);
 	if (a_count > stack->count) {
 		retval = TRUE;
