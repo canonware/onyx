@@ -14,6 +14,7 @@ onyx_config - configuration helper for building with libonyx
 .BR [ \-\-help ]
 .BR [ \-\-prefix ]
 .BR [ \-\-version ]
+.BR [ \-\-features ]
 .BR [ \-\-cppflags ]
 .BR [ \-\-cflags ]
 .BR [ \-\-ldflags ]
@@ -29,6 +30,8 @@ Display usage information and exit.
 Display the installation prefix.
 .IP \-\-version
 Display the release version.
+.IP \-\-features
+Display a space-separated list of the features built into the Onyx interpreter.
 .IP \-\-cppflags
 Display the C preprocessor flags.
 .IP \-\-cflags

@@ -349,6 +349,7 @@ enable_inlines="1"
 if test "x$enable_inlines" = "x1" ; then
   AC_DEFINE(CW_USE_INLINES)
 fi
+AC_SUBST(enable_inlines)
 
 dnl Build libonyx by default.
 AC_ARG_ENABLE(libonyx, [  --disable-libonyx       Do not build libonyx],
@@ -475,6 +476,7 @@ if test "x$enable_debug" = "x1" ; then
   AC_DEFINE(CW_DBG)
   AC_DEFINE(CW_ASSERT)
 fi
+AC_SUBST(enable_debug)
 
 dnl Only optimize if not debugging.
 if test "x$enable_debug" = "x0" -a "x$no_CFLAGS" = "xyes" ; then

@@ -1,3 +1,7 @@
+2003-03-03 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config/src/onyx_config.nx.in.in : Add the --features flag.
+
 2003-03-02 : Jason Evans <jasone@canonware.com>
 
 	* For Linux, define _GNU_SOURCE in CFLAGS rather than in a header, so

@@ -17,7 +17,7 @@
 # - usage_string #string
 $usage_string
 `\
-Usage: onyx_config [--help] [--version] [--prefix]\n\
+Usage: onyx_config [--help] [--version] [--features] [--prefix]\n\
                    [--cppflags] [--cflags] [--ldflags] [--libs]\n'
 def
 
@@ -55,6 +55,38 @@ $flags <
     }
     `--version' {
 	`Canonware Onyx, version <Version = onyx>.' strip_print
+    }
+    `--features' {
+	mark # Use for counting number of feature strings on stack.
+	@enable_threads@ 1 eq {
+	    ` threads'
+	} if
+	@enable_real@ 1 eq {
+	    ` real'
+	} if
+	@enable_regex@ 1 eq {
+	    ` regex'
+	} if
+	@enable_posix@ 1 eq {
+	    ` posix'
+	} if
+	@enable_posix_file@ 1 eq {
+	    ` posix_file'
+	} if
+	@enable_socket@ 1 eq {
+	    ` socket'
+	} if
+	@enable_modprompt@ 1 eq {
+	    ` modprompt'
+	} if
+	@enable_inlines@ 1 eq {
+	    ` inlines'
+	} if
+	@enable_debug@ 1 eq {
+	    ` debug'
+	} if
+	counttomark ncat strip_print
+	pop # Remove mark.
     }
     `--cppflags' {
 	`@CPPFLAGS@'
