@@ -491,6 +491,7 @@ ed_tty_sigint(el, c)
     EditLine *el;
     int c;
 {
+	_cw_out_put_e("Got here\n");
     return CC_NORM;
 }
 
@@ -505,6 +506,7 @@ ed_tty_dsusp(el, c)
     EditLine *el;
     int c;
 {
+	_cw_out_put_e("Got here\n");
     return CC_NORM;
 }
 
@@ -519,6 +521,7 @@ ed_tty_flush_output(el, c)
     EditLine *el;
     int c;
 {
+	_cw_out_put_e("Got here\n");
     return CC_NORM;
 }
 
@@ -533,6 +536,7 @@ ed_tty_sigquit(el, c)
     EditLine *el;
     int c;
 {
+	_cw_out_put_e("Got here\n");
     return CC_NORM;
 }
 
@@ -547,6 +551,7 @@ ed_tty_sigtstp(el, c)
     EditLine *el;
     int c;
 {
+	_cw_out_put_e("Got here\n");
     return CC_NORM;
 }
 

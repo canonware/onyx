@@ -276,14 +276,18 @@ el_getc(el, cp)
 #ifdef DEBUG_READ
     (void) fprintf(el->el_errfile, "Turning raw mode on\n");
 #endif /* DEBUG_READ */
+
     if (tty_rawmode(el) < 0)	/* make sure the tty is set up correctly */
 	return 0;
 
 #ifdef DEBUG_READ
     (void) fprintf(el->el_errfile, "Reading a character\n");
 #endif /* DEBUG_READ */
+/*      _cw_out_put_e("Got here\n"); */
+#if (1)
     while ((num_read = read(el->el_infd, (char *) &tcp, 1)) == -1) {
-	    if (errno == EINTR)
+/*      _cw_out_put_e("Got here\n"); */
+	if (errno == EINTR)
 		    continue;
 	if (!tried && read__fixio(el->el_infd, errno) == 0)
 	    tried = 1;
@@ -296,6 +300,13 @@ el_getc(el, cp)
     (void) fprintf(el->el_errfile, "Got it %c\n", tcp);
 #endif /* DEBUG_READ */
     *cp = tcp;
+#else
+    sleep(1);
+    *cp = 'x';
+    num_read = 1;
+
+#endif
+/*      _cw_out_put_e("Got here `[c]' ([i])\n", *cp, num_read); */
     return num_read;
 }
 
@@ -310,9 +321,6 @@ el_gets(el, nread)
     el_action_t  cmdnum = 0;
     int     num;		/* how many chars we have read at NL */
     char    ch;
-
-    if (el->el_flags & HANDLE_SIGNALS)
-	sig_set(el);
 
     re_clear_display(el);		/* reset the display stuff */
     ch_reset(el);
@@ -435,8 +443,6 @@ el_gets(el, nread)
 
     term__flush();		/* flush any buffered output */
     (void) tty_cookedmode(el);	/* make sure the tty is set up correctly */
-    if (el->el_flags & HANDLE_SIGNALS)
-	sig_clr(el);
     if (nread)
 	    *nread = num;
     return num ? el->el_line.buffer : NULL;

@@ -85,8 +85,6 @@ typedef void (*sig_t)__P((int));
  */
 extern char    *getenv		__P((const char *));
 extern int	fprintf		__P((FILE *, const char *, ...));
-extern int	sigsetmask	__P((int));
-extern int	sigblock	__P((int));
 extern int	ioctl		__P((int, int, void *));
 extern int	fputc		__P((int, FILE *));
 extern int	fgetc		__P((FILE *));
@@ -134,5 +132,4 @@ extern char    *fgetline	__P((FILE *, int *));
 #include "hist.h"
 #include "map.h"
 #include "parse.h"
-#include "sig.h"
 #include "help.h"

@@ -25,7 +25,7 @@
 /* Include files that _are_ installed. */
 {
   local incs = tty.h vi.h term.h parse.h key.h chared.h hist.h histedit.h
-               refresh.h search.h map.h sig.h libedit.h prompt.h libedit_incs.h
+               refresh.h search.h map.h libedit.h prompt.h libedit_incs.h
                emacs.h common.h fcns.h help.h tokenizer.h;
   incs = [fromto % [srcdir]/lib/c/libedit/include/libedit/% [incs]];
   incs = [incs] [objdir]/lib/c/libedit/include/libedit/libedit_defs.h;
@@ -44,7 +44,7 @@
 
 /* Source files. */
 LIBEDIT_SRCS = chared.c common.c edit.c emacs.c hist.c history.c key.c map.c
-             parse.c prompt.c read.c refresh.c search.c sig.c term.c
+             parse.c prompt.c read.c refresh.c search.c term.c
              tokenizer.c tty.c vi.c fcns.c help.c;
 LIBEDIT_SRCS = [fromto % [srcdir]/lib/c/libedit/src/% [LIBEDIT_SRCS]];
 SRCS = [SRCS] [LIBEDIT_SRCS];

@@ -38,7 +38,6 @@
  *	   termcap putchar routine does not take an argument!
  */
 #include <stdio.h>
-#include <signal.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -745,12 +744,7 @@ term_set(el, term)
     char    buf[TC_BUFSIZE];
     char   *area;
     struct termcapstr *t;
-    sigset_t oset, nset;
     int     lins, cols;
-
-    (void) sigemptyset(&nset);
-    (void) sigaddset(&nset, SIGWINCH);
-    (void) sigprocmask(SIG_BLOCK, &nset, &oset);
 
     area = buf;
 
@@ -804,7 +798,6 @@ term_set(el, term)
 
     (void) term_get_size(el, &lins, &cols);/* get the correct window size */
     term_change_size(el, lins, cols);
-    (void) sigprocmask(SIG_SETMASK, &oset, NULL);
     term_bind_arrow(el);
     return i <= 0 ? -1 : 0;
 } /* end term_set */

@@ -92,7 +92,6 @@ el_init(prog, fin, fout)
     (void) search_init(el);
     (void) hist_init(el);
     (void) prompt_init(el);
-    (void) sig_init(el);
     el->el_flags = 0;
     el->data = NULL;
 
@@ -120,7 +119,6 @@ el_end(el)
     search_end(el);
     hist_end(el);
     prompt_end(el);
-    sig_end(el);
 
     free((ptr_t) el->el_prog);
     el_free((ptr_t) el);
@@ -174,14 +172,6 @@ el_set(va_alist)
 
     case EL_EDITOR:
 	rv = map_set_editor(el, va_arg(va, char *));
-	break;
-
-    case EL_SIGNAL:
-	if (va_arg(va, int))
-	    el->el_flags |= HANDLE_SIGNALS;
-	else
-	    el->el_flags &= ~HANDLE_SIGNALS;
-	rv = 0;
 	break;
 
     case EL_BIND:
@@ -274,16 +264,10 @@ el_resize(el)
     EditLine *el;
 {
     int lins, cols;
-    sigset_t oset, nset;
-    (void) sigemptyset(&nset);
-    (void) sigaddset(&nset, SIGWINCH);
-    (void) thd_sigmask(SIG_BLOCK, &nset, &oset);
 
     /* get the correct window size */
     if (term_get_size(el, &lins, &cols))
 	term_change_size(el, lins, cols);
-
-    (void) thd_sigmask(SIG_SETMASK, &oset, NULL);
 }
 
 public void

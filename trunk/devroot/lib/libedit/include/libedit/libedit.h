@@ -49,8 +49,6 @@
 
 #define EL_BUFSIZ	1024		/* Maximum line size		*/
 
-#define HANDLE_SIGNALS	1
-
 typedef int bool_t;			/* True or not			*/
 
 typedef unsigned char el_action_t;	/* Index to command array	*/
@@ -108,7 +106,6 @@ struct editline {
     el_key_t	  el_key;	/* Key binding stuff			*/
     el_history_t  el_history;	/* History stuff			*/
     el_search_t	  el_search;	/* Search stuff				*/
-    el_signal_t	  el_signal;	/* Signal handling stuff		*/
 
     void         *data;		/* user data */
 };

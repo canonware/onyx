@@ -99,7 +99,6 @@ int 		 el_set		__P((EditLine *, int, ...));
 #define EL_PROMPT	0	/* , el_pfunc_t);		*/
 #define EL_TERMINAL	1	/* , const char *);		*/
 #define EL_EDITOR	2	/* , const char *);		*/
-#define EL_SIGNAL	3	/* , int);			*/
 #define	EL_BIND		4	/* , const char *, ..., NULL);	*/
 #define	EL_TELLTC	5	/* , const char *, ..., NULL);	*/
 #define	EL_SETTC	6	/* , const char *, ..., NULL);	*/
@@ -110,9 +109,7 @@ int 		 el_set		__P((EditLine *, int, ...));
 #define EL_HIST		10	/* , hist_fun_t, const char *);	*/
 
 /*
- * Must be called when the terminal changes size; If EL_SIGNAL
- * is set this is done automatically otherwise it is the responsibility
- * of the application
+ * Must be called when the terminal changes size.
  */
 void		 el_resize	__P((EditLine *));
 
