@@ -1,6 +1,6 @@
 Name:		onyx
 Summary:	An embeddable stack-based threaded interpreted language.
-Version:	5.0.1
+Version:	5.1.0
 Release:	1
 License:	BSD-like
 Group:		Development/Languages
@@ -71,13 +71,11 @@ fi
 %{_bindir}/onyx-%{version}
 %{_mandir}/man1/onyx.1*
 %{_datadir}/onyx
-%{_datadir}/onyx-%{version}/libonyx
-%{_datadir}/onyx-%{version}/nx
-%{_datadir}/onyx-%{version}/nxm
+%{_datadir}/onyx-%{version}
 %{_libdir}/libonyx.so*
 
-%doc %{_datadir}/onyx-%{version}/doc/html
-%doc %{_datadir}/onyx-%{version}/doc/pdf
+%doc %{_datadir}/doc/onyx
+%doc %{_datadir}/doc/onyx-%{version}
 
 %files devel
 %defattr(-,root,root)
