@@ -52,7 +52,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
                  c_buf_e.c c_ch_a.c c_cnd_a.c c_dbg_a.c c_dch_a.c
                  c_libstash_a.c c_mq_a.c c_mtx_a.c c_out_a.c c_pezz_a.c
                  c_pool_a.c c_ql_a.c c_qr_a.c c_qs_a.c c_res_a.c c_rwl_a.c
-                 c_sema_a.c c_thd_a.c c_thd_b.c c_treen_a.c;
+                 c_sema_a.c c_thd_a.c c_thd_b.c c_treen_a.c c_tsd_a.c;
   ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];
