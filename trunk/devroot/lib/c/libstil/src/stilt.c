@@ -43,7 +43,8 @@ struct cw_stilt_entry_s {
 	cw_thd_t	thd;
 	cw_stilt_t	*stilt;
 	cw_stilts_t	*stilts;
-	cw_buf_t	buf;
+	const cw_uint8_t *str;
+	cw_uint32_t	len;
 };
 
 static cw_sint32_t	stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
@@ -268,7 +269,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 }
 
 cw_bool_t
-stilt_interp_str(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
+stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
     *a_str, cw_uint32_t a_len)
 {
 	cw_bool_t	retval;
@@ -281,73 +282,22 @@ stilt_interp_str(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 	return retval;
 }
 
-cw_bool_t
-stilt_interp_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_buf_t *a_buf)
-{
-	cw_bool_t	retval;
-	int		iov_cnt, i;
-	const struct iovec *iov;
-
-	_cw_check_ptr(a_stilt);
-	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
-	_cw_check_ptr(a_buf);
-
-	iov = buf_iovec_get(a_buf, UINT_MAX, FALSE, &iov_cnt);
-
-	for (i = 0; i < iov_cnt; i++) {
-		if (stilt_p_feed(a_stilt, a_stilts, iov[i].iov_base,
-		    (cw_uint32_t)iov[i].iov_len)) {
-			retval = TRUE;
-			goto RETURN;
-		}
-	}
-
-	retval = FALSE;
-	RETURN:
-	return retval;
-}
-
 void
-stilt_detach_str(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
+stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
     *a_str, cw_uint32_t a_len)
-{
-	cw_buf_t	buf;
-
-	_cw_check_ptr(a_stilt);
-	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
-	_cw_check_ptr(a_str);
-
-	buf_new(&buf, stilt_mem_get(a_stilt));
-	buf_range_set(&buf, 0, a_len, (cw_uint8_t *)a_str, FALSE);
-	stilt_detach_buf(a_stilt, a_stilts, &buf);
-
-	buf_delete(&buf);
-}
-
-void
-stilt_detach_buf(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_buf_t *a_buf)
 {
 	struct cw_stilt_entry_s	*entry_arg;
 
 	_cw_check_ptr(a_stilt);
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
-	_cw_check_ptr(a_buf);
+	_cw_check_ptr(a_str);
 
 	entry_arg = (struct cw_stilt_entry_s *)_cw_malloc(sizeof(struct
 	    cw_stilt_entry_s));
 	entry_arg->stilt = a_stilt;
 	entry_arg->stilts = a_stilts;
-	buf_new(&entry_arg->buf, stilt_mem_get(a_stilt));
-
-	xep_begin();
-	xep_try {
-		buf_buf_catenate(&entry_arg->buf, a_buf, TRUE);
-	}
-	xep_catch(_CW_XEPV_OOM) {
-		buf_delete(&entry_arg->buf);
-		_cw_free(entry_arg);
-	}
-	xep_end();
+	entry_arg->str = a_str;
+	entry_arg->len = a_len;
 
 	stilt_p_entry((void *)entry_arg);
 }
@@ -1211,10 +1161,8 @@ stilt_p_entry(void *a_arg)
 {
 	struct cw_stilt_entry_s	*arg = (struct cw_stilt_entry_s *)a_arg;
 
-	if (stilt_interp_buf(arg->stilt, arg->stilts, &arg->buf)) {
-		/* XXX OOM error needs delivered in interpreter. */
-	}
-	buf_delete(&arg->buf);
+	stilt_interpret(arg->stilt, arg->stilts, arg->str, arg->len);
+
 	stilts_delete(arg->stilts, arg->stilt);
 	stilt_delete(arg->stilt);
 	/* XXX Deal with detach/join inside interpreter. */
