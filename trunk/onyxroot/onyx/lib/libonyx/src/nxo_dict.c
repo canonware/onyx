@@ -38,8 +38,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 
 	nxa = nx_nxa_get(a_nx);
 
-	dict = (cw_nxoe_dict_t *)nxa_malloc(nx_nxa_get(a_nx),
-	    sizeof(cw_nxoe_dict_t));
+	dict = (cw_nxoe_dict_t *)nxa_malloc(nxa, sizeof(cw_nxoe_dict_t));
 
 	nxoe_l_new(&dict->nxoe, NXOT_DICT, a_locking);
 #ifdef _CW_THREADS
@@ -67,7 +66,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	a_nxo->o.nxoe = (cw_nxoe_t *)dict;
 	nxo_p_type_set(a_nxo, NXOT_DICT);
 
-	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)dict);
+	nxa_l_gc_register(nxa, (cw_nxoe_t *)dict);
 }
 
 void
@@ -76,6 +75,7 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	cw_nxoe_dict_t	*dict;
 	cw_nxoe_dicto_t	*dicto;
 	cw_chi_t	*chi;
+	cw_nxa_t	*nxa;
 
 	dict = (cw_nxoe_dict_t *)a_nxoe;
 
@@ -83,14 +83,15 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+	nxa = nx_nxa_get(a_nx);
 #ifdef _CW_THREADS
 	if (dict->nxoe.locking)
 		mtx_delete(&dict->lock);
 #endif
 	while (dch_remove_iterate(&dict->hash, NULL, (void **)&dicto, &chi) ==
 	    FALSE) {
-		nxa_l_dicto_put(nx_nxa_get(a_nx), dicto);
-		nxa_l_chi_put(nx_nxa_get(a_nx), chi);
+		nxa_free(nxa, dicto);
+		nxa_free(nxa, chi);
 	}
 	dch_delete(&dict->hash);
 
@@ -136,6 +137,7 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 	cw_nxoe_dicto_t	*dicto_to, *dicto_from, *dicto_rm;
 	cw_chi_t	*chi, *chi_rm;
 	cw_bool_t	removed;
+	cw_nxa_t	*nxa;
 
 	_cw_check_ptr(a_to);
 	_cw_dassert(a_to->magic == _CW_NXO_MAGIC);
@@ -153,6 +155,8 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 	_cw_dassert(from->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(from->nxoe.type == NXOT_DICT);
 
+	nxa = nx_nxa_get(a_nx);
+
 	/* Deep (but not recursive) copy. */
 #ifdef _CW_THREADS
 	nxoe_p_dict_lock(from);
@@ -163,12 +167,13 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 		dch_get_iterate(&from->hash, NULL, (void **)&dicto_from);
 
 		/* Allocate and copy. */
-		dicto_to = nxa_l_dicto_get(nx_nxa_get(a_nx));
+		dicto_to = (cw_nxoe_dicto_t *)nxa_malloc(nxa,
+		    sizeof(cw_nxoe_dicto_t));
 		nxo_no_new(&dicto_to->key);
 		nxo_dup(&dicto_to->key, &dicto_from->key);
 		nxo_no_new(&dicto_to->val);
 		nxo_dup(&dicto_to->val, &dicto_from->val);
-		chi = nxa_l_chi_get(nx_nxa_get(a_nx));
+		chi = (cw_chi_t *)nxa_malloc(nxa, sizeof(cw_chi_t));
 
 		/* Make sure the key is not defined, then insert. */
 #ifdef _CW_THREADS
@@ -182,12 +187,8 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 #endif
 
 		if (removed == FALSE) {
-			cw_nxa_t	*nxa;
-
-			nxa = nx_nxa_get(a_nx);
-
-			nxa_l_dicto_put(nxa, dicto_rm);
-			nxa_l_chi_put(nxa, chi_rm);
+			nxa_free(nxa, dicto_rm);
+			nxa_free(nxa, chi_rm);
 		}
 	}
 #ifdef _CW_THREADS
@@ -227,10 +228,14 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 		_cw_assert(a_key != &dicto->val);
 	} else {
 		cw_chi_t	*chi;
+		cw_nxa_t	*nxa;
+
+		nxa = nx_nxa_get(a_nx);
 
 		/* Allocate and initialize. */
-		dicto = nxa_l_dicto_get(nx_nxa_get(a_nx));
-		chi = nxa_l_chi_get(nx_nxa_get(a_nx));
+		dicto = (cw_nxoe_dicto_t *)nxa_malloc(nxa,
+		    sizeof(cw_nxoe_dicto_t));
+		chi = (cw_chi_t *)nxa_malloc(nxa, sizeof(cw_chi_t));
 		nxo_no_new(&dicto->key);
 		nxo_dup(&dicto->key, a_key);
 		nxo_no_new(&dicto->val);
@@ -285,8 +290,8 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 
 		nxa = nx_nxa_get(a_nx);
 
-		nxa_l_dicto_put(nxa, dicto);
-		nxa_l_chi_put(nxa, chi);
+		nxa_free(nxa, dicto);
+		nxa_free(nxa, chi);
 	}
 }
 

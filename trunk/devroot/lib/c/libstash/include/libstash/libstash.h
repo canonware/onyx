@@ -189,7 +189,6 @@ typedef void cw_opaque_dealloc_t (const void *, const void *, const char *,
 #include "dch.h"
 #include "out.h"
 #include "mem.h"
-#include "pool.h"
 #ifdef _CW_THREADS
 #include "mq.h"
 #endif

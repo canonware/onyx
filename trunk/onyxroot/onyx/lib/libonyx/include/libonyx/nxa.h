@@ -22,16 +22,6 @@ struct cw_nxa_s {
 	cw_mtx_t	lock;
 #endif
 
-	/* Various pools. */
-	cw_uint32_t	chi_sizeof;
-	cw_pool_t	chi_pool;
-
-	cw_uint32_t	dicto_sizeof;
-	cw_pool_t	dicto_pool;
-
-	cw_uint32_t	stacko_sizeof;
-	cw_pool_t	stacko_pool;
-
 	/*
 	 * Dictionary that contains stats and flags, available from within the
 	 * interpreter.

@@ -85,7 +85,7 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	for (i = 0; i < stack->count + stack->nspare; i++) {
 		tstacko = qr_next(stacko, link);
 		qr_remove(tstacko, link);
-		nxa_l_stacko_put(stack->nxa, tstacko);
+		nxa_free(stack->nxa, tstacko);
 	}
 
 #ifdef _CW_THREADS
@@ -201,7 +201,8 @@ nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
 	cw_nxoe_stacko_t	*retval;
 
 	/* No spares.  Allocate and insert one. */
-	retval = nxa_l_stacko_get(a_stack->nxa);
+	retval = (cw_nxoe_stacko_t *)nxa_malloc(a_stack->nxa,
+	    sizeof(cw_nxoe_stacko_t));
 	qr_new(retval, link);
 	qr_after_insert(&a_stack->under, retval, link);
 
@@ -223,7 +224,7 @@ nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
 	stacko = ql_first(&a_stack->stack);
 	ql_first(&a_stack->stack) = qr_next(ql_first(&a_stack->stack), link);
 	qr_remove(stacko, link);
-	nxa_l_stacko_put(a_stack->nxa, stacko);
+	nxa_free(a_stack->nxa, stacko);
 }
 
 /*
@@ -281,7 +282,7 @@ nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 		 _CW_LIBONYX_STACK_CACHE; i++) {
 		tstacko = qr_next(stacko, link);
 		qr_remove(tstacko, link);
-		nxa_l_stacko_put(a_stack->nxa, tstacko);
+		nxa_free(a_stack->nxa, tstacko);
 	}
 
 	a_stack->nspare = _CW_LIBONYX_STACK_CACHE;

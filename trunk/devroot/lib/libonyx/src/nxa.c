@@ -105,30 +105,18 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		try_stage = 1;
 #endif
 
-		a_nxa->chi_sizeof = sizeof(cw_chi_t);
-		pool_new(&a_nxa->chi_pool, NULL, sizeof(cw_chi_t));
-		try_stage = 2;
-
-		a_nxa->dicto_sizeof = sizeof(cw_nxoe_dicto_t);
-		pool_new(&a_nxa->dicto_pool, NULL, sizeof(cw_nxoe_dicto_t));
-		try_stage = 3;
-
-		a_nxa->stacko_sizeof = sizeof(cw_nxoe_stacko_t);
-		pool_new(&a_nxa->stacko_pool, NULL, sizeof(cw_nxoe_stacko_t));
-		try_stage = 4;
-
 #ifdef _CW_THREADS
 		mtx_new(&a_nxa->seq_mtx);
 #endif
 		ql_new(&a_nxa->seq_set);
 		a_nxa->white = FALSE;
-		try_stage = 5;
+		try_stage = 2;
 
 #ifdef _CW_THREADS
 		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
 #endif
 		a_nxa->gc_pending = FALSE;
-		try_stage = 6;
+		try_stage = 3;
 
 #ifdef _CW_DBG
 		a_nxa->magic = _CW_NXA_MAGIC;
@@ -158,27 +146,19 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		thd_sigmask(SIG_BLOCK, &sig_mask, &old_mask);
 		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, FALSE);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
-		try_stage = 7;
+		try_stage = 4;
 #endif
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
-		case 7:
-		case 6:
+		case 4:
+		case 3:
 #ifdef _CW_THREADS
 			mq_delete(&a_nxa->gc_mq);
 #endif
-		case 5:
+		case 2:
 #ifdef _CW_THREADS
 			mtx_delete(&a_nxa->seq_mtx);
-#endif
-		case 4:
-			pool_delete(&a_nxa->stacko_pool);
-		case 3:
-			pool_delete(&a_nxa->dicto_pool);
-		case 2:
-			pool_delete(&a_nxa->chi_pool);
-#ifdef _CW_THREADS
 		case 1:
 			mtx_delete(&a_nxa->lock);
 #endif
@@ -206,10 +186,6 @@ nxa_delete(cw_nxa_t *a_nxa)
 #else
 	nxa_p_collect(a_nxa);
 #endif
-
-	pool_delete(&a_nxa->stacko_pool);
-	pool_delete(&a_nxa->dicto_pool);
-	pool_delete(&a_nxa->chi_pool);
 
 #ifdef _CW_THREADS
 	mtx_delete(&a_nxa->lock);
@@ -722,11 +698,6 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	/* If there is garbage, discard it. */
 	if (garbage != NULL)
 		nxa_p_sweep(garbage, a_nxa->nx);
-
-	/* Drain the pools. */
-	pool_drain(&a_nxa->chi_pool);
-	pool_drain(&a_nxa->dicto_pool);
-	pool_drain(&a_nxa->stacko_pool);
 
 	/* Record the sweep finish time and calculate sweep_us. */
 	gettimeofday(&t_tv, NULL);
