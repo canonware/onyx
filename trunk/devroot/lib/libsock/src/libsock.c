@@ -375,7 +375,6 @@ libsock_l_register_sock(cw_sock_t *a_sock)
 
 	message = (struct cw_libsock_msg_s
 	    *)_cw_pezz_get(&g_libsock->messages_pezz);
-
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
@@ -408,7 +407,6 @@ libsock_l_unregister_sock(cw_uint32_t a_sockfd)
 
 	message = (struct cw_libsock_msg_s
 	    *)_cw_pezz_get(&g_libsock->messages_pezz);
-
 	if (message == NULL) {
 		retval = TRUE;
 		goto RETURN;
@@ -635,7 +633,8 @@ libsock_p_entry_func(void *a_arg)
 
 	while (g_libsock->should_quit == FALSE) {
 		/* Check for messages in the message queues. */
-		while (mq_tryget(&g_libsock->messages, &message)) {
+		while (mq_tryget(&g_libsock->messages, &message) == FALSE) {
+			_cw_check_ptr(message);
 			switch (message->type) {
 			case REGISTER:
 				sock = message->data.sock;
