@@ -8,8 +8,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 222 $
- * Last modified: $Date: 1998-09-15 17:25:47 -0700 (Tue, 15 Sep 1998) $
+ * Current revision: $Revision: 224 $
+ * Last modified: $Date: 1998-09-15 18:08:52 -0700 (Tue, 15 Sep 1998) $
  *
  * <<< Description >>>
  *
@@ -484,6 +484,7 @@ res_dump(cw_res_t * a_res_o, char * a_filename)
 	  {
 	    log_printf(t_log_o, "%s\\n", (char *) (val + curr_offset));
 	  }
+	  val[j] = '\n';
 	  curr_offset = j + 1;
 	}
 	else if (val[j] == '\0')
