@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 86 $
- * Last modified: $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * Current revision: $Revision: 108 $
+ * Last modified: $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * Description: 
  *              
@@ -64,6 +64,7 @@ int log_leprintf(cw_log_t * a_log_o,
     abort(); \
   }
 
+#ifdef _CW_DEBUG
 #define _cw_assert(a) \
   { \
     if (!(a)) \
@@ -89,5 +90,10 @@ int log_leprintf(cw_log_t * a_log_o,
         abort(); \
       } \
   }
+#else
+#  define _cw_assert(a)
+#  define _cw_marker(a)
+#  define _cw_check_ptr(a)
+#endif
 
 #endif /* _LOG_H_ */

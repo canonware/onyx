@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 97 $
- * $Date: 1998-06-26 23:48:56 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 108 $
+ * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -24,58 +24,62 @@
 #define _CW_DBG_C_DBG 0
 #define _CW_DBG_C_FUNC 1
 #define _CW_DBG_C_ERROR 2
-#define _CW_DBG_C_OH_FUNC 3
-#define _CW_DBG_C_OH_SLOT 4
-#define _CW_DBG_C_RES_FUNC 5
-#define _CW_DBG_C_RES_ERROR 6
-#define _CW_DBG_C_RES_STATE 7
-#define _CW_DBG_C_BHP_FUNC 8
-#define _CW_DBG_C_LIST_FUNC 9
-#define _CW_DBG_C_BR_FUNC 10
-#define _CW_DBG_C_BRBLK_FUNC 11
-#define _CW_DBG_C_BRBS_FUNC 12
-#define _CW_DBG_C_BRBS_INIT 13
-#define _CW_DBG_C_BRBS_ERROR 14
+#define _CW_DBG_C_OH_SLOT 3
+#define _CW_DBG_C_RES_ERROR 4
+#define _CW_DBG_C_RES_STATE 5
+#define _CW_DBG_C_BR_FUNC 6
+#define _CW_DBG_C_BRBLK_FUNC 7
+#define _CW_DBG_C_BRBS_FUNC 8
+#define _CW_DBG_C_BRBS_INIT 9
+#define _CW_DBG_C_BRBS_ERROR 10
 /* <ADD> */
 
 /* Filters (rows).  Use these with calls to dbg_fmatch() and dbg_pmatch(). */
 #define _CW_DBG_R_DBG 0
 #define _CW_DBG_R_FUNC 1
 #define _CW_DBG_R_ERROR 2
-#define _CW_DBG_R_OH_FUNC 3
-#define _CW_DBG_R_OH_SLOT 4
-#define _CW_DBG_R_RES_FUNC 5
-#define _CW_DBG_R_RES_ERROR 6
-#define _CW_DBG_R_RES_STATE 7
-#define _CW_DBG_R_BHP_FUNC 8
-#define _CW_DBG_R_LIST_FUNC 9
-#define _CW_DBG_R_BR_FUNC 10
-#define _CW_DBG_R_BRBLK_FUNC 11
-#define _CW_DBG_R_BRBS_FUNC 12
-#define _CW_DBG_R_BRBS_INIT 13
-#define _CW_DBG_R_BRBS_ERROR 14
+#define _CW_DBG_R_OH_SLOT 3
+#define _CW_DBG_R_RES_ERROR 4
+#define _CW_DBG_R_RES_STATE 5
+#define _CW_DBG_R_BR_FUNC 6
+#define _CW_DBG_R_BRBLK_FUNC 7
+#define _CW_DBG_R_BRBS_FUNC 8
+#define _CW_DBG_R_BRBS_INIT 9
+#define _CW_DBG_R_BRBS_ERROR 10
 /* <ADD> */
 
 /* Put these here only because they're related to the above macros.  They
  * aren't directly useful to the caller. */
-#define _CW_DBG_C_MAX 14 /* Highest numbered column in table. */
-#define _CW_DBG_R_MAX 14 /* Highest numbered row in table. */
+#define _CW_DBG_C_MAX 10 /* Highest numbered column in table. */
+#define _CW_DBG_R_MAX 10 /* Highest numbered row in table. */
 /* <ADD> */
 
 typedef struct cw_dbg_s cw_dbg_t;
 
+struct cw_dbg_s
+{
+  cw_rwl_t rw_lock;
+  cw_bool_t curr_settings[_CW_DBG_C_MAX + 1];
+  cw_bool_t fmatch[_CW_DBG_R_MAX + 1];
+  cw_bool_t pmatch[_CW_DBG_R_MAX + 1];
+  cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_R_MAX + 1];
+};
+
 #define dbg_new _CW_NS_CMN(dbg_new)
 #define dbg_delete _CW_NS_CMN(dbg_delete)
-#define dbg_fmatch _CW_NS_CMN(dbg_fmatch)
-#define dbg_pmatch _CW_NS_CMN(dbg_pmatch)
 #define dbg_turn_on _CW_NS_CMN(dbg_turn_on)
 #define dbg_turn_off _CW_NS_CMN(dbg_turn_off)
 #define dbg_clear _CW_NS_CMN(dbg_clear)
 
 cw_dbg_t * dbg_new();
 void dbg_delete(cw_dbg_t * a_dbg_o);
-cw_bool_t dbg_fmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
-cw_bool_t dbg_pmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
+#ifdef _CW_DEBUG
+#  define dbg_fmatch(a, b) (a)->fmatch[(b)]
+#  define dbg_pmatch(a, b) (a)->pmatch[(b)]
+#else
+#  define dbg_fmatch(a, b) (0)
+#  define dbg_pmatch(a, b) (0)
+#endif
 void dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
 void dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag);
 void dbg_clear(cw_dbg_t * a_dbg_o);

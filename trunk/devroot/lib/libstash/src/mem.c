@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 108 $
+ * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -102,7 +102,10 @@ mem_malloc(cw_mem_t * a_mem_o, size_t a_size)
   _cw_check_ptr(a_mem_o);
 
   retval = malloc(a_size);
-  _cw_check_ptr(retval);
+  if (retval == NULL)
+  {
+    _cw_error("malloc() returned a NULL pointer.");
+  }
 
   return retval;
 }
@@ -134,7 +137,10 @@ mem_calloc(cw_mem_t * a_mem_o, size_t a_number,
   _cw_check_ptr(a_mem_o);
 
   retval = calloc(a_number, a_size);
-  _cw_check_ptr(retval);
+  if (retval == NULL)
+  {
+    _cw_error("calloc() returned a NULL pointer.");
+  }
 
   return retval;
 }
@@ -166,8 +172,11 @@ mem_realloc(cw_mem_t * a_mem_o, void * a_ptr, size_t a_size)
   _cw_check_ptr(a_ptr);
 
   retval = realloc(a_ptr, a_size);
-  _cw_check_ptr(retval);
-
+  if (retval == NULL)
+  {
+    _cw_error("realloc() returned a NULL pointer.");
+  }
+  
   return retval;
 }
 

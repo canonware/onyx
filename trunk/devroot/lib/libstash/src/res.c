@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * Current revision: $Revision: 103 $
- * Last modified: $Date: 1998-06-29 21:48:35 -0700 (Mon, 29 Jun 1998) $
+ * Current revision: $Revision: 108 $
+ * Last modified: $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -97,11 +97,6 @@ res_new(cw_res_t * a_res_o)
 {
   cw_res_t * retval;
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_new()");
-  }
-  
   if (a_res_o == NULL)
   {
     retval = (cw_res_t *) _cw_malloc(sizeof(cw_res_t));
@@ -119,20 +114,12 @@ res_new(cw_res_t * a_res_o)
    * locking. */
   oh_new(&retval->hash_o, FALSE);
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_new()");
-  }
   return retval;
 }
 
 void
 res_delete(cw_res_t * a_res_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_delete()");
-  }
   _cw_check_ptr(a_res_o);
 
   /* Clean up internals. */
@@ -142,10 +129,6 @@ res_delete(cw_res_t * a_res_o)
   if (a_res_o->is_malloced)
   {
     _cw_free(a_res_o);
-  }
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_delete()");
   }
 }
 
@@ -166,10 +149,6 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
   int error;
   FILE * fd;
     
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_merge_file()");
-  }
   _cw_check_ptr(a_res_o);
   rwl_wlock(&a_res_o->rw_lock);
 
@@ -196,10 +175,6 @@ res_merge_file(cw_res_t * a_res_o, char * a_filename)
   }
 
   rwl_wunlock(&a_res_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_merge_file()");
-  }
   return retval;
 }
 
@@ -223,10 +198,6 @@ res_merge_list(cw_res_t * a_res_o, ...)
   va_list ap;
   cw_bool_t retval = FALSE, state_mach_error;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_merge_list()");
-  }
   _cw_check_ptr(a_res_o);
   rwl_wlock(&a_res_o->rw_lock);
 
@@ -245,10 +216,6 @@ res_merge_list(cw_res_t * a_res_o, ...)
   va_end(ap);
   
   rwl_wunlock(&a_res_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_merge_list()");
-  }
   return retval;
 }
 
@@ -270,10 +237,6 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
   char * retval;
   cw_bool_t error;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_get_res_val()");
-  }
   _cw_check_ptr(a_res_o);
   _cw_check_ptr(a_res_name);
   rwl_rlock(&a_res_o->rw_lock);
@@ -286,10 +249,6 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
   }
   
   rwl_runlock(&a_res_o->rw_lock);
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_get_res_val()");
-  }
   return retval;
 }
 		
@@ -307,17 +266,9 @@ res_get_res_val(cw_res_t * a_res_o, char * a_res_name)
 void
 res_dump(cw_res_t * a_res_o)
 {
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_dump()");
-  }
   _cw_check_ptr(a_res_o);
 
   _cw_error("Not implemented.");
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_dump()");
-  }
 }
 
 /****************************************************************************
@@ -339,10 +290,6 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
   cw_uint32_t state = _CW_RES_STATE_START, col_num, line_num = 1;
   char c, name[_CW_RES_BUFFSIZE], val[_CW_RES_BUFFSIZE];
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_parse_res()");
-  }
   /* These switch statements look awful, but they should be fast, since the
    * compiler supposedly builds perfect hashes for them.  I'm not sure why
    * I'm so worried about performance.  Oh well, it's neat at least. */
@@ -999,10 +946,6 @@ res_parse_res(cw_res_t * a_res_o, cw_bool_t a_is_file)
     }
   }
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_parse_res()");
-  }
   return retval;
 }
 
@@ -1017,10 +960,6 @@ res_char_type(char a_char)
 {
   cw_uint32_t retval;
   
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_char_type()");
-  }
   switch (a_char)
   {
     /* Capital letters. */
@@ -1125,10 +1064,6 @@ res_char_type(char a_char)
     }
   }
 
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_char_type()");
-  }
   return retval;
 }
 
@@ -1146,10 +1081,6 @@ res_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
   char * temp_name, * temp_val;
   cw_bool_t error;
 	    
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Enter res_merge_res()");
-  }
   /* Make copies to insert into the hash table. */
   temp_name = (char *) _cw_malloc(strlen(a_name) + 1);
   strcpy(temp_name, a_name);
@@ -1181,9 +1112,5 @@ res_merge_res(cw_res_t * a_res_o, char * a_name, char * a_val)
 
     oh_item_insert(&a_res_o->hash_o, (void *) temp_name,
 		   (void *) temp_val);
-  }
-  if (dbg_pmatch(g_dbg_o, _CW_DBG_R_RES_FUNC))
-  {
-    _cw_marker("Exit res_merge_res()");
   }
 }

@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 97 $
- * $Date: 1998-06-26 23:48:56 -0700 (Fri, 26 Jun 1998) $
+ * $Revision: 108 $
+ * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -35,13 +35,9 @@ cw_sint32_t dbg_raw_tbl[] =
   _CW_DBG_C_DBG, -1, /* CW_DBG_R_DBG */
   _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_FUNC */
   _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_ERROR */
-  _CW_DBG_C_OH_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_OH_FUNC */
   _CW_DBG_C_OH_SLOT, -1, /* _CW_DBG_R_OH_SLOT */
-  _CW_DBG_C_RES_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_RES_FUNC */
   _CW_DBG_C_RES_ERROR, _CW_DBG_C_ERROR, -1, /* _CW_DBG_R_RES_ERROR */
   _CW_DBG_C_RES_STATE, -1, /* _CW_DBG_R_RES_STATE */
-  _CW_DBG_C_BHP_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BHP_FUNC */
-  _CW_DBG_C_LIST_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_LIST_FUNC */
   _CW_DBG_C_BR_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BR_FUNC */
   _CW_DBG_C_BRBLK_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BRBLK_FUNC */
   _CW_DBG_C_BRBS_FUNC, _CW_DBG_C_FUNC, -1, /* _CW_DBG_R_BRBS_FUNC */
@@ -60,16 +56,6 @@ cw_sint32_t dbg_raw_on[] =
   _CW_DBG_C_BRBS_ERROR,
   /* <ADD> */
   -1
-};
-
-struct cw_dbg_s
-{
-  cw_rwl_t rw_lock;
-  cw_bool_t is_current;
-  cw_bool_t curr_settings[_CW_DBG_C_MAX + 1];
-  cw_bool_t fmatch[_CW_DBG_R_MAX + 1];
-  cw_bool_t pmatch[_CW_DBG_R_MAX + 1];
-  cw_bool_t tbl[_CW_DBG_C_MAX + 1][_CW_DBG_R_MAX + 1];
 };
 
 #define dbg_build_tbl _CW_NS_CMN(dbg_build_tbl)

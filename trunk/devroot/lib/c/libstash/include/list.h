@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 108 $
+ * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -30,9 +30,9 @@ struct cw_list_s
   cw_mtx_t lock;
   cw_list_item_t * head;
   cw_list_item_t * tail;
-  cw_sint64_t count;
+  cw_uint64_t count;
   cw_list_item_t * spares_head;
-  cw_sint64_t spares_count;
+  cw_uint64_t spares_count;
 };
 
 /*
@@ -63,7 +63,7 @@ void list_item_set(cw_list_item_t * a_cont, void * a_data);
 
 cw_list_t * list_new(cw_list_t * a_list_o, cw_bool_t a_is_thread_safe);
 void list_delete(cw_list_t * a_list_o);
-cw_sint64_t list_count(cw_list_t * a_list_o);
+cw_uint64_t list_count(cw_list_t * a_list_o);
 cw_list_item_t * list_hpush(cw_list_t * a_list_o, void * a_data);
 void * list_hpop(cw_list_t * a_list_o);
 cw_list_item_t * list_tpush(cw_list_t * a_list_o, void * a_data);

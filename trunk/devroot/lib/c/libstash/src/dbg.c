@@ -7,8 +7,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 86 $
- * $Date: 1998-06-23 17:40:29 -0700 (Tue, 23 Jun 1998) $
+ * $Revision: 108 $
+ * $Date: 1998-06-30 00:07:07 -0700 (Tue, 30 Jun 1998) $
  *
  * <<< Description >>>
  *
@@ -94,69 +94,6 @@ dbg_delete(cw_dbg_t * a_dbg_o)
 /****************************************************************************
  * <<< Description >>>
  *
- * See if row a_flag is a subset of curr_settings.
- *
- ****************************************************************************/
-cw_bool_t
-dbg_fmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
-{
-  cw_bool_t retval;
-  
-  _cw_check_ptr(a_dbg_o);
-  rwl_rlock(&a_dbg_o->rw_lock);
-  
-  if (a_dbg_o->is_current == FALSE)
-  {
-    dbg_recalc_fpmatch(a_dbg_o);
-  }
-  if (a_flag <= _CW_DBG_R_MAX)
-  {
-    retval = a_dbg_o->fmatch[a_flag];
-  }
-  else
-  {
-    retval = FALSE;
-  }
-  
-  rwl_runlock(&a_dbg_o->rw_lock);
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * See if the intersection of row a_flag and curr_settings exists.
- *
- ****************************************************************************/
-cw_bool_t
-dbg_pmatch(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
-{
-  cw_bool_t retval;
-  
-  _cw_check_ptr(a_dbg_o);
-  rwl_rlock(&a_dbg_o->rw_lock);
-
-  if (a_dbg_o->is_current == FALSE)
-  {
-    dbg_recalc_fpmatch(a_dbg_o);
-  }
-
-  if (a_flag <= _CW_DBG_R_MAX)
-  {
-    retval = a_dbg_o->pmatch[a_flag];
-  }
-  else
-  {
-    retval = FALSE;
-  }
-  
-  rwl_runlock(&a_dbg_o->rw_lock);
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
  * Set column a_flag in curr_settings to true.
  *
  ****************************************************************************/
@@ -167,8 +104,8 @@ dbg_turn_on(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
   _cw_assert(a_flag <= _CW_DBG_R_MAX);
   rwl_wlock(&a_dbg_o->rw_lock);
 
-  a_dbg_o->is_current = FALSE;
   a_dbg_o->curr_settings[a_flag] = TRUE;
+  dbg_recalc_fpmatch(a_dbg_o);
 
   rwl_wunlock(&a_dbg_o->rw_lock);
 }
@@ -186,8 +123,8 @@ dbg_turn_off(cw_dbg_t * a_dbg_o, cw_uint32_t a_flag)
   _cw_assert(a_flag <= _CW_DBG_R_MAX);
   rwl_wlock(&a_dbg_o->rw_lock);
 
-  a_dbg_o->is_current = FALSE;
   a_dbg_o->curr_settings[a_flag] = FALSE;
+  dbg_recalc_fpmatch(a_dbg_o);
 
   rwl_wunlock(&a_dbg_o->rw_lock);
 }
@@ -206,12 +143,11 @@ dbg_clear(cw_dbg_t * a_dbg_o)
   _cw_check_ptr(a_dbg_o);
   rwl_wlock(&a_dbg_o->rw_lock);
 
-  a_dbg_o->is_current = FALSE;
-  
   for (x = 0; x <= _CW_DBG_C_MAX; x++)
   {
     a_dbg_o->curr_settings[x] = FALSE;
   }
+  dbg_recalc_fpmatch(a_dbg_o);
   
   rwl_wunlock(&a_dbg_o->rw_lock);
 }
@@ -306,6 +242,4 @@ dbg_recalc_fpmatch(cw_dbg_t * a_dbg_o)
     a_dbg_o->fmatch[y] = f;
     a_dbg_o->pmatch[y] = p;
   }
-  
-  a_dbg_o->is_current = TRUE;
 }
