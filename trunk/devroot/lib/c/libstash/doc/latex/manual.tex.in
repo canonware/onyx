@@ -246,6 +246,5 @@ defines the following exceptions:
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/rwl}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/sema}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/thd}
-\input{@abs_srcdir@/lib/c/libstash/doc/latex/treen}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/tsd}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/xep}

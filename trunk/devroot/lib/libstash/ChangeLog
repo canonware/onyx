@@ -1,3 +1,7 @@
+2001-04-22  Jason Evans  <jasone@canonware.com>
+
+	* : Remove the treen class.
+
 2001-04-20  Jason Evans  <jasone@canonware.com>
 
 	* src/out.c (out_put_l): Remove.
