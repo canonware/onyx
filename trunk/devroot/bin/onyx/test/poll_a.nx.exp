@@ -1,0 +1,37 @@
+Test begin
+in:
+<-file- </POLLOUT false>>
+out:
+[-file-]
+<-file- </POLLOUT true>>
+in:
+<-file- </POLLOUT false> -file- </POLLOUT false>>
+out:
+[-file- -file-]
+<-file- </POLLOUT true> -file- </POLLOUT true>>
+in:
+<-file- </POLLWRNORM false>>
+out:
+[-file-]
+<-file- </POLLWRNORM true>>
+in:
+<-file- </garbage `ignore me' /POLLOUT true>>
+out:
+[-file-]
+<-file- </garbage `ignore me' /POLLOUT true>>
+in:
+<-file- </POLLWRBAND false /POLLWRNORM false /POLLOUT false /POLLPRI false /POLLRDBAND false /POLLRDNORM false /POLLIN false>>
+out:
+[-file-]
+<-file- </POLLWRBAND false /POLLWRNORM true /POLLOUT true /POLLPRI false /POLLRDBAND false /POLLRDNORM true /POLLIN true>>
+in:
+<-file- </POLLWRBAND true /POLLWRNORM true /POLLOUT true /POLLPRI true /POLLRDBAND true /POLLRDNORM true /POLLIN true>>
+out:
+[-file-]
+<-file- </POLLWRBAND false /POLLWRNORM true /POLLOUT true /POLLPRI false /POLLRDBAND false /POLLRDNORM true /POLLIN true>>
+in:
+<-file- </POLLWRBAND false /POLLWRNORM false /POLLOUT false /POLLPRI false /POLLRDBAND false /POLLRDNORM false /POLLIN false> -file- </POLLWRBAND false /POLLWRNORM false /POLLOUT false /POLLPRI false /POLLRDBAND false /POLLRDNORM false /POLLIN false>>
+out:
+[-file- -file-]
+<-file- </POLLWRBAND false /POLLWRNORM true /POLLOUT true /POLLPRI false /POLLRDBAND false /POLLRDNORM true /POLLIN true> -file- </POLLWRBAND false /POLLWRNORM true /POLLOUT true /POLLPRI false /POLLRDBAND false /POLLRDNORM true /POLLIN true>>
+Test end

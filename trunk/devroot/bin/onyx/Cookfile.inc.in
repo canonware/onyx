@@ -69,7 +69,9 @@ ONYX_OTESTS =
 
               argv_a.nx.in argv_b.nx.in dirforeach_a.nx.in dirforeach_b.nx.in
               dirforeach_c.nx.in nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in
-              nsleep_d.nx.in rand_a.nx.in setenv_a.nx.in setenv_b.nx.in
+              nsleep_d.nx.in poll_a.nx.in poll_b.nx.in poll_c.nx.in poll_d.nx.in
+              poll_e.nx.in poll_f.nx.in poll_g.nx.in poll_h.nx.in poll_i.nx.in
+              poll_j.nx.in rand_a.nx.in setenv_a.nx.in setenv_b.nx.in
               setenv_c.nx.in srand_a.nx.in srand_b.nx.in srand_c.nx.in
               srand_d.nx.in unsetenv_a.nx.in unsetenv_b.nx.in truncate_a.nx.in
               truncate_b.nx.in truncate_c.nx.in truncate_d.nx.in
