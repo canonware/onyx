@@ -1236,6 +1236,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 	    break;
 
 	    INVOKABLE_ERROR:
+	    nxo_stack_pop(&thread->estack);
 	    nxo_thread_nerror(a_nxo, error);
 	    nxo_stack_pop(&thread->estack);
 	    break;
