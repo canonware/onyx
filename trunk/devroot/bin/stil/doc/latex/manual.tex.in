@@ -45,8 +45,8 @@ or vi.
 \section{Language differences}
 If \binname{stil} is being run interactively:
 \begin{itemize}
-\item{The promptstring operator is defined in userdict to print the number of
-objects on the operand stack.}
+\item{The promptstring operator is defined in the initial thread's userdict to
+print the number of objects on the operand stack.}
 \item{The stop operator in currenterror is redefined to the empty procedure in
 order to keep the interpreter from exiting on error.}
 \item{The estackoverflow operator in errordict is redefined to call the quit
@@ -56,8 +56,10 @@ The need for this is a result of not exiting on error.}
 
 If \binname{stil} is not being run interactively:
 \begin{itemize}
-\item{\#! is defined in userdict to push a mark object on the operand stack.}
-\item{!\# is defined in userdict to call the cleartomark operator.}
+\item{\#! is defined in the initial thread's userdict to push a mark object on
+the operand stack.}
+\item{!\# is defined in the initial thread's userdict to call the cleartomark
+operator.}
 \end{itemize}
 
 In order to cleanly use \#! magic, the header of a stil script should look like:
