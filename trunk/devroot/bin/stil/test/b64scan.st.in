@@ -1,16 +1,16 @@
-%#!@stil@
-%!#
+#!/usr/home/jasone/cw/devroot/bin/stil/src/stil
+!#
 
 % Test scanning of base64 strings.
-<~YQ==~> print "\n" print		% "a"
-<~YWI=~> print "\n" print		% "ab"
-<~YWJj~> print "\n" print		% "abc"
-<~YWJjZA==~> print "\n" print		% "abcd"
-<~~> print "\n" print			% ""
+<~YQ==~> print (\n) print		% "a"
+<~YWI=~> print (\n) print		% "ab"
+<~YWJj~> print (\n) print		% "abc"
+<~YWJjZA==~> print (\n) print		% "abcd"
+<~~> print (\n) print			% ""
 
-<~SGkgd29ybGQ=~> print "\n" print	% "Hi world"
-<~QnllIHdvcmxk~> print "\n" print	% "Bye world"
-<~QmFuZyB3b3JsZA==~> print "\n" print	% "Bang world"
+<~SGkgd29ybGQ=~> print (\n) print	% "Hi world"
+<~QnllIHdvcmxk~> print (\n) print	% "Bye world"
+<~QmFuZyB3b3JsZA==~> print (\n) print	% "Bang world"
 
 <~
 IF8gICBfICAgICAgXyBfICAgICAgICAgICAgICAgICAgICAgICAgICAgIF8gICAgIF8gCnwgfCB8
