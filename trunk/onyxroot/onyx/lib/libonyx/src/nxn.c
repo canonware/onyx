@@ -49,6 +49,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "blocks",
 #endif
     "booleantype",
+    "bpop",
 #ifdef CW_THREADS
     "broadcast",
 #endif
@@ -124,7 +125,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "div",
 #endif
     "dn",
-    "drop",
     "dstack",
     "dstackunderflow",
     "dup",
@@ -255,8 +255,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "mutextype",
 #endif
     "nametype",
+    "nbpop",
     "ndn",
-    "ndrop",
     "ndup",
     "ne",
     "neg",
@@ -345,12 +345,12 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_REAL
     "round",
 #endif
+    "sbpop",
     "sclear",
     "scleartomark",
     "scount",
     "scounttomark",
     "sdn",
-    "sdrop",
     "sdup",
 #ifdef CW_POSIX
     "seek",
@@ -402,8 +402,8 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "size",
 #endif
+    "snbpop",
     "sndn",
-    "sndrop",
     "sndup",
     "snip",
     "snpop",

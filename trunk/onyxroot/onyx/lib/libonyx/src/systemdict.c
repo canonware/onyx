@@ -88,6 +88,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(bindsocket),
 #endif
+    ENTRY(bpop),
 #ifdef CW_THREADS
     ENTRY(broadcast),
 #endif
@@ -154,7 +155,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(div),
 #endif
     ENTRY(dn),
-    ENTRY(drop),
     ENTRY(dstack),
     ENTRY(echeck),
 #ifdef CW_POSIX
@@ -251,8 +251,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(mutex),
 #endif
+    ENTRY(nbpop),
     ENTRY(ndn),
-    ENTRY(ndrop),
     ENTRY(ndup),
     ENTRY(ne),
     ENTRY(neg),
@@ -299,12 +299,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_REAL
     ENTRY(round),
 #endif
+    ENTRY(sbpop),
     ENTRY(sclear),
     ENTRY(scleartomark),
     ENTRY(scount),
     ENTRY(scounttomark),
     ENTRY(sdn),
-    ENTRY(sdrop),
     ENTRY(sdup),
 #ifdef CW_POSIX
     ENTRY(seek),
@@ -346,8 +346,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sin),
 #endif
     ENTRY(sipop),
+    ENTRY(snbpop),
     ENTRY(sndn),
-    ENTRY(sndrop),
     ENTRY(sndup),
     ENTRY(snip),
     ENTRY(snpop),
@@ -882,6 +882,12 @@ systemdict_bindsocket(cw_nxo_t *a_thread)
     cw_error("XXX Not implemented");
 }
 #endif
+
+void
+systemdict_bpop(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
 
 #ifdef CW_THREADS
 void
@@ -2468,12 +2474,6 @@ systemdict_div(cw_nxo_t *a_thread)
 
 void
 systemdict_dn(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-
-void
-systemdict_drop(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
@@ -4677,13 +4677,13 @@ systemdict_mutex(cw_nxo_t *a_thread)
 #endif
 
 void
-systemdict_ndn(cw_nxo_t *a_thread)
+systemdict_nbpop(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-systemdict_ndrop(cw_nxo_t *a_thread)
+systemdict_ndn(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
@@ -5874,6 +5874,12 @@ systemdict_round(cw_nxo_t *a_thread)
 #endif
 
 void
+systemdict_sbpop(cw_nxo_t *a_thread)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
 systemdict_sclear(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *stack;
@@ -5978,12 +5984,6 @@ systemdict_scounttomark(cw_nxo_t *a_thread)
 
 void
 systemdict_sdn(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
-}
-
-void
-systemdict_sdrop(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
@@ -6563,13 +6563,13 @@ systemdict_sipop(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_sndn(cw_nxo_t *a_thread)
+systemdict_snbpop(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-systemdict_sndrop(cw_nxo_t *a_thread)
+systemdict_sndn(cw_nxo_t *a_thread)
 {
     cw_error("XXX Not implemented");
 }

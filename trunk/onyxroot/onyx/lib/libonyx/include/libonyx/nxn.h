@@ -48,6 +48,7 @@ typedef enum
     NXN_blocks,
 #endif
     NXN_booleantype,
+    NXN_bpop,
 #ifdef CW_THREADS
     NXN_broadcast,
 #endif
@@ -123,7 +124,6 @@ typedef enum
     NXN_div,
 #endif
     NXN_dn,
-    NXN_drop,
     NXN_dstack,
     NXN_dstackunderflow,
     NXN_dup,
@@ -254,8 +254,8 @@ typedef enum
     NXN_mutextype,
 #endif
     NXN_nametype,
+    NXN_nbpop,
     NXN_ndn,
-    NXN_ndrop,
     NXN_ndup,
     NXN_ne,
     NXN_neg,
@@ -344,12 +344,12 @@ typedef enum
 #ifdef CW_REAL
     NXN_round,
 #endif
+    NXN_sbpop,
     NXN_sclear,
     NXN_scleartomark,
     NXN_scount,
     NXN_scounttomark,
     NXN_sdn,
-    NXN_sdrop,
     NXN_sdup,
 #ifdef CW_POSIX
     NXN_seek,
@@ -401,8 +401,8 @@ typedef enum
 #ifdef CW_POSIX
     NXN_size,
 #endif
+    NXN_snbpop,
     NXN_sndn,
-    NXN_sndrop,
     NXN_sndup,
     NXN_snip,
     NXN_snpop,
