@@ -3836,7 +3836,11 @@ systemdict_p_exec_prepare(cw_nxo_t *a_thread, char **r_path, char ***r_argv,
      * great care, since an exception will cause us to leak all of the allocated
      * memory.  For example, a user can cause an exception in
      * nxo_thread_nerror(), so we must do all cleanup before throwing the
-     * error. */
+     * error.
+     *
+     * This function does not deal with OOM exceptions, so it is possible for
+     * leaks to happen.  It really isn't worth worrying about though, since the
+     * purpose of this operator is to overlay a new program. */
 
     ostack = nxo_thread_ostack_get(a_thread);
     tstack = nxo_thread_tstack_get(a_thread);
@@ -3963,18 +3967,83 @@ systemdict_p_exec_prepare(cw_nxo_t *a_thread, char **r_path, char ***r_argv,
 
     return TRUE;
 }
+
 void
 systemdict_exec(cw_nxo_t *a_thread)
 {
     char *path, **argv, **envp;
+    cw_nxn_t error;
+    int execerror;
 
     if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
     {
-	execve(path, argv, envp);
-	/* If we get here, then the execve() call failed.  Get an error back to
-	 * the parent. */
-	_exit(1);
+	execerror = execve(path, argv, envp);
+	if (execerror == -1)
+	{
+	    switch (errno)
+	    {
+		case EACCES:
+		case ENOEXEC:
+		{
+		    error = NXN_invalidaccess;
+		    goto ERROR;
+		}
+		case ENOENT:
+		case ENOTDIR:
+		{
+		    error = NXN_undefinedfilename;
+		    goto ERROR;
+		}
+		case EIO:
+		case ETXTBSY:
+		{
+		    error = NXN_ioerror;
+		    goto ERROR;
+		}
+		case E2BIG:
+		case ELOOP:
+		case ENAMETOOLONG:
+		{
+		    error = NXN_invalidfileaccess;
+		    goto ERROR;
+		}
+		case EFAULT:
+		case EISDIR:
+		case EMFILE:
+		case ENFILE:
+		case ENOMEM:
+		default:
+		{
+		    error = NXN_unregistered;
+		    goto ERROR;
+		}
+	    }
+	}
+	cw_not_reached();
     }
+
+    ERROR:
+    {
+	cw_uint32_t i;
+
+	/* Clean up memory allocation. */
+	for (i = 0; envp[i] != NULL; i++)
+	{
+	    cw_free(envp[i]);
+	}
+	cw_free(envp);
+
+	for (i = 0; argv[i] != NULL; i++)
+	{
+	    cw_free(argv[i]);
+	}
+	cw_free(argv);
+
+	cw_free(path);
+    }
+
+    /* Throw error. */
+    nxo_thread_nerror(a_thread, error);
 }
 #endif
 
@@ -4376,25 +4445,90 @@ systemdict_foreach(cw_nxo_t *a_thread)
 void
 systemdict_forkexec(cw_nxo_t *a_thread)
 {
-    cw_nxo_t *ostack;
-    cw_nxo_t *nxo;
     char *path, **argv, **envp;
-    pid_t pid;
-    cw_uint32_t i;
 
     if (systemdict_p_exec_prepare(a_thread, &path, &argv, &envp) == FALSE)
     {
+	pid_t pid;
+	cw_nxn_t error;
+	int execerror;
+
 	pid = fork();
 	if (pid == 0)
 	{
 	    /* Child. */
-	    execve(path, argv, envp);
-	    /* If we get here, then the execve() call failed.  Get an error back
-	     * to the parent. */
-	    _exit(1);
+	    execerror = execve(path, argv, envp);
+	    if (execerror == -1)
+	    {
+		switch (errno)
+		{
+		    case EACCES:
+		    case ENOEXEC:
+		    {
+			error = NXN_invalidaccess;
+			goto ERROR;
+		    }
+		    case ENOENT:
+		    case ENOTDIR:
+		    {
+			error = NXN_undefinedfilename;
+			goto ERROR;
+		    }
+		    case EIO:
+		    case ETXTBSY:
+		    {
+			error = NXN_ioerror;
+			goto ERROR;
+		    }
+		    case E2BIG:
+		    case ELOOP:
+		    case ENAMETOOLONG:
+		    {
+			error = NXN_invalidfileaccess;
+			goto ERROR;
+		    }
+		    case EFAULT:
+		    case EISDIR:
+		    case EMFILE:
+		    case ENFILE:
+		    case ENOMEM:
+		    default:
+		    {
+			error = NXN_unregistered;
+			goto ERROR;
+		    }
+		}
+	    }
+	    cw_not_reached();
+
+	    ERROR:
+	    {
+		cw_uint32_t i;
+
+		/* Clean up memory allocation. */
+		for (i = 0; envp[i] != NULL; i++)
+		{
+		    cw_free(envp[i]);
+		}
+		cw_free(envp);
+
+		for (i = 0; argv[i] != NULL; i++)
+		{
+		    cw_free(argv[i]);
+		}
+		cw_free(argv);
+
+		cw_free(path);
+	    }
+
+	    /* Throw error. */
+	    nxo_thread_nerror(a_thread, error);
 	}
 	else
 	{
+	    cw_nxo_t *ostack, *nxo;
+	    cw_uint32_t i;
+
 	    /* Parent. */
 
 	    /* Clean up memory allocation. */
