@@ -23,8 +23,8 @@
  *
  * User input that does not involve explicit point movement causes the history
  * log to grow by approximately one byte per inserted/deleted character.  Log
- * records have a fixed overhead of 18 bytes.  A log record has the following
- * format:
+ * records have an overhead of 2, 4, or 18 bytes, depending on the record type,
+ * and the amount of record data.  Log records have the following formats:
  *
  *     T : Record tag.
  *     A : Record auxiliary data (data length or bpos), big endian (network byte
@@ -32,14 +32,25 @@
  *   ... : Data, if any.  Data are stored in the logical order that the user
  *         would type them in.
  *
- *     TAAAAAAAA...TAAAAAAAA
+ * Sync (SYNC), group begin/end (GBEG, GEND):
+ *   TT
+ *
+ * Position (POS):
+ *   TAAAAAAAAAAAAAAAAT
+ *
+ * Short insert/yank/remove/delete (SINS, SYNK, SREM, SDEL):
+ *   TA...AT
+ *
+ * Insert/yank/remove/delete (INS, YNK, REM, DEL):
+ *   TAAAAAAAA...AAAAAAAAT
+ *
+ * Three markers are used when traversing the history.  hbeg and hend bracket
+ * the current record, and hcur is at the current position within the record.
+ *
+ *     TAAAAAAAA...AAAAAAAAT
  *    /\         /\        /\
  *    ||         ||        ||
  *   hbeg       hcur      hend
- *
- * Three markers are used when traversing the history.  hbeg and hend bracket
- * the current record, and hcur is at the current position within the record for
- * insert, yank, remove, and delete records.
  *
  * The following notation is used in discussing the history buffer:
  *
@@ -49,9 +60,13 @@
  * E      : Group end.
  * P(n,m) : Buffer position change.
  * I(s)   : Insert string s before point.
+ * i(s)   : Insert short string s before point.
  * Y(s)   : Insert (yank) string s after point.
+ * y(s)   : Insert (yank) short string s after point.
  * R(s)   : Remove string s before point.
- * D(s)   : Remove (delete) string s after point.
+ * r(s)   : Remove short string s before point.
+ * D(s)   : Remove (delete) short string s after point.
+ * d(s)   : Remove (delete) short string s after point.
  *
  ******************************************************************************/
 
@@ -73,19 +88,31 @@ histh_p_delete(cw_histh_t *a_histh);
 CW_P_INLINE cw_bufv_t *
 histh_p_bufv_get(cw_histh_t *a_histh);
 CW_P_INLINE cw_uint32_t
-histh_p_bufvcnt_get(cw_histh_t *a_histh);
+histh_p_bufvcnt_get(const cw_histh_t *a_histh);
+CW_P_INLINE cw_uint32_t
+histh_p_len_get(const cw_histh_t *a_histh);
 CW_P_INLINE cw_uint8_t
-histh_p_tag_get(cw_histh_t *a_histh);
+histh_p_tag_get(const cw_histh_t *a_histh);
 CW_P_INLINE void
 histh_p_tag_set(cw_histh_t *a_histh, cw_uint8_t a_tag);
 CW_P_INLINE cw_uint64_t
-histh_p_aux_get(cw_histh_t *a_histh);
+histh_p_aux_get(const cw_histh_t *a_histh);
 CW_P_INLINE void
 histh_p_aux_set(cw_histh_t *a_histh, cw_uint64_t a_aux);
+CW_P_INLINE cw_uint8_t
+histh_p_saux_get(const cw_histh_t *a_histh);
 CW_P_INLINE void
-histh_p_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b);
+histh_p_saux_set(cw_histh_t *a_histh, cw_uint8_t a_aux);
 CW_P_INLINE void
-histh_p_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b);
+histh_p_header_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b,
+			  cw_uint8_t a_tag);
+CW_P_INLINE void
+histh_p_footer_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b);
+CW_P_INLINE void
+histh_p_header_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b);
+CW_P_INLINE void
+histh_p_footer_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b,
+			 cw_uint8_t a_tag);
 CW_P_INLINE void
 histh_p_record_prev(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 		    cw_mkr_t *a_beg, cw_mkr_t *a_cur, cw_mkr_t *a_end,
@@ -127,11 +154,7 @@ histh_p_new(cw_histh_t *a_histh)
     a_histh->tag = HISTH_TAG_NONE;
     a_histh->u.aux = 0;
 
-    a_histh->bufv[0].data = &a_histh->tag;
-    a_histh->bufv[0].len = sizeof(a_histh->tag);
-
-    a_histh->bufv[1].data = a_histh->u.str;
-    a_histh->bufv[1].len = sizeof(a_histh->u.aux);
+    a_histh->bufvcnt = 0;
 
 #ifdef CW_DBG
     a_histh->magic = CW_HISTH_MAGIC;
@@ -159,16 +182,32 @@ histh_p_bufv_get(cw_histh_t *a_histh)
 }
 
 CW_P_INLINE cw_uint32_t
-histh_p_bufvcnt_get(cw_histh_t *a_histh)
+histh_p_bufvcnt_get(const cw_histh_t *a_histh)
 {
     cw_check_ptr(a_histh);
     cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
 
-    return (sizeof(a_histh->bufv) / sizeof(cw_bufv_t));
+    return a_histh->bufvcnt;
+}
+
+CW_P_INLINE cw_uint32_t
+histh_p_len_get(const cw_histh_t *a_histh)
+{
+    cw_uint32_t retval, i;
+
+    cw_check_ptr(a_histh);
+    cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
+
+    for (retval = i = 0; i < a_histh->bufvcnt; i++)
+    {
+	retval += a_histh->bufv[i].len;
+    }
+
+    return a_histh->bufvcnt;
 }
 
 CW_P_INLINE cw_uint8_t
-histh_p_tag_get(cw_histh_t *a_histh)
+histh_p_tag_get(const cw_histh_t *a_histh)
 {
     cw_check_ptr(a_histh);
     cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
@@ -186,7 +225,7 @@ histh_p_tag_set(cw_histh_t *a_histh, cw_uint8_t a_tag)
 }
 
 CW_P_INLINE cw_uint64_t
-histh_p_aux_get(cw_histh_t *a_histh)
+histh_p_aux_get(const cw_histh_t *a_histh)
 {
     cw_uint64_t retval;
 
@@ -207,11 +246,35 @@ histh_p_aux_set(cw_histh_t *a_histh, cw_uint64_t a_aux)
     a_histh->u.aux = cw_htonq(a_aux);
 }
 
+CW_P_INLINE cw_uint8_t
+histh_p_saux_get(const cw_histh_t *a_histh)
+{
+    cw_uint8_t retval;
+
+    cw_check_ptr(a_histh);
+    cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
+
+    retval = a_histh->u.saux;
+
+    return retval;
+}
+
+CW_P_INLINE void
+histh_p_saux_set(cw_histh_t *a_histh, cw_uint8_t a_aux)
+{
+    cw_check_ptr(a_histh);
+    cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
+
+    a_histh->u.saux = a_aux;
+}
+
 /* Get the header that precedes a_a.  Various code relies on the fact that the
  * header is bracketed by a_b..a_a after this call. */
 CW_P_INLINE void
-histh_p_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
+histh_p_header_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b,
+			  cw_uint8_t a_tag)
 {
+    cw_sint64_t offset = 0;
     cw_bufv_t *bufv;
     cw_uint32_t bufvcnt;
 
@@ -219,32 +282,286 @@ histh_p_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
     cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
     cw_assert(mkr_pos(a_a) > 1);
 
+    /* Prepare to copy the header into a_histh's bufv. */
+    switch (a_tag)
+    {
+	case HISTH_TAG_SYNC:
+	case HISTH_TAG_GBEG:
+	case HISTH_TAG_GEND:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset -= a_histh->bufv[0].len;
+	    a_histh->bufvcnt = 1;
+	    break;
+	}
+	case HISTH_TAG_SINS:
+	case HISTH_TAG_SYNK:
+	case HISTH_TAG_SREM:
+	case HISTH_TAG_SDEL:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset -= a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = a_histh->u.str;
+	    a_histh->bufv[1].len = sizeof(a_histh->u.saux);
+	    offset -= a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_POS:
+	case HISTH_TAG_INS:
+	case HISTH_TAG_YNK:
+	case HISTH_TAG_REM:
+	case HISTH_TAG_DEL:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset -= a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = a_histh->u.str;
+	    a_histh->bufv[1].len = sizeof(a_histh->u.aux);
+	    offset -= a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_NONE:
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* Get a bufv containing the header. */
     mkr_dup(a_b, a_a);
-    mkr_seek(a_b, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
+    mkr_seek(a_b, offset, BUFW_REL);
     bufv = mkr_range_get(a_b, a_a, &bufvcnt);
     cw_check_ptr(bufv);
 
-    bufv_copy(a_histh->bufv, 2, bufv, bufvcnt, 0);
+    /* Copy the header to a_histh. */
+    bufv_copy(a_histh->bufv, a_histh->bufvcnt, bufv, bufvcnt, 0);
 }
 
-/* Get the header that follows a_a.  Various code relies on the fact that the
- * header is bracketed by a_a..a_b after this call. */
+/* Get the footer that precedes a_a.  Various code relies on the fact that the
+ * footer is bracketed by a_b..a_a after this call. */
 CW_P_INLINE void
-histh_p_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
+histh_p_footer_before_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
 {
+    cw_uint8_t *tag;
+    cw_sint64_t offset = 0;
     cw_bufv_t *bufv;
     cw_uint32_t bufvcnt;
 
     cw_check_ptr(a_histh);
     cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
+    cw_assert(mkr_pos(a_a) > 1);
 
+    /* Get record type and prepare to copy the footer into a_histh's bufv. */
+    tag = mkr_before_get(a_a);
+    switch (*tag)
+    {
+	case HISTH_TAG_SYNC:
+	case HISTH_TAG_GBEG:
+	case HISTH_TAG_GEND:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset -= a_histh->bufv[0].len;
+	    a_histh->bufvcnt = 1;
+	    break;
+	}
+	case HISTH_TAG_SINS:
+	case HISTH_TAG_SYNK:
+	case HISTH_TAG_SREM:
+	case HISTH_TAG_SDEL:
+	{
+	    a_histh->bufv[0].data = a_histh->u.str;
+	    a_histh->bufv[0].len = sizeof(a_histh->u.saux);
+	    offset -= a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = &a_histh->tag;
+	    a_histh->bufv[1].len = sizeof(a_histh->tag);
+	    offset -= a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_POS:
+	case HISTH_TAG_INS:
+	case HISTH_TAG_YNK:
+	case HISTH_TAG_REM:
+	case HISTH_TAG_DEL:
+	{
+	    a_histh->bufv[0].data = a_histh->u.str;
+	    a_histh->bufv[0].len = sizeof(a_histh->u.aux);
+	    offset -= a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = &a_histh->tag;
+	    a_histh->bufv[1].len = sizeof(a_histh->tag);
+	    offset -= a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_NONE:
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* Get a bufv containing the footer. */
     mkr_dup(a_b, a_a);
-    mkr_seek(a_b, HISTH_LEN, BUFW_REL);
-    cw_assert(mkr_pos(a_a) + HISTH_LEN == mkr_pos(a_b));
+    mkr_seek(a_b, offset, BUFW_REL);
+    bufv = mkr_range_get(a_b, a_a, &bufvcnt);
+    cw_check_ptr(bufv);
+
+    /* Copy the footer to a_histh. */
+    bufv_copy(a_histh->bufv, a_histh->bufvcnt, bufv, bufvcnt, 0);
+}
+
+/* Get the header that follows a_a.  Various code relies on the fact that the
+ * header is bracketed by a_a..a_b after this call. */
+CW_P_INLINE void
+histh_p_header_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b)
+{
+    cw_uint8_t *tag;
+    cw_sint64_t offset = 0;
+    cw_bufv_t *bufv;
+    cw_uint32_t bufvcnt;
+
+    cw_check_ptr(a_histh);
+    cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
+    cw_assert(mkr_pos(a_a) > 1);
+
+    /* Get record type and prepare to copy the header into a_histh's bufv. */
+    tag = mkr_before_get(a_a);
+    switch (*tag)
+    {
+	case HISTH_TAG_SYNC:
+	case HISTH_TAG_GBEG:
+	case HISTH_TAG_GEND:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset += a_histh->bufv[0].len;
+	    a_histh->bufvcnt = 1;
+	    break;
+	}
+	case HISTH_TAG_SINS:
+	case HISTH_TAG_SYNK:
+	case HISTH_TAG_SREM:
+	case HISTH_TAG_SDEL:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset += a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = a_histh->u.str;
+	    a_histh->bufv[1].len = sizeof(a_histh->u.saux);
+	    offset += a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_POS:
+	case HISTH_TAG_INS:
+	case HISTH_TAG_YNK:
+	case HISTH_TAG_REM:
+	case HISTH_TAG_DEL:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset += a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = a_histh->u.str;
+	    a_histh->bufv[1].len = sizeof(a_histh->u.aux);
+	    offset += a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_NONE:
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* Get a bufv containing the header. */
+    mkr_dup(a_b, a_a);
+    mkr_seek(a_b, offset, BUFW_REL);
+    cw_assert(mkr_pos(a_a) + offset == mkr_pos(a_b));
     bufv = mkr_range_get(a_a, a_b, &bufvcnt);
     cw_check_ptr(bufv);
 
-    bufv_copy(a_histh->bufv, 2, bufv, bufvcnt, 0);
+    /* Copy the header to a_histh. */
+    bufv_copy(a_histh->bufv, a_histh->bufvcnt, bufv, bufvcnt, 0);
+}
+
+/* Get the footer that follows a_a.  Various code relies on the fact that the
+ * footer is bracketed by a_a..a_b after this call. */
+CW_P_INLINE void
+histh_p_footer_after_get(cw_histh_t *a_histh, cw_mkr_t *a_a, cw_mkr_t *a_b,
+			 cw_uint8_t a_tag)
+{
+    cw_sint64_t offset = 0;
+    cw_bufv_t *bufv;
+    cw_uint32_t bufvcnt;
+
+    cw_check_ptr(a_histh);
+    cw_dassert(a_histh->magic == CW_HISTH_MAGIC);
+    cw_assert(mkr_pos(a_a) > 1);
+
+    /* Get record type and prepare to copy the footer into a_histh's bufv. */
+    switch (a_tag)
+    {
+	case HISTH_TAG_SYNC:
+	case HISTH_TAG_GBEG:
+	case HISTH_TAG_GEND:
+	{
+	    a_histh->bufv[0].data = &a_histh->tag;
+	    a_histh->bufv[0].len = sizeof(a_histh->tag);
+	    offset += a_histh->bufv[0].len;
+	    a_histh->bufvcnt = 1;
+	    break;
+	}
+	case HISTH_TAG_SINS:
+	case HISTH_TAG_SYNK:
+	case HISTH_TAG_SREM:
+	case HISTH_TAG_SDEL:
+	{
+	    a_histh->bufv[0].data = a_histh->u.str;
+	    a_histh->bufv[0].len = sizeof(a_histh->u.saux);
+	    offset += a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = &a_histh->tag;
+	    a_histh->bufv[1].len = sizeof(a_histh->tag);
+	    offset += a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_POS:
+	case HISTH_TAG_INS:
+	case HISTH_TAG_YNK:
+	case HISTH_TAG_REM:
+	case HISTH_TAG_DEL:
+	{
+	    a_histh->bufv[0].data = a_histh->u.str;
+	    a_histh->bufv[0].len = sizeof(a_histh->u.aux);
+	    offset += a_histh->bufv[0].len;
+	    a_histh->bufv[1].data = &a_histh->tag;
+	    a_histh->bufv[1].len = sizeof(a_histh->tag);
+	    offset += a_histh->bufv[1].len;
+	    a_histh->bufvcnt = 2;
+	    break;
+	}
+	case HISTH_TAG_NONE:
+	default:
+	{
+	    cw_not_reached();
+	}
+    }
+
+    /* Get a bufv containing the footer. */
+    mkr_dup(a_b, a_a);
+    mkr_seek(a_b, offset, BUFW_REL);
+    cw_assert(mkr_pos(a_a) + offset == mkr_pos(a_b));
+    bufv = mkr_range_get(a_a, a_b, &bufvcnt);
+    cw_check_ptr(bufv);
+
+    /* Copy the footer to a_histh. */
+    bufv_copy(a_histh->bufv, a_histh->bufvcnt, bufv, bufvcnt, 0);
 }
 
 /* Move to the previous record. */
@@ -273,7 +590,7 @@ histh_p_record_prev(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 	}
 
 	/* Get footer. */
-	histh_p_before_get(a_foot, a_end, a_cur);
+	histh_p_footer_before_get(a_foot, a_end, a_cur);
 
 	switch (histh_p_tag_get(a_foot))
 	{
@@ -283,12 +600,13 @@ histh_p_record_prev(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 		again = TRUE;
 		/* Fall through. */
 	    }
-	    case HISTH_TAG_GRP_BEG:
-	    case HISTH_TAG_GRP_END:
+	    case HISTH_TAG_GBEG:
+	    case HISTH_TAG_GEND:
 	    case HISTH_TAG_POS:
 	    {
 		/* Get header. */
-		histh_p_before_get(a_head, a_cur, a_beg);
+		histh_p_header_before_get(a_head, a_cur, a_beg,
+					  histh_p_tag_get(a_foot));
 
 		break;
 	    }
@@ -303,7 +621,8 @@ histh_p_record_prev(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 			 BUFW_REL);
 
 		/* Get header. */
-		histh_p_before_get(a_head, a_tmp, a_beg);
+		histh_p_header_before_get(a_head, a_tmp, a_beg,
+					  histh_p_tag_get(a_foot));
 
 		break;
 	    }
@@ -342,7 +661,7 @@ histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 	}
 
 	/* Get header. */
-	histh_p_after_get(a_head, a_beg, a_cur);
+	histh_p_header_after_get(a_head, a_beg, a_cur);
 
 	switch (histh_p_tag_get(a_head))
 	{
@@ -352,12 +671,13 @@ histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 		again = TRUE;
 		/* Fall through. */
 	    }
-	    case HISTH_TAG_GRP_BEG:
-	    case HISTH_TAG_GRP_END:
+	    case HISTH_TAG_GBEG:
+	    case HISTH_TAG_GEND:
 	    case HISTH_TAG_POS:
 	    {
 		/* Get footer. */
-		histh_p_after_get(a_foot, a_cur, a_end);
+		histh_p_footer_after_get(a_foot, a_cur, a_end,
+					 histh_p_tag_get(a_head));
 
 		break;
 	    }
@@ -371,7 +691,8 @@ histh_p_record_next(cw_histh_t *a_head, cw_histh_t *a_foot, cw_buf_t *a_buf,
 		mkr_seek(a_tmp, histh_p_aux_get(a_head), BUFW_REL);
 
 		/* Get footer. */
-		histh_p_after_get(a_foot, a_tmp, a_end);
+		histh_p_footer_after_get(a_foot, a_tmp, a_end,
+					 histh_p_tag_get(a_head));
 
 		break;
 	    }
@@ -392,14 +713,18 @@ histh_p_dump(cw_histh_t *a_histh, const char *a_beg, const char *a_mid,
     static const char *tags[] =
     {
 	"HISTH_TAG_NONE",
-	"HISTH_TAG_GRP_BEG",
-	"HISTH_TAG_GRP_END",
+	"HISTH_TAG_SYNC",
+	"HISTH_TAG_GBEG",
+	"HISTH_TAG_GEND",
 	"HISTH_TAG_POS",
+	"HISTH_TAG_SINS",
 	"HISTH_TAG_INS",
+	"HISTH_TAG_SYNK",
 	"HISTH_TAG_YNK",
+	"HISTH_TAG_SREM",
 	"HISTH_TAG_REM",
-	"HISTH_TAG_DEL",
-	"HISTH_TAG_SYNC"
+	"HISTH_TAG_SDEL",
+	"HISTH_TAG_DEL"
     };
 
     beg = (a_beg != NULL) ? a_beg : "";
@@ -476,10 +801,12 @@ hist_p_redo_flush(cw_hist_t *a_hist)
     }
 
     /* Flush all data between hcur and the end of the current record. */
-    if (mkr_pos(&a_hist->hcur) + HISTH_LEN < mkr_pos(&a_hist->hend))
+    if (mkr_pos(&a_hist->hcur) + histh_p_len_get(&a_hist->hfoot)
+	< mkr_pos(&a_hist->hend))
     {
 	mkr_dup(&a_hist->htmp, &a_hist->hend);
-	mkr_seek(&a_hist->htmp, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->htmp, -(cw_sint64_t)histh_p_len_get(&a_hist->hfoot),
+		 BUFW_REL);
 	mkr_remove(&a_hist->hcur, &a_hist->hend);
     }
     else if (mkr_pos(&a_hist->hbeg) == mkr_pos(&a_hist->hend)
@@ -520,7 +847,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
 
     /* Relocate hcur. */
     mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-    mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+    mkr_seek(&a_hist->hcur, histh_p_len_get(&a_hist->hhead), BUFW_REL);
 
     /* Initialize footer (new position). */
     histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_POS);
@@ -532,7 +859,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
 
     /* Relocate hend. */
     mkr_dup(&a_hist->hend, &a_hist->hcur);
-    mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
+    mkr_seek(&a_hist->hend, histh_p_len_get(&a_hist->hfoot), BUFW_REL);
 
     /* Update hbpos now that the history record is complete. */
     a_hist->hbpos = a_bpos;
@@ -597,20 +924,21 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 	 * location (just before the footer). */
 
 	/* Header. */
-	histh_p_aux_set(&a_hist->hhead, histh_p_aux_get(&a_hist->hhead) + cnt);
 	mkr_dup(&a_hist->htmp, &a_hist->hbeg);
-	mkr_seek(&a_hist->htmp, HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->htmp, histh_p_len_get(&a_hist->hhead), BUFW_REL);
 	mkr_remove(&a_hist->hbeg, &a_hist->htmp);
+	histh_p_aux_set(&a_hist->hhead, histh_p_aux_get(&a_hist->hhead) + cnt);
 	mkr_after_insert(&a_hist->hbeg, histh_p_bufv_get(&a_hist->hhead),
 			 histh_p_bufvcnt_get(&a_hist->hhead));
-	mkr_seek(&a_hist->htmp, HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->htmp, histh_p_len_get(&a_hist->hhead), BUFW_REL);
 
 	/* Footer. */
 	histh_p_aux_set(&a_hist->hfoot, histh_p_aux_get(&a_hist->hfoot) + cnt);
 	mkr_remove(&a_hist->hcur, &a_hist->hend);
 	mkr_before_insert(&a_hist->hend, histh_p_bufv_get(&a_hist->hfoot),
 			  histh_p_bufvcnt_get(&a_hist->hfoot));
-	mkr_seek(&a_hist->hcur, -(cw_sint64_t)HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->hcur, -(cw_sint64_t)histh_p_len_get(&a_hist->hfoot),
+		 BUFW_REL);
     }
     else
     {
@@ -627,7 +955,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 
 	/* Relocate hcur. */
 	mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-	mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->hcur, histh_p_len_get(&a_hist->hhead), BUFW_REL);
 
 	/* Initialize footer. */
 	histh_p_tag_set(&a_hist->hfoot, a_tag);
@@ -639,7 +967,7 @@ hist_p_ins_ynk_rem_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos,
 
 	/* Relocate hend. */
 	mkr_dup(&a_hist->hend, &a_hist->hcur);
-	mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
+	mkr_seek(&a_hist->hend, histh_p_len_get(&a_hist->hfoot), BUFW_REL);
     }
 
     /* Insert the data in the appropriate order for the record type. */
@@ -718,7 +1046,7 @@ hist_undoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf)
 
     /* There is at least one undoable operation unless hcur is at or before the
      * beginning of the data in the first record. */
-    if (mkr_pos(&a_hist->hcur) > 1 + HISTH_LEN)
+    if (mkr_pos(&a_hist->hcur) > 1 + histh_p_len_get(&a_hist->hhead))
     {
 	retval = TRUE;
     }
@@ -741,7 +1069,8 @@ hist_redoable(const cw_hist_t *a_hist, const cw_buf_t *a_buf)
 
     /* There is at least one redoable operation unless hcur is at or past the
      * end of the data in the last record. */
-    if (mkr_pos(&a_hist->hcur) + HISTH_LEN < buf_len(&a_hist->h) + 1)
+    if (mkr_pos(&a_hist->hcur) + histh_p_len_get(&a_hist->hfoot)
+	< buf_len(&a_hist->h) + 1)
     {
 	retval = TRUE;
     }
@@ -784,13 +1113,59 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
     {
 	switch (histh_p_tag_get(&a_hist->hhead))
 	{
+	    case HISTH_TAG_SYNC:
+	    {
+		/* Remove sync records. */
+		mkr_remove(&a_hist->hbeg, &a_hist->hend);
+
+		/* Get the previous record. */
+		hist_p_record_prev(a_hist);
+		break;
+	    }
+	    case HISTH_TAG_GBEG:
+	    {
+		/* Decrease depth. */
+		a_hist->gdepth--;
+
+		/* Increment the undo count, if the group depth dropped to 0. */
+		if (a_hist->gdepth == 0)
+		{
+		    retval++;
+		}
+
+		/* Get the previous record. */
+		hist_p_record_prev(a_hist);
+		break;
+	    }
+	    case HISTH_TAG_GEND:
+	    {
+		/* Increase depth. */
+		a_hist->gdepth++;
+
+		/* Get the previous record. */
+		hist_p_record_prev(a_hist);
+		break;
+	    }
+	    case HISTH_TAG_POS:
+	    {
+		/* Update hbpos. */
+		a_hist->hbpos = histh_p_aux_get(&a_hist->hhead);
+
+		/* Move. */
+		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
+
+		/* Get the previous record. */
+		hist_p_record_prev(a_hist);
+		break;
+	    }
 	    case HISTH_TAG_INS:
 	    case HISTH_TAG_YNK:
 	    case HISTH_TAG_REM:
 	    case HISTH_TAG_DEL:
 	    {
 		cw_assert(mkr_pos(&a_hist->hcur)
-			  > mkr_pos(&a_hist->hbeg) + HISTH_LEN);
+			  > mkr_pos(&a_hist->hbeg)
+			  + histh_p_len_get(&a_hist->hhead));
 
 		/* Take action. */
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
@@ -862,55 +1237,10 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		/* Move to the previous record if all data in this record have
 		 * already been undone. */
 		if (mkr_pos(&a_hist->hcur)
-		    == mkr_pos(&a_hist->hbeg) + HISTH_LEN)
+		    == mkr_pos(&a_hist->hbeg) + histh_p_len_get(&a_hist->hhead))
 		{
 		    hist_p_record_prev(a_hist);
 		}
-		break;
-	    }
-	    case HISTH_TAG_GRP_BEG:
-	    {
-		/* Decrease depth. */
-		a_hist->gdepth--;
-
-		/* Increment the undo count, if the group depth dropped to 0. */
-		if (a_hist->gdepth == 0)
-		{
-		    retval++;
-		}
-
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
-		break;
-	    }
-	    case HISTH_TAG_GRP_END:
-	    {
-		/* Increase depth. */
-		a_hist->gdepth++;
-
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
-		break;
-	    }
-	    case HISTH_TAG_POS:
-	    {
-		/* Update hbpos. */
-		a_hist->hbpos = histh_p_aux_get(&a_hist->hhead);
-
-		/* Move. */
-		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
-
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
-		break;
-	    }
-	    case HISTH_TAG_SYNC:
-	    {
-		/* Remove sync records. */
-		mkr_remove(&a_hist->hbeg, &a_hist->hend);
-
-		/* Get the previous record. */
-		hist_p_record_prev(a_hist);
 		break;
 	    }
 	    case HISTH_TAG_NONE:
@@ -962,13 +1292,59 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 
 	switch (histh_p_tag_get(&a_hist->hhead))
 	{
+	    case HISTH_TAG_SYNC:
+	    {
+		/* Remove sync records. */
+		mkr_remove(&a_hist->hbeg, &a_hist->hend);
+
+		/* Get the next record. */
+		hist_p_record_next(a_hist);
+		break;
+	    }
+	    case HISTH_TAG_GBEG:
+	    {
+		/* Increase depth. */
+		a_hist->gdepth++;
+
+		/* Get the next record. */
+		hist_p_record_next(a_hist);
+		break;
+	    }
+	    case HISTH_TAG_GEND:
+	    {
+		/* Decrease depth. */
+		a_hist->gdepth--;
+
+		/* Increment the redo count, if the group depth dropped to 0. */
+		if (a_hist->gdepth == 0)
+		{
+		    retval++;
+		}
+
+		/* Get the next record. */
+		hist_p_record_next(a_hist);
+		break;
+	    }
+	    case HISTH_TAG_POS:
+	    {
+		/* Update hbpos. */
+		a_hist->hbpos = histh_p_aux_get(&a_hist->hfoot);
+
+		/* Move. */
+		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
+
+		/* Get the next record. */
+		hist_p_record_next(a_hist);
+		break;
+	    }
 	    case HISTH_TAG_INS:
 	    case HISTH_TAG_YNK:
 	    case HISTH_TAG_REM:
 	    case HISTH_TAG_DEL:
 	    {
 		cw_assert(mkr_pos(&a_hist->hcur)
-			  < mkr_pos(&a_hist->hend) - HISTH_LEN);
+			  < mkr_pos(&a_hist->hend)
+			  - histh_p_len_get(&a_hist->hfoot));
 
 		/* Take action. */
 		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
@@ -1040,55 +1416,10 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 		/* Move to the next record if all data in this record have
 		 * already been redone. */
 		if (mkr_pos(&a_hist->hcur)
-		    == mkr_pos(&a_hist->hend) - HISTH_LEN)
+		    == mkr_pos(&a_hist->hend) - histh_p_len_get(&a_hist->hfoot))
 		{
 		    hist_p_record_next(a_hist);
 		}
-		break;
-	    }
-	    case HISTH_TAG_GRP_BEG:
-	    {
-		/* Increase depth. */
-		a_hist->gdepth++;
-
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
-		break;
-	    }
-	    case HISTH_TAG_GRP_END:
-	    {
-		/* Decrease depth. */
-		a_hist->gdepth--;
-
-		/* Increment the redo count, if the group depth dropped to 0. */
-		if (a_hist->gdepth == 0)
-		{
-		    retval++;
-		}
-
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
-		break;
-	    }
-	    case HISTH_TAG_POS:
-	    {
-		/* Update hbpos. */
-		a_hist->hbpos = histh_p_aux_get(&a_hist->hfoot);
-
-		/* Move. */
-		mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BOB);
-
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
-		break;
-	    }
-	    case HISTH_TAG_SYNC:
-	    {
-		/* Remove sync records. */
-		mkr_remove(&a_hist->hbeg, &a_hist->hend);
-
-		/* Get the next record. */
-		hist_p_record_next(a_hist);
 		break;
 	    }
 	    default:
@@ -1147,7 +1478,7 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
     }
 
     /* Initialize header. */
-    histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GRP_BEG);
+    histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GBEG);
     histh_p_aux_set(&a_hist->hhead, 0);
 
     /* Relocate hbeg. */
@@ -1159,10 +1490,10 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 
     /* Relocate hcur. */
     mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-    mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+    mkr_seek(&a_hist->hcur, histh_p_len_get(&a_hist->hhead), BUFW_REL);
 
     /* Initialize footer. */
-    histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GRP_BEG);
+    histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GBEG);
     histh_p_aux_set(&a_hist->hfoot, 0);
 
     /* Insert footer. */
@@ -1171,7 +1502,7 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 
     /* Relocate hend. */
     mkr_dup(&a_hist->hend, &a_hist->hcur);
-    mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
+    mkr_seek(&a_hist->hend, histh_p_len_get(&a_hist->hfoot), BUFW_REL);
 
     /* Increase depth. */
     a_hist->gdepth++;
@@ -1196,7 +1527,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
     hist_p_redo_flush(a_hist);
 
     /* Initialize header. */
-    histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GRP_END);
+    histh_p_tag_set(&a_hist->hhead, HISTH_TAG_GEND);
     histh_p_aux_set(&a_hist->hhead, 0);
 
     /* Relocate hbeg. */
@@ -1208,10 +1539,10 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
     /* Relocate hcur. */
     mkr_dup(&a_hist->hcur, &a_hist->hbeg);
-    mkr_seek(&a_hist->hcur, HISTH_LEN, BUFW_REL);
+    mkr_seek(&a_hist->hcur, histh_p_len_get(&a_hist->hhead), BUFW_REL);
 
     /* Initialize footer. */
-    histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GRP_END);
+    histh_p_tag_set(&a_hist->hfoot, HISTH_TAG_GEND);
     histh_p_aux_set(&a_hist->hfoot, 0);
 
     /* Insert footer. */
@@ -1220,7 +1551,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
     /* Relocate hend. */
     mkr_dup(&a_hist->hend, &a_hist->hcur);
-    mkr_seek(&a_hist->hend, HISTH_LEN, BUFW_REL);
+    mkr_seek(&a_hist->hend, histh_p_len_get(&a_hist->hfoot), BUFW_REL);
 
     /* Decrease depth. */
     a_hist->gdepth--;
@@ -1355,8 +1686,8 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	else
 	{
 	    /* Get current record header/footer. */
-	    histh_p_before_get(&tfoot, &tend, &ttmp);
-	    histh_p_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_footer_before_get(&tfoot, &tend, &ttmp);
 	}
 
 	/* Iterate through records. */
@@ -1364,12 +1695,17 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	{
 	    switch (histh_p_tag_get(&thead))
 	    {
-		case HISTH_TAG_GRP_BEG:
+		case HISTH_TAG_SYNC:
+		{
+		    fprintf(stderr, "%s|         S\n", mid);
+		    break;
+		}
+		case HISTH_TAG_GBEG:
 		{
 		    fprintf(stderr, "%s|         B\n", mid);
 		    break;
 		}
-		case HISTH_TAG_GRP_END:
+		case HISTH_TAG_GEND:
 		{
 		    fprintf(stderr, "%s|         E\n", mid);
 		    break;
@@ -1380,12 +1716,30 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 			    histh_p_aux_get(&thead), histh_p_aux_get(&tfoot));
 		    break;
 		}
+		case HISTH_TAG_SINS:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%llui\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
 		case HISTH_TAG_INS:
 		{
 		    fprintf(stderr, "%s|         (", mid);
 		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")%lluI\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_SYNK:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%lluy\n",
 			    histh_p_aux_get(&thead));
 		    break;
 		}
@@ -1398,12 +1752,30 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 			    histh_p_aux_get(&thead));
 		    break;
 		}
+		case HISTH_TAG_SREM:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%llur\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
 		case HISTH_TAG_REM:
 		{
 		    fprintf(stderr, "%s|         (", mid);
 		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")%lluR\n",
+			    histh_p_aux_get(&thead));
+		    break;
+		}
+		case HISTH_TAG_SDEL:
+		{
+		    fprintf(stderr, "%s|         (", mid);
+		    bufv = mkr_range_get(&ttmp, &tcur, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")%llud\n",
 			    histh_p_aux_get(&thead));
 		    break;
 		}
@@ -1414,11 +1786,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")%lluD\n",
 			    histh_p_aux_get(&thead));
-		    break;
-		}
-		case HISTH_TAG_SYNC:
-		{
-		    fprintf(stderr, "%s|         S\n", mid);
 		    break;
 		}
 		default:
@@ -1451,8 +1818,8 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	else
 	{
 	    /* Get current record header/footer. */
-	    histh_p_after_get(&thead, &tbeg, &ttmp);
-	    histh_p_before_get(&tfoot, &tend, &ttmp);
+	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_footer_before_get(&tfoot, &tend, &ttmp);
 	}
 
 	/* Iterate through records. */
@@ -1460,12 +1827,17 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 	{
 	    switch (histh_p_tag_get(&thead))
 	    {
-		case HISTH_TAG_GRP_BEG:
+		case HISTH_TAG_SYNC:
+		{
+		    fprintf(stderr, "%s|         S\n", mid);
+		    break;
+		}
+		case HISTH_TAG_GBEG:
 		{
 		    fprintf(stderr, "%s|         B\n", mid);
 		    break;
 		}
-		case HISTH_TAG_GRP_END:
+		case HISTH_TAG_GEND:
 		{
 		    fprintf(stderr, "%s|         E\n", mid);
 		    break;
@@ -1476,9 +1848,27 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 			    histh_p_aux_get(&thead), histh_p_aux_get(&tfoot));
 		    break;
 		}
+		case HISTH_TAG_SINS:
+		{
+		    fprintf(stderr, "%s|         i%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
 		case HISTH_TAG_INS:
 		{
 		    fprintf(stderr, "%s|         I%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_SYNK:
+		{
+		    fprintf(stderr, "%s|         y%llu(\n", mid,
 			    histh_p_aux_get(&thead));
 		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
@@ -1494,9 +1884,27 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    fprintf(stderr, ")\n");
 		    break;
 		}
+		case HISTH_TAG_SREM:
+		{
+		    fprintf(stderr, "%s|         r%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
 		case HISTH_TAG_REM:
 		{
 		    fprintf(stderr, "%s|         R%llu(", mid,
+			    histh_p_aux_get(&thead));
+		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
+		    hist_p_bufv_print(bufv, bufvcnt);
+		    fprintf(stderr, ")\n");
+		    break;
+		}
+		case HISTH_TAG_SDEL:
+		{
+		    fprintf(stderr, "%s|         d%llu(", mid,
 			    histh_p_aux_get(&thead));
 		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
@@ -1510,11 +1918,6 @@ hist_dump(cw_hist_t *a_hist, const char *a_beg, const char *a_mid,
 		    bufv = mkr_range_get(&tcur, &ttmp, &bufvcnt);
 		    hist_p_bufv_print(bufv, bufvcnt);
 		    fprintf(stderr, ")\n");
-		    break;
-		}
-		case HISTH_TAG_SYNC:
-		{
-		    fprintf(stderr, "%s|         S\n", mid);
 		    break;
 		}
 		default:
@@ -1586,8 +1989,8 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	else
 	{
 	    /* Get current record header/footer. */
-	    histh_p_before_get(&tfoot, &tend, &ttmp);
-	    histh_p_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_footer_before_get(&tfoot, &tend, &ttmp);
 	}
 
 	/* Iterate through records. */
@@ -1597,9 +2000,9 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
 	    switch (histh_p_tag_get(&thead))
 	    {
-		case HISTH_TAG_GRP_BEG:
-		case HISTH_TAG_GRP_END:
 		case HISTH_TAG_SYNC:
+		case HISTH_TAG_GBEG:
+		case HISTH_TAG_GEND:
 		{
 		    cw_assert(histh_p_aux_get(&thead) == 0);
 		    cw_assert(histh_p_aux_get(&tfoot) == 0);
@@ -1649,8 +2052,8 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	else
 	{
 	    /* Get current record header/footer. */
-	    histh_p_after_get(&thead, &tbeg, &ttmp);
-	    histh_p_before_get(&tfoot, &tend, &ttmp);
+	    histh_p_header_after_get(&thead, &tbeg, &ttmp);
+	    histh_p_footer_before_get(&tfoot, &tend, &ttmp);
 	}
 
 	/* Iterate through records. */
@@ -1660,9 +2063,9 @@ hist_validate(cw_hist_t *a_hist, cw_buf_t *a_buf)
 
 	    switch (histh_p_tag_get(&thead))
 	    {
-		case HISTH_TAG_GRP_BEG:
-		case HISTH_TAG_GRP_END:
 		case HISTH_TAG_SYNC:
+		case HISTH_TAG_GBEG:
+		case HISTH_TAG_GEND:
 		{
 		    cw_assert(histh_p_aux_get(&thead) == 0);
 		    cw_assert(histh_p_aux_get(&tfoot) == 0);

@@ -23,27 +23,32 @@ struct cw_histh_s
     cw_uint32_t magic;
 #endif
     /* Record tag.  Not an enumerated type since it needs to be only 8 bits. */
-#define HISTH_TAG_NONE		0
-#define HISTH_TAG_GRP_BEG	1
-#define HISTH_TAG_GRP_END	2
-#define HISTH_TAG_POS		3
-#define HISTH_TAG_INS		4
-#define HISTH_TAG_YNK		5
-#define HISTH_TAG_REM		6
-#define HISTH_TAG_DEL		7
-#define HISTH_TAG_SYNC		8
+#define HISTH_TAG_NONE		 0
+#define HISTH_TAG_SYNC		 1
+#define HISTH_TAG_GBEG		 2
+#define HISTH_TAG_GEND		 3
+#define HISTH_TAG_POS		 4
+#define HISTH_TAG_SINS		 5
+#define HISTH_TAG_SYNK		 6
+#define HISTH_TAG_SREM		 7
+#define HISTH_TAG_SDEL		 8
+#define HISTH_TAG_INS		 9
+#define HISTH_TAG_YNK		10
+#define HISTH_TAG_REM		11
+#define HISTH_TAG_DEL		12
     cw_uint8_t tag;
 
     /* Auxiliary field (bpos or data byte count). */
     union
     {
 	cw_uint64_t aux; /* Always network byte order. */
+	cw_uint8_t saux;
 	cw_uint8_t str[8];
     } u;
 
-    /* Vector that is set up to contain &tag and u.str. */
-#define HISTH_LEN	9
+    /* Vector that is set up to contain the header data. */
     cw_bufv_t bufv[2];
+    cw_uint32_t bufvcnt;
 };
 
 struct cw_hist_s
