@@ -1,3 +1,11 @@
+2001-08-20  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_file.c: Clean up the internals of onyx file objects and
+	rename nxo_file_interactive() to nxo_file_synthetic() (with API
+	changes).  As a result of the cleanup, the API for
+	nxo_file_readline() and nxo_file_buffer_size_set() have also
+	changed.
+
 2001-08-19  Jason Evans  <jasone@canonware.com>
 
 	* src/nxa.c (nxa_p_roots): Don't iterate through objects once a

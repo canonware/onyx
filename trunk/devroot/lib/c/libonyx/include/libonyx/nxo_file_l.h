@@ -29,10 +29,32 @@ struct cw_nxoe_file_s {
 	 */
 	cw_mtx_t	lock;
 #endif
-	/*
-	 * File descriptor number.  -1: Invalid, -2: Wrapped.
-	 */
-	cw_sint32_t	fd;
+	cw_nx_t		*nx;
+
+	enum {
+		FILE_NONE,
+#ifdef _CW_POSIX_FILE
+		FILE_POSIX,
+#endif
+		FILE_SYNTHETIC
+	}		mode;
+
+	union {
+		struct {
+			cw_nxo_file_read_t	*read_f;
+			cw_nxo_file_write_t	*write_f;
+			cw_nxo_file_ref_iter_t	*ref_iter_f;
+			cw_nxo_file_delete_t	*delete_f;
+			void			*arg;
+			cw_nxoi_t		position;
+		}	s;
+#ifdef _CW_POSIX_FILE
+		struct {
+			cw_sint32_t		fd;
+			cw_bool_t		wrapped;
+		}	p;
+#endif
+	}		f;
 	/*
 	 * Buffering.
 	 */
@@ -44,13 +66,6 @@ struct cw_nxoe_file_s {
 		BUFFER_WRITE
 	}		buffer_mode;
 	cw_uint32_t	buffer_offset;
-	/*
-	 * Used for wrapped files.
-	 */
-	cw_nxo_file_read_t	*read_f;
-	cw_nxo_file_write_t	*write_f;
-	void		*arg;
-	cw_nxoi_t	position;
 };
 
 void	nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);

@@ -71,21 +71,27 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 
 		/* Initialize stdin. */
 		nxo_file_new(&retval->stdin_nxo, retval, TRUE);
+#ifdef _CW_POSIX_FILE
 		nxo_file_fd_wrap(&retval->stdin_nxo, 0);
-		nxo_file_buffer_size_set(&retval->stdin_nxo, retval,
+#endif
+		nxo_file_buffer_size_set(&retval->stdin_nxo,
 		    _CW_LIBONYX_FILE_BUFFER_SIZE);
 		try_stage = 5;
 
 		/* Initialize stdout. */
 		nxo_file_new(&retval->stdout_nxo, retval, TRUE);
+#ifdef _CW_POSIX_FILE
 		nxo_file_fd_wrap(&retval->stdout_nxo, 1);
-		nxo_file_buffer_size_set(&retval->stdout_nxo, retval,
+#endif
+		nxo_file_buffer_size_set(&retval->stdout_nxo,
 		    _CW_LIBONYX_FILE_BUFFER_SIZE);
 		try_stage = 6;
 
 		/* Initialize stderr. */
 		nxo_file_new(&retval->stderr_nxo, retval, TRUE);
+#ifdef _CW_POSIX_FILE
 		nxo_file_fd_wrap(&retval->stderr_nxo, 2);
+#endif
 		try_stage = 7;
 
 		/* Initialize globaldict. */

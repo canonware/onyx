@@ -83,7 +83,7 @@ const char	*basename(const char *a_str);
 
 struct nx_read_arg_s *stdin_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, cw_bool_t
     a_interactive);
-void		stdin_shutdown(struct nx_read_arg_s *a_arg);
+void		stdin_shutdown(void *a_arg, cw_nx_t *a_nx);
 cw_sint32_t	nx_read(void *a_arg, cw_nxo_t *a_file, cw_uint32_t a_len,
     cw_uint8_t *r_str);
 
@@ -131,15 +131,20 @@ usage(const char *a_progname)
 	    "    %s -h\n"
 	    "    %s -V\n"
 	    "    %s -e <expr>\n"
+#ifdef _CW_POSIX_FILE
 	    "    %s <file> [<args>]\n"
+#endif
 	    "\n"
 	    "    Option    | Description\n"
 	    "    ----------+------------------------------------\n"
 	    "    -h        | Print usage and exit.\n"
 	    "    -V        | Print version information and exit.\n"
 	    "    -e <expr> | Execute <expr> as onyx code.\n",
-	    a_progname, a_progname, a_progname, a_progname, a_progname,
-	    a_progname);
+	    a_progname, a_progname, a_progname, a_progname, a_progname
+#ifdef _CW_POSIX_FILE
+	    , a_progname
+#endif
+	    );
 }
 
 /* Doesn't strip trailing '/' characters. */
@@ -189,7 +194,8 @@ stdin_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, cw_bool_t a_interactive)
 	/* Set up the interactive wrapper for stdin. */
 	nxo = nx_stdin_get(a_nx);
 	nxo_file_new(nxo, a_nx, TRUE);
-	nxo_file_interactive(nxo, nx_read, NULL, (void *)&stdin_arg);
+	nxo_file_synthetic(nxo, nx_read, NULL, NULL, stdin_shutdown, (void
+	    *)&stdin_arg);
 
 	return &stdin_arg;
 }
@@ -209,17 +215,20 @@ stdin_init(cw_nx_t *a_nx, cw_nxo_t *a_thread, cw_bool_t a_interactive)
 
 	nxo = nx_stdin_get(a_nx);
 	nxo_file_new(nxo, a_nx, TRUE);
-	nxo_file_interactive(nxo, nx_read, NULL, (void *)&stdin_arg);
+	nxo_file_synthetic(nxo, nx_read, NULL, NULL, stdin_shutdown, (void
+	    *)&stdin_arg);
 
 	return &stdin_arg;
 }
 #endif
 
 void
-stdin_shutdown(struct nx_read_arg_s *a_arg)
+stdin_shutdown(void *a_arg, cw_nx_t *a_nx)
 {
-	if (a_arg->buffer != NULL)
-		_cw_free(a_arg->buffer);
+	struct nx_read_arg_s *arg = (struct nx_read_arg_s *)a_arg;
+
+	if (arg->buffer != NULL)
+		_cw_free(arg->buffer);
 }
 
 #ifdef _ONYX_FULL
@@ -483,7 +492,6 @@ interactive_run(int argc, char **argv, char **envp)
 
 	nxo_threadp_delete(&threadp, &thread);
 	nx_delete(&nx);
-	stdin_shutdown(stdin_arg);
 	return 0;
 }
 #else
@@ -491,11 +499,10 @@ int
 interactive_run(int argc, char **argv, char **envp)
 {
 	cw_nx_t			nx;
-	struct nx_read_arg_s	*stdin_arg;
 
 	nx_new(&nx, NULL, argc, argv, NULL);
 
-	stdin_arg = stdin_init(&nx, &thread, TRUE);
+	stdin_init(&nx, &thread, TRUE);
 #ifdef _ONYX_MINIMAL
 	stdout_init(&nx);
 	stderr_init(&nx);
@@ -519,7 +526,6 @@ interactive_run(int argc, char **argv, char **envp)
 	nxo_thread_start(&thread);
 
 	nx_delete(&nx);
-	stdin_shutdown(stdin_arg);
 	return 0;
 }
 #endif
@@ -533,9 +539,6 @@ batch_run(int argc, char **argv, char **envp)
 	cw_bool_t	opt_version = FALSE;
 	cw_uint8_t	*opt_expression = NULL;
 	cw_nx_t		nx;
-#ifdef _ONYX_MINIMAL
-	struct nx_read_arg_s	*stdin_arg;
-#endif
 
 	/*
 	 * Parse command line arguments, but postpone taking any actions
@@ -592,7 +595,7 @@ batch_run(int argc, char **argv, char **envp)
 	 */
 	nx_new(&nx, NULL, argc - optind, &argv[optind], envp);
 #ifdef _ONYX_MINIMAL
-	stdin_arg = stdin_init(&nx, &thread, FALSE);
+	stdin_init(&nx, &thread, FALSE);
 	stdout_init(&nx);
 	stderr_init(&nx);
 #endif
@@ -643,7 +646,9 @@ batch_run(int argc, char **argv, char **envp)
 		nxo_attr_set(string, NXOA_EXECUTABLE);
 		str = nxo_string_get(string);
 		memcpy(str, opt_expression, nxo_string_len_get(string));
-	} else if (optind < argc) {
+	}
+#ifdef _CW_POSIX_FILE
+	else if (optind < argc) {
 		int	src_fd;
 
 		/*
@@ -663,20 +668,20 @@ batch_run(int argc, char **argv, char **envp)
 		file = nxo_stack_push(nxo_thread_ostack_get(&thread));
 		nxo_file_new(file, &nx, FALSE);
 		nxo_attr_set(file, NXOA_EXECUTABLE);
+
 		nxo_file_fd_wrap(file, src_fd);
-	} else if (argc == 1) {
+	}
+#endif
+	else {
 		/*
-		 * No source file specified, and there there was no -e
-		 * expression specified either, so treat stdin as the source.
-		 *
-		 * In other words, there were no arguments specified, and this
-		 * isn't a tty.
+		 * No source file specified (or not supported), and there there
+		 * was no -e expression specified either, so treat stdin as the
+		 * source.
 		 */
 		file = nxo_stack_push(nxo_thread_ostack_get(&thread));
 		nxo_dup(file, nx_stdin_get(&nx));
 		nxo_attr_set(file, NXOA_EXECUTABLE);
-	} else
-		_cw_not_reached();
+	}
 
 	/* Run the interpreter non-interactively. */
 	nxo_thread_start(&thread);
@@ -685,9 +690,6 @@ batch_run(int argc, char **argv, char **envp)
 	RETURN:
 	nxo_threadp_delete(&threadp, &thread);
 	nx_delete(&nx);
-#ifdef _ONYX_MINIMAL
-	stdin_shutdown(stdin_arg);
-#endif
 	CLERROR:
 	return retval;
 }
@@ -884,7 +886,8 @@ stdout_init(cw_nx_t *a_nx)
 
 	nxo = nx_stdout_get(a_nx);
 	nxo_file_new(nxo, a_nx, TRUE);
-	nxo_file_interactive(nxo, NULL, nx_write, (void *)&stdout_arg);
+	nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void
+	    *)&stdout_arg);
 }
 
 void
@@ -898,7 +901,8 @@ stderr_init(cw_nx_t *a_nx)
 
 	nxo = nx_stderr_get(a_nx);
 	nxo_file_new(nxo, a_nx, TRUE);
-	nxo_file_interactive(nxo, NULL, nx_write, (void *)&stderr_arg);
+	nxo_file_synthetic(nxo, NULL, nx_write, NULL, NULL, (void
+	    *)&stderr_arg);
 }
 
 cw_bool_t

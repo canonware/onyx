@@ -47,17 +47,13 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	if (a_locking)
 		mtx_new(&file->lock);
 #endif
-	file->fd = -1;
+	file->nx = a_nx;
+	file->mode = FILE_NONE;
 
 	file->buffer = NULL;
 	file->buffer_mode = BUFFER_EMPTY;
 	file->buffer_size = 0;
 	file->buffer_offset = 0;
-
-	file->read_f = NULL;
-	file->write_f = NULL;
-	file->arg = NULL;
-	file->position = 0;
 
 	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)file;
@@ -84,11 +80,20 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	if (file->nxoe.locking)
 		mtx_delete(&file->lock);
 #endif
-	/*
-	 * Don't automatically close() predefined or wrapped descriptors.
-	 */
-	if (file->fd >= 3)
-		close(file->fd);
+	switch (file->mode) {
+	case FILE_NONE:
+		break;
+#ifdef _CW_POSIX_FILE
+	case FILE_POSIX:
+		if (file->f.p.wrapped == FALSE)
+			close(file->f.p.fd);
+		break;
+#endif
+	case FILE_SYNTHETIC:
+		if (file->f.s.delete_f != NULL)
+			file->f.s.delete_f(file->f.s.arg, a_nx);
+		break;
+	}
 
 	_CW_NXOE_FREE(file);
 }
@@ -96,9 +101,20 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 cw_nxoe_t *
 nxoe_l_file_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 {
-	return NULL;
+	cw_nxoe_t	*retval;
+	cw_nxoe_file_t	*file;
+
+	file = (cw_nxoe_file_t *)a_nxoe;
+
+	if (file->mode == FILE_SYNTHETIC && file->f.s.ref_iter_f != NULL)
+		retval = file->f.s.ref_iter_f(file->f.s.arg, a_reset);
+	else
+		retval = NULL;
+
+	return retval;
 }
 
+#ifdef _CW_POSIX_FILE
 void
 nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
 {
@@ -113,14 +129,18 @@ nxo_file_fd_wrap(cw_nxo_t *a_nxo, cw_uint32_t a_fd)
 	_cw_check_ptr(file);
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
-	_cw_assert(file->fd == -1);
+	_cw_assert(file->mode == FILE_NONE);
 
-	file->fd = a_fd;
+	file->mode = FILE_POSIX;
+	file->f.p.fd = a_fd;
+	file->f.p.wrapped = TRUE;
 }
+#endif
 
 void
-nxo_file_interactive(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
-    cw_nxo_file_write_t *a_write, void *a_arg)
+nxo_file_synthetic(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
+    cw_nxo_file_write_t *a_write, cw_nxo_file_ref_iter_t *a_ref_iter,
+    cw_nxo_file_delete_t *a_delete, void *a_arg)
 {
 	cw_nxoe_file_t	*file;
 
@@ -133,17 +153,15 @@ nxo_file_interactive(cw_nxo_t *a_nxo, cw_nxo_file_read_t *a_read,
 	_cw_check_ptr(file);
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
-	_cw_assert(file->fd == -1);
+	_cw_assert(file->mode == FILE_NONE);
 
-	/*
-	 * -2 is a special value that signifies this is an interactive editor
-	 * "file".
-	 */
-	file->fd = -2;
-	file->read_f = a_read;
-	file->write_f = a_write;
-	file->arg = a_arg;
-	file->position = 0;
+	file->mode = FILE_SYNTHETIC;
+	file->f.s.read_f = a_read;
+	file->f.s.write_f = a_write;
+	file->f.s.ref_iter_f = a_ref_iter;
+	file->f.s.delete_f = a_delete;
+	file->f.s.arg = a_arg;
+	file->f.s.position = 0;
 }
 
 #ifdef _CW_POSIX_FILE
@@ -191,7 +209,7 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd != -1) {
+	if (file->mode != FILE_NONE) {
 		retval = NXO_THREADE_INVALIDFILEACCESS;
 		goto URETURN;
 	}
@@ -242,8 +260,8 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 		goto URETURN;
 	}
 
-	file->fd = open(filename, access, 0x1ff);
-	if (file->fd == -1) {
+	file->f.p.fd = open(filename, access, 0x1ff);
+	if (file->f.p.fd == -1) {
 		switch (errno) {
 		case ENOSPC:
 		case EMFILE:
@@ -255,6 +273,9 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 			goto URETURN;
 		}
 	}
+
+	file->mode = FILE_POSIX;
+	file->f.p.wrapped = FALSE;
 
 	retval = NXO_THREADE_NONE;
 	URETURN:
@@ -286,7 +307,7 @@ nxo_file_close(cw_nxo_t *a_nxo)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd == -1) {
+	if (file->mode == FILE_NONE) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
 	}
@@ -302,14 +323,26 @@ nxo_file_close(cw_nxo_t *a_nxo)
 		file->buffer_mode = BUFFER_EMPTY;
 	}
 
+	switch (file->mode) {
+	case FILE_NONE:
+		_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-	if ((file->fd >= 0) && (close(file->fd) == -1)) {
-		file->fd = -1;
-		retval = NXO_THREADE_IOERROR;
-		goto RETURN;
-	}
+	case FILE_POSIX:
+		file->mode = FILE_NONE;
+		if (file->f.p.wrapped == FALSE) {
+			if (close(file->f.p.fd) == -1) {
+				retval = NXO_THREADE_IOERROR;
+				goto RETURN;
+			}
+		}
+		break;
 #endif
-	file->fd = -1;
+	case FILE_SYNTHETIC:
+		file->mode = FILE_NONE;
+		if (file->f.s.delete_f != NULL)
+			file->f.s.delete_f(file->f.s.arg, file->nx);
+		break;
+	}
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
@@ -339,14 +372,18 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd < 0) {
+	switch (file->mode) {
+	case FILE_NONE:
+	case FILE_SYNTHETIC:
 		retval = -1;
-		goto RETURN;
+		break;
+#ifdef _CW_POSIX_FILE
+	case FILE_POSIX:
+		retval = file->f.p.fd;
+		break;
+#endif
 	}
 
-	retval = file->fd;
-
-	RETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
@@ -374,7 +411,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd == -1) {
+	if (file->mode == FILE_NONE) {
 		retval = -1;
 		goto RETURN;
 	}
@@ -414,8 +451,11 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			file->buffer_offset = 0;
 			file->buffer_mode = BUFFER_EMPTY;
 
+			switch (file->mode) {
+			case FILE_NONE:
+				_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-			if (file->fd >= 0) {
+			case FILE_POSIX: {
 				struct pollfd	events;
 				struct iovec	iov[2];
 
@@ -424,7 +464,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * No data read yet.  Sleep until some
 					 * data are available.
 					 */
-					events.fd = file->fd;
+					events.fd = file->f.p.fd;
 					events.events = POLLIN
 #ifdef POLLRDNORM
 					    | POLLRDNORM
@@ -442,8 +482,8 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					iov[1].iov_base = file->buffer;
 					iov[1].iov_len = file->buffer_size;
 
-					while ((nread = readv(file->fd, iov, 2))
-					    == -1) {
+					while ((nread = readv(file->f.p.fd, iov,
+					    2)) == -1) {
 						if (errno != EINTR)
 							break;
 					}
@@ -453,7 +493,7 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					/*
 					 * Only read if data are available.
 					 */
-					events.fd = file->fd;
+					events.fd = file->f.p.fd;
 					events.events = POLLIN
 #ifdef POLLRDNORM
 					    | POLLRDNORM
@@ -475,20 +515,23 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 						iov[1].iov_len =
 						    file->buffer_size;
 
-						while ((nread = readv(file->fd,
-						    iov, 2)) == -1) {
+						while ((nread =
+						    readv(file->f.p.fd, iov, 2))
+						    == -1) {
 							if (errno != EINTR)
 								break;
 						}
 					} else
 						nread = 0;
 				}
-			} else
+				break;
+			}
 #endif
-			{
+			case FILE_SYNTHETIC:
 				/* Use the read wrapper function. */
-				nread = file->read_f(file->arg, a_nxo, a_len,
-				    r_str);
+				nread = file->f.s.read_f(file->f.s.arg, a_nxo,
+				    a_len, r_str);
+				break;
 			}
 
 			/* Handle various read return values. */
@@ -515,15 +558,23 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 			}
 		}
 	} else {
+		switch (file->mode) {
+		case FILE_NONE:
+			_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-		if (file->fd >= 0) {
-			while ((retval = read(file->fd, r_str, a_len)) == -1) {
+		case FILE_POSIX:
+			while ((retval = read(file->f.p.fd, r_str, a_len)) ==
+			    -1) {
 				if (errno != EINTR)
 					break;
 			}
-		} else
+			break;
 #endif
-			retval = file->read_f(file->arg, a_nxo, a_len, r_str);
+		case FILE_SYNTHETIC:
+			retval = file->f.s.read_f(file->f.s.arg, a_nxo, a_len,
+			    r_str);
+			break;
+		}
 	}
 
 	if (retval == 0 && file->buffer != NULL) {
@@ -531,8 +582,8 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 		file->buffer_mode = BUFFER_EMPTY;
 	}
 	RETURN:
-	if (retval != -1)
-		file->position += retval;
+	if (file->mode == FILE_SYNTHETIC && retval != -1)
+		file->f.s.position += retval;
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
@@ -541,8 +592,8 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 /* NXO_THREADE_IOERROR */
 cw_nxo_threade_t
-nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
-    *r_string, cw_bool_t *r_eof)
+nxo_file_readline(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_nxo_t *r_string,
+    cw_bool_t *r_eof)
 {
 	cw_nxo_threade_t	retval;
 	cw_nxoe_file_t		*file;
@@ -566,7 +617,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd == -1) {
+	if (file->mode == FILE_NONE) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
 	}
@@ -599,7 +650,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 				if (line == s_line) {
 					/* First expansion. */
 					line = (cw_uint8_t
-					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    *)nxa_malloc(nx_nxa_get(file->nx),
 					    maxlen << 1);
 					memcpy(line, s_line, maxlen);
 				} else {
@@ -611,7 +662,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 					 */
 					oldline = line;
 					line = (cw_uint8_t
-					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    *)nxa_malloc(nx_nxa_get(file->nx),
 					    maxlen << 1);
 					memcpy(line, oldline, maxlen);
 					_cw_free(oldline);
@@ -622,33 +673,40 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 			if ((offset >= file->buffer_offset) ||
 			    (file->buffer_mode == BUFFER_EMPTY)) {
 				/* Replenish the internal buffer. */
+				switch (file->mode) {
+				case FILE_NONE:
+					_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-				if (file->fd >= 0) {
-					while ((nread = read(file->fd,
+				case FILE_POSIX:
+					while ((nread = read(file->f.p.fd,
 					    file->buffer, file->buffer_size)) ==
 					    -1) {
 						if (errno != EINTR)
 							break;
 					}
-				} else
+					break;
 #endif
-				{
+				case FILE_SYNTHETIC:
 					/* Use the read wrapper function. */
-					nread = file->read_f(file->arg, a_nxo,
-					    file->buffer_size, file->buffer);
+					nread = file->f.s.read_f(file->f.s.arg,
+					    a_nxo, file->buffer_size,
+					    file->buffer);
+					break;
 				}
+
 				if (nread <= 0) {
 					/* EOF. */
-					file->fd = -1;
 					file->buffer_offset = 0;
 					file->buffer_mode = BUFFER_EMPTY;
 
-					nxo_string_new(r_string, a_nx,
+					nxo_string_new(r_string, file->nx,
 					    a_locking, i);
 					nxo_string_lock(r_string);
 					nxo_string_set(r_string, 0, line, i);
 					nxo_string_unlock(r_string);
-					file->position += i;
+
+					if (file->mode == FILE_SYNTHETIC)
+						file->f.s.position += i;
 
 					retval = NXO_THREADE_NONE;
 					*r_eof = TRUE;
@@ -672,11 +730,14 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 					/* Throw away the preceding \r. */
 					i--;
 				}
-				nxo_string_new(r_string, a_nx, a_locking, i);
+				nxo_string_new(r_string, file->nx, a_locking,
+				    i);
 				nxo_string_lock(r_string);
 				nxo_string_set(r_string, 0, line, i);
 				nxo_string_unlock(r_string);
-				file->position += i;
+
+				if (file->mode == FILE_SYNTHETIC)
+					file->f.s.position += i;
 
 				/*
 				 * Shift the remaining buffered data to the
@@ -716,7 +777,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 				if (line == s_line) {
 					/* First expansion. */
 					line = (cw_uint8_t
-					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    *)nxa_malloc(nx_nxa_get(file->nx),
 					    maxlen << 1);
 					memcpy(line, s_line, maxlen);
 				} else {
@@ -728,7 +789,7 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 					 */
 					oldline = line;
 					line = (cw_uint8_t
-					    *)nxa_malloc(nx_nxa_get(a_nx),
+					    *)nxa_malloc(nx_nxa_get(file->nx),
 					    maxlen << 1);
 					memcpy(line, oldline, maxlen);
 					_cw_free(oldline);
@@ -736,27 +797,35 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 				maxlen <<= 1;
 			}
 
+			switch (file->mode) {
+			case FILE_NONE:
+				_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-			if (file->fd >= 0) {
-				while ((nread = read(file->fd, &line[i], 1)) ==
-				    -1) {
+			case FILE_POSIX:
+				while ((nread = read(file->f.p.fd, &line[i], 1))
+				    == -1) {
 					if (errno != EINTR)
 						break;
 				}
-			} else
+				break;
 #endif
-			{
+			case FILE_SYNTHETIC:
 				/* Use the read wrapper function. */
-				nread = file->read_f(file->arg, a_nxo, 1,
-				    &line[i]);
+				nread = file->f.s.read_f(file->f.s.arg, a_nxo,
+				    1, &line[i]);
+				break;
 			}
+
 			if (nread <= 0) {
 				/* EOF. */
-				nxo_string_new(r_string, a_nx, a_locking, i);
+				nxo_string_new(r_string, file->nx, a_locking,
+				    i);
 				nxo_string_lock(r_string);
 				nxo_string_set(r_string, 0, line, i);
 				nxo_string_unlock(r_string);
-				file->position += i;
+
+				if (file->mode == FILE_SYNTHETIC)
+					file->f.s.position += i;
 
 				retval = NXO_THREADE_NONE;
 				*r_eof = TRUE;
@@ -772,11 +841,14 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 					/* Throw away the preceding \r. */
 					i--;
 				}
-				nxo_string_new(r_string, a_nx, a_locking, i);
+				nxo_string_new(r_string, file->nx, a_locking,
+				    i);
 				nxo_string_lock(r_string);
 				nxo_string_set(r_string, 0, line, i);
 				nxo_string_unlock(r_string);
-				file->position += i;
+
+				if (file->mode == FILE_SYNTHETIC)
+					file->f.s.position += i;
 
 				retval = NXO_THREADE_NONE;
 				*r_eof = FALSE;
@@ -817,7 +889,7 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd == -1) {
+	if (file->mode == FILE_NONE) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
 	}
@@ -840,61 +912,71 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 			    a_len);
 			file->buffer_mode = BUFFER_WRITE;
 			file->buffer_offset += a_len;
-		}
+		} else {
+			switch (file->mode) {
+			case FILE_NONE:
+				_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-		else if (file->fd >= 0) {
-			struct iovec	iov[2];
+			case FILE_POSIX: {
+				struct iovec	iov[2];
 
-			/* a_str won't fit.  Do a writev(). */
+				/* a_str won't fit.  Do a writev(). */
 
-			iov[0].iov_base = file->buffer;
-			iov[0].iov_len = file->buffer_offset;
-			iov[1].iov_base = (char *)a_str;
-			iov[1].iov_len = a_len;
+				iov[0].iov_base = file->buffer;
+				iov[0].iov_len = file->buffer_offset;
+				iov[1].iov_base = (char *)a_str;
+				iov[1].iov_len = a_len;
 
-			while (writev(file->fd, iov, 2) == -1) {
-				if (errno != EINTR) {
+				while (writev(file->f.p.fd, iov, 2) == -1) {
+					if (errno != EINTR) {
+						retval = NXO_THREADE_IOERROR;
+						goto RETURN;
+					}
+				}
+
+				file->buffer_mode = BUFFER_EMPTY;
+				file->buffer_offset = 0;
+				break;
+			}
+#endif
+			case FILE_SYNTHETIC:
+				/*
+				 * a_str won't fit.  Flush the buffer and call
+				 * the write wrapper function.
+				 */
+				retval = nxo_p_file_buffer_flush(file);
+				if (retval)
+					goto RETURN;
+
+				if (file->f.s.write_f(file->f.s.arg, a_nxo,
+				    a_str, a_len)) {
 					retval = NXO_THREADE_IOERROR;
 					goto RETURN;
 				}
+				file->f.s.position += a_len;
 			}
-
-			file->buffer_mode = BUFFER_EMPTY;
-			file->buffer_offset = 0;
-		}
-#endif
-		else {
-			/*
-			 * a_str won't fit.  Flush the buffer and call the
-			 * write wrapper function.
-			 */
-			retval = nxo_p_file_buffer_flush(file);
-			if (retval)
-				goto RETURN;
-
-			if (file->write_f(file->arg, a_nxo, a_str, a_len)) {
-				retval = NXO_THREADE_IOERROR;
-				goto RETURN;
-			}
-			file->position += a_len;
 		}
 	} else {
+		switch (file->mode) {
+		case FILE_NONE:
+			_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-		if (file->fd >= 0) {
-			while (write(file->fd, a_str, a_len) == -1) {
+		case FILE_POSIX:
+			while (write(file->f.p.fd, a_str, a_len) == -1) {
 				if (errno != EINTR) {
 					retval = NXO_THREADE_IOERROR;
 					goto RETURN;
 				}
 			}
-		} else
+			break;
 #endif
-		{
-			if (file->write_f(file->arg, a_nxo, a_str, a_len)) {
+		case FILE_SYNTHETIC:
+			if (file->f.s.write_f(file->f.s.arg, a_nxo, a_str,
+			    a_len)) {
 				retval = NXO_THREADE_IOERROR;
 				goto RETURN;
 			}
-			file->position += a_len;
+			file->f.s.position += a_len;
 		}
 	}
 
@@ -927,16 +1009,17 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd == -2) {
+	switch (file->mode) {
+	case FILE_NONE:
+	case FILE_SYNTHETIC:
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
-	}
-
-	nxo_p_file_buffer_flush(file);
-
-	if (ftruncate(file->fd, a_length)) {
-		retval = NXO_THREADE_IOERROR;
-		goto RETURN;
+	case FILE_POSIX:
+		nxo_p_file_buffer_flush(file);
+		if (ftruncate(file->f.p.fd, a_length)) {
+			retval = NXO_THREADE_IOERROR;
+			goto RETURN;
+		}
 	}
 
 	retval = NXO_THREADE_NONE;
@@ -968,25 +1051,27 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd == -1) {
-		retval = -1;
-		goto RETURN;
-	}
 
-	if (file->fd == -2)
-		retval = file->position;
-	else {
+	switch (file->mode) {
+	case FILE_NONE:
+		retval = -1;
+		break;
+#ifdef _CW_POSIX_FILE
+	case FILE_POSIX:
 		/*
 		 * Flush the file in case there are buffered data that have yet
 		 * to be written.
 		 */
 		retval = nxo_p_file_buffer_flush(file);
 		if (retval)
-			goto RETURN;
-		retval = lseek(file->fd, 0, SEEK_CUR);
+			break;
+		retval = lseek(file->f.p.fd, 0, SEEK_CUR);
+		break;
+#endif
+	case FILE_SYNTHETIC:
+		retval = file->f.s.position;
 	}
 
-	RETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
@@ -1014,22 +1099,20 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if (file->fd < 0) {
+	switch (file->mode) {
+	case FILE_NONE:
+	case FILE_SYNTHETIC:
 		retval = NXO_THREADE_IOERROR;
-		goto RETURN;
+		break;
+	case FILE_POSIX:
+		retval = nxo_p_file_buffer_flush(file);
+		if (retval)
+			break;
+
+		if (lseek(file->f.p.fd, a_position, SEEK_SET) == -1)
+			retval = NXO_THREADE_IOERROR;
 	}
 
-	retval = nxo_p_file_buffer_flush(file);
-	if (retval)
-		goto RETURN;
-
-	if (lseek(file->fd, a_position, SEEK_SET) == -1) {
-		retval = NXO_THREADE_IOERROR;
-		goto RETURN;
-	}
-
-	retval = NXO_THREADE_NONE;
-	RETURN:
 #ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
 #endif
@@ -1065,7 +1148,7 @@ nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
 }
 
 void
-nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_uint32_t a_size)
+nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_uint32_t a_size)
 {
 	cw_nxoe_file_t	*file;
 
@@ -1091,7 +1174,7 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_uint32_t a_size)
 	} else {
 		if (file->buffer != NULL)
 			_cw_free(file->buffer);
-		file->buffer = (cw_uint8_t *)nxa_malloc(nx_nxa_get(a_nx),
+		file->buffer = (cw_uint8_t *)nxa_malloc(nx_nxa_get(file->nx),
 		    a_size);
 		file->buffer_size = a_size;
 	}
@@ -1121,8 +1204,8 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 #ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
 #endif
-	if ((file->fd != -1 && file->buffer != NULL && file->buffer_mode !=
-	    BUFFER_WRITE))
+	if ((file->mode != FILE_NONE && file->buffer != NULL &&
+	    file->buffer_mode != BUFFER_WRITE))
 		retval = file->buffer_offset;
 	else
 		retval = 0;
@@ -1166,7 +1249,7 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 {
 	cw_nxo_threade_t	retval;
 
-	if (a_file->fd == -1) {
+	if (a_file->mode == FILE_NONE) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
 	}
@@ -1174,19 +1257,21 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 	if (a_file->buffer != NULL) {
 		/* Only write if the buffered data is for writing. */
 		if (a_file->buffer_mode == BUFFER_WRITE) {
+			switch (a_file->mode) {
+			case FILE_NONE:
+				_cw_not_reached();
 #ifdef _CW_POSIX_FILE
-			if (a_file->fd >= 0) {
-				/* Normal file descriptor. */
-				while (write(a_file->fd, a_file->buffer,
+			case FILE_POSIX:
+				while (write(a_file->f.p.fd, a_file->buffer,
 				    a_file->buffer_offset) == -1) {
 					if (errno != EINTR) {
 						retval = NXO_THREADE_IOERROR;
 						goto RETURN;
 					}
 				}
-			} else
+				break;
 #endif
-			{
+			case FILE_SYNTHETIC: {
 				cw_nxo_t	tnxo;
 
 				/* Fake up a file object. */
@@ -1194,11 +1279,12 @@ nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file)
 				tnxo.o.nxoe = (cw_nxoe_t *)a_file;
 
 				/* Use the write wrapper function. */
-				if (a_file->write_f(a_file->arg, &tnxo,
+				if (a_file->f.s.write_f(a_file->f.s.arg, &tnxo,
 				    a_file->buffer, a_file->buffer_offset)) {
 					retval = NXO_THREADE_IOERROR;
 					goto RETURN;
 				}
+			}
 			}
 		}
 		/*
