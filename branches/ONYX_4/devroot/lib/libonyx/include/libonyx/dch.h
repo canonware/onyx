@@ -39,13 +39,15 @@ struct cw_dch_s
     cw_opaque_dealloc_t *dealloc;
     void *arg;
 
-    cw_bool_t is_malloced;
+    cw_bool_t is_malloced:1;
 
     /* Intial table size and high/low water marks.  These values are used in
      * proportion if the table grows. */
     cw_uint32_t base_table;
     cw_uint32_t base_grow;
     cw_uint32_t base_shrink;
+
+    cw_bool_t shrinkable:1;
 
     /* (grow_factor * base_table) is the current table size. */
     cw_uint32_t grow_factor;
@@ -69,6 +71,12 @@ dch_delete(cw_dch_t *a_dch);
 
 cw_uint32_t
 dch_count(cw_dch_t *a_dch);
+
+cw_bool_t
+dch_shrinkable_get(cw_dch_t *a_dch);
+
+void
+dch_shrinkable_set(cw_dch_t *a_dch, cw_bool_t a_shrinkable);
 
 void
 dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data,

@@ -104,6 +104,56 @@ cw\_uint32\_t a\_base\_grow, cw\_uint32\_t a\_base\_shrink, cw\_ch\_hash\_t
 	\item[Description: ]
 		Return the number of items in \cvar{a\_dch}.
 	\end{capilist}
+\label{dch_shrinkable_get}
+\index{dch_shrinkable_get@\cfunc{dch\_shrinkable\_get}{}}
+\citem{\cfunc[cw\_bool\_t]{dch\_shrinkable\_get}{cw\_dch\_t *a\_dch}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[TRUE: ] \cvar{a\_dch} is currently shrinkable
+				(initial default).
+			\item[FALSE: ] \cvar{a\_dch} is not currently
+				shrinkable, so no attempt will be made to shrink
+				the hash table in \cfunc{dch\_remove}{} or
+				\cfunc{dch\_remove\_iterate}{}.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return whether \cvar{a\_dch} is currently shrinkable.
+	\end{capilist}
+\label{dch_shrinkable_set}
+\index{dch_shrinkable_set@\cfunc{dch\_shrinkable\_set}{}}
+\citem{\cfunc[void]{dch\_shrinkable\_set}{cw\_dch\_t *a\_dch, cw\_bool\_t
+a\_shrinkable}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[a\_shrinkable: ]
+			\begin{description}\item[]
+			\item[TRUE: ] Set \cvar{a\_dch} to be shrinkable.
+			\item[FALSE: ] Set \cvar{a\_dch} to not be shrinkable.
+				No attempt will be made to shrink the hash table
+				in \cfunc{dch\_remove}{} or
+				\cfunc{dch\_remove\_iterate}{} while in this
+				state.
+			\end{description}
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set whether \cvar{a\_dch} should try to shrink the hash table in
+		\cfunc{dch\_remove}{} and \cfunc{dch\_remove\_iterate}{}.
+	\end{capilist}
 \label{dch_insert}
 \index{dch_insert@\cfunc{dch\_insert}{}}
 \citem{\cfunc[void]{dch\_insert}{cw\_dch\_t *a\_dch, const void *a\_key, const

@@ -183,6 +183,20 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nx_t *a_nx, cw_nxo_t *a_key,
 #ifdef CW_THREADS
 		thd_crit_enter();
 #endif
+		/* Create a dch that initially has twice the capacity of what
+		 * can fit in the array.  This has the advantage of avoiding a
+		 * rehash when populating it below, but the disadvantage is that
+		 * the dict can't ever shrink down below this size.  Oh well;
+		 * converting from the array to a dch is a one way process
+		 * anyway.
+		 *
+		 * Don't let the table get more than 80% full, or less than 25%
+		 * full, when shrinking. */
+		dch_new(&a_dict->data.hash, (cw_opaque_alloc_t *) nxa_malloc_e,
+			(cw_opaque_dealloc_t *) nxa_free_e, nx_nxa_get(a_nx),
+			CW_LIBONYX_DICT_SIZE * 2.5, CW_LIBONYX_DICT_SIZE * 2,
+			CW_LIBONYX_DICT_SIZE / 2,
+			nxo_p_dict_hash, nxo_p_dict_key_comp);
 		for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
 		{
 		    if (nxo_type_get(&tarray[i].key) != NXOT_NO)

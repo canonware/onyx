@@ -58,6 +58,7 @@ dch_new(cw_dch_t *a_dch, cw_opaque_alloc_t *a_alloc,
     retval->base_table = a_base_table;
     retval->base_grow = a_base_grow;
     retval->base_shrink = a_base_shrink;
+    retval->shrinkable = TRUE;
     retval->grow_factor = 1;
     retval->hash = a_hash;
     retval->key_comp = a_key_comp;
@@ -126,6 +127,24 @@ dch_count(cw_dch_t *a_dch)
     return ch_count(a_dch->ch);
 }
 
+cw_bool_t
+dch_shrinkable_get(cw_dch_t *a_dch)
+{
+    cw_check_ptr(a_dch);
+    cw_dassert(a_dch->magic == CW_DCH_MAGIC);
+
+    return a_dch->shrinkable;
+}
+
+void
+dch_shrinkable_set(cw_dch_t *a_dch, cw_bool_t a_shrinkable)
+{
+    cw_check_ptr(a_dch);
+    cw_dassert(a_dch->magic == CW_DCH_MAGIC);
+
+    a_dch->shrinkable = a_shrinkable;
+}
+
 void
 dch_insert(cw_dch_t *a_dch, const void *a_key, const void *a_data,
 	   cw_chi_t *a_chi)
@@ -146,7 +165,10 @@ dch_remove(cw_dch_t *a_dch, const void *a_search_key, void **r_key,
     cw_check_ptr(a_dch);
     cw_dassert(a_dch->magic == CW_DCH_MAGIC);
 
-    dch_p_shrink(a_dch);
+    if (a_dch->shrinkable)
+    {
+	dch_p_shrink(a_dch);
+    }
     if (ch_remove(a_dch->ch, a_search_key, r_key, r_data, r_chi))
     {
 	retval = TRUE;
@@ -184,7 +206,10 @@ dch_remove_iterate(cw_dch_t *a_dch, void **r_key, void **r_data,
     cw_check_ptr(a_dch);
     cw_dassert(a_dch->magic == CW_DCH_MAGIC);
 
-    dch_p_shrink(a_dch);
+    if (a_dch->shrinkable)
+    {
+	dch_p_shrink(a_dch);
+    }
     if (ch_remove_iterate(a_dch->ch, r_key, r_data, r_chi))
     {
 	retval = TRUE;
