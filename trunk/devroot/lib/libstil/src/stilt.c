@@ -354,6 +354,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 
 		switch (a_stilt->state) {
 		case _CW_STILT_STATE_START:
+			/*
+			 * A literal string cannot be accepted until one
+			 * character past the ' at the end has been seen, at
+			 * which point the scanner jumps here.
+			 */
+			START_CONTINUE:
 			_cw_assert(a_stilt->index == 0);
 
 			/* Record where this token starts. */
@@ -361,12 +367,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 			a_stilt->tok_column = a_stilt->column;
 
 			switch (c) {
-			case '(':
+			case '"':
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
-				a_stilt->meta.string.paren_depth = 1;
 				break;
-			case ')':
-				stilt_p_print_syntax_error(a_stilt, c);
+			case '`':
+				a_stilt->state = _CW_STILT_STATE_LIT_STRING;
 				break;
 			case '<':
 				a_stilt->state = _CW_STILT_STATE_LT_CONT;
@@ -528,8 +533,8 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				_CW_STILT_NEWLINE();
 				break;
 			case '\0': case '\t': case '\f': case '\r': case ' ':
-			case '(': case ')': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '%':
+			case '"': case '`': case '\'': case '<': case '>':
+			case '[': case ']': case '{': case '}': case '%':
 				stilt_p_print_syntax_error(a_stilt, c);
 				break;
 			default:
@@ -691,7 +696,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				_CW_STILT_PUTC(c);
 				break;
 			}
-			case '(': case ')': case '<': case '>': case '[':
+			case '"': case '`': case '<': case '>': case '[':
 			case ']': case '{': case '}': case '/': case '%':
 				/* New token. */
 				a_stilt->state = _CW_STILT_STATE_START;
@@ -748,35 +753,23 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->state =
 				    _CW_STILT_STATE_ASCII_STRING_PROT_CONT;
 				break;
-			case '(':
-				a_stilt->meta.string.paren_depth++;
-				_CW_STILT_PUTC(c);
-				break;
-			case ')':
-				a_stilt->meta.string.paren_depth--;
-				if (a_stilt->meta.string.paren_depth == 0) {
-					/*
-					 * Matched opening paren; not part of
-					 * the string.
-					 */
-					a_stilt->state = _CW_STILT_STATE_START;
+			case '"':
+				a_stilt->state = _CW_STILT_STATE_START;
 
-					stilt_p_print_token(a_stilt,
-					    a_stilt->index, "string");
-					stilo = stils_push(&a_stilt->data_stils,
-					    a_stilt, _CW_STILOT_STRINGTYPE,
+				stilt_p_print_token(a_stilt,
+				    a_stilt->index, "string");
+				stilo = stils_push(&a_stilt->data_stils,
+				    a_stilt, _CW_STILOT_STRINGTYPE,
+				    a_stilt->index);
+				if (a_stilt->index <=
+				    _CW_STIL_BUFC_SIZE) {
+					stilo_string_set(stilo, 0,
+					    a_stilt->tok_buffer.str,
 					    a_stilt->index);
-					if (a_stilt->index <=
-					    _CW_STIL_BUFC_SIZE) {
-						stilo_string_set(stilo, 0,
-						    a_stilt->tok_buffer.str,
-						    a_stilt->index);
-					} else
-						_cw_error("XXX Unimplemented");
-
-					stilt_p_reset_tok_buffer(a_stilt);
 				} else
-					_CW_STILT_PUTC(c);
+					_cw_error("XXX Unimplemented");
+
+				stilt_p_reset_tok_buffer(a_stilt);
 				break;
 			case '\r':
 				a_stilt->state =
@@ -833,13 +826,9 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
 				_CW_STILT_PUTC('\\');
 				break;
-			case '(':
+			case '"':
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
-				_CW_STILT_PUTC('(');
-				break;
-			case ')':
-				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
-				_CW_STILT_PUTC(')');
+				_CW_STILT_PUTC('"');
 				break;
 			case 'x':
 				a_stilt->state =
@@ -857,6 +846,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				break;
 			default:
 				a_stilt->state = _CW_STILT_STATE_ASCII_STRING;
+				_CW_STILT_PUTC('\\');
 				_CW_STILT_PUTC(c);
 				break;
 			}
@@ -945,6 +935,76 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 				break;
 			}
 			break;
+		case _CW_STILT_STATE_LIT_STRING:
+			/* The CRLF code jumps here if there was no LF. */
+			LIT_STRING_CONTINUE:
+
+			switch (c) {
+			case '\'':
+				a_stilt->state =
+				    _CW_STILT_STATE_LIT_STRING_PROT_CONT;
+				break;
+			case '\r':
+				a_stilt->state =
+				    _CW_STILT_STATE_LIT_STRING_NEWLINE_CONT;
+				break;
+			case '\n':
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			default:
+				_CW_STILT_PUTC(c);
+				break;
+			}
+			break;
+		case _CW_STILT_STATE_LIT_STRING_NEWLINE_CONT:
+			/* All cases in the switch statement do this. */
+			_CW_STILT_PUTC('\n');
+			a_stilt->state = _CW_STILT_STATE_LIT_STRING;
+			switch (c) {
+			case '\n':
+				_CW_STILT_NEWLINE();
+				break;
+			default:
+				/*
+				 * '\r' was not followed by a '\n'.  Translate
+				 * the '\r' to a '\n' and jump back up to the
+				 * string scanning state to scan c again.
+				 */
+				goto LIT_STRING_CONTINUE;
+			}
+			break;
+		case _CW_STILT_STATE_LIT_STRING_PROT_CONT:
+			switch (c) {
+			case '\'':
+				a_stilt->state = _CW_STILT_STATE_LIT_STRING;
+				_CW_STILT_PUTC('\'');
+				break;
+			default:
+				/* Accept literal string. */
+				a_stilt->state = _CW_STILT_STATE_START;
+
+				stilt_p_print_token(a_stilt,
+				    a_stilt->index, "literal string");
+				stilo = stils_push(&a_stilt->data_stils,
+				    a_stilt, _CW_STILOT_STRINGTYPE,
+				    a_stilt->index);
+				if (a_stilt->index <=
+				    _CW_STIL_BUFC_SIZE) {
+					stilo_string_set(stilo, 0,
+					    a_stilt->tok_buffer.str,
+					    a_stilt->index);
+				} else
+					_cw_error("XXX Unimplemented");
+
+				stilt_p_reset_tok_buffer(a_stilt);
+
+				/*
+				 * We're currently looking at the first
+				 * character of the next token, so re-scan it.
+				 */
+				goto START_CONTINUE;
+			}
+			break;
 		case _CW_STILT_STATE_HEX_STRING:
 			switch (c) {
 			case '>':
@@ -1023,7 +1083,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len)
 					stilt_p_print_syntax_error(a_stilt, c);
 				stilt_p_reset_tok_buffer(a_stilt);
 				break;
-			case '(': case ')': case '<': case '>': case '[':
+			case '"': case '`': case '<': case '>': case '[':
 			case ']': case '{': case '}': case '/': case '%':
 				/* New token. */
 				a_stilt->state = _CW_STILT_STATE_START;

@@ -12,6 +12,7 @@
 #include "../include/libstil/libstil.h"
 
 #include <stdarg.h>
+#include <ctype.h>
 
 #ifdef _LIBSTIL_DBG
 #define _CW_STILO_MAGIC		0x398754ba
@@ -1725,16 +1726,51 @@ stilo_p_string_print(cw_stilo_t *a_stilo, cw_sint32_t a_fd, cw_bool_t
 	cw_uint8_t	newline = (a_newline) ? '\n' : '\0';
 	cw_uint8_t	*str;
 	cw_sint32_t	len;
+	cw_uint32_t	i;
 
 	str = stilo_string_get(a_stilo);
 	len = stilo_string_len_get(a_stilo);
 
-	if (a_syntactic)
-		_cw_out_put_f(a_fd, "(");
-	if (len > 0)
-		_cw_out_put_fn(a_fd, len, "[s]", str);
-	if (a_syntactic)
-		_cw_out_put_f(a_fd, ")");
+	if (a_syntactic) {
+		_cw_out_put_f(a_fd, "\"");
+		for (i = 0; i < len; i++) {
+			switch (str[i]) {
+			case '\n':
+				_cw_out_put_f(a_fd, "\\n");
+				break;
+			case '\r':
+				_cw_out_put_f(a_fd, "\\r");
+				break;
+			case '\t':
+				_cw_out_put_f(a_fd, "\\t");
+				break;
+			case '\b':
+				_cw_out_put_f(a_fd, "\\b");
+				break;
+			case '\f':
+				_cw_out_put_f(a_fd, "\\f");
+				break;
+			case '\\':
+				_cw_out_put_f(a_fd, "\\\\");
+				break;
+			case '"':
+				_cw_out_put_f(a_fd, "\\\"");
+				break;
+			default:
+				if (isprint(str[i]))
+					_cw_out_put_f(a_fd, "[c]", str[i]);
+				else {
+					_cw_out_put_f(a_fd, "\\x[i|b:16]",
+					    str[i]);
+				}
+				break;
+			}
+		}
+		_cw_out_put_f(a_fd, "\"");
+	} else {
+		if (len > 0)
+			_cw_out_put_fn(a_fd, len, "[s]", str);
+	}
 	_cw_out_put_f(a_fd, "[c]", newline);
 }
 
