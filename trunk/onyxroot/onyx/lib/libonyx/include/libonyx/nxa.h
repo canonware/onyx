@@ -61,14 +61,10 @@ cw_nxoi_t nxa_period_get(cw_nxa_t *a_nxa);
 void	nxa_period_set(cw_nxa_t *a_nxa, cw_nxoi_t a_period);
 cw_nxoi_t nxa_threshold_get(cw_nxa_t *a_nxa);
 void	nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold);
-cw_nxoi_t nxa_collections_get(cw_nxa_t *a_nxa);
-cw_nxoi_t nxa_new_get(cw_nxa_t *a_nxa);
-void	nxa_current_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
-    cw_nxoi_t *r_sweep);
-void	nxa_maximum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
-    cw_nxoi_t *r_sweep);
-void	nxa_sum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
-    cw_nxoi_t *r_sweep);
+void	nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t
+    *r_new, cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep,
+    cw_nxoi_t *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep, cw_nxoi_t
+    *r_scount, cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep);
 
 #ifndef _CW_USE_INLINES
 cw_nxo_t *nxa_gcdict_get(cw_nxa_t *a_nxa);

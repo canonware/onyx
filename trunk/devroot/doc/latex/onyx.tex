@@ -520,6 +520,16 @@ threshold can be changed to suit the application.}
 allocated since the last collection.  This idle timeout period can be changed.}
 \end{enumerate}
 
+There is one situation in which it is possible for garbage to never be
+collected, despite the garbage collector being properly configured.  Suppose
+that a program creates some objects, the garbage collector runs, then the
+program enters a code path that clobbers object references, such that the
+objects could be collected, but no new objects are allocated.  In such a
+situation, neither the allocation inactivity timer (period), nor the object
+allocation threshold will trigger a collection, and garbage will remain
+uncollected.  In practice this situation is unlikely, and isn't a significant
+problem since the program size is not growing.
+
 Garbage collection is controlled via \htmlref{gcdict}{systemdict:gcdict}, which
 is described in Section~\ref{sec:gcdict}.
 
@@ -548,8 +558,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \caption[]{\emph{continued}} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
+\hline \endhead
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
@@ -618,7 +627,7 @@ onyx:1>
 		\item[name: ]
 			Name of the most recent error.  The name is usually one
 			of the errors defined in
-			\htmlref{errordict}{sec:errordict}, but .
+			\htmlref{errordict}{sec:errordict}.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
@@ -854,13 +863,10 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \caption[]{\emph{continued}} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
+\hline \endhead
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
-& {\bf \htmlref{stop}{errordict:stop}} & & \\
-\hline
 & {\bf \htmlref{dstackunderflow}{errordict:dstackunderflow}} & & \\
 \hline
 & {\bf \htmlref{estackunderflow}{errordict:estackunderflow}} & & \\
@@ -1143,27 +1149,6 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 
 		\end{verbatim}
 	\end{description}
-\label{errordict:stop}
-\index{stop@\onyxop{}{stop}{}}
-\item[{\onyxop{--}{stop}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
 \label{syntaxerror}
 \label{errordict:syntaxerror}
 \index{syntaxerror@\onyxop{}{syntaxerror}{}}
@@ -1345,6 +1330,9 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \subsection{gcdict}
 \label{sec:gcdict}
 
+The gcdict dictionary provides garbage collection control and status
+capabilities.
+
 \begin{longtable}{|r|l|l|p{3in}|}
 \caption[gcdict summary]{gcdict summary by functional group}
 \\
@@ -1356,316 +1344,276 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \caption[]{\emph{continued}} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
+\hline \endhead
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
 \multicolumn{4}{|l|}{Control operators} \\
 \hline \hline
-& {\bf \htmlref{collect}{gcdict:collect}} & & \\
+-- & {\bf \htmlref{collect}{gcdict:collect}} & -- & Force a garbage
+collection. \\
 \hline
-& {\bf \htmlref{setactive}{gcdict:setactive}} & & \\
+boolean & {\bf \htmlref{setactive}{gcdict:setactive}} & -- & Set whether the
+garbage collector is active. \\
 \hline
-& {\bf \htmlref{setperiod}{gcdict:setperiod}} & & \\
+seconds & {\bf \htmlref{setperiod}{gcdict:setperiod}} & -- & Set the inactivity
+period before the garbage collector will run. \\
 \hline
-& {\bf \htmlref{setthreshold}{gcdict:setthreshold}} & & \\
-\hline
-& {\bf \htmlref{dump}{gcdict:dump}} & & \\
+count & {\bf \htmlref{setthreshold}{gcdict:setthreshold}} & -- & Set the number
+of object allocations that will trigger a garbage collection. \\
 \hline \hline
-\multicolumn{4}{|l|}{State operators} \\
+\multicolumn{4}{|l|}{State and statistics operators} \\
 \hline \hline
-& {\bf \htmlref{active}{gcdict:active}} & & \\
+-- & {\bf \htmlref{active}{gcdict:active}} & boolean & Get whether the garbage
+collector is active. \\
 \hline
-& {\bf \htmlref{period}{gcdict:period}} & & \\
+-- & {\bf \htmlref{period}{gcdict:period}} & seconds & Get the inactivity period
+befor the garbage collector will run. \\
 \hline
-& {\bf \htmlref{threshold}{gcdict:threshold}} & & \\
-\hline \hline
-\multicolumn{4}{|l|}{Statistics operators} \\
-\hline \hline
-& {\bf \htmlref{collections}{gcdict:collections}} & & \\
+-- & {\bf \htmlref{threshold}{gcdict:threshold}} & count & Get the number of
+object allocations that will trigger a garbage collection. \\
 \hline
-& {\bf \htmlref{new}{gcdict:new}} & & \\
-\hline
-& {\bf \htmlref{current}{gcdict:current}} & & \\
-\hline
-& {\bf \htmlref{maximum}{gcdict:maximum}} & & \\
-\hline
-& {\bf \htmlref{sum}{gcdict:sum}} & & \\
+-- & {\bf \htmlref{stats}{gcdict:stats}} & array & Get garbage collection
+statistics. \\
 \end{longtable}
 
 \begin{description}
 \label{gcdict:active}
 \index{active@\onyxop{}{active}{}}
-\item[{\onyxop{--}{active}{--}}: ]
+\item[{\onyxop{--}{active}{boolean}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			If true, the garbage collector is active; otherwise it
+			is not active.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get whether the garbage collector is active.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin active end 1 sprint
+false
 		\end{verbatim}
 	\end{description}
 \label{gcdict:collect}
 \index{collect@\onyxop{}{collect}{}}
 \item[{\onyxop{--}{collect}{--}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Force a garbage collection.  The garbage collection occurs
+		asynchronously, so there are no guarantees as to when the
+		garbage collection will occur, only that a garbage collection
+		will occur.
 	\item[Example(s): ]\begin{verbatim}
 
-		\end{verbatim}
-	\end{description}
-\label{gcdict:collections}
-\index{collections@\onyxop{}{collections}{}}
-\item[{\onyxop{--}{collections}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{gcdict:current}
-\index{current@\onyxop{}{current}{}}
-\item[{\onyxop{--}{current}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{gcdict:dump}
-\index{dump@\onyxop{}{dump}{}}
-\item[{\onyxop{--}{dump}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{gcdict:maximum}
-\index{maximum@\onyxop{}{maximum}{}}
-\item[{\onyxop{--}{maximum}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
-		\end{verbatim}
-	\end{description}
-\label{gcdict:new}
-\index{new@\onyxop{}{new}{}}
-\item[{\onyxop{--}{new}{--}}: ]
-	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
-	\item[Description: ]
-	\item[Example(s): ]\begin{verbatim}
-
+onyx:0> gcdict begin collect end
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{gcdict:period}
 \index{period@\onyxop{}{period}{}}
-\item[{\onyxop{--}{period}{--}}: ]
+\item[{\onyxop{--}{period}{seconds}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[seconds: ]
+			The minimum number of seconds since the last object
+			allocation that the garbage collector will wait before
+			doing a garbage collection.  0 is treated specially to
+			mean forever.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the minimum number of seconds of object allocation
+		inactivity that the garbage collector will wait before doing a
+		garbage collection.  This setting is disjoint from the threshold
+		setting, and does not prevent garbage collection due to the
+		threshold having been reached.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin period end 1 sprint
+60
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{gcdict:setactive}
 \index{setactive@\onyxop{}{setactive}{}}
-\item[{\onyxop{--}{setactive}{--}}: ]
+\item[{\onyxop{boolean}{setactive}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[boolean: ]
+			If true (initial setting), activate the garbage
+			collector; otherwise deactivate the garbage collector.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Set whether the garbage collector is active.  This setting takes
+		effect asynchronously, so it is possible for the garbage
+		collector to run even after it has been deactivated.  This
+		setting overrides the allocation inactivity period an allocation
+		threshold settings, so that if this setting is set to false, the
+		other settings have no effect.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin false setactive end
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{gcdict:setperiod}
 \index{setperiod@\onyxop{}{setperiod}{}}
-\item[{\onyxop{--}{setperiod}{--}}: ]
+\item[{\onyxop{seconds}{setperiod}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[seconds: ]
+			The minimum number of seconds since the last object
+			allocation that the garbage collector will wait before
+			doing a garbage collection.  0 is treated specially to
+			mean forever.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the minimum number of seconds of object allocation
+		inactivity that the garbage collector will wait before doing a
+		garbage collection.  This setting is disjoint from the threshold
+		setting, and does not prevent garbage collection due to the
+		threshold having been reached.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin 60 setperiod end
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{gcdict:setthreshold}
 \index{setthreshold@\onyxop{}{setthreshold}{}}
-\item[{\onyxop{--}{setthreshold}{--}}: ]
+\item[{\onyxop{count}{setthreshold}{--}}: ]
 	\begin{description}\item[]
 	\item[Input(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			Number of objects allocations since the last garbage
+			collection that will trigger a garbage collection.  0 is
+			treated specially to mean infinity.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Errors(s): ]
 		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
 		\end{description}
 	\item[Description: ]
+		Set the number of object allocations since the last garbage
+		collection that will trigger a garbage collection.  This setting
+		is disjoint from the inactivity period setting, and does not
+		prevent garbage collection due to the allocation inactivity
+		period having been exceeded.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin 40000 setthreshold end
+onyx:0>
 		\end{verbatim}
 	\end{description}
-\label{gcdict:sum}
-\index{sum@\onyxop{}{sum}{}}
-\item[{\onyxop{--}{sum}{--}}: ]
+\label{gcdict:stats}
+\index{sum@\onyxop{}{stats}{}}
+\item[{\onyxop{--}{stats}{array}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[array: ]
+			An array with the format {\lb}collections new
+			{\lb}ccount cmark csweep{\rb} {\lb}mcount mmark
+			msweep{\rb} {\lb}scount smark ssweep{\rb}{\rb}, where
+			the fields have the following meanings:
+			\begin{description}\item[]
+			\item[collections: ]
+				Total number of collections the garbage
+				collector has performed.
+			\item[new: ]
+				Number of objects created since the last garbage
+				collection.
+			\item[ccount: ]
+				Current number of objects.
+			\item[cmark: ]
+				Number of microseconds taken by the most recent
+				garbage collection mark phase.
+			\item[csweep: ]
+				Number of microseconds taken by the most recent
+				garbage collection sweep phase.
+			\item[mcount: ]
+				Maximum number of objects that have ever 
+				existed.
+			\item[mmark: ]
+				Maximum number of microseconds taken by any
+				garbage collection mark phase.
+			\item[msweep: ]
+				Number of microseconds taken by any garbage
+				collection sweep phase.
+			\item[scount: ]
+				Total number of objects that have ever existed.
+			\item[smark: ]
+				Total number of microseconds taken by all
+				garbage collection mark phases.
+			\item[ssweep: ]
+				Total number of microseconds taken by all
+				garbage collection sweep phase.
+			\end{description}
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get statistics about the garbage collector.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin
+onyx:0> stats 2 sprint
+[3 3 [441 700 100] [577 784 1267] [606 2174 1499]]
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{gcdict:threshold}
 \index{threshold@\onyxop{}{threshold}{}}
-\item[{\onyxop{--}{threshold}{--}}: ]
+\item[{\onyxop{--}{threshold}{count}}: ]
 	\begin{description}\item[]
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[: ]
-		\end{description}
+	\item[Input(s): ] None.
 	\item[Output(s): ]
 		\begin{description}\item[]
-		\item[: ]
+		\item[count: ]
+			Number of objects allocations since the last garbage
+			collection that will trigger a garbage collection.  0 is
+			treated specially to mean infinity.
 		\end{description}
-	\item[Errors(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{XXX stackunderflow}{XXX stackunderflow}.]
-		\end{description}
+	\item[Errors(s): ] None.
 	\item[Description: ]
+		Get the number of object allocations since the last garbage
+		collection that will trigger a garbage collection.  This setting
+		is disjoint from the inactivity period setting, and does not
+		prevent garbage collection due to the allocation inactivity
+		period having been exceeded.
 	\item[Example(s): ]\begin{verbatim}
 
+onyx:0> gcdict begin threshold end 1 sprint
+40000
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \end{description}
@@ -1691,8 +1639,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \caption[]{\emph{continued}} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
+\hline \endhead
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
@@ -2063,8 +2010,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \caption[]{\emph{continued}} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
+\hline \endhead
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}
@@ -6087,8 +6033,7 @@ Input(s) & Op/Proc/Var & Output(s) & Description \\
 \caption[]{\emph{continued}} \\
 \hline
 Input(s) & Op/Proc/Var & Output(s) & Description \\
-\hline \hline \endhead
-\hline
+\hline \endhead
 \multicolumn{4}{r}{\emph{Continued on next page...}} \endfoot
 \hline \endlastfoot
 %end{latexonly}

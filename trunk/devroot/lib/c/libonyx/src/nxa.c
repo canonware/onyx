@@ -198,76 +198,6 @@ nxa_collect(cw_nxa_t *a_nxa)
 	mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
 }
 
-void
-nxa_dump(cw_nxa_t *a_nxa, cw_nxo_t *a_thread)
-{
-	cw_nxo_t		*file;
-	cw_nxo_threade_t	error;
-
-	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-
-	file = nxo_thread_stdout_get(a_thread);
-
-	/*
-	 * Print out the contents of gcdict while under the protection of the
-	 * nxa lock, so that we are sure of printing a consistent snapshot.
-	 */
-	mtx_lock(&a_nxa->lock);
-	error = nxo_file_output(file, "active: [s|w:10]\n", a_nxa->gcdict_active
-	    ? "true" : "false");
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file, "period: [q|w:10]\n",
-	    a_nxa->gcdict_period);
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file, "threshold: [q|w:7]\n",
-	    a_nxa->gcdict_threshold);
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file, "collections: [q|w:5]\n",
-	    a_nxa->gcdict_collections);
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file, "new:     [q|w:9]\n", a_nxa->gcdict_new);
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file,
-	    "current: [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
-	    a_nxa->gcdict_current[0],
-	    a_nxa->gcdict_current[1] / 1000000,
-	    a_nxa->gcdict_current[1] % 1000000,
-	    a_nxa->gcdict_current[2] / 1000000,
-	    a_nxa->gcdict_current[2] % 1000000);
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file,
-	    "maximum: [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
-	    a_nxa->gcdict_maximum[0],
-	    a_nxa->gcdict_maximum[1] / 1000000,
-	    a_nxa->gcdict_maximum[1] % 1000000,
-	    a_nxa->gcdict_maximum[2] / 1000000,
-	    a_nxa->gcdict_maximum[2] % 1000000);
-	if (error)
-		goto ERROR;
-	error = nxo_file_output(file,
-	    "sum:     [q|w:9] [q|w:5].[q|w:6|p:0] [q|w:5].[q|w:6|p:0]\n",
-	    a_nxa->gcdict_sum[0],
-	    a_nxa->gcdict_sum[1] / 1000000,
-	    a_nxa->gcdict_sum[1] % 1000000,
-	    a_nxa->gcdict_sum[2] / 1000000,
-	    a_nxa->gcdict_sum[2] % 1000000);
-	if (error)
-		goto ERROR;
-	error = nxo_file_buffer_flush(file);
-
-	ERROR:
-	mtx_unlock(&a_nxa->lock);
-	if (error)
-		nxo_thread_error(a_thread, error);
-}
-
 cw_bool_t
 nxa_active_get(cw_nxa_t *a_nxa)
 {
@@ -354,84 +284,49 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 	mtx_unlock(&a_nxa->lock);
 }
 
-cw_nxoi_t
-nxa_collections_get(cw_nxa_t *a_nxa)
-{
-	cw_nxoi_t	retval;
-
-	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-
-	mtx_lock(&a_nxa->lock);
-	retval = a_nxa->gcdict_collections;
-	mtx_unlock(&a_nxa->lock);
-
-	return retval;
-}
-
-cw_nxoi_t
-nxa_new_get(cw_nxa_t *a_nxa)
-{
-	cw_nxoi_t	retval;
-
-	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-
-	mtx_lock(&a_nxa->lock);
-	retval = a_nxa->gcdict_new;
-	mtx_unlock(&a_nxa->lock);
-
-	return retval;
-}
-
 void
-nxa_current_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
-    cw_nxoi_t *r_sweep)
+nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
+    cw_nxoi_t *r_ccount, cw_nxoi_t *r_cmark, cw_nxoi_t *r_csweep, cw_nxoi_t
+    *r_mcount, cw_nxoi_t *r_mmark, cw_nxoi_t *r_msweep, cw_nxoi_t *r_scount,
+    cw_nxoi_t *r_smark, cw_nxoi_t *r_ssweep)
 {
 	_cw_check_ptr(a_nxa);
 	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-	_cw_check_ptr(r_count);
-	_cw_check_ptr(r_mark);
-	_cw_check_ptr(r_sweep);
 	
 	mtx_lock(&a_nxa->lock);
-	*r_count = a_nxa->gcdict_current[0];
-	*r_mark = a_nxa->gcdict_current[1];
-	*r_sweep = a_nxa->gcdict_current[2];
-	mtx_unlock(&a_nxa->lock);
-}
 
-void
-nxa_maximum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
-    cw_nxoi_t *r_sweep)
-{
-	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-	_cw_check_ptr(r_count);
-	_cw_check_ptr(r_mark);
-	_cw_check_ptr(r_sweep);
-	
-	mtx_lock(&a_nxa->lock);
-	*r_count = a_nxa->gcdict_maximum[0];
-	*r_mark = a_nxa->gcdict_maximum[1];
-	*r_sweep = a_nxa->gcdict_maximum[2];
-	mtx_unlock(&a_nxa->lock);
-}
+	/* collections. */
+	if (r_collections != NULL)
+		*r_collections = a_nxa->gcdict_collections;
 
-void
-nxa_sum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark, cw_nxoi_t
-    *r_sweep)
-{
-	_cw_check_ptr(a_nxa);
-	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
-	_cw_check_ptr(r_count);
-	_cw_check_ptr(r_mark);
-	_cw_check_ptr(r_sweep);
-	
-	mtx_lock(&a_nxa->lock);
-	*r_count = a_nxa->gcdict_sum[0];
-	*r_mark = a_nxa->gcdict_sum[1];
-	*r_sweep = a_nxa->gcdict_sum[2];
+	/* new. */
+	if (r_new != NULL)
+		*r_new = a_nxa->gcdict_new;
+
+	/* current. */
+	if (r_ccount != NULL)
+		*r_ccount = a_nxa->gcdict_current[0];
+	if (r_cmark != NULL)
+		*r_cmark = a_nxa->gcdict_current[1];
+	if (r_csweep != NULL)
+		*r_csweep = a_nxa->gcdict_current[2];
+
+	/* maximum. */
+	if (r_mcount != NULL)
+		*r_mcount = a_nxa->gcdict_maximum[0];
+	if (r_mmark != NULL)
+		*r_mmark = a_nxa->gcdict_maximum[1];
+	if (r_msweep != NULL)
+		*r_msweep = a_nxa->gcdict_maximum[2];
+
+	/* sum. */
+	if (r_scount != NULL)
+		*r_scount = a_nxa->gcdict_sum[0];
+	if (r_smark != NULL)
+		*r_smark = a_nxa->gcdict_sum[1];
+	if (r_ssweep != NULL)
+		*r_ssweep = a_nxa->gcdict_sum[2];
+
 	mtx_unlock(&a_nxa->lock);
 }
 
