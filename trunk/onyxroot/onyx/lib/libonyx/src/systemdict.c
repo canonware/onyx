@@ -29,6 +29,8 @@
 #endif
 #ifdef HAVE_POLL
 #include <sys/poll.h>
+#else
+#include "poll.c"
 #endif
 #ifdef CW_REAL
 #include <math.h>
