@@ -44,6 +44,7 @@ BTESTS := b_echos.c b_proxy.c
 INCS := $(addprefix include/libsock/,$(INCS))
 P_INCS := $(addprefix include/libsock/,$(P_INCS))
 SRCS := $(addprefix src/,$(SRCS))
+override BINS := $(addprefix bin/,$(BINS:.c=))
 override CTESTS := $(addprefix test/,$(CTESTS:.c=))
 override BTESTS := $(addprefix test/,$(BTESTS:.c=))
 override PTESTS := $(addprefix test/,$(PTESTS:.pl.in=.pl))
