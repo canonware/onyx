@@ -1522,6 +1522,9 @@ bufm_after_insert(cw_bufm_t *a_bufm, const cw_char_t *a_str, cw_uint64_t
 void
 bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 {
+	cw_bufm_t	*start, *end, *bufm;
+	cw_uint64_t	start_bpos, end_bpos, napos, nlines;
+
 	_cw_check_ptr(a_start);
 	_cw_dassert(a_start->magic == _CW_BUFM_MAGIC);
 	_cw_check_ptr(a_start->buf);
@@ -1530,5 +1533,47 @@ bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
 	_cw_check_ptr(a_end->buf);
 	_cw_assert(a_start->buf == a_end->buf);
 
-	_cw_error("XXX Not implemented");
+	if (a_start->apos < a_end->apos) {
+		start = a_start;
+		end = a_end;
+	} else if (a_start->apos > a_end->apos) {
+		start = a_end;
+		end = a_start;
+	} else {
+		/* No data need to be removed. */
+		return;
+	}
+
+	/* Get bpos for start and end, since they are used more than once. */
+	start_bpos = buf_p_pos_a2b(start->buf, start->apos);
+	end_bpos = buf_p_pos_a2b(start->buf, end->apos);
+
+	/* Move the gap. */
+	buf_p_gap_move(start->buf, start, FALSE, start_bpos);
+
+	/* Grow the gap. */
+	start->buf->gap_len += end_bpos - start_bpos;
+
+	/* Adjust the apos and line of all bufm's in the gap. */
+	for (bufm = ql_next(&start->buf->bufms, start, link);
+	     bufm->apos < end->apos;
+	     bufm = ql_next(&start->buf->bufms, bufm, link)) {
+		bufm->apos = start->apos;
+		bufm->line = start->line;
+	}
+
+	napos = end_bpos - start_bpos;
+	nlines = end->line - start->line;
+
+	/* Adjust the buf's len and nlines. */
+	start->buf->len -= napos;
+	start->buf->nlines -= nlines;
+
+	/* Adjust the apos and line of all bufm's after the gap. */
+	for (bufm = end;
+	     bufm != NULL;
+	     bufm = ql_next(&start->buf->bufms, bufm, link)) {
+		bufm->apos -= napos;
+		bufm->line -= nlines;
+	}
 }

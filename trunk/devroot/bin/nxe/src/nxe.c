@@ -15,7 +15,7 @@ void
 foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 {
 	cw_buf_t	*buf;
-	cw_bufm_t	*bufm;
+	cw_bufm_t	*bufm, *bufm_b, *bufm_c;
 	cw_char_t	data_a[] = "AB\nD";
 	cw_char_t	data_b[] = "\nabc";
 	cw_char_t	data_c[] = "012\n";
@@ -80,7 +80,25 @@ foo(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
 	}
 	
+	bufm_b = bufm_new(NULL, buf, NULL);
+	bufm_c = bufm_new(NULL, buf, NULL);
 
+	fprintf(stderr, "bufm_remove():\n");
+	bufm_seek(bufm_b, 1, BUFW_BEG);
+	bufm_seek(bufm_c, 3, BUFW_BEG);
+	bufm_remove(bufm_b, bufm_c);
+
+	fprintf(stderr, "bufm_after_get():\n");
+	for (bufm_seek(bufm, 0, BUFW_BEG); bufm_pos(bufm) <= buf_len(buf);
+	    bufm_seek(bufm, 1, BUFW_REL)) {
+		_cw_assert(bufm_after_get(bufm, &bufc) == FALSE);
+		fprintf(stderr, "position %llu, line %llu, char :%c:\n",
+		    bufm_pos(bufm), bufm_line(bufm), bufc_char_get(bufc));
+	}
+
+
+	bufm_delete(bufm_c);
+	bufm_delete(bufm_b);
 	bufm_delete(bufm);
 	buf_delete(buf);
 }
