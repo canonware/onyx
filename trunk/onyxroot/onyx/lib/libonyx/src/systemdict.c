@@ -5039,6 +5039,7 @@ systemdict_mod(cw_nxo_t *a_thread)
 }
 
 #ifdef CW_MODULES
+/* #define CW_MODLOAD_VERBOSE */
 static cw_nxmod_t *
 systemdict_p_nxmod_new(cw_nx_t *a_nx, void *a_handle)
 {
@@ -5071,6 +5072,9 @@ systemdict_p_nxmod_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 	goto RETURN;
     }
 
+#ifdef CW_MODLOAD_VERBOSE
+    fprintf(stderr, "dlclose(%p)\n", nxmod->dlhandle);
+#endif
     dlclose(nxmod->dlhandle);
     nxa_free(nx_nxa_get(a_nx), a_data, sizeof(cw_nxmod_t));
 	
@@ -5107,9 +5111,6 @@ systemdict_modload(cw_nxo_t *a_thread)
     str = nxo_string_get(nxo);
 
     /* Try to dlopen(). */
-#if (0)
-    fprintf(stderr, "dlopen(\"%s\")\n", str);
-#endif
     handle = dlopen(str, RTLD_LAZY);
     if (handle == NULL)
     {
@@ -5120,13 +5121,16 @@ systemdict_modload(cw_nxo_t *a_thread)
 	nxo_thread_nerror(a_thread, NXN_invalidfileaccess);
 	return;
     }
+#ifdef CW_MODLOAD_VERBOSE
+    fprintf(stderr, "dlopen(\"%s\") handle: %p\n", str, handle);
+#endif
 
     /* Create '\0'-terminated copy of sym. */
     nxo_string_cstring(nxo, sym, a_thread);
     str = nxo_string_get(nxo);
 
     /* Look up symbol. */
-#if (0)
+#ifdef CW_MODLOAD_VERBOSE
     fprintf(stderr, "dlsym(\"%s\")\n", str);
 #endif
     symbol = dlsym(handle, str);
