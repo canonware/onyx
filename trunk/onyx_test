@@ -96,13 +96,16 @@ bins="onyx"
 #
 # Test everything with every allowable combination of configure options.
 #
-for c in 0 1 ; do
-    # --disable-threads
+for c in 0 1 2 ; do
+    # --enable-pth, --disable-threads
     case $c in
     0)
         conf_c=""
         ;;
     1)
+        conf_c="--enable-pth"
+        ;;
+    2)
         conf_c="--disable-threads"
         ;;
     esac
