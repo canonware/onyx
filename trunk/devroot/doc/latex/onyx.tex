@@ -4826,16 +4826,16 @@ onyx:0>
 		\oparg{b}:
 		\begin{description}
 		\item[array, condition, dict, file, hook, mutex, stack,
-		thread: ] \oparg{a} and \oparg{b} are not equal iff they refer
-		to the same memory.
-		\item[operator: ] \oparg{a} and \oparg{b} are not equal iff they
-		refer to the same function.
+		thread: ] \oparg{a} and \oparg{b} are not equal unless they
+		refer to the same memory.
+		\item[operator: ] \oparg{a} and \oparg{b} are not equal unless
+		they refer to the same function.
 		\item[name, string: ] \oparg{a} and \oparg{b} are not equal iff
 		they are lexically equivalent.  A name can be equal to a string.
-		\item[boolean: ] \oparg{a} and \oparg{b} are not equal iff they
-		are the same value.
-		\item[integer: ] \oparg{a} and \oparg{b} are not equal iff they
-		are the same value.
+		\item[boolean: ] \oparg{a} and \oparg{b} are not equal unless
+		they are the same value.
+		\item[integer: ] \oparg{a} and \oparg{b} are not equal unless
+		they are the same value.
 		\end{description}
 	\item[Example(s): ]\begin{verbatim}
 
