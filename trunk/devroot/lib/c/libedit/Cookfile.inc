@@ -7,7 +7,9 @@
  *
  * Version: <Version>
  *
- * cook file for libedit.
+ * cook file for libedit.  Although the mechanisms are in place to install
+ * libedit, key sections of this file are commented out, so that only the
+ * shared library gets installed, and that only happens if [ENABLE_SHARED].
  *
  ******************************************************************************/
 
@@ -132,7 +134,7 @@ libedit : [LIBEDIT_D] [LIBEDIT_A] [LIBEDIT_P]
 #endif
 ;
 
-libedit_install : libedit_install_d libedit_install_a libedit_install_p
+libedit_install : /* libedit_install_d libedit_install_a libedit_install_p */
 #if [ENABLE_SHARED]
                    libedit_install_s
 #endif
@@ -147,8 +149,8 @@ data
 echo rm -f [PREFIX]/lib/libedit*
 rm -f [PREFIX]/lib/libedit*
 
-echo rm -rf [PREFIX]/include/libedit
-rm -rf [PREFIX]/include/libedit
+#echo rm -rf [PREFIX]/include/libedit
+#rm -rf [PREFIX]/include/libedit
 dataend
 }
 
@@ -178,13 +180,13 @@ libedit_install_common :
 data
 #![SHELL]
 
-echo [INSTALL] -d [PREFIX]/include/libedit
-[INSTALL] -d [PREFIX]/include/libedit
+#echo [INSTALL] -d [PREFIX]/include/libedit
+#[INSTALL] -d [PREFIX]/include/libedit
 
-for i in [LIBEDIT_INCS]; do
-	echo [INSTALL] -m 0644 $i [PREFIX]/include/libedit/
-	[INSTALL] -m 0644 $i [PREFIX]/include/libedit/
-done
+#for i in [LIBEDIT_INCS]; do
+#	echo [INSTALL] -m 0644 $i [PREFIX]/include/libedit/
+#	[INSTALL] -m 0644 $i [PREFIX]/include/libedit/
+#done
 
 echo [INSTALL] -d [PREFIX]/lib
 [INSTALL] -d [PREFIX]/lib
