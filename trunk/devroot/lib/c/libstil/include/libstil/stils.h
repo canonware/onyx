@@ -52,23 +52,57 @@ struct cw_stils_s {
 };
 
 void		stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool);
-void		stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
+void		stils_delete(cw_stils_t *a_stils);
 void		stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void
     *add_root_arg, cw_stilo_t *root), void *a_add_root_arg);
 
-cw_stilo_t	*stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
-cw_stilo_t	*stils_under_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt,
-    cw_stilo_t *a_stilo);
-void		stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
-void		stils_npop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t
-    a_count);
-void		stils_roll(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t
-    a_count, cw_sint32_t a_amount);
+cw_stilo_t	*stils_push(cw_stils_t *a_stils);
+cw_stilo_t	*stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
+cw_bool_t	stils_pop(cw_stils_t *a_stils);
+cw_bool_t	stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count);
+void		stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t
+    a_amount);
 #define		stils_count(a_stils) (a_stils)->count
-cw_stilo_t	*stils_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt);
-	
-cw_stilo_t	*stils_nget(cw_stils_t *a_stils, cw_stilt_t *a_stilt,
-    cw_uint32_t a_index);
-cw_stilo_t	*stils_down_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt,
-    cw_stilo_t *a_stilo);
+
+cw_stilo_t	*stils_get(cw_stils_t *a_stils);
+cw_stilo_t	*stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index);
+cw_stilo_t	*stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
 cw_uint32_t	stils_index_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo);
+
+#define	STILS_POP(a_stils, a_stilt) do {				\
+	if (stils_pop(a_stils)) {					\
+		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		return;							\
+	}								\
+} while (0)
+
+#define	STILS_NPOP(a_stils, a_stilt, a_count) do {			\
+	if (stils_npop((a_stils), (a_count)) {				\
+		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		return;							\
+	}								\
+} while (0)
+
+#define	STILS_GET(r_stilo, a_stils, a_stilt) do {			\
+	(r_stilo) = stils_get(a_stils);					\
+	if ((r_stilo) == NULL) {					\
+		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		return;							\
+	}								\
+} while (0)
+
+#define	STILS_NGET(r_stilo, a_stils, a_stilt, a_index) do {		\
+	(r_stilo) = stils_nget((a_stils), (a_index));			\
+	if ((r_stilo) == NULL) {					\
+		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		return;							\
+	}								\
+} while (0)
+
+#define	STILS_DOWN_GET(r_stilo, a_stils, a_stilt, a_stilo) do {		\
+	(r_stilo) = stils_down_get((a_stils), (a_stilo));		\
+	if ((r_stilo) == NULL) {					\
+		stilt_error((a_stilt), STILTE_STACKUNDERFLOW);		\
+		return;							\
+	}								\
+} while (0)

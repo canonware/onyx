@@ -116,8 +116,8 @@ struct cw_stilt_s {
 	/*
 	 * Local dictionaries.
 	 */
-	cw_stilo_t	errordict;
 	cw_stilo_t	derror;
+	cw_stilo_t	errordict;
 	cw_stilo_t	userdict;
 	cw_stilo_t	threaddict;
 

@@ -278,56 +278,6 @@ void		stilo_hook_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 	(a_stilo)->o.integer.i = (a_val);				\
 } while (0)
 
-#define		stilo_integer_and(a_a, a_b, r) do {			\
-	(r)->o.integer.i = (a_a)->o.integer.i & (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_or(a_a, a_b, r) do {			\
-	(r)->o.integer.i = (a_a)->o.integer.i | (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_xor(a_a, a_b, r) do {			\
-	(r)->o.integer.i = (a_a)->o.integer.i ^ (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_not(a_stilo, r) do {			\
-	(r)->o.integer.i = ~(a_stilo)->o.integer.i;			\
-} while (0)
-#define		stilo_integer_shift(a_stilo, a_amount, r) do {		\
-	if (a_amount > 0)						\
-		(r)->o.integer.i = (a_stilo)->o.integer.i << 		\
-		    (a_amount)->o.integer.i;				\
-	else if (a_amount < 0)						\
-		(r)->o.integer.i = (a_stilo)->o.integer.i >> 		\
-		    -(a_amount)->o.integer.i;				\
-} while (0)
-
-#define		stilo_integer_add(a_a, a_b, r) do {			\
-	(r)->o.integer.i = (a_a)->o.integer.i + (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_sub(a_a, a_b, r) do {			\
-	(r)->o.integer.i = (a_a)->o.integer.i - (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_mul(a_a, a_b, r) do {			\
-	(r)->o.integer.i = (a_a)->o.integer.i * (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_div(a_a, a_b, a_stilt, r) do {		\
-	if ((a_b)->o.integer.i == 0)					\
-		stilt_error((a_stilt), STILTE_UNDEFINEDRESULT);		\
-	(r)->o.integer.i = (a_a)->o.integer.i / (a_b)->o.integer.i;	\
-} while (0)
-#define		stilo_integer_mod(a_a, a_b, a_stilt, r) do {		\
-	if ((a_b)->o.integer.i == 0)					\
-		stilt_error((a_stilt), STILTE_UNDEFINEDRESULT);		\
-	(r)->o.integer.i = (a_a)->o.integer.i % (a_b)->o.integer.i;	\
-} while (0)
-void		stilo_integer_exp(const cw_stilo_t *a_num, const cw_stilo_t
-    *a_exp, cw_stilo_t *r_result);
-
-void		stilo_integer_abs(const cw_stilo_t *a_num, cw_stilo_t *r_abs);
-#define		stilo_integer_neg(a_a, r) do {				\
-	(r)->o.integer.i = -(a_a)->o.integer.i;				\
-} while (0)
-void		stilo_integer_srand(const cw_stilo_t *a_seed);
-void		stilo_integer_rand(cw_stilo_t *r_num);
-
 /*
  * lock.
  */

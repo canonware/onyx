@@ -57,7 +57,7 @@ stils_new(cw_stils_t *a_stils, cw_pool_t *a_stilsc_pool)
 }
 
 void
-stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
+stils_delete(cw_stils_t *a_stils)
 {
 	cw_stilsc_t	*stilsc;
 
@@ -69,7 +69,7 @@ stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 	 * stilsc's.
 	 */
 	if (a_stils->count > 0)
-		stils_npop(a_stils, a_stilt, a_stils->count);
+		stils_npop(a_stils, a_stils->count);
 
 	while (qs_top(&a_stils->chunks) != NULL) {
 		stilsc = qs_top(&a_stils->chunks);
@@ -118,7 +118,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
 	 */
 	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link),
 		 i++) {
-		new_stilo = stils_push(a_stils, NULL);
+		new_stilo = stils_push(a_stils);
 		stilo_move(new_stilo, &old_stilso->stilo);
 
 		switch (stilo_type_get(new_stilo)) {
@@ -146,7 +146,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
 }
 
 cw_stilo_t *
-stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
+stils_push(cw_stils_t *a_stils)
 {
 	cw_stilso_t	*stilso;
 
@@ -167,7 +167,7 @@ stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 }
 
 cw_stilo_t *
-stils_under_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
+stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 {
 	cw_stilso_t	*stilso;
 
@@ -194,25 +194,33 @@ stils_under_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
 	return &stilso->stilo;
 }
 
-void
-stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
+cw_bool_t
+stils_pop(cw_stils_t *a_stils)
 {
+	cw_bool_t	retval;
 	cw_stilso_t	*stilso;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if (a_stils->count == 0)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	if (a_stils->count == 0) {
+		retval = TRUE;
+		goto RETURN;
+	}
 
 	stilso = ql_first(&a_stils->stack);
 	ql_first(&a_stils->stack) = qr_next(ql_first(&a_stils->stack), link);
 	a_stils->count--;
+
+	retval = FALSE;
+	RETURN:
+	return retval;
 }
 
-void
-stils_npop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
+cw_bool_t
+stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 {
+	cw_bool_t	retval;
 	cw_stilso_t	*top;
 	cw_uint32_t	i;
 
@@ -220,8 +228,10 @@ stils_npop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 	_cw_assert(a_count > 0);
 
-	if (a_count > a_stils->count)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	if (a_count > a_stils->count) {
+		retval = TRUE;
+		goto RETURN;
+	}
 
 	/* Get a pointer to what will be the new stack top. */
 	for (i = 0, top = ql_first(&a_stils->stack); i < a_count; i++)
@@ -229,22 +239,22 @@ stils_npop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 
 	ql_first(&a_stils->stack) = top;
 	a_stils->count -= a_count;
+
+	retval = FALSE;
+	RETURN:
+	return retval;
 }
 
 void
-stils_roll(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count,
-    cw_sint32_t a_amount)
+stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 {
 	cw_stilso_t	*top, *noroll;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
-
-	if (a_count < 1)
-		stilt_error(a_stilt, STILTE_RANGECHECK);
-	if (a_count > a_stils->count)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	_cw_assert(a_count > 0);
+	_cw_assert(a_count <= a_stils->count);
 
 	/*
 	 * Calculate the current index of the element that will end up on top of
@@ -318,63 +328,82 @@ stils_roll(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count,
 }
 
 cw_stilo_t *
-stils_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
+stils_get(cw_stils_t *a_stils)
 {
+	cw_stilo_t	*retval;
 	cw_stilso_t	*stilso;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if (a_stils->count == 0)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	if (a_stils->count == 0) {
+		retval = NULL;
+		goto RETURN;
+	}
 
 	stilso = ql_first(&a_stils->stack);
 
-	return &stilso->stilo;
+	retval = &stilso->stilo;
+	RETURN:
+	return retval;
 }
 
 cw_stilo_t *
-stils_nget(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_index)
+stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
 {
+	cw_stilo_t	*retval;
 	cw_stilso_t	*stilso;
 	cw_uint32_t	i;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
-	if (a_index >= a_stils->count)
-		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+	if (a_index >= a_stils->count) {
+		retval = NULL;
+		goto RETURN;
+	}
 
 	for (i = 0, stilso = ql_first(&a_stils->stack); i < a_index; i++)
 		stilso = qr_next(stilso, link);
 
-	return &stilso->stilo;
+	retval = &stilso->stilo;
+	RETURN:
+	return retval;
 }
 
 cw_stilo_t *
-stils_down_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
+stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 {
+	cw_stilo_t	*retval;
 	cw_stilso_t	*stilso;
 
 	_cw_check_ptr(a_stils);
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stilo != NULL) {
-		if (a_stils->count <= 1)
-			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+		if (a_stils->count <= 1) {
+			retval = NULL;
+			goto RETURN;
+		}
 		stilso = (cw_stilso_t *)a_stilo;
 		stilso = qr_next(stilso, link);
-		if (stilso == &a_stils->under)
-			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+		if (stilso == &a_stils->under) {
+			retval = NULL;
+			goto RETURN;
+		}
 	} else {
 		/* Same as stils_get(). */
-		if (a_stils->count == 0)
-			stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
+		if (a_stils->count == 0) {
+			retval = NULL;
+			goto RETURN;
+		}
 
 		stilso = ql_first(&a_stils->stack);
 	}
 
-	return &stilso->stilo;
+	retval = &stilso->stilo;
+	RETURN:
+	return retval;
 }
 
 cw_uint32_t

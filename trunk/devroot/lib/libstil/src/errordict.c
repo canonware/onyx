@@ -13,7 +13,7 @@
 
 #include <errno.h>
 
-#define soft_code(a_str) do {					\
+#define soft_code(a_str) do {						\
 	cw_stilts_t	stilts;						\
 	static const cw_uint8_t	code[] = (a_str);			\
 									\
@@ -103,16 +103,16 @@ errordict_generic(cw_stilt_t *a_stilt)
 	tstack = stilt_tstack_get(a_stilt);
 
 	/* Get $error. */
-	derror = stils_push(tstack, a_stilt);
-	tname = stils_push(tstack, a_stilt);
+	derror = stils_push(tstack);
+	tname = stils_push(tstack);
 	stilo_name_new(tname, a_stilt, stiln_str(STILN_sym_derror),
 	    stiln_len(STILN_sym_derror), TRUE);
 	if (stilt_dict_stack_search(a_stilt, tname, derror)) {
-		stils_npop(tstack, a_stilt, 2);
+		stils_npop(tstack, 2);
 		xep_throw(_CW_STILX_DERROR);
 	}
 
-	tstilo = stils_push(tstack, a_stilt);
+	tstilo = stils_push(tstack);
 
 	/* Set newerror to TRUE. */
 	stilo_boolean_new(tstilo, TRUE);
@@ -164,8 +164,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 		/* Set command to second element of estack. */
 		stilo_name_new(tname, a_stilt, stiln_str(STILN_command),
 		    stiln_len(STILN_command), TRUE);
-		stilo_dict_def(derror, a_stilt, tname, stils_nget(estack,
-		    a_stilt, 1));
+		stilo_dict_def(derror, a_stilt, tname, stils_nget(estack, 1));
 
 		/*
 		 * If recordstacks is TRUE, snapshot the stacks (unless
@@ -174,11 +173,11 @@ errordict_generic(cw_stilt_t *a_stilt)
 		stilo_name_new(tname, a_stilt, stiln_str(STILN_recordstacks),
 		    stiln_len(STILN_recordstacks), TRUE);
 		if (stilo_dict_lookup(derror, a_stilt, tname, tstilo)) {
-			stils_npop(tstack, a_stilt, 3);
+			stils_npop(tstack, 3);
 			xep_throw(_CW_STILX_DERROR);
 		}
 		if (stilo_type_get(tstilo) != STILOT_BOOLEAN) {
-			stils_npop(tstack, a_stilt, 3);
+			stils_npop(tstack, 3);
 			xep_throw(_CW_STILX_DERROR);
 		}
 		if (stilo_boolean_get(tstilo) && stilt_error_get(a_stilt) !=
@@ -186,7 +185,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			cw_stilo_t	*arr, *stilo;
 			cw_sint32_t	i, count;
 
-			arr = stils_push(tstack, a_stilt);
+			arr = stils_push(tstack);
 
 			/* ostack. */
 			stilo_name_new(tname, a_stilt, stiln_str(STILN_ostack),
@@ -194,7 +193,7 @@ errordict_generic(cw_stilt_t *a_stilt)
 			count = stils_count(ostack);
 			stilo_array_new(arr, a_stilt, count);
 			for (i = count - 1, stilo = NULL; i >= 0; i--) {
-				stilo = stils_down_get(ostack, a_stilt, stilo);
+				stilo = stils_down_get(ostack, stilo);
 				stilo_dup(stilo_array_el_get(arr, a_stilt, i),
 				    stilo);
 			}
@@ -208,9 +207,9 @@ errordict_generic(cw_stilt_t *a_stilt)
 			    stiln_len(STILN_estack), TRUE);
 			count = stils_count(estack) - 1;
 			stilo_array_new(arr, a_stilt, count);
-			for (i = count - 1, stilo = stils_get(estack, a_stilt);
+			for (i = count - 1, stilo = stils_get(estack);
 			     i >= 0; i--) {
-				stilo = stils_down_get(estack, a_stilt, stilo);
+				stilo = stils_down_get(estack, stilo);
 				stilo_dup(stilo_array_el_get(arr, a_stilt, i),
 				    stilo);
 			}
@@ -222,21 +221,22 @@ errordict_generic(cw_stilt_t *a_stilt)
 			count = stils_count(dstack);
 			stilo_array_new(arr, a_stilt, count);
 			for (i = count - 1, stilo = NULL; i >= 0; i--) {
-				stilo = stils_down_get(dstack, a_stilt, stilo);
+				stilo = stils_down_get(dstack, stilo);
 				stilo_dup(stilo_array_el_get(arr, a_stilt, i),
 				    stilo);
 			}
 			stilo_dict_def(derror, a_stilt, tname, arr);
 			
-			stils_pop(tstack, a_stilt);
+			stils_pop(tstack);
 		}
 		break;
 	}
 	default:
 		_cw_not_reached();
 	}
-	stils_npop(tstack, a_stilt, 3);
-	systemdict_stop(a_stilt);
+	stils_npop(tstack, 3);
+
+	soft_code("handleerror stop");
 }
 
 void

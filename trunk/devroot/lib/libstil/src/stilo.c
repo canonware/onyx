@@ -658,8 +658,8 @@ stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t *a_stilt)
 	/* Make sure both objects are of the same type. */
 	if (stilo_type_get(a_to) != stilo_type_get(a_from))
 		stilt_error(a_stilt, STILTE_TYPECHECK);
-
-	stilot_vtable[a_from->type].copy_f(a_to, a_from, a_stilt);
+	else
+		stilot_vtable[a_from->type].copy_f(a_to, a_from, a_stilt);
 }
 
 /* XXX Unused? */
@@ -892,8 +892,10 @@ stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t *a_array, cw_stilt_t
 	orig = (cw_stiloe_array_t *)a_array->o.stiloe;
 	_cw_check_ptr(orig);
 	_cw_assert(orig->stiloe.magic == _CW_STILOE_MAGIC);
-	if (a_offset + a_len > orig->e.a.len)
+	if (a_offset + a_len > orig->e.a.len) {
 		stilt_error(a_stilt, STILTE_RANGECHECK);
+		goto RETURN;
+	}
 
 	stilo_p_new(a_stilo, STILOT_ARRAY);
 	array = (cw_stiloe_array_t *)stilt_malloc(a_stilt,
@@ -909,6 +911,8 @@ stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t *a_array, cw_stilt_t
 	memcpy(&array->stiloe, &orig->stiloe, sizeof(cw_stiloe_t));
 	array->stiloe.watchpoint = FALSE;
 	array->stiloe.indirect = TRUE;
+
+	RETURN:
 }
 
 static void
@@ -2615,46 +2619,6 @@ stilo_p_integer_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
 	
 	stilo_file_output(a_file, a_stilt, "[q|s:s][c]", a_stilo->o.integer.i,
 	    newline);
-}
-
-void
-stilo_integer_exp(const cw_stilo_t *a_num, const cw_stilo_t *a_exp, cw_stilo_t
-    *r_result)
-{
-	cw_sint64_t	i;
-
-	for (i = 0, r_result->o.integer.i = a_num->o.integer.i;
-	     i < a_exp->o.integer.i - 1; i++)
-		r_result->o.integer.i *= a_num->o.integer.i;
-}
-
-void
-stilo_integer_abs(const cw_stilo_t *a_num, cw_stilo_t *r_abs)
-{
-	if (a_num->o.integer.i >= 0)
-		r_abs->o.integer.i = a_num->o.integer.i;
-	else
-		r_abs->o.integer.i = -a_num->o.integer.i;
-}
-
-void
-stilo_integer_srand(const cw_stilo_t *a_seed)
-{
-	_cw_check_ptr(a_seed);
-	_cw_assert(a_seed->magic == _CW_STILO_MAGIC);
-	_cw_assert(a_seed->type == STILOT_INTEGER);
-
-	srandom(a_seed->o.integer.i);
-}
-
-void
-stilo_integer_rand(cw_stilo_t *r_num)
-{
-	_cw_check_ptr(r_num);
-	_cw_assert(r_num->magic == _CW_STILO_MAGIC);
-	_cw_assert(r_num->type == STILOT_INTEGER);
-
-	r_num->o.integer.i = random();
 }
 
 /*

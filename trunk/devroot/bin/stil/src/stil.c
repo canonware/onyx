@@ -45,6 +45,8 @@ const char	*basename(const char *a_str);
 int
 main(int argc, char **argv)
 {
+	static const cw_uint8_t	magic[] =
+	    "/#! {mark} def /!# {cleartomark} def";
 	cw_stil_t	stil;
 
 	libstash_init();
@@ -56,18 +58,26 @@ main(int argc, char **argv)
 	 */
 	if (isatty(0)) {
 		static const cw_uint8_t	code[] =
-		    "product print `, version ' print version print \".\n\""
-		    " print flush";
+		    "product print (, version ) print version print (.\n)"
+		    " print flush"
+		    "/stop {} def";
 		struct stil_arg_s	arg = {NULL, 0, 0};
 
 		stil_new(&stil, cl_read, NULL, NULL, (void *)&arg);
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts, &stilt);
 
-		/* Print product and version info. */
+		/*
+		 * Print product and version info.  Redefine stop so that the
+		 * interpreter won't exit on error.
+		 */
 		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
 		stilt_flush(&stilt, &stilts);
 
+		/* Create procedures to handle #! magic. */
+		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
+		stilt_flush(&stilt, &stilts);
+		
 		/*
 		 * Initialize the command editor.
 		 */
@@ -94,6 +104,10 @@ main(int argc, char **argv)
 		stilt_new(&stilt, &stil);
 		stilts_new(&stilts, &stilt);
 
+		/* Create procedures to handle #! magic. */
+		stilt_interpret(&stilt, &stilts, magic, sizeof(magic) - 1);
+		stilt_flush(&stilt, &stilts);
+		
 		/* Run the interpreter non-interactively. */
 		stilt_start(&stilt);
 	}
@@ -121,20 +135,27 @@ prompt(EditLine *a_el)
 		stilt_flush(&stilt, &stilts);
 
 		/* Get the actual prompt string. */
-		stilo = stils_get(stack, &stilt);
-		if (stilo_type_get(stilo) != STILOT_STRING)
+		stilo = stils_get(stack);
+		if (stilo == NULL) {
+			stilt_error(&stilt, STILTE_STACKUNDERFLOW);
+			maxlen = 0;
+		} else if (stilo_type_get(stilo) != STILOT_STRING) {
 			stilt_error(&stilt, STILTE_TYPECHECK);
-		pstr = stilo_string_get(stilo);
-		plen = stilo_string_len_get(stilo);
+			maxlen = 0;
+		} else {
+			pstr = stilo_string_get(stilo);
+			plen = stilo_string_len_get(stilo);
 
-		/* Copy the prompt string to a global buffer. */
-		maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN - 1 :
-		    plen;
-		strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
+			/* Copy the prompt string to a global buffer. */
+			maxlen = (plen > _PROMPT_STRLEN - 1) ? _PROMPT_STRLEN -
+			    1 : plen;
+			strncpy(prompt_str, pstr, _PROMPT_STRLEN - 1);
+		}
+
 		prompt_str[maxlen] = '\0';
 
 		/* Pop the prompt string off the data stack. */
-		stils_pop(stack, &stilt);
+		stils_pop(stack);
 	} else {
 		/*
 		 * One or both of:
