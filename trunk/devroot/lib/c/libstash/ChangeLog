@@ -1,3 +1,11 @@
+1998-11-30  Jason Evans  <jasone@canonware.com>
+
+	* Makefile.in: Fold .d* and .o* dependency trees together.  This
+	keeps dependency files from being built until an object file is
+	built.  The dependency file is always up to date, except in the
+	case where the object file would be rebuilt anyway, and this
+	causes a rebuild of the dependency file, so everything is fine.
+
 1998-11-29  Jason Evans  <jasone@canonware.com>
 
 	* src/locks.c: Added function comments.
