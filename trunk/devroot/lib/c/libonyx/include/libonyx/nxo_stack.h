@@ -72,17 +72,23 @@ void	nxoe_p_stack_spares_create(cw_nxoe_stack_t *a_stack);
 void	nxoe_p_stack_spares_destroy(cw_nxoe_stack_t *a_stack, cw_nxoe_stackc_t
     *a_stackc);
 
-/* Private, but defined here for the inline functions. */
-#define	nxoe_p_stack_lock(a_nxoe) do {					\
-	if ((a_nxoe)->nxoe.locking)					\
-		mtx_lock(&(a_nxoe)->lock);				\
-} while (0)
-#define	nxoe_p_stack_unlock(a_nxoe) do {				\
-	if ((a_nxoe)->nxoe.locking)					\
-		mtx_unlock(&(a_nxoe)->lock);				\
-} while (0)
-
 #if (defined(_CW_USE_INLINES) || defined(_NXO_STACK_C_))
+/* Private, but defined here for the inline functions. */
+_CW_INLINE void
+nxoe_p_stack_lock(cw_nxoe_stack_t *a_nxoe)
+{
+	if (a_nxoe->nxoe.locking)
+		mtx_lock(&a_nxoe->lock);
+}
+
+/* Private, but defined here for the inline functions. */
+_CW_INLINE void
+nxoe_p_stack_unlock(cw_nxoe_stack_t *a_nxoe)
+{
+	if (a_nxoe->nxoe.locking)
+		mtx_unlock(&a_nxoe->lock);
+}
+
 _CW_INLINE cw_nxo_t *
 nxo_stack_push(cw_nxo_t *a_nxo)
 {

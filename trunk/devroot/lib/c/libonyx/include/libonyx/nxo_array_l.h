@@ -52,6 +52,7 @@ struct cw_nxoe_array_s {
 void	nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
 cw_nxoe_t *nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
 void nxo_l_array_print(cw_nxo_t *a_thread);
+cw_nxo_t *nxo_l_array_get(cw_nxo_t *a_nxo);
 
 #ifndef _CW_USE_INLINES
 void	nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el);
@@ -84,12 +85,23 @@ nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 	}
 	nxoe_p_array_unlock(array);
 }
+_CW_INLINE cw_bool_t
+nxo_l_array_bound_get(cw_nxo_t *a_nxo)
+{
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
+
+	return ((a_nxo->flags >> 7) & 1);
+}
+
+_CW_INLINE void
+nxo_l_array_bound_set(cw_nxo_t *a_nxo)
+{
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+	_cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
+
+	a_nxo->flags = (a_nxo->flags & 0xffffff7f) | (1 << 7);
+}
 #endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_ARRAY_C_)) */
-
-cw_nxo_t *nxo_l_array_get(cw_nxo_t *a_nxo);
-
-#define	nxo_l_array_bound_get(a_nxo) (((a_nxo)->flags >> 7) & 1)
-#define	nxo_l_array_bound_set(a_nxo, a_abound) do {			\
-	(a_nxo)->flags = ((a_nxo)->flags & 0xffffff7f) |		\
-	    ((a_abound) << 7);						\
-} while (0)

@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+#define	_NXO_MARK_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxo_mark_l.h"
 

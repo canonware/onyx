@@ -9,11 +9,6 @@
  *
  ******************************************************************************/
 
-#ifdef _LIBONYX_DBG
-#define _CW_NXO_MAGIC	0x398754ba
-#define _CW_NXOE_MAGIC	0x0fa6e798
-#endif
-
 typedef struct cw_nxo_s cw_nxo_t;
 typedef struct cw_nxoe_s cw_nxoe_t;
 
@@ -83,6 +78,7 @@ typedef cw_sint64_t cw_nxoi_t;
 struct cw_nxo_s {
 #ifdef _LIBONYX_DBG
 	cw_uint32_t	magic;
+#define _CW_NXO_MAGIC	0x398754ba
 #endif
 
 	/*
@@ -136,6 +132,7 @@ struct cw_nxo_s {
 struct cw_nxoe_s {
 #ifdef _LIBONYX_DBG
 	cw_uint32_t	magic;
+#define _CW_NXOE_MAGIC	0x0fa6e798
 #endif
 
 	/*
@@ -177,55 +174,81 @@ struct cw_nxoe_s {
 };
 
 cw_sint32_t nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b);
-
-/*
- * The order of operations is important in order to avoid a GC race.
- */
-#ifdef _LIBONYX_DBG
-#define	nxo_dup(a_to, a_from) do {					\
-	(a_to)->flags = 0;						\
-	(a_to)->o = (a_from)->o;					\
-	(a_to)->flags = (a_from)->flags;				\
-	(a_to)->magic = (a_from)->magic;				\
-} while (0)
-#else
-#define	nxo_dup(a_to, a_from) do {					\
-	(a_to)->flags = 0;						\
-	(a_to)->o = (a_from)->o;					\
-	(a_to)->flags = (a_from)->flags;				\
-} while (0)
-#endif
-
-#define	nxo_type_get(a_nxo)	((a_nxo)->flags & 0x1f)
 cw_nxoe_t *nxo_nxoe_get(cw_nxo_t *a_nxo);
 cw_bool_t nxo_lcheck(cw_nxo_t *a_nxo);
 
-#define	nxo_attr_get(a_nxo) (((a_nxo)->flags >> 6) & 1)
-#define	nxo_attr_set(a_nxo, a_attr) do {				\
-	(a_nxo)->flags = ((a_nxo)->flags & 0xffffffbf)			\
-	    | ((a_attr) << 6);						\
-} while (0)
+#ifndef _CW_USE_INLINES
+void	nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from);
+cw_nxot_t nxo_type_get(cw_nxo_t *a_nxo);
+cw_nxoa_t nxo_attr_get(cw_nxo_t *a_nxo);
+void	nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr);
+void	nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type);
+#endif
+
+#if (defined(_CW_USE_INLINES) || defined(_NXO_C_))
+_CW_INLINE void
+nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from)
+{
+	_cw_check_ptr(a_to);
+	_cw_assert(a_to->magic == _CW_NXO_MAGIC);
+
+	_cw_check_ptr(a_from);
+	_cw_assert(a_from->magic == _CW_NXO_MAGIC);
+
+	/*
+	 * The order of operations is important in order to avoid a GC race.
+	 */
+	a_to->flags = 0;
+	a_to->o = a_from->o;
+	a_to->flags = a_from->flags;
+}
+
+_CW_INLINE cw_nxot_t
+nxo_type_get(cw_nxo_t *a_nxo)
+{
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	return ((cw_nxot_t)(a_nxo->flags & 0x1f));
+}
+
+_CW_INLINE cw_nxoa_t
+nxo_attr_get(cw_nxo_t *a_nxo)
+{
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	return ((cw_nxoa_t)(((a_nxo)->flags >> 6) & 1));
+}
+
+_CW_INLINE void
+nxo_attr_set(cw_nxo_t *a_nxo, cw_nxoa_t a_attr)
+{
+	_cw_check_ptr(a_nxo);
+	_cw_assert(a_nxo->magic == _CW_NXO_MAGIC);
+
+	a_nxo->flags = (a_nxo->flags & 0xffffffbf) | (a_attr << 6);
+}
 
 /*
  * Private, but various object constructor macros need its definition.
- *
- * o.integer.i is assumed to be at least as big as all the other fields in the
- * union.
- *
- * The order of operations is important in order to avoid a GC race.
  */
+_CW_INLINE void
+nxo_p_new(cw_nxo_t *a_nxo, cw_nxot_t a_type)
+{
+	/*
+	 * The order of operations is important in order to avoid a GC race.
+	 */
+	a_nxo->flags = 0;
 #ifdef _LIBONYX_DBG
-#define	nxo_p_new(a_nxo, a_type) do {					\
-	(a_nxo)->flags = 0;						\
-	(a_nxo)->magic = 0;						\
-	(a_nxo)->o.integer.i = 0;					\
-	(a_nxo)->magic = _CW_NXO_MAGIC;					\
-	(a_nxo)->flags = (a_type);					\
-} while (0)
-#else
-#define	nxo_p_new(a_nxo, a_type) do {					\
-	(a_nxo)->flags = 0;						\
-	(a_nxo)->o.integer.i = 0;					\
-	(a_nxo)->flags = (a_type);					\
-} while (0)
+	a_nxo->magic = _CW_NXO_MAGIC;
 #endif
+
+	/*
+	 * o.integer.i is assumed to be at least as big as all the other fields
+	 * in the union.
+	 */
+	a_nxo->o.integer.i = 0;
+	a_nxo->flags = a_type;
+}
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NXO_C_)) */

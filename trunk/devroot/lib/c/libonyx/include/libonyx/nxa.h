@@ -15,6 +15,7 @@
 struct cw_nxa_s {
 #ifdef _LIBONYX_DBG
 	cw_uint32_t	magic;
+#define	_CW_NXA_MAGIC	0x63935743
 #endif
 	cw_mtx_t	lock;
 
@@ -69,4 +70,17 @@ void	nxa_maximum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
 void	nxa_sum_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_count, cw_nxoi_t *r_mark,
     cw_nxoi_t *r_sweep);
 
-#define	nxa_gcdict_get(a_nxa) &(a_nxa)->gcdict
+#ifndef _CW_USE_INLINES
+cw_nxo_t *nxa_gcdict_get(cw_nxa_t *a_nxa);
+#endif
+
+#if (defined(_CW_USE_INLINES) || defined(_NXA_C_))
+_CW_INLINE cw_nxo_t *
+nxa_gcdict_get(cw_nxa_t *a_nxa)
+{
+	_cw_check_ptr(a_nxa);
+	_cw_assert(a_nxa->magic == _CW_NXA_MAGIC);
+
+	return &a_nxa->gcdict;
+}
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NXA_C_)) */

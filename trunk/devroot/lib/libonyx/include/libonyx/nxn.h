@@ -11,9 +11,6 @@
 
 extern const cw_uint8_t *cw_g_nx_names[];
 
-#define	nxn_str(a_nxn)	cw_g_nx_names[(a_nxn)]
-#define	nxn_len(a_nxn)	strlen(cw_g_nx_names[(a_nxn)])
-
 /* Same order as in nxn.c. */
 typedef enum {
 	NXN_ZERO,
@@ -258,3 +255,26 @@ typedef enum {
 	NXN_yield
 #define	NXN_LAST	NXN_yield
 } cw_nxn_t;
+
+#ifndef _CW_USE_INLINES
+const cw_uint8_t *nxn_str(cw_nxn_t a_nxn);
+cw_uint32_t nxn_len(cw_nxn_t a_nxn);
+#endif
+
+#if (defined(_CW_USE_INLINES) || defined(_NXN_C_))
+_CW_INLINE const cw_uint8_t *
+nxn_str(cw_nxn_t a_nxn)
+{
+	_cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
+
+	return cw_g_nx_names[a_nxn];
+}
+
+_CW_INLINE cw_uint32_t
+nxn_len(cw_nxn_t a_nxn)
+{
+	_cw_assert(a_nxn > NXN_ZERO && a_nxn <= NXN_LAST);
+
+	return strlen(cw_g_nx_names[a_nxn]);
+}
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NXN_C_)) */

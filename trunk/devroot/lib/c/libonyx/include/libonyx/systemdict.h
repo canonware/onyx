@@ -164,6 +164,16 @@ void	systemdict_xor(cw_nxo_t *a_thread);
 void	systemdict_yield(cw_nxo_t *a_thread);
 
 #ifndef _CW_USE_INLINES
+/*
+ * Rename the inline functions, since they're not inlined.  The normal
+ * definitions for these functions are #ifdef'ed out in this case.
+ */
+#define	systemdict_inline_add	systemdict_add
+#define	systemdict_inline_dup	systemdict_dup
+#define	systemdict_inline_exch	systemdict_exch
+#define	systemdict_inline_index	systemdict_index
+#define	systemdict_inline_pop	systemdict_pop
+#define	systemdict_inline_roll	systemdict_roll
 void	systemdict_inline_add(cw_nxo_t *a_thread);
 void	systemdict_inline_dup(cw_nxo_t *a_thread);
 void	systemdict_inline_exch(cw_nxo_t *a_thread);

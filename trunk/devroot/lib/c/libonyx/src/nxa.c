@@ -71,20 +71,19 @@
  *
  ******************************************************************************/
 
+#define	_NXA_C_
+
 #include "../include/libonyx/libonyx.h"
 
 #include <sys/time.h>
 
 #include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/nx_l.h"
+#include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_dict_l.h"
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
-
-#ifdef _LIBONYX_DBG
-#define	_CW_NXA_MAGIC		0x63935743
-#endif
 
 typedef enum {
 	NXAM_NONE,

@@ -12,6 +12,7 @@
 struct cw_nx_s {
 #ifdef _LIBONYX_DBG
 	cw_uint32_t	magic;
+#define _CW_NX_MAGIC	0xae9678fd
 #endif
 
 	cw_bool_t	is_malloced;
@@ -68,13 +69,87 @@ cw_nx_t *nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
     cw_nxo_file_write_t *a_stderr, void *a_arg, cw_op_t *a_thread_init);
 void	nx_delete(cw_nx_t *a_nx);
 
-#define	nx_nxa_get(a_nx) (&(a_nx)->nxa)
+#ifndef _CW_USE_INLINES
+cw_nxa_t *nx_nxa_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_systemdict_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_globaldict_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_envdict_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_sprintdict_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_stdin_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_stdout_get(cw_nx_t *a_nx);
+cw_nxo_t *nx_stderr_get(cw_nx_t *a_nx);
+#endif
 
-#define	nx_systemdict_get(a_nx) (&(a_nx)->systemdict)
-#define	nx_globaldict_get(a_nx) (&(a_nx)->globaldict)
-#define	nx_envdict_get(a_nx) (&(a_nx)->envdict)
-#define	nx_sprintdict_get(a_nx) (&(a_nx)->sprintdict)
+#if (defined(_CW_USE_INLINES) || defined(_NX_C_))
+_CW_INLINE cw_nxa_t *
+nx_nxa_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
 
-#define	nx_stdin_get(a_nx) (&(a_nx)->stdin_nxo)
-#define	nx_stdout_get(a_nx) (&(a_nx)->stdout_nxo)
-#define	nx_stderr_get(a_nx) (&(a_nx)->stderr_nxo)
+	return &a_nx->nxa;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_systemdict_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->systemdict;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_globaldict_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->globaldict;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_envdict_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->envdict;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_sprintdict_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->sprintdict;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_stdin_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->stdin_nxo;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_stdout_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->stdout_nxo;
+}
+
+_CW_INLINE cw_nxo_t *
+nx_stderr_get(cw_nx_t *a_nx)
+{
+	_cw_check_ptr(a_nx);
+	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
+
+	return &a_nx->stderr_nxo;
+}
+#endif	/* (defined(_CW_USE_INLINES) || defined(_NX_C_)) */

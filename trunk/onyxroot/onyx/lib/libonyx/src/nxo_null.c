@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+#define	_NXO_NULL_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxo_null_l.h"
 

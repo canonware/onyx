@@ -39,9 +39,6 @@ nxo_array_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 
 	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)array;
-#ifdef _LIBONYX_DBG
-	a_nxo->magic = _CW_NXO_MAGIC;
-#endif
 	nxo_p_type_set(a_nxo, NXOT_ARRAY);
 
 	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)array);
@@ -75,9 +72,6 @@ nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_nx_t *a_nx,
 
 		nxo_no_new(a_nxo);
 		a_nxo->o.nxoe = (cw_nxoe_t *)array;
-#ifdef _LIBONYX_DBG
-		a_nxo->magic = _CW_NXO_MAGIC;
-#endif
 		nxo_p_type_set(a_nxo, NXOT_ARRAY);
 
 		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)array);

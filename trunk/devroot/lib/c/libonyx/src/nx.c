@@ -9,16 +9,15 @@
  *
  ******************************************************************************/
 
+#define	_NX_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/envdict_l.h"
 #include "../include/libonyx/sprintdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
+#include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_name_l.h"
-
-#ifdef _LIBONYX_DBG
-#define _CW_NX_MAGIC 0xae9678fd
-#endif
 
 static void nx_p_soft_init(cw_nx_t *a_nx);
 
@@ -44,6 +43,10 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 		}
 		v_retval = retval;
 		try_stage = 1;
+
+#ifdef _LIBONYX_DBG
+		retval->magic = _CW_NX_MAGIC;
+#endif
 
 		/* Initialize the global name cache. */
 		mtx_new(&retval->name_lock);
@@ -139,6 +142,9 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 			dch_delete(&retval->name_hash);
 			mtx_delete(&retval->name_lock);
 		case 1:
+#ifdef _LIBONYX_DBG
+			memset(a_nx, 0x5a, sizeof(cw_nx_t));
+#endif
 			if (retval->is_malloced)
 				_cw_free(retval);
 			break;
@@ -147,10 +153,6 @@ nx_new(cw_nx_t *a_nx, int a_argc, char **a_argv, char **a_envp,
 		}
 	}
 	xep_end();
-
-#ifdef _LIBONYX_DBG
-	retval->magic = _CW_NX_MAGIC;
-#endif
 
 	return retval;
 }
@@ -178,64 +180,6 @@ nx_delete(cw_nx_t *a_nx)
 	else
 		memset(a_nx, 0x5a, sizeof(cw_nx_t));
 #endif
-}
-
-cw_nxoe_t *
-nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset)
-{
-	cw_nxoe_t	*retval;
-
-	_cw_check_ptr(a_nx);
-	_cw_assert(a_nx->magic == _CW_NX_MAGIC);
-
-	if (a_nx->shutdown) {
-		/*
-		 * Return an empty root set so that the garbage collector will
-		 * collect everything.
-		 */
-		retval = NULL;
-		goto RETURN;
-	}
-
-	if (a_reset)
-		a_nx->ref_iter = 0;
-
-	for (retval = NULL; retval == NULL; a_nx->ref_iter++) {
-		switch (a_nx->ref_iter) {
-		case 0:
-			retval = nxo_nxoe_get(nxa_gcdict_get(&a_nx->nxa));
-		case 1:
-			retval = nxo_nxoe_get(&a_nx->threadsdict);
-			break;
-		case 2:
-			retval = nxo_nxoe_get(&a_nx->systemdict);
-			break;
-		case 3:
-			retval = nxo_nxoe_get(&a_nx->globaldict);
-			break;
-		case 4:
-			retval = nxo_nxoe_get(&a_nx->envdict);
-			break;
-		case 5:
-			retval = nxo_nxoe_get(&a_nx->sprintdict);
-			break;
-		case 6:
-			retval = nxo_nxoe_get(&a_nx->stdin_nxo);
-			break;
-		case 7:
-			retval = nxo_nxoe_get(&a_nx->stdout_nxo);
-			break;
-		case 8:
-			retval = nxo_nxoe_get(&a_nx->stderr_nxo);
-			break;
-		default:
-			retval = NULL;
-			goto RETURN;
-		}
-	}
-
-	RETURN:
-	return retval;
 }
 
 /* Include generated code. */

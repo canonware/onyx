@@ -47,21 +47,22 @@ gcdict_l_populate(cw_nxo_t *a_dict, cw_nxa_t *a_nxa)
 {
 	cw_uint32_t	i;
 	cw_nxo_t	name, value;
+	cw_nx_t		*nx;
 
 #define	NEXTRA	0
 #define NENTRIES							\
 	(sizeof(gcdict_ops) / sizeof(struct cw_gcdict_entry))
 
-	nxo_dict_new(a_dict, nxa_l_nx_get(a_nxa), FALSE, NENTRIES + NEXTRA);
+	nx = nxa_l_nx_get(a_nxa);
+	nxo_dict_new(a_dict, nx, FALSE, NENTRIES + NEXTRA);
 
 	for (i = 0; i < NENTRIES; i++) {
-		nxo_name_new(&name, nxa_l_nx_get(a_nxa),
-		    nxn_str(gcdict_ops[i].nxn), nxn_len(gcdict_ops[i].nxn),
-		    TRUE);
+		nxo_name_new(&name, nx, nxn_str(gcdict_ops[i].nxn),
+		    nxn_len(gcdict_ops[i].nxn), TRUE);
 		nxo_operator_new(&value, gcdict_ops[i].op_f, gcdict_ops[i].nxn);
 		nxo_attr_set(&value, NXOA_EXECUTABLE);
 
-		nxo_dict_def(a_dict, nxa_l_nx_get(a_nxa), &name, &value);
+		nxo_dict_def(a_dict, nx, &name, &value);
 	}
 
 #ifdef _LIBONYX_DBG

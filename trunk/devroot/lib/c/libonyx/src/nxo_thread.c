@@ -202,6 +202,9 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
 	nxo_no_new(&thread->currenterror);
 	nxo_no_new(&thread->errordict);
 	nxo_no_new(&thread->userdict);
+	nxo_no_new(&thread->stdin_nxo);
+	nxo_no_new(&thread->stdout_nxo);
+	nxo_no_new(&thread->stderr_nxo);
 
 	/*
 	 * Register this thread with the interpreter so that the GC will be able
@@ -713,6 +716,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 					nxo_dup(tnxo, el);
 					break;
 				case NXOT_OPERATOR:
+#ifdef _CW_USE_INLINES
 					if (nxo_l_operator_fast_op_get(el)
 					    == FALSE) {
 						nxo_operator_f(el)(a_nxo);
@@ -744,6 +748,10 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 						   _cw_not_reached();
 					}
 					break;
+#else
+					nxo_operator_f(el)(a_nxo);
+					break;
+#endif
 				default:
 					/*
 					 * Not a simple common case, so use the
@@ -814,6 +822,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			break;
 		}
 		case NXOT_OPERATOR:
+#ifdef _CW_USE_INLINES
 			if (nxo_l_operator_fast_op_get(nxo) == FALSE) {
 				nxo_operator_f(nxo)(a_nxo);
 				nxo_stack_pop(&thread->estack);
@@ -846,6 +855,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 			nxo_stack_pop(&thread->estack);
 			break;
+#else
+			nxo_operator_f(nxo)(a_nxo);
+			nxo_stack_pop(&thread->estack);
+			break;
+#endif
 		case NXOT_FILE: {
 			cw_nxo_threadp_t	threadp;
 			cw_sint32_t	nread;

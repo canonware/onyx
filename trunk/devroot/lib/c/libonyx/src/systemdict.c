@@ -327,11 +327,13 @@ systemdict_abs(cw_nxo_t *a_thread)
 		nxo_integer_set(a, -nxo_integer_get(a));
 }
 
+#ifdef _CW_USE_INLINES
 void
 systemdict_add(cw_nxo_t *a_thread)
 {
 	systemdict_inline_add(a_thread);
 }
+#endif
 
 void
 systemdict_aload(cw_nxo_t *a_thread)
@@ -493,7 +495,7 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 	val = nxo_stack_push(tstack);
 	el = nxo_stack_push(tstack);
 
-	nxo_l_array_bound_set(a_proc, TRUE);
+	nxo_l_array_bound_set(a_proc);
 
 	for (i = 0, count = nxo_array_len_get(a_proc); i < count; i++) {
 		nxo_array_el_get(a_proc, i, el);
@@ -1632,11 +1634,13 @@ systemdict_dstack(cw_nxo_t *a_thread)
 	nxo_stack_copy(stack, dstack);
 }
 
+#ifdef _CW_USE_INLINES
 void
 systemdict_dup(cw_nxo_t *a_thread)
 {
 	systemdict_inline_dup(a_thread);
 }
+#endif
 
 void
 systemdict_end(cw_nxo_t *a_thread)
@@ -1719,11 +1723,13 @@ systemdict_eval(cw_nxo_t *a_thread)
 	nxo_thread_loop(a_thread);
 }
 
+#ifdef _CW_USE_INLINES
 void
 systemdict_exch(cw_nxo_t *a_thread)
 {
 	systemdict_inline_exch(a_thread);
 }
+#endif
 
 void
 systemdict_exec(cw_nxo_t *a_thread)
@@ -2545,11 +2551,13 @@ systemdict_ifelse(cw_nxo_t *a_thread)
 	nxo_thread_loop(a_thread);
 }
 
+#ifdef _CW_USE_INLINES
 void
 systemdict_index(cw_nxo_t *a_thread)
 {
 	systemdict_inline_index(a_thread);
 }
+#endif
 
 void
 systemdict_join(cw_nxo_t *a_thread)
@@ -3203,11 +3211,13 @@ systemdict_ostack(cw_nxo_t *a_thread)
 	nxo_stack_pop(stack);
 }
 
+#ifdef _CW_USE_INLINES
 void
 systemdict_pop(cw_nxo_t *a_thread)
 {
 	systemdict_inline_pop(a_thread);
 }
+#endif
 
 void
 systemdict_print(cw_nxo_t *a_thread)
@@ -3716,11 +3726,13 @@ systemdict_rmdir(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
+#ifdef _CW_USE_INLINES
 void
 systemdict_roll(cw_nxo_t *a_thread)
 {
 	systemdict_inline_roll(a_thread);
 }
+#endif
 
 void
 systemdict_run(cw_nxo_t *a_thread)

@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+#define	_NXO_INTEGER_C_
+
 #include "../include/libonyx/libonyx.h"
 #include "../include/libonyx/nxo_integer_l.h"
 

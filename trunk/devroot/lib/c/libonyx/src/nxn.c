@@ -9,6 +9,8 @@
  *
  ******************************************************************************/
 
+#define	_NXN_C_
+
 #include "../include/libonyx/libonyx.h"
 
 /* Alphabetical order. */
