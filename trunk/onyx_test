@@ -61,7 +61,7 @@ if [ "x$?" = "x0" ] ; then
 	exit 2
 fi
 
-libs="libstash libonyx"
+libs="libonyx"
 bins="onyx"
 #
 # Test everything with every allowable combination of configure options.
