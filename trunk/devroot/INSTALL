@@ -64,7 +64,7 @@ Targets that depend on optional supporting software include:
 
 	all
 	docs
-	doc_[pfh]
+	docs_[pfh]
 	release
 	check
 	check_update

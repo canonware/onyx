@@ -122,10 +122,10 @@ check_update : tests
 
 release : docs;
 
-docs : doc_p doc_f doc_h;
-doc_p : [P_MANUAL];
-doc_f : [F_MANUAL];
-doc_h : [H_MANUAL];
+docs : docs_p docs_f docs_h;
+docs_p : [P_MANUAL];
+docs_f : [F_MANUAL];
+docs_h : [H_MANUAL];
 
 install_bins : [addsuffix _install_a @bins@];
 install_libs : [addsuffix _install @libs@];
