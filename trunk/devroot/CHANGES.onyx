@@ -1,3 +1,7 @@
+2003-04-05 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 4.4.3 released.
+
 2003-04-04 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/nxo_file.c:nxo_file_fd_wrap() : Add the a_close
