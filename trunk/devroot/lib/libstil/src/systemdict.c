@@ -2941,8 +2941,9 @@ systemdict_realtime(cw_stilo_t *a_thread)
 	stilo = stilo_stack_push(ostack);
 
 	gettimeofday(&tv, NULL);
-	stilo_integer_new(stilo, ((cw_stiloi_t)tv.tv_sec *
-	    (cw_stiloi_t)1000000) + (cw_stiloi_t)tv.tv_usec);
+	stilo_integer_new(stilo, (((cw_stiloi_t)tv.tv_sec *
+	    (cw_stiloi_t)1000000000) + (cw_stiloi_t)tv.tv_usec *
+	    (cw_stiloi_t)1000));
 }
 
 void
