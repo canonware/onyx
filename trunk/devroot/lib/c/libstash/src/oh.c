@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 73 $
- * $Date: 1998-05-02 13:58:09 -0700 (Sat, 02 May 1998) $
+ * $Revision: 75 $
+ * $Date: 1998-05-02 20:01:04 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -87,11 +87,15 @@ oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe, cw_bool_t a_should_shuffle)
   retval->should_shuffle = a_should_shuffle;
 
   retval->size = 1 << _OH_BASE_POWER;
-  
+
+  /* Create the items pointer array. */
   retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
 					       * sizeof(cw_oh_item_t *));
   bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
 
+  /* Create the spare items list. */
+  list_new(&retval->spares_list, FALSE);
+  
   retval->base_h1 = oh_h1_priv;
   retval->curr_h1 = oh_h1_priv;
   retval->key_compare = oh_key_compare_priv;
@@ -156,6 +160,20 @@ oh_delete(cw_oh_t * a_oh_o)
       _cw_free(a_oh_o->items[i]);
     }
   }
+
+  /* Delete the spares list. */
+  {
+    cw_sint64_t i, count;
+    cw_oh_item_t * item;
+
+    count = list_count(&a_oh_o->spares_list);
+    for (i = 0; i < count; i++)
+    {
+      item = (cw_oh_item_t *) list_hpop(&a_oh_o->spares_list);
+      _cw_free(item);
+    }
+    list_delete(&a_oh_o->spares_list);
+  }
   
   _cw_free(a_oh_o->items);
   if (a_oh_o->is_malloced == TRUE)
@@ -168,11 +186,9 @@ oh_delete(cw_oh_t * a_oh_o)
   }
 }
 
-cw_bool_t
+void
 oh_rehash(cw_oh_t * a_oh_o)
 {
-  cw_bool_t retval;
-
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Enter oh_rehash()");
@@ -184,7 +200,7 @@ oh_rehash(cw_oh_t * a_oh_o)
     rwl_wlock(&a_oh_o->rw_lock);
   }
 
-  retval = oh_rehash_priv(a_oh_o, TRUE);
+  oh_rehash_priv(a_oh_o, TRUE);
 
   if (a_oh_o->is_thread_safe)
   {
@@ -195,7 +211,6 @@ oh_rehash(cw_oh_t * a_oh_o)
   {
     _cw_marker("Exit oh_rehash()");
   }
-  return retval;
 }
 
 cw_uint64_t
@@ -364,12 +379,8 @@ oh_set_h1(cw_oh_t * a_oh_o,
   if (a_oh_o->curr_h1 != a_new_h1)
   {
     a_oh_o->curr_h1 = a_new_h1;
-
-    retval = oh_rehash_priv(a_oh_o, TRUE);
-    if (retval == FALSE)
-    {
-      retval = oh_coalesce_priv(a_oh_o);
-    }
+    oh_rehash_priv(a_oh_o, TRUE);
+    oh_coalesce_priv(a_oh_o);
   }
   else
   {
@@ -444,7 +455,7 @@ oh_set_base_h2(cw_oh_t * a_oh_o,
 			<< (a_oh_o->curr_power
 			    - a_oh_o->base_power))
 		       - 1);
-    retval = oh_rehash_priv(a_oh_o, TRUE);
+    oh_rehash_priv(a_oh_o, TRUE);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -486,7 +497,7 @@ oh_set_base_shrink_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_shrink_point
       = (a_oh_o->base_shrink_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    retval = oh_shrink_priv(a_oh_o);
+    oh_shrink_priv(a_oh_o);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -529,7 +540,7 @@ oh_set_base_grow_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_grow_point
       = (a_oh_o->base_grow_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    retval = oh_grow_priv(a_oh_o);
+    oh_grow_priv(a_oh_o);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -572,7 +583,7 @@ oh_set_base_rehash_point(cw_oh_t * a_oh_o,
     a_oh_o->curr_rehash_point
       = (a_oh_o->base_rehash_point
 	 << (a_oh_o->curr_power - a_oh_o->base_power));
-    retval = oh_rehash_priv(a_oh_o, FALSE);
+    oh_rehash_priv(a_oh_o, FALSE);
   }
 
   if (a_oh_o->is_thread_safe)
@@ -610,14 +621,17 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     rwl_wlock(&a_oh_o->rw_lock);
   }
 
-  retval = oh_coalesce_priv(a_oh_o);
-  if (retval == TRUE)
+  oh_coalesce_priv(a_oh_o);
+
+  /* Grab an item off the spares list, if there are any. */
+  if (list_count(&a_oh_o->spares_list) > 0)
   {
-    goto RETURN;
+    item = (cw_oh_item_t *) list_hpop(&a_oh_o->spares_list);
   }
-  
-  item = (cw_oh_item_t *) _cw_malloc(sizeof(cw_oh_item_t));
-  _cw_check_ptr(item);
+  else
+  {
+    item = (cw_oh_item_t *) _cw_malloc(sizeof(cw_oh_item_t));
+  }
 
   item->is_valid = TRUE;
   item->key = a_key;
@@ -629,7 +643,6 @@ oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
     oh_coalesce_priv(a_oh_o);
   }
 
- RETURN:
   if (a_oh_o->is_thread_safe)
   {
     rwl_wunlock(&a_oh_o->rw_lock);
@@ -684,7 +697,10 @@ oh_item_delete(cw_oh_t * a_oh_o,
       *a_key = a_oh_o->items[slot]->key;
       *a_data = a_oh_o->items[slot]->data;
       a_oh_o->num_items--;
-      _cw_free(a_oh_o->items[slot]);
+
+      /* Put the item on the spares list. */
+      list_hpush(&a_oh_o->spares_list, (void *) a_oh_o->items[slot]);
+
       a_oh_o->items[slot] = NULL;
 
       if (dbg_fmatch(g_dbg_o, _CW_DBG_R_OH_SLOT))
@@ -1078,39 +1094,22 @@ oh_key_compare_priv(void * a_k1, void * a_k2)
  * Make sure that the hash table is in an acceptable state.  If not, fix it.
  *
  ****************************************************************************/
-cw_bool_t
+void
 oh_coalesce_priv(cw_oh_t * a_oh_o)
 {
-  cw_bool_t retval;
-  
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Enter oh_coalesce_priv()");
   }
-  retval = oh_shrink_priv(a_oh_o);
-  if (retval == TRUE)
-  {
-    goto RETURN;
-  }
 
-  retval = oh_rehash_priv(a_oh_o, FALSE);
-  if (retval == TRUE)
-  {
-    goto RETURN;
-  }
+  oh_shrink_priv(a_oh_o);
+  oh_rehash_priv(a_oh_o, FALSE);
+  oh_grow_priv(a_oh_o);
 
-  retval = oh_grow_priv(a_oh_o);
-  if (retval == TRUE)
-  {
-    goto RETURN;
-  }
-
- RETURN:
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_coalesce_priv()");
   }
-  return retval;
 }
 
 /****************************************************************************
@@ -1119,12 +1118,11 @@ oh_coalesce_priv(cw_oh_t * a_oh_o)
  * If the table is too full, double in size and insert into the new table.
  *
  ****************************************************************************/
-cw_bool_t
+void
 oh_grow_priv(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t old_size, i;
-  cw_bool_t retval;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -1135,7 +1133,6 @@ oh_grow_priv(cw_oh_t * a_oh_o)
   /* Should we grow? */
   if (a_oh_o->num_items < a_oh_o->curr_grow_point)
   {
-    retval = FALSE;
     goto RETURN;
   }
   
@@ -1179,11 +1176,7 @@ oh_grow_priv(cw_oh_t * a_oh_o)
     {
       if (old_items[i]->is_valid == TRUE)
       {
-	retval = oh_item_insert_priv(a_oh_o, old_items[i]);
-	if (retval == TRUE)
-	{
-	  goto RETURN;
-	}
+	oh_item_insert_priv(a_oh_o, old_items[i]);
       }
       else
       {
@@ -1193,13 +1186,11 @@ oh_grow_priv(cw_oh_t * a_oh_o)
   }
   _cw_free(old_items);
   
-  retval = FALSE;
  RETURN:
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_grow_priv()");
   }
-  return retval;
 }
 
 /****************************************************************************
@@ -1209,12 +1200,11 @@ oh_grow_priv(cw_oh_t * a_oh_o)
  * making it so small that the table would need to immediately grow again.
  *
  ****************************************************************************/
-cw_bool_t
+void
 oh_shrink_priv(cw_oh_t * a_oh_o)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t old_size, i;
-  cw_bool_t retval = FALSE;
   cw_uint32_t num_halvings;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
@@ -1283,11 +1273,7 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
     {
       if (old_items[i]->is_valid == TRUE)
       {
-	retval = oh_item_insert_priv(a_oh_o, old_items[i]);
-	if (retval == TRUE)
-	{
-	  goto RETURN;
-	}
+	oh_item_insert_priv(a_oh_o, old_items[i]);
       }
       else
       {
@@ -1296,13 +1282,27 @@ oh_shrink_priv(cw_oh_t * a_oh_o)
     }
   }
   _cw_free(old_items);
+
+  /* Shrink the spares list down to a reasonable size. */
+  {
+    cw_sint64_t i;
+    cw_oh_item_t * item;
+
+    for (i = list_count(&a_oh_o->spares_list);
+	 i > a_oh_o->curr_grow_point;
+	 i--)
+    {
+      item = (cw_oh_item_t *) list_hpop(&a_oh_o->spares_list);
+      _cw_free(item);
+    }
+    list_purge_spares(&a_oh_o->spares_list);
+  }
   
  RETURN:
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
     _cw_marker("Exit oh_shrink_priv()");
   }
-  return retval;
 }
 
 /****************************************************************************
@@ -1457,12 +1457,11 @@ oh_item_search_priv(cw_oh_t * a_oh_o,
  * dirtiness of the table, in conjunction with curr_rehash_point.
  *
  ****************************************************************************/
-cw_bool_t
+void
 oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
 {
   cw_oh_item_t ** old_items;
   cw_uint64_t i;
-  cw_bool_t retval = FALSE;
 
   if (dbg_pmatch(g_dbg_o, _CW_DBG_R_OH_FUNC))
   {
@@ -1503,14 +1502,7 @@ oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
       {
 	if (old_items[i]->is_valid == TRUE)
 	{
-	  retval = oh_item_insert_priv(a_oh_o, old_items[i]);
-	  if (retval == TRUE)
-	  {
-	    /* XXX If this happens, we're in deep trouble, because it means
-	     * we had a corrupted hash table before the rehash.  Maybe we
-	     * should crash instead. */
-	    break;
-	  }
+	  oh_item_insert_priv(a_oh_o, old_items[i]);
 	}
 	else
 	{
@@ -1528,7 +1520,6 @@ oh_rehash_priv(cw_oh_t * a_oh_o, cw_bool_t a_force)
   {
     _cw_marker("Exit oh_rehash_priv()");
   }
-  return retval;
 }
 
 #ifdef _OH_PERF_

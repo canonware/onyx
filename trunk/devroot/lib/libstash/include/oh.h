@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 71 $
- * $Date: 1998-05-02 02:10:52 -0700 (Sat, 02 May 1998) $
+ * $Revision: 75 $
+ * $Date: 1998-05-02 20:01:04 -0700 (Sat, 02 May 1998) $
  *
  * <<< Description >>>
  *
@@ -61,6 +61,7 @@ struct cw_oh_s
   cw_rwl_t rw_lock;
   cw_bool_t should_shuffle;
   cw_oh_item_t ** items;
+  cw_list_t spares_list;
 
   cw_uint64_t (*base_h1)(cw_oh_t *, void *);
   cw_uint64_t (*curr_h1)(cw_oh_t *, void *);
@@ -137,7 +138,7 @@ typedef cw_bool_t oh_key_comp_t(void *, void *);
 cw_oh_t * oh_new(cw_oh_t * a_oh_o, cw_bool_t a_is_thread_safe,
 		 cw_bool_t a_should_shuffle);
 void oh_delete(cw_oh_t * a_oh_o);
-cw_bool_t oh_rehash(cw_oh_t * a_oh_o);
+void oh_rehash(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_size(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_items(cw_oh_t * a_oh_o);
 cw_uint64_t oh_get_num_invalid(cw_oh_t * a_oh_o);
