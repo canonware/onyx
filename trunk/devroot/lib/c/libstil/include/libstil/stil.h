@@ -9,8 +9,6 @@
  *
  ******************************************************************************/
 
-typedef struct cw_stil_s cw_stil_t;
-
 struct cw_stil_s {
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t	magic;
@@ -19,8 +17,11 @@ struct cw_stil_s {
 	cw_bool_t	is_malloced;
 	cw_mtx_t	lock;
 
-	/* Global allocator. */
-	cw_stilag_t	stilag;
+	/* List of all stilt's. */
+	ql_head(cw_stilt_t) stilt_head;
+
+	/* Memory allocator. */
+	cw_stila_t	stila;
 
         /*
          * Global hash of names (key: {name, len}, value: (stiloe_name *)).
@@ -53,9 +54,7 @@ cw_stil_t	*stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
     *a_arg);
 void		stil_delete(cw_stil_t *a_stil);
 
-#define	stil_stilag_get(a_stil) (&(a_stil)->stilag)
-#define	stil_name_lock_get(a_stil) (&(a_stil)->name_lock)
-#define	stil_name_hash_get(a_stil) (&(a_stil)->name_hash)
+#define	stil_stila_get(a_stil) (&(a_stil)->stila)
 
 #define	stil_systemdict_get(a_stil) (&(a_stil)->systemdict)
 #define	stil_globaldict_get(a_stil) (&(a_stil)->globaldict)

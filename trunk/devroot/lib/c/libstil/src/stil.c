@@ -71,11 +71,12 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 		try_stage = 1;
 
 		v_retval = retval;
-		stilag_new(&retval->stilag);
+		stila_new(&retval->stila, retval);
 		try_stage = 2;
 
+		ql_new(&retval->stilt_head);
 		mtx_new(&retval->name_lock);
-		dch_new(&retval->name_hash, stilag_mem_get(&retval->stilag),
+		dch_new(&retval->name_hash, stila_mem_get(&retval->stila),
 		    _CW_STIL_NAME_BASE_TABLE, _CW_STIL_NAME_BASE_GROW,
 		    _CW_STIL_NAME_BASE_SHRINK, stilo_name_hash,
 		    stilo_name_key_comp);
@@ -146,7 +147,7 @@ stil_new(cw_stil_t *a_stil, cw_stilo_file_read_t *a_stdin,
 			dch_delete(&retval->name_hash);
 			mtx_delete(&retval->name_lock);
 		case 2:
-			stilag_delete(&retval->stilag);
+			stila_delete(&retval->stila);
 		case 1:
 			if (retval->is_malloced)
 				_cw_free(retval);
@@ -191,7 +192,7 @@ stil_delete(cw_stil_t *a_stil)
 
 	dch_delete(&a_stil->name_hash);
 	mtx_delete(&a_stil->name_lock);
-	stilag_delete(&a_stil->stilag);
+	stila_delete(&a_stil->stila);
 	mtx_delete(&a_stil->lock);
 
 	if (a_stil->is_malloced)

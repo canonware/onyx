@@ -10,6 +10,7 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+#include "../include/libstil/stil_l.h"
 
 #include <ctype.h>
 #include <errno.h>
@@ -245,33 +246,32 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 			retval->is_malloced = TRUE;
 		}
 		retval->stil = a_stil;
+		ql_elm_new(retval, link);
 		retval->tok_str = retval->buffer;
 		try_stage = 1;
 
-		stilat_new(&retval->stilat, a_stilt, stil_stilag_get(a_stil));
-		try_stage = 2;
-
-		dch_new(&retval->name_hash, stilat_mem_get(&retval->stilat),
+		dch_new(&retval->name_hash,
+		    stila_mem_get(stil_stila_get(a_stil)),
 		    _CW_STILT_NAME_BASE_TABLE, _CW_STILT_NAME_BASE_GROW,
 		    _CW_STILT_NAME_BASE_SHRINK, stilo_name_hash,
 		    stilo_name_key_comp);
-		try_stage = 3;
+		try_stage = 2;
 
 		stils_new(&retval->estack,
-		    stilat_stilsc_pool_get(&a_stilt->stilat));
-		try_stage = 4;
+		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		try_stage = 3;
 
 		stils_new(&retval->ostack,
-		    stilat_stilsc_pool_get(&a_stilt->stilat));
-		try_stage = 5;
+		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		try_stage = 4;
 
 		stils_new(&retval->dstack,
-		    stilat_stilsc_pool_get(&a_stilt->stilat));
-		try_stage = 6;
+		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		try_stage = 5;
 
 		stils_new(&retval->tstack,
-		    stilat_stilsc_pool_get(&a_stilt->stilat));
-		try_stage = 7;
+		    stila_stilsc_pool_get(stil_stila_get(a_stil)));
+		try_stage = 6;
 
 		/*
 		 * Create derror, errordict, and userdict.  threaddict
@@ -304,18 +304,16 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
 		switch (try_stage) {
-		case 7:
-			stils_delete(&retval->tstack);
 		case 6:
-			stils_delete(&retval->dstack);
+			stils_delete(&retval->tstack);
 		case 5:
-			stils_delete(&retval->ostack);
+			stils_delete(&retval->dstack);
 		case 4:
-			stils_delete(&retval->estack);
+			stils_delete(&retval->ostack);
 		case 3:
-			dch_delete(&retval->name_hash);
+			stils_delete(&retval->estack);
 		case 2:
-			stilat_delete(&retval->stilat);
+			dch_delete(&retval->name_hash);
 		case 1:
 			if (retval->is_malloced)
 				_cw_free(retval);
@@ -326,6 +324,7 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 	}
 	xep_end();
 
+	stil_l_stilt_insert(a_stilt->stil, a_stilt);
 #ifdef _LIBSTIL_DBG
 	retval->magic = _CW_STILT_MAGIC;
 #endif
@@ -353,7 +352,7 @@ stilt_delete(cw_stilt_t *a_stilt)
 	stils_delete(&a_stilt->ostack);
 	stils_delete(&a_stilt->estack);
 	dch_delete(&a_stilt->name_hash);
-	stilat_delete(&a_stilt->stilat);
+	stil_l_stilt_remove(a_stilt->stil, a_stilt);
 	if (a_stilt->is_malloced)
 		_cw_free(a_stilt);
 #ifdef _LIBSTIL_DBG

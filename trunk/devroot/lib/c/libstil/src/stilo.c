@@ -10,6 +10,9 @@
  ******************************************************************************/
 
 #include "../include/libstil/libstil.h"
+#include "../include/libstil/stil_l.h"
+#include "../include/libstil/stilo_l.h"
+#include "../include/libstil/stilt_l.h"
 
 #include <stdarg.h>
 #include <ctype.h>
@@ -38,57 +41,6 @@ typedef struct cw_stiloe_hook_s cw_stiloe_hook_t;
 typedef struct cw_stiloe_mutex_s cw_stiloe_mutex_t;
 typedef struct cw_stiloe_name_s cw_stiloe_name_t;
 typedef struct cw_stiloe_string_s cw_stiloe_string_t;
-
-/*
- * All extended type objects contain a stiloe.  This provides a poor man's
- * inheritance.  Since stil's type system is static, this idiom is adequate.
- */
-struct cw_stiloe_s {
-#ifdef _LIBSTIL_DBG
-	cw_uint32_t	magic;
-#endif
-
-	/*
-	 * Linkage for GC.  All stiloe's are in a single ring, which the GC uses
-	 * to implement a Baker's Treadmill collector.
-	 */
-	qr(cw_stiloe_t)	link;
-	/*
-	 * Object type.  We store this in stiloe's as well as stilo's, since
-	 * various functions access stiloe's directly, rather than going through
-	 * a referring stilo.
-	 */
-	cw_stilot_t	type:4;
-	/*
-	 * Dictionary permissions.  Only dictionaries share permissions accross
-	 * all references.
-	 */
-	cw_stilop_t	perms:2;
-	/*
-	 * Since dictionaries share permissions across all references, and
-	 * permissions can only ever decrease, it is possible to avoid locking
-	 * even global dict's, if the permissions are unlimited.  In order to
-	 * avoid a race condition, this field is set to TRUE when a dict is
-	 * locked, so that it can be correctly unlocked, even if the dict's
-	 * permissions change in the meanwhile.
-	 */
-	cw_bool_t	dict_locked:1;
-	/*
-	 * If TRUE, there is a watchpoint set on this object.  In general, this
-	 * field is not looked at unless the interpreter has been put into
-	 * debugging mode. Note that setting a watchpoint on an extended type
-	 * causes modification via *any* reference to be watched.
-	 */
-	cw_bool_t	watchpoint:1;
-	/* If TRUE, this object is black (or gray).  Otherwise it is white. */
-	cw_bool_t	black:1;
-	/* Allocated locally or globally? */
-	cw_bool_t	global:1;
-	/*
-	 * If TRUE, this stiloe is a reference to another stiloe.
-	 */
-	cw_bool_t	indirect:1;
-};
 
 struct cw_stiloe_array_s {
 	cw_stiloe_t	stiloe;
@@ -1500,12 +1452,14 @@ stilo_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_uint32_t
 	 * XXX Magic numbers.
 	 */
 	if (a_dict_size > 16) {
-		dch_new(&dict->hash, stilt_mem_get(a_stilt), a_dict_size *
-		    1.25, a_dict_size, a_dict_size / 4, stilo_p_hash,
-		    stilo_p_key_comp);
-	} else {
-		dch_new(&dict->hash, stilt_mem_get(a_stilt), 20, 16, 4,
+		dch_new(&dict->hash,
+		    stila_mem_get(stil_stila_get(stilt_stil_get(a_stilt))),
+		    a_dict_size * 1.25, a_dict_size, a_dict_size / 4,
 		    stilo_p_hash, stilo_p_key_comp);
+	} else {
+		dch_new(&dict->hash,
+		    stila_mem_get(stil_stila_get(stilt_stil_get(a_stilt))), 20,
+		    16, 4, stilo_p_hash, stilo_p_key_comp);
 	}
 
 	stilo_p_new(a_stilo, STILOT_DICT);
@@ -3570,7 +3524,7 @@ stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
 		 * hash for the name.  Create the name in the global hash if
 		 * necessary, then create a cached reference if necessary.
 		 */
-		name_hash = stilt_name_hash_get(a_stilt);
+		name_hash = stilt_l_name_hash_get(a_stilt);
 		if (dch_search(name_hash, (void *)&key, (void **)&name)) {
 			/* Not found in the per-thread name cache. */
 			gname = stilo_p_name_gref(a_stilt, a_name, a_len,
@@ -3749,8 +3703,8 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 	key.e.n.name = a_str;
 	key.e.n.len = a_len;
 
-	name_lock = stil_name_lock_get(stilt_stil_get(a_stilt));
-	name_hash = stil_name_hash_get(stilt_stil_get(a_stilt));
+	name_lock = stil_l_name_lock_get(stilt_stil_get(a_stilt));
+	name_hash = stil_l_name_hash_get(stilt_stil_get(a_stilt));
 
 	/*
 	 * Look in the global hash for the name.  If the name doesn't exist,
@@ -3758,14 +3712,11 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 	 */
 	mtx_lock(name_lock);
 	if (dch_search(name_hash, (void *)&key, (void **)&retval)) {
-		cw_stilag_t	*stilag;
-
 		/*
 		 * Not found in the global hash.  Create, initialize, and insert
 		 * a new entry.
 		 */
-		stilag = stil_stilag_get(stilt_stil_get(a_stilt));
-		retval = (cw_stiloe_name_t *)stilag_malloc(stilag,
+		retval = (cw_stiloe_name_t *)stilt_malloc(a_stilt,
 		    sizeof(cw_stiloe_name_t));
 		memset(retval, 0, sizeof(cw_stiloe_name_t));
 
@@ -3776,9 +3727,7 @@ stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
 	
 		if (a_is_static == FALSE) {
 			/* This should be allocated from global space. */
-			retval->e.n.name =
-			    stilag_malloc(stil_stilag_get(stilt_stil_get(a_stilt)),
-			    a_len);
+			retval->e.n.name = stilt_malloc(a_stilt, a_len);
 			/*
 			 * Cast away the const here; it's the only place that
 			 * the string is allowed to be modified, and this cast
@@ -3814,7 +3763,7 @@ stilo_p_name_kref_insert(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 	if (name->e.n.keyed_refs == NULL) {
 		/* No keyed references.  Create the hash. */
 		name->e.n.keyed_refs = dch_new(NULL,
-		    stilag_mem_get(stil_stilag_get(stilt_stil_get(a_stilt))),
+		    stila_mem_get(stil_stila_get(stilt_stil_get(a_stilt))),
 		    _CW_STILO_NAME_KREF_TABLE, _CW_STILO_NAME_KREF_GROW,
 		    _CW_STILO_NAME_KREF_SHRINK, ch_direct_hash,
 		    ch_direct_key_comp);
@@ -3871,7 +3820,6 @@ stilo_p_name_kref_remove(const cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
 
 	if ((retval = dch_remove(name->e.n.keyed_refs, (void *)a_dict, NULL,
 	    NULL, &chi)) == FALSE)
-		/* XXX Need stilag, not a_stilt. */
 		stilt_chi_put(a_stilt, chi);
 
 	/* If there are no more keyed references, delete the hash. */

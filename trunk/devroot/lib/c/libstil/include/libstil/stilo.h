@@ -18,9 +18,8 @@ typedef struct cw_stiloe_s cw_stiloe_t;
 typedef struct cw_stiloe_dicto_s cw_stiloe_dicto_t;
 
 /* Declared here to avoid a circular header dependency. */
+typedef struct cw_stil_s cw_stil_t;
 typedef struct cw_stila_s cw_stila_t;
-typedef struct cw_stilag_s cw_stilag_t;
-typedef struct cw_stilat_s cw_stilat_t;
 typedef struct cw_stilt_s cw_stilt_t;
 typedef struct cw_stilsc_s cw_stilsc_t;
 typedef struct cw_stiloe_dict_s cw_stiloe_dict_t;
@@ -149,12 +148,6 @@ struct cw_stilo_s {
 	}	o;
 };
 
-/* This is private, but stila needs to know its size. */
-struct cw_stiloe_dicto_s {
-	cw_stilo_t	key;
-	cw_stilo_t	val;
-};
-
 cw_sint32_t	stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b, cw_stilt_t
     *a_stilt);
 #define		stilo_dup(a_to, a_from) do {				\
@@ -182,11 +175,6 @@ cw_stilte_t	stilo_perms_set(cw_stilo_t *a_stilo, cw_stilop_t a_perms);
 
 cw_stilte_t	stilo_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
     *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
-
-/* XXX For the GC only. */
-cw_stiloe_t	*stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
-void		stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stilt_t *a_stilt);
-#define		stiloe_l_next(a_stiloe) (qr_next((a_stiloe), link))
 
 /*
  * no.
