@@ -100,10 +100,10 @@ ONYX_OTESTS =
 #if @enable_oop@
 
               ccheck_a.nx.in ccheck_b.nx.in cdef_a.nx.in cdef_b.nx.in
-              cdef_c.nx.in cdef_d.nx.in cdef_e.nx.in cvc_a.nx.in cvc_b.nx.in
-              cvf_a.nx.in cvf_b.nx.in cvi_a.nx.in cvi_b.nx.in fcheck_a.nx.in
-              fcheck_b.nx.in icheck_a.nx.in icheck_b.nx.in threadcstack_a.nx.in
-              threadcstack_b.nx.in threadcstack_c.nx.in
+              cdef_c.nx.in cdef_d.nx.in cdef_e.nx.in cstack_a.nx.in cvc_a.nx.in
+              cvc_b.nx.in cvf_a.nx.in cvf_b.nx.in cvi_a.nx.in cvi_b.nx.in
+              fcheck_a.nx.in fcheck_b.nx.in icheck_a.nx.in icheck_b.nx.in
+              threadcstack_a.nx.in threadcstack_b.nx.in threadcstack_c.nx.in
 
 #endif
 #if @enable_posix@
