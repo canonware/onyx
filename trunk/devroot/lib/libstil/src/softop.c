@@ -23,7 +23,7 @@ stil_p_soft_init(cw_stil_t *a_stil)
 /monitor
 {1 index type /mutextype ne {errordict begin typecheck end} if 1 index lock eval unlock}
 /promptstring
-{count cvs dup length 4 add string dup 0 `s:' putinterval dup dup length 2 sub `> ' putinterval dup 3 2 roll 2 exch putinterval}
+{count `s:' exch cvs catenate `> ' catenate}
 /product
 {`Canonware stil'}
 /pstack

@@ -77,9 +77,7 @@ systemdict begin
 
 % - promptstring <string>
 /promptstring {
-	count cvs dup length 4 add string
-	dup 0 `s:' putinterval dup dup length 2 sub `> '
-	putinterval dup 3 2 roll 2 exch putinterval
+	count `s:' exch cvs catenate `> ' catenate
 } bind def
 
 % - product <string>
