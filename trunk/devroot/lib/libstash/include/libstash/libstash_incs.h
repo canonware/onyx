@@ -39,7 +39,7 @@
 #include "xep.h"
 #include "mtx.h"
 #include "cnd.h"
-#include "sema.h"
+#include "sma.h"
 #include "tsd.h"
 #include "thd.h"
 #include "rwl.h"

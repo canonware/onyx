@@ -1,5 +1,8 @@
 2001-07-12  Jason Evans  <jasone@canonware.com>
 
+	* : Rename the sema class to sma, in order to avoid namespace
+	collisions with Solaris Threads's sema.
+
 	* src/thd.c: thd_self() isn't safe to call within a signal
 	handler.  Therefore, use a global variable to store a pointer to
 	the thread being suspended so that the signal handler can access

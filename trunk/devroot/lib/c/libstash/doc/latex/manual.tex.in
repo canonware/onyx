@@ -248,7 +248,7 @@ defines the following exceptions:
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/qr}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/qs}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/rwl}
-\input{@abs_srcdir@/lib/c/libstash/doc/latex/sema}
+\input{@abs_srcdir@/lib/c/libstash/doc/latex/sma}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/thd}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/tsd}
 \input{@abs_srcdir@/lib/c/libstash/doc/latex/xep}

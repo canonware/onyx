@@ -71,7 +71,7 @@ struct cw_libsock_s {
 	cw_thd_t	*thread;
 	int		pipe_in;
 	int		pipe_out;
-	cw_sema_t	pipe_sema;
+	cw_sma_t	pipe_sma;
 
 	cw_pezz_t	bufc_pool;
 	cw_pezz_t	buffer_pool;
@@ -195,7 +195,7 @@ libsock_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size, cw_uint32_t
 			 * data should be written to the pipe in order to force
 			 * a return from poll().
 			 */
-			sema_new(&g_libsock->pipe_sema, 1);
+			sma_new(&g_libsock->pipe_sma, 1);
 
 			/*
 			 * Create the spare bufc pool and initialize associated
@@ -268,7 +268,7 @@ libsock_shutdown(void)
 		libsock_l_wakeup();
 		thd_join(g_libsock->thread);
 
-		sema_delete(&g_libsock->pipe_sema);
+		sma_delete(&g_libsock->pipe_sma);
 
 		/* Clean up the spare bufc's. */
 		pezz_delete(&g_libsock->bufc_pool);
@@ -373,7 +373,7 @@ libsock_in_notify(cw_mq_t *a_mq, cw_sock_t *a_sock, void *a_val)
 void
 libsock_l_wakeup(void)
 {
-	if (sema_trywait(&g_libsock->pipe_sema) == FALSE) {
+	if (sma_trywait(&g_libsock->pipe_sma) == FALSE) {
 		while (write(g_libsock->pipe_in, "X", 1) == -1) {
 			if (errno != EINTR) {
 #ifdef _CW_LIBSOCK_CONFESS
@@ -881,7 +881,7 @@ libsock_p_entry_func(void *a_arg)
 					 * written to the pipe may have already
 					 * been read.
 					 */
-					sema_post(&g_libsock->pipe_sema);
+					sma_post(&g_libsock->pipe_sma);
 				}
 			}
 			for (i = 1, j = 0; (j < num_ready) && (i < nfds); i++) {

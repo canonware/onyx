@@ -7,7 +7,7 @@
  *
  * Version: <Version>
  *
- * sema test.
+ * sma test.
  *
  ******************************************************************************/
 
@@ -18,9 +18,9 @@
 void *
 thread_entry_func(void *a_arg)
 {
-	cw_sema_t	*sema = (cw_sema_t *)a_arg;
+	cw_sma_t	*sma = (cw_sma_t *)a_arg;
 
-	sema_wait(sema);
+	sma_wait(sma);
 	out_put(out_err, "Got semaphore.\n");
 
 	return NULL;
@@ -29,7 +29,7 @@ thread_entry_func(void *a_arg)
 int
 main()
 {
-	cw_sema_t	sema_a, sema_b;
+	cw_sma_t	sma_a, sma_b;
 	cw_thd_t	*threads[_CW_TEST_NUM_THREADS];
 	cw_uint32_t	i;
 	struct timespec	timeout;
@@ -37,48 +37,48 @@ main()
 	libstash_init();
 	out_put(out_err, "Test begin\n");
 
-	sema_new(&sema_b, 0);
-	_cw_assert(sema_getvalue(&sema_b) == 0);
-	sema_post(&sema_b);
-	_cw_assert(sema_getvalue(&sema_b) == 1);
-	sema_adjust(&sema_b, -2);
-	_cw_assert(sema_getvalue(&sema_b) == -1);
-	sema_post(&sema_b);
-	_cw_assert(sema_trywait(&sema_b));
-	sema_post(&sema_b);
-	_cw_assert(sema_trywait(&sema_b) == FALSE);
-	sema_post(&sema_b);
-	sema_wait(&sema_b);
-	sema_post(&sema_b);
+	sma_new(&sma_b, 0);
+	_cw_assert(sma_getvalue(&sma_b) == 0);
+	sma_post(&sma_b);
+	_cw_assert(sma_getvalue(&sma_b) == 1);
+	sma_adjust(&sma_b, -2);
+	_cw_assert(sma_getvalue(&sma_b) == -1);
+	sma_post(&sma_b);
+	_cw_assert(sma_trywait(&sma_b));
+	sma_post(&sma_b);
+	_cw_assert(sma_trywait(&sma_b) == FALSE);
+	sma_post(&sma_b);
+	sma_wait(&sma_b);
+	sma_post(&sma_b);
 
 	/* Set timeout for 2 seconds. */
 	timeout.tv_sec = 2;
 	timeout.tv_nsec = 0;
 
-	_cw_assert(sema_timedwait(&sema_b, &timeout) == FALSE);
-	_cw_assert(sema_timedwait(&sema_b, &timeout));
-	sema_delete(&sema_b);
+	_cw_assert(sma_timedwait(&sma_b, &timeout) == FALSE);
+	_cw_assert(sma_timedwait(&sma_b, &timeout));
+	sma_delete(&sma_b);
 
-	sema_new(&sema_a, 0);
-
-	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&sema_a, TRUE);
-
-	sema_adjust(&sema_a, _CW_TEST_NUM_THREADS);
+	sma_new(&sma_a, 0);
 
 	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
-		thd_join(threads[i]);
+		threads[i] = thd_new(thread_entry_func, (void *)&sma_a, TRUE);
 
-	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
-		threads[i] = thd_new(thread_entry_func, (void *)&sema_a, TRUE);
-
-	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
-		sema_post(&sema_a);
+	sma_adjust(&sma_a, _CW_TEST_NUM_THREADS);
 
 	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
 		thd_join(threads[i]);
 
-	sema_delete(&sema_a);
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
+		threads[i] = thd_new(thread_entry_func, (void *)&sma_a, TRUE);
+
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
+		sma_post(&sma_a);
+
+	for (i = 0; i < _CW_TEST_NUM_THREADS; i++)
+		thd_join(threads[i]);
+
+	sma_delete(&sma_a);
 
 	out_put(out_err, "Test end\n");
 	libstash_shutdown();
