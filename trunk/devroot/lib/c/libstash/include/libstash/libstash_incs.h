@@ -30,6 +30,7 @@
  * example, ring.h must come before oh.h.
  */
 
+#include "queue.h"
 #include "ring.h"
 #include "thd.h"
 #include "mtx.h"

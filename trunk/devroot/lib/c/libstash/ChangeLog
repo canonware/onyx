@@ -1,3 +1,8 @@
+2000-04-30  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/queue.h: Add FreeBSD's /usr/include/sys/queue.h,
+	with the addition of the RING macros.
+
 2000-02-12  Jason Evans  <jasone@canonware.com>
 
 	* include/libstash/libstash.h (_cw_marker): Remove, since
