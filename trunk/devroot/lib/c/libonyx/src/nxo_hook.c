@@ -190,10 +190,9 @@ nxo_hook_data_get(cw_nxo_t *a_nxo)
 	return retval;
 }
 
-cw_nxo_threade_t
+void
 nxo_hook_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 {
-	cw_nxo_threade_t	retval;
 	cw_nxoe_hook_t		*hook;
 
 	_cw_check_ptr(a_nxo);
@@ -206,12 +205,17 @@ nxo_hook_eval(cw_nxo_t *a_nxo, cw_nxo_t *a_thread)
 	_cw_assert(hook->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(hook->nxoe.type == NXOT_HOOK);
 
-	if (hook->eval_f == NULL) {
-		retval = NXO_THREADE_INVALIDACCESS;
-		goto RETURN;
-	}
+	if (hook->eval_f != NULL)
+		hook->eval_f(hook->data, a_thread);
+	else {
+		cw_nxo_t	*ostack, *nxo;
 
-	retval = hook->eval_f(hook->data, a_thread);
-	RETURN:
-	return retval;
+		/*
+		 * This hook can't be executed, so push it onto ostack just like
+		 * a normal literal object would be.
+		 */
+		ostack = nxo_thread_ostack_get(a_thread);
+		nxo = nxo_stack_push(ostack);
+		nxo_dup(nxo, a_nxo);
+	}
 }

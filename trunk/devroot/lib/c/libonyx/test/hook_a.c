@@ -16,14 +16,12 @@
 
 const cw_uint8_t *data = "hook data";
 
-cw_nxo_threade_t
+void
 hook_eval(void *a_data, cw_nxo_t *a_thread)
 {
 	_cw_assert(a_data == data);
 
 	_cw_onyx_code(a_thread, "`Evaluated hook\n' print");
-
-	return NXO_THREADE_NONE;
 }
 
 cw_nxoe_t *

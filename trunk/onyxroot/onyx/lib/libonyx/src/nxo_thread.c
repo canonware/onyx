@@ -901,16 +901,11 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			nxo_stack_pop(&thread->estack);
 			break;
 		}
-		case NXOT_HOOK: {
-			cw_nxo_threade_t	error;
-			
-			error = nxo_hook_eval(nxo, a_nxo);
-			if (error)
-				nxo_thread_error(a_nxo, error);
+		case NXOT_HOOK:
+			nxo_hook_eval(nxo, a_nxo);
 
 			nxo_stack_pop(&thread->estack);
 			break;
-		}
 		default:
 			_cw_not_reached();
 		}

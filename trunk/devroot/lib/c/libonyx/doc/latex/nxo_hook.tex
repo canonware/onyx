@@ -22,7 +22,7 @@ The \classname{nxo\_hook} class is a subclass of the \classname{nxo} class.
 \begin{capi}
 \label{cw_nxo_hook_eval_t}
 \index{cw_nxo_hook_eval_t@\cfunc{cw\_nxo\_hook\_eval\_t}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{cw\_nxo\_hook\_eval\_t}{void *a\_data,
+\citem{\cfunc[void]{cw\_nxo\_hook\_eval\_t}{void *a\_data,
 cw\_nxo\_t *a\_thread}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -32,11 +32,7 @@ cw\_nxo\_t *a\_thread}}
 		\item[a\_thread: ]
 			Pointer to a thread \classname{nxo}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Hook-dependent.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Exception(s): ] Hook-dependent.
 	\item[Description: ]
 		Evaluation function typedef.
@@ -159,8 +155,7 @@ cw\_bool\_t a\_reset}}
 	\end{capilist}
 \label{nxo_hook_eval}
 \index{nxo_hook_eval@\cfunc{nxo\_hook\_eval}{}}
-\citem{\cfunc[cw\_nxo\_threade\_t]{nxo\_hook\_eval}{cw\_nxo\_t *a\_nxo,
-cw\_nxo\_t *a\_thread}}
+\citem{\cfunc[void]{nxo\_hook\_eval}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t *a\_thread}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -169,13 +164,10 @@ cw\_nxo\_t *a\_thread}}
 		\item[a\_thread: ]
 			Pointer to a thread \classname{nxo}.
 		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Hook-specific.
-		\end{description}
+	\item[Output(s): ] None.
 	\item[Exception(s): ] Hook-specific.
 	\item[Description: ]
-		Evaluate the \cvar{a\_nxo}.
+		Evaluate the \cvar{a\_nxo}.  If there is no evaluation function
+		associated with \cvar{a\_nxo}, it is pushed onto ostack.
 	\end{capilist}
 \end{capi}
