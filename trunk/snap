@@ -130,7 +130,7 @@ while ($opt_root =~ /\/$/)
 
 if (defined($opt_tag))
 {
-    $opt_pkgname = $opt_pkgname . "_" . $opt_tag;
+    $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = $opt_tag;
     $tag_cvs =~ s/\./_/g;
     $tag_cvs = "SNAP_$tag_cvs";
