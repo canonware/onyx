@@ -33,13 +33,15 @@
     `-6.1415'
     `-5.1415'
     `-4.1415'
-    `-3.1415'
+    % Various systems produce exponents of +00 or -00, so don't check this.
+    % `-3.1415'
     `-2.1415'
     `-1.1415'
     `0.1415'
     `1.1415'
     `2.1415'
-    `3.1415'
+    % Various systems produce exponents of +00 or -00, so don't check this.
+    % `3.1415'
     `4.1415'
     `5.1415'
     `6.1415'

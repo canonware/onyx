@@ -1,5 +1,5 @@
 Test begin
-`0.0 neg'
+`0.0 neg neg'
 0.000000e+00
 `5.0 neg'
 -5.000000e+00
