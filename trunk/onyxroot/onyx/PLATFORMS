@@ -6,15 +6,14 @@
 #
 ################################################################################
 
+* Fedora Core 1.
+
+* Red Hat Linux 9.
+
 * FreeBSD 4.9, 5.1.
 
 * Apple OS X 10.2.
 
-* Red Hat Linux 8.
-
 * NetBSD 1.5.
-
-  - POSIX threading does not work due to NetBSD's lack of pthreads.  However,
-    GNU pth threading should work.
 
 * Sun Solaris 2.6.
