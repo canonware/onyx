@@ -28,7 +28,7 @@ the main Onyx language documentation.
 
 \binname{onyx} -e {\lt}expr{\gt}
 
-\binname{onyx} [-i {\lt}init{\gt}]*
+\binname{onyx} [-i {\lt}expr{\gt}]* [-s {\lt}file{\gt}]*
 
 \binname{onyx} {\lt}file{\gt} [{\lt}args{\gt}]
 
@@ -36,8 +36,9 @@ the main Onyx language documentation.
 \begin{description}
 \item[-h: ] Display usage information and exit.
 \item[-V: ] Display the version number and exit.
-\item[-e {\lt}expr{\gt}: ] Execute {\lt}expr{\gt} as Onyx code.
-\item[-i {\lt}file{\gt}: ] Execute initialization {\lt}file{\gt}.
+\item[-e {\lt}expr{\gt}: ] Evaluate {\lt}expr{\gt} as Onyx code.
+\item[-i {\lt}expr{\gt}: ] Evaluate initialization {\lt}expr{\gt}.
+\item[-f {\lt}file{\gt}: ] Evaluate initialization {\lt}file{\gt}.
 \end{description}
 
 \section{Environment variables}
@@ -46,9 +47,28 @@ the main Onyx language documentation.
 bindings.  Use this variable to explicitly set the key bindings to either
 ``emacs'' or ``vi''.
 \item[ONYXRC: ] If this variable is set to the name of a file, that file will be
-executed as part of the initialization of interactive onyx sessions.  A typical
-setting for this would be ``{\twid}/.onyxrc''.
+evaluated as part of the initialization of interactive onyx sessions.  A typical
+setting for this would be ``{\tt {\twid}/.onyxrc}''.
 \end{description}
+
+\section{Initialization for interactive sessions}
+When \binname{onyx} is run interactively, there are several stages of
+initialization, some of which can be controlled directly by the user.
+
+\begin{enumerate}
+\item{The interpreter is booted.}
+\item{Standard I/O is set up.}
+\item{The initial thread is created and used by all subsequent steps.}
+\item{The initial thread's stdin is modified to support interactive command line
+editing.}
+\item{Language changes specific to interactive invocation are made (see
+Section~\ref{sec:onyx_lang_diffs}).}
+\item{If the {\tt ONYXRC} environment variable is set, then the contents of the
+file it specifies are evaluated.}
+\item{Initialization expressions and scripts (specified by the {\tt -i} and {\tt
+-s} flags) are evaluated in the order they are specified on the command line.}
+\item{stdin is evaluated.}
+\end{enumerate}
 
 \section{Language differences}
 \label{sec:onyx_lang_diffs}
@@ -57,7 +77,7 @@ If \binname{onyx} is being run interactively:
 \label{onyx_interactive:stop}
 \index{stop@\onyxop{}{stop}{}}
 \item{The name ``stop'' is redefined in the initial thread's errordict to
-recursively execute the stdin file in a stopped context in order to keep the
+recursively evaluate the stdin file in a stopped context in order to keep the
 interpreter from exiting on error.  It is possible (though generally unlikely,
 since the user must type a very long line of code) for buffering of stdin to
 cause strange things to occur; any additional program execution after an error

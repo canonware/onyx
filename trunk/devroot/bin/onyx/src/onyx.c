@@ -28,6 +28,12 @@ interactive_nxcode(cw_nxo_t *a_thread);
 #define CW_PROMPT_STRLEN 80
 #define CW_BUFFER_SIZE 512
 
+typedef struct
+{
+    cw_bool_t is_expr;
+    cw_uint8_t *str; /* If is_expr is FALSE: filename; expression otherwise. */
+} cw_nxinit_t;
+
 #if (!defined(CW_POSIX_FILE) || !defined(CW_USE_MODPROMPT))
 struct nx_read_arg_s
 {
@@ -60,7 +66,7 @@ void
 usage(void);
 
 int
-interactive_run(int argc, char **argv, char **envp, cw_uint8_t **a_init,
+interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 		cw_uint32_t a_ninit);
 
 int
@@ -100,7 +106,8 @@ main(int argc, char **argv, char **envp)
     cw_bool_t opt_version = FALSE;
     cw_uint8_t *opt_expression = NULL;
     cw_uint32_t opt_ninit = 0;
-    cw_uint8_t **opt_init = NULL;
+    cw_nxinit_t *opt_init = NULL;
+//    cw_uint8_t **opt_init = NULL;
 
     libonyx_init();
 
@@ -113,7 +120,7 @@ main(int argc, char **argv, char **envp)
 			* the end of the argument list. */
 		       "+"
 #endif
-		       "hVe:i:")) != -1)
+		       "hVe:i:s:")) != -1)
     {
 	switch (c)
 	{
@@ -147,18 +154,36 @@ main(int argc, char **argv, char **envp)
 		opt_ninit++;
 		if (opt_ninit == 1)
 		{
-		    opt_init = (cw_uint8_t **)cw_malloc(sizeof(cw_uint8_t *));
+		    opt_init = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
 		}
 		else
 		{
-		    opt_init = (cw_uint8_t **)cw_realloc(opt_init,
-							 sizeof(cw_uint8_t *)
+		    opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
+							 sizeof(cw_nxinit_t)
 							 * opt_ninit);
 		}
-		opt_init[opt_ninit - 1] = optarg;
+		opt_init[opt_ninit - 1].is_expr = TRUE;
+		opt_init[opt_ninit - 1].str = optarg;
 		break;
 	    }
 #endif
+	    case 's':
+	    {
+		opt_ninit++;
+		if (opt_ninit == 1)
+		{
+		    opt_init = (cw_nxinit_t *)cw_malloc(sizeof(cw_nxinit_t));
+		}
+		else
+		{
+		    opt_init = (cw_nxinit_t *)cw_realloc(opt_init,
+							 sizeof(cw_nxinit_t)
+							 * opt_ninit);
+		}
+		opt_init[opt_ninit - 1].is_expr = FALSE;
+		opt_init[opt_ninit - 1].str = optarg;
+		break;
+	    }
 	    default:
 	    {
 		fprintf(stderr,  "onyx: Unrecognized option\n");
@@ -210,26 +235,28 @@ usage(void)
 	   "    onyx -h\n"
 	   "    onyx -V\n"
 	   "    onyx [-e <expr>]\n"
-	   "    onyx [-i <file>]*\n"
+	   "    onyx [-i <expr>]* [-s <file>]*\n"
 	   "    onyx <file> [<args>]\n"
 	   "\n"
 	   "    Option    | Description\n"
-	   "    ----------+--------------------------------------------------------\n"
+	   "    ----------+--------------------------------------------\n"
 	   "    -h        | Print usage and exit.\n"
 	   "    -V        | Print version information and exit.\n"
-	   "    -e <expr> | Execute <expr> as Onyx code.\n"
+	   "    -e <expr> | Evaluate <expr>.\n"
+	   "    -i <expr> | Evaluate initialization <expr>.\n"
 #ifdef CW_POSIX_FILE
-	   "    -i <file> | Execute contents of <file> as Onyx initialization code.\n"
+	   "    -s <file> | Evaluate contents of initialization <file>.\n"
 #endif
 	   );
 }
 
 int
-interactive_run(int argc, char **argv, char **envp, cw_uint8_t **a_init,
+interactive_run(int argc, char **argv, char **envp, cw_nxinit_t *a_init,
 		cw_uint32_t a_ninit)
 {
     int retval;
     cw_nx_t nx;
+    cw_nxo_t *nxo;
 #ifdef CW_POSIX_FILE
     cw_uint32_t i;
     char *init;
@@ -255,17 +282,6 @@ interactive_run(int argc, char **argv, char **envp, cw_uint8_t **a_init,
     interactive_nxcode(&thread);
 
 #ifdef CW_POSIX_FILE
-    /* Run initialization scripts, if any. */
-    for (i = 0; i < a_ninit; i++)
-    {
-	if (file_setup(&nx, &thread, (char *)a_init[i]))
-	{
-	    retval = 1;
-	    goto RETURN;
-	}
-	nxo_thread_start(&thread);
-    }
-
     /* Run RC ("run commands") file specified by ONYXRC environment variable,
      * if any. */
     init = getenv("ONYXRC");
@@ -278,7 +294,38 @@ interactive_run(int argc, char **argv, char **envp, cw_uint8_t **a_init,
 	}
 	nxo_thread_start(&thread);
     }
+
+    /* Run initialization scripts, if any. */
+    for (i = 0; i < a_ninit; i++)
+    {
+	if (a_init[i].is_expr)
+	{
+	    /* Set up string for evaluation. */
+	    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+	    nxo_string_new(nxo, &nx, FALSE, strlen((char *) a_init[i].str));
+	    nxo_attr_set(nxo, NXOA_EXECUTABLE);
+	    nxo_string_set(nxo, 0, (cw_uint8_t *) a_init[i].str,
+			   nxo_string_len_get(nxo));
+	}
+	else
+	{
+	    /* Set up file for evaluation. */
+	    if (file_setup(&nx, &thread, (char *) a_init[i].str))
+	    {
+		retval = 1;
+		goto RETURN;
+	    }
+	}
+	nxo_thread_start(&thread);
+    }
 #endif
+
+    /* Push an executable stdin on ostack.  This must be done after loading
+     * modprompt, as well as after any initialization scripts that are specified
+     * on the command line. */
+    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+    nxo_dup(nxo, nxo_thread_stdin_get(&thread));
+    nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
     /* Run the interpreter such that it will not exit on errors. */
     nxo_thread_start(&thread);
@@ -329,14 +376,12 @@ batch_run(int argc, char **argv, char **envp, cw_bool_t a_version,
     else if (a_expression != NULL)
     {
 	cw_nxo_t *string;
-	cw_uint8_t *str;
 
 	/* Push the string onto the execution stack. */
 	string = nxo_stack_push(nxo_thread_ostack_get(&thread));
 	nxo_string_new(string, &nx, FALSE, strlen((char *) a_expression));
 	nxo_attr_set(string, NXOA_EXECUTABLE);
-	str = nxo_string_get(string);
-	memcpy(str, a_expression, nxo_string_len_get(string));
+	nxo_string_set(string, 0, a_expression, nxo_string_len_get(string));
     }
     else if (optind < argc)
     {
