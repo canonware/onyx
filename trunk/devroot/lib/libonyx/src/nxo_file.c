@@ -459,7 +459,11 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * data are available.
 					 */
 					events.fd = file->fd;
-					events.events = POLLIN | POLLRDNORM;
+					events.events = POLLIN
+#ifdef POLLRDNORM
+					    | POLLRDNORM
+#endif
+					    ;
 					while ((poll(&events, 1, -1)) == -1)
 						; /* EINTR; try again. */
 
@@ -484,7 +488,11 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 					 * Only read if data are available.
 					 */
 					events.fd = file->fd;
-					events.events = POLLIN | POLLRDNORM;
+					events.events = POLLIN
+#ifdef POLLRDNORM
+					    | POLLRDNORM
+#endif
+					    ;
 					while ((nready = poll(&events, 1, 0)) ==
 					    -1)
 						; /* EINTR; try again. */

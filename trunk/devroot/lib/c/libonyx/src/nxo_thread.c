@@ -26,6 +26,16 @@
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
+/*
+ * These should be defined by the system headers, but Linux fails to do so.
+ */
+#ifndef LLONG_MIN
+#define	LLONG_MIN (-0x7fffffffffffffffLL -1)
+#endif
+#ifndef LLONG_MAX
+#define	LLONG_MAX 0x7fffffffffffffffLL
+#endif
+
 cw_nxn_t
 nxo_threade_nxn(cw_nxo_threade_t a_threade)
 {

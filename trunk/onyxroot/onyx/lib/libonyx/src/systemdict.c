@@ -814,7 +814,9 @@ systemdict_chmod(cw_nxo_t *a_thread)
 			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
 			break;
 		case EACCES:
+#ifdef EFTYPE
 		case EFTYPE:
+#endif
 		case EINVAL:
 		case ELOOP:
 		case ENAMETOOLONG:
@@ -1553,6 +1555,12 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		 */
 		while ((error = readdir_r(dir, &ent, &entp) == 0) && entp ==
 		    &ent) {
+/*
+ * OSes don't agree on field naming!
+ */
+#ifndef d_namlen
+#define	d_namlen	d_reclen
+#endif
 			_cw_assert(ent.d_namlen < PATH_MAX);
 
 			/*
