@@ -29,7 +29,8 @@ typedef enum {
 /* Function prototypes. */
 cw_sock_t 	*client_setup(const char *a_rhost, int a_rport, struct timespec
     *a_timeout);
-cw_sock_t	*server_setup(int a_port, struct timespec *a_timeout);
+cw_sock_t	*server_setup(int a_port, cw_uint32_t a_ip, struct timespec
+    *a_timeout);
 char		*get_out_str_pretty(cw_buf_t *a_buf, cw_bool_t is_send, char
     *a_str);
 char		*get_out_str_hex(cw_buf_t *a_buf, cw_bool_t is_send, char
@@ -60,6 +61,7 @@ main(int argc, char **argv)
 	cw_bool_t	cl_error = FALSE;
 	cw_bool_t	opt_verbose = FALSE, opt_quiet = FALSE;
 	int		opt_port = 0;
+	cw_uint32_t	opt_ip = htonl(INADDR_ANY);
 	char		*opt_rhost = "localhost";
 	char		*opt_log = NULL;
 	format_t	opt_format = NONE;
@@ -70,7 +72,7 @@ main(int argc, char **argv)
 
 	dbg_register(cw_g_dbg, "ncat_error");
 
-	while ((c = getopt(argc, argv, "hVvql:f:r:p:t:")) != -1) {
+	while ((c = getopt(argc, argv, "hVvql:f:r:p:i:t:")) != -1) {
 		switch (c) {
 		case 'h':
 			usage();
@@ -81,6 +83,7 @@ main(int argc, char **argv)
 		case 'v':
 			if (opt_verbose) {
 				dbg_register(cw_g_dbg, "libsock_verbose");
+				dbg_register(cw_g_dbg, "socks_verbose");
 				dbg_register(cw_g_dbg, "libsock_error");
 				dbg_register(cw_g_dbg, "socks_error");
 				dbg_register(cw_g_dbg, "sock_error");
@@ -157,6 +160,26 @@ main(int argc, char **argv)
 
 			break;
 		}
+		case 'i':
+			if (strcmp(optarg, "ANY") == 0) {
+				/* Same as default. */
+				opt_ip = htonl(INADDR_ANY);
+			} else if (strcmp(optarg, "LOOPBACK") == 0)
+				opt_ip = htonl(INADDR_LOOPBACK);
+			else {
+				struct in_addr	addr;
+
+				if (inet_aton(optarg, &addr) == 0) {
+					/* Conversion error. */
+					_cw_out_put("Invalid IP address "
+					    "specified with \"-i\" flag\n");
+					usage();
+					retval = 1;
+					goto RETURN;
+				}
+				opt_ip = addr.s_addr;
+			}
+			break;
 		case 't':
 			tout = _cw_malloc(sizeof(struct timespec));
 			tout->tv_sec = strtoul(optarg, NULL, 10);
@@ -230,7 +253,7 @@ main(int argc, char **argv)
 		sock = client_setup(opt_rhost, opt_port, tout);
 	} else {
 		/* Solicit a client connection. */
-		sock = server_setup(opt_port, tout);
+		sock = server_setup(opt_port, opt_ip, tout);
 	}
 
 	if (sock == NULL) {
@@ -431,7 +454,7 @@ client_setup(const char *a_rhost, int a_rport, struct timespec * a_timeout)
 }
 
 cw_sock_t *
-server_setup(int a_port, struct timespec * a_timeout)
+server_setup(int a_port, cw_uint32_t a_ip, struct timespec *a_timeout)
 {
 	cw_sock_t	*retval;
 	cw_socks_t	*socks;
@@ -440,7 +463,7 @@ server_setup(int a_port, struct timespec * a_timeout)
         socks = socks_new();
 
         port = ask_port = a_port;
-	if (socks_listen(socks, INADDR_ANY, &port)) {
+	if (socks_listen(socks, a_ip, &port)) {
 		retval = NULL;
 		goto RETURN;
 	}
@@ -721,7 +744,7 @@ usage(void)
 	    "    [s] -h\n"
 	    "    [s] -V\n"
 	    "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -r [[<rhost>:]<rport>\n"
-	    "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] -p <port>\n"
+	    "    [s] [[-v [[-v] | -q] [[-l <logfile> [[-f <format>]] [[-t <timeout>] [[-i <ip>] -p <port>\n"
 	    "\n"
 	    "    Option               | Description\n"
 	    "    ---------------------+-----------------------------------------------------\n"

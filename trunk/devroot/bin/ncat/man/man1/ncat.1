@@ -22,6 +22,8 @@ ncat - catenate and print using TCP/IP
 .br
 .B ncat
 .RI [ <common-flags> ]
+.RI [ -\i
+.IR <ip> ]
 .B \-p
 .I <port>
 .br
@@ -71,6 +73,14 @@ ascii
 .RE
 .IP \-h
 Display usage information and exit.
+.PP
+.B \-i
+.I <ip>
+.RS
+In server mode (\-p specified), bind to IP address
+.IR <ip> .
+The special values of ANY (default) and LOOPBACK are supported.
+.RE
 .PP
 .B \-p
 .I <port>

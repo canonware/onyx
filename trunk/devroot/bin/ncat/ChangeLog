@@ -1,3 +1,7 @@
+2000-12-01  Jason Evans  <jasone@canonware.com>
+
+	* src/ncat.c: Add the -i flag.
+
 2000-10-31  Jason Evans  <jasone@canonware.com>
 
 	* src/ncat.c (get_out_str_pretty): Use an indexed array for
