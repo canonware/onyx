@@ -124,6 +124,8 @@ optclass:new
     [`fake_argv_11' `-b' `-a' `remainder' `arguments']
 
     [`fake_argv_12' `-b' `bam' `remainder' `arguments']
+
+    [`fake_argv_13' `--foo' `--bar' `--' `--biz=bang' `more' `remainder']
 ]{
     `=== ' print
     dup 1 sprints print

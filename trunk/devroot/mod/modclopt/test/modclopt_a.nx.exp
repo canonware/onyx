@@ -64,4 +64,9 @@ Remainder: [`remainder' `arguments']
 1 --> -b ==> `bam'
 Parse success
 Remainder: [`remainder' `arguments']
+=== [`fake_argv_13' `--foo' `--bar' `--' `--biz=bang' `more' `remainder'] ===
+1 --> --foo ==> null
+2 --> --bar ==> null
+Parse success
+Remainder: [`--biz=bang' `more' `remainder']
 Test end

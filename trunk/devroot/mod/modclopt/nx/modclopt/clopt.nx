@@ -74,6 +74,16 @@ clopt <
 	} ifelse
     } bind
 
+    #instance#
+    #- remainder #remainder/null
+    $remainder {
+	;data $remainder known {
+	    ,remainder
+	}{
+	    null
+	} ifelse
+    } bind
+
     # Parse #argv.
     #
     #instance#
@@ -121,6 +131,13 @@ clopt <
 		;p_longopt_dispatch
 		#argv #i
 	    }{
+	    dup `^--$' match {
+		# Terminate argument processing.  Make the remainder of the
+		# arguments (not including the --) available via :remainder.
+		pop inc
+		#argv #i+1
+		exit
+	    }{
 	    dup `^-..*' match {
 		# Short format option.
 		#argv #i #elm
@@ -135,6 +152,7 @@ clopt <
 		exit
 	    } ifelse
 	    } ifelse
+	    } ifelse
 	    #argv #i
 
 	    # Increment index.
@@ -145,6 +163,7 @@ clopt <
 	#argv #i #remlen
 	getinterval
 	#remainder
+	$remainder over ;def
     } bind
 
     # Dispatch a long format option.
