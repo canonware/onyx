@@ -223,6 +223,7 @@ if test "x$build_onyx" = "xyes" ; then
   AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
   AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
 
+  mkdir -p $objdir/bin/onyx/man/man1
   cfgoutputs="$cfgoutputs bin/onyx/man/man1/onyx.1"
 fi
 
