@@ -171,30 +171,6 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
   OTESTS = [OTESTS] [otests];
 }
 
-/* Perl scripts that drive other tests and use the sequence mode of verify. */
-{
-  local ptests = ;
-  ptests = [fromto % [srcdir]/bin/onyx/test/% [ptests]];
-
-  PTESTS = [PTESTS] [ptests];
-}
-
-/* C programs that are driven by tests. */
-{
-  local cbtests = ;
-  cbtests = [fromto % [srcdir]/bin/onyx/test/% [cbtests]];
-
-  CBTESTS = [CBTESTS] [cbtests];
-}
-
-/* Onyx programs that are driven by tests. */
-{
-  local obtests = ;
-  obtests = [fromto % [srcdir]/bin/onyx/test/% [obtests]];
-
-  OBTESTS = [OBTESTS] [obtests];
-}
-
 /* LaTeX source files. */
 {
   local tex_srcs = ;
@@ -202,14 +178,6 @@ SRCS = [SRCS] [ONYX_SRCS] [TONYX_SRCS];
   tex_srcs = [tex_srcs] [objdir]/bin/onyx/doc/latex/manual.tex;
 
   TEX_SRCS = [TEX_SRCS] [tex_srcs];
-}
-
-/* xfig source files. */
-{
-  local fig_srcs = ;
-  fig_srcs = [fromto % [srcdir]/bin/onyx/doc/latex/% [fig_srcs]];
-
-  FIG_SRCS = [FIG_SRCS] [fig_srcs];
 }
 
 /* Binaries. */
@@ -244,6 +212,10 @@ onyx : [ONYX];
 tonyx : [TONYX];
 
 onyx_install_self : [ONYX]
+#if [matches macho [abi]]
+/* Make sure install_name is set correctly before relinking. */
+                    install_libs
+#endif
 {
   [INSTALL] -d [PREFIX]/bin;
   [CC] [A_CFLAGS] -o [PREFIX]/bin/onyx
