@@ -56,7 +56,9 @@ struct cw_sock_s
  *
  * a_sock : Pointer to space for a sock, or NULL.
  *
- * a_in_max_buf_size : Maximum number of bytes of incoming data to buffer.
+ * a_in_max_buf_size : Maximum number of bytes of incoming data to buffer.  A
+ *                     value of 0 will prevent the sockb thread from ever trying
+ *                     to read from the discriptor.
  *
  * <<< Output(s) >>>
  *
@@ -168,6 +170,8 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
  *
  * a_sock_fd : File descriptor number.
  *
+ * a_init : FALSE == use a_sockfd as is, TRUE == initialize a_sockfd.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
@@ -179,7 +183,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
  *
  ****************************************************************************/
 cw_bool_t
-sock_wrap(cw_sock_t * a_sock, int a_sockfd);
+sock_wrap(cw_sock_t * a_sock, int a_sockfd, cw_bool_t a_init);
 
 /****************************************************************************
  *

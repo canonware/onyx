@@ -2,6 +2,7 @@
 *.core
 core
 proxy
+ncat
 blow
 suck
 echos

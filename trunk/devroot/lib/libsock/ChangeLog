@@ -1,9 +1,25 @@
 1999-09-17  Jason Evans  <jasone@canonware.com>
 
+	* src/sock.c (sock_new): Treat (0 == a_in_max_buf_size) as a
+	special case, such that the sockb thread will never try to read
+	data for the sock.
+
+	(sock_wrap): Add the a_init argument.  This bypasses all internal
+	socket configuration.
+
+	(sock_read): Don't return an error due to disconnection until all
+	buffered incoming data have been consumed.
+
+	* bin/ncat.c: Add.  `ncat' pipes data read from stdin to a sock,
+	and pipes the data read from the sock to stdout.
+
 	* src/sockb.c (sockb_p_entry_func): Fix a race condition bug that
 	could result in no mq message being sent when using
 	sockb_in_notify() if a socket is remotely disconnected after the
 	last time that the program calls a sock_*() function.
+
+	Only send an mq message after readv() if the sock's input buffer
+	was empty before the readv().
 
 1999-09-14  Jason Evans  <jasone@canonware.com>
 

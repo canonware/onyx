@@ -14,7 +14,7 @@
  *
  ****************************************************************************/
 
-/*  #define _LIBSTASH_SOCKB_CONFESS */
+/*  #define _LIBSOCK_SOCKB_CONFESS */
 
 #define _LIBSTASH_USE_PEZZ
 #define _LIBSTASH_USE_MQ
@@ -216,26 +216,27 @@ sockb_init(cw_uint32_t a_max_fds, cw_uint32_t a_bufc_size,
 void
 sockb_shutdown(void)
 {
-  _cw_check_ptr(g_sockb);
+  if (NULL != g_sockb)
+  {
+    /* Tell the back end thread to quit, then join on it. */
+    g_sockb->should_quit = TRUE;
+    sockb_l_wakeup();
+    thd_join(&g_sockb->thread);
 
-  /* Tell the back end thread to quit, then join on it. */
-  g_sockb->should_quit = TRUE;
-  sockb_l_wakeup();
-  thd_join(&g_sockb->thread);
-
-  sem_delete(&g_sockb->pipe_sem);
+    sem_delete(&g_sockb->pipe_sem);
   
-  /* Clean up the spare bufc's. */
-  pezz_delete(&g_sockb->bufc_pool);
-  pezz_delete(&g_sockb->buffer_pool);
+    /* Clean up the spare bufc's. */
+    pezz_delete(&g_sockb->bufc_pool);
+    pezz_delete(&g_sockb->buffer_pool);
 
-  pezz_delete(&g_sockb->messages_pezz);
-  mq_delete(&g_sockb->messages);
+    pezz_delete(&g_sockb->messages_pezz);
+    mq_delete(&g_sockb->messages);
 
-  /* Delete the gethostbyname() protection lock. */
-  mtx_delete(&g_sockb->get_ip_addr_lock);
+    /* Delete the gethostbyname() protection lock. */
+    mtx_delete(&g_sockb->get_ip_addr_lock);
   
-  _cw_free(g_sockb);
+    _cw_free(g_sockb);
+  }
 }
 
 cw_bufc_t *
@@ -583,7 +584,7 @@ sockb_p_notify(cw_mq_t * a_mq, int a_sockfd)
   retval = FALSE;
 
   RETURN:
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
   out_put(cw_g_out, "n");
 #endif
   return retval;
@@ -639,17 +640,31 @@ sockb_p_entry_func(void * a_arg)
 	  if ((-1 == regs[sockfd].pollfd_pos) && (max_fds > nfds))
 	  {
 	    /* The sock isn't registered.  Register it. */
-#ifdef _LIBSTASH_SOCKB_CONFESS
-	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-		      "Register [i]\n", sockfd);
-#endif
-	    
 	    regs[sockfd].sock = sock;
 	    regs[sockfd].pollfd_pos = nfds;
 	    regs[sockfd].notify_mq = NULL;
 
 	    fds[nfds].fd = sockfd;
-	    fds[nfds].events = POLLIN;
+	    /* There are no data queued for this sock yet, so it's safe to
+	     * assume that sock_l_get_in_space() tells us the maximum buffer
+	     * size for this sock.  If the buffer size is 0, don't ever try to
+	     * read on this descriptor. */
+	    if (0 != sock_l_get_in_space(sock))
+	    {
+#ifdef _LIBSOCK_SOCKB_CONFESS
+	      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+			"Register [i]\n", sockfd);
+#endif
+	      fds[nfds].events = POLLIN;
+	    }
+	    else
+	    {
+#ifdef _LIBSOCK_SOCKB_CONFESS
+	      out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
+			"Register [i](no in buffer)\n", sockfd);
+#endif
+	      fds[nfds].events = 0;
+	    }
 	    nfds++;
 
 	    /* Notify the sock that it's registered. */
@@ -657,7 +672,7 @@ sockb_p_entry_func(void * a_arg)
 	  }
 	  else
 	  {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Refuse to register [i]\n", sockfd);
 #endif
@@ -673,7 +688,7 @@ sockb_p_entry_func(void * a_arg)
 
 	  if (-1 != regs[sockfd].pollfd_pos)
 	  {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Unregister [i]\n", sockfd);
 #endif
@@ -681,7 +696,7 @@ sockb_p_entry_func(void * a_arg)
 	    nfds--;
 	    if (regs[sockfd].pollfd_pos != nfds)
 	    {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	      out_put(cw_g_out, "h([i]-->[i])", nfds, regs[sockfd].pollfd_pos);
 #endif
 
@@ -699,7 +714,7 @@ sockb_p_entry_func(void * a_arg)
 	      regs[sockfd].notify_mq = NULL;
 	    }
 	  }
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  else
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -718,14 +733,14 @@ sockb_p_entry_func(void * a_arg)
 
 	  if (-1 != regs[sockfd].pollfd_pos)
 	  {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Set [i]w\n", sockfd);
 #endif
 
 	    fds[regs[sockfd].pollfd_pos].events |= POLLOUT;
 	  }
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  else
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -740,14 +755,14 @@ sockb_p_entry_func(void * a_arg)
 
 	  if (-1 != regs[sockfd].pollfd_pos)
 	  {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Set [i]r\n", sockfd);
 #endif
 
 	    fds[regs[sockfd].pollfd_pos].events |= POLLIN;
 	  }
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  else
 	  {
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -764,7 +779,7 @@ sockb_p_entry_func(void * a_arg)
 	  {
 	    _cw_check_ptr(regs[sockfd].sock);
 	    regs[sockfd].notify_mq = message->data.in_notify.mq;
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "regs[[[i]].notify_mq = 0x[p]\n",
 		      sockfd,
@@ -803,7 +818,7 @@ sockb_p_entry_func(void * a_arg)
 	      sockb_p_notify(message->data.in_notify.mq, sockfd);
 	    }
 	    
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		      "Refuse to set regs[[[i]].notify_mq = 0x[p]\n",
 		      sockfd,
@@ -824,7 +839,7 @@ sockb_p_entry_func(void * a_arg)
       _cw_pezz_put(&g_sockb->messages_pezz, (void *) message);
     }
     
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
     {
       cw_uint32_t i;
 
@@ -855,7 +870,7 @@ sockb_p_entry_func(void * a_arg)
 
     num_ready = poll(fds, nfds, -1);
     
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
     out_put(cw_g_out, "-->([i|s:s])\n", num_ready);
 #endif
     
@@ -873,7 +888,7 @@ sockb_p_entry_func(void * a_arg)
     {
 	cw_sint32_t i, j;
       
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
       out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		"Check fd:");
 #endif
@@ -884,7 +899,7 @@ sockb_p_entry_func(void * a_arg)
 	char t_buf[2];
 	ssize_t bytes_read;
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	out_put(cw_g_out, " ([i|s:s]r)", g_sockb->pipe_out);
 #endif
 	
@@ -926,7 +941,7 @@ sockb_p_entry_func(void * a_arg)
       {
 	sockfd = fds[i].fd;
 	
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	out_put(cw_g_out, " [i][s][s][s][s][s][s][s][s][s][s]",
 		sockfd,
 #ifdef POLLIN
@@ -986,7 +1001,7 @@ sockb_p_entry_func(void * a_arg)
 	  
 	  j++;
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "r");
 #endif
 	  /* Ready for reading. */
@@ -995,8 +1010,6 @@ sockb_p_entry_func(void * a_arg)
 	   * incoming buffer. */
 	  max_read = sock_l_get_in_space(regs[sockfd].sock);
 	  
-	  _cw_assert(max_read > 0);
-
 	  /* Build up buf_in to be at least large enough for the readv(). */
 	  while (buf_get_size(&buf_in) < max_read)
 	  {
@@ -1027,7 +1040,8 @@ sockb_p_entry_func(void * a_arg)
 	    }
 	    if (TRUE
 		== buf_append_bufc(&buf_in, bufc, 0,
-				   pezz_get_buffer_size(&g_sockb->buffer_pool)))
+				   pezz_get_buffer_size(
+				     &g_sockb->buffer_pool)))
 	    {
 	      /* As above, we have a memory allocation problem.  Clean up
 	       * bufc, but otherwise take the same approach. */
@@ -1054,14 +1068,15 @@ sockb_p_entry_func(void * a_arg)
 	  }
 	  
 	  /* Get an iovec for reading.  This somewhat goes against the idea of
-	   * never writing the internals of a buf after the buffers have been
-	   * inserted.  However, this is quite safe, since as a result of how we
-	   * use buf_in, we know for sure that there are no other references to
-	   * the byte ranges of the buffers we are writing to. */
+	     * never writing the internals of a buf after the buffers have been
+	     * inserted.  However, this is quite safe, since as a result of how
+	     * we use buf_in, we know for sure that there are no other
+	     * references to the byte ranges of the buffers we are writing
+	     * to. */
 	  iov = buf_get_iovec(&buf_in, max_read, TRUE, &iov_cnt);
 
 	  bytes_read = readv(sockfd, iov, iov_cnt);
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "([i|s:s])", bytes_read);
 #endif
 
@@ -1082,7 +1097,7 @@ sockb_p_entry_func(void * a_arg)
 	      nfds--;
 	      if (regs[sockfd].pollfd_pos != nfds)
 	      {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 		out_put(cw_g_out, "h([i]-->[i])", nfds, i);
 #endif
 	      
@@ -1102,7 +1117,7 @@ sockb_p_entry_func(void * a_arg)
 		}
 	      }
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	      out_put(cw_g_out, "\n");
 #endif
 	      continue;
@@ -1117,14 +1132,14 @@ sockb_p_entry_func(void * a_arg)
 	      {
 		/* Turn off the read bit for this sock.  The sock will send a
 		 * message when there is once again space. */
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 		out_put(cw_g_out, "u");
 #endif
 		fds[i].events ^= (fds[i].events & POLLIN);
 	      }
 
-	      /* Only send a message if the sock buffer was empty before we put
-	       * data in it. */
+	      /* Only send a message if the sock buffer was empty before we
+	       * put data in it. */
 	      if (0 == (max_read - (in_buf_free + bytes_read)))
 	      {
 		if (NULL != regs[sockfd].notify_mq)
@@ -1151,7 +1166,7 @@ sockb_p_entry_func(void * a_arg)
 	    nfds--;
 	    if (regs[sockfd].pollfd_pos != nfds)
 	    {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	      out_put(cw_g_out, "h([i]-->[i])", nfds, i);
 #endif
 	      
@@ -1171,7 +1186,7 @@ sockb_p_entry_func(void * a_arg)
 	      }
 	    }
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put(cw_g_out, "\n");
 #endif
 	    continue;
@@ -1191,7 +1206,7 @@ sockb_p_entry_func(void * a_arg)
 	  /* Linux (seemingly correctly) sets POLLHUP instead of POLLIN when a
 	   * socket is closed. */
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "c");
 #endif
 
@@ -1205,7 +1220,7 @@ sockb_p_entry_func(void * a_arg)
 	  nfds--;
 	  if (regs[sockfd].pollfd_pos != nfds)
 	  {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    out_put(cw_g_out, "h([i]-->[i])", nfds, i);
 #endif
 	      
@@ -1225,7 +1240,7 @@ sockb_p_entry_func(void * a_arg)
 	    }
 	  }
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "\n");
 #endif
 	  continue;
@@ -1238,7 +1253,7 @@ sockb_p_entry_func(void * a_arg)
 	  
 	  j++;
 
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "w");
 #endif	  
 	  /* Ready for writing. */
@@ -1258,7 +1273,7 @@ sockb_p_entry_func(void * a_arg)
 	   * in practice very unlikely though, and doesn't cause erroneous
 	   * behavior. */
 	  bytes_written = writev(sockfd, iov, iov_cnt);
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	  out_put(cw_g_out, "([i|s:s]/[i])", bytes_written,
 		  buf_get_size(&tmp_buf));
 #endif
@@ -1271,12 +1286,12 @@ sockb_p_entry_func(void * a_arg)
 	    {
 	      /* The socket has no more outgoing data, so turn the write bit
 	       * off in the master write descriptor set. */
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	      out_put(cw_g_out, "u");
 #endif
 	      fds[i].events ^= (fds[i].events & POLLOUT);
 	    }
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	    else
 	    {
 	      out_put(cw_g_out, "i");
@@ -1300,7 +1315,7 @@ sockb_p_entry_func(void * a_arg)
 	    nfds--;
 	    if (regs[sockfd].pollfd_pos != nfds)
 	    {
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
 	      out_put(cw_g_out, "h([i]-->[i])", nfds, i);
 #endif
 	      regs[fds[nfds].fd].pollfd_pos = i;
@@ -1322,7 +1337,7 @@ sockb_p_entry_func(void * a_arg)
 	  _cw_assert(buf_get_size(&tmp_buf) == 0);
 	}
       }
-#ifdef _LIBSTASH_SOCKB_CONFESS
+#ifdef _LIBSOCK_SOCKB_CONFESS
       out_put(cw_g_out, "\n");
 #endif
     }

@@ -180,7 +180,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
       goto RETURN;
     }
 
-    if (sock_p_config_socket(a_sock))
+    if (sock_p_config_socket(a_sock, TRUE))
     {
       a_sock->sockfd = -1;
       retval = -1;
@@ -378,7 +378,7 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
 }
 
 cw_bool_t
-sock_wrap(cw_sock_t * a_sock, int a_sockfd)
+sock_wrap(cw_sock_t * a_sock, int a_sockfd, cw_bool_t a_init)
 {
   cw_bool_t retval;
   
@@ -393,17 +393,19 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd)
   }
 
   a_sock->sockfd = a_sockfd;
-  if (sock_p_config_socket(a_sock))
+  if (sock_p_config_socket(a_sock, a_init))
   {
     a_sock->sockfd = -1;
     retval = TRUE;
   }
   else
   {
-    /* Get the port number for the socket. */
+    if (TRUE == a_init)
     {
       struct sockaddr_in name;
       int name_size;
+      
+      /* Get the port number for the socket. */
 
       name_size = sizeof(name);
       if (0 > getsockname(a_sock->sockfd,
@@ -422,6 +424,10 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd)
       {
 	a_sock->port = (cw_uint32_t) ntohs(name.sin_port);
       }
+    }
+    else
+    {
+      a_sock->port = 0;
     }
     
     a_sock->is_connected = TRUE;
@@ -477,8 +483,38 @@ sock_read(cw_sock_t * a_sock, cw_buf_t * a_spare, cw_sint32_t a_max_read,
   mtx_lock(&a_sock->in_lock);
   if (a_sock->error)
   {
+    /* Even though the sock has been closed, give the user back any queued data
+     * before indicating an error. */
+    
+    size = buf_get_size(&a_sock->in_buf);
+    if (0 == size)
+    {
+      retval = -2;
+    }
+    else if ((a_max_read == 0) || (size < a_max_read))
+    {
+      if (TRUE == (buf_catenate_buf(a_spare, &a_sock->in_buf, FALSE)))
+      {
+	retval = -1;
+      }
+      else
+      {
+	retval = size;
+      }
+    }
+    else
+    {
+      if (TRUE == (buf_split(a_spare, &a_sock->in_buf, a_max_read)))
+      {
+	retval = -1;
+      }
+      else
+      {
+	retval = a_max_read;
+      }
+    }
+    
     mtx_unlock(&a_sock->in_lock);
-    retval = -2;
   }
   else
   {
@@ -932,56 +968,120 @@ sock_l_error_callback(cw_sock_t * a_sock)
 }
 
 static cw_bool_t
-sock_p_config_socket(cw_sock_t * a_sock)
+sock_p_config_socket(cw_sock_t * a_sock, cw_bool_t a_init)
 {
   cw_bool_t retval;
   int val, len;
   struct linger linger_struct;
-  
-  /* Print out all kinds of socket info. */
-  if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
+
+  if (TRUE == a_init)
   {
-    /* Define a macro to do the drudgery of getting an option and printing it,
-     * since we're doing this quite a few times. */
+    /* Print out all kinds of socket info. */
+    if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
+    {
+      /* Define a macro to do the drudgery of getting an option and printing it,
+       * since we're doing this quite a few times. */
 #define _CW_SOCK_GETSOCKOPT(a) \
-    len = sizeof(val); \
-    if (getsockopt(a_sock->sockfd, SOL_SOCKET, (a), \
-		   (void *) &val, &len)) \
-    { \
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
+      len = sizeof(val); \
+      if (getsockopt(a_sock->sockfd, SOL_SOCKET, (a), \
+	  	     (void *) &val, &len)) \
+      { \
+        out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
 		  "Error for [s] in getsockopt(): [s]\n", \
                   #a, strerror(errno)); \
-      retval = TRUE; \
-      goto RETURN; \
-    } \
-    else \
-    { \
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
+        retval = TRUE; \
+        goto RETURN; \
+      } \
+      else \
+      { \
+        out_put_e(cw_g_out, NULL, 0, __FUNCTION__, \
 		  "[s]: [i]\n", #a, val); \
-    }
+      }
 
-    _CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
+      _CW_SOCK_GETSOCKOPT(SO_REUSEADDR);
 #ifdef SO_REUSEPORT
-    _CW_SOCK_GETSOCKOPT(SO_REUSEPORT);
+      _CW_SOCK_GETSOCKOPT(SO_REUSEPORT);
 #endif
-    _CW_SOCK_GETSOCKOPT(SO_KEEPALIVE);
-    _CW_SOCK_GETSOCKOPT(SO_OOBINLINE);
-    _CW_SOCK_GETSOCKOPT(SO_SNDBUF);
-    _CW_SOCK_GETSOCKOPT(SO_RCVBUF);
+      _CW_SOCK_GETSOCKOPT(SO_KEEPALIVE);
+      _CW_SOCK_GETSOCKOPT(SO_OOBINLINE);
+      _CW_SOCK_GETSOCKOPT(SO_SNDBUF);
+      _CW_SOCK_GETSOCKOPT(SO_RCVBUF);
 #ifdef SO_SNDLOWAIT
-    _CW_SOCK_GETSOCKOPT(SO_SNDLOWAT);
+      _CW_SOCK_GETSOCKOPT(SO_SNDLOWAT);
 #endif
 #ifdef SO_RCVLOWAIT
-    _CW_SOCK_GETSOCKOPT(SO_RCVLOWAT);
+      _CW_SOCK_GETSOCKOPT(SO_RCVLOWAT);
 #endif
 #ifdef SO_SNDTIMEO
-    _CW_SOCK_GETSOCKOPT(SO_SNDTIMEO);
+      _CW_SOCK_GETSOCKOPT(SO_SNDTIMEO);
 #endif
 #ifdef SO_RCVTIMEO
-    _CW_SOCK_GETSOCKOPT(SO_RCVTIMEO);
+      _CW_SOCK_GETSOCKOPT(SO_RCVTIMEO);
 #endif
 
 #undef _CW_SOCK_GETSOCKOPT
+    }
+  
+    /* Tell the socket to wait and try to flush buffered data before closing at
+     * the end.
+     *
+     * 10 seconds is a bit arbitrary, eh? */
+    linger_struct.l_onoff = 1;
+    linger_struct.l_linger = 10;
+    if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER,
+		   (void *) &linger_struct, sizeof(linger_struct)))
+    {
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Error for SO_LINGER in setsockopt(): [s]\n",
+		  strerror(errno));
+      }
+      retval = TRUE;
+      goto RETURN;
+    }
+    else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"SO_LINGER: [s], [i] second[s]\n",
+		linger_struct.l_onoff ? "on" : "off",
+		linger_struct.l_linger,
+		linger_struct.l_linger != 1 ? "s" : "");
+    }
+
+#ifdef SO_SNDLOWAIT
+    /* Set the socket to not buffer outgoing data without trying to send it. */
+    val = 1;
+    if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT,
+		   (void *) &val, sizeof(val)))
+    {
+      if (dbg_is_registered(cw_g_dbg, "sock_error"))
+      {
+	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		  "Error for SO_SNDLOWAT in setsockopt(): [s]\n",
+		  strerror(errno));
+      }
+      retval = TRUE;
+      goto RETURN;
+    }
+    else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"SO_SNDLOWAT: [d]\n", val);
+    }
+#endif
+
+    /* Re-use the socket. */
+    val = 1;
+    if (0 > setsockopt(a_sock->sockfd, SOL_SOCKET, SO_REUSEADDR,
+		       (void *) &val, sizeof(val)))
+    {
+      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
+		"Error for SO_REUSEADDR in setsockopt(): [s]\n",
+		strerror(errno));
+      retval = TRUE;
+      goto RETURN;
+    }
   }
 
   /* Get the size of the OS's incoming buffer, so that we don't place undo
@@ -993,10 +1093,17 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (getsockopt(a_sock->sockfd, SOL_SOCKET, (SO_RCVBUF),
 		   (void *) &a_sock->os_inbuf_size, &len))
     {
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for SO_RCVBUF in getsockopt(): [s]\n", strerror(errno));
-      retval = TRUE;
-      goto RETURN;
+/*        if (dbg_is_registered(cw_g_dbg, "sock_error")) */
+/*        { */
+/*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  		  "Error for SO_RCVBUF in getsockopt(): [s]\n", */
+/*  		  strerror(errno)); */
+/*        } */
+      
+      /* Just choose some number... */
+      a_sock->os_inbuf_size = 65536;
+/*        retval = TRUE; */
+/*        goto RETURN; */
     }
   }
   
@@ -1009,14 +1116,17 @@ sock_p_config_socket(cw_sock_t * a_sock)
     if (getsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDBUF,
 		   (void *) &a_sock->os_outbuf_size, &len))
     {
-      if (dbg_is_registered(cw_g_dbg, "sock_error"))
-      {
-	out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		  "Error for SO_SNDBUF in getsockopt(): [s]\n",
-		  strerror(errno));
-      }
-      retval = TRUE;
-      goto RETURN;
+/*        if (dbg_is_registered(cw_g_dbg, "sock_error")) */
+/*        { */
+/*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
+/*  		  "Error for SO_SNDBUF in getsockopt(): [s]\n", */
+/*  		  strerror(errno)); */
+/*        } */
+
+      /* Just choose some number... */
+      a_sock->os_outbuf_size = 65536;
+/*        retval = TRUE; */
+/*        goto RETURN; */
     }
   }
 
@@ -1044,66 +1154,6 @@ sock_p_config_socket(cw_sock_t * a_sock)
     goto RETURN;
   }
 
-  /* Tell the socket to wait and try to flush buffered data before closing at
-   * the end.
-   *
-   * 10 seconds is a bit arbitrary, eh? */
-  linger_struct.l_onoff = 1;
-  linger_struct.l_linger = 10;
-  if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_LINGER,
-		 (void *) &linger_struct, sizeof(linger_struct)))
-  {
-    if (dbg_is_registered(cw_g_dbg, "sock_error"))
-    {
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for SO_LINGER in setsockopt(): [s]\n", strerror(errno));
-    }
-    retval = TRUE;
-    goto RETURN;
-  }
-  else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
-  {
-    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "SO_LINGER: [s], [i] second[s]\n",
-	      linger_struct.l_onoff ? "on" : "off",
-	      linger_struct.l_linger,
-	      linger_struct.l_linger != 1 ? "s" : "");
-  }
-
-#ifdef SO_SNDLOWAIT
-  /* Set the socket to not buffer outgoing data without trying to send it. */
-  val = 1;
-  if (setsockopt(a_sock->sockfd, SOL_SOCKET, SO_SNDLOWAT,
-		 (void *) &val, sizeof(val)))
-  {
-    if (dbg_is_registered(cw_g_dbg, "sock_error"))
-    {
-      out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-		"Error for SO_SNDLOWAT in setsockopt(): [s]\n",
-		strerror(errno));
-    }
-    retval = TRUE;
-    goto RETURN;
-  }
-  else if (dbg_is_registered(cw_g_dbg, "sock_sockopt"))
-  {
-    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "SO_SNDLOWAT: [d]\n", val);
-  }
-#endif
-
-  /* Re-use the socket. */
-  val = 1;
-  if (0 > setsockopt(a_sock->sockfd, SOL_SOCKET, SO_REUSEADDR,
-		     (void *) &val, sizeof(val)))
-  {
-    out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
-	      "Error for SO_REUSEADDR in setsockopt(): [s]\n",
-	      strerror(errno));
-    retval = TRUE;
-    goto RETURN;
-  }
-  
   retval = FALSE;
   
   RETURN:

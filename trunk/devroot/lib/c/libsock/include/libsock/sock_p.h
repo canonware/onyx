@@ -20,6 +20,8 @@
  *
  * a_sock : Pointer to a sock.
  *
+ * a_init : FALSE == use a_sockfd as is, TRUE == initialize a_sockfd.
+ *
  * <<< Output(s) >>>
  *
  * retval : FALSE == success, TRUE == error.
@@ -32,7 +34,7 @@
  *
  ****************************************************************************/
 static cw_bool_t
-sock_p_config_socket(cw_sock_t * a_sock);
+sock_p_config_socket(cw_sock_t * a_sock, cw_bool_t a_init);
 
 /****************************************************************************
  *

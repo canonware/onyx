@@ -250,7 +250,7 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
     /* Wrap the socket descriptor inside a sock. */
     retval = r_sock;
 
-    wrap_error = sock_wrap(retval, sockfd);
+    wrap_error = sock_wrap(retval, sockfd, TRUE);
     if (wrap_error == TRUE)
     {
       retval = NULL;

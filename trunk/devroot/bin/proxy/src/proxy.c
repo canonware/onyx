@@ -124,8 +124,6 @@ main(int argc, char ** argv)
 	dbg_register(cw_g_dbg, "sockb_verbose");
 	dbg_register(cw_g_dbg, "socks_verbose");
 /*  	dbg_register(cw_g_dbg, "sock_sockopt"); */
-	/* Nothing uses this flag. */
-/*      dbg_register(cw_g_dbg, "sock_verbose"); */
 	break;
       }
       case 'q':
