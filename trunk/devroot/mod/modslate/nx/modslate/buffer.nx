@@ -1,0 +1,37 @@
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Slate <Version = slate>
+#
+################################################################################
+
+# Finish initializing the buffer class.
+
+buffer vclass setsuper
+buffer data <
+    $name null
+> copy pop
+buffer methods <
+    #bsize #class new #instance
+    $new {
+	tuck :buffer
+	#class #instance
+
+	:rnew
+	#instance
+    }
+
+    #instance :name #name
+    $name {
+	data $name get
+    }
+
+    #name #instance :setname -
+    $setname {
+	data $name dn put
+    }
+> exch copy pop

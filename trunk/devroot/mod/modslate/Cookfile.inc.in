@@ -31,7 +31,7 @@ MODSLATE_NX_GEN = [fromto %.nx.in @objroot@/mod/modslate/nx/modslate/%.nx
                           ];
 
 MODSLATE_NX = [addprefix @srcroot@/mod/modslate/nx/modslate/
-                         modslate.nx
+                         buffer.nx modslate.nx
                          ];
 
 MODSLATE_CTESTS = [addprefix @srcroot@/mod/modslate/test/

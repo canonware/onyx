@@ -43,28 +43,23 @@ $cs {
     hs
 } def
 
-#=buffer= buffer_name #name
-$buffer_name {
-    buffer_aux_get $name get
-} def
-
 # - status_line -
 $status_line {
     # Reverse video.
     `\e[7m' print
 
     # History.
-    scratch buffer_undoable {
+    scratch:undoable {
 	` [<' print
     }{
 	` [[' print
     } ifelse
-    scratch buffer_history_active {
+    scratch:history_active {
 	`+' print
     }{
 	`-' print
     } ifelse
-    scratch buffer_redoable {
+    scratch:redoable {
 	`>]' print
     }{
 	`]]' print
@@ -72,34 +67,34 @@ $status_line {
 
     # Line.
     ` L' print
-    bpoint marker_line cvs print
+    bpoint:line cvs print
     `/' print
-    scratch buffer_lines cvs print
+    scratch:lines cvs print
 
     # Column.
     ` C' print
-    tpoint dup 0 bpoint marker_seek
-    exch -1 marker_seekline
+    0 bpoint tpoint:seek
+    -1 tpoint:seekline
     sub cvs print
     `/' print
-    tpoint dup 0 bpoint marker_seek pop
-    dup 1 marker_seekline
-    exch -1 marker_seekline
+    0 bpoint tpoint:seek pop
+    1 tpoint:seekline
+    -1 tpoint:seekline
     sub cvs print
 
     # Position.
     ` p' print
-    bpoint marker_position cvs print
+    bpoint:position cvs print
     `/' print
-    scratch buffer_length inc cvs print
+    scratch:length inc cvs print
 
     # Mark.
     ` m' print
-    bmark marker_position cvs print
+    bmark:position cvs print
 
     # Buffer name.
     ` ' print
-    scratch buffer_name print
+    scratch:name print
 
     `\r\n' print
     # Reset attributes.
@@ -108,9 +103,10 @@ $status_line {
 
 #=buffer= b2s #string
 $b2s {
-    tmark dup 0 $SEEK_BOB marker_seek pop
-    tpoint dup 0 $SEEK_EOB marker_seek pop
-    marker_range_get
+    pop
+    0 $SEEK_BOB tmark:seek pop
+    0 $SEEK_EOB tpoint:seek pop
+    tmark tpoint:range_get
 } def
 
 #string srender -
@@ -129,14 +125,13 @@ $redisplay {
     status_line
 
     scratch b2s
-#    stderr over 1 sprints write stderr `\n' write pop
     srender
 
     hs
     `\r\n' print
-    tpoint dup 0 $SEEK_BOB marker_seek pop bpoint marker_range_get
+
+    0 $SEEK_BOB tpoint:seek pop bpoint:range_get
     srender flush
-#    scratch `redisplay ' buffer_dump
 } def
 
 # - getc #string
@@ -149,30 +144,33 @@ $getc {
 
 #string self_insert_char -
 $insert_string {
-    bpoint exch marker_before_insert
-#    scratch `insert_string ' buffer_dump
+    bpoint:before_insert
 } def
 
 # Undefined characters are inserted literally.
 $keytable <
     `\b' {
-	bmark dup 0 bpoint marker_seek pop
-	bpoint dup -1 marker_seek pop
-	marker_range_cut pop
+	0 bpoint bmark:seek pop
+	-1 bpoint:seek pop
+	bmark bpoint:range_cut pop
     }
     # Delete.
     `\x7f' {
-	bmark dup 0 bpoint marker_seek pop
-	bpoint dup -1 marker_seek pop
-	marker_range_cut pop
+	0 bpoint bmark:seek pop
+	-1 bpoint:seek pop
+	bmark bpoint:range_cut pop
     }
     `\cd' {
-	bmark dup 0 bpoint marker_seek pop
-	bpoint dup 1 marker_seek pop
-	marker_range_cut pop
+	0 bpoint bmark:seek pop
+	1 bpoint:seek pop
+	bmark bpoint:range_cut pop
     }
     `\r' {
 	`\n' insert_string
+    }
+    `\cg' {
+	gcdict $stats get eval 2 sprints
+	insert_string
     }
     `\cq' {
 	`\r\nslate GC stats: '
@@ -183,54 +181,56 @@ $keytable <
 	exit
     }
     `\cu' {
-	bpoint buffer_undo
+	# XXX Change syntax to: bpoint scratch:undo
+	bpoint:undo
     }
     `\cr' {
-	bpoint buffer_redo
+	# XXX Change syntax to: bpoint scratch:redo
+	bpoint:redo
     }
     `\cb' {
-	bpoint -1 marker_seek pop
+	-1 bpoint:seek pop
     }
     `\cf' {
-	bpoint 1 marker_seek pop
+	1 bpoint:seek pop
     }
     # C-space
     `\x00' {
-	bmark 0 bpoint marker_seek pop
+	0 bpoint bmark:seek pop
     }
     `\ck' {
 	# Move bmark to eol.
-	bmark 0 bpoint marker_seek pop
-	bmark 1 marker_seekline
+	0 bpoint bmark:seek pop
+	1 bmark:seekline
 
 	# Cut if there are any data to remove.
-	bpoint bmark marker_range_get length 0 gt {
+	bpoint bmark:range_get length 0 gt {
 	    # Start group.
-	    scratch bpoint buffer_history_startgroup
+	    bpoint scratch:history_startgroup
 
 	    # Cut.
-	    bpoint bmark marker_range_cut pop
+	    bpoint bmark:range_cut pop
 
 	    # End group.
-	    scratch buffer_history_endgroup
+	    scratch:history_endgroup
 	} if
     }
     `\cw' {
-	scratch bpoint buffer_history_startgroup
-	bmark bpoint marker_range_cut pop
-	scratch buffer_history_endgroup
+	bpoint scratch:history_startgroup
+	bmark bpoint:range_cut pop
+	scratch_history_endgroup
     }
     `\ca' {
-	bpoint -1 marker_seekline
+	-1 bpoint:seekline
     }
     `\ce' {
-	bpoint 1 marker_seekline
+	1 bpoint:seekline
     }
     `\cs' {
-	scratch bpoint buffer_history_startgroup
+	bpoint scratch:history_startgroup
     }
     `\cg' {
-	scratch buffer_history_endgroup
+	scratch:history_endgroup
     }
     `\ct' {
 	stdin readline pop
@@ -249,11 +249,11 @@ $keytable <
 #	`ABCDEFGH' insert_string
     }
     `\cx' {
-	scratch `dump ' buffer_dump
+	`dump ' scratch:dump
     }
     `\cy' {
-	scratch dup buffer_history_active
-	not buffer_history_setactive
+	scratch:history_active
+	not scratch:history_setactive
     }
     `\cc' {
 	exit
@@ -262,8 +262,6 @@ $keytable <
 
 #string interpc -
 $interpc {
-#    stderr 1 idup cvs write pop stderr `\n' write pop
-#    scratch `interpc ' buffer_dump
     keytable 1 idup known {
 	keytable exch get eval
     }{
@@ -271,21 +269,19 @@ $interpc {
     } ifelse
 } def
 
-$scratch 16 buffer def
-$bpoint scratch marker def
-$tpoint scratch marker def
-$bmark scratch marker def
-$tmark scratch marker def
+$scratch 16 buffer:new def
+$bpoint scratch marker:new def
+$tpoint scratch marker:new def
+$bmark scratch marker:new def
+$tmark scratch marker:new def
 
-scratch <
-    $name	`*scratch*'
-> buffer_aux_set
+`*scratch*' scratch:setname
 
 # XXX
 #2 gcdict $setperiod get eval
 # false gcdict $setactive get eval
 
-scratch true buffer_history_setactive
+true scratch:history_setactive
 
 $disp envdict $TERM get stdin stdout display
 ostack {
@@ -298,8 +294,8 @@ stdin 0 setiobuf {
     redisplay
     getc
     interpc
-#    scratch `' buffer_dump
-    scratch buffer_validate
+#    `' scratch:dump
+    scratch:validate
 } loop
 
 disp display_stop

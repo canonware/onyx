@@ -16,11 +16,11 @@
  * module. */
 static cw_nxo_t modslate_module_handle;
 
-/* Reference iterator function used for modslate handles created via
- * modslate_handles_init().  This function makes sure that
- * modslate_module_handle is not deleted until there are no more handles. */
+/* Reference iterator function used for modslate classes/handles created via
+ * modslate_class_init().  This function makes sure that modslate_module_handle
+ * is not deleted until there are no more handles. */
 static cw_nxoe_t *
-modslate_p_handle_ref_iter(void *a_data, cw_bool_t a_reset)
+modslate_p_ref_iter(void *a_data, cw_bool_t a_reset)
 {
     cw_nxoe_t *retval;
     static cw_uint32_t iter;
@@ -52,6 +52,65 @@ modslate_p_handle_ref_iter(void *a_data, cw_bool_t a_reset)
 }
 
 void
+modslate_class_init(cw_nxo_t *a_thread, const cw_uint8_t *a_name,
+		    const struct cw_modslate_method *a_methods,
+		    cw_uint32_t a_nmethods, void *a_opaque, cw_nxo_t *r_class)
+{
+    cw_nxo_t *tstack, *classname, *class_;
+    cw_nxo_t *data, *methods;
+    cw_nxo_t *name, *value;
+    cw_bool_t currentlocking;
+    cw_uint32_t i;
+
+    tstack = nxo_thread_tstack_get(a_thread);
+    currentlocking = nxo_thread_currentlocking(a_thread);
+
+    /* Create the class name. */
+    classname = nxo_stack_push(tstack);
+    nxo_name_new(classname, a_name, strlen(a_name), FALSE);
+
+    /* Create a class. */
+    class_ = nxo_stack_push(tstack);
+    nxo_class_new(class_, a_opaque, modslate_p_ref_iter, NULL);
+
+    /* Set the class's name. */
+    nxo_dup(nxo_class_name_get(class_), classname);
+
+    /* Create data dict. */
+    data = nxo_class_data_get(class_);
+    nxo_dict_new(data, currentlocking, 0);
+
+    /* Create methods dict. */
+    methods = nxo_class_methods_get(class_);
+    nxo_dict_new(methods, currentlocking, a_nmethods);
+
+    /* Populate methods dict. */
+    name = nxo_stack_push(tstack);
+    value = nxo_stack_push(tstack);
+    for (i = 0; i < a_nmethods; i++)
+    {
+	nxo_name_new(name, a_methods[i].name,
+		     strlen((char *) a_methods[i].name), FALSE);
+	nxo_handle_new(value, NULL, a_methods[i].eval_f,
+		       modslate_p_ref_iter, NULL);
+	nxo_dup(nxo_handle_tag_get(value), name);
+	nxo_attr_set(value, NXOA_EXECUTABLE);
+
+	nxo_dict_def(methods, name, value);
+    }
+
+    /* Define class in currentdict. */
+    nxo_dict_def(nxo_stack_get(nxo_thread_dstack_get(a_thread)),
+		 classname, class_);
+
+    nxo_dup(class_, r_class);
+
+    /* Clean up. */
+    nxo_stack_npop(tstack, 4);
+}
+
+// XXX
+void
 modslate_handles_init(cw_nxo_t *a_thread,
 		      const struct cw_modslate_entry *a_entries,
 		      cw_uint32_t a_nentries)
@@ -71,7 +130,7 @@ modslate_handles_init(cw_nxo_t *a_thread,
 	nxo_name_new(name, a_entries[i].name,
 		     strlen((char *) a_entries[i].name), FALSE);
 	nxo_handle_new(value, NULL, a_entries[i].eval_f,
-		       modslate_p_handle_ref_iter, NULL);
+		       modslate_p_ref_iter, NULL);
 	nxo_dup(nxo_handle_tag_get(value), name);
 	nxo_attr_set(value, NXOA_EXECUTABLE);
 
@@ -81,6 +140,40 @@ modslate_handles_init(cw_nxo_t *a_thread,
     nxo_stack_npop(tstack, 2);
 }
 
+/* Verify that a_nxo has a_class in its inheritance hierarchy. */
+cw_nxn_t
+modslate_instance_kind(cw_nxo_t *a_instance, cw_nxo_t *a_class)
+{
+    cw_nxn_t retval;
+    cw_nxo_t *tclass;
+
+    if (nxo_type_get(a_instance) != NXOT_INSTANCE)
+    {
+	retval = NXN_typecheck;
+	goto RETURN;
+    }
+
+    /* Iterate up the inheritance chain until class_ is found, or the baseclass
+     * is reached. */
+    for (tclass = nxo_instance_isa_get(a_instance);
+	 nxo_type_get(tclass) == NXOT_CLASS;
+	 tclass = nxo_class_super_get(tclass))
+    {
+	if (nxo_compare(a_class, tclass) == 0)
+	{
+	    /* Found. */
+	    retval = NXN_ZERO;
+	    goto RETURN;
+	}
+    }
+
+    /* Not found. */
+    retval = NXN_typecheck;
+    RETURN:
+    return retval;
+}
+
+// XXX
 /* Verify that a_nxo is a =a_type=. */
 cw_nxn_t
 modslate_handle_type(cw_nxo_t *a_handle, const cw_uint8_t *a_type)
@@ -116,7 +209,6 @@ modslate_handle_type(cw_nxo_t *a_handle, const cw_uint8_t *a_type)
     RETURN:
     return retval;
 }
-
 
 /* #object a_type? #boolean */
 void
