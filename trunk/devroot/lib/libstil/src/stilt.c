@@ -149,7 +149,7 @@ stilts_new(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
 void
 stilts_delete(cw_stilts_t *a_stilts, cw_stilt_t *a_stilt)
 {
-	if (a_stilt->state != STATE_START) {
+	if (a_stilt->state != STILTTS_START) {
 		/*
 		 * It's possible that the last token seen hasn't been accepted
 		 * yet.  Reset the internal state so that this won't screw
@@ -224,41 +224,50 @@ stilt_new(cw_stilt_t *a_stilt, cw_stil_t *a_stil)
 		    ch_direct_key_comp);
 		try_stage = 3;
 
-		stils_new(&retval->exec_stils,
+		stils_new(&retval->estack,
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 4;
 
-		stils_new(&retval->data_stils,
+		stils_new(&retval->ostack,
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 5;
 
-		stils_new(&retval->dict_stils,
+		stils_new(&retval->dstack,
 		    stilat_stilsc_pool_get(&a_stilt->stilat));
 		try_stage = 6;
 
+		stils_new(&retval->tstack,
+		    stilat_stilsc_pool_get(&a_stilt->stilat));
+		try_stage = 7;
+
 		/* Push systemdict onto the dictionary stack. */
-		stilo = stils_push(&retval->dict_stils);
+		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, stil_systemdict_get(a_stil));
 
 		/* Push globaldict onto the dictionary stack. */
-		stilo = stils_push(&retval->dict_stils);
+		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, stil_globaldict_get(a_stil));
 
 		/* Create and push userdict onto the dictionary stack. */
 		stilo_dict_new(&retval->userdict, retval,
 		    _CW_STILT_USERDICT_SIZE);
-		stilo = stils_push(&retval->dict_stils);
+		stilo = stils_push(&retval->dstack, retval);
 		stilo_dup(stilo, &retval->userdict);
+
+		/* Create errordict. */
+		errordict_populate(&retval->errordict, retval);
 	}
 	xep_catch (_CW_XEPV_OOM) {
 		retval = (cw_stilt_t *)v_retval;
 		switch (try_stage) {
+		case 7:
+			stils_delete(&retval->tstack, retval);
 		case 6:
-			stils_delete(&retval->dict_stils, retval);
+			stils_delete(&retval->dstack, retval);
 		case 5:
-			stils_delete(&retval->data_stils, retval);
+			stils_delete(&retval->ostack, retval);
 		case 4:
-			stils_delete(&retval->exec_stils, retval);
+			stils_delete(&retval->estack, retval);
 		case 3:
 			dch_delete(&retval->name_hash);
 		case 2:
@@ -295,9 +304,10 @@ stilt_delete(cw_stilt_t *a_stilt)
 		stilt_free(a_stilt, a_stilt->tok_str);
 	}
 
-	stils_delete(&a_stilt->dict_stils, a_stilt);
-	stils_delete(&a_stilt->data_stils, a_stilt);
-	stils_delete(&a_stilt->exec_stils, a_stilt);
+	stils_delete(&a_stilt->tstack, a_stilt);
+	stils_delete(&a_stilt->dstack, a_stilt);
+	stils_delete(&a_stilt->ostack, a_stilt);
+	stils_delete(&a_stilt->estack, a_stilt);
 	dch_delete(&a_stilt->name_hash);
 	stilat_delete(&a_stilt->stilat);
 	if (a_stilt->is_malloced)
@@ -314,14 +324,14 @@ stilt_loop(cw_stilt_t *a_stilt)
 	cw_stilo_t	*stilo, *tstilo;
 	cw_uint32_t	sdepth;
 
-	for (sdepth = stils_count(&a_stilt->exec_stils);
-	     stils_count(&a_stilt->exec_stils) >= sdepth;) {
-		stilo = stils_get(&a_stilt->exec_stils);
+	for (sdepth = stils_count(&a_stilt->estack);
+	     stils_count(&a_stilt->estack) >= sdepth;) {
+		stilo = stils_get(&a_stilt->estack, a_stilt);
 		if (stilo_attrs_get(stilo) == STILOA_LITERAL) {
 			/* Always push literal objects onto the data stack. */
-			tstilo = stils_push(&a_stilt->data_stils);
+			tstilo = stils_push(&a_stilt->ostack, a_stilt);
 			stilo_dup(tstilo, stilo);
-			stils_pop(&a_stilt->exec_stils);
+			stils_pop(&a_stilt->estack, a_stilt);
 			continue;
 		}
 
@@ -335,13 +345,13 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * Always push the object onto the data stack, even
 			 * though it isn't literal.
 			 */
-			tstilo = stils_push(&a_stilt->data_stils);
+			tstilo = stils_push(&a_stilt->ostack, a_stilt);
 			stilo_dup(tstilo, stilo);
-			stils_pop(&a_stilt->exec_stils);
+			stils_pop(&a_stilt->estack, a_stilt);
 			break;
 		case STILOT_NULL:
 			/* Do nothing. */
-			stils_pop(&a_stilt->exec_stils);
+			stils_pop(&a_stilt->estack, a_stilt);
 			break;
 		case STILOT_ARRAY: {
 			cw_uint32_t	i, len;
@@ -349,7 +359,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 
 			len = stilo_array_len_get(stilo);
 			if (len == 0) {
-				stils_pop(&a_stilt->exec_stils);
+				stils_pop(&a_stilt->estack, a_stilt);
 				break;
 			}
 
@@ -371,7 +381,8 @@ stilt_loop(cw_stilt_t *a_stilt)
                                          * data stack.
 					 */
 					tstilo =
-					    stils_push(&a_stilt->data_stils);
+					    stils_push(&a_stilt->ostack,
+					    a_stilt);
 					stilo_dup(tstilo, &array[i]);
 				} else if (stilo_type_get(&array[i]) ==
 				    STILOT_OPERATOR) {
@@ -383,7 +394,8 @@ stilt_loop(cw_stilt_t *a_stilt)
 					 * generic algorithm.
 					 */
 					tstilo =
-					    stils_push(&a_stilt->exec_stils);
+					    stils_push(&a_stilt->estack,
+					    a_stilt);
 					stilo_dup(tstilo, &array[i]);
 					stilt_loop(a_stilt);
 				}
@@ -399,17 +411,17 @@ stilt_loop(cw_stilt_t *a_stilt)
 				 * Always push literal objects onto the
 				 * data stack.
 				 */
-				tstilo = stils_push(&a_stilt->data_stils);
+				tstilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_dup(tstilo, &array[i]);
-				stils_pop(&a_stilt->exec_stils);
+				stils_pop(&a_stilt->estack, a_stilt);
 			} else {
 				/*
 				 * Possible recursion, so use the generic
 				 * algorithm.
 				 */
 				/* XXX GC-unsafe. */
-				stils_pop(&a_stilt->exec_stils);
-				tstilo = stils_push(&a_stilt->exec_stils);
+				stils_pop(&a_stilt->estack, a_stilt);
+				tstilo = stils_push(&a_stilt->estack, a_stilt);
 				stilo_dup(tstilo, &array[i]);
 			}
 			break;
@@ -426,7 +438,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			    stilo_string_len_get(stilo));
 			stilt_flush(a_stilt, &stilts);
 			stilts_delete(&stilts, a_stilt);
-			stils_pop(&a_stilt->exec_stils);
+			stils_pop(&a_stilt->estack, a_stilt);
 
 			break;
 		}
@@ -438,16 +450,16 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * in the dictionary stack, push it onto the
 			 * execution stack, and execute it.
 			 */
-			stilo = stils_get(&a_stilt->exec_stils);
+			stilo = stils_get(&a_stilt->estack, a_stilt);
 			stilo_no_new(&val);
 			if (stilt_dict_stack_search(a_stilt, stilo, &val))
-				xep_throw(_CW_STILX_UNDEFINED);
+				stilt_error(a_stilt, STILTE_UNDEFINED);
 			stilo_move(stilo, &val);
 			break;
 		}
 		case STILOT_OPERATOR:
 			stilo->o.operator.f(a_stilt);
-			stils_pop(&a_stilt->exec_stils);
+			stils_pop(&a_stilt->estack, a_stilt);
 			break;
 		case STILOT_FILE: {
 			cw_stilts_t	stilts;
@@ -459,9 +471,9 @@ stilt_loop(cw_stilt_t *a_stilt)
 			 * Read data from the file and interpret it until an EOF
 			 * (0 byte read).
 			 */
-			for (nread = stilo_file_read(stilo,
+			for (nread = stilo_file_read(stilo, a_stilt,
 			    _CW_STILT_FILE_READ_SIZE, buffer); nread > 0;
-			    nread = stilo_file_read(stilo,
+			    nread = stilo_file_read(stilo, a_stilt,
 			    _CW_STILT_FILE_READ_SIZE, buffer)) {
 				stilt_interpret(a_stilt, &stilts, buffer,
 				    nread);
@@ -469,7 +481,7 @@ stilt_loop(cw_stilt_t *a_stilt)
 			stilt_flush(a_stilt, &stilts);
 			stilts_delete(&stilts, a_stilt);
 
-			stils_pop(&a_stilt->exec_stils);
+			stils_pop(&a_stilt->estack, a_stilt);
 			break;
 		}
 		case STILOT_HOOK:
@@ -522,6 +534,223 @@ stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 	stilt_p_entry((void *)entry_arg);
 }
 
+void
+stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
+{
+	cw_stilo_t	*stilo, *errordict, *key, *handler;
+	cw_bool_t	ostack_push = TRUE;
+
+	_cw_check_ptr(a_stilt);
+	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
+
+	/*
+	 * Get errordict.  We can't throw an undefined error here because it
+	 * would go infinitely recursive.
+	 */
+	key = stils_push(&a_stilt->tstack, a_stilt);
+	{
+		cw_uint8_t	keystr[] = "errordict";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+	}
+	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
+		stils_pop(&a_stilt->tstack, a_stilt);
+		xep_throw(_CW_STILX_ERRORDICT);
+	}
+
+	/*
+	 * Find handler corresponding to error.
+	 */
+	switch (a_error) {
+	case STILTE_DICTFULL: {
+		cw_uint8_t	keystr[] = "dictfull";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_DICTSTACKOVERFLOW: {
+		cw_uint8_t	keystr[] = "dictstackoverflow";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_DICTSTACKUNDERFLOW: {
+		cw_uint8_t	keystr[] = "dictstackunderflow";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_EXECSTACKOVERFLOW: {
+		cw_uint8_t	keystr[] = "execstackoverflow";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_INTERRUPT: {
+		cw_uint8_t	keystr[] = "interrupt";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		ostack_push = FALSE;
+		break;
+	}
+	case STILTE_INVALIDACCESS: {
+		cw_uint8_t	keystr[] = "invalidaccess";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_INVALIDCONTEXT: {
+		cw_uint8_t	keystr[] = "invalidcontext";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_INVALIDEXIT: {
+		cw_uint8_t	keystr[] = "invalidexit";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_INVALIDFILEACCESS: {
+		cw_uint8_t	keystr[] = "invalidfileaccess";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_IOERROR: {
+		cw_uint8_t	keystr[] = "ioerror";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_LIMITCHECK: {
+		cw_uint8_t	keystr[] = "limitcheck";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_RANGECHECK: {
+		cw_uint8_t	keystr[] = "rangecheck";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_STACKOVERFLOW: {
+		cw_uint8_t	keystr[] = "stackoverflow";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_STACKUNDERFLOW: {
+		cw_uint8_t	keystr[] = "stackunderflow";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_SYNTAXERROR: {
+		cw_uint8_t	keystr[] = "syntaxerror";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_TIMEOUT: {
+		cw_uint8_t	keystr[] = "timeout";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		ostack_push = FALSE;
+		break;
+	}
+	case STILTE_TYPECHECK: {
+		cw_uint8_t	keystr[] = "typecheck";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_UNDEFINED: {
+		cw_uint8_t	keystr[] = "undefined";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_UNDEFINEDFILENAME: {
+		cw_uint8_t	keystr[] = "undefinedfilename";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_UNDEFINEDRESOURCE: {
+		cw_uint8_t	keystr[] = "undefinedresource";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_UNDEFINEDRESULT: {
+		cw_uint8_t	keystr[] = "undefinedresult";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_UNMATCHEDMARK: {
+		cw_uint8_t	keystr[] = "unmatchedmark";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_UNREGISTERED: {
+		cw_uint8_t	keystr[] = "unregistered";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	case STILTE_VMERROR: {
+		cw_uint8_t	keystr[] = "vmerror";
+
+		stilo_name_new(key, a_stilt, keystr, sizeof(keystr) - 1, TRUE);
+		break;
+	}
+	default:
+		_cw_not_reached();
+	}
+
+	/*
+	 * Push the object being executed onto ostack unless this is an
+	 * interrupt or timeout.
+	 */
+	if (ostack_push) {
+		stilo = stils_push(&a_stilt->ostack, a_stilt);
+		stilo_dup(stilo, stils_get(&a_stilt->estack, a_stilt));
+	}
+
+	/*
+	 * Get the handler for this particular error.  We could potentially
+	 * throw another error here without going infinitely recursive, but it's
+	 * not worth the risk.  After all, the user has done some really hokey
+	 * management of errordict if this happens.
+	 */
+
+	/* Execute errordict in order to make sure we have the value. */
+	stilo = stils_push(&a_stilt->estack, a_stilt);
+	stilo_dup(stilo, errordict);
+	stilt_loop(a_stilt);
+
+	/* Move errordict from ostack to tstack. */
+	errordict = stils_push(&a_stilt->tstack, a_stilt);
+	stilo = stils_get(&a_stilt->ostack, a_stilt);
+	stilo_dup(errordict, stilo);
+
+	/* Get the handler and push it onto estack. */
+	handler = stils_push(&a_stilt->estack, a_stilt);
+	if (stilo_dict_lookup(errordict, a_stilt, key, handler)) {
+		stils_npop(&a_stilt->tstack, a_stilt, 2);
+		stils_pop(&a_stilt->estack, a_stilt);
+		xep_throw(_CW_STILX_ERRORDICT);
+	}
+	stils_npop(&a_stilt->tstack, a_stilt, 2);
+
+	/* Execute the handler. */
+	stilt_loop(a_stilt);
+}
+
 cw_bool_t
 stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
     *r_value)
@@ -534,10 +763,11 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 	 * Iteratively search the dictionaries on the dictionary stack for
 	 * a_key.
 	 */
+	/* XXX We're guaranteed that dstack is >= 3 deep. */
 	i = 0;
-	depth = stils_count(&a_stilt->dict_stils);
+	depth = stils_count(&a_stilt->dstack);
 	if (depth > 0) {
-		dict = stils_get(&a_stilt->dict_stils);
+		dict = stils_get(&a_stilt->dstack, a_stilt);
 		if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) == FALSE) {
 			/* Found. */
 			retval = FALSE;
@@ -545,7 +775,7 @@ stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key, cw_stilo_t
 		}
 
 		for (i = 1; i < depth; i++) {
-			dict = stils_down_get(&a_stilt->dict_stils, dict);
+			dict = stils_down_get(&a_stilt->dstack, a_stilt, dict);
 			if (stilo_dict_lookup(dict, a_stilt, a_key, r_value) ==
 			    FALSE) {
 				/* Found. */
@@ -580,28 +810,28 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 		_cw_out_put("c: '[c]' ([i]), index: [i] ", c, c,
 		    a_stilt->index);
-		_CW_STILT_PSTATE(STATE_START);
-		_CW_STILT_PSTATE(STATE_LT_CONT);
-		_CW_STILT_PSTATE(STATE_GT_CONT);
-		_CW_STILT_PSTATE(STATE_SLASH_CONT);
-		_CW_STILT_PSTATE(STATE_COMMENT);
-		_CW_STILT_PSTATE(STATE_INTEGER);
-		_CW_STILT_PSTATE(STATE_INTEGER_RADIX);
-		_CW_STILT_PSTATE(STATE_ASCII_STRING);
-		_CW_STILT_PSTATE(STATE_ASCII_STRING_NEWLINE_CONT);
-		_CW_STILT_PSTATE(STATE_ASCII_STRING_PROT_CONT);
-		_CW_STILT_PSTATE(STATE_ASCII_STRING_CRLF_CONT);
-		_CW_STILT_PSTATE(STATE_ASCII_STRING_HEX_CONT);
-		_CW_STILT_PSTATE(STATE_ASCII_STRING_HEX_FINISH);
-		_CW_STILT_PSTATE(STATE_LIT_STRING);
-		_CW_STILT_PSTATE(STATE_LIT_STRING_NEWLINE_CONT);
-		_CW_STILT_PSTATE(STATE_LIT_STRING_PROT_CONT);
-		_CW_STILT_PSTATE(STATE_HEX_STRING);
-		_CW_STILT_PSTATE(STATE_BASE64_STRING);
-		_CW_STILT_PSTATE(STATE_BASE64_STRING_PAD);
-		_CW_STILT_PSTATE(STATE_BASE64_STRING_TILDE);
-		_CW_STILT_PSTATE(STATE_BASE64_STRING_FINISH);
-		_CW_STILT_PSTATE(STATE_NAME);
+		_CW_STILT_PSTATE(STILTTS_START);
+		_CW_STILT_PSTATE(STILTTS_LT_CONT);
+		_CW_STILT_PSTATE(STILTTS_GT_CONT);
+		_CW_STILT_PSTATE(STILTTS_SLASH_CONT);
+		_CW_STILT_PSTATE(STILTTS_COMMENT);
+		_CW_STILT_PSTATE(STILTTS_INTEGER);
+		_CW_STILT_PSTATE(STILTTS_INTEGER_RADIX);
+		_CW_STILT_PSTATE(STILTTS_ASCII_STRING);
+		_CW_STILT_PSTATE(STILTTS_ASCII_STRING_NEWLINE_CONT);
+		_CW_STILT_PSTATE(STILTTS_ASCII_STRING_PROT_CONT);
+		_CW_STILT_PSTATE(STILTTS_ASCII_STRING_CRLF_CONT);
+		_CW_STILT_PSTATE(STILTTS_ASCII_STRING_HEX_CONT);
+		_CW_STILT_PSTATE(STILTTS_ASCII_STRING_HEX_FINISH);
+		_CW_STILT_PSTATE(STILTTS_LIT_STRING);
+		_CW_STILT_PSTATE(STILTTS_LIT_STRING_NEWLINE_CONT);
+		_CW_STILT_PSTATE(STILTTS_LIT_STRING_PROT_CONT);
+		_CW_STILT_PSTATE(STILTTS_HEX_STRING);
+		_CW_STILT_PSTATE(STILTTS_BASE64_STRING);
+		_CW_STILT_PSTATE(STILTTS_BASE64_STRING_PAD);
+		_CW_STILT_PSTATE(STILTTS_BASE64_STRING_TILDE);
+		_CW_STILT_PSTATE(STILTTS_BASE64_STRING_FINISH);
+		_CW_STILT_PSTATE(STILTTS_NAME);
 #undef _CW_STILT_PSTATE
 #endif
 
@@ -610,12 +840,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 		 * the state machine builds the object, then restarts the state
 		 * machine without incrementing the input character index.  This
 		 * is done in order to avoid having to duplicate the
-		 * STATE_START code.
+		 * STILTTS_START code.
 		 */
 		RESTART:
 
 		switch (a_stilt->state) {
-		case STATE_START:
+		case STILTTS_START:
 			/*
 			 * A literal string cannot be accepted until one
 			 * character past the ' at the end has been seen, at
@@ -630,16 +860,16 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 			switch (c) {
 			case '"':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				break;
 			case '`':
-				a_stilt->state = STATE_LIT_STRING;
+				a_stilt->state = STILTTS_LIT_STRING;
 				break;
 			case '<':
-				a_stilt->state = STATE_LT_CONT;
+				a_stilt->state = STILTTS_LT_CONT;
 				break;
 			case '>':
-				a_stilt->state = STATE_GT_CONT;
+				a_stilt->state = STILTTS_GT_CONT;
 				break;
 			case '[':
 				/* An operator, not the same as '{'. */
@@ -654,7 +884,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case '{':
 				stilt_p_token_print(a_stilt, a_stilts, 0, "{");
 				a_stilt->defer_count++;
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_no_new(stilo);
 				/*
 				 * Leave the stilo as notype in order to
@@ -667,15 +897,16 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					a_stilt->defer_count--;
 				else {
 					/* Missing '{'. */
-					xep_throw(_CW_STILX_SYNTAXERROR);
+					stilt_error(a_stilt,
+					    STILTE_SYNTAXERROR);
 				}
 				stilt_p_procedure_accept(a_stilt);
 				break;
 			case '/':
-				a_stilt->state = STATE_SLASH_CONT;
+				a_stilt->state = STILTTS_SLASH_CONT;
 				break;
 			case '%':
-				a_stilt->state = STATE_COMMENT;
+				a_stilt->state = STILTTS_COMMENT;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -684,52 +915,52 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Swallow. */
 				break;
 			case '+':
-				a_stilt->state = STATE_INTEGER;
+				a_stilt->state = STILTTS_INTEGER;
 				a_stilt->m.n.b_off = 1;
 				_CW_STILT_PUTC(c);
 				break;
 			case '-':
-				a_stilt->state = STATE_INTEGER;
+				a_stilt->state = STILTTS_INTEGER;
 				a_stilt->m.n.b_off = 1;
 				_CW_STILT_PUTC(c);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
-				a_stilt->state = STATE_INTEGER;
+				a_stilt->state = STILTTS_INTEGER;
 				a_stilt->m.n.b_off = 0;
 				_CW_STILT_PUTC(c);
 				break;
 			default:
-				a_stilt->state = STATE_NAME;
+				a_stilt->state = STILTTS_NAME;
 				a_stilt->m.m.action = ACTION_EXECUTE;
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
-		case STATE_LT_CONT:
+		case STILTTS_LT_CONT:
 			_cw_assert(a_stilt->index == 0);
 
 			switch (c) {
 			case '<':
-				a_stilt->state = STATE_START;
+				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, "<<");
 				stilt_p_special_accept(a_stilt, "<<", 2);
 				break;
 			case '>':
-				a_stilt->state = STATE_START;
+				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "empty hex string");
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_string_new(stilo, a_stilt, 0);
 				break;
 			case '~':
-				a_stilt->state = STATE_BASE64_STRING;
+				a_stilt->state = STILTTS_BASE64_STRING;
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f':
-				a_stilt->state = STATE_HEX_STRING;
+				a_stilt->state = STILTTS_HEX_STRING;
 				_CW_STILT_PUTC(c);
 				break;
 			case '\n':
@@ -737,19 +968,19 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				/* Whitespace within a hex string. */
-				a_stilt->state = STATE_HEX_STRING;
+				a_stilt->state = STILTTS_HEX_STRING;
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
 				break;
 			}
 			break;
-		case STATE_GT_CONT:
+		case STILTTS_GT_CONT:
 			_cw_assert(a_stilt->index == 0);
 
 			switch (c) {
 			case '>':
-				a_stilt->state = STATE_START;
+				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts, 0, ">>");
 				stilt_p_special_accept(a_stilt, ">>", 2);
 				break;
@@ -758,12 +989,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_SLASH_CONT:
+		case STILTTS_SLASH_CONT:
 			_cw_assert(a_stilt->index == 0);
 
 			switch (c) {
 			case '/':
-				a_stilt->state = STATE_NAME;
+				a_stilt->state = STILTTS_NAME;
 				a_stilt->m.m.action = ACTION_EVALUATE;
 				break;
 			case '\n':
@@ -777,13 +1008,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_syntax_error_print(a_stilt, c);
 				break;
 			default:
-				a_stilt->state = STATE_NAME;
+				a_stilt->state = STILTTS_NAME;
 				a_stilt->m.m.action = ACTION_LITERAL;
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
-		case STATE_COMMENT:
+		case STILTTS_COMMENT:
 			_cw_assert(a_stilt->index == 0);
 
 			switch (c) {
@@ -791,13 +1022,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				_CW_STILT_NEWLINE();
 				/* Fall through. */
 			case '\r':
-				a_stilt->state = STATE_START;
+				a_stilt->state = STILTTS_START;
 				break;
 			default:
 				break;
 			}
 			break;
-		case STATE_INTEGER: {
+		case STILTTS_INTEGER: {
 			cw_bool_t	restart = FALSE;
 
 			switch (c) {
@@ -842,11 +1073,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					 * Base too small (or too large, as
 					 * detected in the for loop above).
 					 */
-					a_stilt->state = STATE_NAME;
+					a_stilt->state = STILTTS_NAME;
 					a_stilt->m.m.action = ACTION_EXECUTE;
 				} else {
 					a_stilt->m.n.b_off = a_stilt->index + 1;
-					a_stilt->state = STATE_INTEGER_RADIX;
+					a_stilt->state = STILTTS_INTEGER_RADIX;
 				}
 				_CW_STILT_PUTC(c);
 				break;
@@ -883,10 +1114,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					    10);
 					if ((errno == ERANGE) && ((val ==
 					    QUAD_MIN) || (val == QUAD_MAX)))
-						xep_throw(_CW_STILX_RANGECHECK);
+						stilt_error(a_stilt,
+						    STILTE_RANGECHECK);
 
 					stilo =
-					    stils_push(&a_stilt->data_stils);
+					    stils_push(&a_stilt->ostack,
+					    a_stilt);
 					stilo_integer_new(stilo, val);
 
 					stilt_p_reset(a_stilt);
@@ -903,13 +1136,13 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			default:
 				/* Not a number character. */
 				a_stilt->m.m.action = ACTION_EXECUTE;
-				a_stilt->state = STATE_NAME;
+				a_stilt->state = STILTTS_NAME;
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
 		}
-		case STATE_INTEGER_RADIX: {
+		case STILTTS_INTEGER_RADIX: {
 			cw_bool_t	restart = FALSE;
 
 			switch (c) {
@@ -922,7 +1155,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				if (a_stilt->m.n.base <= (10 +
 				    ((cw_uint32_t)(c - 'a')))) {
 					/* Too big for this base. */
-					a_stilt->state = STATE_NAME;
+					a_stilt->state = STILTTS_NAME;
 					a_stilt->m.m.action = ACTION_EXECUTE;
 				}
 				_CW_STILT_PUTC(c);
@@ -932,7 +1165,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				if (a_stilt->m.n.base <=
 				    ((cw_uint32_t)(c - '0'))) {
 					/* Too big for this base. */
-					a_stilt->state = STATE_NAME;
+					a_stilt->state = STILTTS_NAME;
 					a_stilt->m.m.action = ACTION_EXECUTE;
 				}
 				_CW_STILT_PUTC(c);
@@ -971,10 +1204,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					    a_stilt->m.n.base);
 					if ((errno == ERANGE) && ((val ==
 					    QUAD_MIN) || (val == QUAD_MAX)))
-						xep_throw(_CW_STILX_RANGECHECK);
+						stilt_error(a_stilt,
+						    STILTE_RANGECHECK);
 
 					stilo =
-					    stils_push(&a_stilt->data_stils);
+					    stils_push(&a_stilt->ostack,
+					    a_stilt);
 					stilo_integer_new(stilo, val);
 
 					stilt_p_reset(a_stilt);
@@ -991,34 +1226,34 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			default:
 				/* Not a number character. */
 				a_stilt->m.m.action = ACTION_EXECUTE;
-				a_stilt->state = STATE_NAME;
+				a_stilt->state = STILTTS_NAME;
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
 		}
-		case STATE_ASCII_STRING:
+		case STILTTS_ASCII_STRING:
 			/* The CRLF code jumps here if there was no LF. */
 			ASCII_STRING_CONTINUE:
 
 			switch (c) {
 			case '\\':
-				a_stilt->state = STATE_ASCII_STRING_PROT_CONT;
+				a_stilt->state = STILTTS_ASCII_STRING_PROT_CONT;
 				break;
 			case '"':
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "string");
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_string_new(stilo, a_stilt,
 				    a_stilt->index);
-				stilo_string_set(stilo, 0, a_stilt->tok_str,
-				    a_stilt->index);
+				stilo_string_set(stilo, a_stilt, 0,
+				    a_stilt->tok_str, a_stilt->index);
 
 				stilt_p_reset(a_stilt);
 				break;
 			case '\r':
 				a_stilt->state =
-				    STATE_ASCII_STRING_NEWLINE_CONT;
+				    STILTTS_ASCII_STRING_NEWLINE_CONT;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1028,10 +1263,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_ASCII_STRING_NEWLINE_CONT:
+		case STILTTS_ASCII_STRING_NEWLINE_CONT:
 			/* All cases in the switch statement do this. */
 			_CW_STILT_PUTC('\n');
-			a_stilt->state = STATE_ASCII_STRING;
+			a_stilt->state = STILTTS_ASCII_STRING;
 			switch (c) {
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1045,74 +1280,75 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				goto ASCII_STRING_CONTINUE;
 			}
 			break;
-		case STATE_ASCII_STRING_PROT_CONT:
+		case STILTTS_ASCII_STRING_PROT_CONT:
 			switch (c) {
 			case 'n':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\n');
 				break;
 			case 'r':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\r');
 				break;
 			case 't':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\t');
 				break;
 			case 'b':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\b');
 				break;
 			case 'f':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\f');
 				break;
 			case '\\':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\\');
 				break;
 			case '"':
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('"');
 				break;
 			case 'x':
-				a_stilt->state = STATE_ASCII_STRING_HEX_CONT;
+				a_stilt->state = STILTTS_ASCII_STRING_HEX_CONT;
 				break;
 			case '\r':
-				a_stilt->state = STATE_ASCII_STRING_CRLF_CONT;
+				a_stilt->state = STILTTS_ASCII_STRING_CRLF_CONT;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
 
 				/* Ignore. */
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				break;
 			default:
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				_CW_STILT_PUTC('\\');
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
-		case STATE_ASCII_STRING_CRLF_CONT:
+		case STILTTS_ASCII_STRING_CRLF_CONT:
 			switch (c) {
 			case '\n':
 				_CW_STILT_NEWLINE();
 
 				/* Ignore. */
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				break;
 			default:
 				goto ASCII_STRING_CONTINUE;
 			}
 			break;
-		case STATE_ASCII_STRING_HEX_CONT:
+		case STILTTS_ASCII_STRING_HEX_CONT:
 			switch (c) {
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f':
-				a_stilt->state = STATE_ASCII_STRING_HEX_FINISH;
+				a_stilt->state =
+				    STILTTS_ASCII_STRING_HEX_FINISH;
 				a_stilt->m.s.hex_val = c;
 				break;
 			default:
@@ -1120,7 +1356,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_ASCII_STRING_HEX_FINISH:
+		case STILTTS_ASCII_STRING_HEX_FINISH:
 			switch (c) {
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
@@ -1128,7 +1364,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case 'f':{
 				cw_uint8_t	val;
 
-				a_stilt->state = STATE_ASCII_STRING;
+				a_stilt->state = STILTTS_ASCII_STRING;
 				switch (a_stilt->m.s.hex_val) {
 				case '0': case '1': case '2': case '3':
 				case '4': case '5': case '6': case '7':
@@ -1166,16 +1402,17 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_LIT_STRING:
+		case STILTTS_LIT_STRING:
 			/* The CRLF code jumps here if there was no LF. */
 			LIT_STRING_CONTINUE:
 
 			switch (c) {
 			case '\'':
-				a_stilt->state = STATE_LIT_STRING_PROT_CONT;
+				a_stilt->state = STILTTS_LIT_STRING_PROT_CONT;
 				break;
 			case '\r':
-				a_stilt->state = STATE_LIT_STRING_NEWLINE_CONT;
+				a_stilt->state =
+				    STILTTS_LIT_STRING_NEWLINE_CONT;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1185,10 +1422,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_LIT_STRING_NEWLINE_CONT:
+		case STILTTS_LIT_STRING_NEWLINE_CONT:
 			/* All cases in the switch statement do this. */
 			_CW_STILT_PUTC('\n');
-			a_stilt->state = STATE_LIT_STRING;
+			a_stilt->state = STILTTS_LIT_STRING;
 			switch (c) {
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1202,21 +1439,21 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				goto LIT_STRING_CONTINUE;
 			}
 			break;
-		case STATE_LIT_STRING_PROT_CONT:
+		case STILTTS_LIT_STRING_PROT_CONT:
 			switch (c) {
 			case '\'':
-				a_stilt->state = STATE_LIT_STRING;
+				a_stilt->state = STILTTS_LIT_STRING;
 				_CW_STILT_PUTC('\'');
 				break;
 			default:
 				/* Accept literal string. */
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "literal string");
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_string_new(stilo, a_stilt,
 				    a_stilt->index);
-				stilo_string_set(stilo, 0, a_stilt->tok_str,
-				    a_stilt->index);
+				stilo_string_set(stilo, a_stilt, 0,
+				    a_stilt->tok_str, a_stilt->index);
 
 				stilt_p_reset(a_stilt);
 
@@ -1227,7 +1464,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				goto START_CONTINUE;
 			}
 			break;
-		case STATE_HEX_STRING:
+		case STILTTS_HEX_STRING:
 			switch (c) {
 			case '>': {
 				cw_uint8_t	*str;
@@ -1235,7 +1472,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "hex string");
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_string_new(stilo, a_stilt,
 				    (a_stilt->index + 1) >> 1);
 				/*
@@ -1298,11 +1535,11 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_BASE64_STRING:
+		case STILTTS_BASE64_STRING:
 			switch (c) {
 			case '~':
 				a_stilt->m.b.nodd = 0;
-				a_stilt->state = STATE_BASE64_STRING_FINISH;
+				a_stilt->state = STILTTS_BASE64_STRING_FINISH;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1342,12 +1579,12 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				case 2:
 					a_stilt->m.b.nodd = 1;
 					a_stilt->state =
-					    STATE_BASE64_STRING_PAD;
+					    STILTTS_BASE64_STRING_PAD;
 					break;
 				case 3:
 					a_stilt->m.b.nodd = 2;
 					a_stilt->state =
-					    STATE_BASE64_STRING_TILDE;
+					    STILTTS_BASE64_STRING_TILDE;
 					break;
 				default:
 					_cw_not_reached();
@@ -1358,10 +1595,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_BASE64_STRING_PAD:
+		case STILTTS_BASE64_STRING_PAD:
 			switch (c) {
 			case '=':
-				a_stilt->state = STATE_BASE64_STRING_TILDE;
+				a_stilt->state = STILTTS_BASE64_STRING_TILDE;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1375,10 +1612,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_BASE64_STRING_TILDE:
+		case STILTTS_BASE64_STRING_TILDE:
 			switch (c) {
 			case '~':
-				a_stilt->state = STATE_BASE64_STRING_FINISH;
+				a_stilt->state = STILTTS_BASE64_STRING_FINISH;
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1392,7 +1629,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_BASE64_STRING_FINISH:
+		case STILTTS_BASE64_STRING_FINISH:
 			switch (c) {
 			case '>': {
 				cw_uint8_t	*str;
@@ -1403,7 +1640,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				    a_stilt->index, "base 64 string");
 
 				ngroups = a_stilt->index >> 2;
-				stilo = stils_push(&a_stilt->data_stils);
+				stilo = stils_push(&a_stilt->ostack, a_stilt);
 				stilo_string_new(stilo, a_stilt,
 				    ngroups * 3 + a_stilt->m.b.nodd);
 
@@ -1466,7 +1703,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_NAME: {
+		case STILTTS_NAME: {
 			cw_bool_t	restart = FALSE;
 
 			switch (c) {
@@ -1566,7 +1803,7 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 static void
 stilt_p_reset(cw_stilt_t *a_stilt)
 {
-	a_stilt->state = STATE_START;
+	a_stilt->state = STILTTS_START;
 	if (a_stilt->index > _CW_STILT_BUFFER_SIZE) {
 		stilt_free(a_stilt, a_stilt->tok_str);
 		a_stilt->tok_str = a_stilt->buffer;
@@ -1601,10 +1838,10 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 
 	stilo_name_new(&key, a_stilt, a_token, a_len, TRUE);
 
-	stilo = stils_push(&a_stilt->exec_stils);
+	stilo = stils_push(&a_stilt->estack, a_stilt);
 	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
-		stils_pop(&a_stilt->exec_stils);
-		xep_throw(_CW_STILX_UNDEFINED);
+		stils_pop(&a_stilt->estack, a_stilt);
+		stilt_error(a_stilt, STILTE_UNDEFINED);
 	}
 
 	stilt_loop(a_stilt);
@@ -1618,14 +1855,15 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 
 	/* Find the "mark". */
 	i = 0;
-	depth = stils_count(&a_stilt->data_stils);
+	depth = stils_count(&a_stilt->ostack);
 	if (depth > 0) {
-		stilo = stils_get(&a_stilt->data_stils);
+		stilo = stils_get(&a_stilt->ostack, a_stilt);
 		if (stilo_type_get(stilo) == STILOT_NO)
 			goto OUT;
 
 		for (i = 1; i < depth; i++) {
-			stilo = stils_down_get(&a_stilt->data_stils, stilo);
+			stilo = stils_down_get(&a_stilt->ostack, a_stilt,
+			    stilo);
 			if (stilo_type_get(stilo) == STILOT_NO)
 				break;
 		}
@@ -1649,20 +1887,21 @@ stilt_p_procedure_accept(cw_stilt_t *a_stilt)
 	 */
 	i = nelements;
 	if (i > 0) {
-		stilo = stils_get(&a_stilt->data_stils);
+		stilo = stils_get(&a_stilt->ostack, a_stilt);
 		stilo_move(&arr[i - 1], stilo);
 
 		for (i--; i > 0; i--) {
-			stilo = stils_down_get(&a_stilt->data_stils, stilo);
+			stilo = stils_down_get(&a_stilt->ostack, a_stilt,
+			    stilo);
 			stilo_move(&arr[i - 1], stilo);
 		}
 	}
 
 	/* Pop the stilo's off the stack now. */
-	stils_npop(&a_stilt->data_stils, nelements + 1);
+	stils_npop(&a_stilt->ostack, a_stilt, nelements + 1);
 
 	/* Push the array onto the stack. */
-	stilo = stils_push(&a_stilt->data_stils);
+	stilo = stils_push(&a_stilt->ostack, a_stilt);
 	stilo_move(stilo, &t_stilo);
 }
 
@@ -1679,7 +1918,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			 * dictionary stack, push it onto the execution stack,
 			 * and run the execution loop.
 			 */
-			stilo = stils_push(&a_stilt->exec_stils);
+			stilo = stils_push(&a_stilt->estack, a_stilt);
 			stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
 			    a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
@@ -1688,7 +1927,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			stilt_loop(a_stilt);
 		} else {
 			/* Push the name object onto the data stack. */
-			stilo = stils_push(&a_stilt->data_stils);
+			stilo = stils_push(&a_stilt->ostack, a_stilt);
 			stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
 			    a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
@@ -1697,7 +1936,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		break;
 	case ACTION_LITERAL:
 		/* Push the name object onto the data stack. */
-		stilo = stils_push(&a_stilt->data_stils);
+		stilo = stils_push(&a_stilt->ostack, a_stilt);
 		stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
 		    a_stilt->index, FALSE);
 		stilt_p_reset(a_stilt);
@@ -1712,9 +1951,9 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		stilo_name_new(&key, a_stilt, a_stilt->tok_str,
 		    a_stilt->index, FALSE);
 		
-		stilo = stils_push(&a_stilt->data_stils);
+		stilo = stils_push(&a_stilt->ostack, a_stilt);
 		if (stilt_dict_stack_search(a_stilt, &key, stilo))
-			xep_throw(_CW_STILX_UNDEFINED);
+			stilt_error(a_stilt, STILTE_UNDEFINED);
 
 		stilt_p_reset(a_stilt);
 		break;

@@ -15,30 +15,58 @@
 #define	_CW_STILT_BUFFER_SIZE	256
 #endif
 
+typedef enum {
+	/* Interpreter errors. */
+	STILTE_DICTFULL,
+	STILTE_DICTSTACKOVERFLOW,	/* dstack too deep. */
+	STILTE_DICTSTACKUNDERFLOW,	/* No poppable dictionary on dstack. */
+	STILTE_EXECSTACKOVERFLOW,	/* estack too deep. */
+	STILTE_INTERRUPT,		/* Interrupt. */
+	STILTE_INVALIDACCESS,		/* Permission error. */
+	STILTE_INVALIDCONTEXT,		/* Bad thread context. */
+	STILTE_INVALIDEXIT,		/* exit operator called outside loop. */
+	STILTE_INVALIDFILEACCESS,	/* Insufficient file permissions. */
+	STILTE_IOERROR,			/* read()/write()/etc. error. */
+	STILTE_LIMITCHECK,		/* Value outside legal range. */
+	STILTE_RANGECHECK,		/* Out of bounds string or array use. */
+	STILTE_STACKOVERFLOW,		/* ostack too full. */
+	STILTE_STACKUNDERFLOW,		/* Not enough objects on ostack. */
+	STILTE_SYNTAXERROR,		/* Scanner syntax error. */
+	STILTE_TIMEOUT,			/* Timeout. */
+	STILTE_TYPECHECK,		/* Incorrect argument type. */
+	STILTE_UNDEFINED,		/* Object not found in dstack. */
+	STILTE_UNDEFINEDFILENAME,	/* Bad filename. */
+	STILTE_UNDEFINEDRESOURCE,	/* Resource not found. */
+	STILTE_UNDEFINEDRESULT,
+	STILTE_UNMATCHEDMARK,		/* No mark on ostack. */
+	STILTE_UNREGISTERED,		/* Other non-enumerated error. */
+	STILTE_VMERROR			/* Out of memory. */
+} cw_stilte_t;
+
 typedef struct cw_stilts_s cw_stilts_t;
 typedef enum {
-	STATE_START			=  0,
-	STATE_LT_CONT			=  1,
-	STATE_GT_CONT			=  2,
-	STATE_SLASH_CONT		=  3,
-	STATE_COMMENT			=  4,
-	STATE_INTEGER			=  5,
-	STATE_INTEGER_RADIX		=  6,
-	STATE_ASCII_STRING		=  7,
-	STATE_ASCII_STRING_NEWLINE_CONT	=  8,
-	STATE_ASCII_STRING_PROT_CONT	=  9,
-	STATE_ASCII_STRING_CRLF_CONT	= 10,
-	STATE_ASCII_STRING_HEX_CONT	= 11,
-	STATE_ASCII_STRING_HEX_FINISH	= 12,
-	STATE_LIT_STRING		= 13,
-	STATE_LIT_STRING_NEWLINE_CONT	= 14,
-	STATE_LIT_STRING_PROT_CONT	= 15,
-	STATE_HEX_STRING		= 16,
-	STATE_BASE64_STRING		= 17,
-	STATE_BASE64_STRING_PAD		= 18,
-	STATE_BASE64_STRING_TILDE	= 19,
-	STATE_BASE64_STRING_FINISH	= 20,
-	STATE_NAME			= 21
+	STILTTS_START,
+	STILTTS_LT_CONT,
+	STILTTS_GT_CONT,
+	STILTTS_SLASH_CONT,
+	STILTTS_COMMENT,
+	STILTTS_INTEGER,
+	STILTTS_INTEGER_RADIX,
+	STILTTS_ASCII_STRING,
+	STILTTS_ASCII_STRING_NEWLINE_CONT,
+	STILTTS_ASCII_STRING_PROT_CONT,
+	STILTTS_ASCII_STRING_CRLF_CONT,
+	STILTTS_ASCII_STRING_HEX_CONT,
+	STILTTS_ASCII_STRING_HEX_FINISH,
+	STILTTS_LIT_STRING,
+	STILTTS_LIT_STRING_NEWLINE_CONT,
+	STILTTS_LIT_STRING_PROT_CONT,
+	STILTTS_HEX_STRING,
+	STILTTS_BASE64_STRING,
+	STILTTS_BASE64_STRING_PAD,
+	STILTTS_BASE64_STRING_TILDE,
+	STILTTS_BASE64_STRING_FINISH,
+	STILTTS_NAME
 } cw_stiltts_t;
 
 struct cw_stilts_s {
@@ -79,21 +107,21 @@ struct cw_stilt_s {
 	/*
 	 * Stacks.
 	 */
-	cw_stils_t	exec_stils;
-	cw_stils_t	data_stils;
-	cw_stils_t	dict_stils;
+	cw_stils_t	estack;	/* Execution stack. */
+	cw_stils_t	ostack;	/* Operand stack. */
+	cw_stils_t	dstack;	/* Dictionary stack. */
+	cw_stils_t	tstack;	/* Temp stack. */
 
 	/*
-	 * Local dictionary.
+	 * Local dictionaries.
 	 */
 	cw_stilo_t	userdict;
+	cw_stilo_t	errordict;
 
 	/*
-	 * File handles.
-	 *
-	 * XXX File handles should eventually be objects in threaddict.
+	 * Number of objects to pop off ostack if there is an error.
 	 */
-	cw_sint32_t	stdout_fd;
+	cw_uint32_t	hedge;
 
 	/*
 	 * Tokenizer state.  If a token is broken across two or more input
@@ -102,6 +130,7 @@ struct cw_stilt_s {
 	 * again.
 	 */
 
+	/* Current scanner state. */
 	cw_stiltts_t	state;
 
 	/*
@@ -183,6 +212,7 @@ void		stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
 void		stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts);
 void		stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts,
     const cw_uint8_t *a_str, cw_uint32_t a_len);
+void		stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error);
 
 cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
     cw_stilo_t *r_value);
@@ -194,15 +224,17 @@ cw_bool_t	stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,
 #define		stilt_stdout_get(a_stilt) stil_stdout_get((a_stilt)->stil)
 #define		stilt_stderr_get(a_stilt) stil_stderr_get((a_stilt)->stil)
 
-#define		stilt_data_stack_get(a_stilt) (&((a_stilt)->data_stils))
-#define		stilt_dict_stack_get(a_stilt) (&((a_stilt)->dict_stils))
-#define		stilt_exec_stack_get(a_stilt) (&((a_stilt)->exec_stils))
+#define		stilt_ostack_get(a_stilt) (&((a_stilt)->ostack))
+#define		stilt_dstack_get(a_stilt) (&((a_stilt)->dstack))
+#define		stilt_estack_get(a_stilt) (&((a_stilt)->estack))
+#define		stilt_tstack_get(a_stilt) (&((a_stilt)->tstack))
 
 #define		stilt_systemdict_get(a_stilt)				\
 	(stil_systemdict_get((a_stilt)->stil))
 #define		stilt_globaldict_get(a_stilt)				\
 	(stil_globaldict_get((a_stilt)->stil))
 #define		stilt_userdict_get(a_stilt) (&((a_stilt)->userdict))
+#define		stilt_errordict_get(a_stilt) (&((a_stilt)->errordict))
 
 /*
  * If TRUE, allocation for the stilt is global.  Otherwise, allocation is

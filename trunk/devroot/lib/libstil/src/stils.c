@@ -69,7 +69,7 @@ stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 	 * stilsc's.
 	 */
 	if (a_stils->count > 0)
-		stils_npop(a_stils, a_stils->count);
+		stils_npop(a_stils, a_stilt, a_stils->count);
 
 	while (qs_top(&a_stils->chunks) != NULL) {
 		stilsc = qs_top(&a_stils->chunks);
@@ -83,8 +83,8 @@ stils_delete(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 }
 
 void
-stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
-    cw_stilo_t *root), void *a_add_root_arg)
+stils_collect(cw_stils_t *a_stils, void (*a_add_root_func)
+    (void *add_root_arg, cw_stilo_t *root), void *a_add_root_arg)
 {
 	cw_stilsc_t	*stilsc;
 	cw_stilso_t	*old_stilso;
@@ -118,7 +118,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 	 */
 	for (i = 0; i < old_count; old_stilso = qr_next(old_stilso, link),
 		 i++) {
-		new_stilo = stils_push(a_stils);
+		new_stilo = stils_push(a_stils, NULL);
 		stilo_move(new_stilo, &old_stilso->stilo);
 
 		switch (stilo_type_get(new_stilo)) {
@@ -146,7 +146,7 @@ stils_collect(cw_stils_t *a_stils, void (*a_add_root_func) (void *add_root_arg,
 }
 
 cw_stilo_t *
-stils_push(cw_stils_t *a_stils)
+stils_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 {
 	cw_stilso_t	*stilso;
 
@@ -167,7 +167,7 @@ stils_push(cw_stils_t *a_stils)
 }
 
 cw_stilo_t *
-stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
+stils_under_push(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
 {
 	cw_stilso_t	*stilso;
 
@@ -189,7 +189,7 @@ stils_under_push(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 }
 
 void
-stils_pop(cw_stils_t *a_stils)
+stils_pop(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 {
 	cw_stilso_t	*stilso;
 
@@ -197,7 +197,7 @@ stils_pop(cw_stils_t *a_stils)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stils->count == 0)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	stilso = ql_first(&a_stils->stack);
 	ql_first(&a_stils->stack) = qr_next(ql_first(&a_stils->stack), link);
@@ -205,7 +205,7 @@ stils_pop(cw_stils_t *a_stils)
 }
 
 void
-stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
+stils_npop(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count)
 {
 	cw_stilso_t	*top;
 	cw_uint32_t	i;
@@ -215,7 +215,7 @@ stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 	_cw_assert(a_count > 0);
 
 	if (a_count > a_stils->count)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	/* Get a pointer to what will be the new stack top. */
 	for (i = 0, top = ql_first(&a_stils->stack); i < a_count; i++)
@@ -226,7 +226,8 @@ stils_npop(cw_stils_t *a_stils, cw_uint32_t a_count)
 }
 
 void
-stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
+stils_roll(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_count,
+    cw_sint32_t a_amount)
 {
 	cw_stilso_t	*top, *noroll;
 	cw_uint32_t	i;
@@ -235,9 +236,9 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_count < 1)
-		xep_throw(_CW_STILX_RANGECHECK);
+		stilt_error(a_stilt, STILTE_RANGECHECK);
 	if (a_count > a_stils->count)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	/*
 	 * Calculate the current index of the element that will end up on top of
@@ -311,7 +312,7 @@ stils_roll(cw_stils_t *a_stils, cw_uint32_t a_count, cw_sint32_t a_amount)
 }
 
 cw_stilo_t *
-stils_get(cw_stils_t *a_stils)
+stils_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt)
 {
 	cw_stilso_t	*stilso;
 
@@ -319,7 +320,7 @@ stils_get(cw_stils_t *a_stils)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stils->count == 0)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	stilso = ql_first(&a_stils->stack);
 
@@ -327,7 +328,7 @@ stils_get(cw_stils_t *a_stils)
 }
 
 cw_stilo_t *
-stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
+stils_nget(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_uint32_t a_index)
 {
 	cw_stilso_t	*stilso;
 	cw_uint32_t	i;
@@ -336,7 +337,7 @@ stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_index >= a_stils->count)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	for (i = 0, stilso = ql_first(&a_stils->stack); i < a_index; i++)
 		stilso = qr_next(stilso, link);
@@ -345,7 +346,7 @@ stils_nget(cw_stils_t *a_stils, cw_uint32_t a_index)
 }
 
 cw_stilo_t *
-stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
+stils_down_get(cw_stils_t *a_stils, cw_stilt_t *a_stilt, cw_stilo_t *a_stilo)
 {
 	cw_stilso_t	*stilso;
 
@@ -353,12 +354,12 @@ stils_down_get(cw_stils_t *a_stils, cw_stilo_t *a_stilo)
 	_cw_assert(a_stils->magic == _CW_STILS_MAGIC);
 
 	if (a_stils->count <= 1)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	stilso = (cw_stilso_t *)a_stilo;
 	stilso = qr_next(stilso, link);
 	if (stilso == &a_stils->under)
-		xep_throw(_CW_STILX_STACKUNDERFLOW);
+		stilt_error(a_stilt, STILTE_STACKUNDERFLOW);
 
 	return &stilso->stilo;
 }

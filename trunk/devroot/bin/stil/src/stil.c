@@ -103,19 +103,19 @@ char *
 prompt(EditLine *a_el)
 {
 	if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
-	    STATE_START)) {
+	    STILTTS_START)) {
 		cw_uint8_t	code[] = "prompt";
 		cw_uint8_t	*pstr;
 		cw_uint32_t	plen, maxlen;
 		cw_stilo_t	*stilo;
-		cw_stils_t	*stack = stilt_data_stack_get(&stilt);
+		cw_stils_t	*stack = stilt_ostack_get(&stilt);
 
 		/* Push the prompt onto the data stack. */
 		stilt_interpret(&stilt, &stilts, code, sizeof(code) - 1);
 		stilt_flush(&stilt, &stilts);
 
 		/* Get the actual prompt string. */
-		stilo = stils_get(stack);
+		stilo = stils_get(stack, &stilt);
 		pstr = stilo_string_get(stilo);
 		plen = stilo_string_len_get(stilo);
 
@@ -126,7 +126,7 @@ prompt(EditLine *a_el)
 		prompt_str[maxlen] = '\0';
 
 		/* Pop the prompt string off the data stack. */
-		stils_pop(stack);
+		stils_pop(stack, &stilt);
 	} else {
 		/*
 		 * One or both of:
@@ -163,7 +163,7 @@ cl_read(void *a_arg, cw_uint32_t a_len, cw_uint8_t *r_str)
 		 * Update the command line history.
 		 */
 		if ((stilt_deferred(&stilt) == FALSE) && (stilt_state(&stilt) ==
-		    STATE_START)) {
+		    STILTTS_START)) {
 			const HistEvent	*hevent;
 
 			/*

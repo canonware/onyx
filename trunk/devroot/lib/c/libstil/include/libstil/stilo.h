@@ -135,7 +135,8 @@ void		stilo_delete(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
 #define		stilo_perms_get(a_stilo) (a_stilo)->perms
 #define		stilo_perms_set(a_stilo, a_perms) (a_stilo)->perms = (a_perms)
 
-void		stilo_cast(cw_stilo_t *a_stilo, cw_stilot_t a_stilot);
+void		stilo_cast(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilot_t
+    a_stilot);
 void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
     *a_stilt);
 #define		stilo_dup(a_to, a_from) do {				\
@@ -151,8 +152,8 @@ void		stilo_copy(cw_stilo_t *a_to, cw_stilo_t *a_from, cw_stilt_t
 /*      *a_stilt); */
 void		stilo_move(cw_stilo_t *a_to, cw_stilo_t *a_from);
 
-void		stilo_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
-    a_syntactic, cw_bool_t a_newline);
+void		stilo_print(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, cw_stilo_t
+    *a_file, cw_bool_t a_syntactic, cw_bool_t a_newline);
 
 /* XXX For the GC only. */
 cw_stiloe_t	*stilo_l_stiloe_get(cw_stilo_t *a_stilo);
@@ -182,12 +183,13 @@ void		stilo_array_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
 void		stilo_array_subarray_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_array, cw_stilt_t *a_stilt, cw_uint32_t a_offset, cw_uint32_t a_len);
 cw_uint32_t	stilo_array_len_get(cw_stilo_t *a_stilo);
-cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
-void		stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilo_t *a_el,
+cw_stilo_t	*stilo_array_el_get(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_sint64_t a_offset);
+void		stilo_array_el_set(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_stilo_t *a_el, cw_sint64_t a_offset);
 cw_stilo_t	*stilo_array_get(cw_stilo_t *a_stilo);
-void		stilo_array_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
-    cw_stilo_t *a_arr, cw_uint32_t a_len);
+void		stilo_array_set(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_offset, cw_stilo_t *a_arr, cw_uint32_t a_len);
 
 /*
  * boolean.
@@ -224,27 +226,29 @@ void		stilo_file_fd_wrap(cw_stilo_t *a_stilo, cw_uint32_t a_fd);
 void		stilo_file_interactive(cw_stilo_t *a_stilo, cw_sint32_t
     (*a_read_f)(void *a_read_arg, cw_uint32_t a_len, cw_uint8_t *r_str), void
     *a_read_arg);
-void		stilo_file_open(cw_stilo_t *a_stilo, const cw_uint8_t
-    *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags, cw_uint32_t
-    a_flen);
-void		stilo_file_close(cw_stilo_t *a_stilo);
-cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_uint32_t a_len,
-    cw_uint8_t *r_str);
-void		stilo_file_write(cw_stilo_t *a_stilo, const cw_uint8_t *a_str,
-    cw_uint32_t a_len);
-void		stilo_file_output(cw_stilo_t *a_stilo, const char *a_format,
-    ...);
-void		stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size,
+void		stilo_file_open(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_uint8_t *a_filename, cw_uint32_t a_nlen, const cw_uint8_t *a_flags,
+    cw_uint32_t a_flen);
+void		stilo_file_close(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt);
+cw_sint32_t	stilo_file_read(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_len, cw_uint8_t *r_str);
+void		stilo_file_write(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const
+    cw_uint8_t *a_str, cw_uint32_t a_len);
+void		stilo_file_output(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     const char *a_format, ...);
-void		stilo_file_truncate(cw_stilo_t *a_stilo, cw_uint32_t a_length);
+void		stilo_file_output_n(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_size, const char *a_format, ...);
+void		stilo_file_truncate(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_length);
 cw_sint64_t	stilo_file_position_get(cw_stilo_t *a_stilo);
-void		stilo_file_position_set(cw_stilo_t *a_stilo, cw_sint64_t
-    a_position);
+void		stilo_file_position_set(cw_stilo_t *a_stilo, cw_stilt_t
+    *a_stilt, cw_sint64_t a_position);
 cw_uint32_t	stilo_file_buffer_size_get(cw_stilo_t *a_stilo);
 void		stilo_file_buffer_size_set(cw_stilo_t *a_stilo, cw_uint32_t
     a_size);
 cw_sint64_t	stilo_file_buffer_count(cw_stilo_t *a_stilo);
-void		stilo_file_buffer_flush(cw_stilo_t *a_stilo);
+void		stilo_file_buffer_flush(cw_stilo_t *a_stilo, cw_stilt_t
+    *a_stilt);
 void		stilo_file_buffer_reset(cw_stilo_t *a_stilo);
 cw_bool_t	stilo_file_status(cw_stilo_t *a_stilo);
 cw_sint64_t	stilo_file_mtime(cw_stilo_t *a_stilo);
@@ -346,9 +350,10 @@ void		stilo_string_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
 void		stilo_string_substring_new(cw_stilo_t *a_stilo, cw_stilo_t
     *a_string, cw_stilt_t *a_stilt, cw_uint32_t a_offset, cw_uint32_t a_len);
 cw_uint32_t	stilo_string_len_get(cw_stilo_t *a_stilo);
-cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_sint64_t a_offset);
-void		stilo_string_el_set(cw_stilo_t *a_stilo, cw_uint8_t a_el,
+cw_uint8_t	*stilo_string_el_get(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
     cw_sint64_t a_offset);
+void		stilo_string_el_set(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint8_t a_el, cw_sint64_t a_offset);
 cw_uint8_t	*stilo_string_get(cw_stilo_t *a_stilo);
-void		stilo_string_set(cw_stilo_t *a_stilo, cw_uint32_t a_offset,
-    const cw_uint8_t *a_str, cw_uint32_t a_len);
+void		stilo_string_set(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt,
+    cw_uint32_t a_offset, const cw_uint8_t *a_str, cw_uint32_t a_len);
