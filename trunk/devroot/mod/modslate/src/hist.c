@@ -183,6 +183,9 @@
 
 #include "../include/modslate.h"
 #include "../include/buf_l.h"
+#ifndef HAVE_ASPRINTF
+#include "../../../lib/libonyx/src/asprintf.c"
+#endif
 
 /* The upper 3 bits are used to denote the record type, and the lower 5 bits are
  * used to record the number of characters for insert/delete.  5 bits isn't
