@@ -131,7 +131,7 @@ read_preread(el)
     int    chrs = 0;
 
     if (el->el_chared.c_macro.nline) {
-	el_free((ptr_t) el->el_chared.c_macro.nline);
+	free((ptr_t) el->el_chared.c_macro.nline);
 	el->el_chared.c_macro.nline = NULL;
     }
 

@@ -70,8 +70,8 @@ struct history {
 #define	HENTER(h, str)	(*(h)->h_enter)((h)->h_ref, str)
 #define	HADD(h, str)	(*(h)->h_add)((h)->h_ref, str)
 
-#define h_malloc(a)	malloc(a)
-#define h_free(a)	free(a)
+#define h_malloc(a)	_cw_malloc(a)
+#define h_free(a)	_cw_free(a)
 
 
 private int		 history_set_num	__P((History *, int));
@@ -240,7 +240,7 @@ history_def_delete(h, hp)
 	abort();
     hp->prev->next = hp->next;
     hp->next->prev = hp->prev;
-    h_free((ptr_t) hp->ev.str);
+    free((ptr_t) hp->ev.str);
     h_free(hp);
     h->cur--;
 }
@@ -326,6 +326,7 @@ history_def_clear(p)
 	history_def_delete(h, h->list.prev);
     h->eventno = 0;
     h->cur = 0;
+    h_free(h);
 }
 
 /************************************************************************/
@@ -362,6 +363,7 @@ history_end(h)
 {
     if (h->h_next == history_def_next)
 	history_def_clear(h->h_ref);
+    h_free(h);
 }
 
 

@@ -107,7 +107,7 @@ key_end(el)
 {
     el_free((ptr_t) el->el_key.buf);
     el->el_key.buf = NULL;
-    /* XXX: provide a function to clear the keys */
+    key_reset(el);
     el->el_key.map = NULL;
 }
 

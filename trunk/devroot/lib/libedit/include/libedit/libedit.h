@@ -77,15 +77,15 @@ typedef struct el_state_t {
     el_action_t lastcmd;		/* Previous command		*/
 } el_state_t;
 
+#include "libedit_incs.h"
+
 /*
  * Until we come up with something better...
  */
-#define el_malloc(a)	malloc(a)
-#define el_realloc(a,b)	realloc(a, b)
-#define el_reallocf(a,b) reallocf(a, b)
-#define el_free(a)	free(a)
-
-#include "libedit_incs.h"
+#define el_malloc(a)	_cw_malloc(a)
+#define el_realloc(a,b)	_cw_realloc(a, b)
+#define el_reallocf(a,b) _cw_realloc(a, b)
+#define el_free(a)	_cw_free(a)
 
 struct editline {
     char	 *el_prog;	/* the program name 			*/

@@ -109,6 +109,8 @@ extern char    *fgetline	__P((FILE *, int *));
 
 #include <fcntl.h>
 
+#include <libstash/libstash.h>
+
 /*
  * Include files.  These must be listed in reverse dependency order.
  */

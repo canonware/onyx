@@ -122,7 +122,7 @@ el_end(el)
     prompt_end(el);
     sig_end(el);
 
-    el_free((ptr_t) el->el_prog);
+    free((ptr_t) el->el_prog);
     el_free((ptr_t) el);
 } /* end el_end */
 
