@@ -105,9 +105,20 @@ ONYX_OTESTS =
               cstack_a.nx.in cvc_a.nx.in cvc_b.nx.in cvf_a.nx.in cvf_b.nx.in
               cvi_a.nx.in cvi_b.nx.in data_a.nx.in data_b.nx.in data_c.nx.in
               fcheck_a.nx.in fcheck_b.nx.in icheck_a.nx.in icheck_b.nx.in
-              methods_a.nx.in methods_b.nx.in methods_c.nx.in this_a.nx.in
-              this_b.nx.in threadcstack_a.nx.in threadcstack_b.nx.in
-              threadcstack_c.nx.in vclass_a.nx.in
+              implementor_a.nx.in implementor_b.nx.in implementor_c.nx.in
+              implements_a.nx.in implements_b.nx.in implements_c.nx.in
+              instance_a.nx.in isa_a.nx.in isa_b.nx.in isa_c.nx.in kind_a.nx.in
+              kind_b.nx.in kind_c.nx.in kind_d.nx.in method_a.nx.in
+              method_b.nx.in method_c.nx.in method_d.nx.in methods_a.nx.in
+              methods_b.nx.in methods_c.nx.in setclassname_a.nx.in
+              setclassname_b.nx.in setclassname_c.nx.in setclassname_d.nx.in
+              setdata_a.nx.in setdata_b.nx.in setdata_c.nx.in setdata_d.nx.in
+              setisa_a.nx.in setisa_b.nx.in setisa_c.nx.in setmethods_a.nx.in
+              setmethods_b.nx.in setmethods_c.nx.in setmethods_d.nx.in
+              setsuper_a.nx.in setsuper_b.nx.in setsuper_c.nx.in
+              setsuper_d.nx.in super_a.nx.in super_b.nx.in super_c.nx.in
+              this_a.nx.in this_b.nx.in threadcstack_a.nx.in
+              threadcstack_b.nx.in threadcstack_c.nx.in vclass_a.nx.in
 
 #endif
 #if @enable_posix@
