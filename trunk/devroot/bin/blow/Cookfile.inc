@@ -87,7 +87,7 @@ P_BINS = [P_BINS] [BLOW_P];
  * User cook'ables.
  */
 
-blow : [BLOW_D] [BLOW_A] [BLOW_P];
+blow_all : [BLOW_D] [BLOW_A] [BLOW_P];
 
 blow_install : blow_install_d blow_install_a blow_install_p;
 

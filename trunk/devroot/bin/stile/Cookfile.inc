@@ -87,7 +87,7 @@ P_BINS = [P_BINS] [STILE_P];
  * User cook'ables.
  */
 
-stile : [STILE_D] [STILE_A] [STILE_P];
+stile_all : [STILE_D] [STILE_A] [STILE_P];
 
 stile_install : stile_install_d stile_install_a stile_install_p;
 

@@ -87,7 +87,7 @@ P_BINS = [P_BINS] [NCAT_P];
  * User cook'ables.
  */
 
-ncat : [NCAT_D] [NCAT_A] [NCAT_P];
+ncat_all : [NCAT_D] [NCAT_A] [NCAT_P];
 
 ncat_install : ncat_install_d ncat_install_a ncat_install_p;
 

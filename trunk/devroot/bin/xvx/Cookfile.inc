@@ -87,7 +87,7 @@ P_BINS = [P_BINS] [XVX_P];
  * User cook'ables.
  */
 
-xvx : [XVX_D] [XVX_A] [XVX_P];
+xvx_all : [XVX_D] [XVX_A] [XVX_P];
 
 xvx_install : xvx_install_d xvx_install_a xvx_install_p;
 

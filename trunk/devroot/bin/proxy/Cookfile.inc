@@ -87,7 +87,7 @@ P_BINS = [P_BINS] [PROXY_P];
  * User cook'ables.
  */
 
-proxy : [PROXY_D] [PROXY_A] [PROXY_P];
+proxy_all : [PROXY_D] [PROXY_A] [PROXY_P];
 
 proxy_install : proxy_install_d proxy_install_a proxy_install_p;
 

@@ -87,7 +87,7 @@ P_BINS = [P_BINS] [EDITTEST_P];
  * User cook'ables.
  */
 
-edittest : [EDITTEST_D] [EDITTEST_A] [EDITTEST_P];
+edittest_all : [EDITTEST_D] [EDITTEST_A] [EDITTEST_P];
 
 edittest_install : edittest_install_d edittest_install_a edittest_install_p;
 
