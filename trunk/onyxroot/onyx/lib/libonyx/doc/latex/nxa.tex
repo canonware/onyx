@@ -24,39 +24,6 @@ done in the thread context of the mutator that triggers collection.
 
 \subsubsection{API}
 \begin{capi}
-\label{nxa_new}
-\index{nxa_new@\cfunc{nxa\_new}{}}
-\citem{\cfunc[void]{nxa\_new}{cw\_nxa\_t *a\_nxa, cw\_nx\_t *a\_nx}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\item[a\_nx: ]
-			Pointer to a \classname{nx}.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Constructor.
-	\end{capilist}
-\label{nxa_delete}
-\index{nxa_delete@\cfunc{nxa\_delete}{}}
-\citem{\cfunc[void]{nxa\_delete}{cw\_nxa\_t *a\_nxa}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxa: ]
-			Pointer to a \classname{nxa}.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Exception(s): ] None.
-	\item[Description: ]
-		Destructor.
-	\end{capilist}
 \label{nxa_malloc_e}
 \index{nxa_malloc_e@\cfunc{nxa\_malloc\_e}{}}
 \citem{\cfunc[void *]{nxa\_malloc\_e}{cw\_nxa\_t *a\_nxa, size\_t a\_size, const

@@ -52,7 +52,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 #endif
 
 		/* Initialize the GC. */
-		nxa_new(&retval->nxa, retval);
+		nxa_l_new(&retval->nxa, retval);
 		try_stage = 2;
 
 		/* Initialize the global name cache. */
@@ -144,12 +144,13 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		case 5:
 		case 4:
 		case 3:
+			nxa_l_shutdown(&retval->nxa);
 			dch_delete(&retval->name_hash);
 #ifdef _CW_THREADS
 			mtx_delete(&retval->name_lock);
 #endif
 		case 2:
-			nxa_delete(&retval->nxa);
+			nxa_l_delete(&retval->nxa);
 		case 1:
 #ifdef _CW_DBG
 			memset(a_nx, 0x5a, sizeof(cw_nx_t));
@@ -182,7 +183,7 @@ nx_delete(cw_nx_t *a_nx)
 #ifdef _CW_THREADS
 	mtx_delete(&a_nx->name_lock);
 #endif
-	nxa_delete(&a_nx->nxa);
+	nxa_l_delete(&a_nx->nxa);
 
 	if (a_nx->is_malloced)
 		_cw_free(a_nx);

@@ -1,3 +1,9 @@
+2001-11-04  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c: Rename nxa_new() and nxa_delete() to nxa_l_new() and
+	nxa_l_delete(), since the functions are not part of the public
+	API.
+
 2001-11-03  Jason Evans  <jasone@canonware.com>
 
 	* src/systemdict.c (systemdict_exec): Throw a rangecheck error if
