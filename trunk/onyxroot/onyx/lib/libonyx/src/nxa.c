@@ -87,7 +87,9 @@
 #endif
 #include "../include/libonyx/nxo_dict_l.h"
 #include "../include/libonyx/nxo_file_l.h"
+#ifdef CW_HOOK
 #include "../include/libonyx/nxo_hook_l.h"
+#endif
 #ifdef CW_THREADS
 #include "../include/libonyx/nxo_mutex_l.h"
 #endif
@@ -843,11 +845,13 @@ nxa_p_mark(cw_uint32_t *r_nreachable)
 		    nxoe = nxoe_l_file_ref_iter(gray, reset);
 		    break;
 		}
+#ifdef CW_HOOK
 		case NXOT_HOOK:
 		{
 		    nxoe = nxoe_l_hook_ref_iter(gray, reset);
 		    break;
 		}
+#endif
 #ifdef CW_THREADS
 		case NXOT_MUTEX:
 		{
@@ -981,11 +985,13 @@ nxa_p_sweep(cw_nxoe_t *a_garbage)
 		    notyet = nxoe_l_file_delete(nxoe, i);
 		    break;
 		}
+#ifdef CW_HOOK
 		case NXOT_HOOK:
 		{
 		    notyet = nxoe_l_hook_delete(nxoe, i);
 		    break;
 		}
+#endif
 #ifdef CW_THREADS
 		case NXOT_MUTEX:
 		{

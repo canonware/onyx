@@ -248,7 +248,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(gstdout),
 #endif
     ENTRY(gt),
+#ifdef CW_HOOK
     ENTRY(hooktag),
+#endif
     ENTRY(ibdup),
     ENTRY(ibpop),
     ENTRY(idiv),
@@ -1426,7 +1428,11 @@ systemdict_p_bind(cw_nxo_t *a_proc, cw_nxo_t *a_thread)
 		     *
 		     * 4) Array.  (Set attribute to evaluatable.) */
 		    if (nxo_attr_get(val) == NXOA_LITERAL
-			|| type == NXOT_OPERATOR || type == NXOT_HOOK)
+			|| type == NXOT_OPERATOR
+#ifdef CW_HOOK
+			|| type == NXOT_HOOK
+#endif
+			)
 		    {
 			nxo_array_el_set(a_proc, val, i);
 		    }
@@ -3149,7 +3155,9 @@ systemdict_cvs(cw_nxo_t *a_thread)
 	case NXOT_DICT:
 	case NXOT_FILE:
 	case NXOT_FINO:
+#ifdef CW_HOOK
 	case NXOT_HOOK:
+#endif
 	case NXOT_MARK:
 #ifdef CW_THREADS
 	case NXOT_MUTEX:
@@ -4580,6 +4588,7 @@ systemdict_gt(cw_nxo_t *a_thread)
     nxo_stack_pop(ostack);
 }
 
+#ifdef CW_HOOK
 void
 systemdict_hooktag(cw_nxo_t *a_thread)
 {
@@ -4602,6 +4611,7 @@ systemdict_hooktag(cw_nxo_t *a_thread)
 
     nxo_stack_pop(tstack);
 }
+#endif
 
 void
 systemdict_ibdup(cw_nxo_t *a_thread)
@@ -4906,7 +4916,9 @@ systemdict_lcheck(cw_nxo_t *a_thread)
 	case NXOT_BOOLEAN:
 	case NXOT_CONDITION:
 	case NXOT_FINO:
+#ifdef CW_HOOK
 	case NXOT_HOOK:
+#endif
 	case NXOT_INTEGER:
 	case NXOT_MARK:
 	case NXOT_MUTEX:
@@ -12318,7 +12330,9 @@ systemdict_type(cw_nxo_t *a_thread)
 	NXN_dicttype,
 	NXN_filetype,
 	NXN_finotype,
+#ifdef CW_HOOK
 	NXN_hooktype,
+#endif
 	NXN_integertype,
 	NXN_marktype,
 #ifdef CW_THREADS

@@ -730,6 +730,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 			    break;
 			}
+#ifdef CW_HOOK
 			case NXOT_HOOK:
 			{
 			    cw_nxo_t *hook;
@@ -746,6 +747,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 #endif
 			    break;
 			}
+#endif
 			case NXOT_NAME:
 			{
 			    /* There is no way to evaluate the result of the
@@ -903,6 +905,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		nxo_stack_pop(&thread->estack);
 		break;
 	    }
+#ifdef CW_HOOK
 	    case NXOT_HOOK:
 	    {
 		nxo_hook_eval(nxo, a_nxo);
@@ -910,6 +913,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		nxo_stack_pop(&thread->estack);
 		break;
 	    }
+#endif
 	    case NXOT_NAME:
 	    {
 		cw_nxo_t *name;

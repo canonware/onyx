@@ -29,7 +29,9 @@ typedef enum
     NXOT_DICT,
     NXOT_FILE,
     NXOT_FINO,
+#ifdef CW_HOOK
     NXOT_HOOK,
+#endif
     NXOT_INTEGER,
     NXOT_MARK,
 #ifdef CW_THREADS

@@ -120,17 +120,12 @@ if [not [defined LDFLAGS]] then
   @objroot@/config.status --recheck;
 }
 
-@srcroot@/config.stamp.in : @srcroot@/configure.in @srcroot@/aclocal.m4
-{
-  cd @srcroot@/\; @AUTOHEADER@;
-  echo stamp > @srcroot@/config.stamp.in;
-}
-
 [fromto @objroot@/%0% @srcroot@/%0%.in
         [filter_out @objroot@/config.stamp @cfghdrs@]]
-  : @srcroot@/config.stamp.in;
+  : @srcroot@/configure.in;
 
-@objroot@/config.stamp : [fromto @objroot@/%0% @srcroot@/%0%.in @cfghdrs@]
+@objroot@/config.stamp : [fromto @objroot@/%0% @srcroot@/%0%.in 
+                          [filter_out @objroot@/config.stamp @cfghdrs@]]
                          @objroot@/config.status
 {
   @objroot@/config.status;

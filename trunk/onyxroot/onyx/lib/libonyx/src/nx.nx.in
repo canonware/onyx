@@ -167,6 +167,9 @@ $sprintsdict <
 	pop pop
 	`-fino-'
     }
+' cat
+@enable_hook@ 1 eq {
+    `
     $hooktype {
 	#hook #depth
 	exch hooktag
@@ -183,6 +186,9 @@ $sprintsdict <
 	    `-hook-'
 	} ifelse
     }
+    ' cat
+} if
+`
     $integertype {
 	pop
 	cvs
@@ -547,7 +553,13 @@ $outputsdict <
 	$dicttype
 	$filetype
 	$finotype
+' cat
+@enable_threads@ 1 eq {
+    `
 	$hooktype
+    ' cat
+} if
+`
 	$marktype
 ' cat
 @enable_threads@ 1 eq {

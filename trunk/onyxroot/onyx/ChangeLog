@@ -1,3 +1,7 @@
+2003-04-26 : Jason Evans <jasone@canonware.com>
+
+	* configure.in : Add --disable-hook.  Remove dependency on autoheader.
+
 2003-04-24 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/libonyx.h : Add the following functions:

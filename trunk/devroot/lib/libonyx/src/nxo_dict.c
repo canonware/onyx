@@ -589,7 +589,9 @@ nxo_p_dict_hash(const void *a_key)
 #endif
 	case NXOT_DICT:
 	case NXOT_FILE:
+#ifdef CW_HOOK
 	case NXOT_HOOK:
+#endif
 #ifdef CW_THREADS
 	case NXOT_MUTEX:
 #endif

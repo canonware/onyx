@@ -225,8 +225,10 @@ typedef enum
     NXN_ENTRY(gstdout),
 #endif
     NXN_ENTRY(gt),
+#ifdef CW_HOOK
     NXN_ENTRY(hooktag),
     NXN_ENTRY(hooktype),
+#endif
 #ifdef CW_POSIX
     NXN_ENTRY(hour),
     NXN_ENTRY(IPPROTO_IP),

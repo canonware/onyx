@@ -14,6 +14,9 @@ PTH_VERSION_MIN=2.0
 PCRE_VERSION_MIN=4.0
 LIBEDIT_VERSION_MIN=2.6
 
+dnl 
+dnl Various paths.
+dnl 
 srcroot=$srcdir
 AC_SUBST(srcroot)
 abs_srcroot=`cd "$srcdir"; pwd`
@@ -51,7 +54,7 @@ AC_SUBST(MANDIR)
 
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
-cfghdrs="config.stamp"
+cfghdrs="$objroot/config.stamp"
 bins=
 mods=
 libs=
@@ -374,6 +377,21 @@ if test "x$enable_libonyx" = "x1" ; then
   AC_DEFINE(CW_USE_LIBONYX)
 fi
 
+dnl Check if hooks should be supported.
+AC_ARG_ENABLE(hook, [  --disable-hook          Disable hook support],
+if test "x$enable_hook" = "xno" ; then
+  enable_hook="0"
+else
+  enable_hook="1"
+fi
+,
+enable_hook="1"
+)
+AC_SUBST(enable_hook)
+if test "x$enable_hook" = "x1" ; then
+  AC_DEFINE(CW_HOOK)
+fi
+
 dnl Check if modules should be used.
 AC_ARG_ENABLE(modules, [  --disable-modules       Do not support modules],
 if test "x$enable_modules" = "xno" ; then
@@ -384,7 +402,7 @@ fi
 ,
 enable_modules="1"
 )
-if test "x$enable_posix" = "x0" ; then
+if test "x$enable_posix" = "x0" -o "x$enable_hook" = "x0" ; then
   enable_modules="0"
 fi
 if test "x$enable_modules" = "x1" ; then
@@ -710,7 +728,6 @@ AC_PATH_PROG(LD, ld, , $PATH)
 AC_PATH_PROG(PERL, perl, , $PATH)
 AC_PATH_PROG(ACLOCAL, aclocal, , $PATH)
 AC_PATH_PROG(AUTOCONF, autoconf, , $PATH)
-AC_PATH_PROG(AUTOHEADER, autoheader, , $PATH)
 
 dnl Do not build documentaion by default; instead use the prebuilt
 dnl documentation.
@@ -1001,6 +1018,7 @@ AC_MSG_RESULT(mods          :${mods})
 AC_MSG_RESULT(bins          :${bins})
 AC_MSG_RESULT(docs          :${docs})
 AC_MSG_RESULT()
+AC_MSG_RESULT(hook          : ${enable_hook})
 AC_MSG_RESULT(threads       : ${enable_threads})
 AC_MSG_RESULT(real          : ${enable_real})
 AC_MSG_RESULT(regex         : ${enable_regex})
