@@ -60,7 +60,7 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 
 #ifdef _LIBSTASH_DBG
 	retval->addr_hash = ch_new(NULL, a_internal, _CW_MEM_TABLE_SIZE,
-	    ch_hash_direct, ch_key_comp_direct);
+	    ch_direct_hash, ch_direct_key_comp);
 	if (retval->addr_hash == NULL)
 		goto OOM_2;
 #endif

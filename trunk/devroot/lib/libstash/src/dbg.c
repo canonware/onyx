@@ -33,7 +33,7 @@ dbg_new(cw_mem_t *a_mem)
 	mtx_new(&retval->lock);
 
 	retval->flag_hash = ch_new(NULL, a_mem, _CW_DBG_TABLE_SIZE,
-	    ch_hash_string, ch_key_comp_string);
+	    ch_string_hash, ch_string_key_comp);
 	if (retval->flag_hash == NULL) {
 		mtx_delete(&retval->lock);
 		_cw_mem_free(a_mem, retval);

@@ -353,7 +353,7 @@ ch_dump(cw_ch_t *a_ch, const char *a_prefix)
 }
 
 cw_uint32_t
-ch_hash_string(const void *a_key)
+ch_string_hash(const void *a_key)
 {
 	cw_uint32_t	retval;
 	char		*str;
@@ -367,7 +367,7 @@ ch_hash_string(const void *a_key)
 }
 
 cw_uint32_t
-ch_hash_direct(const void *a_key)
+ch_direct_hash(const void *a_key)
 {
 	cw_uint32_t	retval, i;
 
@@ -386,7 +386,7 @@ ch_hash_direct(const void *a_key)
 }
 
 cw_bool_t
-ch_key_comp_string(const void *a_k1, const void *a_k2)
+ch_string_key_comp(const void *a_k1, const void *a_k2)
 {
 	_cw_check_ptr(a_k1);
 	_cw_check_ptr(a_k2);
@@ -395,7 +395,8 @@ ch_key_comp_string(const void *a_k1, const void *a_k2)
 }
 
 cw_bool_t
-ch_key_comp_direct(const void *a_k1, const void *a_k2)
+ch_direct_key_comp(const void *a_k1, const void *a_k2)
 {
 	return (a_k1 == a_k2) ? TRUE : FALSE;
 }
+

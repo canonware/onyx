@@ -45,22 +45,22 @@ mq - Message queue.
 
 .I cw_bool_t
 .br
-.B mq_start_get
+.B mq_get_start
 .RI ( "cw_mq_t *a_mq" )
 
 .I cw_bool_t
 .br
-.B mq_stop_get
+.B mq_get_stop
 .RI ( "cw_mq_t *a_mq" )
 
 .I cw_bool_t
 .br
-.B mq_start_put
+.B mq_put_start
 .RI ( "cw_mq_t *a_mq" )
 
 .I cw_bool_t
 .br
-.B mq_stop_put
+.B mq_put_stop
 .RI ( "cw_mq_t *a_mq" )
 
 .SS Debugging (dbg) symbols
@@ -275,7 +275,7 @@ Put a message in a_mq.
 
 .I cw_bool_t
 .br
-.B mq_start_get
+.B mq_get_start
 .RI ( "cw_mq_t *a_mq" )
 .RS
 Input(s):
@@ -303,7 +303,7 @@ NULL).
 
 .I cw_bool_t
 .br
-.B mq_stop_get
+.B mq_get_stop
 .RI ( "cw_mq_t *a_mq" )
 .RS
 Input(s):
@@ -330,7 +330,7 @@ Change the get operation to the stop state (\fBmq_get\fR() will return NULL).
 
 .I cw_bool_t
 .br
-.B mq_start_put
+.B mq_put_start
 .RI ( "cw_mq_t *a_mq" )
 .RS
 Input(s):
@@ -357,7 +357,7 @@ Change the put operation to the start state (\fBmq_put\fR() will not return 1).
 
 .I cw_bool_t
 .br
-.B mq_stop_put
+.B mq_put_stop
 .RI ( "cw_mq_t *a_mq" )
 .RS
 Input(s):

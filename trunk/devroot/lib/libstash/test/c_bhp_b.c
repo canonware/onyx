@@ -43,21 +43,21 @@ main()
 		cw_bhp_t	bhp, *bhp_p;
 
 		_cw_assert(&bhp == bhp_new_r(&bhp, cw_g_mem,
-		    bhp_priority_compare_uint32));
+		    bhp_uint32_priority_compare));
 		bhp_delete(&bhp);
 
-		bhp_p = bhp_new(NULL, cw_g_mem, bhp_priority_compare_sint32);
+		bhp_p = bhp_new(NULL, cw_g_mem, bhp_sint32_priority_compare);
 		_cw_check_ptr(bhp_p);
 		bhp_delete(bhp_p);
 	}
 
-	/* bhp_insert(), bhp_find_min(), bhp_get_size(), bhp_del_min(). */
+	/* bhp_insert(), bhp_min_find(), bhp_size_get(), bhp_min_del(). */
 	{
 		cw_bhp_t	*bhp_p;
 		cw_bhpi_t	*bhpi_p;
 		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
-		bhp_p = bhp_new_r(NULL, cw_g_mem, bhp_priority_compare_uint32);
+		bhp_p = bhp_new_r(NULL, cw_g_mem, bhp_uint32_priority_compare);
 		_cw_check_ptr(bhp_p);
 
 		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {
@@ -67,16 +67,16 @@ main()
 			    *)&items[i], (const void *)items[i], NULL, NULL);
 			_cw_check_ptr(bhpi_p);
 
-			_cw_assert(bhp_get_size(bhp_p) == i);
+			_cw_assert(bhp_size_get(bhp_p) == i);
 			bhp_insert(bhp_p, bhpi_p);
-			_cw_assert(bhp_get_size(bhp_p) == i + 1);
+			_cw_assert(bhp_size_get(bhp_p) == i + 1);
 		}
 
 		for (i = 0; i < 129; i++) {
-			_cw_assert(bhp_get_size(bhp_p) ==
+			_cw_assert(bhp_size_get(bhp_p) ==
 			    _LIBSTASH_TEST_HEAP_SIZE - i);
-			_cw_assert(bhp_del_min(bhp_p, NULL, NULL) == FALSE);
-			_cw_assert(bhp_get_size(bhp_p) ==
+			_cw_assert(bhp_min_del(bhp_p, NULL, NULL) == FALSE);
+			_cw_assert(bhp_size_get(bhp_p) ==
 			    _LIBSTASH_TEST_HEAP_SIZE - 1 - i);
 		}
 
@@ -90,11 +90,11 @@ main()
 		cw_uint32_t	items[_LIBSTASH_TEST_HEAP_SIZE], i;
 
 		bhp_p_a = bhp_new_r(NULL, cw_g_mem,
-		    bhp_priority_compare_uint32);
+		    bhp_uint32_priority_compare);
 		_cw_check_ptr(bhp_p_a);
 
 		bhp_p_b = bhp_new_r(NULL, cw_g_mem,
-		    bhp_priority_compare_uint32);
+		    bhp_uint32_priority_compare);
 		_cw_check_ptr(bhp_p_b);
 
 		for (i = 0; i < _LIBSTASH_TEST_HEAP_SIZE; i++) {

@@ -64,22 +64,22 @@ ch - Chained hashing.
 
 .I cw_uint32_t
 .br
-.B ch_hash_string
+.B ch_string_hash
 .RI ( "const void *a_key" )
 
 .I cw_uint32_t
 .br
-.B ch_hash_direct
+.B ch_direct_hash
 .RI ( "const void *a_key" )
 
 .I cw_bool_t
 .br
-.B ch_key_comp_string
+.B ch_string_key_comp
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
 
 .I cw_bool_t
 .br
-.B ch_key_comp_direct
+.B ch_direct_key_comp
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
 
 .SS Debugging (dbg) symbols
@@ -478,7 +478,7 @@ Print the internal state of a_ch.
 
 .I cw_uint32_t
 .br
-.B ch_hash_string
+.B ch_string_hash
 .RI ( "const void *a_key" )
 .RS
 Input(s):
@@ -503,7 +503,7 @@ NULL-terminated string hashing function.
 
 .I cw_uint32_t
 .br
-.B ch_hash_direct
+.B ch_direct_hash
 .RI ( "const void *a_key" )
 .RS
 Input(s):
@@ -528,7 +528,7 @@ Direct (pointer) hashing function.
 
 .I cw_bool_t
 .br
-.B ch_key_comp_string
+.B ch_string_key_comp
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
 .RS
 Input(s):
@@ -559,7 +559,7 @@ Test two keys (NULL-terminated strings) for equality.
 
 .I cw_bool_t
 .br
-.B ch_key_comp_direct
+.B ch_direct_key_comp
 .RI ( "const void *a_k1" ", " "const void *a_k2" )
 .RS
 Input(s):

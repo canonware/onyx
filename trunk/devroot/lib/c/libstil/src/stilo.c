@@ -1015,11 +1015,11 @@ stilo_p_dict_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, va_list a_p)
 	 */
 	if (dict_size > 16) {
 		dch_new(&dict->e.d.hash, stilt_mem_get(a_stilt), dict_size *
-		    1.25, dict_size, dict_size / 4, ch_hash_direct,
-		    ch_key_comp_direct);
+		    1.25, dict_size, dict_size / 4, ch_direct_hash,
+		    ch_direct_key_comp);
 	} else {
 		dch_new(&dict->e.d.hash, stilt_mem_get(a_stilt), 20, 16, 4,
-		    ch_hash_direct, ch_key_comp_direct);
+		    ch_direct_hash, ch_direct_key_comp);
 	}
 
 	stiloe_p_new(a_stilo->o.stiloe, _CW_STILOT_DICTTYPE);

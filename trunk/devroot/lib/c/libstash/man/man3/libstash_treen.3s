@@ -32,27 +32,27 @@ treen - Arbitrary tree (tree node).
 
 .I cw_treen_t *
 .br
-.B treen_get_parent
+.B treen_parent_get
 .RI ( "cw_treen_t *a_treen" )
 
 .I cw_treen_t *
 .br
-.B treen_get_child
+.B treen_child_get
 .RI ( "cw_treen_t *a_treen" )
 
 .I cw_treen_t *
 .br
-.B treen_get_sibling
+.B treen_sibling_get
 .RI ( "cw_treen_t *a_treen" )
 
 .I void *
 .br
-.B treen_get_data_ptr
+.B treen_data_ptr_get
 .RI ( "cw_treen_t *a_treen" )
 
 .I void
 .br
-.B treen_set_data_ptr
+.B treen_data_ptr_set
 .RI ( "cw_treen_t *a_treen" ", " "void *a_data" )
 
 .SS Debugging (dbg) symbols
@@ -64,7 +64,7 @@ number of children.  In actuality, each treen only has one child pointer, so
 children must be accessed by traversing to the child, then iterating on a
 sibling ring.  This allows the treen structure to be a constant size, regardless
 of the fan-out.  Care must be taken when iterating on the sibling ring with
-\fBtreen_get_sibling\fR() to detect the point of wrap-around.
+\fBtreen_sibling_get\fR() to detect the point of wrap-around.
 
 .SH USAGE
 .I cw_treen_t *
@@ -158,13 +158,13 @@ Description:
 .RS
 Make a_treen a child of a_parent.  If a_parent already has one or more siblings,
 a_treen is inserted into the sibling ring such that iterating on the sibling
-ring, starting at \fBtreen_get_child\fR(a_parent) will get to a_treen last.
+ring, starting at \fBtreen_child_get\fR(a_parent) will get to a_treen last.
 .RE
 .RE
 
 .I cw_treen_t *
 .br
-.B treen_get_parent
+.B treen_parent_get
 .RI ( "cw_treen_t *a_treen" )
 .RS
 Input(s):
@@ -191,7 +191,7 @@ Return a pointer to a_treen's parent.
 
 .I cw_treen_t *
 .br
-.B treen_get_child
+.B treen_child_get
 .RI ( "cw_treen_t *a_treen" )
 .RS
 Input(s):
@@ -218,7 +218,7 @@ Return a pointer to a_treen's first child.
 
 .I cw_treen_t *
 .br
-.B treen_get_sibling
+.B treen_sibling_get
 .RI ( "cw_treen_t *a_treen" )
 .RS
 Input(s):
@@ -245,7 +245,7 @@ Return a pointer to a_treen's sibling.
 
 .I void *
 .br
-.B treen_get_data_ptr
+.B treen_data_ptr_get
 .RI ( "cw_treen_t *a_treen" )
 .RS
 Input(s):
@@ -270,7 +270,7 @@ Return a pointer to the data for a_treen.
 
 .I void
 .br
-.B treen_set_data_ptr
+.B treen_data_ptr_set
 .RI ( "cw_treen_t *a_treen" ", " "void *a_data" )
 .RS
 Input(s):

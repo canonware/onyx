@@ -7,8 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Multi-threaded concurrent transparent proxy.
  *
  ****************************************************************************/

@@ -7,8 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Send a specified amount of data through one or more sockets as fast as
  * possible.
  *

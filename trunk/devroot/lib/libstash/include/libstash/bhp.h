@@ -72,13 +72,13 @@ void		bhp_delete(cw_bhp_t *a_bhp);
 void		bhp_dump(cw_bhp_t *a_bhp);
 
 void		bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi);
-cw_bool_t	bhp_find_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data);
-cw_bool_t	bhp_del_min(cw_bhp_t *a_bhp, void **r_priority, void **r_data);
+cw_bool_t	bhp_min_find(cw_bhp_t *a_bhp, void **r_priority, void **r_data);
+cw_bool_t	bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data);
 
-cw_uint64_t	bhp_get_size(cw_bhp_t *a_bhp);
+cw_uint64_t	bhp_size_get(cw_bhp_t *a_bhp);
 
 void		bhp_union(cw_bhp_t *a_a, cw_bhp_t *a_b);
 
-cw_sint32_t	bhp_priority_compare_uint32(const void *a_a, const void *a_b);
-cw_sint32_t	bhp_priority_compare_sint32(const void *a_a, const void *a_b);
-cw_sint32_t	bhp_priority_compare_uint64(const void *a_a, const void *a_b);
+cw_sint32_t	bhp_uint32_priority_compare(const void *a_a, const void *a_b);
+cw_sint32_t	bhp_sint32_priority_compare(const void *a_a, const void *a_b);
+cw_sint32_t	bhp_uint64_priority_compare(const void *a_a, const void *a_b);

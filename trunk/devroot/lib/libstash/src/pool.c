@@ -41,8 +41,8 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 	qs_new(&retval->spares);
 
 #ifdef _LIBSTASH_DBG
-	if (dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_hash_direct,
-	    ch_key_comp_direct) == NULL)
+	if (dch_new(&retval->addr_hash, a_mem, 8, 6, 2, ch_direct_hash,
+	    ch_direct_key_comp) == NULL)
 		goto OOM_2;
 
 	retval->magic = _CW_POOL_MAGIC;

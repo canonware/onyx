@@ -12,69 +12,71 @@
 /*
  * Ring definitions.
  */
-#define qr_elm(type)							\
+#define qr(a_type)							\
 struct {								\
-	type *qre_next;			/* Next element. */		\
-	type *qre_prev;			/* Previous element. */		\
+	a_type *qre_next;			/* Next element. */	\
+	a_type *qre_prev;			/* Previous element. */	\
 }
 
 /*
  * Ring functions.
  */
-#define qr_new(elm, field) do {						\
-	(elm)->field.qre_next = (elm);					\
-	(elm)->field.qre_prev = (elm);					\
+#define qr_new(a_qr, a_field) do {					\
+	(a_qr)->a_field.qre_next = (a_qr);				\
+	(a_qr)->a_field.qre_prev = (a_qr);				\
 } while (0)
 
-#define qr_next(elm, field) ((elm)->field.qre_next)
+#define qr_next(a_qr, a_field) ((a_qr)->a_field.qre_next)
 
-#define qr_prev(elm, field) ((elm)->field.qre_prev)
+#define qr_prev(a_qr, a_field) ((a_qr)->a_field.qre_prev)
 
-#define qr_before_insert(qrelm, elm, field) do {			\
-	(elm)->field.qre_prev = (qrelm)->field.qre_prev;		\
-	(elm)->field.qre_next = (qrelm);				\
-	(elm)->field.qre_prev->field.qre_next = (elm);			\
-	(qrelm)->field.qre_prev = (elm);				\
+#define qr_before_insert(a_qrelm, a_qr, a_field) do {			\
+	(a_qr)->a_field.qre_prev = (a_qrelm)->a_field.qre_prev;		\
+	(a_qr)->a_field.qre_next = (a_qrelm);				\
+	(a_qr)->a_field.qre_prev->a_field.qre_next = (a_qr);		\
+	(a_qrelm)->a_field.qre_prev = (a_qr);				\
 } while (0)
 
-#define qr_after_insert(qrelm, elm, field) do {				\
-	(elm)->field.qre_next = (qrelm)->field.qre_next;		\
-	(elm)->field.qre_prev = (qrelm);				\
-	(elm)->field.qre_next->field.qre_prev = (elm);			\
-	(qrelm)->field.qre_next = (elm);				\
+#define qr_after_insert(a_qrelm, a_qr, a_field) do {			\
+	(a_qr)->a_field.qre_next = (a_qrelm)->a_field.qre_next;		\
+	(a_qr)->a_field.qre_prev = (a_qrelm);				\
+	(a_qr)->a_field.qre_next->a_field.qre_prev = (a_qr);		\
+	(a_qrelm)->a_field.qre_next = (a_qr);				\
 } while (0)
 
-#define qr_meld(elm_a, elm_b, field) do {				\
+#define qr_meld(a_qr_a, a_qr_b, a_field) do {				\
 	void	*t;							\
-	(elm_a)->field.qre_prev->field.qre_next = (elm_b);		\
-	(elm_b)->field.qre_prev->field.qre_next = (elm_a);		\
-	t = (elm_a)->field.qre_prev;					\
-	(elm_a)->field.qre_prev = (elm_b)->field.qre_prev;		\
-	(elm_b)->field.qre_prev = t;					\
+	(a_qr_a)->a_field.qre_prev->a_field.qre_next = (a_qr_b);	\
+	(a_qr_b)->a_field.qre_prev->a_field.qre_next = (a_qr_a);	\
+	t = (a_qr_a)->a_field.qre_prev;					\
+	(a_qr_a)->a_field.qre_prev = (a_qr_b)->a_field.qre_prev;	\
+	(a_qr_b)->a_field.qre_prev = t;					\
 } while (0)
 
 /*
  * qr_meld() and qr_split() are functionally equivalent, so there's no need to
  * have two copies of the code.
  */
-#define qr_split(elm_a, elm_b, field)					\
-	qr_meld((elm_a), (elm_b), field)
+#define qr_split(a_qr_a, a_qr_b, a_field)				\
+	qr_meld((a_qr_a), (a_qr_b), a_field)
 
-#define qr_remove(elm, field) do {					\
-	(elm)->field.qre_prev->field.qre_next = (elm)->field.qre_next;	\
-	(elm)->field.qre_next->field.qre_prev = (elm)->field.qre_prev;	\
-	(elm)->field.qre_next = (elm);					\
-	(elm)->field.qre_prev = (elm);					\
+#define qr_remove(a_qr, a_field) do {					\
+	(a_qr)->a_field.qre_prev->a_field.qre_next =			\
+	    (a_qr)->a_field.qre_next;					\
+	(a_qr)->a_field.qre_next->a_field.qre_prev =			\
+	    (a_qr)->a_field.qre_prev;					\
+	(a_qr)->a_field.qre_next = (a_qr);				\
+	(a_qr)->a_field.qre_prev = (a_qr);				\
 } while (0)
 
-#define qr_foreach(var, elm, field)					\
-	for ((var) = (elm);						\
+#define qr_foreach(var, a_qr, a_field)					\
+	for ((var) = (a_qr);						\
 	    (var) != NULL;						\
-	    (var) = (((var)->field.qre_next != (elm))			\
-	    ? (var)->field.qre_next : NULL))
+	    (var) = (((var)->a_field.qre_next != (a_qr))		\
+	    ? (var)->a_field.qre_next : NULL))
 
-#define qr_reverse_foreach(var, elm, field)				\
-	for ((var) = ((elm) != NULL) ? qr_prev(elm, field) : NULL;	\
+#define qr_reverse_foreach(var, a_qr, a_field)				\
+	for ((var) = ((a_qr) != NULL) ? qr_prev(a_qr, a_field) : NULL;	\
 	    (var) != NULL;						\
-	    (var) = (((var) != (elm))					\
-	    ? (var)->field.qre_prev : NULL))
+	    (var) = (((var) != (a_qr))					\
+	    ? (var)->a_field.qre_prev : NULL))

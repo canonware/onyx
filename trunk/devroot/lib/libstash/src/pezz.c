@@ -70,7 +70,7 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 
 #ifdef _LIBSTASH_DBG
 	if (dch_new(&retval->addr_hash, a_mem, a_num_buffers * 3, a_num_buffers
-	    * 2, 0, ch_hash_direct, ch_key_comp_direct) == NULL)
+	    * 2, 0, ch_direct_hash, ch_direct_key_comp) == NULL)
 		goto OOM_4;
 
 	retval->magic = _CW_PEZZ_MAGIC;

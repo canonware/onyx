@@ -37,7 +37,7 @@ typedef struct cw_stilso_s cw_stilso_t;
 
 struct cw_stilso_s {
 	cw_stilo_t	stilo;		/* Payload.  Must be first field. */
-	qr_elm(cw_stilso_t) link;	/* Stack/spares ring linkage. */
+	qr(cw_stilso_t) link;		/* Stack/spares ring linkage. */
 };
 
 struct cw_stilsc_s {

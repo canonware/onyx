@@ -95,7 +95,7 @@ tests : [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS] [BTESTS]]
 
 check : tests
 {
-  [VERIFY] -v -z -r [srcdir] -o [objdir]
+  [VERIFY] -z -r [srcdir] -o [objdir]
            [prepost "-d " "" [fromto [srcdir]/%0%.c [objdir]/%0% [CTESTS]]]
            [prepost "-s " ""
                     [fromto [srcdir]/%0%.pl.in [objdir]/%0%.pl [PTESTS]]];

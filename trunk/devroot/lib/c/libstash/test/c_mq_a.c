@@ -391,7 +391,7 @@ main()
 		mq_delete(mq_p);
 	}
 
-	/* mq_start_get(), mq_stop_get(), mq_tryget(), mq_put(). */
+	/* mq_get_start(), mq_get_stop(), mq_tryget(), mq_put(). */
 	{
 		cw_mq_t		*mq_p;
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
@@ -399,23 +399,23 @@ main()
 		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint8_t));
 		_cw_check_ptr(mq_p);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(mq_put(mq_p, i) == 0);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 		_cw_assert(mq_get(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
 		_cw_assert(t == i);
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -433,23 +433,23 @@ main()
 		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint16_t));
 		_cw_check_ptr(mq_p);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(mq_put(mq_p, i) == 0);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 		_cw_assert(mq_get(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
 		_cw_assert(t == i);
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -467,23 +467,23 @@ main()
 		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint32_t));
 		_cw_check_ptr(mq_p);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(mq_put(mq_p, i) == 0);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 		_cw_assert(mq_get(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
 		_cw_assert(t == i);
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -501,23 +501,23 @@ main()
 		mq_p = mq_new(NULL, cw_g_mem, sizeof(cw_uint64_t));
 		_cw_check_ptr(mq_p);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(mq_put(mq_p, i) == 0);
 
-		_cw_assert(mq_stop_get(mq_p) == FALSE);
-		_cw_assert(mq_stop_get(mq_p));
+		_cw_assert(mq_get_stop(mq_p) == FALSE);
+		_cw_assert(mq_get_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 		_cw_assert(mq_get(mq_p, &t));
 
-		_cw_assert(mq_start_get(mq_p) == FALSE);
-		_cw_assert(mq_start_get(mq_p));
+		_cw_assert(mq_get_start(mq_p) == FALSE);
+		_cw_assert(mq_get_start(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
 		_cw_assert(t == i);
 		_cw_assert(mq_tryget(mq_p, &t));
@@ -529,7 +529,7 @@ main()
 		mq_delete(mq_p);
 	}
 
-	/* mq_start_put(), mq_stop_put(), mq_tryget(), mq_put(). */
+	/* mq_put_start(), mq_put_stop(), mq_tryget(), mq_put(). */
 	{
 		cw_mq_t		*mq_p;
 		cw_uint8_t	i = 1, j = 2, k = 3, t;
@@ -538,19 +538,19 @@ main()
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(1 == mq_put(mq_p, i));
 
-		_cw_assert(mq_start_put(mq_p) == FALSE);
-		_cw_assert(mq_start_put(mq_p));
+		_cw_assert(mq_put_start(mq_p) == FALSE);
+		_cw_assert(mq_put_start(mq_p));
 		_cw_assert(mq_put(mq_p, i) == 0);
 		_cw_assert(mq_put(mq_p, j) == 0);
 
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_put(mq_p, k) == 1);
 
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
@@ -569,19 +569,19 @@ main()
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(1 == mq_put(mq_p, i));
 
-		_cw_assert(mq_start_put(mq_p) == FALSE);
-		_cw_assert(mq_start_put(mq_p));
+		_cw_assert(mq_put_start(mq_p) == FALSE);
+		_cw_assert(mq_put_start(mq_p));
 		_cw_assert(mq_put(mq_p, i) == 0);
 		_cw_assert(mq_put(mq_p, j) == 0);
 
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_put(mq_p, k) == 1);
 
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
@@ -600,19 +600,19 @@ main()
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(1 == mq_put(mq_p, i));
 
-		_cw_assert(mq_start_put(mq_p) == FALSE);
-		_cw_assert(mq_start_put(mq_p));
+		_cw_assert(mq_put_start(mq_p) == FALSE);
+		_cw_assert(mq_put_start(mq_p));
 		_cw_assert(mq_put(mq_p, i) == 0);
 		_cw_assert(mq_put(mq_p, j) == 0);
 
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_put(mq_p, k) == 1);
 
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);
@@ -631,19 +631,19 @@ main()
 		_cw_check_ptr(mq_p);
 
 		_cw_assert(mq_tryget(mq_p, &t));
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_tryget(mq_p, &t));
 
 		_cw_assert(1 == mq_put(mq_p, i));
 
-		_cw_assert(mq_start_put(mq_p) == FALSE);
-		_cw_assert(mq_start_put(mq_p));
+		_cw_assert(mq_put_start(mq_p) == FALSE);
+		_cw_assert(mq_put_start(mq_p));
 		_cw_assert(mq_put(mq_p, i) == 0);
 		_cw_assert(mq_put(mq_p, j) == 0);
 
-		_cw_assert(mq_stop_put(mq_p) == FALSE);
-		_cw_assert(mq_stop_put(mq_p));
+		_cw_assert(mq_put_stop(mq_p) == FALSE);
+		_cw_assert(mq_put_stop(mq_p));
 		_cw_assert(mq_put(mq_p, k) == 1);
 
 		_cw_assert(mq_tryget(mq_p, &t) == FALSE);

@@ -80,6 +80,7 @@ SRCS = [SRCS] [LIBSTASH_SRCS];
                      libstash_cnd.3s libstash_dch.3s libstash_dbg.3s
                      libstash_mem.3s libstash_mq.3s libstash_mtx.3s
                      libstash_out.3s libstash_pezz.3s libstash_pool.3s
+                     libstash_ql.3s libstash_qr.3s libstash_qs.3s
                      libstash_res.3s libstash_rwl.3s libstash_sema.3s
                      libstash_thd.3s libstash_tsd.3s libstash_treen.3s;
   manpages_3 = [fromto % [srcdir]/lib/c/libstash/man/man3/% [manpages_3]];

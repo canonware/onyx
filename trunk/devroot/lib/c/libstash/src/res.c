@@ -77,8 +77,8 @@ res_new(cw_res_t *a_res, cw_mem_t *a_mem)
 	retval->mem = a_mem;
 	rwl_new(&retval->rw_lock);
 	if (dch_new(&retval->hash, a_mem, _CW_RES_BASE_TABLE,
-	    _CW_RES_BASE_GROW, _CW_RES_BASE_SHRINK, ch_hash_string,
-	    ch_key_comp_string) == NULL)
+	    _CW_RES_BASE_GROW, _CW_RES_BASE_SHRINK, ch_string_hash,
+	    ch_string_key_comp) == NULL)
 		goto OOM_2;
 
 	return retval;

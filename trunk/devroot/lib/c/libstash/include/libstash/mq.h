@@ -45,8 +45,8 @@ cw_bool_t	mq_timedget(cw_mq_t *a_mq, const struct timespec *a_timeout,
     ...);
 cw_bool_t	mq_get(cw_mq_t *a_mq, ...);
 cw_sint32_t	mq_put(cw_mq_t *a_mq, ...);
-cw_bool_t	mq_start_get(cw_mq_t *a_mq);
-cw_bool_t	mq_stop_get(cw_mq_t *a_mq);
-cw_bool_t	mq_start_put(cw_mq_t *a_mq);
-cw_bool_t	mq_stop_put(cw_mq_t *a_mq);
+cw_bool_t	mq_get_start(cw_mq_t *a_mq);
+cw_bool_t	mq_get_stop(cw_mq_t *a_mq);
+cw_bool_t	mq_put_start(cw_mq_t *a_mq);
+cw_bool_t	mq_put_stop(cw_mq_t *a_mq);
 void		mq_dump(cw_mq_t *a_mq, const char *a_prefix);

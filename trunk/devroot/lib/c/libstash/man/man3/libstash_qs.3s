@@ -1,0 +1,372 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_qs 3s "libstash, version <Version>"
+.Nm libstash_qs
+.hy 1
+.SH NAME
+qs - Stack macros
+.SH SYNOPSIS
+\fB#include <libstash/libstash.h>\fR
+
+.SS Data structures
+.B qs_head
+.RI ( "<qs_type> a_type" )
+
+.B qs_head_initializer
+.RI ( "<qs_type> *a_head" )
+
+.B qs_elm
+.RI ( "<qs_elm_type> a_type" )
+
+.SS Operations
+.I void
+.br
+.B qs_new
+.RI ( "<qs_type> *a_head" )
+
+.I void
+.br
+.B qs_elm_new
+.RI ( "<qs_elm_type> *a_elm" ", " "<field_name> a_field" )
+
+.I <qs_type> *
+.br
+.B qs_top
+.RI ( "<qs_type> *a_head" )
+
+.I <qs_type> *
+.br
+.B qs_down
+.RI ( "<qs_elm_type> *a_elm" ", " "<field_name> a_field" )
+
+.I void
+.br
+.B qs_push
+.RI ( "<qs_type> *a_head" ", " "<qs_elm_type> *a_elm" ", "
+.IR "<field_name> a_field" )
+
+.I void
+.br
+.B qs_under_push
+.RI ( "<qs_elm_type> *a_qselm" ", " "<qs_elm_type> *a_elm" ", "
+.IR "<field_name> a_field" )
+
+.I <qs_elm_type> *
+.br
+.B qs_pop
+.RI ( "<qs_type> *a_head" ", " "<field_name> a_field" )
+
+.B qs_foreach
+.RI ( "<qs_elm_type> *a_var" ", " "<qs_type> *a_head" ", "
+.IR "<field_name> a_field" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+The qs macros implement operations on a stack.  The type of the stack elements
+and which field of the elements to use are determined by arguments that are
+passed into the macros.  The macros are optimized for speed and code size, which
+means that there is minimal error checking built in.  As a result, care must be
+taken to assure that these macros are used as intended, or strange things can
+happen.
+
+.SH USAGE
+.SS Data structures
+.B qs_head
+.RI ( "<qs_type> a_type" )
+.RS
+Input(s):
+.RS
+.IR a_type :
+.RS
+Data type for the qs.
+.RE
+.RE
+Output(s):
+.RS
+A data structure that can be used as a qs head.
+.RE
+Description:
+.RS
+Generate code for a qs head data structure.
+.RE
+.RE
+
+.B qs_head_initializer
+.RI ( "<qs_type> *a_head" )
+.RS
+Input(s):
+.RS
+.IR a_head :
+.RS
+Pointer to a qs head
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Statically initialize a qs head.
+.RE
+.RE
+
+.B qs_elm
+.RI ( "<qs_elm_type> a_type" )
+.RS
+Input(s):
+.RS
+.IR a_type :
+.RS
+Data type for the qs elements.
+.RE
+.RE
+Output(s):
+.RS
+A data structure that can be used as a qs element.
+.RE
+Description:
+.RS
+Generate code for a qs element data structure.
+.RE
+.RE
+
+.SS Operations
+.I void
+.br
+.B qs_new
+.RI ( "<qs_type> *a_head" )
+.RS
+Input(s):
+.RS
+.IR a_head :
+.RS
+Pointer to a qs head.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I void
+.br
+.B qs_elm_new
+.RI ( "<qs_elm_type> *a_elm" ", " "<field_name> a_field" )
+.RS
+Input(s):
+.RS
+.IR a_head :
+.RS
+Pointer to a qs element.
+.RE
+.IR a_field :
+.RS
+Field within the qs element to use.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Constructor.
+.RE
+.RE
+
+.I <qs_type> *
+.br
+.B qs_top
+.RI ( "<qs_type> *a_head" )
+.RS
+Input(s):
+.RS
+.IR a_head :
+.RS
+Pointer to a qs head.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Pointer to the top element in the qs.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the top element in the qs.
+.RE
+.RE
+
+.I <qs_type> *
+.br
+.B qs_down
+.RI ( "<qs_elm_type> *a_elm" ", " "<field_name> a_field" )
+.RS
+Input(s):
+.RS
+.IR a_elm :
+.RS
+Pointer to a qs element.
+.RE
+.IR a_field :
+.RS
+Field within the qs element to use.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to the next element in the qs.
+.br
+NULL: a_elm is the bottom element in the qs.
+.RE
+.RE
+Description:
+.RS
+Return a pointer to the next element in the qs below a_elm.
+.RE
+.RE
+
+.I void
+.br
+.B qs_push
+.RI ( "<qs_type> *a_head" ", " "<qs_elm_type> *a_elm" ", "
+.IR "<field_name> a_field" )
+.RS
+Input(s):
+.RS
+.IR a_head :
+.RS
+Pointer to a qs head.
+.RE
+.IR a_elm :
+.RS
+Pointer to an element.
+.RE
+.IR a_field :
+.RS
+Field within the qs element to use.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Push a_elm onto the qs.
+.RE
+.RE
+
+.I void
+.br
+.B qs_under_push
+.RI ( "<qs_elm_type> *a_qselm" ", " "<qs_elm_type> *a_elm" ", "
+.IR "<field_name> a_field" )
+.RS
+Input(s):
+.RS
+.IR a_qselm :
+.RS
+Pointer to a qs element.
+.RE
+.IR a_elm :
+.RS
+Pointer to an element.
+.RE
+.IR a_field :
+.RS
+Field within the qs element to use.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Push a_elm under a_qselm.
+.RE
+.RE
+
+.I <qs_elm_type> *
+.br
+.B qs_pop
+.RI ( "<qs_type> *a_head" ", " "<field_name> a_field" )
+.RS
+Input(s):
+.RS
+.IR a_head :
+.RS
+Pointer to a qs head.
+.RE
+.IR a_field :
+.RS
+Field within the qs element to use.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a qs element.
+.br
+NULL: a_head is empty.
+.RE
+.RE
+Description:
+.RS
+Pop an element off of a_head.
+.RE
+.RE
+
+.B qs_foreach
+.RI ( "<qs_elm_type> *a_var" ", " "<qs_type> *a_head" ", "
+.IR "<field_name> a_field" )
+.RS
+Input(s):
+.RS
+.IR a_var :
+.RS
+The name of a temporary variable to use for iteration.
+.RE
+.IR a_head :
+.RS
+Pointer to a qs head.
+.RE
+.IR a_field :
+.RS
+Field within the qs element to use.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Iterate down the qs, storing a pointer to each element in a_var along the way.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

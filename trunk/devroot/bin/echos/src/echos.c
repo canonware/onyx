@@ -7,8 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Multi-threaded concurrent line echo server that uses the sock and socks
  * classes.
  *

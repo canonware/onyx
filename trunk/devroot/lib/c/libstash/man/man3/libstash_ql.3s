@@ -1,0 +1,60 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_ql 3s "libstash, version <Version>"
+.Nm libstash_ql
+.hy 1
+.SH NAME
+ql - <XXX Description>
+.SH SYNOPSIS
+\fB#include <libstash/libstash.h>\fR
+
+.I <return type>
+.br
+.B ql_<func>
+.RI ( "cw_ql_t *a_ql" ", " <args> )
+
+.SS Debugging (dbg) symbols
+.TP \" XXX
+\*(lq<XXX symbol>\*(rq
+<XXX Symbol description>
+
+.SH DESCRIPTION
+<XXX Description>
+
+.SH USAGE
+
+.RS
+Input(s):
+.RS
+.IR a_ql :
+.RS
+Pointer to a ql.
+.RE
+.IR <input> :
+.RS
+<input description>
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+<retval description>
+.RE
+.RE
+Description:
+.RS
+<description>
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

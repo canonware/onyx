@@ -7,8 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Accept connections and throw away incoming data as fast as possible.
  *
  ****************************************************************************/

@@ -529,6 +529,9 @@ l | l | l.
  out@libstash_out(3s)@Output (printf(3) replacement).
  pezz@libstash_pezz(3s)@Cached memory allocation.
  pool@libstash_pool(3s)@Cached memory allocation.
+ ql@libstash_ql(3s)@List macros.
+ qr@libstash_ql(3s)@Ring macros.
+ qs@libstash_ql(3s)@Stack macros.
  res@libstash_res(3s)@Resource (name/value pairs).
  rwl@libstash_rwl(3s)@Read/write lock.
  sema@libstash_sema(3s)@Semaphore.

@@ -102,8 +102,8 @@ cw_bool_t
 stilng_new(cw_stilng_t *a_stilng, cw_mem_t *a_mem)
 {
 	if (dch_new(&a_stilng->hash, a_mem, _CW_STILN_BASE_TABLE,
-	    _CW_STILN_BASE_GROW, _CW_STILN_BASE_SHRINK, ch_hash_direct,
-	    ch_key_comp_direct) == NULL)
+	    _CW_STILN_BASE_GROW, _CW_STILN_BASE_SHRINK, ch_direct_hash,
+	    ch_direct_key_comp) == NULL)
 		goto OOM;
 
 	return FALSE;
@@ -135,8 +135,8 @@ cw_bool_t
 stilnt_new(cw_stilnt_t *a_stilnt, cw_mem_t *a_mem, cw_stilng_t *a_stilng)
 {
 	if (dch_new(&a_stilnt->hash, a_mem, _CW_STILN_BASE_TABLE,
-	    _CW_STILN_BASE_GROW, _CW_STILN_BASE_SHRINK, ch_hash_direct,
-	    ch_key_comp_direct) == NULL)
+	    _CW_STILN_BASE_GROW, _CW_STILN_BASE_SHRINK, ch_direct_hash,
+	    ch_direct_key_comp) == NULL)
 		goto OOM;
 
 	/* XXX Need handle for allocation.  stilat, mem, or stilt? */

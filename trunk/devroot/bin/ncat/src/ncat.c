@@ -7,8 +7,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
  * Simple program that pipes input from stdin to a TCP socket, and pipes the
  * result to stdout.
  *

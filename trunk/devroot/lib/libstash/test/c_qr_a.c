@@ -17,7 +17,7 @@
 typedef struct ring_s ring_t;
 
 struct ring_s {
-	qr_elm(ring_t) link;
+	qr(ring_t) link;
 	cw_uint8_t	id;
 };
 

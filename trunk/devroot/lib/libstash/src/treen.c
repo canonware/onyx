@@ -59,7 +59,7 @@ treen_delete(cw_treen_t *a_treen)
 	_cw_assert(a_treen->magic_b == _CW_TREEN_MAGIC);
 
 	/* Recursively delete all subtrees. */
-	while ((child = treen_get_child(a_treen)) != NULL)
+	while ((child = treen_child_get(a_treen)) != NULL)
 		treen_delete(child);
 
 	/* Delete self. */
@@ -88,7 +88,7 @@ treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent)
 	 */
 	if (a_treen->parent != NULL) {
 		if (a_treen == a_treen->parent->child) {
-			if (treen_get_sibling(a_treen) != a_treen) {
+			if (treen_sibling_get(a_treen) != a_treen) {
 				/*
 				 * The parent's child pointer points to a_treen,
 				 * and this isn't the only child, so parent's
@@ -96,7 +96,7 @@ treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent)
 				 * child.
 				 */
 				a_treen->parent->child =
-				    treen_get_sibling(a_treen);
+				    treen_sibling_get(a_treen);
 			} else {
 				/* Last child. */
 				a_treen->parent->child = NULL;
@@ -117,7 +117,7 @@ treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent)
 			/* The parent has no children yet. */
 			a_parent->child = a_treen;
 		} else {
-			cw_treen_t	*sibling = treen_get_child(a_parent);
+			cw_treen_t	*sibling = treen_child_get(a_parent);
 
 			qr_meld(sibling, a_treen, sib_link);
 		}
@@ -125,7 +125,7 @@ treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent)
 }
 
 cw_treen_t *
-treen_get_parent(cw_treen_t *a_treen)
+treen_parent_get(cw_treen_t *a_treen)
 {
 	_cw_check_ptr(a_treen);
 	_cw_assert(a_treen->magic_a == _CW_TREEN_MAGIC);
@@ -136,7 +136,7 @@ treen_get_parent(cw_treen_t *a_treen)
 }
 
 cw_treen_t *
-treen_get_child(cw_treen_t *a_treen)
+treen_child_get(cw_treen_t *a_treen)
 {
 	_cw_check_ptr(a_treen);
 	_cw_assert(a_treen->magic_a == _CW_TREEN_MAGIC);
@@ -147,7 +147,7 @@ treen_get_child(cw_treen_t *a_treen)
 }
 
 cw_treen_t *
-treen_get_sibling(cw_treen_t *a_treen)
+treen_sibling_get(cw_treen_t *a_treen)
 {
 	cw_treen_t	*retval;
 
@@ -162,7 +162,7 @@ treen_get_sibling(cw_treen_t *a_treen)
 }
 
 void *
-treen_get_data_ptr(cw_treen_t *a_treen)
+treen_data_ptr_get(cw_treen_t *a_treen)
 {
 	_cw_check_ptr(a_treen);
 	_cw_assert(a_treen->magic_a == _CW_TREEN_MAGIC);
@@ -173,7 +173,7 @@ treen_get_data_ptr(cw_treen_t *a_treen)
 }
 
 void
-treen_set_data_ptr(cw_treen_t *a_treen, void *a_data)
+treen_data_ptr_set(cw_treen_t *a_treen, void *a_data)
 {
 	_cw_check_ptr(a_treen);
 	_cw_assert(a_treen->magic_a == _CW_TREEN_MAGIC);

@@ -29,7 +29,7 @@ struct cw_treen_s {
 	 */
 	cw_treen_t	*child;
 
-	qr_elm(cw_treen_t) sib_link;	/* Linkage for the sibling ring. */
+	qr(cw_treen_t) sib_link;	/* Linkage for the sibling ring. */
 
 	void		*data;		/* The payload. */
 
@@ -43,8 +43,8 @@ cw_treen_t	*treen_new(cw_treen_t *a_treen, cw_mem_t *a_mem,
     cw_opaque_dealloc_t *a_dealloc_func, void *a_dealloc_arg);
 void		treen_delete(cw_treen_t *a_treen);
 void		treen_link(cw_treen_t *a_treen, cw_treen_t *a_parent);
-cw_treen_t	*treen_get_parent(cw_treen_t *a_treen);
-cw_treen_t	*treen_get_child(cw_treen_t *a_treen);
-cw_treen_t	*treen_get_sibling(cw_treen_t *a_treen);
-void		*treen_get_data_ptr(cw_treen_t *a_treen);
-void		treen_set_data_ptr(cw_treen_t *a_treen, void *a_data);
+cw_treen_t	*treen_parent_get(cw_treen_t *a_treen);
+cw_treen_t	*treen_child_get(cw_treen_t *a_treen);
+cw_treen_t	*treen_sibling_get(cw_treen_t *a_treen);
+void		*treen_data_ptr_get(cw_treen_t *a_treen);
+void		treen_data_ptr_set(cw_treen_t *a_treen, void *a_data);

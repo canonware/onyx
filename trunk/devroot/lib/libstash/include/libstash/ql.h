@@ -12,80 +12,83 @@
 /*
  * List definitions.
  */
-#define ql_head(type)							\
+#define ql_head(a_type)							\
 struct {								\
-	type *qlh_first;						\
+	a_type *qlh_first;						\
 }
 
-#define ql_head_initializer(head)					\
+#define ql_head_initializer(a_head)					\
 	{NULL}
 
-#define ql_elm(type)	qr_elm(type)
+#define ql_elm(a_type)	qr(a_type)
 
 /*
  * List functions.
  */
-#define ql_new(head) do {						\
-	(head)->qlh_first = NULL;					\
+#define ql_new(a_head) do {						\
+	(a_head)->qlh_first = NULL;					\
 } while (0)
 
-#define ql_elm_new(elm, field)	qr_new((elm), field)
+#define ql_elm_new(a_elm, a_field)	qr_new((a_elm), a_field)
 
-#define ql_first(head) ((head)->qlh_first)
+#define ql_first(a_head) ((a_head)->qlh_first)
 
-#define ql_last(head, field)						\
-	((ql_first(head) != NULL) ? qr_prev(ql_first(head), field) : NULL)
+#define ql_last(a_head, a_field)					\
+	((ql_first(a_head) != NULL) ? qr_prev(ql_first(a_head), a_field)\
+	    : NULL)
 
-#define ql_next(head, elm, field)					\
-	((ql_last(head, field) != (elm)) ? qr_next((elm), field) : NULL)
+#define ql_next(a_head, a_elm, a_field)					\
+	((ql_last(a_head, a_field) != (a_elm)) ? qr_next((a_elm),	\
+	    a_field) : NULL)
 
-#define ql_prev(head, elm, field)					\
-	((ql_first(head) != (elm)) ? qr_prev((elm), field) : NULL)
+#define ql_prev(a_head, a_elm, a_field)					\
+	((ql_first(a_head) != (a_elm)) ? qr_prev((a_elm), a_field) :	\
+	    NULL)
 
-#define ql_before_insert(head, qlelm, elm, field) do {			\
-	qr_before_insert((qlelm), (elm), field);			\
-	if (ql_first(head) == (qlelm))					\
-		ql_first(head) = (elm);					\
+#define ql_before_insert(a_head, a_qlelm, a_elm, a_field) do {		\
+	qr_before_insert((a_qlelm), (a_elm), a_field);			\
+	if (ql_first(a_head) == (a_qlelm))				\
+		ql_first(a_head) = (a_elm);				\
 } while (0)
 
-#define ql_after_insert(qlelm, elm, field)				\
-	qr_after_insert((qlelm), (elm), field)
+#define ql_after_insert(a_qlelm, a_elm, a_field)			\
+	qr_after_insert((a_qlelm), (a_elm), a_field)
 
-#define ql_head_insert(head, elm, field) do {				\
-	if (ql_first(head) != NULL)					\
-		qr_before_insert(ql_first(head), (elm), field);		\
-	ql_first(head) = (elm);						\
+#define ql_head_insert(a_head, a_elm, a_field) do {			\
+	if (ql_first(a_head) != NULL)					\
+		qr_before_insert(ql_first(a_head), (a_elm), a_field);	\
+	ql_first(a_head) = (a_elm);					\
 } while (0)
 
-#define ql_tail_insert(head, elm, field) do {				\
-	if (ql_first(head) != NULL) {					\
-		qr_before_insert(ql_first(head), (elm), field);		\
+#define ql_tail_insert(a_head, a_elm, a_field) do {			\
+	if (ql_first(a_head) != NULL) {					\
+		qr_before_insert(ql_first(a_head), (a_elm), a_field);	\
 	}								\
-	ql_first(head) = qr_next((elm), field);				\
+	ql_first(a_head) = qr_next((a_elm), a_field);			\
 } while (0)
 
-#define ql_remove(head, elm, field) do {				\
-	if (ql_first(head) == (elm)) {					\
-		ql_first(head) = qr_next(ql_first(head), field);	\
+#define ql_remove(a_head, a_elm, a_field) do {				\
+	if (ql_first(a_head) == (a_elm)) {				\
+		ql_first(a_head) = qr_next(ql_first(a_head), a_field);	\
 	}								\
-	if (ql_first(head) != (elm))					\
-		qr_remove((elm), field);				\
+	if (ql_first(a_head) != (a_elm))				\
+		qr_remove((a_elm), a_field);				\
 	else								\
-		ql_first(head) = NULL;					\
+		ql_first(a_head) = NULL;				\
 } while (0)
 
-#define ql_head_remove(head, type, field) do {				\
-	type	*t = ql_first(head);					\
-	ql_remove((head), t, field);					\
+#define ql_head_remove(a_head, a_type, a_field) do {			\
+	a_type	*t = ql_first(a_head);					\
+	ql_remove((a_head), t, a_field);				\
 } while (0)
 
-#define ql_tail_remove(head, type, field) do {				\
-	type	*t = ql_last(head, field);				\
-	ql_remove((head), t, field);					\
+#define ql_tail_remove(a_head, a_type, a_field) do {			\
+	a_type	*t = ql_last(a_head, a_field);				\
+	ql_remove((a_head), t, a_field);				\
 } while (0)
 
-#define ql_foreach(var, head, field)					\
-	qr_foreach((var), ql_first(head), field)
+#define ql_foreach(var, a_head, a_field)				\
+	qr_foreach((var), ql_first(a_head), a_field)
 
-#define ql_reverse_foreach(var, head, field)				\
-	qr_reverse_foreach((var), ql_first(head), field)
+#define ql_reverse_foreach(var, a_head, a_field)			\
+	qr_reverse_foreach((var), ql_first(a_head), a_field)

@@ -55,17 +55,17 @@ bhp, bhpi - Binomial heap.
 
 .I cw_bool_t
 .br
-.B bhp_find_min
+.B bhp_min_find
 .RI ( "cw_bhp_t *a_bhp" ", " "void **r_priority" ", " "void **r_data" )
 
 .I cw_bool_t
 .br
-.B bhp_del_min
+.B bhp_min_del
 .RI ( "cw_bhp_t *a_bhp" ", " "void **r_priority" ", " "void **r_data" )
 
 .I cw_uint64_t
 .br
-.B bhp_get_size
+.B bhp_size_get
 .RI ( "cw_bhp_t *a_bhp" )
 
 .I void
@@ -291,7 +291,7 @@ Insert an item into a_bhp.
 
 .I cw_bool_t
 .br
-.B bhp_find_min
+.B bhp_min_find
 .RI ( "cw_bhp_t *a_bhp" ", " "void **r_priority" ", " "void **r_data" )
 .RS
 Input(s):
@@ -334,7 +334,7 @@ Set *r_priority and *r_data to point to a minimum node in a_bhp.
 
 .I cw_bool_t
 .br
-.B bhp_del_min
+.B bhp_min_del
 .RI ( "cw_bhp_t *a_bhp" ", " "void **r_priority" ", " "void **r_data" )
 .RS
 Input(s):
@@ -378,7 +378,7 @@ item from a_bhp.
 
 .I cw_uint64_t
 .br
-.B bhp_get_size
+.B bhp_size_get
 .RI ( "cw_bhp_t *a_bhp" )
 .RS
 Input(s):

@@ -319,7 +319,7 @@ stila_p_new(cw_stila_t *a_stila, cw_mem_t *a_mem)
 {
 	if (dch_new(&a_stila->seq_set, a_mem, _CW_STILA_SEQ_SET_BASE,
 	    _CW_STILA_SEQ_SET_BASE_GROW, _CW_STILA_SEQ_SET_BASE_SHRINK,
-	    ch_hash_direct, ch_key_comp_direct) == NULL)
+	    ch_direct_hash, ch_direct_key_comp) == NULL)
 		goto OOM;
 
 	return FALSE;

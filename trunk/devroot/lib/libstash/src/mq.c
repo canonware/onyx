@@ -404,7 +404,7 @@ mq_put(cw_mq_t *a_mq, ...)
 }
 
 cw_bool_t
-mq_start_get(cw_mq_t *a_mq)
+mq_get_start(cw_mq_t *a_mq)
 {
 	cw_bool_t	retval;
 
@@ -425,7 +425,7 @@ mq_start_get(cw_mq_t *a_mq)
 }
 
 cw_bool_t
-mq_stop_get(cw_mq_t *a_mq)
+mq_get_stop(cw_mq_t *a_mq)
 {
 	cw_bool_t	retval;
 
@@ -447,7 +447,7 @@ mq_stop_get(cw_mq_t *a_mq)
 }
 
 cw_bool_t
-mq_start_put(cw_mq_t *a_mq)
+mq_put_start(cw_mq_t *a_mq)
 {
 	cw_bool_t retval;
 
@@ -468,7 +468,7 @@ mq_start_put(cw_mq_t *a_mq)
 }
 
 cw_bool_t
-mq_stop_put(cw_mq_t *a_mq)
+mq_put_stop(cw_mq_t *a_mq)
 {
 	cw_bool_t retval;
 
