@@ -86,6 +86,7 @@ sizes:
 \item[cw\_uint32\_t: ] Unsigned 32 bit variable.
 \item[cw\_sint64\_t: ] Signed 64 bit variable.
 \item[cw\_uint64\_t: ] Unsigned 64 bit variable.
+\item[cw\_fp64\_t: ] 64 bit IEEE floating point variable.
 \end{description}
 
 \section{Global variables}
