@@ -29,8 +29,8 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 45 $
- * $Date: 1998-04-26 22:53:33 -0700 (Sun, 26 Apr 1998) $
+ * $Revision: 53 $
+ * $Date: 1998-04-30 02:41:20 -0700 (Thu, 30 Apr 1998) $
  *
  * <<< Description >>>
  *
@@ -151,8 +151,8 @@ cw_bool_t oh_set_base_rehash_point(cw_oh_t * a_oh_o,
 				   cw_sint32_t a_rehash_point);
 
 cw_bool_t oh_item_insert(cw_oh_t * a_oh_o, void * a_key,
-			 void * a_data_addr);
-cw_bool_t oh_item_delete(cw_oh_t * a_oh_o, void * a_key,
+			 void * a_data);
+cw_bool_t oh_item_delete(cw_oh_t * a_oh_o, void * a_search_key, void ** a_key,
 			 void ** a_data);
 cw_bool_t oh_item_search(cw_oh_t * a_oh_o, void * a_key,
 			 void ** a_data);
