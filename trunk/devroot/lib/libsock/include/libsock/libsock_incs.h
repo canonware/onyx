@@ -17,6 +17,20 @@
  ****************************************************************************/
 
 /*
+ * System headers to always be included.
+ */
+
+#ifndef _SYS_TYPES_H_
+#  include <sys/types.h>
+#  define _SYS_TYPES_H_
+#endif
+
+#ifndef _SYS_TIME_H_
+#  include <sys/time.h>
+#  define _SYS_TIME_H_
+#endif
+
+/*
  * Define dependencies between the headers.  These must be listed in forward
  * dependency order.
  */

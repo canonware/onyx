@@ -21,8 +21,6 @@
 #include <signal.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <limits.h>
 
 struct handler_s
@@ -52,10 +50,6 @@ cw_bool_t should_quit = FALSE;
 /* Function prototypes. */
 void *
 sig_handler(void * a_arg);
-/*  void */
-/*  sig_int(int a_signum); */
-/*  void */
-/*  sig_hup(int a_signum); */
 char *
 get_log_str(cw_buf_t * a_buf, cw_bool_t is_send, char * a_str);
 void *

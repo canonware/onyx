@@ -24,5 +24,4 @@ $(TARGETS) :
 	printf \"%s %s\n\" \"make: Entering directory\" \\\`\$$pdir\'; \
 	$(MAKE) -i $@; \
 	printf \"%s %s\n\" \"make: Leaving directory\" \\\`\$$pdir\'; \
-	cd - \
 	"
