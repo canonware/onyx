@@ -190,13 +190,15 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_POSIX
     ENTRY(link),
 #endif
+#ifdef CW_REAL
+    ENTRY(ln),
+#endif
     ENTRY(load),
 #ifdef CW_THREADS
     ENTRY(lock),
 #endif
 #ifdef CW_REAL
     ENTRY(log),
-    ENTRY(ln),
 #endif
     ENTRY(loop),
     ENTRY(lt),
@@ -3740,6 +3742,38 @@ systemdict_link(cw_nxo_t *a_thread)
 }
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_ln(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    cw_nxor_t real;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    real = (cw_nxor_t) nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_REAL:
+	{
+	    real = nxo_real_get(nxo);
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    nxo_real_new(nxo, log(real));
+}
+#endif
+
 void
 systemdict_load(cw_nxo_t *a_thread)
 {
@@ -3812,36 +3846,6 @@ systemdict_log(cw_nxo_t *a_thread)
 	}
     }
     nxo_real_new(nxo, log10(real));
-}
-
-void
-systemdict_ln(cw_nxo_t *a_thread)
-{
-    cw_nxo_t *ostack;
-    cw_nxo_t *nxo;
-    cw_nxor_t real;
-
-    ostack = nxo_thread_ostack_get(a_thread);
-    NXO_STACK_GET(nxo, ostack, a_thread);
-    switch (nxo_type_get(nxo))
-    {
-	case NXOT_INTEGER:
-	{
-	    real = (cw_nxor_t) nxo_integer_get(nxo);
-	    break;
-	}
-	case NXOT_REAL:
-	{
-	    real = nxo_real_get(nxo);
-	    break;
-	}
-	default:
-	{
-	    nxo_thread_nerror(a_thread, NXN_typecheck);
-	    return;
-	}
-    }
-    nxo_real_new(nxo, log(real));
 }
 #endif
 

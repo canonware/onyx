@@ -189,13 +189,15 @@ typedef enum
 #ifdef CW_POSIX
     NXN_link,
 #endif
+#ifdef CW_REAL
+    NXN_ln,
+#endif
     NXN_load,
 #ifdef CW_THREADS
     NXN_lock,
 #endif
 #ifdef CW_REAL
     NXN_log,
-    NXN_ln,
 #endif
     NXN_loop,
     NXN_lt,

@@ -296,6 +296,11 @@ void
 systemdict_link(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_REAL
+void
+systemdict_ln(cw_nxo_t *a_thread);
+#endif
+
 void
 systemdict_load(cw_nxo_t *a_thread);
 
@@ -307,9 +312,6 @@ systemdict_lock(cw_nxo_t *a_thread);
 #ifdef CW_REAL
 void
 systemdict_log(cw_nxo_t *a_thread);
-
-void
-systemdict_ln(cw_nxo_t *a_thread);
 #endif
 
 void

@@ -190,13 +190,15 @@ const cw_uint8_t *cw_g_nx_names[] = {
 #ifdef CW_POSIX
     "link",
 #endif
+#ifdef CW_REAL
+    "ln",
+#endif
     "load",
 #ifdef CW_THREADS
     "lock",
 #endif
 #ifdef CW_REAL
     "log",
-    "ln",
 #endif
     "loop",
     "lt",
