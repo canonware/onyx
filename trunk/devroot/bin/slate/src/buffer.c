@@ -407,7 +407,7 @@ slate_buffer_redoable(cw_nxo_t *a_thread)
 	nxo_boolean_new(nxo, redoable);
 }
 
-/* XXX Bad API. */
+/* %=marker= %count? buffer_undo %error */
 void
 slate_buffer_undo(cw_nxo_t *a_thread)
 {
@@ -415,9 +415,19 @@ slate_buffer_undo(cw_nxo_t *a_thread)
 	cw_nxn_t		error;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
+	cw_nxoi_t		nundo;
+	cw_bool_t		pop, result;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) == NXOT_INTEGER) {
+		pop = TRUE;
+		nundo = nxo_integer_get(nxo);
+		NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	} else {
+		pop = FALSE;
+		nundo = 1;
+	}
 	error = marker_type(nxo);
 	if (error) {
 		nxo_thread_nerror(a_thread, error);
@@ -427,15 +437,18 @@ slate_buffer_undo(cw_nxo_t *a_thread)
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
 	buffer_p_lock(buffer);
-	buf_undo(&buffer->buf, &marker->bufm, 1);
+	result = buf_undo(&buffer->buf, &marker->bufm, nundo);
 	buffer->seq++;
 	marker->seq++;
 	buffer_p_unlock(buffer);
 
-	nxo_stack_pop(ostack);
+	nxo_boolean_new(nxo, result);
+
+	if (pop)
+		nxo_stack_pop(ostack);
 }
 
-/* XXX Bad API. */
+/* %=marker= %count? buffer_redo %error */
 void
 slate_buffer_redo(cw_nxo_t *a_thread)
 {
@@ -443,9 +456,19 @@ slate_buffer_redo(cw_nxo_t *a_thread)
 	cw_nxn_t		error;
 	struct cw_marker	*marker;
 	struct cw_buffer	*buffer;
+	cw_nxoi_t		nredo;
+	cw_bool_t		pop, result;
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	NXO_STACK_GET(nxo, ostack, a_thread);
+	if (nxo_type_get(nxo) == NXOT_INTEGER) {
+		pop = TRUE;
+		nredo = nxo_integer_get(nxo);
+		NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	} else {
+		pop = FALSE;
+		nredo = 1;
+	}
 	error = marker_type(nxo);
 	if (error) {
 		nxo_thread_nerror(a_thread, error);
@@ -455,12 +478,15 @@ slate_buffer_redo(cw_nxo_t *a_thread)
 	buffer = (struct cw_buffer *)nxo_hook_data_get(&marker->buffer_nxo);
 
 	buffer_p_lock(buffer);
-	buf_redo(&buffer->buf, &marker->bufm, 1);
+	result = buf_redo(&buffer->buf, &marker->bufm, nredo);
 	buffer->seq++;
 	marker->seq++;
 	buffer_p_unlock(buffer);
 
-	nxo_stack_pop(ostack);
+	nxo_boolean_new(nxo, result);
+
+	if (pop)
+		nxo_stack_pop(ostack);
 }
 
 void
@@ -1355,8 +1381,7 @@ slate_marker_range_get(cw_nxo_t *a_thread)
 
 	if (buffer != (struct cw_buffer
 	    *)nxo_hook_data_get(&marker_b->buffer_nxo)) {
-		/* XXX Throw /argcheck or something similar. */
-		nxo_thread_nerror(a_thread, NXN_typecheck);
+		nxo_thread_serror(a_thread, "argcheck", strlen("argcheck"));
 		return;
 	}
 
@@ -1421,8 +1446,7 @@ slate_marker_range_cut(cw_nxo_t *a_thread)
 
 	if (buffer != (struct cw_buffer
 	    *)nxo_hook_data_get(&marker_b->buffer_nxo)) {
-		/* XXX Throw /argcheck or something similar. */
-		nxo_thread_nerror(a_thread, NXN_typecheck);
+		nxo_thread_serror(a_thread, "argcheck", strlen("argcheck"));
 		return;
 	}
 
