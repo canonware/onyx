@@ -22,9 +22,7 @@
 #include "libsock/libsock.h"
 
 #include <sys/types.h>
-#ifndef _LIBSOCK_SOCKB_USE_SELECT
-#  include <poll.h>
-#endif
+#include <poll.h>
 #include <sys/time.h>
 #include <sys/uio.h>
 #include <fcntl.h>
@@ -902,7 +900,7 @@ sockb_p_entry_func(void * a_arg)
 	      "poll([i])", nfds);
 #endif
 
-    num_ready = poll(fds, nfds, INFTIM);
+    num_ready = poll(fds, nfds, -1);
     
 #ifdef _LIBSTASH_SOCKB_CONFESS
     out_put(cw_g_out, "-->([i|s:s])\n", num_ready);
