@@ -230,6 +230,8 @@ systemdict_add(cw_stilt_t *a_stilt)
 	b = stils_get(stack, 0);
 	/* XXX Check type of b. */
 	a = stils_get_down(stack, b);
+	if (a == NULL)
+		xep_throw(_CW_XEPV_STACKUNDERFLOW);
 	/* XXX Check type of a. */
 	stilo_no_new(&t_stilo);
 	stilo_move(&t_stilo, a);

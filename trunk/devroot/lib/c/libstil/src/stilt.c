@@ -353,7 +353,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 		_CW_STILT_PSTATE(STATE_GT_CONT);
 		_CW_STILT_PSTATE(STATE_SLASH_CONT);
 		_CW_STILT_PSTATE(STATE_COMMENT);
-		_CW_STILT_PSTATE(STATE_NUMBER);
+		_CW_STILT_PSTATE(STATE_INTEGER);
+		_CW_STILT_PSTATE(STATE_INTEGER_RADIX);
+		_CW_STILT_PSTATE(STATE_REAL);
+		_CW_STILT_PSTATE(STATE_REAL_EXP);
 		_CW_STILT_PSTATE(STATE_ASCII_STRING);
 		_CW_STILT_PSTATE(STATE_ASCII_STRING_NEWLINE_CONT);
 		_CW_STILT_PSTATE(STATE_ASCII_STRING_PROT_CONT);
@@ -447,45 +450,34 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				/* Swallow. */
 				break;
 			case '+':
-				a_stilt->state = STATE_NUMBER;
-				a_stilt->meta.number.sign = SIGN_POS;
-				a_stilt->meta.number.base = 10;
-				a_stilt->meta.number.exp_offset = -1;
-				a_stilt->meta.number.point_offset = -1;
-				a_stilt->meta.number.begin_offset = 1;
+				a_stilt->state = STATE_INTEGER;
+				a_stilt->m.n.sign = SIGN_POS;
+				a_stilt->m.n.b_off = 1;
 				_CW_STILT_PUTC(c);
 				break;
 			case '-':
-				a_stilt->state = STATE_NUMBER;
-				a_stilt->meta.number.sign = SIGN_NEG;
-				a_stilt->meta.number.base = 10;
-				a_stilt->meta.number.exp_offset = -1;
-				a_stilt->meta.number.point_offset = -1;
-				a_stilt->meta.number.begin_offset = 1;
+				a_stilt->state = STATE_INTEGER;
+				a_stilt->m.n.sign = SIGN_NEG;
+				a_stilt->m.n.b_off = 1;
 				_CW_STILT_PUTC(c);
 				break;
 			case '.':
-				a_stilt->state = STATE_NUMBER;
-				a_stilt->meta.number.sign = SIGN_POS;
-				a_stilt->meta.number.base = 10;
-				a_stilt->meta.number.exp_offset = -1;
-				a_stilt->meta.number.point_offset = 0;
-				a_stilt->meta.number.begin_offset = 0;
+				a_stilt->state = STATE_REAL;
+				a_stilt->m.n.sign = SIGN_POS;
+				a_stilt->m.n.t.r.p_off = 0;
+				a_stilt->m.n.b_off = 0;
 				_CW_STILT_PUTC(c);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
-				a_stilt->state = STATE_NUMBER;
-				a_stilt->meta.number.sign = SIGN_POS;
-				a_stilt->meta.number.base = 10;
-				a_stilt->meta.number.exp_offset = -1;
-				a_stilt->meta.number.point_offset = -1;
-				a_stilt->meta.number.begin_offset = 0;
+				a_stilt->state = STATE_INTEGER;
+				a_stilt->m.n.sign = SIGN_POS;
+				a_stilt->m.n.b_off = 0;
 				_CW_STILT_PUTC(c);
 				break;
 			default:
 				a_stilt->state = STATE_NAME;
-				a_stilt->meta.name.action = ACTION_EXECUTE;
+				a_stilt->m.m.action = ACTION_EXECUTE;
 				_CW_STILT_PUTC(c);
 				break;
 			}
@@ -544,7 +536,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			switch (c) {
 			case '/':
 				a_stilt->state = STATE_NAME;
-				a_stilt->meta.name.action = ACTION_EVALUATE;
+				a_stilt->m.m.action = ACTION_EVALUATE;
 				break;
 			case '\n':
 				stilt_p_syntax_error_print(a_stilt, c);
@@ -558,7 +550,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			default:
 				a_stilt->state = STATE_NAME;
-				a_stilt->meta.name.action = ACTION_LITERAL;
+				a_stilt->m.m.action = ACTION_LITERAL;
 				_CW_STILT_PUTC(c);
 				break;
 			}
@@ -577,186 +569,297 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_NUMBER:
+		case STATE_INTEGER: {
+			cw_bool_t	restart = FALSE;
+
 			switch (c) {
-			case '.':
-				if (a_stilt->meta.number.point_offset ==
-				    -1) {
-					a_stilt->meta.number.point_offset =
-					    a_stilt->index;
-				} else {
+			case '0': case '1': case '2': case '3': case '4':
+			case '5': case '6': case '7': case '8': case '9':
+				_CW_STILT_PUTC(c);
+				break;
+			case '#': {
+				cw_uint32_t	i, digit;
+
+				/*
+				 * Convert the string to a base (interpreted as
+				 * base 10).
+				 */
+				a_stilt->m.n.t.b.base = 0;
+
+				for (i = 0; i < a_stilt->index; i++) {
+					digit =
+					    _CW_STILT_GETC(a_stilt->m.n.b_off +
+					    i) - '0';
+
+					if (a_stilt->index - a_stilt->m.n.b_off
+					    - i == 2)
+						digit *= 10;
+					a_stilt->m.n.t.b.base += digit;
+
+					if (((digit != 0) && ((a_stilt->index -
+					    a_stilt->m.n.b_off - i) > 2)) ||
+					    (a_stilt->m.n.t.b.base > 36)) {
+						/*
+						 * Base too large. Set base to 0
+						 * so that the check for too
+						 * small a base catches this.
+						 */
+						a_stilt->m.n.t.b.base = 0;
+						break;
+					}
+				}
+
+				if (a_stilt->m.n.t.b.base < 2) {
+					/*
+					 * Base too small (or too large, as
+					 * detected in the for loop above).
+					 */
 					a_stilt->state = STATE_NAME;
-					a_stilt->meta.name.action =
-					    ACTION_EXECUTE;
+					a_stilt->m.m.action = ACTION_EXECUTE;
+				} else {
+					a_stilt->m.n.b_off = a_stilt->index + 1;
+					a_stilt->state = STATE_INTEGER_RADIX;
 				}
 				_CW_STILT_PUTC(c);
 				break;
+			}
+			case '.':
+				a_stilt->m.n.t.r.p_off = a_stilt->index;
+				a_stilt->state = STATE_REAL;
+				_CW_STILT_PUTC(c);
+				break;
+			case 'e':
+				if (a_stilt->index > a_stilt->m.n.b_off) {
+					a_stilt->m.n.t.e.esign = ESIGN_POS;
+					a_stilt->m.n.t.e.p_off = -1;
+					a_stilt->m.n.t.e.e_off = a_stilt->index;
+					a_stilt->state = STATE_REAL_EXP;
+				} else {
+					/* No number specified, so a name. */
+					a_stilt->m.m.action = ACTION_EXECUTE;
+					a_stilt->state = STATE_NAME;
+				}
+				_CW_STILT_PUTC(c);
+				break;
+			case '\n':
+				restart = TRUE; /* Inverted below. */
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			case '"': case '`': case '<': case '>': case '[':
+			case ']': case '{': case '}': case '/': case '%':
+				/* New token. */
+				/*
+				 * Invert, in case we fell through from
+				 * above.
+				 */
+				restart = !restart;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
+				if (a_stilt->index > a_stilt->m.n.b_off) {
+					/* Integer. */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "integer");
+					stilt_p_reset(a_stilt);
+				} else {
+					/* No number specified, so a name. */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "name 1");
+					a_stilt->m.m.action = ACTION_EXECUTE;
+					stilt_p_name_accept(a_stilt, a_stilts);
+				}
+				if (restart)
+					goto RESTART;
+				break;
+			default:
+				/* Not a number character. */
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				a_stilt->state = STATE_NAME;
+				_CW_STILT_PUTC(c);
+				break;
+			}
+			break;
+		}
+		case STATE_INTEGER_RADIX: {
+			cw_bool_t	restart = FALSE;
+
+			switch (c) {
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f': case 'g': case 'h': case 'i': case 'j':
 			case 'k': case 'l': case 'm': case 'n': case 'o':
 			case 'p': case 'q': case 'r': case 's': case 't':
 			case 'u': case 'v': case 'w': case 'x': case 'y':
 			case 'z':
-				if (a_stilt->meta.number.base <= (10 +
+				if (a_stilt->m.n.t.b.base <= (10 +
 				    ((cw_uint32_t)(c - 'a')))) {
 					/* Too big for this base. */
 					a_stilt->state = STATE_NAME;
-					a_stilt->meta.name.action =
-					    ACTION_EXECUTE;
+					a_stilt->m.m.action = ACTION_EXECUTE;
 				}
 				_CW_STILT_PUTC(c);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
-				if (a_stilt->meta.number.base <=
+				if (a_stilt->m.n.t.b.base <=
 				    ((cw_uint32_t)(c - '0'))) {
 					/* Too big for this base. */
 					a_stilt->state = STATE_NAME;
-					a_stilt->meta.name.action =
-					    ACTION_EXECUTE;
+					a_stilt->m.m.action = ACTION_EXECUTE;
 				}
 				_CW_STILT_PUTC(c);
 				break;
-			case '#':{
-				cw_uint32_t	ndigits;
-
-				ndigits = a_stilt->index -
-				    a_stilt->meta.number.begin_offset;
-
-				if ((a_stilt->meta.number.point_offset != -1)
-				    || (a_stilt->meta.number.begin_offset ==
-				    a_stilt->index)) {
-					/*
-					 * Decimal point already seen, or no
-					 * base specified.
-					 */
-					a_stilt->state = STATE_NAME;
-					a_stilt->meta.name.action =
-					    ACTION_EXECUTE;
-				} else {
-					cw_uint32_t	i, digit;
-
-					/*
-					 * Convert the string to a base
-					 * (interpreted as base 10).
-					 */
-					a_stilt->meta.number.base = 0;
-
-					for (i = 0; i < ndigits; i++) {
-						digit =
-						    _CW_STILT_GETC(a_stilt->meta.number.begin_offset
-						    + i) - '0';
-
-						if (a_stilt->index -
-						    a_stilt->meta.number.begin_offset
-						    - i == 2)
-							digit *= 10;
-						a_stilt->meta.number.base +=
-						    digit;
-
-						if (((digit != 0) &&
-						    ((a_stilt->index -
-						    a_stilt->meta.number.begin_offset
-						    - i) > 2)) ||
-						    (a_stilt->meta.number.base
-						    > 36)) {
-							/*
-							 * Base too large. Set
-							 * base to 0 so that the
-							 * check for too small a
-							 * base catches this.
-							 */
-							a_stilt->meta.number.base
-							    = 0;
-							break;
-						}
-					}
-
-					if (a_stilt->meta.number.base < 2) {
-						/*
-						 * Base too small (or too large,
-						 * as detected in the for loop
-						 * above).
-						 */
-						a_stilt->state = STATE_NAME;
-						a_stilt->meta.name.action =
-						    ACTION_EXECUTE;
-					} else {
-						a_stilt->meta.number.begin_offset
-						    = a_stilt->index + 1;
-					}
-				}
-
-				_CW_STILT_PUTC(c);
-				break;
-			}
+			case '\n':
+				restart = TRUE; /* Inverted below. */
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
 			case '"': case '`': case '<': case '>': case '[':
 			case ']': case '{': case '}': case '/': case '%':
 				/* New token. */
-				if ((a_stilt->index -
-				    a_stilt->meta.number.begin_offset > 1) ||
-				    ((a_stilt->index -
-				    a_stilt->meta.number.begin_offset > 0) &&
-				    (a_stilt->meta.number.point_offset ==
-				    -1))) {
-					if (a_stilt->meta.number.point_offset ==
-					    -1) {
-						/* Integer. */
-						stilt_p_token_print(a_stilt,
-						    a_stilts, a_stilt->index,
-						    "integer");
-					} else {
-						/* Real. */
-						stilt_p_token_print(a_stilt,
-						    a_stilts, a_stilt->index,
-						    "real");
-					}
-					stilt_p_reset(a_stilt);
-				} else {
-					/* No number specified, so a name. */
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "name 1");
-					stilt_p_name_accept(a_stilt, a_stilts);
-				}
-				goto RESTART;
-			case '\n':
-				_CW_STILT_NEWLINE();
+				/*
+				 * Invert, in case we fell through from
+				 * above.
+				 */
+				restart = !restart;
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
-				if ((a_stilt->index -
-				    a_stilt->meta.number.begin_offset > 1) ||
-				    ((a_stilt->index -
-				    a_stilt->meta.number.begin_offset > 0) &&
-				    (a_stilt->meta.number.point_offset ==
-				    -1))) {
-					if (a_stilt->meta.number.point_offset ==
-					    -1) {
-						/* Integer. */
-						stilt_p_token_print(a_stilt,
-						    a_stilts, a_stilt->index,
-						    "integer");
-					} else {
-						/* Real. */
-						stilt_p_token_print(a_stilt,
-						    a_stilts, a_stilt->index,
-						    "real");
-					}
+				if (a_stilt->index > a_stilt->m.n.b_off) {
+					/* Integer. */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "integer (radix)");
 					stilt_p_reset(a_stilt);
 				} else {
 					/* No number specified, so a name. */
 					stilt_p_token_print(a_stilt, a_stilts,
 					    a_stilt->index, "name 2");
+					a_stilt->m.m.action = ACTION_EXECUTE;
 					stilt_p_name_accept(a_stilt, a_stilts);
 				}
+				if (restart)
+					goto RESTART;
 				break;
 			default:
 				/* Not a number character. */
+				a_stilt->m.m.action = ACTION_EXECUTE;
 				a_stilt->state = STATE_NAME;
-				a_stilt->meta.name.action = ACTION_EXECUTE;
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
+		}
+		case STATE_REAL: {
+			cw_bool_t	restart = FALSE;
+
+			switch (c) {
+			case '0': case '1': case '2': case '3': case '4':
+			case '5': case '6': case '7': case '8': case '9':
+				_CW_STILT_PUTC(c);
+				break;
+			case 'e':
+				if (a_stilt->index - a_stilt->m.n.b_off > 1) {
+					a_stilt->m.n.t.e.esign = ESIGN_POS;
+					a_stilt->m.n.t.e.e_off = a_stilt->index;
+					a_stilt->state = STATE_REAL_EXP;
+				} else {
+					/* No digit specified, so a name. */
+					a_stilt->m.m.action = ACTION_EXECUTE;
+					a_stilt->state = STATE_NAME;
+				}
+				_CW_STILT_PUTC(c);
+				break;
+			case '\n':
+				restart = TRUE; /* Inverted below. */
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			case '"': case '`': case '<': case '>': case '[':
+			case ']': case '{': case '}': case '/': case '%':
+				/* New token. */
+				/*
+				 * Invert, in case we fell through from
+				 * above.
+				 */
+				restart = !restart;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
+				if (a_stilt->index - a_stilt->m.n.b_off > 1) {
+					/* Real. */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "real");
+					stilt_p_reset(a_stilt);
+				} else {
+					/*
+					 * No number/fraction specified, so a
+					 * name.
+					 */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "name 3");
+					a_stilt->m.m.action = ACTION_EXECUTE;
+					stilt_p_name_accept(a_stilt, a_stilts);
+				}
+				if (restart)
+					goto RESTART;
+				break;
+			default:
+				/* Not a number character. */
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				a_stilt->state = STATE_NAME;
+				_CW_STILT_PUTC(c);
+				break;
+			}
+			break;
+		}
+		case STATE_REAL_EXP: {
+			cw_bool_t	restart = FALSE;
+
+			switch (c) {
+			case '0': case '1': case '2': case '3': case '4':
+			case '5': case '6': case '7': case '8': case '9':
+				_CW_STILT_PUTC(c);
+				break;
+			case '-':
+				a_stilt->m.n.t.e.esign = ESIGN_NEG;
+				/* Fall through. */
+			case '+':
+				a_stilt->m.n.t.e.e_off = a_stilt->index;
+				_CW_STILT_PUTC(c);
+				break;
+			case '\n':
+				restart = TRUE; /* Inverted below. */
+				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			case '"': case '`': case '<': case '>': case '[':
+			case ']': case '{': case '}': case '/': case '%':
+				/* New token. */
+				/*
+				 * Invert, in case we fell through from
+				 * above.
+				 */
+				restart = !restart;
+				/* Fall through. */
+			case '\0': case '\t': case '\f': case '\r': case ' ':
+				if (a_stilt->index - a_stilt->m.n.t.e.e_off >
+				    1) {
+					/* Real. */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "real (exp)");
+					stilt_p_reset(a_stilt);
+				} else {
+					/* No exponent specified, so a name. */
+					stilt_p_token_print(a_stilt, a_stilts,
+					    a_stilt->index, "name 4");
+					a_stilt->m.m.action = ACTION_EXECUTE;
+					stilt_p_name_accept(a_stilt, a_stilts);
+				}
+				if (restart)
+					goto RESTART;
+				break;
+			default:
+				/* Not a number character. */
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				a_stilt->state = STATE_NAME;
+				_CW_STILT_PUTC(c);
+				break;
+			}
+			break;
+		}
 		case STATE_ASCII_STRING:
 			/* The CRLF code jumps here if there was no LF. */
 			ASCII_STRING_CONTINUE:
@@ -873,7 +976,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case 'a': case 'b': case 'c': case 'd': case 'e':
 			case 'f':
 				a_stilt->state = STATE_ASCII_STRING_HEX_FINISH;
-				a_stilt->meta.string.hex_val = c;
+				a_stilt->m.s.hex_val = c;
 				break;
 			default:
 				stilt_p_syntax_error_print(a_stilt, c);
@@ -889,17 +992,17 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				cw_uint8_t	val;
 
 				a_stilt->state = STATE_ASCII_STRING;
-				switch (a_stilt->meta.string.hex_val) {
+				switch (a_stilt->m.s.hex_val) {
 				case '0': case '1': case '2': case '3':
 				case '4': case '5': case '6': case '7':
 				case '8': case '9':
 					val =
-					    (a_stilt->meta.string.hex_val
+					    (a_stilt->m.s.hex_val
 					    - '0') << 4;
 					break;
 				case 'a': case 'b': case 'c': case 'd':
 				case 'e': case 'f':
-					val = ((a_stilt->meta.string.hex_val
+					val = ((a_stilt->m.s.hex_val
 					    - 'a') + 10) << 4;
 					break;
 				default:
@@ -1042,39 +1145,42 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			}
 			break;
-		case STATE_NAME:
+		case STATE_NAME: {
+			cw_bool_t	restart = FALSE;
+
 			switch (c) {
 			case '\n':
+				restart = TRUE;	/* Inverted below. */
 				_CW_STILT_NEWLINE();
+				/* Fall through. */
+			case '"': case '`': case '<': case '>': case '[':
+			case ']': case '{': case '}': case '/': case '%':
+				/* New token. */
+				/*
+				 * Invert, in case we fell through from
+				 * above.
+				 */
+				restart = !restart;
 				/* Fall through. */
 			case '\0': case '\t': case '\f': case '\r': case ' ':
 				/* End of name. */
 				if (a_stilt->index > 0) {
 					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "name 3");
+					    a_stilt->index, "name 5");
 					stilt_p_name_accept(a_stilt, a_stilts);
 				} else {
 					stilt_p_syntax_error_print(a_stilt, c);
 					stilt_p_reset(a_stilt);
 				}
+				if (restart)
+					goto RESTART;
 				break;
-			case '"': case '`': case '<': case '>': case '[':
-			case ']': case '{': case '}': case '/': case '%':
-				/* New token. */
-				if (a_stilt->index > 0) {
-					stilt_p_token_print(a_stilt, a_stilts,
-					    a_stilt->index, "name 4");
-					stilt_p_name_accept(a_stilt, a_stilts);
-				} else {
-					stilt_p_syntax_error_print(a_stilt, c);
-					stilt_p_reset(a_stilt);
-				}
-				goto RESTART;
 			default:
 				_CW_STILT_PUTC(c);
 				break;
 			}
 			break;
+		}
 		default:
 			_cw_not_reached();
 			break;
@@ -1090,7 +1196,7 @@ static void
 stilt_p_token_print(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t
     a_length, const cw_uint8_t *a_note)
 {
-#if (1)
+#if (0)
 #ifdef _LIBSTIL_DBG
 	cw_uint32_t	line, col;
 
@@ -1243,7 +1349,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 {
 	cw_stilo_t	*stilo;
 
-	switch (a_stilt->meta.name.action) {
+	switch (a_stilt->m.m.action) {
 	case ACTION_EXECUTE:
 		if (a_stilt->defer_count == 0) {
 			cw_stilo_t	key;

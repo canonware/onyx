@@ -22,20 +22,23 @@ typedef enum {
 	STATE_GT_CONT			=  2,
 	STATE_SLASH_CONT		=  3,
 	STATE_COMMENT			=  4,
-	STATE_NUMBER			=  5,
-	STATE_ASCII_STRING		=  6,
-	STATE_ASCII_STRING_NEWLINE_CONT	=  7,
-	STATE_ASCII_STRING_PROT_CONT	=  8,
-	STATE_ASCII_STRING_CRLF_CONT	=  9,
-	STATE_ASCII_STRING_HEX_CONT	= 10,
-	STATE_ASCII_STRING_HEX_FINISH	= 11,
-	STATE_LIT_STRING		= 12,
-	STATE_LIT_STRING_NEWLINE_CONT	= 13,
-	STATE_LIT_STRING_PROT_CONT	= 14,
-	STATE_HEX_STRING		= 15,
-	STATE_BASE85_STRING		= 16,
-	STATE_BASE85_STRING_CONT	= 17,
-	STATE_NAME			= 18
+	STATE_INTEGER			=  5,
+	STATE_INTEGER_RADIX		=  6,
+	STATE_REAL			=  7,
+	STATE_REAL_EXP			=  8,
+	STATE_ASCII_STRING		=  9,
+	STATE_ASCII_STRING_NEWLINE_CONT	= 10,
+	STATE_ASCII_STRING_PROT_CONT	= 11,
+	STATE_ASCII_STRING_CRLF_CONT	= 12,
+	STATE_ASCII_STRING_HEX_CONT	= 13,
+	STATE_ASCII_STRING_HEX_FINISH	= 14,
+	STATE_LIT_STRING		= 15,
+	STATE_LIT_STRING_NEWLINE_CONT	= 16,
+	STATE_LIT_STRING_PROT_CONT	= 17,
+	STATE_HEX_STRING		= 18,
+	STATE_BASE85_STRING		= 19,
+	STATE_BASE85_STRING_CONT	= 20,
+	STATE_NAME			= 21
 } cw_stiltts_t;
 
 struct cw_stilts_s {
@@ -133,22 +136,35 @@ struct cw_stilt_s {
 				SIGN_POS,
 				SIGN_NEG
 			}		sign;
-			cw_uint32_t	base;
-			cw_sint32_t	exp_offset;
-			cw_sint32_t	point_offset;
-			cw_uint32_t	begin_offset;
-		}       number;
+			union {
+				struct {
+					cw_uint32_t	base;
+				}	b;	/* radix (base). */
+				struct {
+					cw_uint32_t	p_off;
+				}	r;	/* real. */
+				struct {
+					enum {
+						ESIGN_POS,
+						ESIGN_NEG
+					}		esign;
+					cw_sint32_t	p_off;
+					cw_uint32_t	e_off;
+				}	e;	/* exponential. */
+			}	t;	/* type. */
+			cw_uint32_t	b_off;	/* Depends on sign, radix. */
+		}       n;	/* number. */
 		struct {
 			cw_uint8_t	hex_val;
-		}	string;
+		}	s;	/* string. */
 		struct {
 			enum {
 				ACTION_EXECUTE,
 				ACTION_LITERAL,
 				ACTION_EVALUATE
 			}	action;
-		}	name;
-	}       meta;
+		}	m;	/* name. */
+	}       m;
 };
 
 /*
