@@ -1034,7 +1034,7 @@ usage(const char * a_progname)
      "%s usage:\n"
      "    %s -h\n"
      "    %s -V\n"
-     "    %s [-v | -q] [-p <port>] [-r [<rhost>:]<rport>] [-l | -d <dirpath>]\n"
+     "    %s [-v | -q] [-l | -d <dirpath>] -p <port> -r [<rhost>:]<rport>\n"
      "\n"
      "    Option               | Description\n"
      "    ---------------------+------------------------------------------\n"
@@ -1042,11 +1042,11 @@ usage(const char * a_progname)
      "    -V                   | Print version information and exit.\n"
      "    -v                   | Verbose.\n"
      "    -q                   | Quiet.\n"
-     "    -p <port>            | Listen on port <port>.\n"
-     "    -r [<rhost>:]<rport> | Forward to host <rhost> or localhost,\n"
-     "                         | port <rport>.\n"
      "    -l                   | Write logs to stderr.\n"
-     "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n",
+     "    -d <dirpath>         | Write logs to \"<dirpath>/proxy.*\".\n"
+     "    -p <port>            | Listen on port <port>.\n"
+     "    -r [<rhost>:]<rport> | Forward to host <rhost> or \"localhost\",\n"
+     "                         | port <rport>.\n",
      a_progname, a_progname, a_progname, a_progname
      );
 }

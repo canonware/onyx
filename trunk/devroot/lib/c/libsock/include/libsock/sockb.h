@@ -98,3 +98,28 @@ sockb_shutdown(void);
  ****************************************************************************/
 cw_bufc_t *
 sockb_get_spare_bufc(void);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_sock_vec : Pointer to an array of pointers to sock's.
+ *
+ * a_vec_len : Size of a_sock_vec array.
+ *
+ * a_timeout : Pointer to timeout, or NULL.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : FALSE : One or more sock's either ready for reading or closed.
+ *          TRUE : Timeout, or memory allocation error.
+ *
+ * <<< Description >>>
+ *
+ * Wait on a set of sock's.
+ *
+ ****************************************************************************/
+cw_bool_t
+sockb_wait(int * a_sock_vec, cw_uint32_t a_vec_len,
+	   struct timespec * a_timeout);
+

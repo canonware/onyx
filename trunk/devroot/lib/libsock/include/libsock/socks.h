@@ -105,7 +105,7 @@ socks_listen(cw_socks_t * a_socks, int * r_port);
  * <<< Description >>>
  *
  * Accept a connection.  Don't return until someone connects, or the timeout
- * expires.  If a_sock is non-NULL, use it for wrapping the socket descriptor.
+ * expires.
  *
  ****************************************************************************/
 cw_sock_t *

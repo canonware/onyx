@@ -337,7 +337,12 @@ sock_connect(cw_sock_t * a_sock, char * a_server_host, int a_port,
   a_sock->error = FALSE;
   
   mtx_lock(&a_sock->lock);
-  sockb_l_register_sock(a_sock);
+  if (TRUE == sockb_l_register_sock(a_sock))
+  {
+    mtx_unlock(&a_sock->lock);
+    retval = TRUE;
+    goto RETURN;
+  }
   cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
   a_sock->is_registered = TRUE;
   mtx_unlock(&a_sock->lock);
@@ -400,7 +405,12 @@ sock_wrap(cw_sock_t * a_sock, int a_sockfd)
     a_sock->error = FALSE;
 
     mtx_lock(&a_sock->lock);
-    sockb_l_register_sock(a_sock);
+    if (TRUE == sockb_l_register_sock(a_sock))
+    {
+      mtx_unlock(&a_sock->lock);
+      retval = TRUE;
+      goto RETURN;
+    }
     cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
     a_sock->is_registered = TRUE;
     mtx_unlock(&a_sock->lock);
@@ -515,14 +525,17 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
     }
     else
     {
-      retval = FALSE;
-    
       mtx_lock(&a_sock->out_lock);
 
       if (a_sock->out_is_flushed == TRUE)
       {
 	/* Notify the sockb that we now have data. */
-	sockb_l_out_notify(&a_sock->sockfd);
+	if (TRUE == sockb_l_out_notify(a_sock->sockfd))
+	{
+	  mtx_unlock(&a_sock->out_lock);
+	  retval = TRUE;
+	  goto RETURN;
+	}
 	a_sock->out_is_flushed = FALSE;
       }
     
@@ -534,8 +547,12 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf)
   else
   {
     retval = TRUE;
+    goto RETURN;
   }
-  
+
+  retval = FALSE;
+
+  RETURN:
   return retval;
 }
 
@@ -577,7 +594,7 @@ sock_flush_out(cw_sock_t * a_sock)
 }
 
 int
-sock_l_get_fd(cw_sock_t * a_sock)
+sock_get_fd(cw_sock_t * a_sock)
 {
   _cw_check_ptr(a_sock);
 
@@ -901,7 +918,13 @@ sock_p_disconnect(cw_sock_t * a_sock)
       a_sock->error = TRUE;
       mtx_unlock(&a_sock->state_lock);
   
-      sockb_l_unregister_sock(&a_sock->sockfd);
+      if (TRUE == sockb_l_unregister_sock(a_sock->sockfd))
+      {
+	mtx_unlock(&a_sock->lock);
+	mtx_unlock(&a_sock->state_lock);
+	retval = TRUE;
+	goto RETURN;
+      }
       cnd_wait(&a_sock->callback_cnd, &a_sock->lock);
     }
     else
@@ -984,5 +1007,6 @@ sock_p_disconnect(cw_sock_t * a_sock)
     retval = TRUE;
   }
 
+  RETURN:
   return retval;
 }

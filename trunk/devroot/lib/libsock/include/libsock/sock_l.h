@@ -18,29 +18,6 @@
  *
  * <<< Input(s) >>>
  *
- * a_sock : Pointer to a sock.
- *
- * <<< Output(s) >>>
- *
- * retval : File descriptor corresponding to a_sock, or -1.
- *          -1 : Not connected.
- *
- * <<< Description >>>
- *
- * Return the number of the file descriptor for a_sock's socket.
- *
- * Don't lock, since sockb needs to get at this info without causing deadlock.
- * This is safe, since the socket is never closed except after sockb says it's
- * okay, in which case sockb wouldn't ask for this info anyway.
- *
- ****************************************************************************/
-int
-sock_l_get_fd(cw_sock_t * a_sock);
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
  * a_sock : Pointer to a sock instance.
  *
  * <<< Output(s) >>>

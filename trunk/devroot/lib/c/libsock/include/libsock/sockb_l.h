@@ -41,55 +41,55 @@ sockb_l_wakeup(void);
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
  * Register a_sock with the sockb thread.
  *
  ****************************************************************************/
-void
+cw_bool_t
 sockb_l_register_sock(cw_sock_t * a_sock);
 
 /****************************************************************************
  *
  * <<< Input(s) >>>
  *
- * a_sockfd : Pointer to a file descriptor number.
+ * a_sockfd : A file descriptor number.
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
- * Unregister the sock corresponding to *a_sockfd with the sockb thread.
- * *a_sockfd must not be modified until after the sockb thread has processed the
- * meessage.
+ * Unregister the sock corresponding to a_sockfd with the sockb thread.
  *
  ****************************************************************************/
-void
-sockb_l_unregister_sock(cw_uint32_t * a_sockfd);
+cw_bool_t
+sockb_l_unregister_sock(cw_uint32_t a_sockfd);
 
 /****************************************************************************
  *
  * <<< Input(s) >>>
  *
- * a_sockfd : Pointer to a file descriptor number.
+ * a_sockfd : A file descriptor number.
  *
  * <<< Output(s) >>>
  *
- * None.
+ * retval : FALSE == success, TRUE == error.
+ *          TRUE : Memory allocation error.
  *
  * <<< Description >>>
  *
- * Tell the sockb thread that the sock corresponding to *a_sockfd has queued
- * outgoing data.  *a_sockfd must not be modified until after the sockb thread
- * has processed the meessage.
+ * Tell the sockb thread that the sock corresponding to a_sockfd has queued
+ * outgoing data.
  *
  ****************************************************************************/
-void
-sockb_l_out_notify(cw_uint32_t * a_sockfd);
+cw_bool_t
+sockb_l_out_notify(cw_uint32_t a_sockfd);
 
 /****************************************************************************
  *

@@ -264,3 +264,23 @@ sock_write(cw_sock_t * a_sock, cw_buf_t * a_buf);
  ****************************************************************************/
 cw_bool_t
 sock_flush_out(cw_sock_t * a_sock);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * a_sock : Pointer to a sock.
+ *
+ * <<< Output(s) >>>
+ *
+ * retval : File descriptor corresponding to a_sock, or -1.
+ *          -1 : Not connected.
+ *
+ * <<< Description >>>
+ *
+ * Return the number of the file descriptor for a_sock's socket.
+ *
+ ****************************************************************************/
+int
+sock_get_fd(cw_sock_t * a_sock);
+

@@ -148,7 +148,8 @@ socks_accept(cw_socks_t * a_socks, struct timeval * a_timeout,
   fd_set fd_read_set;
 
   _cw_check_ptr(a_socks);
-
+  _cw_check_ptr(r_sock);
+  
   /* Are we even listening right now? */
   if (a_socks->is_listening == FALSE)
   {

@@ -27,7 +27,7 @@ P_INCS := sock_p.h sockb_p.h socks_p.h
 SRCS := sock.c sockb.c socks.c
 
 # Executables.
-BINS := proxy.c
+BINS := proxy.c blow.c suck.c
 
 # Simple tests.  Output is diff'ed with the expected (.exp file) output.
 CTESTS :=
