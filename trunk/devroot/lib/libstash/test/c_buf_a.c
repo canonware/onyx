@@ -513,11 +513,11 @@ main()
     _cw_assert(6 == buf_get_num_bufels(&buf));
     bufel_delete(&bufel);
 
-    iov = buf_get_iovec(&buf, 0, &iov_count);
+    iov = buf_get_iovec(&buf, 0, FALSE, &iov_count);
     _cw_assert(iov_count == 0);
     _cw_assert(6 == buf_get_num_bufels(&buf));
     
-    iov = buf_get_iovec(&buf, buf_get_size(&buf), &iov_count);
+    iov = buf_get_iovec(&buf, buf_get_size(&buf), FALSE, &iov_count);
     _cw_assert(iov_count == 6);
     _cw_assert(6 == buf_get_num_bufels(&buf));
     _cw_assert(iov[0].iov_base == (char *) a);
@@ -533,7 +533,7 @@ main()
     _cw_assert(iov[5].iov_base == (char *) &f[1]);
     _cw_assert(iov[5].iov_len == 9);
 
-    iov = buf_get_iovec(&buf, buf_get_size(&buf) + 10, &iov_count);
+    iov = buf_get_iovec(&buf, buf_get_size(&buf) + 10, FALSE, &iov_count);
     _cw_assert(iov_count == 6);
     _cw_assert(6 == buf_get_num_bufels(&buf));
     _cw_assert(iov[0].iov_base == (char *) a);
@@ -549,7 +549,7 @@ main()
     _cw_assert(iov[5].iov_base == (char *) &f[1]);
     _cw_assert(iov[5].iov_len == 9);
 
-    iov = buf_get_iovec(&buf, buf_get_size(&buf) - 5, &iov_count);
+    iov = buf_get_iovec(&buf, buf_get_size(&buf) - 5, FALSE, &iov_count);
     _cw_assert(iov_count == 6);
     _cw_assert(6 == buf_get_num_bufels(&buf));    
     _cw_assert(iov[0].iov_base == (char *) a);
@@ -565,7 +565,7 @@ main()
     _cw_assert(iov[5].iov_base == (char *) &f[1]);
     _cw_assert(iov[5].iov_len == 4);
 
-    iov = buf_get_iovec(&buf, buf_get_size(&buf) - 15, &iov_count);
+    iov = buf_get_iovec(&buf, buf_get_size(&buf) - 15, FALSE, &iov_count);
     _cw_assert(iov_count == 4);
     _cw_assert(6 == buf_get_num_bufels(&buf));
     _cw_assert(iov[0].iov_base == (char *) a);

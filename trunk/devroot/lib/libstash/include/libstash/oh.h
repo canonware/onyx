@@ -52,7 +52,8 @@ typedef struct
   cw_uint64_t jumps;
   const void * key;
   const void * data;
-  cw_list_item_t * list_item;
+  cw_ring_t ring_item;
+/*    cw_list_item_t * list_item; */
 } cw_oh_item_t;
 
 struct cw_oh_s
@@ -63,8 +64,12 @@ struct cw_oh_s
   cw_rwl_t rw_lock;
 #endif
   cw_oh_item_t ** items;
-  cw_list_t items_list;
-  cw_list_t spares_list;
+  cw_ring_t * items_ring;
+  cw_uint64_t items_count;
+  cw_ring_t * spares_ring;
+  cw_uint64_t spares_count;
+/*    cw_list_t items_list; */
+/*    cw_list_t spares_list; */
 
   cw_uint64_t (*curr_h1)(cw_oh_t *, const void *);
   cw_bool_t (*key_compare)(const void *, const void *);

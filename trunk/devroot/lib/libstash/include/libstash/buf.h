@@ -346,6 +346,9 @@ buf_get_num_bufels(cw_buf_t * a_buf);
  *
  * a_max_data : Maximum number of bytes of space to include in the iovec.
  *
+ * a_is_sys_iovec : If TRUE, limit *r_iovec_count to the maximum iovec count
+ *                  supported by this system for readv()/writev().
+ *
  * a_iovec_count : Pointer to an int.
  *
  * <<< Output(s) >>>
@@ -353,7 +356,7 @@ buf_get_num_bufels(cw_buf_t * a_buf);
  * retval : Pointer to an iovec array that represents the internal data buffers
  *          in a_buf.
  *
- * *a_iovec_count : Number of valid iovec structures in retval.
+ * *r_iovec_count : Number of valid iovec structures in retval.
  *
  * <<< Description >>>
  *
@@ -362,7 +365,8 @@ buf_get_num_bufels(cw_buf_t * a_buf);
  *
  ****************************************************************************/
 const struct iovec *
-buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data, int * a_iovec_count);
+buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
+	      cw_bool_t a_is_sys_iovec, int * r_iovec_count);
 
 /****************************************************************************
  *

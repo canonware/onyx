@@ -153,7 +153,8 @@ jtl_new(cw_jtl_t * a_jtl)
 
   mtx_new(&retval->lock);
   cnd_new(&retval->slock_wait);
-  list_new(&retval->tlock_wait, FALSE);
+  retval->tlock_wait_ring = NULL;
+  retval->tlock_wait_count = 0;
   cnd_new(&retval->dlock_wait);
   cnd_new(&retval->qlock_wait);
   cnd_new(&retval->rlock_wait);
@@ -171,7 +172,6 @@ jtl_delete(cw_jtl_t * a_jtl)
   /* Clean up structures. */
   mtx_delete(&a_jtl->lock);
   cnd_delete(&a_jtl->slock_wait);
-  list_delete(&a_jtl->tlock_wait);
   cnd_delete(&a_jtl->dlock_wait);
   cnd_delete(&a_jtl->qlock_wait);
   cnd_delete(&a_jtl->rlock_wait);
@@ -190,8 +190,9 @@ jtl_slock(cw_jtl_t * a_jtl)
   _cw_check_ptr(a_jtl);
 
   mtx_lock(&a_jtl->lock);
+  
   while ((a_jtl->tlock_holders > 0)
-	 || (list_count(&a_jtl->tlock_wait) > 0)
+	 || (a_jtl->tlock_wait_count > 0)
 	 )
   {
     a_jtl->slock_waiters++;
@@ -215,9 +216,19 @@ jtl_get_tq_el(cw_jtl_t * a_jtl)
   retval = (cw_jtl_tq_el_t *) _cw_malloc(sizeof(cw_jtl_tq_el_t));
   retval->is_blocked = FALSE;
   cnd_new(&retval->tlock_wait);
+  ring_new(&retval->ring_item, NULL, NULL);
+  ring_set_data(&retval->ring_item, retval);
 
-  list_tpush(&a_jtl->tlock_wait, retval);
-
+  if (0 < a_jtl->tlock_wait_count)
+  {
+    ring_meld(a_jtl->tlock_wait_ring, &retval->ring_item);
+  }
+  else
+  {
+    a_jtl->tlock_wait_ring = &retval->ring_item;
+  }
+  a_jtl->tlock_wait_count++;
+  
   mtx_unlock(&a_jtl->lock);
   return retval;
 }
@@ -227,20 +238,17 @@ jtl_tlock(cw_jtl_t * a_jtl, cw_jtl_tq_el_t * a_tq_el)
 {
   _cw_check_ptr(a_jtl);
   _cw_check_ptr(a_tq_el);
+  _cw_assert(0 < a_jtl->tlock_wait_count);
 
   mtx_lock(&a_jtl->lock);
-
+  
   if ((a_jtl->tlock_holders == 0)
-      && (list_count(&a_jtl->tlock_wait) == 0)
-      )
-  {
-    /* No other threads are waiting for a tlock.  Help ourselves. */
-  }
-  else if ((a_jtl->tlock_holders == 0)
-	   && (a_tq_el == list_hpeek(&a_jtl->tlock_wait)))
+	   && (a_tq_el == ring_get_data(a_jtl->tlock_wait_ring)))
   {
     /* This thread is first in line. */
-    list_hpop(&a_jtl->tlock_wait);
+    a_jtl->tlock_wait_ring = ring_cut(a_jtl->tlock_wait_ring);
+    a_jtl->tlock_wait_count--;
+    
   }
   else
   {
@@ -248,7 +256,10 @@ jtl_tlock(cw_jtl_t * a_jtl, cw_jtl_tq_el_t * a_tq_el)
     a_jtl->tlock_waiters++;
     cnd_wait(&a_tq_el->tlock_wait, &a_jtl->lock);
     a_jtl->tlock_waiters--;
-    list_hpop(&a_jtl->tlock_wait);
+    
+    a_jtl->tlock_wait_ring = ring_cut(a_jtl->tlock_wait_ring);
+    a_jtl->tlock_wait_count--;
+    
   }
   a_jtl->tlock_holders++;
   cnd_delete(&a_tq_el->tlock_wait);
@@ -363,12 +374,12 @@ jtl_sunlock(cw_jtl_t * a_jtl)
   a_jtl->slock_holders--;
 
   if ((a_jtl->slock_holders == 0)
-      && (list_count(&a_jtl->tlock_wait) > 0)
+      && (a_jtl->tlock_wait_count > 0)
       && (((cw_jtl_tq_el_t *)
-	   list_hpeek(&a_jtl->tlock_wait))->is_blocked == TRUE))
+	   ring_get_data(a_jtl->tlock_wait_ring))->is_blocked == TRUE))
   {
     cnd_signal(&((cw_jtl_tq_el_t *)
-		 list_hpeek(&a_jtl->tlock_wait))->tlock_wait);
+		 ring_get_data(a_jtl->tlock_wait_ring))->tlock_wait);
   }
   else if (a_jtl->slock_waiters > 0)
   {
@@ -391,8 +402,8 @@ jtl_tunlock(cw_jtl_t * a_jtl)
   {
     cw_jtl_tq_el_t * tq_el;
 
-    _cw_assert(list_count(&a_jtl->tlock_wait) > 0);
-    tq_el = (cw_jtl_tq_el_t *) list_hpeek(&a_jtl->tlock_wait);
+    _cw_assert(a_jtl->tlock_wait_count > 0);
+    tq_el = (cw_jtl_tq_el_t *) ring_get_data(a_jtl->tlock_wait_ring);
     _cw_check_ptr(tq_el);
 
     if (tq_el->is_blocked == TRUE)
@@ -401,7 +412,7 @@ jtl_tunlock(cw_jtl_t * a_jtl)
     }
   }
   else if ((a_jtl->slock_waiters > 0)
-	   && (list_count(&a_jtl->tlock_wait) == 0))
+	   && (a_jtl->tlock_wait_count == 0))
   {
     cnd_broadcast(&a_jtl->slock_wait);
   }

@@ -80,7 +80,9 @@ struct cw_jtl_s
 
   cw_uint32_t tlock_holders;
   cw_uint32_t tlock_waiters;
-  cw_list_t tlock_wait;
+  cw_ring_t * tlock_wait_ring;
+  cw_uint32_t tlock_wait_count;
+/*    cw_list_t tlock_wait; */
 
   cw_uint32_t max_dlocks;
   cw_uint32_t dlock_holders;
@@ -108,6 +110,7 @@ struct cw_jtl_tq_el_s
 {
   cw_bool_t is_blocked;
   cw_cnd_t tlock_wait;
+  cw_ring_t ring_item;
 };
 
 /****************************************************************************

@@ -340,7 +340,7 @@ res_dump(cw_res_t * a_res, char * a_filename)
 
     for (i = 0; i < num_items; i++)
     {
-      oh_item_delete_iterate(&a_res->hash, (void *) &key, (void *) &val);
+      oh_item_get_iterate(&a_res->hash, (void *) &key, (void *) &val);
 
       log_printf(t_log, "%s:", key);
       
@@ -367,8 +367,6 @@ res_dump(cw_res_t * a_res, char * a_filename)
 	  log_printf(t_log, "%s\n", (char *) (val + curr_offset));
 	}
       }
-      
-      oh_item_insert(&a_res->hash, key, val);
     }
   }
 

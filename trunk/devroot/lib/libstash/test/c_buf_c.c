@@ -576,7 +576,7 @@ main()
       for (j = 0; buf_get_size(buf_d) > 11; j++)
       {
 	buf_release_head_data(buf_d, 11);
-	buf_get_iovec(buf_d, 0, &iov_cnt);
+	buf_get_iovec(buf_d, 0, FALSE, &iov_cnt);
       }
       buf_release_head_data(buf_d, buf_get_size(buf_d));
     }
@@ -587,7 +587,7 @@ main()
       for (j = 0; buf_get_size(buf_d) > 11; j++)
       {
 	buf_release_head_data(buf_d, 11);
-	buf_get_iovec(buf_d, 0, &iov_cnt);
+	buf_get_iovec(buf_d, 0, FALSE, &iov_cnt);
       }
       buf_release_head_data(buf_d, buf_get_size(buf_d));
     }
@@ -598,7 +598,7 @@ main()
       for (j = 0; buf_get_size(buf_d) > 11; j++)
       {
 	buf_release_head_data(buf_d, 11);
-	buf_get_iovec(buf_d, 0, &iov_cnt);
+	buf_get_iovec(buf_d, 0, FALSE, &iov_cnt);
       }
       buf_release_head_data(buf_d, buf_get_size(buf_d));
     }

@@ -21,6 +21,18 @@
 
 #include <netinet/in.h>
 #include <sys/param.h>
+#include <sys/uio.h>
+
+#ifdef UIO_MAXIOV
+#  define _LIBSTASH_BUF_MAX_IOV UIO_MAXIOV
+#else
+#  ifdef _CW_OS_FREEBSD
+#    define _LIBSTASH_BUF_MAX_IOV 1024
+#  else
+#    define _LIBSTASH_BUF_MAX_IOV 64
+#  endif
+#endif
+
 
 cw_bufpool_t *
 bufpool_new(cw_bufpool_t * a_bufpool, cw_uint32_t a_buffer_size,
@@ -441,7 +453,8 @@ buf_get_num_bufels(cw_buf_t * a_buf)
 }
 
 const struct iovec *
-buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data, int * a_iovec_count)
+buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data,
+	      cw_bool_t a_is_sys_iovec, int * r_iovec_count)
 {
   cw_uint32_t array_index, num_bytes;
   int i;
@@ -476,7 +489,14 @@ buf_get_iovec(cw_buf_t * a_buf, cw_uint32_t a_max_data, int * a_iovec_count)
     a_buf->iov[i - 1].iov_len -= (num_bytes - a_max_data);
   }
 
-  *a_iovec_count = i;
+  if ((TRUE == a_is_sys_iovec) && (i > _LIBSTASH_BUF_MAX_IOV))
+  {
+    *r_iovec_count = _LIBSTASH_BUF_MAX_IOV;
+  }
+  else
+  {
+    *r_iovec_count = i;
+  }
 
 #ifdef _CW_REENTRANT
   if (a_buf->is_threadsafe == TRUE)

@@ -32,7 +32,7 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   if (a_oh == NULL)
   {
     retval = (cw_oh_t *) _cw_malloc(sizeof(cw_oh_t));
-    _cw_check_ptr(retval);
+    _cw_mem_check_ptr(retval);
     retval->is_malloced = TRUE;
   }
   else
@@ -53,27 +53,19 @@ oh_new(cw_oh_t * a_oh, cw_bool_t a_is_thread_safe)
   }
 #endif
 
-  /* Create the list for items. */
-#ifdef _CW_REENTRANT
-  list_new(&retval->items_list, FALSE);
-#else
-  list_new(&retval->items_list);
-#endif
+  retval->items_ring = NULL;
+  retval->items_count = 0;
 
   retval->size = 1 << _OH_BASE_POWER;
 
   /* Create the items pointer array. */
   retval->items = (cw_oh_item_t **) _cw_malloc(retval->size
 					       * sizeof(cw_oh_item_t *));
-  _cw_check_ptr(retval->items);
+  _cw_mem_check_ptr(retval->items);
   bzero(retval->items, retval->size * sizeof(cw_oh_item_t *));
 
-  /* Create the spare items list. */
-#ifdef _CW_REENTRANT
-  list_new(&retval->spares_list, FALSE);
-#else
-  list_new(&retval->spares_list);
-#endif
+  retval->spares_ring = NULL;
+  retval->spares_count = 0;
   
   retval->curr_h1 = oh_h1_string;
   retval->key_compare = oh_key_compare_string;
@@ -117,26 +109,34 @@ oh_delete(cw_oh_t * a_oh)
   {
     cw_sint64_t i;
     cw_oh_item_t * item;
+    cw_ring_t * t_ring;
 
-    for (i = list_count(&a_oh->items_list); i > 0; i--)
+    for (i = 0; i < a_oh->items_count; i++)
     {
-      item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+      t_ring = a_oh->items_ring;
+      a_oh->items_ring = ring_cut(t_ring);
+      
+      item = (cw_oh_item_t *) ring_get_data(t_ring);
+      ring_delete(&item->ring_item);
       _cw_free(item);
     }
-    list_delete(&a_oh->items_list);
   }
   
   /* Delete the spares list. */
   {
     cw_sint64_t i;
     cw_oh_item_t * item;
+    cw_ring_t * t_ring;
 
-    for (i = list_count(&a_oh->spares_list); i > 0; i--)
+    for (i = 0; i < a_oh->spares_count; i++)
     {
-      item = (cw_oh_item_t *) list_hpop(&a_oh->spares_list);
+      t_ring = a_oh->spares_ring;
+      a_oh->spares_ring = ring_cut(t_ring);
+      
+      item = (cw_oh_item_t *) ring_get_data(t_ring);
+      ring_delete(&item->ring_item);
       _cw_free(item);
     }
-    list_delete(&a_oh->spares_list);
   }
   
   _cw_free(a_oh->items);
@@ -183,8 +183,8 @@ oh_get_num_items(cw_oh_t * a_oh)
     rwl_rlock(&a_oh->rw_lock);
   }
 #endif
-  
-  retval = list_count(&a_oh->items_list);
+
+  retval = a_oh->items_count;
   
 #ifdef _CW_REENTRANT
   if (a_oh->is_thread_safe)
@@ -496,16 +496,24 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
   {
     /* Item isn't a duplicate key.  Go ahead and insert it. */
     retval = FALSE;
-    
-    /* Grab an item off the spares list, if there are any. */
-    if (list_count(&a_oh->spares_list) > 0)
+
+    /* Grab an item off the spares ring, if there are any. */
+    if (0 < a_oh->spares_count)
     {
-      item = (cw_oh_item_t *) list_hpop(&a_oh->spares_list);
+      cw_ring_t * t_ring;
+
+      t_ring = a_oh->spares_ring;
+      a_oh->spares_ring = ring_cut(t_ring);
+      a_oh->spares_count--;
+      item = (cw_oh_item_t *) ring_get_data(t_ring);
+      _cw_check_ptr(item);
     }
     else
     {
       item = (cw_oh_item_t *) _cw_malloc(sizeof(cw_oh_item_t));
-      _cw_check_ptr(item);
+      _cw_mem_check_ptr(item);
+      ring_new(&item->ring_item, NULL, NULL);
+      ring_set_data(&item->ring_item, (void *) item);
     }
 
     item->key = a_key;
@@ -564,10 +572,30 @@ oh_item_delete(cw_oh_t * a_oh,
     {
       *a_data = (void *) a_oh->items[slot]->data;
     }
-    list_remove_container(&a_oh->items_list, a_oh->items[slot]->list_item);
+    _cw_check_ptr(&a_oh->items[slot]->ring_item);
+    
+    if (a_oh->items_ring == &a_oh->items[slot]->ring_item)
+    {
+      /* The items_ring head is the same as the item we're removing, so take
+       * care to set the items_ring head correctly. */
+      a_oh->items_ring = ring_cut(&a_oh->items[slot]->ring_item);
+    }
+    else
+    {
+      ring_cut(&a_oh->items[slot]->ring_item);
+    }
+    a_oh->items_count--;
 
     /* Put the item on the spares list. */
-    list_hpush(&a_oh->spares_list, (void *) a_oh->items[slot]);
+    if (a_oh->spares_count == 0)
+    {
+      a_oh->spares_ring = &a_oh->items[slot]->ring_item;
+    }
+    else
+    {
+      ring_meld(a_oh->spares_ring, &a_oh->items[slot]->ring_item);
+    }
+    a_oh->spares_count++;
 
     a_oh->items[slot] = NULL;
 
@@ -643,23 +671,21 @@ oh_item_get_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
   }
 #endif
 
-  if (list_count(&a_oh->items_list) > 0)
+  if (0 < a_oh->items_count)
   {
     cw_oh_item_t * item;
 
     retval = FALSE;
 
-    item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+    item = (cw_oh_item_t *) ring_get_data(a_oh->items_ring);
 
     *a_key = (void *) item->key;
-
     if (NULL != a_data)
     {
       *a_data = (void *) item->data;
     }
 
-    /* Put the item back on the tail of the list. */
-    list_tpush(&a_oh->items_list, item);
+    a_oh->items_ring = ring_next(a_oh->items_ring);
   }
   else
   {
@@ -688,13 +714,18 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
   }
 #endif
 
-  if (list_count(&a_oh->items_list) > 0)
+  if (0 < a_oh->items_count)
   {
+    cw_ring_t * t_ring;
     cw_oh_item_t * item;
 
     retval = FALSE;
 
-    item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+    t_ring = a_oh->items_ring;
+    a_oh->items_ring = ring_cut(t_ring);
+    a_oh->items_count--;
+
+    item = (cw_oh_item_t *) ring_get_data(t_ring);
 
     *a_key = (void *) item->key;
 
@@ -708,7 +739,15 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** a_key, void ** a_data)
     oh_p_slot_shuffle(a_oh, item->slot_num);
 
     /* Add item to spares list. */
-    list_hpush(&a_oh->spares_list, item);
+    if (0 < a_oh->spares_ring)
+    {
+      ring_meld(a_oh->spares_ring, t_ring);
+    }
+    else
+    {
+      a_oh->spares_ring = t_ring;
+    }
+    a_oh->spares_count++;
   }
   else
   {
@@ -743,7 +782,7 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
   log_printf(cw_g_log,
 	     "Size: [%s]  Slots filled: [%d]\n\n",
 	     log_print_uint64(a_oh->size, 10, buf_a),
-	     list_count(&a_oh->items_list));
+	     a_oh->items_count);
   log_printf(cw_g_log, "      pow h1         h2    shrink grow \n");
   log_printf(cw_g_log, "      --- ---------- ----- ------ -----\n");
   log_printf(cw_g_log, "Base: %2d             %5d %5d  %5d\n",
@@ -976,7 +1015,7 @@ static void
 oh_p_grow(cw_oh_t * a_oh)
 {
   /* Should we grow? */
-  if (list_count(&a_oh->items_list) >= a_oh->curr_grow_point)
+  if (a_oh->items_count >= a_oh->curr_grow_point)
   {
     a_oh->num_grows++;
 
@@ -986,7 +1025,7 @@ oh_p_grow(cw_oh_t * a_oh)
     a_oh->items
       = (cw_oh_item_t **) _cw_realloc(a_oh->items,
 				      a_oh->size * sizeof(cw_oh_item_t *));
-    _cw_check_ptr(a_oh->items);
+    _cw_mem_check_ptr(a_oh->items);
     bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
 
     /* Re-calculate curr_* fields. */
@@ -1004,10 +1043,15 @@ oh_p_grow(cw_oh_t * a_oh)
     {
       cw_oh_item_t * item;
       cw_uint64_t i;
-    
-      for (i = list_count(&a_oh->items_list); i > 0; i--)
+      cw_ring_t * t_ring;
+
+      for (i = 0; i < a_oh->items_count; i++)
       {
-	item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+	t_ring = a_oh->items_ring;
+	a_oh->items_ring = ring_cut(t_ring);
+	a_oh->items_count--;
+	
+	item = (cw_oh_item_t *) ring_get_data(t_ring);
 	oh_p_item_insert(a_oh, item);
       }
     }
@@ -1021,12 +1065,12 @@ oh_p_shrink(cw_oh_t * a_oh)
   cw_uint32_t num_halvings;
 
   /* Should we shrink? */
-  if ((list_count(&a_oh->items_list) < a_oh->curr_shrink_point)
+  if ((a_oh->items_count < a_oh->curr_shrink_point)
       && (a_oh->curr_power > a_oh->base_power))
   {
 
     for (j = a_oh->curr_power - a_oh->base_power;
-	 (((a_oh->curr_grow_point >> j) < list_count(&a_oh->items_list))
+	 (((a_oh->curr_grow_point >> j) < a_oh->items_count)
 	  && (j > 0));
 	 j--);
     num_halvings = j;
@@ -1042,7 +1086,7 @@ oh_p_shrink(cw_oh_t * a_oh)
     a_oh->items
       = (cw_oh_item_t **) _cw_realloc(a_oh->items,
 				      a_oh->size * sizeof(cw_oh_item_t *));
-    _cw_check_ptr(a_oh->items);
+    _cw_mem_check_ptr(a_oh->items);
     bzero(a_oh->items, (a_oh->size * sizeof(cw_oh_item_t *)));
   
     /* Re-calculate curr_* fields. */
@@ -1060,30 +1104,39 @@ oh_p_shrink(cw_oh_t * a_oh)
     {
       cw_uint64_t i;
       cw_oh_item_t * item;
-    
-      for (i = list_count(&a_oh->items_list); i > 0; i--)
+      cw_ring_t * t_ring;
+
+      for (i = 0; i < a_oh->items_count; i++)
       {
-	item = list_hpop(&a_oh->items_list);
+	t_ring = a_oh->items_ring;
+	a_oh->items_ring = ring_cut(t_ring);
+	a_oh->items_count--;
+
+	item = (cw_oh_item_t *) ring_get_data(t_ring);
 	oh_p_item_insert(a_oh, item);
       }
     }
 
-    /* Purge the spares in the items_list. */
-    list_purge_spares(&a_oh->items_list);
-  
     /* Shrink the spares list down to a reasonable size. */
+    if (a_oh->spares_count > a_oh->curr_grow_point)
     {
-      cw_sint64_t i;
+      cw_uint64_t i, num_to_delete;
       cw_oh_item_t * item;
-
-      for (i = list_count(&a_oh->spares_list);
-	   i > a_oh->curr_grow_point;
-	   i--)
+      cw_ring_t * t_ring;
+	
+      for (i = 0,
+	     num_to_delete = a_oh->spares_count - a_oh->curr_grow_point;
+	   i < num_to_delete;
+	   i++)
       {
-	item = (cw_oh_item_t *) list_hpop(&a_oh->spares_list);
+	t_ring = a_oh->spares_ring;
+	a_oh->spares_ring = ring_cut(t_ring);
+	a_oh->spares_count--;
+	
+	item = (cw_oh_item_t *) ring_get_data(t_ring);
+	ring_delete(&item->ring_item);
 	_cw_free(item);
       }
-      list_purge_spares(&a_oh->spares_list);
     }
   }
 }
@@ -1092,8 +1145,8 @@ static void
 oh_p_item_insert(cw_oh_t * a_oh,
 		 cw_oh_item_t * a_item)
 {
-  cw_uint64_t slot, i, j;
   cw_bool_t retval = TRUE;
+  cw_uint64_t slot, i, j;
   
   /* Primary hash to first possible location to insert. */
   slot = a_oh->curr_h1(a_oh, a_item->key) % a_oh->size;
@@ -1111,11 +1164,16 @@ oh_p_item_insert(cw_oh_t * a_oh,
       a_item->jumps = i; /* For deletion shuffling. */
       a_oh->items[j] = a_item;
 
-      /* Wow, this looks knarly.  What we're doing here is adding the item
-       * to the items_list, then setting the list_item pointer inside the
-       * item, so that we can rip the item out of the list when
-       * deleting. */
-      a_item->list_item = list_tpush(&a_oh->items_list, a_item);
+      if (0 < a_oh->items_count)
+      {
+	ring_meld(a_oh->items_ring, &a_item->ring_item);
+      }
+      else
+      {
+	a_oh->items_ring = &a_item->ring_item;
+      }
+      a_oh->items_count++;
+      
       retval = FALSE;
       break;
     }
@@ -1166,14 +1224,21 @@ oh_p_rehash(cw_oh_t * a_oh)
 {
   cw_uint64_t i;
   cw_oh_item_t * item;
+  cw_ring_t * t_ring;
 
   /* Clear the table. */
   bzero(a_oh->items, a_oh->size * sizeof(cw_oh_item_t *));
   
   /* Iterate through old table and rehash them. */
-  for (i = list_count(&a_oh->items_list); i > 0; i--)
+  for (i = 0;
+       i < a_oh->items_count;
+       i++)
   {
-    item = (cw_oh_item_t *) list_hpop(&a_oh->items_list);
+    t_ring = a_oh->items_ring;
+    a_oh->items_ring = ring_cut(t_ring);
+    a_oh->items_count--;
+    
+    item = (cw_oh_item_t *) ring_get_data(t_ring);
     oh_p_item_insert(a_oh, item);
   }
 }
@@ -1192,14 +1257,14 @@ oh_p_slot_shuffle(cw_oh_t * a_oh, cw_uint64_t a_slot)
 	curr_distance++,
 	curr_look = (curr_look + a_oh->curr_h2) % a_oh->size)
   {
-    /* See if this item had to jump at least the current distance to
-     * the last empty slot in this secondary hash chain. */
+    /* See if this item had to jump at least the current distance to the last
+     * empty slot in this secondary hash chain. */
     if (a_oh->items[curr_look]->jumps >= curr_distance)
     {
-      /* This item should be shuffled back to the previous empty slot.
-       * Do so, and reset curr_distance and curr_empty.  Also, update
-       * the jumps field of the item we just shuffled, as well as its
-       * record of the slot that it's now in. */
+      /* This item should be shuffled back to the previous empty slot.  Do so,
+       * and reset curr_distance and curr_empty.  Also, update the jumps field
+       * of the item we just shuffled, as well as its record of the slot that
+       * it's now in. */
 	  
       a_oh->items[curr_empty] = a_oh->items[curr_look];
       a_oh->items[curr_empty]->jumps -= curr_distance;

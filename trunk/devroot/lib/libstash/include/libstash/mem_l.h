@@ -39,3 +39,13 @@
 #  undef _cw_dealloc
 #endif
 #define _cw_dealloc(a) free(a)
+
+#define _cw_mem_check_ptr(x) \
+  { \
+    if ((x) == NULL) \
+      { \
+	fprintf(stderr, "At %s, line %d, %s(): %s is a NULL pointer\n", \
+		__FILE__, __LINE__, __FUNCTION__, #x); \
+        abort(); \
+      } \
+  }

@@ -23,7 +23,6 @@ Optionally, pass any of the following (not a definitive list) arguments to
 'configure':
 
 --prefix=<install-root-dir>
-
 	Set the base directory in which to install.  For example:
 	
 	./configure --prefix=/usr/local
@@ -33,40 +32,39 @@ Optionally, pass any of the following (not a definitive list) arguments to
 
 --with-pthreads=no
 --without-pthreads
-
 	Tell 'configure' to not look for pthreads and to generate a Makefile
 	that can be used to compile only the non-threaded versions of the
 	libstash library.  The default is to look for pthreads, and fail if they
 	cannot be found.
 
-	Note that the check target only works correctly if the multi-threaded 
+	Note that the test suite only works correctly if the multi-threaded
 	versions of libstash are built.
 
 --with-gnu-make
 	Tell configure to link Makefile to the GNU Makefile, even if on a system
 	for which there is a native Makefile.
 
+--disable-shared
+	Do not build or install shared libraries by default.  Shared libraries
+	can still be built and installed by manually specifying the shar_opt,
+	shar_opt_r, install_shar_opt, and install_shar_opt_r targets.
+
 Optionally, define environment variables, including (not exclusively):
 
 CFLAGS="?"
-
 	Pass these flags to the compiler.  You probably shouldn't define this
 	unless you know what you are doing.
 
 CPPFLAGS="?"
-
 	Pass these flags to the C preprocessor.  Note that CFLAGS is not passed
 	to 'cpp' when 'configure' is looking for include files, so you must use 
 	CPPFLAGS instead if you need to help 'configure' find header files.
 
 LD_LIBRARY_PATH="?"
-
 	'ld' uses this colon-separated list to find libraries.
 
 LDFLAGS="?"
-
 	Flags passed to 'gcc', which should normally be passed on to 'ld'.
 
 PATH="?"
-
 	'configure' uses this to find programs.

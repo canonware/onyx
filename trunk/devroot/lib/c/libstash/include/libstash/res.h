@@ -127,7 +127,7 @@ res_clear(cw_res_t * a_res);
  *
  ****************************************************************************/
 cw_bool_t
-res_is_equal(cw_res_t * a_res, cw_res_t * a_resther);
+res_is_equal(cw_res_t * a_res, cw_res_t * a_other);
 
 /****************************************************************************
  * <<< Return Value >>>

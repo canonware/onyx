@@ -301,10 +301,11 @@ check : tests
 
 install : install_s @without_threads@install_r
 
-install_s : install_stat_dbg install_stat_opt install_shar_opt install_stat_prof
+install_s : install_stat_dbg install_stat_opt install_stat_prof \
+	@disable_shared@install_shar_opt
 
-install_r : install_stat_dbg_r install_stat_opt_r install_shar_opt_r \
-	install_stat_prof_r
+install_r : install_stat_dbg_r install_stat_opt_r install_stat_prof_r \
+	@disable_shared@install_shar_opt_r
 
 install_common : all
 	$(SHELL) -c \
