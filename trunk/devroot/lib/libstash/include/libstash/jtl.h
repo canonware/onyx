@@ -10,8 +10,6 @@
  *
  * <<< Description >>>
  *
- * Implementation of some complex locking classes.
- *
  * jtl : JOE-tree lock.  These are used by the block repository to provide
  * the necessary locking semantics for concurrent JOE-trees.  The following
  * lock types are encapsulated by jtl:

@@ -8,10 +8,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- *
- *
  ****************************************************************************/
 
 typedef struct cw_matrix_s cw_matrix_t;

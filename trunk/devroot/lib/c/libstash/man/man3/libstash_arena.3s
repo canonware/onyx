@@ -1,0 +1,242 @@
+.ig \" -*-mode:nroff-*-
+
+<Copyright = jasone>
+<License>
+
+Version: <Version>
+..
+.TH libstash_arena 3s "libstash, version <Version>"
+.Nm libstash_arena
+.hy 1
+.SH NAME
+arena - Chunk-based memory allocator.
+.SH SYNOPSIS
+.SS Single-threaded
+\fB#include <libstash/libstash.h>\fR
+
+.SS Multi-threaded
+\fB#include <libstash/libstash_r.h>\fR
+
+.I cw_arena_t *
+.br
+.B arena_new_r
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
+.IR "cw_uint32_t a_max_chunks" )
+
+.SS General
+.I cw_arena_t *
+.br
+.B arena_new
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
+.IR "cw_uint32_t a_max_chunks" )
+
+.I void
+.br
+.B arena_delete
+.RI ( "cw_arena_t * a_arena" )
+
+.I cw_uint32_t
+.br
+.B arena_get_chunk_size
+.RI ( "cw_arena_t * a_arena" )
+
+.I cw_uint32_t 
+.br
+.B arena_get_max_chunks
+.RI ( "cw_arena_t * a_arena" )
+
+.I void *
+.br
+.B arena_malloc
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_size" )
+
+.I void *
+.br
+.B arena_malloc_e
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_size" ", " 
+.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+
+.I void *
+.br
+.B _cw_arena_malloc
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_size" )
+
+.SS Debugging (dbg) symbols
+None.
+
+.SH DESCRIPTION
+\fBarena\fR affords very fast allocation at the expense of never freeing
+anything until you free everything, in \fBarena_delete\fR().  It does
+incremental block allocation, then carves buffers from those blocks.
+
+.SH USAGE
+.I cw_arena_t *
+.br
+.B arena_new
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
+.IR "cw_uint32_t a_max_chunks" )
+.br
+.I cw_arena_t *
+.br
+.B arena_new_r
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_chunk_size" ", " 
+.IR "cw_uint32_t a_max_chunks" )
+.br
+Input(s):
+.RS
+.IR a_arena :
+.RS
+Pointer to space for an arena, or NULL.
+.RE
+.IR a_chunk_size :
+.RS
+Size of chunks the arena will use.
+.RE
+.IR a_max_chunks :
+.RS
+Hard limit to the number of chunks the arena will allocate, or 0 for no limit.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to an arena.
+.br
+NULL: Memory allocation error.
+.RE
+.RE
+Description:
+.RS
+Non-thread-safe and thread-safe constructors.
+.RE
+.RE
+
+.I void
+.br
+.B arena_delete
+.RI ( "cw_arena_t * a_arena" )
+.br
+Input(s):
+.RS
+.IR a_arena :
+.RS
+Pointer to an arena.
+.RE
+.RE
+Output(s):
+.RS
+None.
+.RE
+Description:
+.RS
+Destructor.
+.RE
+.RE
+
+.I cw_uint32_t
+.br
+.B arena_get_chunk_size
+.RI ( "cw_arena_t * a_arena" )
+.br
+Input(s):
+.RS
+.IR a_arena :
+.RS
+Pointer to an arena.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Size of chunks that a_arena is using.
+.RE
+.RE
+Description:
+.RS
+Return the size of the chunks that a_arena is using.
+.RE
+.RE
+
+.I cw_uint32_t 
+.br
+.B arena_get_max_chunks
+.RI ( "cw_arena_t * a_arena" )
+.br
+Input(s):
+.RS
+.IR a_arena :
+.RS
+Pointer to an arena.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+Maximum number of chunks allowed in this arena.
+.RE
+.RE
+Description:
+.RS
+Return the maximum number of chunks that a_arena can have.
+.RE
+.RE
+
+.I void *
+.br
+.B arena_malloc
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_size" )
+.br
+.I void *
+.br
+.B arena_malloc_e
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_size" ", " 
+.IR "const char * a_filename" ", " "cw_uint32_t a_line_num" )
+.br
+.I void *
+.br
+.B _cw_arena_malloc
+.RI ( "cw_arena_t * a_arena" ", " "cw_uint32_t a_size" )
+.br
+Input(s):
+.RS
+.IR a_arena :
+.RS
+Pointer to an arena.
+.RE
+.IR a_size :
+.RS
+Size of memory range to allocate.
+.RE
+.IR a_filename :
+.RS
+Should be __FILE__.
+.RE
+.IR a_line_num :
+.RS
+Should be __LINE__.
+.RE
+.RE
+Output(s):
+.RS
+.IR retval :
+.RS
+non-NULL: Pointer to a memory buffer.
+.br
+NULL: Exceeded maximum allocation space, out of chunks, or memory allocation
+error.
+.RE
+.RE
+Description:
+.RS
+Allocate and return a zero filled memory area of the given size from the arena.
+.RE
+.RE
+
+.SH SEE ALSO
+libstash(3s).
+
+.SH HISTORY
+Written by Jason Evans <jasone@canonware.com>.

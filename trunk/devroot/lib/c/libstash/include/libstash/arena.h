@@ -9,14 +9,6 @@
  *
  * Version: <Version>
  *
- * <<< Description >>>
- *
- * Public interface for the arena class.  arena affords very fast allocation
- * at the expense of never freeing anything until you free everything, in
- * arena_delete
- * many equal-size buffers.  It does incremental block allocation, then carves
- * buffers from those blocks.  No memory is freed until pezz_delete() is called.
- *
  ****************************************************************************/
 
 /* Pseudo-opaque type. */
@@ -56,116 +48,25 @@ struct cw_arena_s
   cw_uint32_t next_alloc_location;
 };
 
-#ifdef _LIBSTASH_DBG
-typedef struct
-{
-  const char * filename;
-  cw_uint32_t line_num;
-} cw_arena_item_t;
-#endif
-
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_arena : Pointer to space for an arena, or NULL.
- *
- * a_chunk_size : Size of chunks the arena will use.
- *
- * a_max_chunks : Hard limit to the number of chunks the arena will
- *                allocate, or 0 for no limit.
- *
- * <<< Output(s) >>>
- *
- * retval : Pointer to an arena, or NULL.
- *          NULL : Memory allocation error.
- *
- * <<< Description >>>
- *
- * Non-thread-safe and thread-safe constructors.
- *
- ****************************************************************************/
 cw_arena_t *
 arena_new(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
 	  cw_uint32_t a_max_chunks);
+
 #ifdef _CW_REENTRANT
 cw_arena_t *
 arena_new_r(cw_arena_t * a_arena, cw_uint32_t a_chunk_size,
 	    cw_uint32_t a_max_chunks);
 #endif
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_arena : Pointer to an arena.
- *
- * <<< Output(s) >>>
- *
- * None.
- *
- * <<< Description >>>
- *
- * Destructor.
- *
- ****************************************************************************/
 void
 arena_delete(cw_arena_t * a_arena);
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_arena : Pointer to an arena.
- *
- * <<< Output(s) >>>
- *
- * retval : Size of chunks that a_arena is using.
- *
- * <<< Description >>>
- *
- * Return the size of the chunks that a_pezz is using.
- *
- ****************************************************************************/
 cw_uint32_t
 arena_get_chunk_size(cw_arena_t * a_arena);
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_arena : Pointer to an arena.
- *
- * <<< Output(s) >>>
- *
- * retval : Maximum number of chunks allowed in this arena.
- *
- * <<< Description >>>
- *
- * Return the maximum number of chunks that a_arena can have.
- *
- ****************************************************************************/
 cw_uint32_t
 arena_get_max_chunks(cw_arena_t * a_arena);
 
-/****************************************************************************
- *
- * <<< Input(s) >>>
- *
- * a_arena : Pointer to an arena.
- *
- * a_size : Size of memory area to allocate.
- *
- * <<< Output(s) >>>
- *
- * retval : Pointer to a memory buffer.
- *
- * <<< Description >>>
- *
- * Allocate and return a zero filled memory area of the given size
- * from the arena.
- *
- ****************************************************************************/
 void *
 arena_malloc(cw_arena_t * a_arena, cw_uint32_t a_size);
 void *
