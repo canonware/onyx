@@ -5,5 +5,4 @@
 c_*_[a-z]
 b_*_[a-z]
 p*.pl
-.cook.fp
-Howto.list
+Cookfile.list
