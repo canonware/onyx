@@ -1,3 +1,8 @@
+2001-02-27  Jason Evans  <jasone@canonware.com>
+
+	* src/thd.c (thd_l_init): Restart system calls interrupted by the
+	suspend/resume signal.
+
 2001-02-26  Jason Evans  <jasone@canonware.com>
 
 	* src/thd.c: Fix bugs in signal-based suspend/resume.

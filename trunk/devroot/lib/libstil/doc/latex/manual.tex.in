@@ -61,9 +61,8 @@ collection, which means that the garbage collector thread suspends all other
 threads (with the exception of signal handler threads) during its mark phase.
 In order for this to work, the garbage collector must not do any locking while
 the other threads are suspended, or else there is a high probability of
-eventual deadlock.  \libname{libstil} itself meets this criteria.
-
-
+eventual deadlock.  \libname{libstil} itself meets these criteria, as must any C
+extensions to the interpreter.
 
 \section{Exceptions}
 \libname{libstil} reserves \htmlref{xep}{xep} exception numbers 128 to 255 and
@@ -109,11 +108,16 @@ synchronous garbage collection seems not worth the effort, considering the low
 likelihood of anyone ever needing to use \libname{libstil} in such a
 configuration.
 
-\subsection{Interrupted system calls}
+\subsection{Restarted interrupted system calls}
 As mentioned above, \libname{libstil} uses thread suspension and resumption to
-implement garbage collection.  This has the side-effect of making interrupted
-system calls a real possibility that must always be checked for in the
-application.  See \htmlref{\classname{thd}}{thd} for more details.
+implement garbage collection.  This has the side-effect of making restarted
+interrupted system calls a real possibility.  However, the operating system will
+return with a partial result if the system call was partially complete when it
+was interrupted.  In practice, what this means is that short reads and writes
+are possible where they otherwise wouldn't happen, so the application should not
+make any assumptions about interruptible system calls always completing with a
+full result.  See the \htmlref{\classname{thd}}{thd} class documentation for
+more details.
 
 \section{API}
 \begin{description}

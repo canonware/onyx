@@ -91,9 +91,10 @@ thd_l_init(void)
 	struct sigaction	action;
 
 	/*
-	 * Install a signal handler for suspend and resume.
+	 * Install a signal handler for suspend and resume.  Restart system
+	 * calls in order to reduce the impact of signals on the application
 	 */
-	action.sa_flags = 0;
+	action.sa_flags = SA_RESTART;
 	action.sa_handler = thd_p_sr_handle;
 	sigemptyset(&action.sa_mask);
 	error = sigaction(_CW_THD_SIGSR, &action, NULL);

@@ -23,12 +23,14 @@ information is kept in order to allow implmentation of thread
 suspension/resumption, ``critical sections'', and ``single sections''.
 
 In most cases, the additional functionality is implemented with the aid of
-signals.  In all cases, if any of the additional functionality is utilized, the
-application must be careful to detect interrupted system calls.  At least the
-following system calls can be interrupted: \cfunc{read}{}, \cfunc{write}{},
-\cfunc{sendto}{}, \cfunc{recvfrom}{}, \cfunc{sendmsg}{} and \cfunc{recvmsg}{},
-\cfunc{ioctl}{}, and \cfunc{wait}{}.  See the system documentation for
-additional information.
+signals.  As a result, system calls may be interrupted by signals.  The system
+calls will be automaticalaly restarted if they have made no progress at the time
+of interruption, but will return a partial result otherwise.  Therefore, if any
+of the additional functionality is utilized, the application must be careful to
+handle partial system call results.  At least the following system calls can be
+interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
+\cfunc{recvfrom}{}, \cfunc{sendmsg}{} and \cfunc{recvmsg}{}, \cfunc{ioctl}{},
+and \cfunc{wait}{}.  See the system documentation for additional information.
 
 \subsubsection{dbg symbols}
 
