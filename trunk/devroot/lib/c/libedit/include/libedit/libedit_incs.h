@@ -107,6 +107,8 @@ extern ptr_t    memset		__P((ptr_t, int, size_t));
 extern char    *fgetline	__P((FILE *, int *));
 #endif
 
+#include <fcntl.h>
+
 /*
  * Include files.  These must be listed in reverse dependency order.
  */
