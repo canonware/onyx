@@ -1248,10 +1248,10 @@ res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
   /* Insert the resource into the hash table. */
   error = oh_item_insert(&a_res->hash, (void *) temp_name,
 			 (void *) temp_val);
-  if (error == 1)
+  if (1 == error)
   {
     char * old_name, * old_val;
-	      
+
     /* The resource already exists.  That means we need to delete the
      * existing one, free the resources that are taken up by it, and redo
      * the insertion. */
@@ -1264,8 +1264,8 @@ res_p_merge_res(cw_res_t * a_res, const char * a_name, const char * a_val)
     error = oh_item_insert(&a_res->hash, (void *) temp_name,
 			   (void *) temp_val);
   }
-
-  if (error == -1)
+  
+  if (-1 == error)
   {
     _cw_free(temp_name);
     _cw_free(temp_val);

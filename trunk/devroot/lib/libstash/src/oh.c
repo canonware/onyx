@@ -524,6 +524,10 @@ oh_item_insert(cw_oh_t * a_oh, const void * a_key, const void * a_data)
       t_ring = a_oh->spares_ring;
       a_oh->spares_ring = ring_cut(t_ring);
       a_oh->spares_count--;
+      if (0 == a_oh->spares_count)
+      {
+	a_oh->spares_ring = NULL;
+      }
       item = (cw_oh_item_t *) ring_get_data(t_ring);
       _cw_check_ptr(item);
     }
@@ -609,6 +613,10 @@ oh_item_delete(cw_oh_t * a_oh,
       ring_cut(&a_oh->items[slot]->ring_item);
     }
     a_oh->items_count--;
+    if (0 == a_oh->items_count)
+    {
+      a_oh->items_ring = NULL;
+    }
 
     /* Put the item on the spares list. */
     if (a_oh->spares_count == 0)
@@ -748,6 +756,10 @@ oh_item_delete_iterate(cw_oh_t * a_oh, void ** r_key, void ** r_data)
     t_ring = a_oh->items_ring;
     a_oh->items_ring = ring_cut(t_ring);
     a_oh->items_count--;
+    if (0 == a_oh->items_count)
+    {
+      a_oh->items_ring = NULL;
+    }
 
     item = (cw_oh_item_t *) ring_get_data(t_ring);
 
@@ -831,6 +843,24 @@ oh_dump(cw_oh_t * a_oh, cw_bool_t a_all)
 
   if (a_all)
   {
+    if (NULL != a_oh->items_ring)
+    {
+      ring_dump(a_oh->items_ring, "items_ring ");
+    }
+    else
+    {
+      log_printf(cw_g_log, "NULL items_ring\n");
+    }
+    
+    if (NULL != a_oh->spares_ring)
+    {
+      ring_dump(a_oh->spares_ring, "spares_ring ");
+    }
+    else
+    {
+      log_printf(cw_g_log, "NULL spares_ring\n");
+    }
+    
     log_printf(cw_g_log, "slot key        value\n");
     log_printf(cw_g_log, "---- ---------- ----------\n");
   
@@ -1084,6 +1114,10 @@ oh_p_grow(cw_oh_t * a_oh)
 	t_ring = a_oh->items_ring;
 	a_oh->items_ring = ring_cut(t_ring);
 	a_oh->items_count--;
+	if (0 == a_oh->items_count)
+	{
+	  a_oh->items_ring = NULL;
+	}
 	
 	item = (cw_oh_item_t *) ring_get_data(t_ring);
 	oh_p_item_insert(a_oh, item);
@@ -1151,6 +1185,10 @@ oh_p_shrink(cw_oh_t * a_oh)
 	t_ring = a_oh->items_ring;
 	a_oh->items_ring = ring_cut(t_ring);
 	a_oh->items_count--;
+	if (0 == a_oh->items_count)
+	{
+	  a_oh->items_ring = NULL;
+	}
 
 	item = (cw_oh_item_t *) ring_get_data(t_ring);
 	oh_p_item_insert(a_oh, item);
@@ -1172,6 +1210,10 @@ oh_p_shrink(cw_oh_t * a_oh)
 	t_ring = a_oh->spares_ring;
 	a_oh->spares_ring = ring_cut(t_ring);
 	a_oh->spares_count--;
+	if (0 == a_oh->spares_count)
+	{
+	  a_oh->spares_ring = NULL;
+	}
 	
 	item = (cw_oh_item_t *) ring_get_data(t_ring);
 	ring_delete(&item->ring_item);
@@ -1277,6 +1319,10 @@ oh_p_rehash(cw_oh_t * a_oh)
     t_ring = a_oh->items_ring;
     a_oh->items_ring = ring_cut(t_ring);
     a_oh->items_count--;
+    if (0 == a_oh->items_count)
+    {
+      a_oh->items_ring = NULL;
+    }
     
     item = (cw_oh_item_t *) ring_get_data(t_ring);
     oh_p_item_insert(a_oh, item);

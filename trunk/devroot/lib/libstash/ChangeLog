@@ -1,3 +1,13 @@
+1999-06-15  Jason Evans  <jasone@canonware.com>
+
+	* src/oh.c : When the items_ring or spares_ring becomes empty, set
+	the pointer to NULL to avoid munging the two rings together.
+
+1999-05-27  Jason Evans  <jasone@canonware.com>
+	
+	* src/buf.c (buf_{ap,pre}pend_bufc): Correctly set bufel magic.
+	This only affects the debug versions of libstash.
+
 1999-05-20  J. Owen Evans  <jasone@canonware.com>
 
 	* src/buf.c : Eliminate the bufel class.  The bufel structure
