@@ -1693,8 +1693,10 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	cw_bool_t	currentlocking;
 	DIR		*dir;
 	struct dirent	ent, *entp;
-	int		error;
 	cw_uint32_t	edepth, tdepth;
+#ifdef _CW_THREADS
+	int		error;
+#endif
 
 	ostack = nxo_thread_ostack_get(a_thread);
 	estack = nxo_thread_estack_get(a_thread);
@@ -1747,8 +1749,14 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		/*
 		 * Iterate through the directory.
 		 */
+#ifdef _CW_THREADS
 		while ((error = readdir_r(dir, &ent, &entp) == 0) && entp ==
-		    &ent) {
+		    &ent)
+#else
+		errno = 0;
+		while ((entp = readdir(dir)) != NULL)
+#endif
+		{
 /*
  * OSes don't agree on field naming.  Try using d_reclen instead of d_namlen if
  * d_namlen isn't in struct dirent.
@@ -1771,7 +1779,12 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 			nxo_dup(nxo, proc);
 			nxo_thread_loop(a_thread);
 		}
-		if (error && entp != NULL) {
+#ifdef _CW_THREADS
+		if (error && entp != NULL)
+#else
+		if (errno != 0)
+#endif
+		{
 			/* The loop terminated due to an error. */
 			nxo_thread_error(a_thread, NXO_THREADE_IOERROR);
 		}
