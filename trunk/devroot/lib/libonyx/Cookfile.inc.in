@@ -82,7 +82,7 @@ LIBONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 LIBONYX_CTESTS = ch_a.c dch_a.c libonyx_a.c ql_a.c qr_a.c qs_a.c xep_a.c
 #if @enable_threads@
-                 cnd_a.c mq_a.c mtx_a.c thd_a.c thd_b.c thd_c.c tsd_a.c
+                 cnd_a.c mq_a.c mtx_a.c nx_a.c thd_a.c thd_b.c thd_c.c tsd_a.c
 #endif
 #if @enable_posix_file@
                  hook_a.c
