@@ -76,8 +76,6 @@ struct history {
 
 private int		 history_set_num	__P((History *, int));
 private int		 history_set_fun	__P((History *, History *));
-private int		 history_load		__P((History *, const char *));
-private int		 history_save		__P((History *, const char *));
 private const HistEvent *history_prev_event	__P((History *, int));
 private const HistEvent *history_next_event	__P((History *, int));
 private const HistEvent *history_next_string	__P((History *, const char *));
