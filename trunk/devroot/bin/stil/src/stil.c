@@ -24,7 +24,7 @@ main(int argc, char **argv)
 {
 	cw_stil_t	stil;
 	cw_stilt_t	stilt;
-	cw_stilts_t	stilts;
+	cw_stilts_t	stilts, estilts;
 	char		input[_BUF_SIZE];
 	ssize_t		bytes_read;
 	cw_out_t	out;
@@ -50,6 +50,10 @@ main(int argc, char **argv)
 		exit(1);
 	}
 	if (stilts_new(&stilts, &stilt) == NULL) {
+		_cw_out_put_e("Error in stilts_new()\n");
+		exit(1);
+	}
+	if (stilts_new(&estilts, &stilt) == NULL) {
 		_cw_out_put_e("Error in stilts_new()\n");
 		exit(1);
 	}
@@ -95,18 +99,16 @@ main(int argc, char **argv)
 	if (is_tty) {
 		cw_uint8_t	code[] =
 		    "product print `, version ' print version print \".\n\""
-		    " print"
-		    " `See http://www.canonware.com/stil/ for information.\n'"
 		    " print\n";
 
-		stilt_interp_str(&stilt, &stilts, code, sizeof(code) - 1);
+		stilt_interp_str(&stilt, &estilts, code, sizeof(code) - 1);
 	}
-		
+
 	for (;;) {
 		if (is_tty) {
 			cw_uint8_t	code[] = "prompt\n";
 
-			stilt_interp_str(&stilt, &stilts, code, sizeof(code) -
+			stilt_interp_str(&stilt, &estilts, code, sizeof(code) -
 			    1);
 		}
 
@@ -118,6 +120,7 @@ main(int argc, char **argv)
 		    (cw_uint32_t)bytes_read);
 	}
 
+	stilts_delete(&estilts, &stilt);
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);
