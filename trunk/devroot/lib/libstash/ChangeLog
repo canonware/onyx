@@ -1,3 +1,11 @@
+1999-06-17  Jason Evans  <jasone@canonware.com>
+
+	* src/mq.c: Add the mq (message queue) class.
+
+1999-06-16  Jason Evans  <jasone@canonware.com>
+
+	* include/libstash/thread.h (thd_yield): Add.
+
 1999-06-15  Jason Evans  <jasone@canonware.com>
 
 	* src/oh.c : When the items_ring or spares_ring becomes empty, set

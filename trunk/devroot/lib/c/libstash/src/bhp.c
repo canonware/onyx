@@ -33,16 +33,23 @@
  ****************************************************************************/
 cw_bhp_t *
 #ifdef _CW_REENTRANT
-bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe)
+bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp,
+	cw_bool_t a_is_thread_safe)
 #else
-     bhp_new(cw_bhp_t * a_bhp)
+  bhp_new(cw_bhp_t * a_bhp, bhp_prio_comp_t * a_prio_comp)
 #endif
 {
   cw_bhp_t * retval;
 
+  _cw_check_ptr(a_prio_comp);
+
   if (a_bhp == NULL)
   {
     retval = (cw_bhp_t *) _cw_malloc(sizeof(cw_bhp_t));
+    if (NULL == retval)
+    {
+      goto RETURN;
+    }
     retval->is_malloced = TRUE;
   }
   else
@@ -65,8 +72,9 @@ bhp_new(cw_bhp_t * a_bhp, cw_bool_t a_is_thread_safe)
   
   retval->head = NULL;
   retval->num_nodes = 0;
-  retval->priority_compare = bhp_p_priority_compare;
-  
+  retval->priority_compare = a_prio_comp;
+
+  RETURN:
   return retval;
 }
 
@@ -87,7 +95,7 @@ bhp_delete(cw_bhp_t * a_bhp)
   }
 #endif
 
-  if (a_bhp->is_malloced == TRUE)
+  if (TRUE == a_bhp->is_malloced)
   {
     _cw_free(a_bhp);
   }
@@ -101,7 +109,8 @@ bhp_delete(cw_bhp_t * a_bhp)
 void
 bhp_dump(cw_bhp_t * a_bhp)
 {
-
+  char buf[21];
+  
   _cw_check_ptr(a_bhp);
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
@@ -110,7 +119,14 @@ bhp_dump(cw_bhp_t * a_bhp)
   }
 #endif
 
-  bhp_p_dump(a_bhp->head, 0, NULL);
+  log_printf(cw_g_log, "=== bhp_dump() start ==============================\n");
+  log_printf(cw_g_log, "num_nodes: %s\n",
+	     log_print_uint64(a_bhp->num_nodes, 10, buf));
+  if (NULL != a_bhp->head)
+  {
+    bhp_p_dump(a_bhp->head, 0, NULL);
+  }
+  log_printf(cw_g_log, "=== bhp_dump() end ================================\n");
   
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
@@ -125,9 +141,10 @@ bhp_dump(cw_bhp_t * a_bhp)
  * Insert an item.
  *
  ****************************************************************************/
-void
-bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data)
+cw_bool_t
+bhp_insert(cw_bhp_t * a_bhp, const void * a_priority, const void * a_data)
 {
+  cw_bool_t retval;
   cw_bhp_t temp_heap;
   cw_bhpi_t * new_item;
   
@@ -141,15 +158,21 @@ bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data)
   
   /* Create and initialize new_item. */
   new_item = (cw_bhpi_t *) _cw_malloc(sizeof(cw_bhpi_t));
+  if (NULL == new_item)
+  {
+    retval = TRUE;
+    goto RETURN;
+  }
+  
   bzero(new_item, sizeof(cw_bhpi_t));
   new_item->priority = a_priority;
   new_item->data = a_data;
-
+  
   /* Create and initialize temp_heap. */
 #ifdef _CW_REENTRANT
-  bhp_new(&temp_heap, FALSE);
+  bhp_new(&temp_heap, a_bhp->priority_compare, FALSE);
 #else
-  bhp_new(&temp_heap);
+  bhp_new(&temp_heap, a_bhp->priority_compare);
 #endif
   temp_heap.head = new_item;
   temp_heap.num_nodes = 1;
@@ -160,13 +183,17 @@ bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data)
   /* Clean up temp_heap. */
   /* XXX This should be done by bhp_merge(). */
   /*   bhp_delete(&temp_heap); */
-  
+
+  retval = FALSE;
+
+  RETURN:
 #ifdef _CW_REENTRANT
   if (a_bhp->is_thread_safe == TRUE)
   {
     rwl_wunlock(&a_bhp->rw_lock);
   }
 #endif
+  return retval;
 }
 
 /****************************************************************************
@@ -176,7 +203,7 @@ bhp_insert(cw_bhp_t * a_bhp, void * a_priority, void * a_data)
  *
  ****************************************************************************/
 cw_bool_t
-bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
+bhp_find_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
 {
   cw_bool_t retval;
   cw_bhpi_t * curr_min, * curr_pos;
@@ -210,10 +237,10 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
       curr_pos = curr_pos->sibling;
     }
 
-    /* We've found a minimum priority item now, so point *a_priority and
-     * *a_data to it. */
-    *a_priority = curr_min->priority;
-    *a_data = curr_min->data;
+    /* We've found a minimum priority item now, so point *r_priority and
+     * *r_data to it. */
+    *r_priority = (void *) curr_min->priority;
+    *r_data = (void *) curr_min->data;
   }
   else
   {
@@ -236,7 +263,7 @@ bhp_find_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
  *
  ****************************************************************************/
 cw_bool_t
-bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
+bhp_del_min(cw_bhp_t * a_bhp, void ** r_priority, void ** r_data)
 {
   cw_bool_t retval;
   cw_bhpi_t * prev_pos, * curr_pos, * next_pos, * before_min, * curr_min;
@@ -317,18 +344,18 @@ bhp_del_min(cw_bhp_t * a_bhp, void ** a_priority, void ** a_data)
 
     /* Create a temporary heap and initialize it. */
 #ifdef _CW_REENTRANT
-    bhp_new(&temp_heap, FALSE);
+    bhp_new(&temp_heap, a_bhp->priority_compare, FALSE);
 #else
-    bhp_new(&temp_heap);
+    bhp_new(&temp_heap, a_bhp->priority_compare);
 #endif
     temp_heap.head = prev_pos;
     bhp_union(a_bhp, &temp_heap);
     a_bhp->num_nodes--;
 
-    /* Now point *a_priority and *a_data to the item and free the space taken 
+    /* Now point *r_priority and *r_data to the item and free the space taken 
      * up by the item structure. */
-    *a_priority = curr_min->priority;
-    *a_data = curr_min->data;
+    *r_priority = (void *) curr_min->priority;
+    *r_data = (void *) curr_min->data;
     _cw_free(curr_min);
   }
   
@@ -382,9 +409,10 @@ bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
   
   _cw_check_ptr(a_bhp);
   _cw_check_ptr(a_other);
-  /* XXX Should this be locked? */
+  /* XXX Should this be locked?  Yes. */
 
   bhp_p_merge(a_bhp, a_other);
+
   if (a_bhp->head == NULL)
   {
     /* Empty heap.  We're done. */
@@ -396,21 +424,28 @@ bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
   next_node = curr_node->sibling;
   while(next_node != NULL)
   {
-    if ((curr_node->degree != 0) /* XXX Is this correct? */
+    if ((curr_node->degree != next_node->degree)
 	|| ((next_node->sibling != NULL)
 	    && (next_node->sibling->degree == curr_node->degree)))
     {
+      /* Either these two roots are unequal, or we're looking at the first two
+       * of three roots of equal degree (can happen because of merge (2) plus
+       * ripple carry (1)). */
       prev_node = curr_node;
       curr_node = next_node;
     }
     else if (1 != a_bhp->priority_compare(curr_node->priority,
 					  next_node->priority)) /* <= */
     {
+      /* The priority of the root of curr_node is <= the priority of the root of
+       * next_node. */
       curr_node->sibling = next_node->sibling;
       bhp_p_bin_link(curr_node, next_node);
     }
     else
     {
+      /* The priority of the root of curr_node is > the priority of the root of
+       * next_node. */
       if (prev_node == NULL)
       {
 	a_bhp->head = next_node;
@@ -422,45 +457,113 @@ bhp_union(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
       bhp_p_bin_link(next_node, curr_node);
       curr_node = curr_node->parent;
     }
-    next_node = curr_node->parent;
+/*      next_node = curr_node->parent; */
+    next_node = curr_node->sibling;
   }
- RETURN:
+  RETURN:
 }
 
 /****************************************************************************
- *
- * Set the priority comparison function.  If the heap has any data in it,
- * behavior is undefined.  The comparison function's return value should be:
  *
  * A < B  --> -1
  * A == B -->  0
  * A > B  -->  1
  *
  ****************************************************************************/
-void
-bhp_set_priority_compare(cw_bhp_t * a_bhp,
-			 bhp_prio_comp_t * a_new_prio_comp)
+cw_sint32_t
+bhp_priority_compare_uint32(const void * a_a, const void * a_b)
 {
-  _cw_check_ptr(a_bhp);
-  _cw_check_ptr(a_new_prio_comp);
-#ifdef _CW_REENTRANT
-  if (a_bhp->is_thread_safe == TRUE)
-  {
-    rwl_wlock(&a_bhp->rw_lock);
-  }
-#endif
+  cw_sint32_t retval;
+  cw_uint32_t a = *(cw_uint32_t *) a_a;
+  cw_uint32_t b = *(cw_uint32_t *) a_b;
 
-  /* To change this while there are items in the heap will wreak havoc. */
-  _cw_assert(a_bhp->num_nodes == 0);
-  
-  a_bhp->priority_compare = a_new_prio_comp;
-  
-#ifdef _CW_REENTRANT
-  if (a_bhp->is_thread_safe == TRUE)
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
+
+  if (a < b)
   {
-    rwl_wunlock(&a_bhp->rw_lock);
+    retval = -1;
   }
-#endif
+  else if (a > b)
+  {
+    retval = 1;
+  }
+  else
+  {
+    retval = 0;
+  }
+  
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * A < B  --> -1
+ * A == B -->  0
+ * A > B  -->  1
+ *
+ ****************************************************************************/
+cw_sint32_t
+bhp_priority_compare_sint32(const void * a_a, const void * a_b)
+{
+  cw_sint32_t retval;
+  cw_sint32_t a = *(cw_sint32_t *) a_a;
+  cw_sint32_t b = *(cw_sint32_t *) a_b;
+
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
+
+  if (a < b)
+  {
+    retval = -1;
+  }
+  else if (a > b)
+  {
+    retval = 1;
+  }
+  else
+  {
+    retval = 0;
+  }
+  
+/*    log_eprintf(cw_g_log, NULL, 0, __FUNCTION__, */
+/*  	      "%d %c %d (%d)\n", */
+/*  	      a, !retval ? '=' : retval > 0 ? '>' : '<', b, retval); */
+  
+  return retval;
+}
+
+/****************************************************************************
+ *
+ * A < B  --> -1
+ * A == B -->  0
+ * A > B  -->  1
+ *
+ ****************************************************************************/
+cw_sint32_t
+bhp_priority_compare_uint64(const void * a_a, const void * a_b)
+{
+  cw_sint32_t retval;
+  cw_uint64_t a = *(cw_uint64_t *) a_a;
+  cw_uint64_t b = *(cw_uint64_t *) a_b;
+
+  _cw_check_ptr(a_a);
+  _cw_check_ptr(a_b);
+
+  if (a < b)
+  {
+    retval = -1;
+  }
+  else if (a > b)
+  {
+    retval = 1;
+  }
+  else
+  {
+    retval = 0;
+  }
+  
+  return retval;
 }
 
 /****************************************************************************
@@ -484,19 +587,33 @@ bhp_p_dump(cw_bhpi_t * a_bhpi, cw_uint32_t a_depth, cw_bhpi_t * a_last_printed)
   if (a_bhpi->parent != a_last_printed)
   {
     /* Indent. */
-    for (i = 0; i < (a_depth * 50); i++)
+/*      for (i = 0; i < (a_depth * 42); i++) */
+    for (i = 0; i < (a_depth * 30); i++)
+/*      for (i = 0; i < (a_depth * 84); i++) */
     {
       log_printf(cw_g_log, " ");
     }
   }
-  log_printf(cw_g_log, "[depth: %d, degree: %d, priority: %d, data: %d]",
-	     a_depth, a_bhpi->degree, *(cw_sint32_t *) a_bhpi->priority,
-	     *(cw_sint32_t *) a_bhpi->data);
+/*    log_printf(cw_g_log, "[deg:%d pri:%010p dat:%010p]", */
+/*  	     a_bhpi->degree, a_bhpi->priority, a_bhpi->data); */
+  log_printf(cw_g_log, "[deg:%d pri:%4d dat:%4d]",
+	     a_bhpi->degree,
+	     *(cw_uint32_t *) a_bhpi->priority,
+	     *(cw_uint32_t *) a_bhpi->data);
+  
+/*    log_printf(cw_g_log, "[deg:%d pri: %4d dat: %4d t:%010p p:%010p c:%010p s:%010p]", */
+/*  	     a_bhpi->degree, *(cw_sint32_t *) a_bhpi->priority, */
+/*  	     *(cw_sint32_t *) a_bhpi->data, */
+/*  	     a_bhpi, */
+/*  	     a_bhpi->parent, */
+/*  	     a_bhpi->child, */
+/*  	     a_bhpi->sibling); */
+  a_last_printed = a_bhpi;
   
   /* Child. */
   if (NULL != a_bhpi->child)
   {
-    log_printf(cw_g_log, " ---> ");
+    log_printf(cw_g_log, " --- ");
     a_last_printed = bhp_p_dump(a_bhpi->child, a_depth + 1, a_bhpi);
   }
   else
@@ -565,12 +682,17 @@ bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
       /* Now link things together. */
       this_marker->sibling = other_marker;
       other_marker->sibling = curr_this;
+
+      /* XXX Experimental. */
+      /* Move forward in this. */
+      this_marker = this_marker->sibling;
+      curr_this = this_marker->sibling;
     }
     /* I think this can only happen once. */
-    else if (curr_this->degree > curr_other->degree)
+    else /*  if (curr_this->degree > curr_other->degree) */
     {
-      /* If first item in the list comes from other, then the following if
-       * statement probably always evaluates to true. */
+      /* If first item in the list comes from other, set the head
+       * accordingly. */
       if (curr_this == a_bhp->head)
       {
 	a_bhp->head = a_other->head;
@@ -591,58 +713,17 @@ bhp_p_merge(cw_bhp_t * a_bhp, cw_bhp_t * a_other)
       other_marker->sibling = curr_this;
     }
   }
-  if (curr_this == NULL)
+  
+  if ((curr_this == NULL) && (curr_other != NULL))
   {
-    if (curr_other == NULL)
-    {
-      /* Bother curr_this and curr_other are NULL.  We're done. */
-    }
-    else
-    {
-      if (curr_this == a_bhp->head)
-      {
-	/* This is an empty list! */
-	a_bhp->head = a_other->head;
-      }
-      else
-      {
-	/* Append remainder of other to this. */
-	_cw_assert(this_marker != NULL);
-	this_marker->sibling = curr_other;
-      }
-    }
+    /* Append remainder of other to this. */
+    _cw_assert(this_marker != NULL);
+    this_marker->sibling = curr_other;
   }
   
- RETURN:
+  RETURN:
   a_bhp->num_nodes += a_other->num_nodes;
 
   /* Destroy the old other heap. */
   bhp_delete(a_other);
-}
-
-/****************************************************************************
- *
- * Default priority comparison function, compares the values of the pointers
- * themselves.  This probably isn't very useful.
- *
- ****************************************************************************/
-static cw_sint32_t
-bhp_p_priority_compare(void * a_a, void * a_b)
-{
-  cw_sint32_t retval;
-
-  if (a_a < a_b)
-  {
-    retval = -1;
-  }
-  else if (a_a > a_b)
-  {
-    retval = 1;
-  }
-  else
-  {
-    retval = 0;
-  }
-  
-  return retval;
 }

@@ -18,40 +18,7 @@
 #include <libstash/libstash_r.h>
 
 /* Make sure that nums is at least as large. */
-#define _LIBSTASH_TEST_NUM_NODES 10
-
-/****************************************************************************
- *
- * Priority comparison function that compares two signed 32 bit integers.
- *
- ****************************************************************************/
-cw_sint32_t
-prio_comp(void * a_a, void * a_b)
-{
-  cw_sint32_t retval,
-    a = *(cw_sint32_t *) a_a,
-    b = *(cw_sint32_t *) a_b;
-
-
-  if (a > b)
-  {
-    retval = 1;
-  }
-  else if (a < b)
-  {
-    retval = -1;
-  }
-  else
-  {
-    retval = 0;
-  }
-
-/*    log_eprintf(cw_g_log, NULL, 0, "prio_comp", */
-/*  	      "%d %c %d (%d)\n", */
-/*  	      a, !retval ? '=' : retval > 0 ? '>' : '<', b, retval); */
-  
-  return retval;
-}
+#define _LIBSTASH_TEST_NUM_NODES 13
 
 int
 main()
@@ -72,26 +39,30 @@ main()
   libstash_init();
   log_printf(cw_g_log, "Test begin\n");
 
-  h = bhp_new(NULL, TRUE);
+  /* XXX */
+/*    h = bhp_new(NULL, bhp_priority_compare_sint32, TRUE); */
+  h = bhp_new(NULL, bhp_priority_compare_sint32, FALSE);
   _cw_check_ptr(h);
-
-  bhp_set_priority_compare(h, prio_comp);
 
   /* Insert all _LIBSTASH_TEST_NUM_NODES numbers into the heap. */
   for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
   {
-    bhp_insert(h, &(nums[i]), &(nums[i]));
     bhp_dump(h);
-    log_printf(cw_g_log, "===========================\n");
+    bhp_insert(h, &(nums[i]), &(nums[i]));
   }
 
+  log_printf(cw_g_log, "***************************************************\n");
+  log_printf(cw_g_log, "***************************************************\n");
+  
   for (i = 0; i < _LIBSTASH_TEST_NUM_NODES; i++)
   {
+    bhp_dump(h);
     _cw_assert(FALSE == bhp_del_min(h, (void **) &a, (void **) &b));
     log_printf(cw_g_log, "i == %d, size == %d: %d, %d\n",
 	       i, bhp_get_size(h), *a, *b);
   }
-  
+
+  bhp_delete(h);
   log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;

@@ -127,6 +127,12 @@
 #  endif
 #endif
 
+#ifdef _LIBSTASH_USE_MQ
+#  ifndef _LIBSTASH_USE_LIST
+#    define _LIBSTASH_USE_LIST
+#  endif
+#endif
+
 /*
  * Include files.  These must be listed in reverse dependency order (for
  * example, list.h must come before oh.h
@@ -236,5 +242,12 @@
 #  ifndef _TREEN_H_
 #    include "treen.h"
 #    define _TREEN_H_
+#  endif
+#endif
+
+#ifdef _LIBSTASH_USE_MQ
+#  ifndef _MQ_H_
+#    include "mq.h"
+#    define _MQ_H_
 #  endif
 #endif

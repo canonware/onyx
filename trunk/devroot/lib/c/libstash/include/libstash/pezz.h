@@ -70,7 +70,8 @@ struct cw_pezz_s
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a pezz.
+ * retval : Pointer to a pezz, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *

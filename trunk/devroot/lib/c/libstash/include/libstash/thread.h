@@ -81,7 +81,8 @@ struct cw_tsd_s
  *
  * <<< Output(s) >>>
  *
- * retval : Pointer to a thd.
+ * retval : Pointer to a thd, or NULL.
+ *          NULL : Memory allocation error.
  *
  * <<< Description >>>
  *
@@ -126,6 +127,23 @@ thd_delete(cw_thd_t * a_thd);
  ****************************************************************************/
 void *
 thd_join(cw_thd_t * a_thd);
+
+/****************************************************************************
+ *
+ * <<< Input(s) >>>
+ *
+ * None.
+ *
+ * <<< Output(s) >>>
+ *
+ * None.
+ *
+ * <<< Description >>>
+ *
+ * Give up the rest of this thread's time slice.
+ *
+ ****************************************************************************/
+#define thd_yield() pthread_yield()
 
 /****************************************************************************
  *
