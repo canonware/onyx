@@ -52,7 +52,6 @@ void	systemdict_estack(cw_stilt_t *a_stilt);
 void	systemdict_eval(cw_stilt_t *a_stilt);
 void	systemdict_exch(cw_stilt_t *a_stilt);
 void	systemdict_exec(cw_stilt_t *a_stilt);
-void	systemdict_executeonly(cw_stilt_t *a_stilt);
 void	systemdict_exit(cw_stilt_t *a_stilt);
 void	systemdict_exp(cw_stilt_t *a_stilt);
 void	systemdict_flush(cw_stilt_t *a_stilt);
