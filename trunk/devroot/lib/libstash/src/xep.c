@@ -104,6 +104,17 @@ xep_retry(void)
 	_cw_assert(cw_g_xep_initialized);
 
 	xep = qr_prev((cw_xep_t *)tsd_get(&cw_g_xep_key), link);
+#ifdef _LIBSTASH_DBG
+	switch (xep->state) {
+	case _CW_XEPS_CATCH:
+		break;
+	case _CW_XEPS_TRY:
+	case _CW_XEPS_FINALLY:
+		_cw_error("Exception retry outside handler");
+	default:
+		_cw_not_reached();
+	}
+#endif
 	xep->value = _CW_XEPV_NONE;
 	xep->state = _CW_XEPS_TRY;
 	xep->is_handled = TRUE;

@@ -31,8 +31,6 @@ main(): _CW_XEPV_FINALLY
 main(): i == 7
 main(): _CW_XEPV_CODE
 main(): _CW_XEPV_BAZ
-main(): _CW_XEPV_FINALLY
-main(): i == 8
 main(): _CW_XEPV_CODE
 main(): _CW_XEPV_BANG
 main(): _CW_XEPV_FINALLY

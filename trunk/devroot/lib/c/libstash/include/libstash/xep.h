@@ -15,10 +15,10 @@ typedef struct cw_xep_s cw_xep_t;
 typedef cw_sint32_t cw_xepv_t;
 
 #define	_CW_XEPV_NONE		 0
-#define	_CW_XEPV_CODE		 _CW_XEPV_NONE
-#define	_CW_XEPV_FINALLY	-1
-#define	_CW_XEPV_OOM		-2
-#define _CW_XEPV_OUT_PARSE	-3
+#define	_CW_XEPV_CODE		-1
+#define	_CW_XEPV_FINALLY	-2
+#define	_CW_XEPV_OOM		-3
+#define _CW_XEPV_OUT_PARSE	-4
 /*
  * Exceptions should be numbered negatively, and care should be taken to avoid
  * duplicates.  -1 through -127 are reserved by libstash.
@@ -47,6 +47,7 @@ struct cw_xep_s {
 #define	xep_try								\
 		xep_p_link(&_xep);					\
 		switch (setjmp(_xep.context)) {				\
+		case _CW_XEPV_NONE:					\
 		case _CW_XEPV_CODE:
 
 #define xep_catch(a_value)						\
@@ -67,7 +68,7 @@ struct cw_xep_s {
 		xep_p_unlink(&_xep);					\
 	}
 
-#define	xep_value()	((cw_xepv_t)_xep.value)
+#define	xep_value()	(_xep.value)
 
 void	xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t
     a_line_num);

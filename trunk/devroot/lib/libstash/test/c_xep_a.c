@@ -109,6 +109,7 @@ main()
 			if (xep_value() == _CW_XEPV_BAZ) {
 				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
 				    "_CW_XEPV_BAZ\n");
+				i++;
 				xep_retry();
 			} else {
 				out_put_e(cw_g_out, NULL, 0, __FUNCTION__,
