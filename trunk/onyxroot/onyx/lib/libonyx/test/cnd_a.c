@@ -49,7 +49,7 @@ main()
     struct cw_foo_s foo_var;
     struct timespec timeout;
     cw_uint32_t i;
-    cw_bool_t num_waiting;
+    cw_uint32_t num_waiting;
 
     libonyx_init();
     fprintf(stderr, "Test begin\n");
