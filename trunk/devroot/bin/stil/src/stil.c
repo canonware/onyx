@@ -394,15 +394,16 @@ cl_read(void *a_arg, cw_stilo_t *a_file, cw_uint32_t a_len, cw_uint8_t *r_str)
 
 			/*
 			 * Completion of a history element.  Insert it, taking
-			 * care to avoid simple (non-continued) duplicates.
+			 * care to avoid simple (non-continued) duplicates and
+			 * empty lines (simple carriage returns).
 			 */
 			if (continuation) {
 				history(hist, H_ENTER, str);
 				continuation = FALSE;
 			} else {
 				hevent = history(hist, H_FIRST);
-				if (hevent == NULL || strcmp(str,
-				    hevent->str))
+				if ((hevent == NULL || strcmp(str,
+				    hevent->str)) && strlen(str) > 1)
 					history(hist, H_ENTER, str);
 			}
 		} else {
