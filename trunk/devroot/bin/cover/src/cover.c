@@ -149,7 +149,7 @@ main(int argc, char **argv)
 	if (opt_key && graphs != NULL) {
 		cw_uint32_t	i;
 
-		for (i = 0; graphs[i] != NULL; i++) {
+		for (i = 0; i < matrix_get_y_size(matrix); i++) {
 			_cw_out_put("Row [i]:\n", i);
 			matrix_dump(graphs[matrix_get_element(y_index, 0, i)],
 			    "\t", FALSE);
