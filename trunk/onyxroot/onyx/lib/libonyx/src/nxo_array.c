@@ -68,30 +68,32 @@ nxo_array_subarray_new(cw_nxo_t *a_nxo, cw_nxo_t *a_array, cw_nx_t *a_nx,
     cw_check_ptr(orig);
     cw_dassert(orig->nxoe.magic == CW_NXOE_MAGIC);
 
+    array = (cw_nxoe_array_t *) nxa_malloc(nx_nxa_get(a_nx),
+					   sizeof(cw_nxoe_array_t));
+
+    nxoe_l_new(&array->nxoe, NXOT_ARRAY, FALSE);
+    array->nxoe.indirect = TRUE;
+
     if (orig->nxoe.indirect)
     {
-	nxo_array_subarray_new(a_nxo, &orig->e.i.nxo, a_nx, a_offset +
-			       orig->e.i.beg_offset, a_len);
+	cw_assert(a_offset + a_len + orig->e.i.beg_offset
+		  <= orig->e.i.array->e.a.len);
+	array->e.i.array = orig->e.i.array;
+	array->e.i.beg_offset = a_offset + orig->e.i.beg_offset;
     }
     else
     {
 	cw_assert(a_offset + a_len <= orig->e.a.len);
-
-	array = (cw_nxoe_array_t *) nxa_malloc(nx_nxa_get(a_nx),
-					       sizeof(cw_nxoe_array_t));
-
-	nxoe_l_new(&array->nxoe, NXOT_ARRAY, FALSE);
-	array->nxoe.indirect = TRUE;
-	memcpy(&array->e.i.nxo, a_array, sizeof(cw_nxo_t));
+	array->e.i.array = orig;
 	array->e.i.beg_offset = a_offset;
-	array->e.i.len = a_len;
-
-	nxo_no_new(a_nxo);
-	a_nxo->o.nxoe = (cw_nxoe_t *) array;
-	nxo_p_type_set(a_nxo, NXOT_ARRAY);
-
-	nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) array);
     }
+    array->e.i.len = a_len;
+
+    nxo_no_new(a_nxo);
+    a_nxo->o.nxoe = (cw_nxoe_t *) array;
+    nxo_p_type_set(a_nxo, NXOT_ARRAY);
+
+    nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *) array);
 }
 
 void
@@ -106,12 +108,12 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
     array_fr = (cw_nxoe_array_t *) a_from->o.nxoe;
     if (array_fr->nxoe.indirect)
     {
-	array_fr_i = (cw_nxoe_array_t *) array_fr->e.i.nxo.o.nxoe;
+	array_fr_i = array_fr->e.i.array;
     }
     array_to = (cw_nxoe_array_t *) a_to->o.nxoe;
     if (array_to->nxoe.indirect)
     {
-	array_to_i = (cw_nxoe_array_t *) array_to->e.i.nxo.o.nxoe;
+	array_to_i = array_to->e.i.array;
     }
 
     /* Set arr_fr and len_fr according to whether array_fr is an indirect
@@ -227,20 +229,19 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
     cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
     cw_assert(array->nxoe.type == NXOT_ARRAY);
 
+    if (array->nxoe.indirect)
+    {
+	a_offset += array->e.i.beg_offset;
+	array = array->e.i.array;
+    }
 #ifdef CW_THREADS
     nxoe_p_array_lock(array);
 #endif
-    if (array->nxoe.indirect == FALSE)
-    {
-	cw_assert(a_offset < array->e.a.len && a_offset >= 0);
-	nxo_no_new(&array->e.a.arr[a_offset]);
-	nxo_dup(&array->e.a.arr[a_offset], a_el);
-    }
-    else
-    {
-	nxo_array_el_set(&array->e.i.nxo, a_el,
-			 a_offset + array->e.i.beg_offset);
-    }
+    cw_assert(array->nxoe.indirect == FALSE);
+
+    cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
+    nxo_no_new(&array->e.a.arr[a_offset]);
+    nxo_dup(&array->e.a.arr[a_offset], a_el);
 #ifdef CW_THREADS
     nxoe_p_array_unlock(array);
 #endif

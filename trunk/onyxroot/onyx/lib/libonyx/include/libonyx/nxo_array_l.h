@@ -26,7 +26,7 @@ struct cw_nxoe_array_s
     {
 	struct
 	{
-	    cw_nxo_t nxo;
+	    cw_nxoe_array_t *array;
 	    cw_uint32_t beg_offset;
 	    cw_uint32_t len;
 	} i;
@@ -130,7 +130,7 @@ nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
     {
 	if (ref_iter == 0)
 	{
-	    retval = array->e.i.nxo.o.nxoe;
+	    retval = (cw_nxoe_t *) array->e.i.array;
 	    ref_iter++;
 	}
 	else
@@ -170,16 +170,15 @@ nxo_l_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 #ifdef CW_THREADS
     nxoe_p_array_lock(array);
 #endif
-    if (array->nxoe.indirect == FALSE)
+    if (array->nxoe.indirect)
     {
-	cw_assert(a_offset < array->e.a.len && a_offset >= 0);
-	nxo_dup(r_el, &array->e.a.arr[a_offset]);
+	a_offset += array->e.i.beg_offset;
+	array = array->e.i.array;
     }
-    else
-    {
-	nxo_array_el_get(&array->e.i.nxo, a_offset + array->e.i.beg_offset,
-			 r_el);
-    }
+    cw_assert(array->nxoe.indirect == FALSE);
+    
+    cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
+    nxo_dup(r_el, &array->e.a.arr[a_offset]);
 #ifdef CW_THREADS
     nxoe_p_array_unlock(array);
 #endif
