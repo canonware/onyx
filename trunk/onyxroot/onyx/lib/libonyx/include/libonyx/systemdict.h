@@ -447,6 +447,11 @@ void
 systemdict_join(cw_nxo_t *a_thread);
 #endif
 
+#ifdef CW_POSIX
+void
+systemdict_kill(cw_nxo_t *a_thread);
+#endif
+
 #ifdef CW_OOP
 void
 systemdict_kind(cw_nxo_t *a_thread);

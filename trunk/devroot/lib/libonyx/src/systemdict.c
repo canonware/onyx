@@ -294,6 +294,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 #ifdef CW_THREADS
     ENTRY(join),
 #endif
+#ifdef CW_POSIX
+    ENTRY(kill),
+#endif
 #ifdef CW_OOP
     ENTRY(kind),
 #endif
@@ -5292,6 +5295,135 @@ systemdict_join(cw_nxo_t *a_thread)
     nxo_thread_join(thread);
 
     nxo_stack_pop(ostack);
+}
+#endif
+
+#ifdef CW_POSIX
+void
+systemdict_kill(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack;
+    cw_nxo_t *nxo;
+    pid_t pid;
+    int sig;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    /* Signal number/name. */
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_INTEGER:
+	{
+	    sig = nxo_integer_get(nxo);
+	    break;
+	}
+	case NXOT_NAME:
+	{
+	    cw_nxo_t *tstack, *tnxo;
+
+#define KILLFLAGCOMP(a_nxn, a_signal)					\
+    nxo_name_new(tnxo, nxn_str(a_nxn), nxn_len(a_nxn), TRUE);		\
+    if (nxo_compare(tnxo, nxo) == 0)					\
+    {									\
+	sig = (a_signal);						\
+	break;								\
+    }
+
+	    sig = -1;
+	    do
+	    {
+		tstack = nxo_thread_tstack_get(a_thread);
+		tnxo = nxo_stack_push(tstack);
+
+		KILLFLAGCOMP(NXN_SIGABRT, SIGABRT);
+		KILLFLAGCOMP(NXN_SIGALRM, SIGALRM);
+		KILLFLAGCOMP(NXN_SIGBUS, SIGBUS);
+		KILLFLAGCOMP(NXN_SIGCHLD, SIGCHLD);
+		KILLFLAGCOMP(NXN_SIGCONT, SIGCONT);
+		KILLFLAGCOMP(NXN_SIGFPE, SIGFPE);
+		KILLFLAGCOMP(NXN_SIGHUP, SIGHUP);
+		KILLFLAGCOMP(NXN_SIGILL, SIGILL);
+		KILLFLAGCOMP(NXN_SIGINT, SIGINT);
+		KILLFLAGCOMP(NXN_SIGKILL, SIGKILL);
+		KILLFLAGCOMP(NXN_SIGPIPE, SIGPIPE);
+		KILLFLAGCOMP(NXN_SIGQUIT, SIGQUIT);
+		KILLFLAGCOMP(NXN_SIGSEGV, SIGSEGV);
+		KILLFLAGCOMP(NXN_SIGSTOP, SIGSTOP);
+		KILLFLAGCOMP(NXN_SIGTERM, SIGTERM);
+		KILLFLAGCOMP(NXN_SIGTSTP, SIGTSTP);
+		KILLFLAGCOMP(NXN_SIGTTIN, SIGTTIN);
+		KILLFLAGCOMP(NXN_SIGTTOU, SIGTTOU);
+		KILLFLAGCOMP(NXN_SIGUSR1, SIGUSR1);
+		KILLFLAGCOMP(NXN_SIGUSR2, SIGUSR2);
+#ifdef SIGPOLL
+		KILLFLAGCOMP(NXN_SIGPOLL, SIGPOLL);
+#endif
+		KILLFLAGCOMP(NXN_SIGPROF, SIGPROF);
+		KILLFLAGCOMP(NXN_SIGSYS, SIGSYS);
+		KILLFLAGCOMP(NXN_SIGTRAP, SIGTRAP);
+		KILLFLAGCOMP(NXN_SIGURG, SIGURG);
+#ifdef SIGVTALRM
+		KILLFLAGCOMP(NXN_SIGVTALRM, SIGVTALRM);
+#endif
+		KILLFLAGCOMP(NXN_SIGXCPU, SIGXCPU);
+		KILLFLAGCOMP(NXN_SIGXFSZ, SIGXFSZ);
+#undef KILLFLAGCOMP
+	    } while (0);
+	    nxo_stack_pop(tstack);
+
+	    if (sig == -1)
+	    {
+		/* Unrecognized signal name. */
+		nxo_thread_nerror(a_thread, NXN_argcheck);
+		return;
+	    }
+
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+    /* Process ID. */
+    NXO_STACK_NGET(nxo, ostack, a_thread, 1);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+    pid = nxo_integer_get(nxo);
+
+    /* Send the signal. */
+    if (kill(pid, sig) == -1)
+    {
+	switch (errno)
+	{
+	    case EINVAL:
+	    {
+		nxo_thread_nerror(a_thread, NXN_rangecheck);
+		return;
+	    }
+	    case EPERM:
+	    {
+		nxo_thread_nerror(a_thread, NXN_invalidaccess);
+		return;
+	    }
+	    case ESRCH:
+	    {
+		nxo_thread_nerror(a_thread, NXN_limitcheck);
+		return;
+	    }
+	    default:
+	    {
+		nxo_thread_nerror(a_thread, NXN_unregistered);
+		return;
+	    }
+	}
+    }
+
+    nxo_stack_npop(ostack, 2);
 }
 #endif
 

@@ -1,3 +1,7 @@
+2003-06-20 : Jason Evans <jasone@canonware.com>
+
+	* Add the kill operator.
+
 2003-06-19 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_exec() : Throw an error if the

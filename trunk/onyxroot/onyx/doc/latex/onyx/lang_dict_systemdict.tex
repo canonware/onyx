@@ -518,6 +518,12 @@ execution stack operators} \\
 	{Execute a program.}
 \hline
 \optableent
+	{pid sig}
+	{{\bf \htmlref{kill}{systemdict:kill}}}
+	{--}
+	{Send a signal to a process.}
+\hline
+\optableent
 	{--}
 	{{\bf \htmlref{pid}{systemdict:pid}}}
 	{pid}
@@ -6097,6 +6103,72 @@ onyx:0>
 onyx:0> (1 2) {add 1 sprint} thread join `Done\n' print flush
 3
 Done
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:kill}
+\index{kill@\onyxop{}{kill}{}}
+\item[{\onyxop{pid sig}{kill}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[pid: ]
+			An integer.  If \oparg{pid} is greater than 0, it
+			specifies a process ID.  If \oparg{pid} is 0, it
+			specifies the calling program's process group.  If
+			\oparg{pid} is -1, the signal is sent to all non-system
+			processes with ID 1.  If \oparg{pid} is less than -1,
+			its absolute value specifies a process group.
+		\item[sig: ]
+			An integer, or one of the following names:
+			\begin{itemize}
+			\item{SIGABRT}
+			\item{SIGALRM}
+			\item{SIGBUS}
+			\item{SIGCHLD}
+			\item{SIGCONT}
+			\item{SIGFPE}
+			\item{SIGHUP}
+			\item{SIGILL}
+			\item{SIGINT}
+			\item{SIGKILL}
+			\item{SIGPIPE}
+			\item{SIGQUIT}
+			\item{SIGSEGV}
+			\item{SIGSTOP}
+			\item{SIGTERM}
+			\item{SIGTSTP}
+			\item{SIGTTIN}
+			\item{SIGTTOU}
+			\item{SIGUSR1}
+			\item{SIGUSR2}
+			\item{SIGPOLL (may not be present)}
+			\item{SIGPROF}
+			\item{SIGSYS}
+			\item{SIGTRAP}
+			\item{SIGURG}
+			\item{SIGVTALRM (may not be present)}
+			\item{SIGXCPU}
+			\item{SIGXFSZ}
+			\end{itemize}
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{argcheck}{argcheck}.]
+		\item[\htmlref{invalidaccess}{invalidaccess}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\item[\htmlref{rangecheck}{rangecheck}.]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{unregistered}{unregistered}.]
+		\end{description}
+	\item[Description: ]
+		Send the signal specified by \oparg{sig} to the process or
+		process group specified by \oparg{pid}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> pid $SIGCONT kill
 onyx:0>
 		\end{verbatim}
 	\end{description}
