@@ -2,26 +2,26 @@ Branches are created for major and minor releases, but not for bugfix releases.
 
 To do a major release of onyx:
 
-	./onyx_release -b ONYX_3 -B ONYX_3_0 -t 3.0.0 -V onyx=3.0.0
+	./onyx_release -v -b ONYX_5 -B ONYX_5_0 -t 5.0.0 -V onyx=5.0.0
 
 To do a minor release of onyx:
 
-	./onyx_release -b ONYX_3 -B ONYX_3_1 -t 3.1.0 -V onyx=3.1.0
+	./onyx_release -v -b ONYX_4 -B ONYX_4_1 -t 4.1.0 -V onyx=4.1.0
   or
-	./onyx_release -b ONYX_3 -B ONYX_3_2 -t 3.2.0 -V onyx=3.2.0
+	./onyx_release -v -b ONYX_4 -B ONYX_4_2 -t 4.2.0 -V onyx=4.2.0
 
 To do a bugfix release of onyx:
 
-	./onyx_release -b ONYX_3_0 -t 3.0.1 -V onyx=3.0.1
+	./onyx_release -v -b ONYX_4_0 -t 4.0.1 -V onyx=4.0.1
   or
-	./onyx_release -b ONYX_3_0 -t 3.0.2 -V onyx=3.0.2
+	./onyx_release -v -b ONYX_4_0 -t 4.0.2 -V onyx=4.0.2
   or
-	./onyx_release -b ONYX_3_1 -t 3.1.1 -V onyx=3.1.1
+	./onyx_release -v -b ONYX_4_1 -t 4.1.1 -V onyx=4.1.1
 
 To re-create a release of onyx using an existing tag:
 
-	./onyx_release -c -b ONYX_3_0_1 -t 3.0.1 -V onyx=3.0.1
+	./onyx_release -cv -b ONYX_4_0_1 -t 4.0.1 -V onyx=4.0.1
 
 To create a snapshot of HEAD:
 
-	./onyx_release -cv -t 4.0a16.0 -V onyx=4.0a16.0
+	./onyx_release -cv -t 4.3a1.0 -V onyx=4.3a1.0
