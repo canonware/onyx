@@ -585,6 +585,7 @@ bufp_p_mkrs_ppos_adjust(cw_bufp_t *a_bufp, cw_sint32_t a_adjust,
     cw_assert(a_beg_ppos < a_end_ppos);
 
     /* Find the first affected mkr. */
+    key.order = MKRO_BEFORE;
     key.ppos = a_beg_ppos;
 #ifdef CW_DBG
     key.bufp = a_bufp;
@@ -1929,9 +1930,9 @@ mkr_p_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf, cw_mkro_t a_order)
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
-    a_mkr->order = a_order;
     bufp = ql_first(&a_buf->plist);
     a_mkr->bufp = bufp;
+    a_mkr->order = a_order;
     a_mkr->ppos = bufp_p_pos_b2p(bufp, 1);
     a_mkr->pline = 0;
     rb_node_new(&bufp->mtree, a_mkr, mnode);
@@ -1956,8 +1957,8 @@ mkr_p_dup(cw_mkr_t *a_to, const cw_mkr_t *a_from, cw_mkro_t a_order)
 
     mkr_p_remove(a_to);
 
-    a_to->order = a_order;
     a_to->bufp = a_from->bufp;
+    a_to->order = a_order;
     a_to->ppos = a_from->ppos;
     a_to->pline = a_from->pline;
 
@@ -2062,6 +2063,7 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     cw_uint32_t nlines;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
+    cw_mkr_t *mkr;
 
     cw_assert(a_count <= CW_BUFP_SIZE - a_mkr->bufp->len);
 
@@ -2075,13 +2077,56 @@ mkr_p_simple_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
     /* Insert. */
     nlines = bufp_p_simple_insert(bufp, a_bufv, a_bufvcnt, a_count);
 
-    /* If inserting after a_mkr, move a_mkr before the data just inserted. */
-    if (a_after)
+    /* Adjust markers at the insertion point. */
+    if (a_after == FALSE)
     {
-	mkr_p_remove(a_mkr);
-	a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
-	a_mkr->pline -= nlines;
-	mkr_p_insert(a_mkr);
+	/* Move MKRO_BEFORE markers at the insertion point in front of the data
+	 * just inserted. */
+
+	/* Skip MKRO_EITHER markers. */
+	for (mkr = ql_prev(&bufp->mlist, a_mkr, mlink);
+	     mkr != NULL && mkr->ppos == a_mkr->ppos
+		 && mkr->order == MKRO_EITHER;
+	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
+	{
+	    /* Do nothing. */
+	}
+
+	/* Move MKRO_BEFORE markers. */
+	for (;
+	     mkr != NULL && mkr->ppos == a_mkr->ppos;
+	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
+	{
+	    cw_assert(mkr->order == MKRO_BEFORE);
+	    a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    a_mkr->pline -= nlines;
+	}
+    }
+    else
+    {
+	cw_uint32_t ppos;
+
+	/* Move MKRO_BEFORE and MKRO_EITHER markers at the insertion point in
+	 * front of the data just inserted. */
+
+	ppos = a_mkr->ppos;
+	/* Iterate forward. */
+	for (mkr = a_mkr;
+	     mkr != NULL && mkr->ppos == ppos && mkr->order == MKRO_EITHER;
+	     mkr = ql_next(&bufp->mlist, mkr, mlink))
+	{
+	    a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    a_mkr->pline -= nlines;
+	}
+
+	/* Iterate backward. */
+	for (mkr = ql_prev(&bufp->mlist, a_mkr, mlink);
+	     mkr != NULL && mkr->ppos == ppos;
+	     mkr = ql_prev(&bufp->mlist, mkr, mlink))
+	{
+	    a_mkr->ppos -= (CW_BUFP_SIZE - bufp->len) + a_count;
+	    a_mkr->pline -= nlines;
+	}	
     }
 
     return nlines;
@@ -2134,7 +2179,7 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
 	 mkr != NULL && mkr->ppos < nmove;
 	 mkr = mmkr)
     {
-	/* Get next befor removing mkr. */
+	/* Get next before removing mkr. */
 	mmkr = ql_next(&bufp->mlist, mkr, mlink);
 
 	mkr_p_remove(mkr);
@@ -2177,11 +2222,6 @@ mkr_p_before_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after,
     nlines = (cw_uint32_t) buf_p_bufv_insert(buf, a_prevp,
 					     ql_next(&buf->plist, bufp, plink),
 					     a_bufv, a_bufvcnt);
-
-    if (a_after)
-    {
-	mkr_seek(a_mkr, -(cw_sint64_t) a_count, BUFW_REL);
-    }
 
     return nlines;
 }
@@ -2276,11 +2316,6 @@ mkr_p_after_slide_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, cw_bufp_t *a_nextp,
 					     ql_next(&buf->plist, a_nextp,
 						     plink),
 					     a_bufv, a_bufvcnt);
-
-    if (a_after)
-    {
-	mkr_seek(a_mkr, -(cw_sint64_t) a_count, BUFW_REL);
-    }
 
     return nlines;
 }
@@ -2402,11 +2437,6 @@ mkr_p_split_insert(cw_mkr_t *a_mkr, cw_bool_t a_after, const cw_bufv_t *a_bufv,
 
     nlines = buf_p_bufv_insert(buf, bufp, pastp, a_bufv, a_bufvcnt);
 
-    if (a_after)
-    {
-	mkr_seek(a_mkr, -(cw_sint64_t) a_count, BUFW_REL);
-    }
-
     return nlines;
 }
 
@@ -2418,9 +2448,11 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
     cw_uint32_t i;
     cw_buf_t *buf;
     cw_bufp_t *bufp;
+    cw_mkr_t *mkr, *mmkr;
 
     cw_check_ptr(a_mkr);
     cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_assert(a_mkr->order == MKRO_EITHER);
 
     bufp = a_mkr->bufp;
     buf = bufp->buf;
@@ -2491,6 +2523,95 @@ mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	{
 	    nlines = mkr_p_split_insert(a_mkr, a_after, a_bufv, a_bufvcnt, cnt);
 	}
+
+	/* Adjust markers at the insertion point. */
+	bufp = a_mkr->bufp;
+	if (a_after == FALSE)
+	{
+	    /* Move MKRO_BEFORE markers at the insertion point in front of the
+	     * data just inserted. */
+
+	    /* Skip MKRO_EITHER markers. */
+	    for (mkr = ql_prev(&bufp->mlist, a_mkr, mlink);
+		 mkr != NULL && mkr->ppos == a_mkr->ppos
+		     && mkr->order == MKRO_EITHER;
+		 mkr = ql_prev(&bufp->mlist, mkr, mlink))
+	    {
+		/* Do nothing. */
+	    }
+
+	    if (mkr != NULL && mkr->ppos == a_mkr->ppos)
+	    {
+		/* Move MKRO_BEFORE markers. */
+
+		/* Get the previous mkr before removing mkr from the list. */
+		mmkr = ql_prev(&bufp->mlist, mkr, mlink);
+
+		/* Seek.  Subsequent moves can be done via dup, which saves
+		 * looking up the bufp to move the mkr to. */
+		mkr_seek(mkr, -(cw_sint64_t) cnt, BUFW_REL);
+
+		for (mkr = mmkr;
+		     mkr != NULL && mkr->ppos == a_mkr->ppos;
+		     mkr = mmkr)
+		{
+		    cw_assert(mkr->order == MKRO_BEFORE);
+
+		    /* Get the previous mkr before removing mkr from the
+		     * list. */
+		    mmkr = ql_prev(&bufp->mlist, mkr, mlink);
+
+		    /* Move mkr. */
+		    mkr_dup(mkr, a_mkr);
+		}
+	    }
+	}
+	else
+	{
+	    cw_uint32_t ppos;
+	    cw_mkr_t *prev;
+
+	    /* Move MKRO_BEFORE and MKRO_EITHER markers at the insertion point
+	     * in front of the data just inserted. */
+
+	    /* Get the previous mkr before removing a_mkr from the list. */
+	    prev = ql_prev(&bufp->mlist, a_mkr, mlink);
+
+	    /* Get the next mkr before removing a_mkr from the list. */
+	    mmkr = ql_next(&bufp->mlist, a_mkr, mlink);
+
+	    ppos = a_mkr->ppos;
+
+	    /* Seek.  Subsequent moves can be done via dup, which saves looking
+	     * up the bufp to move the mkr to. */
+	    mkr_seek(a_mkr, -(cw_sint64_t) cnt, BUFW_REL);
+
+	    /* Iterate forward. */
+	    for (mkr = mmkr;
+		 mkr != NULL && mkr->ppos == ppos && mkr->order == MKRO_EITHER;
+		 mkr = mmkr)
+	    {
+		/* Get the next mkr before removing mkr from the list. */
+		mmkr = ql_next(&bufp->mlist, mkr, mlink);
+
+		/* Move mkr. */
+		mkr_dup(mkr, a_mkr);
+	    }
+
+	    /* Iterate backward. */
+	    for (mkr = prev;
+		 mkr != NULL && mkr->ppos == ppos;
+		 mkr = mmkr)
+	    {
+		cw_assert(mkr->order == MKRO_BEFORE);
+
+		/* Get the previous mkr before removing mkr from the list. */
+		mmkr = ql_prev(&bufp->mlist, mkr, mlink);
+
+		/* Move mkr. */
+		mkr_dup(mkr, a_mkr);
+	    }
+	}
     }
 
     buf->len += cnt;
@@ -2508,9 +2629,11 @@ mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 
     cw_check_ptr(a_start);
     cw_dassert(a_start->magic == CW_MKR_MAGIC);
+    cw_assert(a_start->order == MKRO_EITHER);
     cw_check_ptr(a_start->bufp);
     cw_check_ptr(a_end);
     cw_dassert(a_end->magic == CW_MKR_MAGIC);
+    cw_assert(a_end->order == MKRO_EITHER);
     cw_check_ptr(a_end->bufp);
     cw_assert(a_start->bufp->buf == a_end->bufp->buf);
     cw_dassert(a_start->bufp->magic == CW_BUFP_MAGIC);

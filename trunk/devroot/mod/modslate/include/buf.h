@@ -68,12 +68,12 @@ struct cw_mkr_s
 #define CW_MKR_MAGIC 0x2e84a3c9
 #endif
 
+    /* bufp this marker is in. */
+    cw_bufp_t *bufp;
+
     /* Marker type.  Normal markers are MKRO_EITHER; other values are for
      * extents. */
     cw_mkro_t order;
-
-    /* bufp this marker is in. */
-    cw_bufp_t *bufp;
 
     /* Gap movement can change this. */
     cw_uint32_t ppos;
