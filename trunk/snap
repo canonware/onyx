@@ -101,7 +101,8 @@ $tmpdir = "tmpdir";
 Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 
 $opt_retval = 
-    &GetOptions("h|help" => \$opt_help,
+    &GetOptions("c|cvsnotag" => \$opt_cvsnotag,
+		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
 		"p|pkgname=s" => \$opt_pkgname,
@@ -133,13 +134,19 @@ while ($opt_root =~ /\/$/)
 
 $pkgname_base = $opt_pkgname;
 
-if (defined($opt_tag))
+if (defined($opt_tag) && !defined($opt_cvsnotag))
 {
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = $opt_tag;
     $tag_cvs =~ s/\./_/g;
     $tag_cvs = "SNAP_$tag_cvs";
     $tag_cmd = "-r $tag_cvs";
+}
+elsif (defined($opt_tag) && defined($opt_cvsnotag))
+{
+    $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
+    $tag_cvs = "";
+    $tag_cmd = "-r HEAD";
 }
 else
 {
@@ -168,7 +175,7 @@ foreach $dir (@OPT_FILETREES)
     @TREES = (@TREES, "$opt_root/$dir");
 }
 
-if (defined($opt_tag))
+if (defined($opt_tag) && !defined($opt_cvsnotag))
 {
     if ($opt_verbose)
     {
@@ -198,6 +205,61 @@ unless ($opt_noact)
     `cvs export $tag_cmd -d $tmpdir @TREES`;
 }
 
+# Find all the files that need the copyright tag expanded.
+if ($opt_verbose)
+{
+    print STDERR "Doing copyright tag substitution:\n";
+}
+unless ($opt_noact)
+{
+    finddepth(\&expand_tags, "$tmpdir/devroot");
+}
+
+# cook release.
+if ($opt_verbose)
+{
+    print STDERR "cd $tmpdir/devroot && ./configure\n";
+}
+unless ($opt_noact)
+{
+    `cd $tmpdir/devroot && ./configure`;
+}
+if ($opt_verbose)
+{
+    print STDERR "cd $tmpdir/devroot && cook release\n";
+}
+unless ($opt_noact)
+{
+    `cd $tmpdir/devroot && cook release`;
+
+    # Sanity check to make sure documentation got built.
+    unless (-e "$tmpdir/devroot/doc/ps/manual.ps"
+	    && -e "$tmpdir/devroot/doc/pdf/manual.pdf"
+	    && -e "$tmpdir/devroot/doc/html/manual.html")
+    {
+	print STDERR "'cook release' seems to have failed\n";
+	exit 1;
+    }
+}
+if ($opt_verbose)
+{
+    print STDERR "cd $tmpdir/devroot && cook distclean\n";
+}
+unless ($opt_noact)
+{
+    `cd $tmpdir/devroot && cook distclean`;
+
+    # Sanity check to make sure documentation is still in the tree.
+    unless (-e "$tmpdir/devroot/doc/ps/manual.ps"
+	    && -e "$tmpdir/devroot/doc/pdf/manual.pdf"
+	    && -e "$tmpdir/devroot/doc/html/manual.html")
+    {
+	print STDERR "'cook release' seems to have failed\n";
+	exit 1;
+    }
+}
+
+# Move the tree to its final directory name.
 if ($opt_verbose)
 {
     print STDERR "rm -rf $opt_pkgname\n";
@@ -225,51 +287,7 @@ unless ($opt_noact)
     `rmdir $tmpdir`;
 }
 
-# Find all the files that need the copyright tag expanded.
-if ($opt_verbose)
-{
-    print STDERR "Doing copyright tag substitution:\n";
-}
-unless ($opt_noact)
-{
-    finddepth(\&expand_tags, "$opt_pkgname");
-}
-
-# cook release.
-if ($opt_verbose)
-{
-    print STDERR "cd $opt_pkgname && ./configure\n";
-}
-unless ($opt_noact)
-{
-    `cd $opt_pkgname && ./configure`;
-}
-if ($opt_verbose)
-{
-    print STDERR "cd $opt_pkgname && cook release\n";
-}
-unless ($opt_noact)
-{
-    `cd $opt_pkgname && cook release`;
-}
-if ($opt_verbose)
-{
-    print STDERR "cd $opt_pkgname && cook distclean\n";
-}
-unless ($opt_noact)
-{
-    `cd $opt_pkgname && cook distclean`;
-
-    # Sanity check to make sure documentation got built.
-    unless (-e "$opt_pkgname/doc/ps/manual.ps"
-	    && -e "$opt_pkgname/doc/pdf/manual.pdf"
-	    && -e "$opt_pkgname/doc/html/manual.html")
-    {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
-    }
-}
-
+# Create the tarball.
 if ($opt_verbose)
 {
     print STDERR "tar cvzf $opt_pkgname.tar.gz $opt_pkgname\n";
@@ -279,15 +297,20 @@ unless ($opt_noact)
     `tar cvzf $opt_pkgname.tar.gz $opt_pkgname`;
 }
 
+# Create symlinks to the directory and tarball.
 if ($opt_verbose)
 {
-    print STDERR "ln -sf $opt_pkgname $pkgname_base\-latest\n";
-    print STDERR "ln -sf $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz\n";
+    print STDERR "rm -f $pkgname_base\-latest\n";
+    print STDERR "ln -s $opt_pkgname $pkgname_base\-latest\n";
+    print STDERR "rm -f $pkgname_base\-latest.tar.gz\n";
+    print STDERR "ln -s $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz\n";
 }
 unless ($opt_noact)
 {
-    `ln -sf $opt_pkgname $pkgname_base\-latest`;
-    `ln -sf $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz`;
+    `rm -f $pkgname_base\-latest`;
+    `ln -s $opt_pkgname $pkgname_base\-latest`;
+    `rm -f $pkgname_base\-latest.tar.gz`;
+    `ln -s $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz`;
 }
 
 # End of main execution.
@@ -296,7 +319,7 @@ sub print_usage
 {
     print <<EOF;
 $0 usage:
-$0 [-hnv --help --noact --verbose] [--tag=<tag> | -t <tag>]
+$0 [-chnv --cvsnotag --help --noact --verbose] [--tag=<tag> | -t <tag>]
        {--pkgname=<name> | -p <pkgname>}
        {--root=<treeroot> | -r <treeroot>}
        {--filetree=<filetree> | -f <filetree>}+
@@ -320,7 +343,7 @@ sub expand_tags
 	# The directory is in $File::Find::dir.
 	if ($opt_verbose)
 	{
-	    print STDERR "  $File::Find::dir/$name...";
+#	    print STDERR "  $File::Find::dir/$name...";
 	}
 
 	$ifh = new FileHandle $name, "r";
@@ -391,11 +414,11 @@ sub expand_tags
 	{
 	    if ($did_subst)
 	    {
-		print STDERR "yes\n";
+#		print STDERR "yes\n";
 	    }
 	    else
 	    {
-		print STDERR "no\n";
+#		print STDERR "no\n";
 	    }
 	}
     }

@@ -48,7 +48,8 @@ use Getopt::Long;
 Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 
 $opt_retval = 
-    &GetOptions("h|help" => \$opt_help,
+    &GetOptions("c|cvsnotag" => \$opt_cvsnotag,
+		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
 		"t|tag=s" => \$opt_tag
@@ -90,6 +91,6 @@ sub print_usage
 {
     print <<EOF;
 $0 usage:
-$0 [-hnv --help --noact --verbose] [--tag=<tag> | -t <tag>]
+$0 [-chnv --cvsnotag --help --noact --verbose] [--tag=<tag> | -t <tag>]
 EOF
 }
