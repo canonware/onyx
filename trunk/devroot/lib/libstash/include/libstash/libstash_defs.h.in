@@ -31,6 +31,8 @@
 
 #undef WORDS_BIGENDIAN
 
+#undef _CW_THREADS
+
 /*
  * If using gcc and inlines weren't disabled by configure, use inline functions.
  */

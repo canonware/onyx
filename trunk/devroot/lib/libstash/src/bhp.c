@@ -78,11 +78,13 @@ bhp_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp)
 	return bhp_p_new(a_bhp, a_mem, a_prio_comp, FALSE);
 }
 
+#ifdef _CW_THREADS
 cw_bhp_t *
 bhp_new_r(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp)
 {
 	return bhp_p_new(a_bhp, a_mem, a_prio_comp, TRUE);
 }
+#endif
 
 void
 bhp_delete(cw_bhp_t *a_bhp)
@@ -97,8 +99,10 @@ bhp_delete(cw_bhp_t *a_bhp)
 		while (a_bhp->num_nodes > 0)
 			bhp_min_del(a_bhp, NULL, NULL);
 	}
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_delete(&a_bhp->lock);
+#endif
 	if (a_bhp->is_malloced)
 		mem_free(a_bhp->mem, a_bhp);
 }
@@ -111,8 +115,10 @@ bhp_dump(cw_bhp_t *a_bhp)
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
 	_cw_dassert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+#endif
 	out_put(out_err,
 	    "=== bhp_dump() start ==============================\n");
 	out_put(out_err, "num_nodes: [q]\n", a_bhp->num_nodes);
@@ -121,8 +127,10 @@ bhp_dump(cw_bhp_t *a_bhp)
 	out_put(out_err,
 	    "=== bhp_dump() end ================================\n");
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
+#endif
 }
 
 void
@@ -139,8 +147,10 @@ bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi)
 	_cw_assert(a_bhpi->size_of == sizeof(cw_bhpi_t));
 	_cw_dassert(a_bhpi->magic_b == _CW_BHPI_MAGIC);
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+#endif
 
 	/* Create and initialize temp_heap. */
 	bhp_new(&temp_heap, a_bhp->mem, a_bhp->priority_compare);
@@ -154,8 +164,10 @@ bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi)
 	temp_heap.head = NULL;
 	bhp_delete(&temp_heap);
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
+#endif
 }
 
 cw_bool_t
@@ -169,8 +181,10 @@ bhp_min_find(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
 	_cw_dassert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+#endif
 
 	if (a_bhp->head != NULL) {
 		retval = FALSE;
@@ -201,8 +215,10 @@ bhp_min_find(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 	} else
 		retval = TRUE;
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
+#endif
 	return retval;
 }
 
@@ -218,8 +234,10 @@ bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
 	_cw_dassert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+#endif
 
 	if (a_bhp->num_nodes == 0)
 		retval = TRUE;
@@ -292,8 +310,10 @@ bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		bhpi_delete(curr_min);
 	}
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
+#endif
 	return retval;
 }
 
@@ -307,13 +327,17 @@ bhp_size_get(cw_bhp_t *a_bhp)
 	_cw_assert(a_bhp->size_of == sizeof(cw_bhp_t));
 	_cw_dassert(a_bhp->magic_b == _CW_BHP_MAGIC);
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_lock(&a_bhp->lock);
+#endif
 
 	retval = a_bhp->num_nodes;
 
+#ifdef _CW_THREADS
 	if (a_bhp->is_thread_safe)
 		mtx_unlock(&a_bhp->lock);
+#endif
 	return retval;
 }
 
@@ -329,21 +353,27 @@ bhp_union(cw_bhp_t *a_a, cw_bhp_t *a_b)
 	_cw_assert(a_b->size_of == sizeof(cw_bhp_t));
 	_cw_dassert(a_b->magic_b == _CW_BHP_MAGIC);
 
+#ifdef _CW_THREADS
 	if (a_a->is_thread_safe)
 		mtx_lock(&a_a->lock);
 	if (a_b->is_thread_safe)
 		mtx_lock(&a_b->lock);
+#endif
 
 	bhp_p_union(a_a, a_b);
 
+#ifdef _CW_THREADS
 	if (a_b->is_thread_safe)
 		mtx_unlock(&a_b->lock);
+#endif
 	/* Destroy the old heap. */
 	a_b->head = NULL;
 	bhp_delete(a_b);
 
+#ifdef _CW_THREADS
 	if (a_a->is_thread_safe)
 		mtx_unlock(&a_a->lock);
+#endif
 }
 
 cw_sint32_t
@@ -424,10 +454,12 @@ bhp_p_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t *a_prio_comp,
 
 	retval->mem = a_mem;
 
+#ifdef _CW_THREADS
 	if (a_is_thread_safe) {
 		retval->is_thread_safe = TRUE;
 		mtx_new(&retval->lock);
 	} else
+#endif
 		retval->is_thread_safe = FALSE;
 
 	retval->head = NULL;

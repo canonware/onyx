@@ -31,7 +31,9 @@ struct cw_pool_s {
 	/* Allocator. */
 	cw_mem_t	*mem;
 
+#ifdef _CW_THREADS
 	cw_mtx_t	lock;
+#endif
 
 	/* Size of one buffer, from the user's perspective. */
 	cw_uint32_t	buffer_size;

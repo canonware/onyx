@@ -13,11 +13,13 @@ typedef struct cw_nxoe_string_s cw_nxoe_string_t;
 
 struct cw_nxoe_string_s {
 	cw_nxoe_t	nxoe;
+#ifdef _CW_THREADS
 	/*
 	 * Access is locked if this object has the locking bit set.  Indirect
 	 * strings aren't locked, but their parents are.
 	 */
 	cw_mtx_t	lock;
+#endif
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */

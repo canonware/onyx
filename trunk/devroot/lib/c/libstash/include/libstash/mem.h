@@ -20,7 +20,9 @@ struct cw_mem_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
 
+#ifdef _CW_THREADS
 	cw_mtx_t	lock;
+#endif
 
 #ifdef _CW_MEM_ERROR
 #define	_CW_MEM_BASE_TABLE	1024	/* Slots in base hash table. */

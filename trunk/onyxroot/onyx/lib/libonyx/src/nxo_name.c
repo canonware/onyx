@@ -20,7 +20,9 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
     cw_uint32_t a_len, cw_bool_t a_is_static)
 {
 	cw_nxoe_name_t		*name, key;
+#ifdef _CW_THREADS
 	cw_mtx_t		*name_lock;
+#endif
 	cw_dch_t		*name_hash;
 	cw_nxa_t		*nxa;
 	cw_bool_t		do_register;
@@ -29,15 +31,19 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	key.str = a_str;
 	key.len = a_len;
 
+#ifdef _CW_THREADS
 	name_lock = nx_l_name_lock_get(a_nx);
+#endif
 	name_hash = nx_l_name_hash_get(a_nx);
 
 	/*
 	 * Look in the global hash for the name.  If the name doesn't exist,
 	 * create it.
 	 */
+#ifdef _CW_THREADS
 	mtx_lock(name_lock);
 	thd_crit_enter();
+#endif
 	if (dch_search(name_hash, (void *)&key, (void **)&name)) {
 		/*
 		 * Not found in the name hash.  Create, initialize, and insert
@@ -77,7 +83,9 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 
 		do_register = FALSE;
 	}
+#ifdef _CW_THREADS
 	thd_crit_leave();
+#endif
 
 	/*
 	 * Registration must be done outside the critical region to avoid
@@ -86,23 +94,31 @@ nxo_name_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_uint8_t *a_str,
 	if (do_register)
 		nxa_l_gc_register(nx_nxa_get(a_nx), (cw_nxoe_t *)name);
 		
+#ifdef _CW_THREADS
 	mtx_unlock(name_lock);
+#endif
 }
 
 void
 nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 {
 	cw_nxoe_name_t	*name;
+#ifdef _CW_THREADS
 	cw_mtx_t	*name_lock;
+#endif
 	cw_dch_t	*name_hash;
 	cw_chi_t	*chi;
 
 	name = (cw_nxoe_name_t *)a_nxoe;
 
+#ifdef _CW_THREADS
 	name_lock = nx_l_name_lock_get(a_nx);
+#endif
 	name_hash = nx_l_name_hash_get(a_nx);
 
+#ifdef _CW_THREADS
 	mtx_lock(name_lock);
+#endif
 	/*
 	 * Only delete the hash entry if this object hasn't been put back into
 	 * use.
@@ -129,7 +145,9 @@ nxoe_l_name_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		a_nxoe->registered = FALSE;
 		nxa_l_gc_register(nx_nxa_get(a_nx), a_nxoe);
 	}
+#ifdef _CW_THREADS
 	mtx_unlock(name_lock);
+#endif
 }
 
 cw_nxoe_t *

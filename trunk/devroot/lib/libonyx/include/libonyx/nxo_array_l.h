@@ -17,11 +17,13 @@
 typedef struct cw_nxoe_array_s cw_nxoe_array_t;
 struct cw_nxoe_array_s {
 	cw_nxoe_t	nxoe;
+#ifdef _CW_THREADS
 	/*
 	 * Access is locked if this object has the locking bit set.  Indirect
 	 * arrays aren't locked, but their parents are.
 	 */
 	cw_mtx_t	lock;
+#endif
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
@@ -39,6 +41,7 @@ struct cw_nxoe_array_s {
 	}	e;
 };
 
+#ifdef _CW_THREADS
 /* Private, but defined here for the inline function. */
 #define		nxoe_p_array_lock(a_nxoe) do {				\
 	if ((a_nxoe)->nxoe.locking && !(a_nxoe)->nxoe.indirect)		\
@@ -48,6 +51,7 @@ struct cw_nxoe_array_s {
 	if ((a_nxoe)->nxoe.locking && !(a_nxoe)->nxoe.indirect)		\
 		mtx_unlock(&(a_nxoe)->lock);				\
 } while (0)
+#endif
 
 void	nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
 cw_nxoe_t *nxoe_l_array_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
@@ -76,7 +80,9 @@ nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
+#ifdef _CW_THREADS
 	nxoe_p_array_lock(array);
+#endif
 	if (array->nxoe.indirect == FALSE) {
 		_cw_assert(a_offset < array->e.a.len && a_offset >= 0);
 		nxo_dup(r_el, &array->e.a.arr[a_offset]);
@@ -84,7 +90,9 @@ nxo_l_array_el_get(cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 		nxo_array_el_get(&array->e.i.nxo, a_offset +
 		    array->e.i.beg_offset, r_el);
 	}
+#ifdef _CW_THREADS
 	nxoe_p_array_unlock(array);
+#endif
 }
 _CW_INLINE cw_bool_t
 nxo_l_array_bound_get(cw_nxo_t *a_nxo)

@@ -42,9 +42,13 @@ envdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, char **a_envp)
 			val_len = strlen(val_str);
 			nxo_string_new(&val_nxo, a_nx, TRUE, val_len);
 			t_str = nxo_string_get(&val_nxo);
+#ifdef _CW_THREADS
 			nxo_string_lock(&val_nxo);
+#endif
 			memcpy(t_str, val_str, val_len);
+#ifdef _CW_THREADS
 			nxo_string_unlock(&val_nxo);
+#endif
 
 			/* Insert into dictionary. */
 			nxo_dict_def(a_dict, a_nx, &key_nxo, &val_nxo);

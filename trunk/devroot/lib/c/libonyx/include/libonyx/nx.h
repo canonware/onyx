@@ -35,7 +35,9 @@ struct cw_nx_s {
          * to a nxoe_name in this hash and uses a pointer to that nxoe_name
          * as a unique key.
          */
+#ifdef _CW_THREADS
 	cw_mtx_t	name_lock;
+#endif
 	cw_dch_t	name_hash;
 
 	/* Memory allocator. */

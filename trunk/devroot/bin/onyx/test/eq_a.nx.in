@@ -42,8 +42,8 @@
 	``abd' `abc''
 
 	% Not equal.
-	`mutex mutex'
-	`mutex condition'
+	`dict dict'
+	`dict stack'
 	`//pop //spop'
 	`//pop //roll'
 	`/foo /bar'
@@ -52,7 +52,7 @@
 	`false true'
 
 	% Equal.
-	`mutex dup'
+	`stack dup'
 	`//pop //pop'
 	`/foo /foo'
 	`/foo `foo''

@@ -16,11 +16,15 @@
 #include "../include/libonyx/nxa_l.h"
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_array_l.h"
+#ifdef _CW_THREADS
 #include "../include/libonyx/nxo_condition_l.h"
+#endif
 #include "../include/libonyx/nxo_dict_l.h"
 #include "../include/libonyx/nxo_file_l.h"
 #include "../include/libonyx/nxo_hook_l.h"
+#ifdef _CW_THREADS
 #include "../include/libonyx/nxo_mutex_l.h"
+#endif
 #include "../include/libonyx/nxo_name_l.h"
 #include "../include/libonyx/nxo_operator_l.h"
 #include "../include/libonyx/nxo_stack_l.h"
@@ -59,9 +63,11 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
 	{NULL,
 	 NULL},
 
+#ifdef _CW_THREADS
 	/* NXOT_CONDITION */
 	{nxoe_l_condition_delete,
 	 nxoe_l_condition_ref_iter},
+#endif
 	
 	/* NXOT_DICT */
 	{nxoe_l_dict_delete,
@@ -87,9 +93,11 @@ static const cw_nxot_vtable_t nxot_vtable[] = {
 	{NULL,
 	 NULL},
 
+#ifdef _CW_THREADS
 	/* NXOT_MUTEX */
 	{nxoe_l_mutex_delete,
 	 nxoe_l_mutex_ref_iter},
+#endif
 
 	/* NXOT_NAME */
 	{nxoe_l_name_delete,
@@ -130,11 +138,15 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 
 	switch (nxo_type_get(a_a)) {
 	case NXOT_ARRAY:
+#ifdef _CW_THREADS
 	case NXOT_CONDITION:
+#endif
 	case NXOT_DICT:
 	case NXOT_FILE:
 	case NXOT_HOOK:
+#ifdef _CW_THREADS
 	case NXOT_MUTEX:
+#endif
 	case NXOT_STACK:
 	case NXOT_THREAD:
 		if (nxo_type_get(a_a) == nxo_type_get(a_b) && a_a->o.nxoe ==
@@ -165,35 +177,47 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 	case NXOT_STRING: {
 		const cw_uint8_t	*str_a, *str_b;
 		cw_uint32_t		len_a, len_b;
+#ifdef _CW_THREADS
 		cw_bool_t		lock_a, lock_b;
+#endif
 
 		if (nxo_type_get(a_a) == NXOT_NAME) {
 			str_a = nxo_name_str_get(a_a);
 			len_a = nxo_name_len_get(a_a);
+#ifdef _CW_THREADS
 			lock_a = FALSE;
+#endif
 		} else {
 			str_a = nxo_string_get(a_a);
 			len_a = nxo_string_len_get(a_a);
+#ifdef _CW_THREADS
 			lock_a = TRUE;
+#endif
 		}
 			
 		if (nxo_type_get(a_b) == NXOT_NAME) {
 			str_b = nxo_name_str_get(a_b);
 			len_b = nxo_name_len_get(a_b);
+#ifdef _CW_THREADS
 			lock_b = FALSE;
+#endif
 		} else if (nxo_type_get(a_b) == NXOT_STRING) {
 			str_b = nxo_string_get(a_b);
 			len_b = nxo_string_len_get(a_b);
+#ifdef _CW_THREADS
 			lock_b = TRUE;
+#endif
 		} else {
 			retval = 2;
 			break;
 		}
 
+#ifdef _CW_THREADS
 		if (lock_a)
 			nxo_string_lock(a_a);
 		if (lock_b)
 			nxo_string_lock(a_b);
+#endif
 		if (len_a == len_b)
 			retval = strncmp(str_a, str_b, len_a);
 		else if (len_a < len_b) {
@@ -205,10 +229,12 @@ nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b)
 			if (retval == 0)
 				retval = 1;
 		}
+#ifdef _CW_THREADS
 		if (lock_b)
 			nxo_string_unlock(a_b);
 		if (lock_a)
 			nxo_string_unlock(a_a);
+#endif
 		break;
 	}
 	case NXOT_BOOLEAN:
@@ -262,11 +288,15 @@ nxo_nxoe_get(cw_nxo_t *a_nxo)
 
 	switch (nxo_type_get(a_nxo)) {
 	case NXOT_ARRAY:
+#ifdef _CW_THREADS
 	case NXOT_CONDITION:
+#endif
 	case NXOT_DICT:
 	case NXOT_FILE:
 	case NXOT_HOOK:
+#ifdef _CW_THREADS
 	case NXOT_MUTEX:
+#endif
 	case NXOT_NAME:
 	case NXOT_STACK:
 	case NXOT_STRING:
@@ -280,6 +310,7 @@ nxo_nxoe_get(cw_nxo_t *a_nxo)
 	return retval;
 }
 
+#ifdef _CW_THREADS
 cw_bool_t
 nxo_lcheck(cw_nxo_t *a_nxo)
 {
@@ -306,6 +337,7 @@ nxo_lcheck(cw_nxo_t *a_nxo)
 
 	return retval;
 }
+#endif
 
 /*
  * nxoe.
@@ -319,7 +351,9 @@ nxoe_l_new(cw_nxoe_t *a_nxoe, cw_nxot_t a_type, cw_bool_t a_locking)
 
 	qr_new(a_nxoe, link);
 	a_nxoe->type = a_type;
+#ifdef _CW_THREADS
 	a_nxoe->locking = a_locking;
+#endif
 #ifdef _CW_DBG
 	a_nxoe->magic = _CW_NXOE_MAGIC;
 #endif

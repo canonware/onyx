@@ -23,6 +23,7 @@
 
 static cw_nxo_threade_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 
+#ifdef _CW_THREADS
 #define		nxoe_p_file_lock(a_nxoe) do {			\
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_lock(&(a_nxoe)->lock);				\
@@ -31,6 +32,7 @@ static cw_nxo_threade_t nxo_p_file_buffer_flush(cw_nxoe_file_t *a_file);
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_unlock(&(a_nxoe)->lock);				\
 } while (0)
+#endif
 
 void
 nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
@@ -41,8 +43,10 @@ nxo_file_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	    sizeof(cw_nxoe_file_t));
 
 	nxoe_l_new(&file->nxoe, NXOT_FILE, a_locking);
+#ifdef _CW_THREADS
 	if (a_locking)
 		mtx_new(&file->lock);
+#endif
 	file->fd = -1;
 
 	file->buffer = NULL;
@@ -76,8 +80,10 @@ nxoe_l_file_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	nxo_p_file_buffer_flush(file);
 	if (file->buffer != NULL)
 		_cw_free(file->buffer);
+#ifdef _CW_THREADS
 	if (file->nxoe.locking)
 		mtx_delete(&file->lock);
+#endif
 	/*
 	 * Don't automatically close() predefined or wrapped descriptors.
 	 */
@@ -181,7 +187,9 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd != -1) {
 		retval = NXO_THREADE_INVALIDFILEACCESS;
 		goto URETURN;
@@ -249,7 +257,9 @@ nxo_file_open(cw_nxo_t *a_nxo, const cw_uint8_t *a_filename, cw_uint32_t a_nlen,
 
 	retval = NXO_THREADE_NONE;
 	URETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	RETURN:
 	return retval;
 }
@@ -271,7 +281,9 @@ nxo_file_close(cw_nxo_t *a_nxo)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -297,7 +309,9 @@ nxo_file_close(cw_nxo_t *a_nxo)
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -317,7 +331,9 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd < 0) {
 		retval = -1;
 		goto RETURN;
@@ -326,7 +342,9 @@ nxo_file_fd_get(cw_nxo_t *a_nxo)
 	retval = file->fd;
 
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -347,7 +365,9 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = -1;
 		goto RETURN;
@@ -502,7 +522,9 @@ nxo_file_read(cw_nxo_t *a_nxo, cw_uint32_t a_len, cw_uint8_t *r_str)
 	RETURN:
 	if (retval != -1)
 		file->position += retval;
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -530,7 +552,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 
 	line = s_line;
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -748,7 +772,9 @@ nxo_file_readline(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_nxo_t
 	}
 
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	if (line != s_line)
 		_cw_free(line);
 	return retval;
@@ -771,7 +797,9 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -848,7 +876,9 @@ nxo_file_write(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len)
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -870,7 +900,9 @@ nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -970,7 +1002,9 @@ nxo_file_output(cw_nxo_t *a_nxo, const char *a_format, ...)
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -993,7 +1027,9 @@ nxo_file_output_n(cw_nxo_t *a_nxo, cw_uint32_t a_size, const char *a_format,
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -1081,7 +1117,9 @@ nxo_file_output_n(cw_nxo_t *a_nxo, cw_uint32_t a_size, const char *a_format,
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -1102,7 +1140,9 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -2) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -1117,7 +1157,9 @@ nxo_file_truncate(cw_nxo_t *a_nxo, off_t a_length)
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -1138,7 +1180,9 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd == -1) {
 		retval = -1;
 		goto RETURN;
@@ -1158,7 +1202,9 @@ nxo_file_position_get(cw_nxo_t *a_nxo)
 	}
 
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -1179,7 +1225,9 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (file->fd < 0) {
 		retval = NXO_THREADE_IOERROR;
 		goto RETURN;
@@ -1196,7 +1244,9 @@ nxo_file_position_set(cw_nxo_t *a_nxo, cw_nxoi_t a_position)
 
 	retval = NXO_THREADE_NONE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 	return retval;
 }
 
@@ -1216,9 +1266,13 @@ nxo_file_buffer_size_get(cw_nxo_t *a_nxo)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	retval = file->buffer_size;
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 
 	return retval;
 }
@@ -1238,7 +1292,9 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_uint32_t a_size)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if (a_size == 0) {
 		if (file->buffer != NULL) {
 			_cw_free(file->buffer);
@@ -1254,7 +1310,9 @@ nxo_file_buffer_size_set(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_uint32_t a_size)
 	}
 	file->buffer_mode = BUFFER_EMPTY;
 	file->buffer_offset = 0;
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 }
 
 cw_nxoi_t
@@ -1273,13 +1331,17 @@ nxo_file_buffer_count(cw_nxo_t *a_nxo)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	if ((file->fd != -1 && file->buffer != NULL && file->buffer_mode !=
 	    BUFFER_WRITE))
 		retval = file->buffer_offset;
 	else
 		retval = 0;
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 
 	return retval;
 }
@@ -1301,9 +1363,13 @@ nxo_file_buffer_flush(cw_nxo_t *a_nxo)
 	_cw_dassert(file->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(file->nxoe.type == NXOT_FILE);
 
+#ifdef _CW_THREADS
 	nxoe_p_file_lock(file);
+#endif
 	retval = nxo_p_file_buffer_flush(file);
+#ifdef _CW_THREADS
 	nxoe_p_file_unlock(file);
+#endif
 
 	return retval;
 }

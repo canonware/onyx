@@ -39,8 +39,10 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	    sizeof(cw_nxoe_stack_t));
 
 	nxoe_l_new(&stack->nxoe, NXOT_STACK, a_locking);
+#ifdef _CW_THREADS
 	if (a_locking)
 		mtx_new(&stack->lock);
+#endif
 
 	stack->nxa = nx_nxa_get(a_nx);
 	ql_new(&stack->stack);
@@ -51,7 +53,9 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking)
 	ql_elm_new(&stack->under, link);
 	ql_head_insert(&stack->stack, &stack->under, link);
 
+#ifdef _CW_THREADS
 	stack->noroll = NULL;
+#endif
 
 	nxo_no_new(a_nxo);
 	a_nxo->o.nxoe = (cw_nxoe_t *)stack;
@@ -84,8 +88,10 @@ nxoe_l_stack_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 		nxa_l_stacko_put(stack->nxa, tstacko);
 	}
 
+#ifdef _CW_THREADS
 	if (stack->nxoe.locking)
 		mtx_delete(&stack->lock);
+#endif
 
 	_CW_NXOE_FREE(stack);
 }
@@ -99,6 +105,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 	stack = (cw_nxoe_stack_t *)a_nxoe;
 
 	if (a_reset) {
+#ifdef _CW_THREADS
 		if (stack->noroll != NULL) {
 			/*
 			 * We're in the middle of a roll operation, so need to
@@ -109,11 +116,13 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 			 */
 			stack->ref_stage = 0;
 		} else
+#endif
 			stack->ref_stage = 2;
 	}
 
 	retval = NULL;
 	switch (stack->ref_stage) {
+#ifdef _CW_THREADS
 	case 0:
 		/* Set up for stage 1. */
 		stack->ref_stacko = stack->noroll;
@@ -129,6 +138,7 @@ nxoe_l_stack_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset)
 			break;
 		stack->ref_stage++;
 		/* Fall through. */
+#endif
 	case 2:
 		/* First roll region iteration. */
 		stack->ref_stacko = ql_first(&stack->stack);

@@ -23,10 +23,12 @@ typedef struct cw_nxoe_file_s cw_nxoe_file_t;
 
 struct cw_nxoe_file_s {
 	cw_nxoe_t	nxoe;
+#ifdef _CW_THREADS
 	/*
 	 * Access is locked if this object has the locking bit set.
 	 */
 	cw_mtx_t	lock;
+#endif
 	/*
 	 * File descriptor number.  -1: Invalid, -2: Wrapped.
 	 */

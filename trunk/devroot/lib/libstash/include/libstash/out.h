@@ -33,7 +33,9 @@ struct cw_out_s {
 	cw_bool_t	is_malloced;
 	cw_sint32_t	fd;
 
+#ifdef _CW_THREADS
 	cw_mtx_t	lock;
+#endif
 
 	cw_uint32_t	nextensions;
 	cw_out_ent_t	*extensions;

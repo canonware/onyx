@@ -35,7 +35,9 @@ typedef enum {
 	NXN_blksize,
 	NXN_blocks,
 	NXN_booleantype,
+#ifdef _CW_THREADS
 	NXN_broadcast,
+#endif
 	NXN_bytesavailable,
 	NXN_catenate,
 	NXN_cd,
@@ -46,8 +48,10 @@ typedef enum {
 	NXN_cleartomark,
 	NXN_close,
 	NXN_collect,
+#ifdef _CW_THREADS
 	NXN_condition,
 	NXN_conditiontype,
+#endif
 	NXN_copy,
 	NXN_count,
 	NXN_countdstack,
@@ -55,7 +59,9 @@ typedef enum {
 	NXN_counttomark,
 	NXN_ctime,
 	NXN_currentdict,
+#ifdef _CW_THREADS
 	NXN_currentlocking,
+#endif
 	NXN_cve,
 	NXN_cvlit,
 	NXN_cvn,
@@ -63,7 +69,9 @@ typedef enum {
 	NXN_cvs,
 	NXN_cvx,
 	NXN_def,
+#ifdef _CW_THREADS
 	NXN_detach,
+#endif
 	NXN_dev,
 	NXN_dict,
 	NXN_dicttype,
@@ -114,15 +122,21 @@ typedef enum {
 	NXN_invalidfileaccess,
 	NXN_ioerror,
 	NXN_istack,
+#ifdef _CW_THREADS
 	NXN_join,
+#endif
 	NXN_known,
+#ifdef _CW_THREADS
 	NXN_lcheck,
+#endif
 	NXN_le,
 	NXN_length,
 	NXN_limitcheck,
 	NXN_link,
 	NXN_load,
+#ifdef _CW_THREADS
 	NXN_lock,
+#endif
 	NXN_loop,
 	NXN_lt,
 	NXN_mark,
@@ -130,11 +144,15 @@ typedef enum {
 	NXN_mkdir,
 	NXN_mod,
 	NXN_mode,
+#ifdef _CW_THREADS
 	NXN_monitor,
+#endif
 	NXN_mtime,
 	NXN_mul,
+#ifdef _CW_THREADS
 	NXN_mutex,
 	NXN_mutextype,
+#endif
 	NXN_nametype,
 	NXN_ndup,
 	NXN_ne,
@@ -150,7 +168,9 @@ typedef enum {
 	NXN_operatortype,
 	NXN_or,
 	NXN_ostack,
+#ifdef _CW_THREADS
 	NXN_period,
+#endif
 	NXN_pid,
 	NXN_pmark,
 	NXN_pmarktype,
@@ -179,19 +199,25 @@ typedef enum {
 	NXN_scounttomark,
 	NXN_sdup,
 	NXN_seek,
+#ifdef _CW_THREADS
 	NXN_self,
+#endif
 	NXN_setactive,
 	NXN_setegid,
 	NXN_setenv,
 	NXN_seteuid,
 	NXN_setgid,
+#ifdef _CW_THREADS
 	NXN_setlocking,
 	NXN_setperiod,
+#endif
 	NXN_setthreshold,
 	NXN_setuid,
 	NXN_sexch,
 	NXN_shift,
+#ifdef _CW_THREADS
 	NXN_signal,
+#endif
 	NXN_sindex,
 	NXN_size,
 	NXN_spop,
@@ -218,15 +244,21 @@ typedef enum {
 	NXN_systemdict,
 	NXN_tell,
 	NXN_test,
+#ifdef _CW_THREADS
 	NXN_thread,
 	NXN_threadtype,
+#endif
 	NXN_threshold,
 	NXN_throw,
+#ifdef _CW_THREADS
 	NXN_timedwait,
+#endif
 	NXN_token,
 	NXN_true,
 	NXN_truncate,
+#ifdef _CW_THREADS
 	NXN_trylock,
+#endif
 	NXN_type,
 	NXN_typecheck,
 	NXN_uid,
@@ -235,20 +267,29 @@ typedef enum {
 	NXN_undefinedfilename,
 	NXN_undefinedresult,
 	NXN_unlink,
+#ifdef _CW_THREADS
 	NXN_unlock,
+#endif
 	NXN_unmatchedfino,
 	NXN_unmatchedmark,
 	NXN_unregistered,
 	NXN_unsetenv,
 	NXN_version,
+#ifdef _CW_THREADS
 	NXN_wait,
+#endif
 	NXN_waitpid,
 	NXN_where,
 	NXN_write,
 	NXN_xcheck,
-	NXN_xor,
+	NXN_xor
+#ifdef _CW_THREADS
+	,
 	NXN_yield
 #define	NXN_LAST	NXN_yield
+#else
+#define	NXN_LAST	NXN_xor
+#endif
 } cw_nxn_t;
 
 #ifndef _CW_USE_INLINES

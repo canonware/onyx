@@ -25,9 +25,13 @@ struct cw_gcdict_entry {
 static const struct cw_gcdict_entry gcdict_ops[] = {
 	ENTRY(active),
 	ENTRY(collect),
+#ifdef _CW_THREADS
 	ENTRY(period),
+#endif
 	ENTRY(setactive),
+#ifdef _CW_THREADS
 	ENTRY(setperiod),
+#endif
 	ENTRY(setthreshold),
 	ENTRY(stats),
 	ENTRY(threshold)
@@ -90,6 +94,7 @@ gcdict_collect(cw_nxo_t *a_thread)
 	nxa_collect(nx_nxa_get(nxo_thread_nx_get(a_thread)));
 }
 
+#ifdef _CW_THREADS
 void
 gcdict_period(cw_nxo_t *a_thread)
 {
@@ -102,6 +107,7 @@ gcdict_period(cw_nxo_t *a_thread)
 	period = nxo_stack_push(ostack);
 	nxo_integer_new(period, nxa_period_get(nxa));
 }
+#endif
 
 void
 gcdict_setactive(cw_nxo_t *a_thread)
@@ -122,6 +128,7 @@ gcdict_setactive(cw_nxo_t *a_thread)
 	nxo_stack_pop(ostack);
 }
 
+#ifdef _CW_THREADS
 void
 gcdict_setperiod(cw_nxo_t *a_thread)
 {
@@ -144,6 +151,7 @@ gcdict_setperiod(cw_nxo_t *a_thread)
 
 	nxo_stack_pop(ostack);
 }
+#endif
 
 void
 gcdict_setthreshold(cw_nxo_t *a_thread)

@@ -58,7 +58,9 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 			retval->is_malloced = TRUE;
 		}
 		retval->mem = a_internal;
+#ifdef _CW_THREADS
 		mtx_new(&retval->lock);
+#endif
 		try_stage = 1;
 
 #ifdef _CW_MEM_ERROR
@@ -74,7 +76,9 @@ mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
 		retval = (cw_mem_t *)v_retval;
 		switch (try_stage) {
 		case 1:
+#ifdef _CW_THREADS
 			mtx_delete(&retval->lock);
+#endif
 			if (retval->is_malloced)
 				mem_free(a_internal, retval);
 		case 0:
@@ -113,7 +117,9 @@ mem_delete(cw_mem_t *a_mem)
 			mem_free(a_mem->mem, allocation);
 		}
 		dch_delete(a_mem->addr_hash);
+#ifdef _CW_THREADS
 		mtx_delete(&a_mem->lock);
+#endif
 	}
 #endif
 
@@ -130,8 +136,10 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 	_cw_assert(a_size > 0);
 
 #ifdef _CW_MEM_ERROR
+#ifdef _CW_THREADS
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
+#endif
 #endif
 
 	retval = _cw_malloc(a_size);
@@ -172,7 +180,9 @@ mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
 			dch_insert(a_mem->addr_hash, retval, allocation,
 			    &allocation->chi);
 		}
+#ifdef _CW_THREADS
 		mtx_unlock(&a_mem->lock);
+#endif
 	}
 #endif
 
@@ -188,8 +198,10 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 	_cw_assert(a_size * a_number > 0);
 
 #ifdef _CW_MEM_ERROR
+#ifdef _CW_THREADS
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
+#endif
 #endif
 
 	retval = _cw_calloc(a_number, a_size);
@@ -234,8 +246,10 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size, const char
 			    &allocation->chi);
 		}
 	}
+#ifdef _CW_THREADS
 	if (a_mem != NULL)
 		mtx_unlock(&a_mem->lock);
+#endif
 #endif
 
 	return retval;
@@ -251,8 +265,10 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 	_cw_assert(a_size > 0);
 
 #ifdef _CW_MEM_ERROR
+#ifdef _CW_THREADS
 	if (a_mem != NULL)
 		mtx_lock(&a_mem->lock);
+#endif
 #endif
 
 	retval = _cw_realloc(a_ptr, a_size);
@@ -296,8 +312,10 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char
 #endif
 		}
 	}
+#ifdef _CW_THREADS
 	if (a_mem != NULL)
 		mtx_unlock(&a_mem->lock);
+#endif
 #endif
 
 	return retval;
@@ -314,7 +332,9 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 		if (a_filename == NULL)
 			a_filename = "<?>";
 
+#ifdef _CW_THREADS
 		mtx_lock(&a_mem->lock);
+#endif
 
 		if (dch_remove(a_mem->addr_hash, a_ptr, NULL,
 			(void **)&allocation, NULL)) {
@@ -338,7 +358,9 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, const char *a_filename, cw_uint32_t
 	_cw_free(a_ptr);
 
 #ifdef _CW_MEM_ERROR
+#ifdef _CW_THREADS
 	if (a_mem != NULL)
 		mtx_unlock(&a_mem->lock);
+#endif
 #endif
 }

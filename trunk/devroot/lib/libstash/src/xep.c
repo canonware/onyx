@@ -14,14 +14,22 @@
 #ifdef _CW_DBG
 static cw_bool_t cw_g_xep_initialized = FALSE;
 #endif
+#ifdef _CW_THREADS
 static cw_tsd_t	cw_g_xep_key;
+#else
+static cw_xep_t *cw_g_xep_first;
+#endif
 
 void
 xep_l_init(void)
 {
 	_cw_assert(cw_g_xep_initialized == FALSE);
 
+#ifdef _CW_THREADS
 	tsd_new(&cw_g_xep_key, NULL);
+#else
+	cw_g_xep_first = NULL;
+#endif
 #ifdef _CW_DBG
 	cw_g_xep_initialized = TRUE;
 #endif
@@ -32,7 +40,9 @@ xep_l_shutdown(void)
 {
 	_cw_assert(cw_g_xep_initialized);
 
+#ifdef _CW_THREADS
 	tsd_delete(&cw_g_xep_key);
+#endif
 #ifdef _CW_DBG
 	cw_g_xep_initialized = FALSE;
 #endif
@@ -50,7 +60,11 @@ xep_throw_e(cw_xepv_t a_value, const char *a_filename, cw_uint32_t a_line_num)
 	 * Iterate backward through the exception handlers until the exception
 	 * is handled or there are no more exception handlers.
 	 */
+#ifdef _CW_THREADS
 	xep = xep_first = (cw_xep_t *)tsd_get(&cw_g_xep_key);
+#else
+	xep = xep_first = cw_g_xep_first;
+#endif
 	if (xep_first != NULL)
 		xep = qr_prev(xep_first, link);
 	else {
@@ -103,7 +117,11 @@ xep_retry(void)
 
 	_cw_assert(cw_g_xep_initialized);
 
+#ifdef _CW_THREADS
 	xep = qr_prev((cw_xep_t *)tsd_get(&cw_g_xep_key), link);
+#else
+	xep = qr_prev(cw_g_xep_first, link);
+#endif
 #ifdef _CW_DBG
 	switch (xep->state) {
 	case _CW_XEPS_CATCH:
@@ -129,7 +147,11 @@ xep_handled(void)
 
 	_cw_assert(cw_g_xep_initialized);
 
+#ifdef _CW_THREADS
 	xep = qr_prev((cw_xep_t *)tsd_get(&cw_g_xep_key), link);
+#else
+	xep = qr_prev(cw_g_xep_first, link);
+#endif
 #ifdef _CW_DBG
 	switch (xep->state) {
 	case _CW_XEPS_CATCH:
@@ -154,14 +176,23 @@ xep_p_link(cw_xep_t *a_xep)
 
 	_cw_assert(cw_g_xep_initialized);
 
+#ifdef _CW_THREADS
 	xep_first = (cw_xep_t *)tsd_get(&cw_g_xep_key);
+#else
+	xep_first = cw_g_xep_first;
+#endif
 
 	/* Link into the xep ring, if it exists. */
 	qr_new(a_xep, link);
 	if (xep_first != NULL)
 		qr_before_insert(xep_first, a_xep, link);
-	else
+	else {
+#ifdef _CW_THREADS
 		tsd_set(&cw_g_xep_key, (void *)a_xep);
+#else
+		cw_g_xep_first = a_xep;
+#endif
+	}
 
 	a_xep->value = _CW_XEPV_NONE;
 	a_xep->state = _CW_XEPS_TRY;
@@ -175,7 +206,11 @@ xep_p_unlink(cw_xep_t *a_xep)
 
 	_cw_assert(cw_g_xep_initialized);
 
+#ifdef _CW_THREADS
 	xep_first = (cw_xep_t *)tsd_get(&cw_g_xep_key);
+#else
+	xep_first = cw_g_xep_first;
+#endif
 
 	switch (a_xep->state) {
 	case _CW_XEPS_TRY:	/* No exception. */
@@ -187,8 +222,13 @@ xep_p_unlink(cw_xep_t *a_xep)
 		/* Remove handler from ring. */
 		if (a_xep != xep_first)
 			qr_remove(a_xep, link);
-		else
+		else {
+#ifdef _CW_THREADS
 			tsd_set(&cw_g_xep_key, NULL);
+#else
+			cw_g_xep_first = NULL;
+#endif
+		}
 
 		if (a_xep->is_handled == FALSE) {
 			if (a_xep != xep_first) {

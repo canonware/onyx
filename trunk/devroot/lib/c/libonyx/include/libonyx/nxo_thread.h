@@ -60,6 +60,7 @@ struct cw_nxoe_thread_s {
 	 */
 	cw_nxo_t	self;
 
+#ifdef _CW_THREADS
 	/*
 	 * Used by nxo_thread_thread(), nxo_thread_detach(), and
 	 * nxo_thread_join().
@@ -72,18 +73,21 @@ struct cw_nxoe_thread_s {
 	cw_bool_t	gone:1;
 	cw_bool_t	detached:1;
 	cw_bool_t	joined:1;
+#endif
 
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */
 	cw_uint32_t	ref_iter;
 
+#ifdef _CW_THREADS
 	/*
 	 * TRUE  : New array, dict, file, and string objects are implicitly
 	 *         locked.
 	 * FALSE : No implicit locking for new objects.
 	 */
 	cw_bool_t	locking:1;
+#endif
 
 	/*
 	 * Stacks.
@@ -178,9 +182,11 @@ void	nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx);
 void	nxo_thread_start(cw_nxo_t *a_nxo);
 void	nxo_thread_exit(cw_nxo_t *a_nxo);
 
+#ifdef _CW_THREADS
 void	nxo_thread_thread(cw_nxo_t *a_nxo);
 void	nxo_thread_detach(cw_nxo_t *a_nxo);
 void	nxo_thread_join(cw_nxo_t *a_nxo);
+#endif
 
 cw_nxo_threadts_t nxo_thread_state(cw_nxo_t *a_nxo);
 cw_bool_t nxo_thread_deferred(cw_nxo_t *a_nxo);
@@ -196,8 +202,12 @@ void	nxo_thread_error(cw_nxo_t *a_nxo, cw_nxo_threade_t a_threade);
 cw_bool_t nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t
     *r_value);
 
+#ifdef _CW_THREADS
 cw_bool_t nxo_thread_currentlocking(cw_nxo_t *a_nxo);
 void	nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking);
+#else
+#define	nxo_thread_currentlocking(a_nxo)	FALSE
+#endif
 
 #ifndef _CW_USE_INLINES
 cw_nx_t *nxo_thread_nx_get(cw_nxo_t *a_nxo);

@@ -18,6 +18,7 @@
 #include "../include/libonyx/nxo_l.h"
 #include "../include/libonyx/nxo_string_l.h"
 
+#ifdef _CW_THREADS
 #define		nxoe_p_string_lock(a_nxoe) do {			\
 	if ((a_nxoe)->nxoe.locking && !(a_nxoe)->nxoe.indirect)	\
 		mtx_lock(&(a_nxoe)->lock);				\
@@ -26,6 +27,7 @@
 	if ((a_nxoe)->nxoe.locking && !(a_nxoe)->nxoe.indirect)	\
 		mtx_unlock(&(a_nxoe)->lock);				\
 } while (0)
+#endif
 
 void
 nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
@@ -38,8 +40,10 @@ nxo_string_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	string = (cw_nxoe_string_t *)nxa_malloc(nxa, sizeof(cw_nxoe_string_t));
 
 	nxoe_l_new(&string->nxoe, NXOT_STRING, a_locking);
+#ifdef _CW_THREADS
 	if (a_locking)
 		mtx_new(&string->lock);
+#endif
 	string->e.s.len = a_len;
 	if (string->e.s.len > 0) {
 		string->e.s.str = (cw_uint8_t *)nxa_malloc(nxa,
@@ -104,8 +108,10 @@ nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	if (string->nxoe.indirect == FALSE && string->e.s.len > 0)
 		_CW_FREE(string->e.s.str);
 
+#ifdef _CW_THREADS
 	if (string->nxoe.locking && string->nxoe.indirect == FALSE)
 		mtx_delete(&string->lock);
+#endif
 
 	_CW_NXOE_FREE(string);
 }
@@ -184,10 +190,14 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	_cw_assert(len_fr <= len_to);
 
 	/* Copy bytes. */
+#ifdef _CW_THREADS
 	nxoe_p_string_lock(string_fr_l);
 	nxoe_p_string_lock(string_to_l);
+#endif
 	memcpy(str_to, str_fr, len_fr);
+#ifdef _CW_THREADS
 	nxoe_p_string_unlock(string_fr_l);
+#endif
 
 	/*
 	 * Truncate the destination string if it is shorter than the source
@@ -199,7 +209,9 @@ nxo_string_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 		else
 			string_to->e.s.len = len_fr;
 	}
+#ifdef _CW_THREADS
 	nxoe_p_string_unlock(string_to_l);
+#endif
 }
 
 cw_uint32_t
@@ -274,6 +286,7 @@ nxo_string_el_set(cw_nxo_t *a_nxo, cw_uint8_t a_el, cw_nxoi_t a_offset)
 	}
 }
 
+#ifdef _CW_THREADS
 void
 nxo_string_lock(cw_nxo_t *a_nxo)
 {
@@ -315,6 +328,7 @@ nxo_string_unlock(cw_nxo_t *a_nxo)
 	else
 		nxo_string_unlock(&string->e.i.nxo);
 }
+#endif
 
 cw_uint8_t *
 nxo_string_get(cw_nxo_t *a_nxo)

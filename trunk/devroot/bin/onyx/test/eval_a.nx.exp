@@ -5,9 +5,6 @@ Test begin
 `true'
 true
 true
-`condition'
--condition-
--condition-
 `</foo \`foo\'>'
 </foo `foo'>
 </foo `foo'>
@@ -17,9 +14,6 @@ true
 `mark'
 -mark-
 -mark-
-`mutex'
--mutex-
--mutex-
 `/count'
 /count
 0

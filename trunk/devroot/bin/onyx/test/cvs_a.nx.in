@@ -21,12 +21,10 @@
 	`//pop'
 	``foo''
 	`[]'
-	`condition'
 	`<>'
 	`stdin'
 	`('
 	`mark'
-	`mutex'
 	`null'
 	`()'
 	

@@ -21,8 +21,38 @@ bins=
 mods=
 libs=
 
+dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
+dnl Otherwise, just prevent autoconf from molesting CFLAGS.
+CFLAGS=$CFLAGS
+AC_PROG_CC
+if test "x$CFLAGS" = "x" -a "x$GCC" = "xyes" ; then
+	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+fi
+AC_PROG_CPP
+
+dnl Use threads by default.
+CW_ENABLE_THREADS
+
+dnl Enable inline functions by default.
+CW_ENABLE_INLINES
+
 dnl Use libedit by default.
-CW_USE_LIBEDIT
+CW_ENABLE_LIBEDIT
+
+dnl Do not compile with debugging by default.
+CW_DISABLE_DEBUG
+
+dnl Do not compile with profiling by default.
+CW_DISABLE_PROFILE
+
+dnl Only optimize if not debugging.
+if test "x$enable_debug" = "x0" ; then
+	CFLAGS="$CFLAGS -O"
+fi
+
+if test "x$enable_profile" = "x1" ; then
+	CFLAGS="$CFLAGS -pg"
+fi
 
 dnl Look for libraries.  Order matters.  They should appear in an order that
 dnl works on the link line (-lonyx -ledit -lstash).
@@ -33,9 +63,11 @@ fi
 CW_BUILD_LIB(libstash, lib_stash)
 
 dnl Look for modules.
-CW_BUILD_MOD(modcanonyx, mod_canonyx)
-CW_BUILD_MOD(modgtk, mod_gtk)
-CW_BUILD_MOD(modncurses, mod_ncurses)
+if test "x$enable_threads" = "x1" ; then
+  CW_BUILD_MOD(modcanonyx, mod_canonyx)
+  CW_BUILD_MOD(modgtk, mod_gtk)
+  CW_BUILD_MOD(modncurses, mod_ncurses)
+fi
 
 dnl Look for binaries.
 CW_BUILD_BIN(cover, bin_cover)
@@ -61,22 +93,14 @@ case "${host}" in
 	AC_DEFINE(_CW_OS_SOLARIS, )
 	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
 	RPATH="-Wl,-R,"
-	LIBS="$LIBS -lposix4 -lthread"
+	LIBS="$LIBS -lposix4"
+	if test "x$enable_threads" = "x1" ; then
+		LIBS="$LIBS -lthread"
+	fi
         ;;
 esac
 AC_SUBST(RPATH)
 
-dnl Check for programs.
-
-dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
-dnl Otherwise, just prevent autoconf from molesting CFLAGS.
-CFLAGS=$CFLAGS
-AC_PROG_CC
-if test "x$CFLAGS" = "x" -a "x$GCC" = "xyes" ; then
-	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
-fi
-
-AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AC_PATH_PROG(AR, ar, , $PATH)
@@ -108,11 +132,6 @@ if test "x$enable_libedit" = "x1" ; then
       AC_MSG_ERROR(Cannot find the curses library))
   fi
 fi
-
-CW_USE_PTHREADS()
-
-dnl Enable inline functions by default.
-CW_ENABLE_INLINES()
 
 dnl Define preprocessor macros.
 
@@ -194,23 +213,6 @@ if test "x$build_modgtk" = "xyes" ; then
   AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
 fi
 
-dnl Set CFLAGS.
-
-dnl Do not compile with debugging by default.
-CW_DISABLE_DEBUG()
-
-dnl Do not compile with profiling by default.
-CW_DISABLE_PROFILE()
-
-dnl Only optimize if not debugging.
-if test "x$enable_debug" = "x0" ; then
-	CFLAGS="$CFLAGS -O"
-fi
-
-if test "x$enable_profile" = "x1" ; then
-	CFLAGS="$CFLAGS -pg"
-fi
-
 dnl 
 dnl Print out the results of configuration.
 dnl 
@@ -230,10 +232,11 @@ AC_MSG_RESULT(libs         :${libs})
 AC_MSG_RESULT(mods         :${mods})
 AC_MSG_RESULT(bins         :${bins})
 AC_MSG_RESULT()
-AC_MSG_RESULT(debug        : ${enable_debug})
-AC_MSG_RESULT(profile      : ${enable_profile})
+AC_MSG_RESULT(threads      : ${enable_threads})
 AC_MSG_RESULT(inlines      : ${enable_inlines})
 AC_MSG_RESULT(libedit      : ${enable_libedit})
+AC_MSG_RESULT(debug        : ${enable_debug})
+AC_MSG_RESULT(profile      : ${enable_profile})
 AC_MSG_RESULT(===============================================================================)
 
 dnl Create additional directories that processed files will land in.

@@ -15,11 +15,9 @@
 [
 	`[1]'
 	`true'
-	`condition'
 	`</foo `foo'>'
 	`42'
 	`mark'
-	`mutex'
 	`/count'
 	`//count'
 	`(1)'

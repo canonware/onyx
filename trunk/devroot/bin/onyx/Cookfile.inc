@@ -94,23 +94,22 @@ SRCS = [SRCS] [ONYX_SRCS];
                  loop_a.nx.in loop_b.nx.in lt_a.nx.in lt_b.nx.in lt_c.nx.in
                  lt_d.nx.in lt_e.nx.in lt_f.nx.in lt_g.nx.in lt_h.nx.in
                  mark_a.nx.in mod_a.nx.in mod_b.nx.in mod_c.nx.in mod_d.nx.in
-                 mod_e.nx.in monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
-                 mul_a.nx.in mul_b.nx.in mul_c.nx.in mul_d.nx.in ndup_a.nx.in
-                 ndup_b.nx.in ndup_c.nx.in ndup_d.nx.in ndup_e.nx.in ne_a.nx.in
-                 ne_b.nx.in neg_a.nx.in neg_b.nx.in neg_c.nx.in not_a.nx.in
-                 not_b.nx.in not_c.nx.in npop_a.nx.in npop_b.nx.in npop_c.nx.in
-                 npop_d.nx.in npop_e.nx.in nsleep_a.nx.in nsleep_b.nx.in
-                 nsleep_c.nx.in nsleep_d.nx.in or_a.nx.in or_b.nx.in or_c.nx.in
-                 or_d.nx.in or_e.nx.in or_f.nx.in output_a.nx.in pop_a.nx.in
-                 pop_b.nx.in put_a.nx.in put_b.nx.in put_c.nx.in put_d.nx.in
-                 put_e.nx.in put_f.nx.in put_g.nx.in put_h.nx.in
-                 putinterval_a.nx.in putinterval_b.nx.in putinterval_c.nx.in
-                 putinterval_d.nx.in putinterval_e.nx.in putinterval_f.nx.in
-                 putinterval_g.nx.in putinterval_h.nx.in putinterval_i.nx.in
-                 rand_a.nx.in repeat_a.nx.in repeat_b.nx.in repeat_c.nx.in
-                 repeat_d.nx.in roll_a.nx.in roll_b.nx.in roll_c.nx.in
-                 roll_d.nx.in roll_e.nx.in roll_f.nx.in roll_g.nx.in
-                 sclear_a.nx.in sclear_b.nx.in sclear_c.nx.in
+                 mod_e.nx.in mul_a.nx.in mul_b.nx.in mul_c.nx.in mul_d.nx.in
+                 ndup_a.nx.in ndup_b.nx.in ndup_c.nx.in ndup_d.nx.in
+                 ndup_e.nx.in ne_a.nx.in ne_b.nx.in neg_a.nx.in neg_b.nx.in
+                 neg_c.nx.in not_a.nx.in not_b.nx.in not_c.nx.in npop_a.nx.in
+                 npop_b.nx.in npop_c.nx.in npop_d.nx.in npop_e.nx.in
+                 nsleep_a.nx.in nsleep_b.nx.in nsleep_c.nx.in nsleep_d.nx.in
+                 or_a.nx.in or_b.nx.in or_c.nx.in or_d.nx.in or_e.nx.in
+                 or_f.nx.in output_a.nx.in pop_a.nx.in pop_b.nx.in put_a.nx.in
+                 put_b.nx.in put_c.nx.in put_d.nx.in put_e.nx.in put_f.nx.in
+                 put_g.nx.in put_h.nx.in putinterval_a.nx.in putinterval_b.nx.in
+                 putinterval_c.nx.in putinterval_d.nx.in putinterval_e.nx.in
+                 putinterval_f.nx.in putinterval_g.nx.in putinterval_h.nx.in
+                 putinterval_i.nx.in rand_a.nx.in repeat_a.nx.in repeat_b.nx.in
+                 repeat_c.nx.in repeat_d.nx.in roll_a.nx.in roll_b.nx.in
+                 roll_c.nx.in roll_d.nx.in roll_e.nx.in roll_f.nx.in
+                 roll_g.nx.in sclear_a.nx.in sclear_b.nx.in sclear_c.nx.in
                  scleartomark_a.nx.in scleartomark_b.nx.in scleartomark_c.nx.in
                  scleartomark_d.nx.in scount_a.nx.in scount_b.nx.in
                  scount_c.nx.in scounttomark_a.nx.in scounttomark_b.nx.in
@@ -141,7 +140,12 @@ SRCS = [SRCS] [ONYX_SRCS];
                  undef_a.nx.in undef_b.nx.in undef_c.nx.in unsetenv_a.nx.in
                  unsetenv_b.nx.in where_a.nx.in where_b.nx.in xcheck_a.nx.in
                  xcheck_b.nx.in xor_a.nx.in xor_b.nx.in xor_c.nx.in xor_d.nx.in
-                 xor_e.nx.in xor_f.nx.in;
+                 xor_e.nx.in xor_f.nx.in
+
+#if [enable_threads]
+                 monitor_a.nx.in monitor_b.nx.in monitor_c.nx.in
+#endif
+                 ;
 
   otests = [fromto % [srcdir]/bin/onyx/test/% [otests]];
 

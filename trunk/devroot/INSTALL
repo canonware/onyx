@@ -89,6 +89,12 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	will cause files to be installed into /usr/local/bin, /usr/local/man,
 	/usr/local/include, and /usr/local/lib.
 
+--disable-threads
+	Do not support threads.  This option is incompatible with the libedit
+	option, so implies --disable-libedit.  Specifying this option disables
+	significant functionality.  The documentation does not mention the
+	effects of this option -- UTSL.
+
 --disable-inlines
 	Do not use inline functions.  This reduces the size of binaries at the
 	expense of performance.
@@ -97,7 +103,8 @@ Optionally, pass any of the following (not a definitive list) arguments to
 	Do not use the libedit library for interactive command line editing.
 	This reduces the size of the onyx binary, at the expense of the command
 	line editing functionality.  If the onyx binary is rarely used
-	interactively, using this option may make sense.
+	interactively, using this option may make sense.  The documentation does
+	not mention the effects of this option.
 
 --enable-debug
 	Build debugging code and turn assertions on (controlled by the

@@ -13,7 +13,9 @@
 cw_nxoe_t *nx_l_ref_iter(cw_nx_t *a_nx, cw_bool_t a_reset);
 void	nx_l_thread_insert(cw_nx_t *a_nx, cw_nxo_t *a_thread);
 void	nx_l_thread_remove(cw_nx_t *a_nx, cw_nxo_t *a_thread);
+#ifdef _CW_THREADS
 cw_mtx_t *nx_l_name_lock_get(cw_nx_t *a_nx);
+#endif
 cw_dch_t *nx_l_name_hash_get(cw_nx_t *a_nx);
 cw_op_t *nx_l_thread_init(cw_nx_t *a_nx);
 #endif
@@ -98,6 +100,7 @@ nx_l_thread_remove(cw_nx_t *a_nx, cw_nxo_t *a_thread)
 	nxo_dict_undef(&a_nx->threadsdict, a_nx, a_thread);
 }
 
+#ifdef _CW_THREADS
 _CW_INLINE cw_mtx_t *
 nx_l_name_lock_get(cw_nx_t *a_nx)
 {
@@ -106,6 +109,7 @@ nx_l_name_lock_get(cw_nx_t *a_nx)
 
 	return &a_nx->name_lock;
 }
+#endif
 
 _CW_INLINE cw_dch_t *
 nx_l_name_hash_get(cw_nx_t *a_nx)

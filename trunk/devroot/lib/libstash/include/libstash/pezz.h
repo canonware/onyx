@@ -29,7 +29,9 @@ struct cw_pezz_s {
 #ifdef _CW_PEZZ_ERROR
 	cw_dch_t	addr_hash;
 #endif
+#ifdef _CW_THREADS
 	cw_mtx_t	lock;
+#endif
 
 	/* Size of one buffer, from the user's perspective. */
 	cw_uint32_t	buffer_size;

@@ -17,12 +17,10 @@
 [
 	`true'
 	`[]'
-	`condition'
 	`<>'
 	`('
 	`1'
 	`mark'
-	`mutex'
 	`/foo'
 	`null'
 	`//pop'

@@ -17,10 +17,12 @@ struct cw_nxoe_dicto_s {
 
 struct cw_nxoe_dict_s {
 	cw_nxoe_t	nxoe;
+#ifdef _CW_THREADS
 	/*
 	 * Access is locked if this object has the locking bit set.
 	 */
 	cw_mtx_t	lock;
+#endif
 	/*
 	 * Used for remembering the current state of reference iteration.
 	 */

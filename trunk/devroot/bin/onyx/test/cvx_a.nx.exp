@@ -5,8 +5,6 @@ true
 true
 `true'
 true
-`condition'
-true
 `</foo \`foo\' /bar \`bar\'>'
 true
 `stdin'
@@ -16,8 +14,6 @@ true
 `42'
 true
 `mark'
-true
-`mutex'
 true
 `/foo'
 true

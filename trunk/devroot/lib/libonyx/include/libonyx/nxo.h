@@ -44,14 +44,18 @@ typedef enum {
 	NXOT_NO,
 	NXOT_ARRAY,
 	NXOT_BOOLEAN,
+#ifdef _CW_THREADS
 	NXOT_CONDITION,
+#endif
 	NXOT_DICT,
 	NXOT_FILE,
 	NXOT_FINO,
 	NXOT_HOOK,
 	NXOT_INTEGER,
 	NXOT_MARK,
+#ifdef _CW_THREADS
 	NXOT_MUTEX,
+#endif
 	NXOT_NAME,
 	NXOT_NULL,
 	NXOT_OPERATOR,
@@ -161,11 +165,13 @@ struct cw_nxoe_s {
 	 * but not be registered yet.
 	 */
 	cw_bool_t	registered:1;
+#ifdef _CW_THREADS
 	/*
 	 * If true, accesses to this object are locked.  This applies to arrays,
 	 * dictionaries, files, and strings.
 	 */
 	cw_bool_t	locking:1;
+#endif
 	/*
 	 * If TRUE, this nxoe is a reference to another nxoe.
 	 */
@@ -174,7 +180,9 @@ struct cw_nxoe_s {
 
 cw_sint32_t nxo_compare(cw_nxo_t *a_a, cw_nxo_t *a_b);
 cw_nxoe_t *nxo_nxoe_get(cw_nxo_t *a_nxo);
+#ifdef _CW_THREADS
 cw_bool_t nxo_lcheck(cw_nxo_t *a_nxo);
+#endif
 
 #ifndef _CW_USE_INLINES
 void	nxo_dup(cw_nxo_t *a_to, cw_nxo_t *a_from);

@@ -26,7 +26,9 @@ struct cw_bhp_s {
 	cw_mem_t	*mem;
 	cw_bool_t	is_malloced;
 	cw_bool_t	is_thread_safe;
+#ifdef _CW_THREADS
 	cw_mtx_t	lock;
+#endif
 	cw_bhpi_t	*head;
 	cw_uint64_t	num_nodes;
 	bhp_prio_comp_t	*priority_compare;
@@ -62,8 +64,10 @@ void		bhpi_delete(cw_bhpi_t *a_bhpi);
 
 cw_bhp_t	*bhp_new(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
     *a_prio_comp);
+#ifdef _CW_THREADS
 cw_bhp_t	*bhp_new_r(cw_bhp_t *a_bhp, cw_mem_t *a_mem, bhp_prio_comp_t
     *a_prio_comp);
+#endif
 void		bhp_delete(cw_bhp_t *a_bhp);
 void		bhp_dump(cw_bhp_t *a_bhp);
 void		bhp_insert(cw_bhp_t *a_bhp, cw_bhpi_t *a_bhpi);

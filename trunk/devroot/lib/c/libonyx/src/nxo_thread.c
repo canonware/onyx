@@ -74,7 +74,9 @@ nxo_threade_nxn(cw_nxo_threade_t a_threade)
 #define _CW_NXO_THREAD_NEWLINE()					\
 		newline = 1
 
+#ifdef _CW_THREADS
 static void	*nxo_p_thread_entry(void *a_arg);
+#endif
 static cw_uint32_t nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread,
     cw_nxo_threadp_t *a_threadp, cw_bool_t a_token, const cw_uint8_t *a_str,
     cw_uint32_t a_len);
@@ -380,6 +382,7 @@ nxo_thread_exit(cw_nxo_t *a_nxo)
 	nx_l_thread_remove(nxo_thread_nx_get(a_nxo), a_nxo);
 }
 
+#ifdef _CW_THREADS
 static void *
 nxo_p_thread_entry(void *a_arg)
 {
@@ -492,6 +495,7 @@ nxo_thread_join(cw_nxo_t *a_nxo)
 
 	nx_l_thread_remove(nxo_thread_nx_get(a_nxo), a_nxo);
 }
+#endif
 
 cw_nxo_threadts_t
 nxo_thread_state(cw_nxo_t *a_nxo)
@@ -594,12 +598,16 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 
 		switch (nxo_type_get(nxo)) {
 		case NXOT_BOOLEAN:
+#ifdef _CW_THREADS
 		case NXOT_CONDITION:
+#endif
 		case NXOT_DICT:
 		case NXOT_FINO:
 		case NXOT_INTEGER:
 		case NXOT_MARK:
+#ifdef _CW_THREADS
 		case NXOT_MUTEX:
+#endif
 		case NXOT_PMARK:
 		case NXOT_STACK:
 		case NXOT_THREAD:
@@ -756,10 +764,14 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			 * Use the string as a source of code.
 			 */
 			nxo_threadp_new(&threadp);
+#ifdef _CW_THREADS
 			nxo_string_lock(nxo);
+#endif
 			nxo_thread_interpret(a_nxo, &threadp,
 			    nxo_string_get(nxo), nxo_string_len_get(nxo));
+#ifdef _CW_THREADS
 			nxo_string_unlock(nxo);
+#endif
 			nxo_thread_flush(a_nxo, &threadp);
 			nxo_threadp_delete(&threadp, a_nxo);
 			nxo_stack_pop(&thread->estack);
@@ -967,6 +979,7 @@ nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value)
 	return retval;
 }
 
+#ifdef _CW_THREADS
 cw_bool_t
 nxo_thread_currentlocking(cw_nxo_t *a_nxo)
 {
@@ -996,6 +1009,7 @@ nxo_thread_setlocking(cw_nxo_t *a_nxo, cw_bool_t a_locking)
 
 	thread->locking = a_locking;
 }
+#endif
 
 cw_uint32_t
 nxo_l_thread_token(cw_nxo_t *a_nxo, cw_nxo_threadp_t *a_threadp, const
@@ -1397,8 +1411,13 @@ nxoe_p_thread_feed(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t *a_threadp,
 				if (a_thread->m.s.q_depth == 0) {
 					token = TRUE;
 					nxo = nxo_stack_push(&a_thread->ostack);
+#ifdef _CW_THREADS
 					nxo_string_new(nxo, a_thread->nx,
 					    a_thread->locking, a_thread->index);
+#else
+					nxo_string_new(nxo, a_thread->nx, FALSE,
+					    a_thread->index);
+#endif
 					nxo_string_set(nxo, 0,
 					    a_thread->tok_str, a_thread->index);
 
@@ -1676,8 +1695,13 @@ nxoe_p_thread_syntax_error(cw_nxoe_thread_t *a_thread, cw_nxo_threadp_t
 
 	nxo = nxo_stack_push(&a_thread->ostack);
 
+#ifdef _CW_THREADS
 	nxo_string_new(nxo, a_thread->nx, a_thread->locking, strlen(a_prefix) +
 	    a_thread->index + strlen(a_suffix) + ((a_c >= 0) ? 1 : 0));
+#else
+	nxo_string_new(nxo, a_thread->nx, FALSE, strlen(a_prefix) +
+	    a_thread->index + strlen(a_suffix) + ((a_c >= 0) ? 1 : 0));
+#endif
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
 	/* Prefix. */
@@ -1864,7 +1888,11 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 	nelements = i;
 
 	tnxo = nxo_stack_push(&a_thread->tstack);
+#ifdef _CW_THREADS
 	nxo_array_new(tnxo, a_thread->nx, a_thread->locking, nelements);
+#else
+	nxo_array_new(tnxo, a_thread->nx, FALSE, nelements);
+#endif
 	nxo_attr_set(tnxo, NXOA_EXECUTABLE);
 
 	/*

@@ -84,20 +84,26 @@
 #include "../include/libonyx/nxo_stack_l.h"
 #include "../include/libonyx/nxo_thread_l.h"
 
+#ifdef _CW_THREADS
 static void *nxa_p_gc_entry(void *a_arg);
+#endif
 
 void
 nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 {
+#ifdef _CW_THREADS
 	sigset_t		sig_mask, old_mask;
+#endif
 	volatile cw_uint32_t	try_stage = 0;
 
 	xep_begin();
 	xep_try {
 		a_nxa->nx = a_nx;
 
+#ifdef _CW_THREADS
 		mtx_new(&a_nxa->lock);
 		try_stage = 1;
+#endif
 
 		a_nxa->chi_sizeof = sizeof(cw_chi_t);
 		pool_new(&a_nxa->chi_pool, NULL, sizeof(cw_chi_t));
@@ -111,12 +117,16 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		pool_new(&a_nxa->stacko_pool, NULL, sizeof(cw_nxoe_stacko_t));
 		try_stage = 4;
 
+#ifdef _CW_THREADS
 		mtx_new(&a_nxa->seq_mtx);
+#endif
 		ql_new(&a_nxa->seq_set);
 		a_nxa->white = FALSE;
 		try_stage = 5;
 
+#ifdef _CW_THREADS
 		mq_new(&a_nxa->gc_mq, NULL, sizeof(cw_nxam_t));
+#endif
 		a_nxa->gc_pending = FALSE;
 		try_stage = 6;
 
@@ -128,13 +138,16 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		 * Initialize gcdict state.
 		 */
 		a_nxa->gcdict_active = FALSE;
+#ifdef _CW_THREADS
 		a_nxa->gcdict_period = _CW_LIBONYX_GCDICT_PERIOD;
+#endif
 		a_nxa->gcdict_threshold = _CW_LIBONYX_GCDICT_THRESHOLD;
 		a_nxa->gcdict_new = 0;
 		memset(a_nxa->gcdict_current, 0, sizeof(cw_nxoi_t) * 2);
 		memset(a_nxa->gcdict_maximum, 0, sizeof(cw_nxoi_t) * 2);
 		memset(a_nxa->gcdict_sum, 0, sizeof(cw_nxoi_t) * 2);
 
+#ifdef _CW_THREADS
 		/*
 		 * Block all signals during thread creation, so that the GC
 		 * thread does not receive any signals.  Doing this here rather
@@ -146,22 +159,29 @@ nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx)
 		a_nxa->gc_thd = thd_new(nxa_p_gc_entry, (void *)a_nxa, FALSE);
 		thd_sigmask(SIG_SETMASK, &old_mask, NULL);
 		try_stage = 7;
+#endif
 	}
 	xep_catch(_CW_STASHX_OOM) {
 		switch (try_stage) {
 		case 7:
 		case 6:
+#ifdef _CW_THREADS
 			mq_delete(&a_nxa->gc_mq);
+#endif
 		case 5:
+#ifdef _CW_THREADS
 			mtx_delete(&a_nxa->seq_mtx);
+#endif
 		case 4:
 			pool_delete(&a_nxa->stacko_pool);
 		case 3:
 			pool_delete(&a_nxa->dicto_pool);
 		case 2:
 			pool_delete(&a_nxa->chi_pool);
+#ifdef _CW_THREADS
 		case 1:
 			mtx_delete(&a_nxa->lock);
+#endif
 			break;
 		default:
 			_cw_not_reached();
@@ -176,18 +196,24 @@ nxa_delete(cw_nxa_t *a_nxa)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mq_put(&a_nxa->gc_mq, NXAM_SHUTDOWN);
 
 	thd_join(a_nxa->gc_thd);
 	mq_delete(&a_nxa->gc_mq);
 
 	mtx_delete(&a_nxa->seq_mtx);
+#else
+	nxa_p_collect(a_nxa);
+#endif
 
 	pool_delete(&a_nxa->stacko_pool);
 	pool_delete(&a_nxa->dicto_pool);
 	pool_delete(&a_nxa->chi_pool);
 
+#ifdef _CW_THREADS
 	mtx_delete(&a_nxa->lock);
+#endif
 }
 
 void *
@@ -197,7 +223,9 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 
 	/* Update new. */
 	a_nxa->gcdict_new += (cw_nxoi_t)a_size;
@@ -207,10 +235,17 @@ nxa_malloc_e(cw_nxa_t *a_nxa, size_t a_size, const char *a_filename, cw_uint32_t
 	    a_nxa->gcdict_active && a_nxa->gcdict_threshold != 0) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
+#ifdef _CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+#else
+			if (a_nxa->gcdict_active)
+				nxa_p_collect(a_nxa);
+#endif
 		}
 	}
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 
 	return mem_malloc_e(cw_g_mem, a_size, a_filename, a_line_num);
 }
@@ -231,12 +266,21 @@ nxa_collect(cw_nxa_t *a_nxa)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 	if (a_nxa->gc_pending == FALSE) {
 		a_nxa->gc_pending = TRUE;
+#ifdef _CW_THREADS
 		mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+#else
+		if (a_nxa->gcdict_active)
+			nxa_p_collect(a_nxa);
+#endif
 	}
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 }
 
 cw_bool_t
@@ -247,9 +291,13 @@ nxa_active_get(cw_nxa_t *a_nxa)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 	retval = a_nxa->gcdict_active;
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 
 	return retval;
 }
@@ -260,21 +308,32 @@ nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 	a_nxa->gcdict_active = a_active;
 	if (a_active && a_nxa->gcdict_threshold > 0 && a_nxa->gcdict_threshold
 	    <= a_nxa->gcdict_new) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
+#ifdef _CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+#else
+			if (a_nxa->gcdict_active)
+				nxa_p_collect(a_nxa);
+#endif
 		}
-	} else {
+	}
+#ifdef _CW_THREADS
+	else {
 		if (a_nxa->gc_pending == FALSE)
 			mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
 	}
 	mtx_unlock(&a_nxa->lock);
+#endif
 }
 
+#ifdef _CW_THREADS
 cw_nxoi_t
 nxa_period_get(cw_nxa_t *a_nxa)
 {
@@ -302,6 +361,7 @@ nxa_period_set(cw_nxa_t *a_nxa, cw_nxoi_t a_period)
 	mq_put(&a_nxa->gc_mq, NXAM_RECONFIGURE);
 	mtx_unlock(&a_nxa->lock);
 }
+#endif
 
 cw_nxoi_t
 nxa_threshold_get(cw_nxa_t *a_nxa)
@@ -311,9 +371,13 @@ nxa_threshold_get(cw_nxa_t *a_nxa)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 	retval = a_nxa->gcdict_threshold;
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 
 	return retval;
 }
@@ -325,16 +389,25 @@ nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold)
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 	_cw_assert(a_threshold >= 0);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 	a_nxa->gcdict_threshold = a_threshold;
 	if (a_threshold > 0 && a_threshold <= a_nxa->gcdict_new &&
 	    a_nxa->gcdict_active) {
 		if (a_nxa->gc_pending == FALSE) {
 			a_nxa->gc_pending = TRUE;
+#ifdef _CW_THREADS
 			mq_put(&a_nxa->gc_mq, NXAM_COLLECT);
+#else
+			if (a_nxa->gcdict_active)
+				nxa_p_collect(a_nxa);
+#endif
 		}
 	}
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 }
 
 void
@@ -345,7 +418,9 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 	
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 
 	/* collections. */
 	if (r_collections != NULL)
@@ -373,7 +448,9 @@ nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t *r_new,
 	if (r_ssweep != NULL)
 		*r_ssweep = a_nxa->gcdict_sum[1];
 
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 }
 
 void
@@ -382,7 +459,9 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	_cw_check_ptr(a_nxa);
 	_cw_dassert(a_nxa->magic == _CW_NXA_MAGIC);
 
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->seq_mtx);
+#endif
 	_cw_assert(nxoe_l_registered_get(a_nxoe) == FALSE);
 	_cw_assert(qr_next(a_nxoe, link) == a_nxoe);
 	_cw_assert(qr_prev(a_nxoe, link) == a_nxoe);
@@ -395,7 +474,9 @@ nxa_l_gc_register(cw_nxa_t *a_nxa, cw_nxoe_t *a_nxoe)
 	nxoe_l_registered_set(a_nxoe, TRUE);
 	ql_tail_insert(&a_nxa->seq_set, a_nxoe, link);
 
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->seq_mtx);
+#endif
 }
 
 cw_bool_t
@@ -563,6 +644,9 @@ nxa_p_sweep(cw_nxoe_t *a_garbage, cw_nx_t *a_nx)
  * Collect garbage using a Baker's Treadmill.  a_nxa->lock is held upon entry
  * into this function.
  */
+#ifdef _CW_THREADS
+static
+#endif
 void
 nxa_p_collect(cw_nxa_t *a_nxa)
 {
@@ -583,7 +667,9 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	 * sections.  We don't need the lock anyway, except to protect the GC
 	 * statistics and the gc_pending flag.
 	 */
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->lock);
+#endif
 
 	/* Record the start time. */
 	gettimeofday(&t_tv, NULL);
@@ -592,10 +678,14 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	start_us += t_tv.tv_usec;
 
 	/* Prevent new registrations until after the mark phase is completed. */
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->seq_mtx);
+#endif
 
+#ifdef _CW_THREADS
 	/* Stop mutator threads. */
 	thd_single_enter();
+#endif
 
 	/*
 	 * Mark the root set gray.  If there are any objects in the root set,
@@ -609,14 +699,18 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 		ql_first(&a_nxa->seq_set) = NULL;
 	}
 
+#ifdef _CW_THREADS
 	/* Allow mutator threads to run. */
 	thd_single_leave();
+#endif
 
 	/* Flip the value of white. */
 	a_nxa->white = !a_nxa->white;
 
 	/* New registrations are safe again. */
+#ifdef _CW_THREADS
 	mtx_unlock(&a_nxa->seq_mtx);
+#endif
 
 	/* Record the mark finish time and calculate mark_us. */
 	gettimeofday(&t_tv, NULL);
@@ -643,7 +737,9 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	sweep_us -= mark_us;
 
 	/* Protect statistics updates. */
+#ifdef _CW_THREADS
 	mtx_lock(&a_nxa->lock);
+#endif
 
 	/* Update timing statistics. */
 	/* mark. */
@@ -662,6 +758,7 @@ nxa_p_collect(cw_nxa_t *a_nxa)
 	a_nxa->gcdict_collections++;
 }
 
+#ifdef _CW_THREADS
 static void *
 nxa_p_gc_entry(void *a_arg)
 {
@@ -734,3 +831,4 @@ nxa_p_gc_entry(void *a_arg)
 
 	return NULL;
 }
+#endif

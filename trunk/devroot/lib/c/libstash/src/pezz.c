@@ -42,7 +42,9 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		try_stage = 1;
 
 		retval->mem = a_mem;
+#ifdef _CW_THREADS
 		mtx_new(&retval->lock);
+#endif
 
 		/* Make sure the elements are big enough to contain a pezzi. */
 		if (a_buffer_size >= sizeof(cw_pezzi_t))
@@ -106,7 +108,9 @@ pezz_new(cw_pezz_t *a_pezz, cw_mem_t *a_mem, cw_uint32_t a_buffer_size,
 		case 2:
 			mem_free(a_mem, retval->mem_blocks);
 		case 1:
+#ifdef _CW_THREADS
 			mtx_delete(&retval->lock);
+#endif
 			if (retval->is_malloced)
 				mem_free(a_mem, retval);
 		case 0:
@@ -159,7 +163,9 @@ pezz_delete(cw_pezz_t *a_pezz)
 	}
 	mem_free(a_pezz->mem, a_pezz->mem_blocks);
 
+#ifdef _CW_THREADS
 	mtx_delete(&a_pezz->lock);
+#endif
 
 	if (a_pezz->is_malloced)
 		mem_free(a_pezz->mem, a_pezz);
@@ -186,7 +192,9 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 
 	_cw_check_ptr(a_pezz);
 	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pezz->lock);
+#endif
 
 	if (qs_top(&a_pezz->spares) == NULL) {
 		void		**t_mem_blocks;
@@ -280,7 +288,9 @@ pezz_get_e(cw_pezz_t *a_pezz, const char *a_filename, cw_uint32_t a_line_num)
 	}
 #endif
 
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pezz->lock);
+#endif
 	return retval;
 }
 
@@ -290,7 +300,9 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 {
 	_cw_check_ptr(a_pezz);
 	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pezz->lock);
+#endif
 
 #ifdef _CW_PEZZ_ERROR
 	{
@@ -338,7 +350,9 @@ pezz_put_e(cw_pezz_t *a_pezz, void *a_buffer, const char *a_filename,
 	 */
 RETURN:
 #endif
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pezz->lock);
+#endif
 }
 
 void
@@ -348,7 +362,9 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 
 	_cw_check_ptr(a_pezz);
 	_cw_dassert(a_pezz->magic == _CW_PEZZ_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pezz->lock);
+#endif
 
 	out_put(out_err,
 	    "[s]start ==========================================\n", a_prefix);
@@ -386,5 +402,7 @@ pezz_dump(cw_pezz_t *a_pezz, const char *a_prefix)
 	out_put(out_err,
 	    "[s]end ============================================\n", a_prefix);
 
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pezz->lock);
+#endif
 }

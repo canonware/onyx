@@ -53,7 +53,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		try_stage = 2;
 
 		/* Initialize the global name cache. */
+#ifdef _CW_THREADS
 		mtx_new(&retval->name_lock);
+#endif
 		dch_new(&retval->name_hash, (cw_opaque_alloc_t *)nxa_malloc_e,
 		    (cw_opaque_dealloc_t *)nxa_free_e, &retval->nxa,
 		    _CW_LIBONYX_NAME_HASH, _CW_LIBONYX_NAME_HASH / 4 * 3,
@@ -130,7 +132,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv, char
 		case 4:
 		case 3:
 			dch_delete(&retval->name_hash);
+#ifdef _CW_THREADS
 			mtx_delete(&retval->name_lock);
+#endif
 		case 2:
 			nxa_delete(&retval->nxa);
 		case 1:
@@ -158,7 +162,9 @@ nx_delete(cw_nx_t *a_nx)
 	a_nx->shutdown = TRUE;
 	nxa_delete(&a_nx->nxa);
 	dch_delete(&a_nx->name_hash);
+#ifdef _CW_THREADS
 	mtx_delete(&a_nx->name_lock);
+#endif
 
 	if (a_nx->is_malloced)
 		_cw_free(a_nx);

@@ -136,7 +136,9 @@ out_new(cw_out_t *a_out, cw_mem_t *a_mem)
 	retval->mem = a_mem;
 	retval->fd = 2;
 
+#ifdef _CW_THREADS
 	mtx_new(&retval->lock);
+#endif
 
 	retval->nextensions = 0;
 	retval->extensions = NULL;
@@ -156,7 +158,9 @@ out_delete(cw_out_t *a_out)
 
 	if (a_out->extensions != NULL)
 		mem_free(a_out->mem, a_out->extensions);
+#ifdef _CW_THREADS
 	mtx_delete(&a_out->lock);
+#endif
 
 	if (a_out->is_malloced)
 		mem_free(a_out->mem, a_out);
@@ -636,8 +640,10 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
 		goto RETURN;
 	}
 
+#ifdef _CW_THREADS
 	if (a_out != NULL)
 		mtx_lock(&a_out->lock);
+#endif
 	i = 0;
 	do {
 		while ((nwritten = write(a_fd, &obuf[i], out_size - i)) == -1) {
@@ -647,8 +653,10 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
 		if (nwritten != -1)
 			i += nwritten;
 		else {
+#ifdef _CW_THREADS
 			if (a_out != NULL)
 				mtx_unlock(&a_out->lock);
+#endif
 			retval = -1;
 			goto RETURN;
 		}
@@ -656,8 +664,10 @@ out_p_put_fvn(cw_out_t *a_out, cw_sint32_t a_fd, cw_uint32_t a_size, const char
 
 	retval = i;
 
+#ifdef _CW_THREADS
 	if (a_out != NULL)
 		mtx_unlock(&a_out->lock);
+#endif
 	RETURN:
 	if (obuf != sbuf)
 		mem_free((a_out != NULL) ? a_out->mem : NULL, obuf);

@@ -31,9 +31,9 @@ true
 false
 `\`abd\' \`abc\''
 false
-`mutex mutex'
+`dict dict'
 false
-`mutex condition'
+`dict stack'
 false
 `//pop //spop'
 false
@@ -47,7 +47,7 @@ false
 false
 `false true'
 false
-`mutex dup'
+`stack dup'
 true
 `//pop //pop'
 true

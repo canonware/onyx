@@ -39,7 +39,9 @@ pool_new(cw_pool_t *a_pool, cw_mem_t *a_mem, cw_uint32_t a_buffer_size)
 		try_stage = 1;
 
 		retval->mem = a_mem;
+#ifdef _CW_THREADS
 		mtx_new(&retval->lock);
+#endif
 
 		retval->buffer_size = a_buffer_size;
 		qs_new(&retval->spares);
@@ -113,7 +115,9 @@ pool_delete(cw_pool_t *a_pool)
 		mem_free(a_pool->mem, spare);
 	}
 
+#ifdef _CW_THREADS
 	mtx_delete(&a_pool->lock);
+#endif
 
 	if (a_pool->is_malloced)
 		mem_free(a_pool->mem, a_pool);
@@ -139,7 +143,9 @@ pool_drain(cw_pool_t *a_pool)
 
 	_cw_check_ptr(a_pool);
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pool->lock);
+#endif
 
 	for (spare = qs_top(&a_pool->spares); spare != NULL; spare =
 	     qs_top(&a_pool->spares)) {
@@ -147,7 +153,9 @@ pool_drain(cw_pool_t *a_pool)
 		mem_free(a_pool->mem, spare);
 	}
 
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pool->lock);
+#endif
 }
 
 void *
@@ -158,7 +166,9 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 
 	_cw_check_ptr(a_pool);
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pool->lock);
+#endif
 
 	spare = qs_top(&a_pool->spares);
 	if (spare != NULL) {
@@ -230,7 +240,9 @@ pool_get_e(cw_pool_t *a_pool, const char *a_filename, cw_uint32_t a_line_num)
 		}
 	}
 #endif
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pool->lock);
+#endif
 	return retval;
 }
 
@@ -242,7 +254,9 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 
 	_cw_check_ptr(a_pool);
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pool->lock);
+#endif
 
 #ifdef _CW_POOL_ERROR
 	{
@@ -281,7 +295,9 @@ pool_put_e(cw_pool_t *a_pool, void *a_buffer, const char *a_filename,
 #ifdef _CW_POOL_ERROR
 	RETURN:
 #endif
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pool->lock);
+#endif
 }
 
 void
@@ -291,7 +307,9 @@ pool_dump(cw_pool_t *a_pool, const char *a_prefix)
 
 	_cw_check_ptr(a_pool);
 	_cw_assert(a_pool->magic == _CW_POOL_MAGIC);
+#ifdef _CW_THREADS
 	mtx_lock(&a_pool->lock);
+#endif
 
 	out_put(out_err,
 	    "[s]start ==========================================\n", a_prefix);
@@ -316,5 +334,7 @@ pool_dump(cw_pool_t *a_pool, const char *a_prefix)
 	out_put(out_err,
 	    "[s]end ============================================\n", a_prefix);
 
+#ifdef _CW_THREADS
 	mtx_unlock(&a_pool->lock);
+#endif
 }

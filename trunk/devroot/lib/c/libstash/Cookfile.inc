@@ -21,8 +21,13 @@
 
 /* Include files that _are_ installed. */
 {
-  local incs = libstash.h bhp.h ch.h cnd.h dch.h mem.h mq.h mtx.h out.h pezz.h
-               pool.h ql.h qr.h qs.h rwl.h sma.h thd.h tsd.h xep.h;
+  local incs = libstash.h bhp.h ch.h dch.h mem.h out.h pezz.h pool.h ql.h qr.h
+               qs.h xep.h
+#if [enable_threads]
+               cnd.h mq.h mtx.h rwl.h sma.h thd.h tsd.h
+#endif
+               ;
+
   incs = [fromto % [srcdir]/lib/c/libstash/include/libstash/% [incs]];
   incs = [incs] [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
 
@@ -39,18 +44,24 @@
 }
 
 /* Source files. */
-LIBSTASH_SRCS = libstash.c bhp.c ch.c cnd.c dch.c mem.c mq.c mtx.c out.c pezz.c
-                pool.c rwl.c sma.c thd.c tsd.c xep.c;
-
+LIBSTASH_SRCS = libstash.c bhp.c ch.c dch.c mem.c out.c pezz.c pool.c xep.c
+#if [enable_threads]
+                cnd.c mq.c mtx.c rwl.c sma.c thd.c tsd.c
+#endif
+                ;
 LIBSTASH_SRCS = [fromto % [srcdir]/lib/c/libstash/src/% [LIBSTASH_SRCS]];
 SRCS = [SRCS] [LIBSTASH_SRCS];
 
 /* Simple C tests.  Output is diff'ed with the expected (.exp file) output. */
 {
-  local ctests = c_bhp_a.c c_bhp_b.c c_ch_a.c c_cnd_a.c c_dch_a.c
-                 c_libstash_a.c c_mq_a.c c_mtx_a.c c_out_a.c c_pezz_a.c
-                 c_pool_a.c c_ql_a.c c_qr_a.c c_qs_a.c c_rwl_a.c sma_a.c
-                 c_thd_a.c c_thd_b.c c_thd_c.c c_tsd_a.c c_xep_a.c;
+  local ctests = c_bhp_a.c c_bhp_b.c c_ch_a.c c_dch_a.c c_libstash_a.c
+                 c_out_a.c c_pezz_a.c c_pool_a.c c_ql_a.c c_qr_a.c c_qs_a.c
+                 c_xep_a.c
+#if [enable_threads]
+                 c_cnd_a.c c_mq_a.c c_mtx_a.c c_rwl_a.c sma_a.c c_thd_a.c
+                 c_thd_b.c c_thd_c.c c_tsd_a.c
+#endif
+                 ;
   ctests = [fromto % [srcdir]/lib/c/libstash/test/% [ctests]];
 
   CTESTS = [CTESTS] [ctests];

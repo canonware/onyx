@@ -21,9 +21,6 @@
 	true
 	false
 
-	% condition.
-	condition
-
 	% dict.
 	<>
 	</foo /bar>
@@ -40,9 +37,6 @@
 	-1
 	0
 	123412341234
-
-	% mutex.
-	mutex
 
 	% name.
 	/foo

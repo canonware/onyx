@@ -37,7 +37,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"blksize",
 	"blocks",
 	"booleantype",
+#ifdef _CW_THREADS
 	"broadcast",
+#endif
 	"bytesavailable",
 	"catenate",
 	"cd",
@@ -48,8 +50,10 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"cleartomark",
 	"close",
 	"collect",
+#ifdef _CW_THREADS
 	"condition",
 	"conditiontype",
+#endif
 	"copy",
 	"count",
 	"countdstack",
@@ -57,7 +61,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"counttomark",
 	"ctime",
 	"currentdict",
+#ifdef _CW_THREADS
 	"currentlocking",
+#endif
 	"cve",
 	"cvlit",
 	"cvn",
@@ -65,7 +71,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"cvs",
 	"cvx",
 	"def",
+#ifdef _CW_THREADS
 	"detach",
+#endif
 	"dev",
 	"dict",
 	"dicttype",
@@ -116,15 +124,21 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"invalidfileaccess",
 	"ioerror",
 	"istack",
+#ifdef _CW_THREADS
 	"join",
+#endif
 	"known",
+#ifdef _CW_THREADS
 	"lcheck",
+#endif
 	"le",
 	"length",
 	"limitcheck",
 	"link",
 	"load",
+#ifdef _CW_THREADS
 	"lock",
+#endif
 	"loop",
 	"lt",
 	"mark",
@@ -132,11 +146,15 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"mkdir",
 	"mod",
 	"mode",
+#ifdef _CW_THREADS
 	"monitor",
+#endif
 	"mtime",
 	"mul",
+#ifdef _CW_THREADS
 	"mutex",
 	"mutextype",
+#endif
 	"nametype",
 	"ndup",
 	"ne",
@@ -152,7 +170,9 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"operatortype",
 	"or",
 	"ostack",
+#ifdef _CW_THREADS
 	"period",
+#endif
 	"pid",
 	"pmark",
 	"pmarktype",
@@ -181,19 +201,25 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"scounttomark",
 	"sdup",
 	"seek",
+#ifdef _CW_THREADS
 	"self",
+#endif
 	"setactive",
 	"setegid",
 	"setenv",
 	"seteuid",
 	"setgid",
+#ifdef _CW_THREADS
 	"setlocking",
 	"setperiod",
+#endif
 	"setthreshold",
 	"setuid",
 	"sexch",
 	"shift",
+#ifdef _CW_THREADS
 	"signal",
+#endif
 	"sindex",
 	"size",
 	"spop",
@@ -220,15 +246,21 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"systemdict",
 	"tell",
 	"test",
+#ifdef _CW_THREADS
 	"thread",
 	"threadtype",
+#endif
 	"threshold",
 	"throw",
+#ifdef _CW_THREADS
 	"timedwait",
+#endif
 	"token",
 	"true",
 	"truncate",
+#ifdef _CW_THREADS
 	"trylock",
+#endif
 	"type",
 	"typecheck",
 	"uid",
@@ -237,17 +269,24 @@ const cw_uint8_t *cw_g_nx_names[] = {
 	"undefinedfilename",
 	"undefinedresult",
 	"unlink",
+#ifdef _CW_THREADS
 	"unlock",
+#endif
 	"unmatchedfino",
 	"unmatchedmark",
 	"unregistered",
 	"unsetenv",
 	"version",
+#ifdef _CW_THREADS
 	"wait",
+#endif
 	"waitpid",
 	"where",
 	"write",
 	"xcheck",
-	"xor",
+	"xor"
+#ifdef _CW_THREADS
+	,
 	"yield"
+#endif
 };

@@ -23,7 +23,9 @@ struct cw_nxoe_stacko_s {
 
 struct cw_nxoe_stack_s {
 	cw_nxoe_t		nxoe;
+#ifdef _CW_THREADS
 	cw_mtx_t		lock;	/* Access locked if locking bit set. */
+#endif
 	cw_nxa_t		*nxa;
 	ql_head(cw_nxoe_stacko_t) stack; /* Stack. */
 	cw_uint32_t		count;	/* Number of stack elements. */
@@ -35,7 +37,9 @@ struct cw_nxoe_stack_s {
 	 */
 	cw_uint32_t		ref_stage;
 	cw_nxoe_stacko_t	*ref_stacko;
+#ifdef _CW_THREADS
 	cw_nxoe_stacko_t	*noroll;
+#endif
 };
 
 void	nxo_stack_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking);
@@ -62,6 +66,7 @@ void	nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count);
 
 
 #if (defined(_CW_USE_INLINES) || defined(_NXO_STACK_C_))
+#ifdef _CW_THREADS
 /* Private, but defined here for the inline functions. */
 _CW_INLINE void
 nxoe_p_stack_lock(cw_nxoe_stack_t *a_nxoe)
@@ -77,6 +82,7 @@ nxoe_p_stack_unlock(cw_nxoe_stack_t *a_nxoe)
 	if (a_nxoe->nxoe.locking)
 		mtx_unlock(&a_nxoe->lock);
 }
+#endif
 
 _CW_INLINE cw_uint32_t
 nxo_stack_count(cw_nxo_t *a_nxo)
@@ -110,7 +116,9 @@ nxo_stack_push(cw_nxo_t *a_nxo)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 
 	/* Get an unused stacko. */
 	if (qr_prev(ql_first(&stack->stack), link) != &stack->under) {
@@ -131,7 +139,9 @@ nxo_stack_push(cw_nxo_t *a_nxo)
 	stack->count++;
 	retval = &stacko->nxo;
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 
 	return retval;
 }
@@ -150,7 +160,9 @@ nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 
 	/* Get an unused stacko.  If there are no spare, create one first. */
 	if (qr_prev(ql_first(&stack->stack), link) != &stack->under) {
@@ -181,7 +193,9 @@ nxo_stack_under_push(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	stack->count++;
 	retval = &stacko->nxo;
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 
 	return retval;
 }
@@ -199,7 +213,9 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (stack->count == 0) {
 		retval = TRUE;
 		goto RETURN;
@@ -222,7 +238,9 @@ nxo_stack_pop(cw_nxo_t *a_nxo)
 
 	retval = FALSE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 	return retval;
 }
 
@@ -239,7 +257,9 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (a_count > stack->count) {
 		retval = TRUE;
 		goto RETURN;
@@ -267,7 +287,9 @@ nxo_stack_npop(cw_nxo_t *a_nxo, cw_uint32_t a_count)
 
 	retval = FALSE;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 	return retval;
 }
 
@@ -285,7 +307,9 @@ nxo_stack_get(cw_nxo_t *a_nxo)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (stack->count == 0) {
 		retval = NULL;
 		goto RETURN;
@@ -295,7 +319,9 @@ nxo_stack_get(cw_nxo_t *a_nxo)
 
 	retval = &stacko->nxo;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 	return retval;
 }
 
@@ -314,7 +340,9 @@ nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (a_index >= stack->count) {
 		retval = NULL;
 		goto RETURN;
@@ -325,7 +353,9 @@ nxo_stack_nget(cw_nxo_t *a_nxo, cw_uint32_t a_index)
 
 	retval = &stacko->nxo;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 	return retval;
 }
 
@@ -343,7 +373,9 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 	_cw_dassert(stack->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(stack->nxoe.type == NXOT_STACK);
 
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (a_object != NULL) {
 		if (stack->count <= 1) {
 			retval = NULL;
@@ -367,7 +399,9 @@ nxo_stack_down_get(cw_nxo_t *a_nxo, cw_nxo_t *a_object)
 
 	retval = &stacko->nxo;
 	RETURN:
+#ifdef _CW_THREADS
 	nxoe_p_stack_unlock(stack);
+#endif
 	return retval;
 }
 
@@ -389,9 +423,13 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
 	 * Get a pointer to the new top of the stack.  Then continue on to find
 	 * the end of the roll region.
 	 */
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (stack->count < 2) {
+#ifdef _CW_THREADS
 		nxoe_p_stack_unlock(stack);
+#endif
 		retval = TRUE;
 		goto ERROR;
 	}
@@ -428,12 +466,16 @@ nxo_stack_exch(cw_nxo_t *a_nxo)
 	 * Set stack->noroll so that if the GC runs during the following code,
 	 * it can get at the noroll region.
 	 */
+#ifdef _CW_THREADS
 	stack->noroll = noroll;
+#endif
 	qr_split(ql_first(&stack->stack), noroll, link);
 	ql_first(&stack->stack) = top;
 	qr_meld(top, noroll, link);
+#ifdef _CW_THREADS
 	stack->noroll = NULL;
 	nxoe_p_stack_unlock(stack);
+#endif
 
 	retval = FALSE;
 	ERROR:
@@ -489,9 +531,13 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * Get a pointer to the new top of the stack.  Then continue on to find
 	 * the end of the roll region.
 	 */
+#ifdef _CW_THREADS
 	nxoe_p_stack_lock(stack);
+#endif
 	if (a_count > stack->count) {
+#ifdef _CW_THREADS
 		nxoe_p_stack_unlock(stack);
+#endif
 		retval = TRUE;
 		goto ERROR;
 	}
@@ -530,12 +576,16 @@ nxo_stack_roll(cw_nxo_t *a_nxo, cw_uint32_t a_count, cw_sint32_t a_amount)
 	 * Set stack->noroll so that if the GC runs during the following code,
 	 * it can get at the noroll region.
 	 */
+#ifdef _CW_THREADS
 	stack->noroll = noroll;
+#endif
 	qr_split(ql_first(&stack->stack), noroll, link);
 	ql_first(&stack->stack) = top;
 	qr_meld(top, noroll, link);
+#ifdef _CW_THREADS
 	stack->noroll = NULL;
 	nxoe_p_stack_unlock(stack);
+#endif
 
 	RETURN:
 	retval = FALSE;

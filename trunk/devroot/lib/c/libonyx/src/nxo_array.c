@@ -30,8 +30,10 @@ nxo_array_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking,
 	array = (cw_nxoe_array_t *)nxa_malloc(nxa, sizeof(cw_nxoe_array_t));
 
 	nxoe_l_new(&array->nxoe, NXOT_ARRAY, a_locking);
+#ifdef _CW_THREADS
 	if (a_locking)
 		mtx_new(&array->lock);
+#endif
 	array->e.a.len = a_len;
 	if (array->e.a.len > 0) {
 		array->e.a.arr = (cw_nxo_t *)nxa_malloc(nxa, sizeof(cw_nxo_t) *
@@ -96,8 +98,10 @@ nxoe_l_array_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	if (array->nxoe.indirect == FALSE && array->e.a.len > 0)
 		_CW_FREE(array->e.a.arr);
 
+#ifdef _CW_THREADS
 	if (array->nxoe.locking && array->nxoe.indirect == FALSE)
 		mtx_delete(&array->lock);
+#endif
 
 	_CW_NXOE_FREE(array);
 }
@@ -185,11 +189,15 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 	 * Iteratively copy elements.  Only copy one level deep (not
 	 * recursively), by using dup.
 	 */
+#ifdef _CW_THREADS
 	nxoe_p_array_lock(array_fr_l);
 	nxoe_p_array_lock(array_to_l);
+#endif
 	for (i = 0; i < len_fr; i++)
 		nxo_dup(&arr_to[i], &arr_fr[i]);
+#ifdef _CW_THREADS
 	nxoe_p_array_unlock(array_fr_l);
+#endif
 
 	/*
 	 * Truncate the destination array if it is shorter than the source
@@ -201,7 +209,9 @@ nxo_array_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 		else
 			array_to->e.a.len = len_fr;
 	}
+#ifdef _CW_THREADS
 	nxoe_p_array_unlock(array_to_l);
+#endif
 }
 
 cw_uint32_t
@@ -248,7 +258,9 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 	_cw_dassert(array->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(array->nxoe.type == NXOT_ARRAY);
 
+#ifdef _CW_THREADS
 	nxoe_p_array_lock(array);
+#endif
 	if (array->nxoe.indirect == FALSE) {
 		_cw_assert(a_offset < array->e.a.len && a_offset >= 0);
 		nxo_no_new(&array->e.a.arr[a_offset]);
@@ -257,5 +269,7 @@ nxo_array_el_set(cw_nxo_t *a_nxo, cw_nxo_t *a_el, cw_nxoi_t a_offset)
 		nxo_array_el_set(&array->e.i.nxo, a_el, a_offset +
 		    array->e.i.beg_offset);
 	}
+#ifdef _CW_THREADS
 	nxoe_p_array_unlock(array);
+#endif
 }

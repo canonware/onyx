@@ -15,8 +15,10 @@
 
 /*  #define _CW_MEM_DBG */
 
+#ifdef _CW_THREADS
 void	thd_l_init(void);
 void	thd_l_shutdown(void);
+#endif
 void	xep_l_init(void);
 void	xep_l_shutdown(void);
 
@@ -34,7 +36,9 @@ libstash_init(void)
 	volatile cw_uint32_t	try_stage = 0;
 
 	/* Start up global modules. */
+#ifdef _CW_THREADS
 	thd_l_init();
+#endif
 	xep_l_init();
 
 	xep_begin();
@@ -98,5 +102,7 @@ libstash_shutdown(void)
 #endif
 
 	xep_l_shutdown();
+#ifdef _CW_THREADS
 	thd_l_shutdown();
+#endif
 }

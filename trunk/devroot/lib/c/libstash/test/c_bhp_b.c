@@ -40,8 +40,13 @@ main()
 	{
 		cw_bhp_t	bhp, *bhp_p;
 
+#ifdef _CW_THREADS
 		_cw_assert(&bhp == bhp_new_r(&bhp, cw_g_mem,
 		    bhp_uint32_priority_compare));
+#else
+		_cw_assert(&bhp == bhp_new(&bhp, cw_g_mem,
+		    bhp_uint32_priority_compare));
+#endif
 		bhp_delete(&bhp);
 
 		bhp_p = bhp_new(NULL, cw_g_mem, bhp_sint32_priority_compare);
@@ -55,7 +60,11 @@ main()
 		cw_bhpi_t	*bhpi_p;
 		cw_uint32_t	items[_CW_TEST_HEAP_SIZE], i;
 
+#ifdef _CW_THREADS
 		bhp_p = bhp_new_r(NULL, cw_g_mem, bhp_uint32_priority_compare);
+#else
+		bhp_p = bhp_new(NULL, cw_g_mem, bhp_uint32_priority_compare);
+#endif
 		_cw_check_ptr(bhp_p);
 
 		for (i = 0; i < _CW_TEST_HEAP_SIZE; i++) {
@@ -87,12 +96,22 @@ main()
 		cw_bhpi_t	*bhpi_p;
 		cw_uint32_t	items[_CW_TEST_HEAP_SIZE], i;
 
+#ifdef _CW_THREADS
 		bhp_p_a = bhp_new_r(NULL, cw_g_mem,
 		    bhp_uint32_priority_compare);
+#else
+		bhp_p_a = bhp_new(NULL, cw_g_mem,
+		    bhp_uint32_priority_compare);
+#endif
 		_cw_check_ptr(bhp_p_a);
 
+#ifdef _CW_THREADS
 		bhp_p_b = bhp_new_r(NULL, cw_g_mem,
 		    bhp_uint32_priority_compare);
+#else
+		bhp_p_b = bhp_new(NULL, cw_g_mem,
+		    bhp_uint32_priority_compare);
+#endif
 		_cw_check_ptr(bhp_p_b);
 
 		for (i = 0; i < _CW_TEST_HEAP_SIZE; i++) {

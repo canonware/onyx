@@ -36,7 +36,11 @@ main()
 	libstash_init();
 	out_put(out_err, "Test begin\n");
 
+#ifdef _CW_THREADS
 	h = bhp_new_r(NULL, cw_g_mem, bhp_sint32_priority_compare);
+#else
+	h = bhp_new(NULL, cw_g_mem, bhp_sint32_priority_compare);
+#endif
 	_cw_check_ptr(h);
 
 	for (i = 0; i < _CW_TEST_NUM_NODES; i++) {

@@ -18,6 +18,7 @@
 static cw_uint32_t nxo_p_dict_hash(const void *a_key);
 static cw_bool_t nxo_p_dict_key_comp(const void *a_k1, const void *a_k2);
 
+#ifdef _CW_THREADS
 #define		nxoe_p_dict_lock(a_nxoe) do {			\
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_lock(&(a_nxoe)->lock);				\
@@ -26,6 +27,7 @@ static cw_bool_t nxo_p_dict_key_comp(const void *a_k1, const void *a_k2);
 	if ((a_nxoe)->nxoe.locking)					\
 		mtx_unlock(&(a_nxoe)->lock);				\
 } while (0)
+#endif
 
 void
 nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
@@ -40,8 +42,10 @@ nxo_dict_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_bool_t a_locking, cw_uint32_t
 	    sizeof(cw_nxoe_dict_t));
 
 	nxoe_l_new(&dict->nxoe, NXOT_DICT, a_locking);
+#ifdef _CW_THREADS
 	if (a_locking)
 		mtx_new(&dict->lock);
+#endif
 	dict->dicto = NULL;
 
 	/*
@@ -79,8 +83,10 @@ nxoe_l_dict_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	if (dict->nxoe.locking)
 		mtx_delete(&dict->lock);
+#endif
 	while (dch_remove_iterate(&dict->hash, NULL, (void **)&dicto, &chi) ==
 	    FALSE) {
 		nxa_l_dicto_put(nx_nxa_get(a_nx), dicto);
@@ -148,8 +154,10 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 	_cw_assert(from->nxoe.type == NXOT_DICT);
 
 	/* Deep (but not recursive) copy. */
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(from);
 	nxoe_p_dict_lock(to);
+#endif
 	for (i = 0, count = dch_count(&from->hash); i < count; i++) {
 		/* Get a dicto. */
 		dch_get_iterate(&from->hash, NULL, (void **)&dicto_from);
@@ -163,11 +171,15 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 		chi = nxa_l_chi_get(nx_nxa_get(a_nx));
 
 		/* Make sure the key is not defined, then insert. */
+#ifdef _CW_THREADS
 		thd_crit_enter();
+#endif
 		removed = dch_remove(&to->hash, (void *)&dicto_to->key, NULL,
 		    (void **)&dicto_rm, &chi_rm);
 		dch_insert(&to->hash, &dicto_to->key, dicto_to, chi);
+#ifdef _CW_THREADS
 		thd_crit_leave();
+#endif
 
 		if (removed == FALSE) {
 			cw_nxa_t	*nxa;
@@ -178,8 +190,10 @@ nxo_dict_copy(cw_nxo_t *a_to, cw_nxo_t *a_from, cw_nx_t *a_nx)
 			nxa_l_chi_put(nxa, chi_rm);
 		}
 	}
+#ifdef _CW_THREADS
 	nxoe_p_dict_unlock(to);
 	nxoe_p_dict_unlock(from);
+#endif
 }
 
 void
@@ -198,7 +212,9 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(dict);
+#endif
 	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto) == FALSE) {
 		/* a_key is already defined. */
 		nxo_dup(&dicto->val, a_val);
@@ -221,12 +237,18 @@ nxo_dict_def(cw_nxo_t *a_nxo, cw_nx_t *a_nx, cw_nxo_t *a_key, cw_nxo_t *a_val)
 		nxo_dup(&dicto->val, a_val);
 
 		/* Insert. */
+#ifdef _CW_THREADS
 		thd_crit_enter();
+#endif
 		dch_insert(&dict->hash, (void *)&dicto->key, (void *)dicto,
 		    chi);
+#ifdef _CW_THREADS
 		thd_crit_leave();
+#endif
 	}
+#ifdef _CW_THREADS
 	nxoe_p_dict_unlock(dict);
+#endif
 }
 
 void
@@ -247,12 +269,16 @@ nxo_dict_undef(cw_nxo_t *a_nxo, cw_nx_t *a_nx, const cw_nxo_t *a_key)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(dict);
 	thd_crit_enter();
+#endif
 	error = dch_remove(&dict->hash, (void *)a_key, NULL, (void **)&dicto,
 	    &chi);
+#ifdef _CW_THREADS
 	thd_crit_leave();
 	nxoe_p_dict_unlock(dict);
+#endif
 
 	if (error == FALSE) {
 		cw_nxa_t	*nxa;
@@ -281,14 +307,18 @@ nxo_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key, cw_nxo_t *r_nxo)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(dict);
+#endif
 	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto) == FALSE) {
 		if (r_nxo != NULL)
 			nxo_dup(r_nxo, &dicto->val);
 		retval = FALSE;
 	} else
 		retval = TRUE;
+#ifdef _CW_THREADS
 	nxoe_p_dict_unlock(dict);
+#endif
 
 	return retval;
 }
@@ -316,12 +346,16 @@ nxo_l_dict_lookup(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(dict);
+#endif
 	if (dch_search(&dict->hash, (void *)a_key, (void **)&dicto) == FALSE) {
 		retval = &dicto->val;
 	} else
 		retval = NULL;
+#ifdef _CW_THREADS
 	nxoe_p_dict_unlock(dict);
+#endif
 
 	return retval;
 }
@@ -342,9 +376,13 @@ nxo_dict_count(cw_nxo_t *a_nxo)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(dict);
+#endif
 	retval = dch_count(&dict->hash);
+#ifdef _CW_THREADS
 	nxoe_p_dict_unlock(dict);
+#endif
 
 	return retval;
 }
@@ -366,11 +404,15 @@ nxo_dict_iterate(cw_nxo_t *a_nxo, cw_nxo_t *r_nxo)
 	_cw_dassert(dict->nxoe.magic == _CW_NXOE_MAGIC);
 	_cw_assert(dict->nxoe.type == NXOT_DICT);
 
+#ifdef _CW_THREADS
 	nxoe_p_dict_lock(dict);
+#endif
 	retval = dch_get_iterate(&dict->hash, (void **)&nxo, NULL);
 	if (retval == FALSE)
 		nxo_dup(r_nxo, nxo);
+#ifdef _CW_THREADS
 	nxoe_p_dict_unlock(dict);
+#endif
 
 	return retval;
 }
@@ -387,11 +429,15 @@ nxo_p_dict_hash(const void *a_key)
 
 	switch (nxo_type_get(key)) {
 	case NXOT_ARRAY:
+#ifdef _CW_THREADS
 	case NXOT_CONDITION:
+#endif
 	case NXOT_DICT:
 	case NXOT_FILE:
 	case NXOT_HOOK:
+#ifdef _CW_THREADS
 	case NXOT_MUTEX:
+#endif
 	case NXOT_NAME:
 	case NXOT_STACK:
 	case NXOT_THREAD:

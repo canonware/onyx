@@ -3,8 +3,6 @@ Test begin
 arraytype
 `true'
 booleantype
-`condition'
-conditiontype
 `</foo \`foo\' /bar \`bar\'>'
 dicttype
 `stdin'
@@ -15,8 +13,6 @@ finotype
 integertype
 `mark'
 marktype
-`mutex'
-mutextype
 `/foo'
 nametype
 `null'

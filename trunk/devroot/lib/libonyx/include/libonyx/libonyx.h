@@ -112,14 +112,18 @@ extern  "C" {
 #include "nxo_no.h"
 #include "nxo_array.h"
 #include "nxo_boolean.h"
+#ifdef _CW_THREADS
 #include "nxo_condition.h"
+#endif
 #include "nxo_dict.h"
 #include "nxo_file.h"
 #include "nxo_fino.h"
 #include "nxo_hook.h"
 #include "nxo_integer.h"
 #include "nxo_mark.h"
+#ifdef _CW_THREADS
 #include "nxo_mutex.h"
+#endif
 #include "nxo_name.h"
 #include "nxo_null.h"
 #include "nxo_operator.h"

@@ -1,11 +1,25 @@
-dnl Use pthreads.
-AC_DEFUN(CW_USE_PTHREADS,
+dnl Use threads by default.
+AC_DEFUN(CW_ENABLE_THREADS,
 [
+AC_ARG_ENABLE(threads, [  --disable-threads       Disable threads],
+if test "x$enable_threads" = "xyes" ; then
+  enable_threads="1"
+else
+  enable_threads="0"
+fi
+,
+enable_threads="1"
+)
+AC_SUBST(enable_threads)
+if test "x$enable_threads" = "x1" ; then
+  AC_DEFINE(_CW_THREADS)
+
   AC_CHECK_HEADERS(pthread.h, , AC_MSG_ERROR(Cannot build without pthread.h))
 
   AC_CHECK_LIB(pthread, pthread_create, LIBS="$LIBS -lpthread", \
     AC_CHECK_LIB(c_r, pthread_create, \
       LIBS="$LIBS -pthread", AC_MSG_ERROR(Cannot find the pthreads library)))
+fi
 ])
 
 dnl Do not compile with debugging by default.
@@ -58,16 +72,20 @@ fi
 ])
 
 dnl Use libedit by default.
-AC_DEFUN(CW_USE_LIBEDIT,
+AC_DEFUN(CW_ENABLE_LIBEDIT,
 [
-AC_ARG_ENABLE(libedit, [  --disable-libedit       Do not use inline functions],
+AC_ARG_ENABLE(libedit, [  --disable-libedit       Do not use libedit],
 if test "x$enable_libedit" = "xno" ; then
   enable_libedit="0"
 else
   enable_libedit="1"
 fi
 ,
-enable_libedit="1"
+if "x$enable_threads" = "x1" ; then
+  enable_libedit="1"
+else
+  enable_libedit="0"
+fi
 )
 AC_SUBST(enable_libedit)
 if test "x$enable_libedit" = "x1" ; then

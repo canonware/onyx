@@ -17,8 +17,10 @@ struct cw_nxa_s {
 	cw_uint32_t	magic;
 #define	_CW_NXA_MAGIC	0x63935743
 #endif
+#ifdef _CW_THREADS
 	/* Protects the gcdict_* fields and gc_pending. */
 	cw_mtx_t	lock;
+#endif
 
 	/* Various pools. */
 	cw_uint32_t	chi_sizeof;
@@ -38,7 +40,9 @@ struct cw_nxa_s {
 
 	/* Actual state of gcdict. */
 	cw_bool_t	gcdict_active;
+#ifdef _CW_THREADS
 	cw_nxoi_t	gcdict_period;
+#endif
 	cw_nxoi_t	gcdict_threshold;
 	cw_nxoi_t	gcdict_collections;
 	cw_nxoi_t	gcdict_new;
@@ -47,15 +51,21 @@ struct cw_nxa_s {
 	cw_nxoi_t	gcdict_sum[2];
 
 	/* Sequence set. */
+#ifdef _CW_THREADS
 	cw_mtx_t	seq_mtx;
+#endif
 	ql_head(cw_nxoe_t) seq_set;
 	cw_bool_t	white;	/* Current value for white (alternates). */
 
+#ifdef _CW_THREADS
 	cw_mq_t		gc_mq;
+#endif
 	cw_bool_t	gc_pending;
 
 	cw_nx_t		*nx;
+#ifdef _CW_THREADS
 	cw_thd_t	*gc_thd;
+#endif
 };
 
 void	nxa_new(cw_nxa_t *a_nxa, cw_nx_t *a_nx);
@@ -79,12 +89,13 @@ void	nxa_free_e(cw_nxa_t *a_nxa, void *a_ptr, const char *a_filename,
 #endif
 
 void	nxa_collect(cw_nxa_t *a_nxa);
-void	nxa_dump(cw_nxa_t *a_nxa, cw_nxo_t *a_thread);
 
 cw_bool_t nxa_active_get(cw_nxa_t *a_nxa);
 void	nxa_active_set(cw_nxa_t *a_nxa, cw_bool_t a_active);
+#ifdef _CW_THREADS
 cw_nxoi_t nxa_period_get(cw_nxa_t *a_nxa);
 void	nxa_period_set(cw_nxa_t *a_nxa, cw_nxoi_t a_period);
+#endif
 cw_nxoi_t nxa_threshold_get(cw_nxa_t *a_nxa);
 void	nxa_threshold_set(cw_nxa_t *a_nxa, cw_nxoi_t a_threshold);
 void	nxa_stats_get(cw_nxa_t *a_nxa, cw_nxoi_t *r_collections, cw_nxoi_t
