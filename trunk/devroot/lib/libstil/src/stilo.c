@@ -762,20 +762,26 @@ stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type)
 #endif
 }
 
+cw_stilte_t
+stiloe_l_print(cw_stiloe_t *a_stiloe, cw_stilo_t *a_file, cw_bool_t a_syntactic,
+    cw_bool_t a_newline)
+{
+	cw_stilte_t	retval;
+	cw_stilo_t	stilo;
+
+	stilo_p_new(&stilo, a_stiloe->type);
+	stilo.o.stiloe = a_stiloe;
+
+	retval = stilo_print(&stilo, a_file, a_syntactic, a_newline);
+
+	return retval;
+}
+
 void
 stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 {
 	_cw_check_ptr(a_stiloe);
 	_cw_assert(a_stiloe->magic == _CW_STILOE_MAGIC);
-
-	/*
-	 * The only code that deletes a stiloe is the GC.  Since the GC
-	 * splits the dead stiloe's into a separate ring, then iteratively
-	 * deletes those stiloe's, only one thread will ever access any stiloe's
-	 * in that ring.  Therefore, we don't have to do any locking on the
-	 * ring.
-	 */
-	qr_remove(a_stiloe, link);
 
 	stilot_vtable[a_stiloe->type].delete_f(a_stiloe, a_stil);
 }
@@ -1486,8 +1492,7 @@ stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 
 	if (a_reset) {
 		dict->ref_iter = 0;
-		if (a_stiloe->indirect == FALSE)
-			dict->dicto = NULL;
+		dict->dicto = NULL;
 	}
 
 	retval = NULL;
@@ -1497,8 +1502,10 @@ stiloe_p_dict_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 			dch_get_iterate(&dict->hash, NULL,(void
 			    **)&dict->dicto);
 			retval = stilo_stiloe_get(&dict->dicto->key);
+			_cw_out_put("<K[p]>", retval);
 		} else {
 			/* Value. */
+			_cw_out_put("<V[p]>", retval);
 			retval = stilo_stiloe_get(&dict->dicto->val);
 			dict->ref_iter++;
 			dict->dicto = NULL;

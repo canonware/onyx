@@ -16,7 +16,7 @@
 #include "../include/libstil/stilt_l.h"
 
 /* Print out GC diagnostic information if defined. */
-#define	_LIBSTIL_STILA_DBG
+#define	_STILA_CONFESS
 
 /* Number of stack elements per memory chunk. */
 #define	_CW_STIL_STILSC_COUNT	16
@@ -24,7 +24,7 @@
 /*
  * Interval (in seconds) at which collection occurs, if not triggered sooner.
  */
-#define	_CW_STILA_INTERVAL	 2
+#define	_CW_STILA_INTERVAL	 1
 
 /*
  * Number of sequence set additions since last collection that will cause an
@@ -109,6 +109,7 @@ stila_gc_register(cw_stila_t *a_stila, cw_stiloe_t *a_stiloe)
 /*  	out_put_e(cw_g_out, NULL, 0, __FUNCTION__, */
 /*  	    "0x[p|w:8|p:0] : [i]\n", a_stiloe, a_stiloe->type); */
 	stiloe_l_color_set(a_stiloe, a_stila->white);
+	stiloe_l_registered_set(a_stiloe, TRUE);
 	ql_tail_insert(&a_stila->seq_set, a_stiloe, link);
 	a_stila->seq_new++;
 	if (a_stila->seq_new >= _CW_STILA_THRESHHOLD)
@@ -164,16 +165,21 @@ stila_p_gc_entry(void *a_arg)
 	return NULL;
 }
 
-#define	_STILA_GRAY(a_stiloe) do {					\
+#define	_STILA_COLOR(a_stiloe) do {					\
 	if (stiloe_l_color_get(a_stiloe) == a_stila->white) {		\
 		stiloe_l_color_set((a_stiloe), !a_stila->white);	\
-		if ((a_stiloe) != white) {				\
-			white = qr_next(white, link);			\
+		if ((a_stiloe) != gray) {				\
+			out_put(NULL, "<C>");				\
 			qr_remove((a_stiloe), link);			\
-			qr_before_insert(white, (a_stiloe), link);	\
-		} else							\
-			white = qr_next(white, link);			\
-	}								\
+			qr_before_insert(gray, (a_stiloe), link);	\
+			gray = qr_prev(gray, link);			\
+/*			stiloe_l_print(stiloe,				\
+			    stil_stdout_get(a_stila->stil),		\
+			    TRUE, FALSE);				\
+			stilo_file_buffer_flush(stil_stdout_get(a_stila->stil)); \
+*/		}							\
+	} else								\
+		out_put(NULL, "<S>");					\
 } while (0)
 
 /*
@@ -190,8 +196,7 @@ stila_p_collect(cw_stila_t *a_stila)
 	thd_single_enter();
 
 	/*
-	 * Initialize 'gray' and 'white' for root set iteration.  'white' must
-	 * be adjusted afterwards to point to the first white object.
+	 * Initialize 'gray' and 'white' for root set iteration.
 	 */
 	gray = white = ql_first(&a_stila->seq_set);
 
@@ -207,26 +212,58 @@ stila_p_collect(cw_stila_t *a_stila)
 	 */
 	out_put(NULL, "\n");
 	out_put_e(NULL, NULL, 0, __FUNCTION__, "v");
+
+	/*
+	 * Iterate through stilt's.
+	 */
 	for (stilt = stil_l_ref_iter(a_stila->stil, TRUE); stilt != NULL; stilt
 	    = stil_l_ref_iter(a_stila->stil, FALSE)) {
+		/*
+		 * Iterate through stils's.
+		 */
 		out_put(NULL, "t");
 		for (stils = stilt_l_ref_iter(stilt, TRUE); stils != NULL; stils
 		    = stilt_l_ref_iter(stilt, FALSE)) {
 			out_put(NULL, "s");
+			/*
+			 * Iterate through stiloe's on the stils.
+			 */
 			for (stiloe = stils_l_ref_iter(stils, TRUE); stiloe !=
 			    NULL; stiloe = stils_l_ref_iter(stils, FALSE)) {
-				/* Paint object gray. */
+				/*
+				 * Paint object gray.
+				 */
+				if (stiloe_l_color_get(stiloe) ==
+				    a_stila->white) {
+					stiloe_l_color_set(stiloe,
+					    !a_stila->white);
+					if (stiloe != gray) {
+						out_put(NULL, "<C>");
+						qr_remove(stiloe, link);
+						qr_before_insert(gray, stiloe,
+						    link);
+						gray = qr_prev(gray, link);
+/*  						stiloe_l_print(stiloe, */
+/*  						    stil_stdout_get(a_stila->stil), */
+/*  						    TRUE, FALSE); */
+/*  						stilo_file_buffer_flush(stil_stdout_get(a_stila->stil)); */
+					}
+				}
+/*  				else */
+/*  					out_put(NULL, "<S>"); */
+				
 				out_put(NULL, "+");
-				_STILA_GRAY(stiloe);
+				_STILA_COLOR(stiloe);
 			}
 		}
 	}
 	out_put(NULL, "\n");
 
-	/* Adjust pointers to make the following diagram correct. */
+	/*
+	 * Initialize 'black' to be the same as 'gray'.  There are no black
+	 * objects yet.
+	 */
 	black = gray;
-	if (white != gray)
-		white = qr_next(white, link);
 
 	/*
 	 * Black objects are all the objects between 'black' (inclusive) and
@@ -271,19 +308,25 @@ stila_p_collect(cw_stila_t *a_stila)
 	 *                               \--/
 	 */
 
-#ifdef _LIBSTIL_STILA_DBG
+#ifdef _STILA_CONFESS
 	{
 		cw_stiloe_t	*p;
 		cw_uint32_t	i;
 
+		
 		for (p = gray, i = 0; p != white; p = qr_next(p, link), i++) {
-			_cw_out_put(".");
+/*  			_cw_out_put("."); */
 		}
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
-		    "[i] object[s] in root set\n", i, i == 1 ? "" : "s");
-		
+		    "[i] object[s] in root set:\n", i, i == 1 ? "" : "s");
+		for (p = gray; p != white; p = qr_next(p, link)) {
+			stiloe_l_print(p, stil_stdout_get(a_stila->stil),
+			    TRUE, TRUE);
+			stilo_file_buffer_flush(stil_stdout_get(a_stila->stil));
+		}
+
 		for (p = white, i = 0; p != black; p = qr_next(p, link), i++) {
-			_cw_out_put("*");
+/*  			_cw_out_put("*"); */
 		}
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "[i] object[s] not in root set\n", i, i == 1 ? "" : "s");
@@ -294,9 +337,34 @@ stila_p_collect(cw_stila_t *a_stila)
 	 * Iterate through the gray objects and process them until only black
 	 * and white objects are left.
 	 */
-/*  	while (gray != white) { */
+	for (; gray != white; gray = qr_next(gray, link)) {
+		out_put(NULL, "---> ");
+		stiloe_l_print(gray, stil_stdout_get(a_stila->stil), TRUE,
+		    FALSE);
+		stilo_file_buffer_flush(stil_stdout_get(a_stila->stil));
 
-/*  	} */
+		for (stiloe = stiloe_l_ref_iter(gray, TRUE); stiloe != NULL;
+		     stiloe = stiloe_l_ref_iter(gray, FALSE)) {
+			out_put(NULL, " <--> ");
+			stiloe_l_print(stiloe, stil_stdout_get(a_stila->stil),
+			    TRUE, FALSE);
+			stilo_file_buffer_flush(stil_stdout_get(a_stila->stil));
+
+			/*
+			 * If object is white, color it.
+			 */
+			if (stiloe_l_registered_get(stiloe) &&
+			    (stiloe_l_color_get(stiloe) == a_stila->white)) {
+				stiloe_l_color_set(stiloe, !a_stila->white);
+				if (stiloe != white) {
+					qr_remove(stiloe, link);
+					qr_before_insert(white, stiloe, link);
+				} else
+					white = qr_next(white, link);
+			}
+		}
+		out_put(NULL, "\n");
+	}
 
 	/*
 	 * Split the white objects into a separate ring before resuming other
@@ -330,7 +398,7 @@ stila_p_collect(cw_stila_t *a_stila)
 	}
 
 	/* Flip the value of white. */
-/*  	a_stila->white = !a_stila->white; */
+	a_stila->white = !a_stila->white;
 
 	/* Reset the counter of new sequence set members since collection. */
 	a_stila->seq_new = 0;
@@ -348,12 +416,41 @@ stila_p_collect(cw_stila_t *a_stila)
 		out_put_e(NULL, NULL, 0, __FUNCTION__,
 		    "Take out the garbage: ");
 
+#ifdef _STILA_CONFESS
+		{
+			cw_stiloe_t	*p;
+			cw_uint32_t	i;
+
+			i = 0;
+			qr_foreach(p, white, link) {
+				_cw_out_put("Y");
+				i++;
+			}
+			out_put_e(NULL, NULL, 0, __FUNCTION__,
+			    "[i] white object[s]\n", i, i == 1 ? "" : "s");
+		}
+#endif
+
+		p = white;
+		do {
+			n = qr_next(p, link);
+
+			out_put_e(NULL, NULL, 0, __FUNCTION__,
+			    "0x[p|w:8|p:0]: ", p);
+			stiloe_l_print(p, stil_stdout_get(a_stila->stil), TRUE,
+			    TRUE);
+			stilo_file_buffer_flush(stil_stdout_get(a_stila->stil));
+
+			p = n;
+		} while (p != white);
+		out_put(NULL, "\n");
+
 		p = white;
 		do {
 			n = qr_next(p, link);
 
 			out_put(NULL, "w");
-/*  			stiloe_l_delete(p, a_stila->stil); */
+			stiloe_l_delete(p, a_stila->stil);
 
 			p = n;
 		} while (p != white);

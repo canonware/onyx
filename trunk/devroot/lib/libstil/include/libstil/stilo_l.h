@@ -62,7 +62,13 @@ struct cw_stiloe_s {
 	 * state.
 	 */
 	cw_bool_t	color:1;
-	/* Allocated locally or globally? */
+	/*
+	 * TRUE if this object has been registered with the GC.
+	 */
+	cw_bool_t	registered:1;
+	/*
+	 * Allocated locally or globally?
+	 */
 	cw_bool_t	global:1;
 	/*
 	 * If TRUE, this stiloe is a reference to another stiloe.
@@ -76,9 +82,15 @@ struct cw_stiloe_dicto_s {
 	cw_stilo_t	val;
 };
 
+cw_stilte_t stiloe_l_print(cw_stiloe_t *a_stiloe, cw_stilo_t *a_file, cw_bool_t
+    a_syntactic, cw_bool_t a_newline);
+
 void	stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil);
-cw_stiloe_t *stiloe_l_ref_iterate(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
-#define	stiloe_l_next(a_stiloe) (qr_next((a_stiloe), link))
+cw_stiloe_t *stiloe_l_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset);
 
 #define	stiloe_l_color_get(a_stiloe) (a_stiloe)->color
 #define	stiloe_l_color_set(a_stiloe, a_color) (a_stiloe)->color = (a_color)
+
+#define	stiloe_l_registered_get(a_stiloe) (a_stiloe)->registered
+#define	stiloe_l_registered_set(a_stiloe, a_registered)			\
+	(a_stiloe)->registered = (a_registered)

@@ -188,16 +188,16 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 
 	/* Initialize entries that are not operators. */
 
-	/* globaldict. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_globaldict),
-	    stiln_len(STILN_globaldict), TRUE);
-	stilo_dup(&operator, stilt_globaldict_get(a_stilt));
-	stilo_dict_def(a_dict, a_stilt, &name, &operator);
-
 	/* systemdict. */
 	stilo_name_new(&name, a_stilt, stiln_str(STILN_systemdict),
 	    stiln_len(STILN_systemdict), TRUE);
 	stilo_dup(&operator, stilt_systemdict_get(a_stilt));
+	stilo_dict_def(a_dict, a_stilt, &name, &operator);
+
+	/* globaldict. */
+	stilo_name_new(&name, a_stilt, stiln_str(STILN_globaldict),
+	    stiln_len(STILN_globaldict), TRUE);
+	stilo_dup(&operator, stilt_globaldict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* true. */
