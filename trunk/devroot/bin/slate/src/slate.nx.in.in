@@ -169,8 +169,12 @@ $keytable <
 	`\n' insert_string
     }
     `\cq' {
-	`\r\n' print gcdict $stats get eval 2 sprint flush
-	quit
+	`\r\nslate GC stats: '
+	gcdict $stats get eval 2 sprints
+	`\n'
+	3 ncat
+	stderr exch write pop
+	exit
     }
     `\cu' {
 	bpoint buffer_undo
@@ -227,7 +231,7 @@ $keytable <
 	not buffer_history_setactive
     }
     `\cc' {
-	quit
+	exit
     }
 > def
 
@@ -260,6 +264,6 @@ stdin 0 setiobuf {
     redisplay
     getc
     interpc
-    scratch `pre-validate ' buffer_dump
+    scratch `' buffer_dump
     scratch buffer_validate
 } loop
