@@ -1,3 +1,7 @@
+2004-03-07 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.0 released.
+
 2004-02-29 : Jason Evans <jasone@canonware.com>
 
 	* configure.in : Check for pthread_np.h independently of checking
