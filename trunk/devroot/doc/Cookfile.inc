@@ -42,14 +42,14 @@ HTML_MANUAL = [objdir]/doc/html/manual.html;
 install_docs : docs_install_ps docs_install_pdf docs_install_html;
 docs_install_ps : /* [PS_MANUAL] */
 {
-  [INSTALL] -d [PREFIX]/share/canonware/doc/ps;
-  [INSTALL] -m 0444 [PS_MANUAL] [PREFIX]/share/canonware/doc/ps;
+  [INSTALL] -d [PREFIX]/share/onyx/doc/ps;
+  [INSTALL] -m 0444 [PS_MANUAL] [PREFIX]/share/onyx/doc/ps;
 }
 
 docs_install_pdf : /* [PDF_MANUAL] */
 {
-  [INSTALL] -d [PREFIX]/share/canonware/doc/pdf;
-  [INSTALL] -m 0444 [PDF_MANUAL] [PREFIX]/share/canonware/doc/pdf;
+  [INSTALL] -d [PREFIX]/share/onyx/doc/pdf;
+  [INSTALL] -m 0444 [PDF_MANUAL] [PREFIX]/share/onyx/doc/pdf;
 }
 
 docs_install_html : /* [HTML_MANUAL] */
@@ -58,12 +58,12 @@ docs_install_html : /* [HTML_MANUAL] */
 data
 #![SHELL]
 
-echo [INSTALL] -d [PREFIX]/share/canonware/doc/html
-[INSTALL] -d [PREFIX]/share/canonware/doc/html
+echo [INSTALL] -d [PREFIX]/share/onyx/doc/html
+[INSTALL] -d [PREFIX]/share/onyx/doc/html
 
 for i in `find [objdir]/doc/html -type f`; do
-  echo [INSTALL] -m 0444 $i [PREFIX]/share/canonware/doc/html
-  [INSTALL] -m 0444 $i [PREFIX]/share/canonware/doc/html
+  echo [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
+  [INSTALL] -m 0444 $i [PREFIX]/share/onyx/doc/html
 done
 dataend
 }
@@ -74,8 +74,8 @@ uninstall_docs :
 data
 #![SHELL]
 
-echo rm -rf [PREFIX]/share/canonware/doc
-rm -rf [PREFIX]/share/canonware/doc
+echo rm -rf [PREFIX]/share/onyx/doc
+rm -rf [PREFIX]/share/onyx/doc
 dataend
 }
 

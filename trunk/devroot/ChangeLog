@@ -1,3 +1,8 @@
+2001-07-13  Jason Evans  <jasone@canonware.com>
+
+	* : Install in [prefix]/share/onyx/* instead of
+	[prefix]/share/canonware/onyx/*.
+
 2001-07-12  Jason Evans  <jasone@canonware.com>
 
 	* : Remove libsock, ncat, and proxy.

@@ -91,13 +91,13 @@ modncurses : [MODNCURSES];
 
 modncurses_install : [MODNCURSES]
 {
-  [INSTALL] -d [PREFIX]/share/canonware/onyx/nxmod;
-  [INSTALL] -m 0444 [MODNCURSES] [PREFIX]/share/canonware/onyx/nxmod;
+  [INSTALL] -d [PREFIX]/share/onyx/nxmod;
+  [INSTALL] -m 0444 [MODNCURSES] [PREFIX]/share/onyx/nxmod;
 }
 
 modncurses_uninstall :
 {
-  rm -f [PREFIX]/share/canonware/onyx/nxmod/modncurses.nxm;
+  rm -f [PREFIX]/share/onyx/nxmod/modncurses.nxm;
 }
 
 modncurses_clean :

@@ -95,13 +95,13 @@ modgtk : [MODGTK];
 
 modgtk_install : [MODGTK]
 {
-  [INSTALL] -d [PREFIX]/share/canonware/onyx/nxmod;
-  [INSTALL] -m 0444 [MODGTK] [PREFIX]/share/canonware/onyx/nxmod;
+  [INSTALL] -d [PREFIX]/share/onyx/nxmod;
+  [INSTALL] -m 0444 [MODGTK] [PREFIX]/share/onyx/nxmod;
 }
 
 modgtk_uninstall :
 {
-  rm -f [PREFIX]/share/canonware/onyx/nxmod/modgtk.nxm;
+  rm -f [PREFIX]/share/onyx/nxmod/modgtk.nxm;
 }
 
 modgtk_clean :
