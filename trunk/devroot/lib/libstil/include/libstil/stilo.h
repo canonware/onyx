@@ -56,6 +56,7 @@ typedef enum {
 	STILOT_CONDITION,
 	STILOT_DICT,
 	STILOT_FILE,
+	STILOT_FINO,
 	STILOT_HOOK,
 	STILOT_INTEGER,
 	STILOT_MARK,
@@ -121,7 +122,7 @@ struct cw_stilo_s {
 	/*
 	 * Type.
 	 */
-	cw_stilot_t	type:4;
+	cw_stilot_t	type:5;
 	/*
 	 * If type is STILOT_OPERARTOR and fast_op is TRUE, this operator can be
 	 * handled specially in stilt_loop().
@@ -164,7 +165,7 @@ struct cw_stiloe_s {
 	 * various functions access stiloe's directly, rather than going through
 	 * a referring stilo.
 	 */
-	cw_stilot_t	type:4;
+	cw_stilot_t	type:5;
 	/*
 	 * If TRUE, the string in the key is statically allocated, and should
 	 * not be deallocated during destruction.

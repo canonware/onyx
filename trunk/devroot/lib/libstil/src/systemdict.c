@@ -81,6 +81,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(exit),
 	ENTRY(exp),
 	ENTRY(flush),
+	ENTRY(fino),
 	ENTRY(flushfile),
 	ENTRY(for),
 	ENTRY(foreach),
@@ -143,8 +144,10 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(store),
 	ENTRY(string),
 	ENTRY(sub),
+	ENTRY(sym_rb_gt),
 	ENTRY(sym_gt_gt),
 	{STILN_sym_lb, systemdict_mark},
+	{STILN_sym_lt_lb, systemdict_fino},
 	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
 	ENTRY(symlink),
@@ -1477,6 +1480,17 @@ systemdict_exp(cw_stilt_t *a_stilt)
 
 	stilo_integer_set(a, r);
 	stilo_stack_pop(ostack);
+}
+
+void
+systemdict_fino(cw_stilt_t *a_stilt)
+{
+	cw_stilo_t	*ostack;
+	cw_stilo_t	*stilo;
+
+	ostack = stilt_ostack_get(a_stilt);
+	stilo = stilo_stack_push(ostack);
+	stilo_fino_new(stilo);
 }
 
 void
@@ -3460,6 +3474,13 @@ systemdict_sub(cw_stilt_t *a_stilt)
 	stilo_stack_pop(ostack);
 }
 
+/* ]> */
+void
+systemdict_sym_rb_gt(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
 /* >> */
 void
 systemdict_sym_gt_gt(cw_stilt_t *a_stilt)
@@ -3895,6 +3916,7 @@ systemdict_type(cw_stilt_t *a_stilt)
 		STILN_conditiontype,
 		STILN_dicttype,
 		STILN_filetype,
+		STILN_finotype,
 		STILN_hooktype,
 		STILN_integertype,
 		STILN_marktype,

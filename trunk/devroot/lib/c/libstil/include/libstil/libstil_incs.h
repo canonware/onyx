@@ -33,6 +33,7 @@
 #include "stilo_condition.h"
 #include "stilo_dict.h"
 #include "stilo_file.h"
+#include "stilo_fino.h"
 #include "stilo_hook.h"
 #include "stilo_integer.h"
 #include "stilo_mark.h"

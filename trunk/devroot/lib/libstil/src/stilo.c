@@ -18,6 +18,7 @@
 #include "../include/libstil/stilo_condition_l.h"
 #include "../include/libstil/stilo_dict_l.h"
 #include "../include/libstil/stilo_file_l.h"
+#include "../include/libstil/stilo_fino_l.h"
 #include "../include/libstil/stilo_hook_l.h"
 #include "../include/libstil/stilo_integer_l.h"
 #include "../include/libstil/stilo_mark_l.h"
@@ -87,6 +88,11 @@ static const cw_stilot_vtable_t stilot_vtable[] = {
 	{stiloe_l_file_delete,
 	 stiloe_l_file_ref_iter,
 	 stilo_l_file_print},
+
+	/* STILOT_FINO */
+	{NULL,
+	 NULL,
+	 stilo_l_fino_print},
 
 	/* STILOT_HOOK */
 	{stiloe_l_hook_delete,
@@ -236,6 +242,7 @@ stilo_compare(cw_stilo_t *a_a, cw_stilo_t *a_b)
 		else
 			retval = 1;
 		break;
+	case STILOT_FINO:
 	case STILOT_MARK:
 	case STILOT_NULL:
 		if (a_a->type == a_b->type)

@@ -474,10 +474,12 @@ stilt_loop(cw_stilt_t *a_stilt)
 		case STILOT_BOOLEAN:
 		case STILOT_CONDITION:
 		case STILOT_DICT:
+		case STILOT_FINO:
 		case STILOT_INTEGER:
 		case STILOT_MARK:
 		case STILOT_MUTEX:
 		case STILOT_STACK:
+		case STILOT_THREAD:
 			/*
 			 * Always push the object onto the data stack, even
 			 * though it isn't literal.
@@ -1117,12 +1119,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
 			case ']':
-				/* An operator, not the same as '}'. */
-				stilt_p_token_print(a_stilt, a_stilts, 0, "]");
-				_CW_STILT_PUTC(c);
-				token = TRUE;
-				a_stilt->m.m.action = ACTION_EXECUTE;
-				stilt_p_name_accept(a_stilt, a_stilts);
+				a_stilt->state = STILTTS_RB_CONT;
 				break;
 			case '{':
 				stilt_p_token_print(a_stilt, a_stilts, 0, "{");
@@ -1194,6 +1191,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				a_stilt->m.m.action = ACTION_EXECUTE;
 				stilt_p_name_accept(a_stilt, a_stilts);
 				break;
+			case '[':
+				stilt_p_token_print(a_stilt, a_stilts, 0, "<[");
+				_CW_STILT_PUTC('<');
+				_CW_STILT_PUTC(c);
+				token = TRUE;
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
+				break;
 			case '>':
 				a_stilt->state = STILTTS_START;
 				stilt_p_token_print(a_stilt, a_stilts,
@@ -1244,6 +1249,29 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, cw_uint32_t a_token,
 				    c);
 				if (a_token)
 					goto RETURN;
+			}
+			break;
+		case STILTTS_RB_CONT:
+			_cw_assert(a_stilt->index == 0);
+
+			switch (c) {
+			case '>':
+				stilt_p_token_print(a_stilt, a_stilts, 0, "]>");
+				_CW_STILT_PUTC(']');
+				_CW_STILT_PUTC(c);
+				token = TRUE;
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
+				break;
+			default:
+				/* An operator, not the same as '}'. */
+				stilt_p_token_print(a_stilt, a_stilts, 0, "]");
+				_CW_STILT_PUTC(']');
+				token = TRUE;
+				a_stilt->m.m.action = ACTION_EXECUTE;
+				stilt_p_name_accept(a_stilt, a_stilts);
+
+				goto RESTART;
 			}
 			break;
 		case STILTTS_SLASH_CONT:
