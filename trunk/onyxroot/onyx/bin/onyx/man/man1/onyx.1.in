@@ -26,7 +26,7 @@ The
 programis a stand-alone Onyx language interpreter, with an integrated command
 line editor.
 This manual page only documents the command line usage for
-.B onyx ;
+.BR onyx ;
 much more extensive documentation is available in HTML, PostScript, and PDF
 formats.  See the FILES section below.
 .SS Command line flags:

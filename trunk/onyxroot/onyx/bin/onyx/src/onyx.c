@@ -131,7 +131,7 @@ usage(const char *a_progname)
 	    "    ----------+------------------------------------\n"
 	    "    -h        | Print usage and exit.\n"
 	    "    -V        | Print version information and exit.\n"
-	    "    -e <expr> | Execute <expr> as onyx code.\n",
+	    "    -e <expr> | Execute <expr> as Onyx code.\n",
 	    a_progname, a_progname, a_progname, a_progname, a_progname
 #ifdef _CW_POSIX_FILE
 	    , a_progname
