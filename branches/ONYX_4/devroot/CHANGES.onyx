@@ -3,6 +3,9 @@
 	* lib/libonyx/src/nxo_file.c:nxo_file_write() : Handle short writes (due
 	  to signal interruption) even when there are no buffered data.
 
+	  nxo_p_file_buffer_flush() : Handle short writes (due to signal
+	  interruption).
+
 2003-03-18 : Jason Evans <jasone@canonware.com>
 
 	* Onyx 4.4.0 released.
