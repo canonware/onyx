@@ -1,3 +1,19 @@
+2003-06-07 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/nxo_stack.h : Restructure the internals of
+	  stacks in order to make indexed object access a constant-time
+	  operation.
+
+	  Add the a_mincount argument to nxo_stack_new().
+
+	  Remove:
+	  + nxo_stack_under_push()
+	  + nxo_stack_remove()
+	  + nxo_stack_down_get()
+	  + nxo_stack_up_get()
+	  + NXO_STACK_DOWN_GET()
+	  + NXO_STACK_UP_GET()
+
 2003-05-29 : Jason Evans <jasone@canonware.com>
 
 	* Add operators:

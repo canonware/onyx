@@ -178,6 +178,17 @@ typedef unsigned int cw_bool_t;
  * elements. */
 #define CW_LIBONYX_STACK_CACHE 16
 
+/* Minimum number of object slots within the object arrays that stacks use (not
+ * counting padding slots, which are used to speed up nxo_stack_rot()). */
+#define CW_LIBONYX_STACK_MINCOUNT 16
+
+/* Initial sizes of various stacks. */
+#define CW_LIBONYX_ESTACK_MINCOUNT 64
+#define CW_LIBONYX_ISTACK_MINCOUNT CW_LIBONYX_ESTACK_MINCOUNT
+#define CW_LIBONYX_OSTACK_MINCOUNT 128
+#define CW_LIBONYX_DSTACK_MINCOUNT 8
+#define CW_LIBONYX_TSTACK_MINCOUNT 64
+
 /* Initial size of threaddict. */
 #define CW_LIBONYX_THREADDICT_HASH CW_LIBONYX_DICT_SIZE
 

@@ -23,7 +23,7 @@ The \classname{nxo\_stack} class is a subclass of the \classname{nxo} class.
 \label{nxo_stack_new}
 \index{nxo_stack_new@\cfunc{nxo\_stack\_new}{}}
 \citem{\cfunc[void]{nxo\_stack\_new}{cw\_nxo\_t *a\_nxo, cw\_bool\_t
-a\_locking}}
+a\_locking, cw\_uint32\_t a\_mincount}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -31,6 +31,8 @@ a\_locking}}
 			Pointer to a stack \classname{nxo}.
 		\item[a\_locking: ]
 			Implicit locking mode.
+		\item[a\_mincount: ]
+			Minimum size to allow the internal array to shrink to.
 		\end{description}
 	\item[Output(s): ] None.
 	\item[Exception(s): ]
@@ -122,32 +124,6 @@ a\_locking}}
 	\item[Description: ]
 		Push a no \classname{nxo} onto the bottom of \cvar{a\_nxo} and
 		return a pointer to it.
-	\end{capilist}
-\label{nxo_stack_under_push}
-\index{nxo_stack_under_push@\cfunc{nxo\_stack\_under\_push}{}}
-\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_under\_push}{cw\_nxo\_t *a\_nxo,
-cw\_nxo\_t *a\_object}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxo: ]
-			Pointer to a stack \classname{nxo}.
-		\item[a\_object: ]
-			Pointer to an \classname{nxo} on \cvar{a\_nxo}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			Pointer to a no \classname{nxo} that has been pushed
-			under \cvar{a\_object} on \cvar{a\_nxo}.
-		\end{description}
-	\item[Exception(s): ]
-		\begin{description}\item[]
-		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
-		\end{description}
-	\item[Description: ]
-		Push a no \classname{nxo} under \cvar{a\_object} on
-		\cvar{a\_nxo}.
 	\end{capilist}
 \label{nxo_stack_pop}
 \index{nxo_stack_pop@\cfunc{nxo\_stack\_pop}{}}
@@ -247,23 +223,6 @@ a\_count}}
 	\item[Exception(s): ] None.
 	\item[Description: ]
 		Pop \cvar{a\_count} objects off the bottom of \cvar{a\_nxo}.
-	\end{capilist}
-\label{nxo_stack_remove}
-\index{nxo_stack_remove@\cfunc{nxo\_stack\_remove}{}}
-\citem{\cfunc[void]{nxo\_stack\_remove}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
-*a\_object}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxo: ]
-			Pointer to a stack \classname{nxo}.
-		\item[a\_object: ]
-			Pointer to an object on \cvar{a\_nxo}.
-		\end{description}
-	\item[Output(s): ] None.
-	\item[Exception(s): ] None.
-		Remove \cvar{a\_object} from \cvar{a\_nxo}.
-	\item[Description: ]
 	\end{capilist}
 \label{nxo_stack_get}
 \index{nxo_stack_get@\cfunc{nxo\_stack\_get}{}}
@@ -369,64 +328,6 @@ cw\_uint32\_t a\_index}}
 	\item[Description: ]
 		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} at index
 		\cvar{a\_index}, counting from the bottom.
-	\end{capilist}
-\label{nxo_stack_down_get}
-\index{nxo_stack_down_get@\cfunc{nxo\_stack\_down\_get}{}}
-\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_down\_get}{const cw\_nxo\_t *a\_nxo,
-cw\_nxo\_t *a\_object}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxo: ]
-			Pointer to a stack \classname{nxo}.
-		\item[a\_object: ]
-			Pointer to an object on \cvar{a\_nxo}, or NULL for the
-			top object on \cvar{a\_nxo}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			\begin{description}\item[]
-			\item[non-NULL: ]
-				Pointer to the \cvar{nxo} on \cvar{a\_nxo} under
-				\cvar{a\_object}.
-			\item[NULL: ]
-				Stack underflow.
-			\end{description}
-		\end{description}
-	\item[Exception(s): ] None.
-		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} under
-		\cvar{a\_object}.
-	\item[Description: ]
-	\end{capilist}
-\label{nxo_stack_up_get}
-\index{nxo_stack_up_get@\cfunc{nxo\_stack\_up\_get}{}}
-\citem{\cfunc[cw\_nxo\_t *]{nxo\_stack\_up\_get}{const cw\_nxo\_t *a\_nxo,
-cw\_nxo\_t *a\_object}}
-	\begin{capilist}
-	\item[Input(s): ]
-		\begin{description}\item[]
-		\item[a\_nxo: ]
-			Pointer to a stack \classname{nxo}.
-		\item[a\_object: ]
-			Pointer to an object on \cvar{a\_nxo}, or NULL for the
-			bottom object on \cvar{a\_nxo}.
-		\end{description}
-	\item[Output(s): ]
-		\begin{description}\item[]
-		\item[retval: ]
-			\begin{description}\item[]
-			\item[non-NULL: ]
-				Pointer to the \cvar{nxo} on \cvar{a\_nxo} over
-				\cvar{a\_object}.
-			\item[NULL: ]
-				Stack underflow.
-			\end{description}
-		\end{description}
-	\item[Exception(s): ] None.
-		Return a pointer to the \cvar{nxo} on \cvar{a\_nxo} over
-		\cvar{a\_object}.
-	\item[Description: ]
 	\end{capilist}
 \label{nxo_stack_exch}
 \index{nxo_stack_exch@\cfunc{nxo\_stack\_exch}{}}

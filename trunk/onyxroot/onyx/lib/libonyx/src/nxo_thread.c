@@ -291,11 +291,11 @@ nxo_thread_new(cw_nxo_t *a_nxo, cw_nx_t *a_nx)
     nxa_l_gc_register((cw_nxoe_t *) thread);
 
     /* Finish setting up the internals. */
-    nxo_stack_new(&thread->estack, FALSE);
-    nxo_stack_new(&thread->istack, FALSE);
-    nxo_stack_new(&thread->ostack, FALSE);
-    nxo_stack_new(&thread->dstack, FALSE);
-    nxo_stack_new(&thread->tstack, FALSE);
+    nxo_stack_new(&thread->estack, FALSE, CW_LIBONYX_ESTACK_MINCOUNT);
+    nxo_stack_new(&thread->istack, FALSE, CW_LIBONYX_ISTACK_MINCOUNT);
+    nxo_stack_new(&thread->ostack, FALSE, CW_LIBONYX_OSTACK_MINCOUNT);
+    nxo_stack_new(&thread->dstack, FALSE, CW_LIBONYX_DSTACK_MINCOUNT);
+    nxo_stack_new(&thread->tstack, FALSE, CW_LIBONYX_TSTACK_MINCOUNT);
 
     nxo_dup(&thread->stdin_nxo, nx_stdin_get(a_nx));
     nxo_dup(&thread->stdout_nxo, nx_stdout_get(a_nx));
@@ -1168,7 +1168,7 @@ nxo_thread_dstack_search(cw_nxo_t *a_nxo, cw_nxo_t *a_key, cw_nxo_t *r_value)
 	 i < depth;
 	 i++)
     {
-	dict = nxo_stack_down_get(&thread->dstack, dict);
+	dict = nxo_stack_nget(&thread->dstack, i);
 	if (nxo_dict_lookup(dict, a_key, r_value) == FALSE)
 	{
 	    /* Found. */
@@ -2855,7 +2855,7 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 	 i < depth;
 	 i++)
     {
-	nxo = nxo_stack_down_get(&a_thread->ostack, nxo);
+	nxo = nxo_stack_nget(&a_thread->ostack, i);
 	if (nxo_type_get(nxo) == NXOT_PMARK)
 	{
 	    break;
@@ -2876,11 +2876,11 @@ nxoe_p_thread_procedure_accept(cw_nxoe_thread_t *a_thread)
 #endif
     nxo_attr_set(tnxo, NXOA_EXECUTABLE);
 
-    /* Traverse down the stack, moving nxo's to the array. */
-    for (i = nelements, nxo = NULL; i > 0; i--)
+    /* Iterate up the stack, dup'ing nxo's to the array. */
+    for (i = 0; i < nelements; i++)
     {
-	nxo = nxo_stack_down_get(&a_thread->ostack, nxo);
-	nxo_array_el_set(tnxo, nxo, i - 1);
+	nxo = nxo_stack_nget(&a_thread->ostack, nelements - 1 - i);
+	nxo_array_el_set(tnxo, nxo, i);
     }
 
     /* Pop the nxo's off the stack now. */

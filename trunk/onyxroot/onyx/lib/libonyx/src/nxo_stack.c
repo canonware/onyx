@@ -7,7 +7,7 @@
  ******************************************************************************
  *
  * Version: Onyx <Version = onyx>
- *
+ *XXX
  * Stack object space is allocated on a per-element basis, and a certain number
  * of elements are cached to avoid allocation/deallocation overhead in the
  * common case.  Doing chunked allocation of stack elements would be slightly
@@ -32,7 +32,7 @@
 #include "../include/libonyx/nxo_stack_l.h"
 
 void
-nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking)
+nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking, cw_uint32_t a_mincount)
 {
     cw_nxoe_stack_t *stack;
 
@@ -46,17 +46,37 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking)
     }
 #endif
 
-    ql_new(&stack->stack);
-
-    stack->count = 0;
     stack->nspare = 0;
 
-    ql_elm_new(&stack->under, link);
-    ql_head_insert(&stack->stack, &stack->under, link);
+    if (a_mincount < CW_LIBONYX_STACK_MINCOUNT)
+    {
+	stack->ahmin = stack->ahlen = CW_LIBONYX_STACK_MINCOUNT * 2;
+    }
+    else
+    {
+	stack->ahmin = stack->ahlen = a_mincount * 2;
+    }
+
+    stack->abase = 0;
+    stack->abeg = stack->aend = stack->ahmin / 2;
+
+    xep_begin();
+    xep_try
+    {
+	stack->a = (cw_nxo_t **) nxa_malloc(stack->ahlen * 2 *
+					    sizeof(cw_nxo_t *));
+    }
+    xep_catch (CW_ONYXX_OOM)
+    {
+	nxa_free(stack, sizeof(cw_nxoe_stack_t));
+    }
+    xep_end();
 
 #ifdef CW_THREADS
-    stack->below = NULL;
+    stack->rstate = RSTATE_NONE;
 #endif
+    stack->rbase = stack->ahlen;
+    stack->r = stack->a;
 
     nxo_no_new(a_nxo);
     a_nxo->o.nxoe = (cw_nxoe_t *) stack;
@@ -65,72 +85,264 @@ nxo_stack_new(cw_nxo_t *a_nxo, cw_bool_t a_locking)
     nxa_l_gc_register((cw_nxoe_t *) stack);
 }
 
+CW_P_INLINE void
+nxoe_p_stack_grow(cw_nxoe_stack_t *a_stack, cw_uint32_t a_beg_pad,
+		  cw_uint32_t a_end_pad)
+{
+    cw_uint32_t rhlen, count, pcount;
+
+    /* Protect the current array. */
+    rhlen = a_stack->ahlen;
+    a_stack->rbase = a_stack->abase;
+    a_stack->rbeg = a_stack->abeg;
+    a_stack->rend = a_stack->aend;
+#ifdef CW_THREADS
+    mb_write();
+    a_stack->rstate = RSTATE_RONLY;
+    mb_write();
+#endif
+
+    /* Determine how large to make the new array. */
+    count = a_stack->rend - a_stack->rbeg;
+    pcount = count + a_beg_pad + a_end_pad;
+    for (;
+	 a_stack->ahlen < pcount * 2;
+	 a_stack->ahlen *= 2)
+    {
+	/* Do nothing. */
+    }
+
+    /* Allocate a new array and copy. */
+    a_stack->a = (cw_nxo_t **) nxa_malloc(a_stack->ahlen * 2 *
+					  sizeof(cw_nxo_t *));
+    a_stack->abase = 0;
+    a_stack->abeg = ((a_stack->ahlen - pcount) / 2) + a_beg_pad;
+    a_stack->aend = a_stack->abeg + count;
+    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   count * sizeof(cw_nxo_t *));
+
+#ifdef CW_THREADS
+    /* Unprotect. */
+    mb_write();
+    a_stack->rstate = RSTATE_NONE;
+    mb_write();
+#endif
+
+    /* Update r*. */
+    a_stack->rbase = a_stack->ahlen;
+    nxa_free(a_stack->r, rhlen * 2 * sizeof(cw_nxo_t *));
+    a_stack->r = a_stack->a;
+}
+
+/* Copy the entire array, centering the valid elements as though there were
+ * a_beg_pad leading elements and a_end_pad trailing elements. */
+CW_P_INLINE void
+nxoe_p_stack_center(cw_nxoe_stack_t *a_stack, cw_uint32_t a_beg_pad,
+		    cw_uint32_t a_end_pad)
+{
+    cw_uint32_t trbase, count, pcount;
+
+    /* Protect the region that is being moved. */
+    trbase = a_stack->rbase;
+    a_stack->rbase = a_stack->abase;
+    a_stack->rbeg = a_stack->abeg;
+    a_stack->rend = a_stack->aend;
+#ifdef CW_THREADS
+    mb_write();
+    a_stack->rstate = RSTATE_RONLY;
+    mb_write();
+#endif
+
+    /* Center. */
+    count = a_stack->rend - a_stack->rbeg;
+    pcount = count + a_beg_pad + a_end_pad;
+    a_stack->abase = trbase;
+    cw_assert(pcount <= a_stack->ahlen);
+    a_stack->abeg = ((a_stack->ahlen - pcount) / 2) + a_beg_pad;
+    a_stack->aend = a_stack->abeg + count;
+    cw_assert(a_stack->aend < a_stack->ahlen);
+    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   count * sizeof(cw_nxo_t *));
+
+#ifdef CW_THREADS
+    /* Unprotect. */
+    mb_write();
+    a_stack->rstate = RSTATE_NONE;
+#endif
+}
+
 void
 nxo_stack_copy(cw_nxo_t *a_to, cw_nxo_t *a_from)
 {
-    cw_nxo_t *nxo_to, *nxo_fr;
-    cw_uint32_t i, count;
+    cw_nxoe_stack_t *to, *fr;
+    cw_nxo_t *nxo;
+    cw_uint32_t to_count, fr_count, i;
 
     cw_check_ptr(a_to);
     cw_dassert(a_to->magic == CW_NXO_MAGIC);
 	  
+    to = (cw_nxoe_stack_t *) a_to->o.nxoe;
+    cw_dassert(to->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(to->nxoe.type == NXOT_STACK);
+
     cw_check_ptr(a_from);
     cw_dassert(a_from->magic == CW_NXO_MAGIC);
 
-    for (i = 0, count = nxo_stack_count(a_from), nxo_fr = NULL, nxo_to = NULL;
-	 i < count;
-	 i++)
+    fr = (cw_nxoe_stack_t *) a_from->o.nxoe;
+    cw_dassert(fr->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(fr->nxoe.type == NXOT_STACK);
+
+    /* Grow or recenter a_to if necessary. */
+    to_count = to->aend - to->abeg;
+    fr_count = fr->aend - fr->abeg;
+    if (to_count + fr_count > to->ahlen / 2)
     {
-	nxo_fr = nxo_stack_down_get(a_from, nxo_fr);
-	nxo_to = nxo_stack_under_push(a_to, nxo_to);
-	nxo_dup(nxo_to, nxo_fr);
+	nxoe_p_stack_grow(to, fr_count, 0);
     }
+    else if (fr_count > to->abeg)
+    {
+	nxoe_p_stack_center(to, fr_count, 0);
+    }
+
+    /* Iteratively create nxo's, insert them into a_to, and dup the nxo contents
+     * from a_from. */
+    for (i = 0; to->nspare && i < fr_count; i++)
+    {
+	to->nspare--;
+	nxo = to->spare[to->nspare];
+
+	nxo_no_new(nxo);
+	nxo_dup(nxo, fr->a[fr->abase + fr->abeg + i]);
+	to->a[to->abase + to->abeg - fr_count + i] = nxo;
+    }
+    for (; i < fr_count; i++)
+    {
+	nxo = (cw_nxo_t *) nxa_malloc(sizeof(cw_nxo_t));
+
+	nxo_no_new(nxo);
+	nxo_dup(nxo, fr->a[fr->abase + fr->abeg + i]);
+	to->a[to->abase + to->abeg - fr_count + i] = nxo;
+    }
+
+    /* Now that a_from's contents have been copied, adjust a_to's array bounds.
+     * */
+    mb_write();
+    to->abeg -= fr_count;
+}
+
+void
+nxoe_p_stack_shrink(cw_nxoe_stack_t *a_stack)
+{
+    cw_uint32_t rhlen, count;
+
+    /* Protect the current array. */
+    rhlen = a_stack->ahlen;
+    a_stack->rbase = a_stack->abase;
+    a_stack->rbeg = a_stack->abeg;
+    a_stack->rend = a_stack->aend;
+#ifdef CW_THREADS
+    mb_write();
+    a_stack->rstate = RSTATE_RONLY;
+    mb_write();
+#endif
+
+    /* Determine how large to make the new array. */
+    for (count = a_stack->aend - a_stack->abeg;
+	 a_stack->ahlen > count * 2 && a_stack->ahlen > a_stack->ahmin;
+	 a_stack->ahlen /= 2)
+    {
+	/* Do nothing. */
+    }
+
+    /* Allocate a new array and copy. */
+    a_stack->a = (cw_nxo_t **) nxa_malloc(a_stack->ahlen * 2 *
+					  sizeof(cw_nxo_t *));
+    a_stack->abase = 0;
+    a_stack->abeg = (a_stack->ahlen - count) / 2;
+    a_stack->aend = a_stack->abeg + count;
+    memcpy(&a_stack->a[a_stack->abase + a_stack->abeg],
+	   &a_stack->r[a_stack->rbase + a_stack->rbeg],
+	   count * sizeof(cw_nxo_t *));
+
+#ifdef CW_THREADS
+    /* Unprotect. */
+    mb_write();
+    a_stack->rstate = RSTATE_NONE;
+    mb_write();
+#endif
+
+    /* Update r*. */
+    a_stack->rbase = a_stack->ahlen;
+    nxa_free(a_stack->r, rhlen * 2 * sizeof(cw_nxo_t *));
+    a_stack->r = a_stack->a;
 }
 
 /* This function handles a special case for nxo_stack_push(), but is done as a
  * separate function to keep nxo_stack_push() small. */
-cw_nxoe_stacko_t *
+cw_nxo_t *
 nxoe_p_stack_push(cw_nxoe_stack_t *a_stack)
 {
-    cw_nxoe_stacko_t *retval;
+    cw_nxo_t *retval;
 
-    /* No spares.  Allocate and insert one. */
-    retval = (cw_nxoe_stacko_t *) nxa_malloc(sizeof(cw_nxoe_stacko_t));
-    qr_new(retval, link);
-    nxo_no_new(&retval->nxo);
-    qr_after_insert(&a_stack->under, retval, link);
+    /* Grow if more than half of the available slots will be filled after
+     * insertion.  Otherwise, shift the array contents. */
+    if (a_stack->aend - a_stack->abeg + 1 > a_stack->ahlen / 2)
+    {
+	nxoe_p_stack_grow(a_stack, 1, 0);
+    }
+    else
+    {
+	nxoe_p_stack_center(a_stack, 1, 0);
+    }
+
+    /* Allocate new object. */
+    if (a_stack->nspare)
+    {
+	a_stack->nspare--;
+	retval = a_stack->spare[a_stack->nspare];
+    }
+    else
+    {
+	retval = (cw_nxo_t *) nxa_malloc(sizeof(cw_nxo_t));
+    }
 
     return retval;
 }
 
 /* This function handles a special case for nxo_stack_bpush(), but is done as a
  * separate function to keep nxo_stack_bpush() small. */
-cw_nxoe_stacko_t *
+cw_nxo_t *
 nxoe_p_stack_bpush(cw_nxoe_stack_t *a_stack)
 {
-    cw_nxoe_stacko_t *retval;
+    cw_nxo_t *retval;
 
-    /* No spares.  Allocate and insert one. */
-    retval = (cw_nxoe_stacko_t *) nxa_malloc(sizeof(cw_nxoe_stacko_t));
-    qr_new(retval, link);
+    /* Grow if more than half of the available slots will be filled after
+     * insertion.  Otherwise, shift the array contents. */
+    if (a_stack->aend - a_stack->abeg + 1 > a_stack->ahlen / 2)
+    {
+	/* Grow. */
+	nxoe_p_stack_grow(a_stack, 0, 1);
+    }
+    else
+    {
+	/* Shift the array contents. */
+	nxoe_p_stack_center(a_stack, 0, 1);
+    }
+
+    /* Allocate and insert new object. */
+    if (a_stack->nspare)
+    {
+	a_stack->nspare--;
+	retval = a_stack->spare[a_stack->nspare];
+    }
+    else
+    {
+	retval = (cw_nxo_t *) nxa_malloc(sizeof(cw_nxo_t));
+    }
 
     return retval;
-}
-
-/* This function handles a special case for nxo_stack_pop(), but is done as a
- * separate function to keep nxo_stack_pop() small. */
-void
-nxoe_p_stack_pop(cw_nxoe_stack_t *a_stack)
-{
-    cw_nxoe_stacko_t *stacko;
-
-    cw_assert(a_stack->nspare == CW_LIBONYX_STACK_CACHE);
-
-    /* Throw the popped element away. */
-    stacko = ql_first(&a_stack->stack);
-    ql_first(&a_stack->stack) = qr_next(ql_first(&a_stack->stack), link);
-    qr_remove(stacko, link);
-    nxa_free(stacko, sizeof(cw_nxoe_stacko_t));
 }
 
 /* This function handles a special case for nxo_stack_npop(), but is done as a
@@ -139,72 +351,24 @@ void
 nxoe_p_stack_npop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
-    cw_nxoe_stacko_t *top, *stacko, *tstacko;
+
+    /* Save spares. */
+    for (i = 0; a_stack->nspare < CW_LIBONYX_STACK_CACHE && i < a_count; i++)
+    {
+	a_stack->spare[a_stack->nspare]
+	    = a_stack->a[a_stack->abase + a_stack->abeg - a_count + i];
 #ifdef CW_DBG
-    cw_nxoe_stacko_t *spare = ql_first(&a_stack->stack);
-    cw_uint32_t nspares;
+	memset(a_stack->spare[a_stack->nspare], 0x5a, sizeof(cw_nxo_t));
 #endif
-
-    /* We need to discard some spares, so get a pointer to the beginning of the
-     * region to be removed from the ring. */
-    for (i = 0, stacko = ql_first(&a_stack->stack);
-	 i < CW_LIBONYX_STACK_CACHE - a_stack->nspare;
-	 i++)
-    {
-	stacko = qr_next(stacko, link);
-    }
-#ifdef CW_DBG
-    nspares = i;
-#endif
-    for (top = stacko; i < a_count; i++)
-    {
-	top = qr_next(top, link);
+	a_stack->nspare++;
     }
 
-    /* We now have:
-     *
-     * ql_first(&a_stack->stack) --> /----------\ \
-     *                               |          | |
-     *                               |          | |
-     *                               |          | |
-     *                               |          | |
-     *                               |          | |
-     *                               \----------/  \ a_count
-     *                    stacko --> /----------\  / \
-     *                               |          | |  |
-     *                               |          | |   \ nspare
-     *                               |          | |   / + a_count
-     *                               |          | |  |  - max cache
-     *                               |          | |  /
-     *                               \----------/ /
-     *                       top --> /----------\
-     *                               |          |
-     *                               |          |
-     *                               |          |
-     *                               |          |
-     *                               |          |
-     *                               \----------/
-     *
-     * Remove the region from stacko (inclusive) down to top
-     * (exclusive), then deallocate those stacko's. */
-    ql_first(&a_stack->stack) = top;
-    qr_split(stacko, top, cw_nxoe_stacko_t, link);
-
-    for (i = 0; i < a_stack->nspare + a_count - CW_LIBONYX_STACK_CACHE; i++)
+    /* Discard nxo's since the spares array is full. */
+    for (; i < a_count; i++)
     {
-	tstacko = qr_next(stacko, link);
-	qr_remove(tstacko, link);
-	nxa_free(tstacko, sizeof(cw_nxoe_stacko_t));
+	nxa_free(a_stack->a[a_stack->abase + a_stack->abeg - a_count + i],
+		 sizeof(cw_nxo_t));
     }
-
-    a_stack->nspare = CW_LIBONYX_STACK_CACHE;
-
-#ifdef CW_DBG
-    for (i = 0; i < nspares; i++, spare = qr_next(spare, link))
-    {
-	memset(&spare->nxo, 0x5a, sizeof(cw_nxo_t));
-    }
-#endif
 }
 
 /* This function handles a special case for nxo_stack_nbpop(), but is done as a
@@ -213,77 +377,22 @@ void
 nxoe_p_stack_nbpop(cw_nxoe_stack_t *a_stack, cw_uint32_t a_count)
 {
     cw_uint32_t i;
-    cw_nxoe_stacko_t *bottom, *stacko, *tstacko;
+
+    /* Save spares. */
+    for (i = 0; a_stack->nspare < CW_LIBONYX_STACK_CACHE && i < a_count; i++)
+    {
+	a_stack->spare[a_stack->nspare]
+	    = a_stack->a[a_stack->abase + a_stack->aend + i];
 #ifdef CW_DBG
-    cw_uint32_t nspares;
+	memset(a_stack->spare[a_stack->nspare], 0x5a, sizeof(cw_nxo_t));
 #endif
-
-    /* We need to discard some spares, so get a pointer to the beginning of the
-     * region to be removed from the ring. */
-    for (i = 0, stacko = &a_stack->under;
-	 i < CW_LIBONYX_STACK_CACHE - a_stack->nspare;
-	 i++)
-    {
-	stacko = qr_prev(stacko, link);
-    }
-#ifdef CW_DBG
-    nspares = i;
-#endif
-    for (bottom = stacko; i < a_count; i++)
-    {
-	bottom = qr_prev(bottom, link);
+	a_stack->nspare++;
     }
 
-    /* We now have:
-     *
-     * ql_first(&a_stack->stack) --> /----------\
-     *                               |          |
-     *                               |          |
-     *                               |          |
-     *                               |          |
-     *                               |          |
-     *                               \----------/
-     *                    bottom --> /----------\ \
-     *                               |          | |
-     *                               |          | |
-     *                               |          | |
-     *                               |          | |
-     *                               |          | |
-     *                               \----------/  \ a_count
-     *                    stacko --> /----------\  / \
-     *                               |          | |  |
-     *                               |          | |  |
-     *                               |          | |   \ max cache - nspare
-     *                               |          | |   /
-     *                               |          | |  |
-     *                               \----------/ /  /
-     *               stack.under --> /----------\
-     *                               |          |
-     *                               :          :
-     *                               :          :
-     *
-     * 1) Split bottom/under.
-     * 2) Split bottom/stacko.
-     * 3) Meld first/stacko.
-     * 4) Deallocate the ring pointed to by bottom. */
-
-    qr_split(bottom, &a_stack->under, cw_nxoe_stacko_t, link);
-    qr_split(bottom, stacko, cw_nxoe_stacko_t, link);
-    qr_meld(ql_first(&a_stack->stack), stacko, cw_nxoe_stacko_t, link);
-    
-    for (i = 0; i < a_stack->nspare + a_count - CW_LIBONYX_STACK_CACHE; i++)
+    /* Discard nxo's since the spares array is full. */
+    for (; i < a_count; i++)
     {
-	tstacko = qr_next(bottom, link);
-	qr_remove(tstacko, link);
-	nxa_free(tstacko, sizeof(cw_nxoe_stacko_t));
+	nxa_free(a_stack->a[a_stack->abase + a_stack->aend + i],
+		 sizeof(cw_nxo_t));
     }
-
-    a_stack->nspare = CW_LIBONYX_STACK_CACHE;
-
-#ifdef CW_DBG
-    for (i = 0; i < nspares; i++, stacko = qr_next(stacko, link))
-    {
-	memset(&stacko->nxo, 0x5a, sizeof(cw_nxo_t));
-    }
-#endif
 }

@@ -370,7 +370,7 @@ nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     /* Dup the substrings into r_matches. */
     for (i = 0, tnxo = nxo_stack_get(tstack);
 	 i < acnt;
-	 i++, tnxo = nxo_stack_down_get(tstack, tnxo))
+	 i++, tnxo = nxo_stack_nget(tstack, i))
     {
 	nxo_array_el_set(r_array, tnxo, acnt - 1 - i);
     }
