@@ -71,19 +71,20 @@ dstack saup
 
     # Column.
     ` C' print
-    bpoint marker_position
-    bpoint marker_copy dup -1 marker_seekline pop marker_position
+    tpoint dup 0 bpoint marker_seek
+    exch -1 marker_seekline
     sub cvs print
     `/' print
-    bpoint marker_copy dup 1 marker_seekline pop marker_position
-    bpoint marker_copy dup -1 marker_seekline pop marker_position
+    tpoint dup 0 bpoint marker_seek pop
+    dup 1 marker_seekline
+    exch -1 marker_seekline
     sub cvs print
 
     # Character.
     ` c' print
     bpoint marker_position cvs print
     `/' print
-    scratch marker 0 /SEEK_EOB marker_seek cvs print
+    scratch buffer_length cvs print
 
     # Mark.
     ` m' print
@@ -100,8 +101,8 @@ dstack saup
 
 # #=buffer= b2s #string
 /b2s {
-    marker dup marker_copy
-    dup 0 /SEEK_EOB marker_seek pop
+    tmark dup 0 /SEEK_BOB marker_seek pop
+    tpoint dup 0 /SEEK_EOB marker_seek pop
     marker_range_get
 } def
 
@@ -125,7 +126,8 @@ dstack saup
 
     hs
     `\r\n' print
-    bob dup 0 /SEEK_REL marker_seek pop bpoint marker_range_get
+    tpoint dup 0 /SEEK_BOB marker_seek pop bpoint marker_range_get
+#    bob dup 0 /SEEK_REL marker_seek pop bpoint marker_range_get
     srender flush
 } def
 
@@ -175,7 +177,8 @@ dstack saup
     }
     # C-space
     `\x00' {
-	/bmark bpoint marker_copy def
+	bmark 0 bpoint marker_seek pop
+#	/bmark bpoint marker_copy def
     }
     `\cw' {
 	scratch bpoint buffer_history_startgroup
@@ -209,8 +212,9 @@ dstack saup
 
 /scratch buffer def
 /bpoint scratch marker def
+/tpoint scratch marker def
 /bmark scratch marker def
-/bob scratch marker def
+/tmark scratch marker def
 
 scratch <
     /name	`*scratch*'
