@@ -371,8 +371,7 @@ stilt_p_thread_entry(void *a_arg)
 		mtx_delete(&arg->lock);
 		stilt_delete(arg->stilt);
 		thd_delete(arg->thd);
-		/* XXX Need to free this once thd_delete() is safe. */
-/*  		_cw_free(arg); */
+		_cw_free(arg);
 	} else if (arg->joined) {
 		/* Wake the joiner back up. */
 		cnd_signal(&arg->join_cnd);
