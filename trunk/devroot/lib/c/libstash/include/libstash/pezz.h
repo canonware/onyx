@@ -11,16 +11,14 @@
  * <<< Description >>>
  *
  * Public interface for the pezz class.  pezz is similar to the bufpool class,
- * but differs in that it does all buffer allocation during initialization, and
- * when there are no available buffers, allocation is handled using malloc(),
- * but these malloc()ed buffers cannot be cached.
+ * but differs in that it does incremental block allocation, then carves buffers
+ * from those blocks.  No memory is freed until pezz_delete() is called.
  *
  ****************************************************************************/
 
 /* Pseudo-opaque type. */
 typedef struct cw_pezz_s cw_pezz_t;
 
-#if (0)
 struct cw_pezz_s
 {
   cw_bool_t is_malloced;
@@ -31,53 +29,32 @@ struct cw_pezz_s
   cw_mtx_t lock;
 #endif
 
-  /* Pointer to base of the memory block where all the buffers and ring
-   * structures are. */
-  void * mem_base;
-  /* Pointer one byte past the end of the memory block pointed to by
-   * mem_base. */
-  void * mem_end;
-
-  /* Pointer to base of the rings memory block. */
-  cw_ring_t * rings;
-  
   /* Size of one buffer, from the user's perspective. */
   cw_uint32_t buffer_size;
 
-  /* Max number of buffers available from this pezz. */
-  cw_uint32_t num_buffers;
-
-  /* Ring seam for spare buffers. */
-  cw_ring_t * spare_buffers;
-};
-#endif
-
-struct cw_pezz_s
-{
-  cw_bool_t is_malloced;
-#if (defined(_LIBSTASH_DBG) || defined(_LIBSTASH_DEBUG))
-  cw_uint32_t magic;
-#endif
-#ifdef _CW_REENTRANT
-  cw_mtx_t lock;
-#endif
-
+  /* Number of buffers in one block.  One block is
+   * (buffer_size * block_num_buffers) bytes. */
+  cw_uint32_t block_num_buffers;
+  
   /* Pointer to an array of base addresses for the memory blocks from which
    * memory is allocated. */
-  void * mem_blocks;
+  void ** mem_blocks;
 
   /* Pointer to an array of base addresses for the memory blocks that are used
    * for ring structures. */
-  cw_ring_t * ring_blocks;
+  cw_ring_t ** ring_blocks;
 
+  /* Number of blocks allocated (number of elements in the mem_blocks[] and
+   * ring_blocks[] arrays. */
+  cw_uint32_t num_blocks;
   
-
-  /* Size of one buffer, from the user's perspective. */
-  cw_uint32_t buffer_size;
-
-  
-  /* Ring seam for spare buffers. */
+  /* Ring seam for spare (unallocated) buffers. */
   cw_ring_t * spare_buffers;
+
+  /* Ring seam for spare rings.  This ring has no associated data, and is merely
+   * a cache of ring structures to be used for insertion into the spare_buffers
+   * ring. */
+  cw_ring_t * spare_rings;
 };
 
 /****************************************************************************
@@ -88,7 +65,8 @@ struct cw_pezz_s
  *
  * a_buffer_size : Size of buffers to allocate and return from pezz_get().
  *
- * a_num_buffers : Number of buffers to pre-allocate.
+ * a_num_buffers : Number of buffers to allocate space for each time a new
+ *                 memory block is allocated.
  *
  * <<< Output(s) >>>
  *

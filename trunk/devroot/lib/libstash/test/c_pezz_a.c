@@ -105,7 +105,7 @@ main()
 
     pezz_delete(&pezz);
   }
-
+  
   log_printf(cw_g_log, "Test end\n");
   libstash_shutdown();
   return 0;

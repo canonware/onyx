@@ -1,3 +1,11 @@
+1999-05-17  J. Owen Evans  <jasone@canonware.com>
+
+	* src/pezz.c: Completely re-write the pezz class, such that all
+	buffers are carved from blocks of memory, and new blocks are
+	allocated as needed.  The previous implementation only used one
+	block of memory, then resorted to individual buffer allocations
+	once the block was fully utilized.
+
 1999-05-10  Jason Evans  <jasone@canonware.com>
 
 	* test/verify.in: Add.  verify.in provides support for regression
