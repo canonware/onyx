@@ -263,7 +263,7 @@ if test "x$enable_onyx" = "x1" ; then
 fi
 
 if test "<Version>" != "<Version\>" ; then
-  onyx_version=<Version = onyx>
+  onyx_version="<Version = onyx>"
 else
   onyx_version=devel
 fi
@@ -289,7 +289,7 @@ if test "x$enable_slate" = "x1" ; then
 fi
 
 if test "<Version>" != "<Version\>" ; then
-  slate_version=<Version = slate>
+  slate_version="<Version = slate>"
 else
   slate_version=devel
 fi

@@ -66,9 +66,11 @@ dnl Build onyx by default.
 CW_ENABLE_ONYX
 
 dnl Build slate by default.
-if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1"
+if test "x$enable_threads" = "x1" -a "x$enable_real" = "x1" \
      -a "x$enable_posix" = "x1" -a "x$enable_posix_file" = "x1" ; then
   CW_ENABLE_SLATE
+else
+  AC_MSG_RESULT(Missing configuration options necessary for slate)
 fi
 
 dnl Do not compile with debugging by default.
@@ -103,11 +105,14 @@ AC_CHECK_FUNCS(dlopen, AC_DEFINE(HAVE_DLOPEN), \
     AC_MSG_RESULT(Modules disabled since dlopen is missing)]))
 
 if test "x$enable_modules" = "xyes" -a "x$enable_threads" = "x1" \
-     -a "x$enable_posix" = "x1" ; then
+     -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
+     -a "x$enable_posix_file" = "x1" ; then
   dnl modgtk.
   PKG_CHECK_MODULES(GTK, gtk+-2.0 >= $GTK_VERSION_REQUIRED, \
     CW_BUILD_MOD(modgtk, mod_gtk), \
     AC_MSG_RESULT(gtk+ $GTK_VERSION_REQUIRED or newer not found))
+else
+  AC_MSG_RESULT(Missing configuration options necessary for modgtk)
 fi
 
 dnl Look for binaries.

@@ -275,7 +275,7 @@ if test "x$enable_onyx" = "x1" ; then
 fi
 
 if test "<Version>" != "<Version\>" ; then
-  onyx_version=<Version = onyx>
+  onyx_version="<Version = onyx>"
 else
   onyx_version=devel
 fi
@@ -301,7 +301,7 @@ if test "x$enable_slate" = "x1" ; then
 fi
 
 if test "<Version>" != "<Version\>" ; then
-  slate_version=<Version = slate>
+  slate_version="<Version = slate>"
 else
   slate_version=devel
 fi
@@ -317,6 +317,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/lib/$1" ; then
   build_$1="yes"
   $2=1
+  cfgoutputs="$cfgoutputs lib/$1/Cookfile.inc"
   if test -f "$srcdir/lib/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/lib/$1/doc/latex
     cfgoutputs="$cfgoutputs lib/$1/doc/latex/manual.tex"
@@ -341,6 +342,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/mod/$1" ; then
   build_$1="yes"
   $2=1
+  cfgoutputs="$cfgoutputs mod/$1/Cookfile.inc"
   if test -f "$srcdir/mod/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/mod/$1/doc/latex
     cfgoutputs="$cfgoutputs mod/$1/doc/latex/manual.tex"
@@ -365,6 +367,7 @@ AC_MSG_CHECKING(whether to include $1 in build)
 if test -d "$srcdir/bin/$1" ; then
   build_$1="yes"
   $2=1
+  cfgoutputs="$cfgoutputs bin/$1/Cookfile.inc"
   if test -f "$srcdir/bin/$1/doc/latex/manual.tex.in" ; then
     mkdir -p $objdir/bin/$1/doc/latex
     cfgoutputs="$cfgoutputs bin/$1/doc/latex/manual.tex"
@@ -397,7 +400,7 @@ if test -d "$srcdir/doc/latex/$1" ; then
   $2=1
   if test -f "$srcdir/doc/latex/$1/$1.tex.in" ; then
     mkdir -p $objdir/doc/latex/$1
-    cfgoutputs="$cfgoutputs doc/latex/$1/$1.tex"
+    cfgoutputs="$cfgoutputs doc/latex/$1/$1.tex doc/latex/$1/Cookfile.inc"
   fi
   docs="$docs $1"
 else
