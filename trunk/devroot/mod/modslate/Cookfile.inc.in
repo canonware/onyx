@@ -114,11 +114,11 @@ CPPFLAGS = -I@srcroot@/mod/modslate/include
 [MODSLATE] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [MODSLATE_SRCS]]
   set mkdir
 {
-  [CC]
+  [TCC]
 #if [matches elf @abi@]
-       -shared
+        -shared
 #elif [matches macho @abi@]
-       -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
+        -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
 #endif
-       -o [target] [need] [MODSLATE_LDFLAGS];
+        -o [target] [need] [MODSLATE_LDFLAGS];
 }

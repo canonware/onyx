@@ -111,8 +111,8 @@ slate_bins_distclean :
            [SLATE]
   set mkdir
 {
-  [CC] [A_CFLAGS] -o [target]
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TSLATE_SRCS]];
+  [TCC] [A_CFLAGS] -o [target]
+        [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [TSLATE_SRCS]];
 }
 
 [SLATE] : [fromto @srcroot@/%0%.nx.in.in @objroot@/%0%.nx.in [SLATE_NSRCS]] mods

@@ -38,8 +38,9 @@ bins_distclean : [addsuffix _bins_clean @bins@];
 @objroot@/bin/%0src/%1.o_a : @srcroot@/bin/%0src/%1.c
   set mkdir
 {
-  [CC] [A_CFLAGS] [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
-       [CPPDEFS] -c @srcroot@/bin/%0src/%1.c -o [target];
+  [TCC] [A_CFLAGS] [CPPFLAGS]
+        -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
+        [CPPDEFS] -c @srcroot@/bin/%0src/%1.c -o [target];
 
   c_incl [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
          --no-cache -Absent_Local_Ignore -No_System @srcroot@/bin/%0src/%1.c
@@ -52,7 +53,8 @@ bins_distclean : [addsuffix _bins_clean @bins@];
 @objroot@/bin/%0src/%1.o_a : @objroot@/bin/%0src/%1.c
   set mkdir
 {
-  [CC] [A_CFLAGS] [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
+  [TCC] [A_CFLAGS] [CPPFLAGS]
+       -I@srcroot@/bin/%0include -I@objroot@/bin/%0include
        [CPPDEFS] -c @objroot@/bin/%0src/%1.c -o [target];
 
   c_incl [CPPFLAGS] -I@srcroot@/bin/%0include -I@objroot@/bin/%0include

@@ -63,8 +63,10 @@ else
 
 /* Paths to programs used by the build system. */
 SHELL = /bin/sh;
-if [not [defined CC]] then
-  CC = [split " " [strip "@CC@"]];
+if [not [defined HCC]] then
+  HCC = [split " " [strip "@HCC@"]];
+if [not [defined TCC]] then
+  TCC = [split " " [strip "@TCC@"]];
 
 /* Build parameters. */
 if [not [defined CPPFLAGS]] then

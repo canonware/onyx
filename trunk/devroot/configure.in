@@ -69,6 +69,30 @@ if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
 fi
 AC_PROG_CPP
 
+dnl Check for non-default host C compiler.
+AC_ARG_WITH(host-cc, [  --with-host-cc          Host-specific C compiler],
+if test "x$with_host_cc" = "xno" ; then
+  HCC="$CC"
+else
+  HCC="$with_host_cc"
+fi
+,
+HCC="$CC"
+)
+AC_SUBST(HCC)
+
+dnl Check for non-default target C compiler.
+AC_ARG_WITH(target-cc, [  --with-target-cc        Target-specific C compiler],
+if test "x$with_target_cc" = "xno" ; then
+  TCC="$CC"
+else
+  TCC="$with_target_cc"
+fi
+,
+TCC="$CC"
+)
+AC_SUBST(TCC)
+
 dnl Platform-specific settings.  abi and RPATH can probably be determined
 dnl programmatically, but doing so is error-prone, which makes it generally
 dnl not worth the trouble.
@@ -890,6 +914,8 @@ if test "x$bin_slate" = "x1" ; then
 AC_MSG_RESULT(Slate version : $slate_version)
 fi
 AC_MSG_RESULT()
+AC_MSG_RESULT(HCC           : ${HCC})
+AC_MSG_RESULT(TCC           : ${TCC})
 AC_MSG_RESULT(CFLAGS        : ${CFLAGS})
 AC_MSG_RESULT(CPPFLAGS      : ${CPPFLAGS})
 AC_MSG_RESULT(LDFLAGS       : ${LDFLAGS})

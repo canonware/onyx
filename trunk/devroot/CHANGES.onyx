@@ -1,3 +1,11 @@
+2003-01-30 : Jason Evans <jasone@canonware.com>
+
+	* configure.in : Add --with-host-cc and --with-target-cc to make
+	  cross compiling possible.
+
+	  Cookfile.inc.in : Use HCC and TCC rather than CC to invoke the
+	  compiler.
+
 2003-01-29 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/include/libonyx/libonyx.h:cw_bool_t : Fix cw_bool_t to

@@ -327,8 +327,12 @@ INCLUDEDIR="?"
 MANDIR="?"
 	Use this as the installation prefix for man pages.
 
-CC="?"
-	Use this to invoke the C compiler.
+HCC="?"
+	Use this to invoke the host C compiler (used for building a bootstrap
+	interpreter).
+
+TCC="?"
+	Use this to invoke the target C compiler.
 
 CPPDEFS="?"
 	Pass these flags to the C preprocessor.

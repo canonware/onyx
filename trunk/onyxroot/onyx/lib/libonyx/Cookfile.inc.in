@@ -171,8 +171,10 @@ libonyx_libs_uninstall :
 libonyx_libs_clean :
 {
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBONYX_COMMON_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_b [LIBONYX_COMMON_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_s [LIBONYX_COMMON_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_COMMON_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_b [LIBONYX_COMMON_SRCS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]];
 
   rm -f [LIBONYX_ONLY_SRCS];
@@ -181,8 +183,8 @@ libonyx_libs_clean :
   rm -f [fromto %0%.c %0%.o_a [LIBONYX_ONLY_SRCS]];
   rm -f [fromto %0%.c %0%.o_s [LIBONYX_ONLY_SRCS]];
 
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBBONYX_ONLY_SRCS]];
-  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBBONYX_ONLY_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_b [LIBBONYX_ONLY_SRCS]];
+  rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_b [LIBBONYX_ONLY_SRCS]];
 
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.d_a [LIBONYX_CTESTS]];
   rm -f [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_CTESTS]];
@@ -236,13 +238,13 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
 {
 #if [matches macho @abi@]
   /* Set install_name correctly before installing. */
-  [CC] -undefined suppress -flat_namespace -dynamiclib -bind_at_load
-       -compatibility_version [LIBONYX_REV]
-       -current_version [LIBONYX_REV]
-       -install_name [LIBDIR]/libonyx.[LIBONYX_REV].dylib
-       -o [LIBONYX_S]
-       [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
-       [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]];
+  [TCC] -undefined suppress -flat_namespace -dynamiclib -bind_at_load
+        -compatibility_version [LIBONYX_REV]
+        -current_version [LIBONYX_REV]
+        -install_name [LIBDIR]/libonyx.[LIBONYX_REV].dylib
+        -o [LIBONYX_S]
+        [fromto @srcroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_COMMON_SRCS]]
+        [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]];
 #endif
 
   @INSTALL@ -m 0444 [LIBONYX_S] [LIBDIR];
@@ -257,8 +259,8 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
  * Dependencies.
  */
 
-[LIBBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBONYX_COMMON_SRCS]]
-               [fromto @srcroot@/%0%.c @objroot@/%0%.o_a [LIBBONYX_ONLY_SRCS]]
+[LIBBONYX_A] : [fromto @srcroot@/%0%.c @objroot@/%0%.o_b [LIBONYX_COMMON_SRCS]]
+               [fromto @srcroot@/%0%.c @objroot@/%0%.o_b [LIBBONYX_ONLY_SRCS]]
   set mkdir
 {
   @AR@ cru [target] [younger];
@@ -277,18 +279,18 @@ libonyx_libs_install_s : [LIBONYX_S] libonyx_libs_install_common
               [fromto @objroot@/%0%.c @objroot@/%0%.o_s [LIBONYX_ONLY_SRCS]]
   set mkdir
 {
-  [CC]
+  [TCC]
 #if [matches elf @abi@]
-       -shared
+        -shared
 #elif [matches macho @abi@]
-       -undefined suppress -flat_namespace -dynamiclib -bind_at_load
-       -compatibility_version [LIBONYX_REV]
-       -current_version [LIBONYX_REV]
-       -install_name @abs_objroot@/[LIBONYX_S]
+        -undefined suppress -flat_namespace -dynamiclib -bind_at_load
+        -compatibility_version [LIBONYX_REV]
+        -current_version [LIBONYX_REV]
+        -install_name @abs_objroot@/[LIBONYX_S]
 #else /* if [matches aout @abi@] */
-       -shared
+        -shared
 #endif
-       -o [target] [need];
+        -o [target] [need];
 
 #if [count [LIBONYX_LNAME]]
   rm -f @objroot@/lib/libonyx/lib/[LIBONYX_LNAME];
