@@ -1,5 +1,11 @@
 2002-04-27 : Jason Evans <jasone@canonware.com>
 
+	* Add operators:
+	  + umask
+
+	* lib/libonyx/src/systemdict.c : Optimize operators to take advantage of
+          nxo_stack_remove().
+
 	* lib/libonyx/src/poll.c : Implement poll() emulation based on select().
           This is necessary to make the poll operator portable to OS X.
 

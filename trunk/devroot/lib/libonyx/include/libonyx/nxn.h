@@ -390,7 +390,6 @@ typedef enum
     NXN_setthreshold,
 #ifdef CW_POSIX
     NXN_setuid,
-    NXN_setumask,
 #endif
     NXN_sexch,
     NXN_shift,

@@ -391,7 +391,6 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "setthreshold",
 #ifdef CW_POSIX
     "setuid",
-    "setumask",
 #endif
     "sexch",
     "shift",

@@ -682,11 +682,6 @@ void
 systemdict_setuid(cw_nxo_t *a_thread);
 #endif
 
-#ifdef CW_POSIX
-void
-systemdict_setumask(cw_nxo_t *a_thread);
-#endif
-
 void
 systemdict_sexch(cw_nxo_t *a_thread);
 

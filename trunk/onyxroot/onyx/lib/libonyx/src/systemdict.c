@@ -328,7 +328,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(setstdout),
 #ifdef CW_POSIX
     ENTRY(setuid),
-    ENTRY(setumask),
 #endif
     ENTRY(sexch),
     ENTRY(shift),
@@ -3569,8 +3568,8 @@ systemdict_get(cw_nxo_t *a_thread)
 		nxo_thread_nerror(a_thread, NXN_undefined);
 		return;
 	    }
-	    nxo_stack_roll(ostack, 3, 1);
-	    nxo_stack_npop(ostack, 2);
+	    nxo_stack_remove(ostack, with);
+	    nxo_stack_remove(ostack, from);
 	    break;
 	}
 	case NXOT_STRING:
@@ -3662,8 +3661,8 @@ systemdict_getinterval(cw_nxo_t *a_thread)
 	}
     }
 
-    nxo_stack_roll(ostack, 3, 1);
-    nxo_stack_npop(ostack, 2);
+    nxo_stack_remove(ostack, with);
+    nxo_stack_remove(ostack, from);
 }
 
 #ifdef CW_POSIX
@@ -5879,8 +5878,7 @@ systemdict_read(cw_nxo_t *a_thread)
 		nxo_boolean_new(code, FALSE);
 	    }
 
-	    nxo_stack_roll(ostack, 3, 2);
-	    nxo_stack_pop(ostack);
+	    nxo_stack_remove(ostack, file);
 	    break;
 	}
 	case NXOT_STRING:
@@ -6932,14 +6930,6 @@ systemdict_setuid(cw_nxo_t *a_thread)
 
     error = setuid((uid_t) uid);
     nxo_boolean_new(nxo, error == 0 ? FALSE : TRUE);
-}
-#endif
-
-#ifdef CW_POSIX
-void
-systemdict_setumask(cw_nxo_t *a_thread)
-{
-    cw_error("XXX Not implemented");
 }
 #endif
 
@@ -9103,7 +9093,7 @@ void
 systemdict_uid(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *nxo;
-	
+
     ostack = nxo_thread_ostack_get(a_thread);
     nxo = nxo_stack_push(ostack);
     nxo_integer_new(nxo, getuid());
@@ -9114,7 +9104,20 @@ systemdict_uid(cw_nxo_t *a_thread)
 void
 systemdict_umask(cw_nxo_t *a_thread)
 {
-    cw_error("XXX Not implemented");
+    cw_nxo_t *ostack, *nxo;
+    mode_t omode, nmode;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) != NXOT_INTEGER)
+    {
+	nxo_thread_nerror(a_thread, NXN_typecheck);
+	return;
+    }
+
+    omode = nxo_integer_get(nxo);
+    nmode = umask(omode);
+    nxo_integer_new(nxo, nmode);
 }
 #endif
 
