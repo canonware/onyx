@@ -396,6 +396,9 @@ static void
 thd_p_delete(cw_thd_t *a_thd)
 {
 	cw_bool_t	delete;
+#ifdef _CW_THD_GENERIC_SR
+	int		error;
+#endif
 
 	/* Determine whether to delete the object now. */
 	mtx_lock(&a_thd->crit_lock);
