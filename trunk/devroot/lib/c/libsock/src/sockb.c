@@ -410,19 +410,6 @@ sockb_p_entry_func(void * a_arg)
   cw_sint32_t j;
   cw_buf_t tmp_buf, buf_in;
 
-  if (dbg_is_registered(cw_g_dbg, "sockb_verbose"))
-  {
-    log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__,
-		"Local variable addresses: socks %p, fd_m_read_set %p, "
-		"fd_m_write_set %p, fd_m_exception_set %p, fd_read_set %p, "
-		"fd_write_set %p, fd_exception_set %p, sock %p, "
-		"sockfd %p, max_fd %p, num_ready %p, num_msgs %p, i %p, j %p, "
-		"tmp_buf %p, buf_in %p\n",
-		&socks, &fd_m_read_set, &fd_m_write_set, &fd_m_exception_set,
-		&fd_read_set, &fd_write_set, &fd_exception_set, &sock, &sockfd,
-		&max_fd, &num_ready, &num_msgs, &i, &j, &tmp_buf, &buf_in);
-  }
-  
   /* Initialize data structures. */
   FD_ZERO(&fd_m_read_set);
   FD_ZERO(&fd_m_write_set);
