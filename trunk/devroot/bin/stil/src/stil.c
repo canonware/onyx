@@ -127,6 +127,13 @@ end
 } bind def
 ";
 		struct stil_arg_s	arg = {NULL, 0, 0};
+		char			*editor;
+
+		/*
+		 * Read from the environment before passing it to stil_new(),
+		 * since stil_new() will munge it.
+		 */
+		editor = getenv("STIL_EDITOR");
 
 		stil_new(&stil, argc, argv, envp, cl_read, NULL, NULL, (void
 		    *)&arg);
@@ -150,7 +157,15 @@ end
 		el = el_init(basename(argv[0]), 0, 1);
 		el_set(el, EL_HIST, history, hist);
 		el_set(el, EL_PROMPT, prompt);
-		el_set(el, EL_EDITOR, "emacs");
+		if (editor == NULL || (strcmp(editor, "emacs") && strcmp(editor,
+		    "vi"))) {
+			/*
+			 * Default to emacs key bindings, since they're more
+			 * intuitive to the uninitiated.
+			 */
+			editor = "emacs";
+		}
+		el_set(el, EL_EDITOR, editor);
 /*  		el_set(el, EL_SIGNAL, 1); */
 
 		/* Run the interpreter such that it will not exit on errors. */
