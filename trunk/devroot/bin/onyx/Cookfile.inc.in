@@ -44,10 +44,9 @@ ONYX_ONLY_SRCS = [fromto @srcroot@/%0%.nx.in @objroot@/%0%_nxcode.c
 ONYX_OTESTS =
 #if [and @enable_threads@ @enable_posix@]
 
-              name_unsweep.nx.in setgstderr_a.nx.in setgstderr_b.nx.in
-              setgstderr_c.nx.in setgstdin_a.nx.in setgstdin_b.nx.in
-              setgstdin_c.nx.in setgstdout_a.nx.in setgstdout_b.nx.in
-              setgstdout_c.nx.in
+              setgstderr_a.nx.in setgstderr_b.nx.in setgstderr_c.nx.in
+              setgstdin_a.nx.in setgstdin_b.nx.in setgstdin_c.nx.in
+              setgstdout_a.nx.in setgstdout_b.nx.in setgstdout_c.nx.in
 
 #endif
 #if @enable_threads@
