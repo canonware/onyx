@@ -679,24 +679,6 @@ stiloe_p_new(cw_stiloe_t *a_stiloe, cw_stilot_t a_type, cw_bool_t a_locking)
 #endif
 }
 
-/*
- * Only to be called from the GC.
- */
-cw_stilte_t
-stiloe_l_print(cw_stiloe_t *a_stiloe, cw_stilo_t *a_file, cw_uint32_t a_depth,
-    cw_bool_t a_newline)
-{
-	cw_stilte_t	retval;
-	cw_stilo_t	stilo;
-
-	stilo_p_new(&stilo, a_stiloe->type);
-	stilo.o.stiloe = a_stiloe;
-
-	retval = stilo_print(&stilo, a_file, a_depth, a_newline);
-
-	return retval;
-}
-
 void
 stiloe_l_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 {
