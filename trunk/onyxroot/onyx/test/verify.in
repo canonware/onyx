@@ -304,6 +304,11 @@ if (!$opt_quiet)
     }
 }
 
+if ($#FAILED_TESTS >= 0)
+{
+    # One or more tests failed, so return an error.
+    exit 1;
+}
 # End of main execution.
 
 sub run_test
