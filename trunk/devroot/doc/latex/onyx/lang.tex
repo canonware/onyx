@@ -3859,15 +3859,24 @@ socket. \\
 sock addr & {\bf \htmlref{connect}{systemdict:connect}} & -- & Connect a
 socket. \\
 \hline
-OPARGS & {\bf \htmlref{hostbyname}{systemdict:hostbyname}} & OPOUTS & \\
+service & {\bf \htmlref{serviceport}{systemdict:serviceport}} & port & Get port
+number for service name. \\
 \hline
-OPARGS & {\bf \htmlref{sockname}{systemdict:sockname}} & OPOUTS & \\
+sock & {\bf \htmlref{sockname}{systemdict:sockname}} & dict & \\
 \hline
-OPARGS & {\bf \htmlref{sockopt}{systemdict:sockopt}} & OPOUTS & \\
+sock level optname & {\bf \htmlref{sockopt}{systemdict:sockopt}} & optval & Get
+socket option. \\
 \hline
-OPARGS & {\bf \htmlref{setsockopt}{systemdict:setsockopt}} & OPOUTS & \\
+sock optname & {\bf \htmlref{sockopt}{systemdict:sockopt}} & optval & Get
+socket option. \\
 \hline
-OPARGS & {\bf \htmlref{peername}{systemdict:peername}} & OPOUTS & \\
+sock level optname optval & {\bf \htmlref{setsockopt}{systemdict:setsockopt}} &
+-- & Set socket option. \\
+\hline
+sock optname optval & {\bf \htmlref{setsockopt}{systemdict:setsockopt}} & -- &
+Set socket option. \\
+\hline
+sock & {\bf \htmlref{peername}{systemdict:peername}} & dict & \\
 \hline
 OPARGS & {\bf \htmlref{send}{systemdict:send}} & OPOUTS & \\
 \hline
