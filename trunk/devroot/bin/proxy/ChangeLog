@@ -1,3 +1,7 @@
+2001-07-11  Jason Evans  <jasone@canonware.com>
+
+	* src/proxy.c: Use inet_addr() if inet_aton() isn't available.
+
 2001-01-29  Jason Evans  <jasone@canonware.com>
 
 	* src/proxy.c: Add ipfilter support, contributed by Jacques
