@@ -13,6 +13,7 @@ typedef struct cw_bufqm_s cw_bufqm_t;
 typedef struct cw_bufq_s cw_bufq_t;
 typedef struct cw_bufm_s cw_bufm_t;
 typedef struct cw_bufe_s cw_bufe_t;
+typedef struct cw_bufhi_s cw_bufhi_t;
 typedef struct cw_bufh_s cw_bufh_t;
 typedef struct cw_bufb_s cw_bufb_t;
 typedef cw_uint8_t cw_bufc_t;
@@ -93,8 +94,8 @@ struct cw_bufe_s {
 	cw_bufq_t	*bufq;
 };
 
-struct cw_bufh_s {
-	qs_elm(cw_bufh_t) link;
+struct cw_bufhi_s {
+	qs_elm(cw_bufhi_t) link;
 	enum {
 		BUFH_BOUNDARY,
 		BUFH_SEEK,
@@ -122,7 +123,9 @@ struct cw_bufh_s {
 	}		data;
 };
 
-struct cw_bufbh_s {
+struct cw_bufh_s {
+	qs_head(cw_bufhi_t) undo;
+	qs_head(cw_bufhi_t) redo;
 };
 
 /*
@@ -130,22 +133,19 @@ struct cw_bufbh_s {
  * most malloc implementations.
  */
 #define	_CW_BUFB_SIZE		4096
-#ifdef _CW_DBG
 #define	_CW_BUFB_OVERHEAD	  28
-#else
-#define	_CW_BUFB_OVERHEAD	  24
-#endif
 #define	_CW_BUFB_DATA	(_CW_BUFB_SIZE - _CW_BUFB_OVERHEAD)
 struct cw_bufb_s {
-#ifdef _CW_DBG
-	cw_uint32_t	magic;
-#define _CW_BUFB_MAGIC	0x28da3e88
-#endif
-	cw_uint64_t	offset;
-	cw_uint64_t	line;
-	cw_uint32_t	gap_off;
-	cw_uint32_t	gap_len;
-	cw_bufc_t	data[_CW_BUFB_DATA];
+	/*
+	 * The eoff and eline fields aren't maintained by the bufb code at all;
+	 * for them to be valid, they must be explicitly set by external logic.
+	 */
+	cw_uint64_t	eoff;			/* Last byte offset. */
+	cw_uint64_t	eline;			/* Last line number. */
+	cw_uint32_t	nlines;			/* Number of newlines. */
+	cw_uint32_t	gap_off;		/* Gap offset. */
+	cw_uint32_t	gap_len;		/* Gap length. */
+	cw_bufc_t	data[_CW_BUFB_DATA];	/* Text data, with gap. */
 };
 
 struct cw_buf_s {
@@ -219,7 +219,7 @@ cw_uint64_t bufm_pos(cw_bufm_t *a_bufm);
 cw_bufc_t bufm_bufc_get(cw_bufm_t *a_bufm);
 void	bufm_bufc_set(cw_bufm_t *a_bufm, cw_bufc_t a_bufc);
 void	bufm_bufc_insert(cw_bufm_t *a_bufm, const cw_bufc_t *a_data, cw_uint64_t
-    *a_count);
+    a_count);
 
 cw_bufe_t *bufm_bufe_down(cw_bufm_t *a_bufm, cw_bufe_t *a_bufe);
 cw_bufe_t *bufm_bufe_up(cw_bufm_t *a_bufm, cw_bufe_t *a_bufe);
