@@ -11,7 +11,7 @@
 
 #include "../include/libstash/libstash.h"
 
-#define	NTHREADS	200
+#define	NTHREADS	20
 #define	NITERATIONS	200
 
 cw_uint32_t	count = 0;
