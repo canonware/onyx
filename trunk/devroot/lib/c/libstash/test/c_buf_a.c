@@ -149,16 +149,22 @@ main()
     log_printf(cw_g_log, "upper quad dump:\n");
     for (i = 256; i < 512; i += 8)
     {
+      t_uint64 = buf_get_uint64(buf_p, i);
+      t_uint64 = _cw_htonq(t_uint64);
+      
       log_printf(cw_g_log, "%03u->0x%s\n",
-		 i, log_print_uint64(buf_get_uint64(buf_p, i), 16, buf));
+		 i, log_print_uint64(t_uint64, 16, buf));
     }
     
     /* Unaligned gets. */
     log_printf(cw_g_log, "Unaligned buf_get_uint32():\n");
     for (i = 1; i < 4; i++)
     {
+      t_uint32_a = buf_get_uint32(buf_p, 256 + i);
+      t_uint32_a = htonl(t_uint32_a);
+      
       log_printf(cw_g_log, "%03u->0x%08x\n",
-		 256 + i, buf_get_uint32(buf_p, 256 + i));
+		 256 + i, t_uint32_a);
     }
     
     log_printf(cw_g_log, "Unaligned buf_get_uint64():\n");
