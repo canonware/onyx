@@ -636,7 +636,7 @@ static void *
 sockb_p_entry_func(void * a_arg)
 {
   struct cw_sockb_entry_s * arg = (struct cw_sockb_entry_s *) a_arg;
-/*    cw_uint32_t max_fds = arg->max_fds; */
+  cw_uint32_t max_fds = arg->max_fds;
   struct cw_sockb_reg_s * regs = arg->regs;
   struct pollfd * fds = arg->fds;
   unsigned nfds;
@@ -651,10 +651,19 @@ sockb_p_entry_func(void * a_arg)
   /* Initialize data structures. */
   buf_new(&tmp_buf, FALSE);
   buf_new(&buf_in, FALSE);
+  {
+    cw_uint32_t i;
+
+    for (i = 0; i < max_fds; i++)
+    {
+      regs[i].pollfd_pos = -1;
+    }
+  }
 
   /* Add g_sockb->pipe_out for readingg, so that this thread will return from
    * select() when data is written to g_sockb->pipe_in. */
   fds[0].fd = g_sockb->pipe_out;
+  fds[0].events = POLLIN;
   nfds = 1;
 
   while (g_sockb->should_quit == FALSE)
@@ -703,7 +712,7 @@ sockb_p_entry_func(void * a_arg)
 	{
 	  sockfd = message->data.sockfd;
 
-	  if (-1 == regs[sockfd].pollfd_pos)
+	  if (-1 != regs[sockfd].pollfd_pos)
 	  {
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -742,7 +751,7 @@ sockb_p_entry_func(void * a_arg)
 	{
 	  sockfd = message->data.sockfd;
 
-	  if (-1 == regs[sockfd].pollfd_pos)
+	  if (-1 != regs[sockfd].pollfd_pos)
 	  {
 #ifdef _LIBSTASH_SOCKB_CONFESS
 	    out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
@@ -793,7 +802,7 @@ sockb_p_entry_func(void * a_arg)
       out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
 		"poll fd's:");
 #endif
-      for (i = 0; i < nfds; i++)
+      for (i = 1; i < nfds; i++)
       {
 	sockfd = fds[i].fd;
 	
@@ -845,7 +854,7 @@ sockb_p_entry_func(void * a_arg)
 
 #ifdef _LIBSTASH_SOCKB_CONFESS
     out_put_e(cw_g_out, __FILE__, __LINE__, NULL,
-	      "select([i])", nfds);
+	      "poll([i])", nfds);
 #endif
     num_ready = poll(fds, nfds, INFTIM);
     
