@@ -623,7 +623,8 @@ if test "x$enable_modules" = "x1" ; then
 
   dnl modpane.
   if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" \
-     -a "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" ; then
+     -a "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" \
+     -a "x$enable_handle" = "x1" -a "x$enable_oop" = "x1" ; then
     enable_modpane="1"
 
     dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
