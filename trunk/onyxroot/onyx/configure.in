@@ -671,7 +671,8 @@ if test "x$enable_modules" = "x1" ; then
   if test "x$enable_slate" = "x1" -a "x$enable_threads" = "x1" \
      -a "x$enable_real" = "x1" -a "x$enable_posix" = "x1" \
      -a "x$enable_posix_file" = "x1" -a "x$enable_modules" = "x1" \
-     -a "x$enable_modpane" = "x1" -a "x$enable_oop" = "x1" ; then
+     -a "x$enable_modpane" = "x1" -a "x$enable_oop" = "x1" \
+     -a "x$enable_handle" = "x1" ; then
     dnl Set up CPPFLAGS and LDFLAGS before doing header and library tests.
     TEMP_CPPFLAGS="$CPPFLAGS"
     TEMP_LDFLAGS="$LDFLAGS"
