@@ -1,3 +1,7 @@
+2001-12-15  Jason Evans  <jasone@canonware.com>
+
+	* doc/latex/onyx_lang.tex: Document search.
+
 2001-12-08  Jason Evans  <jasone@canonware.com>
 
 	* : Convert _cw_ to cw_ and _CW_ to CW_ in order to follow the
