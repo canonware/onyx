@@ -584,10 +584,14 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		 * recursion, and popping is excessive for the common cases of a
 		 * simple object or operator.  Therefore, check for the most
 		 * common simple cases and handle them specially. */
-		el = nxo_stack_push(&thread->tstack);
+
+#ifdef CW_THREADS
+		nxo_l_array_lock(nxo);
+#endif
+
 		for (i = 0; i < len - 1; i++)
 		{
-		    nxo_l_array_el_get(nxo, i, el);
+		    el = nxo_l_array_el_get(nxo, i);
 		    attr = nxo_attr_get(el);
 		    if (attr == NXOA_LITERAL)
 		    {
@@ -612,7 +616,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    {
 				tnxo = nxo_stack_push(&thread->estack);
 				nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+				nxo_l_array_unlock(nxo);
+#endif
 				nxo_thread_loop(a_nxo);
+#ifdef CW_THREADS
+				nxo_l_array_lock(nxo);
+#endif
 			    }
 			    else
 			    {
@@ -655,6 +665,9 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    cw_sint32_t nread;
 			    cw_uint8_t buffer[CW_LIBONYX_FILE_EVAL_READ_SIZE];
 
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
 			    nxo_threadp_new(&threadp);
 			    /* Read data from the file and interpret it until an
 			     * EOF (0 byte read). */
@@ -672,11 +685,25 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    /* Do not flush, so that syntax errors get
 			     * caught. */
 			    nxo_threadp_delete(&threadp, a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
 			    break;
 			}
 			case NXOT_HOOK:
 			{
-			    nxo_hook_eval(el, a_nxo);
+			    cw_nxo_t *hook;
+
+			    hook = nxo_stack_push(&thread->tstack);
+			    nxo_dup(hook, el);
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
+			    nxo_hook_eval(hook, a_nxo);
+			    nxo_stack_pop(&thread->tstack);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
 			    break;
 			}
 			case NXOT_NAME:
@@ -686,7 +713,13 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			     * estack and recurse. */
 			    tnxo = nxo_stack_push(&thread->estack);
 			    nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
 			    nxo_thread_loop(a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
 			    break;
 			}
 			case NXOT_NULL:
@@ -696,27 +729,42 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			}
 			case NXOT_OPERATOR:
 			{
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
 			    nxo_operator_f(el)(a_nxo);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
 			    break;
 			}
 			case NXOT_STRING:
 			{
+			    cw_nxo_t *string;
 			    cw_nxo_threadp_t threadp;
 
 			    /* Use the string as a source of code. */
+			    string = nxo_stack_push(&thread->tstack);
+			    nxo_dup(string, el);
+#ifdef CW_THREADS
+			    nxo_l_array_unlock(nxo);
+#endif
 			    nxo_threadp_new(&threadp);
 #ifdef CW_THREADS
-			    nxo_string_lock(el);
+			    nxo_string_lock(string);
 #endif
 			    nxo_thread_interpret(a_nxo, &threadp,
-						 nxo_string_get(el),
-						 nxo_string_len_get(el));
+						 nxo_string_get(string),
+						 nxo_string_len_get(string));
 #ifdef CW_THREADS
-			    nxo_string_unlock(el);
+			    nxo_string_unlock(string);
 #endif
 			    nxo_thread_flush(a_nxo, &threadp);
 			    nxo_threadp_delete(&threadp, a_nxo);
-			    nxo_stack_pop(&thread->estack);
+#ifdef CW_THREADS
+			    nxo_l_array_lock(nxo);
+#endif
+			    nxo_stack_pop(&thread->tstack);
 			    break;
 			}
 			default:
@@ -724,7 +772,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 			    cw_not_reached();
 			}
 		    }
-		    cw_assert(nxo_stack_count(&thread->tstack) == tdepth + 1);
+		    cw_assert(nxo_stack_count(&thread->tstack) == tdepth);
 		}
 
 		/* Set the index back to 0 now that we're not executing an array
@@ -734,7 +782,7 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		/* If recursion is possible and likely, make tail recursion safe
 		 * by replacing the array with its last element before executing
 		 * the last element. */
-		nxo_l_array_el_get(nxo, i, el);
+		el = nxo_l_array_el_get(nxo, i);
 		attr = nxo_attr_get(el);
 		if ((attr == NXOA_LITERAL)
 		    || (nxo_type_get(el) == NXOT_ARRAY
@@ -744,16 +792,23 @@ nxo_thread_loop(cw_nxo_t *a_nxo)
 		     * evaluatable) arrays onto the operand stack. */
 		    tnxo = nxo_stack_push(&thread->ostack);
 		    nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+		    nxo_l_array_unlock(nxo);
+#endif
 		    nxo_stack_pop(&thread->estack);
 		}
 		else
 		{
 		    /* Possible recursion. */
-		    nxo_dup(nxo, el);
+		    tnxo = nxo_stack_push(&thread->tstack);
+		    nxo_dup(tnxo, el);
+#ifdef CW_THREADS
+		    nxo_l_array_unlock(nxo);
+#endif
+		    nxo_dup(nxo, tnxo);
 		    nxo_stack_pop(&thread->tstack);
 		    goto RESTART;
 		}
-		nxo_stack_pop(&thread->tstack);
 		break;
 	    }
 	    case NXOT_BOOLEAN:

@@ -236,7 +236,58 @@ nxo_array_len_get(const cw_nxo_t *a_nxo)
 void
 nxo_array_el_get(const cw_nxo_t *a_nxo, cw_nxoi_t a_offset, cw_nxo_t *r_el)
 {
-    nxo_l_array_el_get(a_nxo, a_offset, r_el);
+    cw_nxoe_array_t *array;
+#ifdef CW_THREADS
+    cw_bool_t locking;
+#endif
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_ARRAY);
+    cw_check_ptr(r_el);
+
+    array = (cw_nxoe_array_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(array);
+    cw_dassert(array->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(array->nxoe.type == NXOT_ARRAY);
+
+    if (array->nxoe.indirect)
+    {
+	a_offset += array->e.i.beg_offset;
+	array = array->e.i.array;
+#ifdef CW_THREADS
+	locking = FALSE;
+#endif
+    }
+#ifdef CW_THREADS
+    else
+    {
+	if (array->nxoe.locking)
+	{
+	    locking = TRUE;
+	}
+	else
+	{
+	    locking = FALSE;
+	}
+    }
+
+    if (locking)
+    {
+	mtx_lock(&array->lock);
+    }
+#endif
+    cw_assert(array->nxoe.indirect == FALSE);
+    
+    cw_assert(a_offset >= 0 && a_offset < array->e.a.len);
+    nxo_dup(r_el, &array->e.a.arr[a_offset]);
+#ifdef CW_THREADS
+    if (locking)
+    {
+	mtx_unlock(&array->lock);
+    }
+#endif
 }
 #endif
 
