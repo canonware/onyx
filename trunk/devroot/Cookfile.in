@@ -93,6 +93,7 @@ check_update : tests
 clean :
 {
   rm -f core *.core;
+  rm -f TAGS;
 
   rm -f [D_LIBS];
   rm -f [A_LIBS];
@@ -171,9 +172,12 @@ distclean : clean
   rm -f [objdir]/config.log;
   rm -f [objdir]/config.status;
   rm -f [objdir]/test/verify;
-  rm -f [objdir]/lib/c/libstash/include/libstash/libstash_defs.h;
-  rm -f [objdir]/lib/c/libsock/include/libsock/libsock_defs.h;
-  rm -f [objdir]/lib/c/libkasi/include/libkasi/libkasi_defs.h;
+  rm -f @cfghdrs@;
+}
+
+etags : [INCS] [PRIV_INCS] [SRCS]
+{
+  @ETAGS@ [INCS] [PRIV_INCS] [SRCS];
 }
 
 [objdir]/%0%.pl : [srcdir]/%0%.pl.in

@@ -36,6 +36,7 @@ if test -d "$srcdir/lib/c/libkasi" ; then
   cfghdrs="$cfghdrs $objdir/lib/c/libkasi/include/libkasi/libkasi_defs.h"
 fi
 AC_CONFIG_HEADER($cfghdrs)
+AC_SUBST(cfghdrs)
 
 AC_CANONICAL_HOST
 case "${host}" in
