@@ -128,17 +128,20 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
     {
 	cw_nxoe_dicta_t *dicta;
 	cw_bool_t done = FALSE;
-	cw_uint32_t i;
+	cw_uint32_t key_hash, i;
 
 	/* Search for an existing definition.  If one exists, replace the
 	 * value.  Otherwise, insert into the array if there is room, or convert
 	 * to a hash then insert if there is not room. */
 
+	key_hash = nxo_p_dict_hash(a_key);
+
 	for (i = 0, dicta = NULL; i < CW_LIBONYX_DICT_SIZE; i++)
 	{
 	    if (nxo_type_get(&a_dict->data.a.array[i].key) != NXOT_NO)
 	    {
-		if (nxo_compare(&a_dict->data.a.array[i].key, a_key) == 0)
+		if (nxo_p_dict_hash(&a_dict->data.a.array[i].key) == key_hash
+		    && nxo_p_dict_key_comp(&a_dict->data.a.array[i].key, a_key))
 		{
 		    nxo_dup(&a_dict->data.a.array[i].val, a_val);
 		    done = TRUE;
@@ -390,12 +393,15 @@ nxo_dict_undef(cw_nxo_t *a_nxo, const cw_nxo_t *a_key)
     }
     else
     {
-	cw_uint32_t i;
+	cw_uint32_t key_hash, i;
+
+	key_hash = nxo_p_dict_hash(a_key);
 
 	for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)
 	{
 	    if (nxo_type_get(&dict->data.a.array[i].key) != NXOT_NO
-		&& nxo_compare(&dict->data.a.array[i].key, a_key) == 0)
+		&& nxo_p_dict_hash(&dict->data.a.array[i].key) == key_hash
+		&& nxo_p_dict_key_comp(&dict->data.a.array[i].key, a_key))
 	    {
 		nxo_no_new(&dict->data.a.array[i].key);
 		break;
@@ -656,8 +662,7 @@ nxo_p_dict_key_comp(const void *a_k1, const void *a_k2)
     cw_check_ptr(k2);
     cw_dassert(k2->magic == CW_NXO_MAGIC);
 
-    if ((nxo_type_get(k1) == NXOT_NAME)
-	&& (nxo_type_get(k1) == NXOT_NAME))
+    if ((nxo_type_get(k1) == NXOT_NAME) && (nxo_type_get(k1) == NXOT_NAME))
     {
 	cw_nxoe_name_t *n1, *n2;
 

@@ -1,3 +1,8 @@
+2003-10-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def(),nxo_dict_undef() : Fix
+	  the same problem as was fixed in nxoe_p_dict_lookup() on 2003-08-22.
+
 2003-10-22 : Jason Evans <jasone@canonware.com>
 
 	* bin/onyx/src/interactive.nx.in : Modify the resume procedure to clear
