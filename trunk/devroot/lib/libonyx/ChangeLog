@@ -1,3 +1,7 @@
+2001-07-23  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Add the pid and ppid operators.
+
 2001-07-22  Jason Evans  <jasone@canonware.com>
 
 	* src/systemdict.c: Add the ndup and npop operators.

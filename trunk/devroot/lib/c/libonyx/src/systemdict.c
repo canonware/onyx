@@ -147,6 +147,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(open),
 	ENTRY(or),
 	ENTRY(ostack),
+	ENTRY(pid),
+	ENTRY(ppid),
 	ENTRY(print),
 	ENTRY(put),
 	ENTRY(putinterval),
@@ -3292,6 +3294,17 @@ systemdict_ostack(cw_nxo_t *a_thread)
 	nxo_stack_pop(stack);
 }
 
+void
+systemdict_pid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack;
+	cw_nxo_t		*nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, getpid());
+}
+
 #ifdef _CW_USE_INLINES
 void
 systemdict_pop(cw_nxo_t *a_thread)
@@ -3299,6 +3312,17 @@ systemdict_pop(cw_nxo_t *a_thread)
 	systemdict_inline_pop(a_thread);
 }
 #endif
+
+void
+systemdict_ppid(cw_nxo_t *a_thread)
+{
+	cw_nxo_t		*ostack;
+	cw_nxo_t		*nxo;
+
+	ostack = nxo_thread_ostack_get(a_thread);
+	nxo = nxo_stack_push(ostack);
+	nxo_integer_new(nxo, getppid());
+}
 
 void
 systemdict_print(cw_nxo_t *a_thread)

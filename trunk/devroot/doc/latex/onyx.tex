@@ -2980,11 +2980,11 @@ on ostack. \\
 \htmlref{roll}{systemdict:roll}} & \oparg{rolled} & Roll the top
 \oparg{count} objects up by \oparg{amount}. \\
 \hline
-any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove the top object from the
-operand stack. \\
+any & {\bf \htmlref{pop}{systemdict:pop}} & -- & Remove the top object from
+ostack. \\
 \hline
 objects count & {\bf \htmlref{npop}{systemdict:npop}} & -- & Remove objects from
-the operand stack. \\
+ostack. \\
 \hline
 objects & {\bf \htmlref{clear}{systemdict:clear}} & -- & Pop all objects off
 ostack. \\
@@ -3065,6 +3065,10 @@ status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
 \hline
 args & {\bf \htmlref{exec}{systemdict:exec}} & -- & Overlay a new program and
 execute it. \\
+\hline
+-- & {\bf \htmlref{pid}{systemdict:pid}} & pid & Get process ID. \\
+\hline
+-- & {\bf \htmlref{ppid}{systemdict:ppid}} & pid & Get parent's process ID. \\
 \hline
 pid & {\bf \htmlref{waitpid}{systemdict:waitpid}} & status & Wait for a program
 to terminate. \\
@@ -3584,8 +3588,8 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Push a fino object onto the operand stack to denote the bottom
-		of a stack that has not yet been constructed.
+		Push a fino object onto ostack to denote the bottom of a stack
+		that has not yet been constructed.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> (
@@ -3616,8 +3620,8 @@ onyx:1>
 		\item[\htmlref{unmatchedfino}{unmatchedfino}.]
 		\end{description}
 	\item[Description: ]
-		Create a stack object and move all objects from the operand
-		stack down to the first fino object to the new stack.
+		Create a stack object and move all objects from ostack down to
+		the first fino object to the new stack.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> ()
@@ -6458,8 +6462,8 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Remove the top \oparg{count} \oparg{objects} off the operand
-		stack and discard them.
+		Remove the top \oparg{count} \oparg{objects} off ostack and
+		discard them.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> `a' `b' `c' 2 npop pstack
@@ -6605,11 +6609,11 @@ onyx:0>
 	\item[Output(s): ]
 		\begin{description}\item[]
 		\item[stack: ]
-			A current snapshot (copy) of the operand stack.
+			A current snapshot (copy) of ostack.
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Get a current snapshot of the operand stack.
+		Get a current snapshot of ostack.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 1 2 3 ostack pstack
@@ -6721,6 +6725,26 @@ onyx:0> outputsdict 0 sprint
 onyx:0>
 		\end{verbatim}
 	\end{description}
+\label{systemdict:pid}
+\index{pid@\onyxop{}{pid}{}}
+\item[{\onyxop{--}{pid}{pid}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[pid: ]
+			Process identifier.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the process ID of the running process.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> pid 1 sprint
+80624
+onyx:0>
+		\end{verbatim}
+	\end{description}
 \label{systemdict:pop}
 \index{pop@\onyxop{}{pop}{}}
 \item[{\onyxop{any}{pop}{--}}: ]
@@ -6736,7 +6760,7 @@ onyx:0>
 		\item[\htmlref{stackunderflow}{stackunderflow}.]
 		\end{description}
 	\item[Description: ]
-		Remove the top object off the operand stack and discard it.
+		Remove the top object off ostack and discard it.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 1 2
@@ -6747,6 +6771,26 @@ onyx:2> pop
 onyx:1> pstack
 1
 onyx:1>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:ppid}
+\index{ppid@\onyxop{}{ppid}{}}
+\item[{\onyxop{--}{ppid}{pid}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[pid: ]
+			Process identifier.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get the process ID of the running process's parent.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> ppid 1 sprint
+352
+onyx:0>
 		\end{verbatim}
 	\end{description}
 \label{systemdict:print}
@@ -7205,11 +7249,10 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
-		Roll the top \oparg{count} objects on the operand stack
-		(not counting \oparg{count} and \oparg{amount}) by
-		\oparg{amount} positions.  A positive \oparg{amount}
-		indicates an upward roll, whereas a negative \oparg{amount}
-		indicates a downward roll.
+		Roll the top \oparg{count} objects on ostack (not counting
+		\oparg{count} and \oparg{amount}) by \oparg{amount} positions.
+		A positive \oparg{amount} indicates an upward roll, whereas a
+		negative \oparg{amount} indicates a downward roll.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> 3 2 1 0 
@@ -7866,7 +7909,7 @@ onyx:1>
 		\end{description}
 	\item[Errors(s): ] None.
 	\item[Description: ]
-		Create a new stack object and push it onto the operand stack.
+		Create a new stack object and push it onto ostack.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> stack
@@ -8904,6 +8947,7 @@ onyx:0>
 		\item[\htmlref{typecheck}{typecheck}.]
 		\end{description}
 	\item[Description: ]
+		Wait for the process with process ID \oparg{pid} to exit.
 	\item[Example(s): ]\begin{verbatim}
 
 onyx:0> {fork dup 0 eq
