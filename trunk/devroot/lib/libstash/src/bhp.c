@@ -257,13 +257,6 @@ bhp_min_del(cw_bhp_t *a_bhp, void **r_priority, void **r_data)
 		curr_pos = curr_min->child;
 		if (curr_pos != NULL)
 			next_pos = curr_pos->sibling;
-/*  		else { */
-			/*
-			 * Make optimizing compilers shut up about using
-			 * next_pos uninitialized.
-			 */
-/*  			next_pos = NULL; */
-/*  		} */
 
 		while (curr_pos != NULL) {
 			curr_pos->parent = NULL;
@@ -520,8 +513,10 @@ bhp_p_merge(cw_bhp_t *a_a, cw_bhp_t *a_b)
 			a_a->head = a_b->head;
 			a_b->head = t_bhpi;
 		}
-		mark_a = NULL;	/* Avoid optimization warnings about
-				 * uninitialized reads. */
+		mark_a = NULL;	/*
+				 * Avoid optimization warnings about
+				 * uninitialized reads.
+				 */
 		curr_a = a_a->head;
 		curr_b = a_b->head;
 		while ((curr_a->sibling != NULL) && (curr_b != NULL)) {
