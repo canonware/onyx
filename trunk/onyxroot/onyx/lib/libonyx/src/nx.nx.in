@@ -863,7 +863,7 @@ dup $vclass setclassname
 dup <
 > setdata
 <
-    #class:
+    #class#
     #- new #instance
     $new {
 	# Create instance.
@@ -875,7 +875,8 @@ dup <
     # Typically called at the beginning of new in subclasses.  Recursively
     # invokes new, and sets isa.
     #
-    #- ;rnew #instance
+    #class#
+    #- rnew #instance
     $rnew {
 	this super
 	dup type $classtype eq {
@@ -905,67 +906,55 @@ dup <
 	dup this setisa
     }
 
-    #class/instance;
-    #key #val def -
-    $def {
-	this data up put
-    }
-
-    #class/instance;
-    #key undef -
-    $undef {
-	this data exch undef
-    }
-
-    #class:
+    #class#
     #name implementor #class
     $implementor {
 	this exch implementor
     }
 
-    #class:
+    #class#
     #name implements #boolean
     $implements {
 	this exch implements
     }
 
-    #class:
+    #class#
     #name method #method
     $method {
 	this exch method
     }
 
-    #class:
+    #class#
     #- classname #name/null
     $classname {
 	this classname
     }
 
-    #class:
+    #class#
     #name/null setclassname -
     $setclassname {
 	this exch setclassname
     }
 
-    #class:
+    #class#
     #- super #super/null
     $super {
 	this super
     }
 
-    #class:
+    #class#
     #super/null setsuper -
     $setsuper {
 	this exch setsuper
     }
 
-    #class:
+    #class#
     #- methods #methods/null
     $methods {
 	this methods
     }
 
-    #class:
+    #class#
     #methods/null setmethods -
     $setmethods {
 	this exch setmethods
@@ -975,35 +964,47 @@ dup <
     # Class/instance-related methods.
     #
 
-    #class/instance:
+    #class/instance#
     #- data #data/null
     $data {
 	this data
     }
 
-    #class/instance:
+    #class/instance#
     #data/null setdata -
     $setdata {
 	this exch setdata
+    }
+
+    #class/instance#
+    #key #val def -
+    $def {
+	this data up put
+    }
+
+    #class/instance#
+    #key undef -
+    $undef {
+	this data exch undef
     }
 
     #
     # Instance-related methods.
     #
 
-    #instance:
+    #instance#
     #- isa #class/null
     $isa {
 	this isa
     }
 
-    #instance:
+    #instance#
     #class/null setisa -
     $setisa {
 	this exch setisa
     }
 
-    #instance:
+    #instance#
     #class kind #boolean
     $kind {
 	this exch kind
@@ -1024,13 +1025,13 @@ dup <
 <
     # This is a singleton class, so do not allow new to be called.
     #
-    #class:
+    #class#
     #- new #instance
     $new {
 	$invalidaccess throw
     }
 
-    #class;
+    #class#
     #- p_new #instance
     $p_new {
 	;rnew
@@ -1041,7 +1042,7 @@ dup <
 	> over data copy pop
     }
 
-    #class:
+    #class#
     #- singleton #instance
     $singleton {
 	,singletons
@@ -1061,7 +1062,7 @@ dup <
 	} ifelse
     }
 
-    #instance:
+    #instance#
     #modname load -
     $load {
 	,modules
@@ -1080,13 +1081,13 @@ dup <
 
     # Called by module:unload.
     #
-    #instance:
+    #instance#
     #modname unload_notify -
     $unload_notify {
 	,modules exch undef
     }
 
-    #instance:
+    #instance#
     #- modules #<modules>
     $modules {
 	,modules
@@ -1101,7 +1102,7 @@ dup vclass setsuper
 dup <
 > setdata
 <
-    #class:
+    #class#
     #modname #mclass_singleton new #instance
     $new {
 	;rnew
@@ -1112,7 +1113,7 @@ dup <
 	#instance
     }
 
-    #instance:
+    #instance#
     #modname #mclass_singleton p_init #instance
     $p_module_init {
 	# Define instance data.
@@ -1144,25 +1145,25 @@ dup <
 	#instance
     }
 
-    #instance:
+    #instance#
     #- version_get #version
     $version_get {
 	,version
     }
 
-    #instance:
+    #instance#
     #version version_set -
     $version_set {
 	this data $version dn put
     }
 
-    #instance:
+    #instance#
     #- deps_get #<deps>
     $deps_get {
 	,deps
     }
 
-    #instance:
+    #instance#
     #- mdefs_get #<mdefs>
     $mdefs_get {
 	,mdefs
@@ -1173,7 +1174,7 @@ dup <
     #
     #   [#defname #defval] --> #defdict
     #
-    #instance:
+    #instance#
     #defname #defval #defdict mdef -
     $mdef {
 	# Record the existence of the definition in $mdefs.
@@ -1194,7 +1195,7 @@ dup <
 
     # Load a module that this one depends on, and record the dependency.
     #
-    #instance:
+    #instance#
     #depname dep_load -
     $dep_load {
 	,mclass_singleton
@@ -1206,7 +1207,7 @@ dup <
 
     # Store a reference to #hook, and evaluate it at the beginning of :unload.
     #
-    #instance:
+    #instance#
     #hook pre_unload_hook_set -
     $pre_unload_hook_set {
 	this data $pre_unload_hook dn put
@@ -1214,7 +1215,7 @@ dup <
 
     # Store a reference to #hook, and evaluate it at the end of :unload.
     #
-    #instance:
+    #instance#
     #hook post_unload_hook_set -
     $post_unload_hook_set {
 	this data $post_unload_hook dn put
@@ -1222,7 +1223,7 @@ dup <
 
     # Unload the module.
     #
-    #instance:
+    #instance#
     #- unload -
     $unload {
 	# Evaluate the pre-unload hook.
