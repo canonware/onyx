@@ -14,3 +14,4 @@
 
 #include "buf.h"
 
+void	canonyx_buffer(cw_nxo_t *a_thread);

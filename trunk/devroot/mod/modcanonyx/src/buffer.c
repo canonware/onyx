@@ -33,7 +33,7 @@ canonyx_buffer(cw_nxo_t *a_thread)
 {
 	cw_nxo_t		*ostack, /*  *tstack,  */*nxo, *tag;
 	cw_nx_t			*nx;
-	cw_buffer_t		*buffer;
+	cw_buf_t		*buffer;
 	static const cw_uint8_t	tagname[] = "buffer";
 
 	ostack = nxo_thread_ostack_get(a_thread);
@@ -41,8 +41,8 @@ canonyx_buffer(cw_nxo_t *a_thread)
 	nx = nxo_thread_nx_get(a_thread);
 
 	/* Allocate and initialize the buffer structure. */
-	buffer = (cw_buffer_t *)_cw_malloc(sizeof(cw_buffer_t));
-	memset(buffer, 0, sizeof(cw_buffer_t));
+	buffer = (cw_buf_t *)_cw_malloc(sizeof(cw_buf_t));
+	memset(buffer, 0, sizeof(cw_buf_t));
 
 	/* Create a reference to the buffer. */
 	nxo = nxo_stack_push(ostack);
