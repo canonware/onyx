@@ -18,6 +18,8 @@
 #define _CW_STIL_MAGIC 0xae9678fd
 #endif
 
+static void stil_p_soft_init(cw_stil_t *a_stil);
+
 cw_stil_t *
 stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
     cw_stilo_file_read_t *a_stdin, cw_stilo_file_write_t *a_stdout,
@@ -115,6 +117,9 @@ stil_new(cw_stil_t *a_stil, int a_argc, char **a_argv, char **a_envp,
 
 		/* Now that we have an initial thread, activate the GC. */
 		stila_active_set(&retval->stila, TRUE);
+
+		/* Do soft operator initialization. */
+		stil_p_soft_init(retval);
 	}
 	xep_catch (_CW_STASHX_OOM) {
 		retval = (cw_stil_t *)v_retval;
@@ -203,3 +208,6 @@ stil_l_ref_iter(cw_stil_t *a_stil, cw_bool_t a_reset)
 
 	return retval;
 }
+
+/* Include generated code. */
+#include "softop.c"

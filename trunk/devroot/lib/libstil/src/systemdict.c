@@ -146,7 +146,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
 	ENTRY(symlink),
-	ENTRY(system),
 	ENTRY(tell),
 	ENTRY(test),
 	ENTRY(thread),
@@ -1558,7 +1557,7 @@ systemdict_for(cw_stilt_t *a_stilt)
 	 */
 	xep_begin();
 	xep_try {
-		if (limit >= 0) {
+		if (inc >= 0) {
 			for (; i <= limit; i += inc) {
 				/*
 				 * Dup the object to execute onto the execution
@@ -3554,185 +3553,6 @@ void
 systemdict_symlink(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_system(cw_stilt_t *a_stilt)
-{
-#if (0)
-	_cw_stil_code(a_stilt, "
-fork
-dup 0 eq {
-	errordict begin
-	/handleerror {quit} def
-	end
-	pop exec
-}{
-	exch pop waitpid
-} ifelse
-");
-#else
-	cw_stils_t	*ostack, *tstack;
-	cw_stilo_t	*array, *el;
-	cw_uint32_t	i, slen, argc;
-	char		*path, **argv, **envp;
-	pid_t		pid;
-	int		status;
-	cw_stiloi_t	result;
-
-	ostack = stilt_ostack_get(a_stilt);
-	tstack = stilt_tstack_get(a_stilt);
-	el = stils_push(tstack);
-	
-	STILS_GET(array, ostack, a_stilt);
-	if (stilo_type_get(array) != STILOT_ARRAY) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		goto VALIDATION_ERROR;
-	}
-	argc = stilo_array_len_get(array);
-	for (i = 0; i < argc; i++) {
-		stilo_array_el_get(array, i, el);
-		if (stilo_type_get(el) != STILOT_STRING) {
-			stilt_error(a_stilt, STILTE_TYPECHECK);
-			goto VALIDATION_ERROR;
-		}
-	}
-
-	/*
-	 * Construct path.
-	 */
-	stilo_array_el_get(array, 0, el);
-	if (stilo_type_get(el) != STILOT_STRING) {
-		stilt_error(a_stilt, STILTE_TYPECHECK);
-		goto PATH_ERROR;
-	}
-	slen = stilo_string_len_get(el);
-	path = (char *)_cw_malloc(slen + 1);
-	stilo_string_lock(el);
-	memcpy(path, stilo_string_get(el), slen);
-	stilo_string_unlock(el);
-	path[slen] = '\0';
-
-	/*
-	 * Construct argv.
-	 */
-	argv = (char **)_cw_malloc(sizeof(char *) * (argc + 1));
-	for (i = 0; i < argc; i++) {
-		stilo_array_el_get(array, i, el);
-		if (stilo_type_get(el) != STILOT_STRING) {
-			stilt_error(a_stilt, STILTE_TYPECHECK);
-			goto ARGV_ERROR;
-		}
-		slen = stilo_string_len_get(el);
-		argv[i] = (char *)_cw_malloc(slen + 1);
-		stilo_string_lock(el);
-		memcpy(argv[i], stilo_string_get(el), slen);
-		stilo_string_unlock(el);
-		argv[i][slen] = '\0';
-	}
-	argv[i] = NULL;
-
-	/*
-	 * Construct envp.
-	 */
-	{
-		cw_uint32_t	dcount, key_len, val_len;
-		cw_stilo_t	*key, *val;
-		char		*entry;
-
-		key = stils_push(tstack);
-		val = stils_push(tstack);
-
-		dcount =
-		    stilo_dict_count(stil_envdict_get(stilt_stil_get(a_stilt)));
-		envp = (char **)_cw_malloc(sizeof(char *) * (dcount + 1));
-		for (i = 0; i < dcount; i++) {
-			/* Get key and val. */
-			stilo_dict_iterate(stil_envdict_get(stilt_stil_get(a_stilt)),
-			    key);
-			stilo_dict_lookup(stil_envdict_get(stilt_stil_get(a_stilt)),
-			    key, val);
-			if (stilo_type_get(key) != STILOT_NAME ||
-			    stilo_type_get(val) != STILOT_STRING) {
-				stilt_error(a_stilt, STILTE_TYPECHECK);
-				stils_npop(tstack, 2);
-				goto ENVP_ERROR;
-			}
-
-			/* Create string that looks like "<key>=<val>\0". */
-			key_len = stilo_name_len_get(key);
-			val_len = stilo_string_len_get(val);
-			entry = (char *)_cw_malloc(key_len + val_len + 2);
-
-			memcpy(entry, stilo_name_str_get(key), key_len);
-			entry[key_len] = '=';
-			stilo_string_lock(val);
-			memcpy(&entry[key_len + 1], stilo_string_get(val),
-			    val_len);
-			stilo_string_unlock(val);
-			entry[key_len + 1 + val_len] = '\0';
-
-			envp[i] = entry;
-		}
-		envp[i] = NULL;
-
-		stils_npop(tstack, 2);
-	}
-
-	/*
-	 * Call fork()/execve()/wait().
-	 */
-	pid = fork();
-	switch (pid) {
-	case -1:
-		/* Error, related to some form of resource exhaustion. */
-		stilt_error(a_stilt, STILTE_LIMITCHECK);
-		goto FORK_ERROR;
-	case 0:
-		/* Child. */
-		execve(path, argv, envp);
-		/*
-		 * If we get here, then the execve() call failed.  Get an error
-		 * back to the parent.
-		 */
-		exit(1);
-	}
-
-	/*
-	 * Only the parent gets to here.
-	 */
-	waitpid(pid, &status, 0);
-	if (WIFEXITED(status)) {
-		/* Normal program exit. */
-		result = WEXITSTATUS(status);
-	} else {
-		/*
-		 * Program termination due to a signal.  Set a negative
-		 * return value.
-		 */
-		result = -WTERMSIG(status);
-	}
-
-	/* Replace the top stack element (array) with the return value. */
-	stilo_integer_new(array, result);
-
-	/*
-	 * Clean up.
-	 */
-	FORK_ERROR:
-	ENVP_ERROR:
-	for (i = 0; envp[i] != NULL; i++)
-		_cw_free(envp[i]);
-	_cw_free(envp);
-	ARGV_ERROR:
-	for (i = 0; argv[i] != NULL; i++)
-		_cw_free(argv[i]);
-	_cw_free(argv);
-	_cw_free(path);
-	PATH_ERROR:
-	VALIDATION_ERROR:
-	stils_pop(tstack);
-#endif
 }
 
 void

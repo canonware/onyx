@@ -128,6 +128,13 @@ S_LINKS = [S_LINKS] [objdir]/lib/c/libstil/lib/libstil.so;
  * User cook'ables.
  */
 
+stil_bootstrap : [STIL_D]
+{
+  cat [srcdir]/lib/c/libstil/src/softop.st
+    | [STIL_D] [srcdir]/lib/c/libstil/src/softop_gen.st
+    > [srcdir]/lib/c/libstil/src/softop.c;
+}
+
 libstil : [LIBSTIL_D] [LIBSTIL_A] [LIBSTIL_P]
 #if [ENABLE_SHARED]
           [LIBSTIL_S]

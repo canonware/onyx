@@ -121,7 +121,6 @@ void	systemdict_sub(cw_stilt_t *a_stilt);
 void	systemdict_sym_gt_gt(cw_stilt_t *a_stilt);
 void	systemdict_sym_rb(cw_stilt_t *a_stilt);
 void	systemdict_symlink(cw_stilt_t *a_stilt);
-void	systemdict_system(cw_stilt_t *a_stilt);
 void	systemdict_tell(cw_stilt_t *a_stilt);
 void	systemdict_test(cw_stilt_t *a_stilt);
 void	systemdict_thread(cw_stilt_t *a_stilt);
