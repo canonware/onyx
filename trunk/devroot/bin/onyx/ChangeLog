@@ -1,3 +1,8 @@
+2001-11-13  Jason Evans  <jasone@canonware.com>
+
+	* src/onyx_ops.c (onyx_ops_modload_sym_delete): Increase the GC sweep
+	iteration for module unloading.
+
 2001-10-07  Jason Evans  <jasone@canonware.com>
 
 	* src/onyx_ops.c (onyx_ops_modload): The hook evaluated by

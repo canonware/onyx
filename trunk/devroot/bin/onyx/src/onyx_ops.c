@@ -28,10 +28,14 @@ onyx_ops_modload_sym_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
 	cw_bool_t	retval;
 
 	/*
-	 * Don't dlclose() until the second GC sweep iteration, so that other
-	 * objects that are part of the module can be deleted first.
+	 * Don't dlclose() until a later GC sweep iteration, so that other
+	 * objects that are part of the module can be deleted first.  What
+	 * iteration to actually dlclose() is a bit arbitrary, but specifying a
+	 * high number forces the GC sweeper to loop rather pointlessly.  This
+	 * is probably a design problem that should be fixed, but the solution
+	 * isn't obvious.
 	 */
-	if (a_iter != 1) {
+	if (a_iter != 31) {
 		retval = TRUE;
 		goto RETURN;
 	}

@@ -651,7 +651,7 @@ nxa_p_mark(cw_nxa_t *a_nxa, cw_uint32_t *r_nreachable)
 _CW_INLINE void
 nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 {
-	cw_nxoe_t	*first, *nxoe;
+	cw_nxoe_t	*last, *defer, *nxoe;
 	cw_uint32_t	i;
 	cw_bool_t	again;
 
@@ -661,19 +661,20 @@ nxa_p_sweep(cw_nxa_t *a_nxa, cw_nxoe_t *a_garbage)
 	 * later pass.  Repeatedly iterate through undeleted objects until no
 	 * objects defer deletion.
 	 */
-	for (first = a_garbage, nxoe = NULL, again = TRUE, i = 0; again == TRUE;
+	for (defer = a_garbage, nxoe = NULL, again = TRUE, i = 0;
+	    again == TRUE;
 	    i++) {
 		again = FALSE;
-
+		last = defer;
 		do {
-			nxoe = qr_next(first, link);
+			nxoe = qr_next(defer, link);
 			qr_remove(nxoe, link);
 			if (nxoe_l_delete(nxoe, a_nxa, i)) {
 				again = TRUE;
-				qr_before_insert(first, nxoe, link);
-				first = nxoe;
+				qr_after_insert(defer, nxoe, link);
+				defer = nxoe;
 			}
-		} while (nxoe != first);
+		} while (nxoe != last);
 	}
 }
 

@@ -1,3 +1,8 @@
+2001-11-13  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_sweep): Fix sweep iteration problems when
+	deferred deletion is encountered.
+
 2001-11-10  Jason Evans  <jasone@canonware.com>
 
 	* src/nx_nxcode.nx: Print errors to stderr rather than stdout in
