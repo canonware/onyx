@@ -47,7 +47,7 @@ struct cw_marker
     cw_nxo_t hook;
 
     cw_nxo_t buffer_nxo;
-    cw_bufm_t bufm;
+    cw_mkr_t mkr;
 
     /* Sequence number. */
     cw_nxoi_t seq;
@@ -65,7 +65,7 @@ struct cw_extent
     cw_nxo_t hook;
 
     cw_nxo_t buffer_nxo;
-    cw_bufe_t bufe;
+    cw_ext_t ext;
 
     /* Sequence number. */
     cw_nxoi_t seq;
@@ -231,7 +231,7 @@ buffer_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     struct cw_buffer *buffer = (struct cw_buffer *) a_data;
 
     /* Don't delete until the second GC sweep iteration, so that associated
-     * bufm's can be deleted first. */
+     * mkr's can be deleted first. */
     if (a_iter != 1)
     {
 	retval = TRUE;
@@ -555,7 +555,7 @@ modslate_buffer_undo(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    result = buf_undo(&buffer->buf, &marker->bufm, nundo);
+    result = buf_undo(&buffer->buf, &marker->mkr, nundo);
     buffer->seq++;
     marker->seq++;
     buffer_p_unlock(buffer);
@@ -602,7 +602,7 @@ modslate_buffer_redo(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    result = buf_redo(&buffer->buf, &marker->bufm, nredo);
+    result = buf_redo(&buffer->buf, &marker->mkr, nredo);
     buffer->seq++;
     marker->seq++;
     buffer_p_unlock(buffer);
@@ -711,7 +711,7 @@ modslate_buffer_history_startgroup(void *a_data, cw_nxo_t *a_thread)
     buffer_p_lock(buffer);
     if (marker != NULL)
     {
-	buf_hist_group_beg(&buffer->buf, &marker->bufm);
+	buf_hist_group_beg(&buffer->buf, &marker->mkr);
     }
     else
     {
@@ -820,7 +820,7 @@ marker_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bufm_delete(&marker->bufm);
+    mkr_delete(&marker->mkr);
     buffer_p_unlock(buffer);
     nxa_free(nx_nxa_get(a_nx), marker, sizeof(struct cw_marker));
 
@@ -936,7 +936,7 @@ modslate_marker(void *a_data, cw_nxo_t *a_thread)
     nxo_no_new(&marker->buffer_nxo);
     nxo_dup(&marker->buffer_nxo, nxo);
     buffer_p_lock(buffer);
-    bufm_new(&marker->bufm, &buffer->buf);
+    mkr_new(&marker->mkr, &buffer->buf);
     buffer_p_unlock(buffer);
 
     /* Create a reference to the marker; keep a reference to the buf on tstack
@@ -1033,8 +1033,8 @@ modslate_marker_copy(void *a_data, cw_nxo_t *a_thread)
     nxo_dup(&marker_copy->buffer_nxo, &marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bufm_new(&marker_copy->bufm, &buffer->buf);
-    bufm_dup(&marker_copy->bufm, &marker->bufm);
+    mkr_new(&marker_copy->mkr, &buffer->buf);
+    mkr_dup(&marker_copy->mkr, &marker->mkr);
     marker_copy->seq++;
     buffer_p_unlock(buffer);
 
@@ -1098,7 +1098,7 @@ modslate_marker_line(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    line = bufm_line(&marker->bufm);
+    line = mkr_line(&marker->mkr);
     buffer_p_unlock(buffer);
 
     nxo_integer_new(nxo, line);
@@ -1167,7 +1167,7 @@ modslate_marker_seekline(void *a_data, cw_nxo_t *a_thread)
     }
 
     buffer_p_lock(buffer);
-    pos = bufm_line_seek(&marker->bufm, offset, whence);
+    pos = mkr_line_seek(&marker->mkr, offset, whence);
     marker->seq++;
     buffer_p_unlock(buffer);
 
@@ -1198,7 +1198,7 @@ modslate_marker_position(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    position = (cw_nxoi_t)bufm_pos(&marker->bufm);
+    position = (cw_nxoi_t)mkr_pos(&marker->mkr);
     buffer_p_unlock(buffer);
 
     nxo_integer_new(nxo, position);
@@ -1286,9 +1286,9 @@ modslate_marker_seek(void *a_data, cw_nxo_t *a_thread)
     {
 	/* Move to the location of the whence marker before doing a relative
 	 * seek. */
-	bufm_dup(&marker->bufm, &whence_marker->bufm);
+	mkr_dup(&marker->mkr, &whence_marker->mkr);
     }
-    pos = bufm_seek(&marker->bufm, offset, whence);
+    pos = mkr_seek(&marker->mkr, offset, whence);
     marker->seq++;
     buffer_p_unlock(buffer);
 
@@ -1319,7 +1319,7 @@ modslate_marker_before_get(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bp = bufm_before_get(&marker->bufm);
+    bp = mkr_before_get(&marker->mkr);
     if (bp == NULL)
     {
 	buffer_p_unlock(buffer);
@@ -1354,7 +1354,7 @@ modslate_marker_after_get(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bp = bufm_after_get(&marker->bufm);
+    bp = mkr_after_get(&marker->mkr);
     if (bp == NULL)
     {
 	buffer_p_unlock(buffer);
@@ -1400,7 +1400,7 @@ modslate_marker_before_set(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bp = bufm_before_get(&marker->bufm);
+    bp = mkr_before_get(&marker->mkr);
     if (bp == NULL)
     {
 	buffer_p_unlock(buffer);
@@ -1447,7 +1447,7 @@ modslate_marker_after_set(void *a_data, cw_nxo_t *a_thread)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&marker->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bp = bufm_after_get(&marker->bufm);
+    bp = mkr_after_get(&marker->mkr);
     if (bp == NULL)
     {
 	buffer_p_unlock(buffer);
@@ -1500,7 +1500,7 @@ modslate_marker_before_insert(void *a_data, cw_nxo_t *a_thread)
     bufv.len = str_len;
 
     buffer_p_lock(buffer);
-    bufm_before_insert(&marker->bufm, &bufv, 1);
+    mkr_before_insert(&marker->mkr, &bufv, 1);
     buffer->seq++;
     marker->seq++;
     buffer_p_unlock(buffer);
@@ -1547,7 +1547,7 @@ modslate_marker_after_insert(void *a_data, cw_nxo_t *a_thread)
     bufv.len = str_len;
 
     buffer_p_lock(buffer);
-    bufm_after_insert(&marker->bufm, &bufv, 1);
+    mkr_after_insert(&marker->mkr, &bufv, 1);
     buffer->seq++;
     buffer_p_unlock(buffer);
 
@@ -1598,9 +1598,9 @@ modslate_marker_range_get(void *a_data, cw_nxo_t *a_thread)
     buffer_p_lock(buffer);
 
     /* Get a pointer to the buffer range and calculate its length. */
-    bufv = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &bufvcnt);
-    pos_a = bufm_pos(&marker_a->bufm);
-    pos_b = bufm_pos(&marker_b->bufm);
+    bufv = mkr_range_get(&marker_a->mkr, &marker_b->mkr, &bufvcnt);
+    pos_a = mkr_pos(&marker_a->mkr);
+    pos_b = mkr_pos(&marker_b->mkr);
     str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
 
     /* Create an Onyx string to store the result.  Since there are two markers
@@ -1662,9 +1662,9 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
     buffer_p_lock(buffer);
 
     /* Get a pointer to the buffer range and calculate its length. */
-    bufv = bufm_range_get(&marker_a->bufm, &marker_b->bufm, &bufvcnt);
-    pos_a = bufm_pos(&marker_a->bufm);
-    pos_b = bufm_pos(&marker_b->bufm);
+    bufv = mkr_range_get(&marker_a->mkr, &marker_b->mkr, &bufvcnt);
+    pos_a = mkr_pos(&marker_a->mkr);
+    pos_b = mkr_pos(&marker_b->mkr);
     str_len = (pos_a < pos_b) ? pos_b - pos_a : pos_a - pos_b;
 
     /* Create an Onyx string to store the result.  Since there are two markers
@@ -1678,7 +1678,7 @@ modslate_marker_range_cut(void *a_data, cw_nxo_t *a_thread)
     bufv_copy(&sbufv, 1, bufv, bufvcnt, 0);
 
     /* Remove the buffer range. */
-    bufm_remove(&marker_a->bufm, &marker_b->bufm);
+    mkr_remove(&marker_a->mkr, &marker_b->mkr);
 
     buffer->seq++;
     marker_a->seq++;
@@ -1738,7 +1738,7 @@ extent_p_delete(void *a_data, cw_nx_t *a_nx, cw_uint32_t a_iter)
     buffer = (struct cw_buffer *) nxo_hook_data_get(&extent->buffer_nxo);
 
     buffer_p_lock(buffer);
-    bufe_delete(&extent->bufe);
+    ext_delete(&extent->ext);
     buffer_p_unlock(buffer);
     nxa_free(nx_nxa_get(a_nx), extent, sizeof(struct cw_extent));
 

@@ -20,10 +20,10 @@ struct cw_hist_s
     cw_buf_t h;
 
     /* Marker at current position in h. */
-    cw_bufm_t hcur;
+    cw_mkr_t hcur;
 
     /* Temporary marker. */
-    cw_bufm_t htmp;
+    cw_mkr_t htmp;
 
     /* Current history bpos (in the data buf). */
     cw_uint64_t hbpos;
@@ -50,18 +50,18 @@ cw_bool_t
 hist_redoable(cw_hist_t *a_hist, cw_buf_t *a_buf);
 
 cw_uint64_t
-hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	  cw_uint64_t a_count);
 
 cw_uint64_t
-hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	  cw_uint64_t a_count);
 
 void
 hist_flush(cw_hist_t *a_hist, cw_buf_t *a_buf);
 
 void
-hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr);
 
 cw_bool_t
 hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf);

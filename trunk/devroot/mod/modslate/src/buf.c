@@ -12,7 +12,7 @@
  * slate text editor.  The code is broken up into the following classes:
  *
  * buf  : Main buffer class.
- * bufm : Marker.  Markers are used as handles for many buf operations.
+ * mkr : Marker.  Markers are used as handles for many buf operations.
  *
  ******************************************************************************
  *
@@ -41,7 +41,7 @@
  * The size of elements in the buffer can be changed on a per-buffer basis on
  * the fly.  This allows character attributes to be stored with the buffer data,
  * but doesn't waste space for buffers that don't utilize character attributes.
- * The only significant impact that this has is on bufm_rang_get().  It is only
+ * The only significant impact that this has is on mkr_rang_get().  It is only
  * safe to treat the return value as a pointer to a string in the buffer if the
  * element size is 1.
  *
@@ -69,12 +69,12 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg,
 		  cw_uint64_t a_apos_end);
 
 static void
-buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+buf_p_mkrs_apos_adjust(cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			cw_sint64_t a_adjust, cw_uint64_t a_beg_apos,
 			cw_uint64_t a_end_apos);
 
 static void
-buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos);
+buf_p_gap_move(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_bpos);
 
 static void
 buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen);
@@ -351,48 +351,48 @@ buf_p_lines_count(cw_buf_t *a_buf, cw_uint64_t a_apos_beg, cw_uint64_t
 }
 
 static void
-buf_p_bufms_apos_adjust(cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+buf_p_mkrs_apos_adjust(cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 			cw_sint64_t a_adjust, cw_uint64_t a_beg_apos,
 			cw_uint64_t a_end_apos)
 {
-    cw_bufm_t *bufm;
+    cw_mkr_t *mkr;
 
     cw_check_ptr(a_buf);
-    cw_check_ptr(a_bufm);
+    cw_check_ptr(a_mkr);
     cw_assert(a_beg_apos < a_end_apos);
 
-    /* Adjust apos field of affected bufm's. a_bufm is either in or adjacent to
-     * the affected range.  Starting at a_bufm, go both directions until out of
+    /* Adjust apos field of affected mkr's. a_mkr is either in or adjacent to
+     * the affected range.  Starting at a_mkr, go both directions until out of
      * the affected range or until past the beginning/end of the list.  Extra
-     * care must be taken to ignore bufm's at the starting apos if a_bufm is
+     * care must be taken to ignore mkr's at the starting apos if a_mkr is
      * merely adjacent to the affected region. */
 
-    /* Forward (including a_bufm). */
-    for (bufm = a_bufm;
-	 bufm != NULL && bufm->apos >= a_beg_apos && bufm->apos < a_end_apos;
-	 bufm = ql_next(&a_buf->bufms, bufm, link))
+    /* Forward (including a_mkr). */
+    for (mkr = a_mkr;
+	 mkr != NULL && mkr->apos >= a_beg_apos && mkr->apos < a_end_apos;
+	 mkr = ql_next(&a_buf->mkrs, mkr, link))
     {
-	bufm->apos += a_adjust;
+	mkr->apos += a_adjust;
     }
 
     /* Backward. */
-    for (bufm = ql_prev(&a_buf->bufms, a_bufm, link);
-	 bufm != NULL && bufm->apos == a_end_apos;
-	 bufm = ql_prev(&a_buf->bufms, bufm, link))
+    for (mkr = ql_prev(&a_buf->mkrs, a_mkr, link);
+	 mkr != NULL && mkr->apos == a_end_apos;
+	 mkr = ql_prev(&a_buf->mkrs, mkr, link))
     {
 	/* Ignore. */
     }
 
     for (;
-	 bufm != NULL && bufm->apos >= a_beg_apos;
-	 bufm = ql_prev(&a_buf->bufms, bufm, link))
+	 mkr != NULL && mkr->apos >= a_beg_apos;
+	 mkr = ql_prev(&a_buf->mkrs, mkr, link))
     {
-	bufm->apos += a_adjust;
+	mkr->apos += a_adjust;
     }
 }
 
 static void
-buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
+buf_p_gap_move(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_bpos)
 {
     cw_uint64_t apos;
 
@@ -423,8 +423,8 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
 		    &a_buf->b[(a_buf->gap_off + a_buf->gap_len)],
 		    (apos - a_buf->gap_off));
 
-	    /* Adjust the apos of all bufm's with apos in the moved region. */
-	    buf_p_bufms_apos_adjust(a_buf, a_bufm, -a_buf->gap_len,
+	    /* Adjust the apos of all mkr's with apos in the moved region. */
+	    buf_p_mkrs_apos_adjust(a_buf, a_mkr, -a_buf->gap_len,
 				    a_buf->gap_off + a_buf->gap_len,
 				    apos + a_buf->gap_len);
 	}
@@ -447,8 +447,8 @@ buf_p_gap_move(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_bpos)
 		    &a_buf->b[apos],
 		    (a_buf->gap_off - apos));
 
-	    /* Adjust the apos of all bufm's with apos in the moved region. */
-	    buf_p_bufms_apos_adjust(a_buf, a_bufm, a_buf->gap_len, apos,
+	    /* Adjust the apos of all mkr's with apos in the moved region. */
+	    buf_p_mkrs_apos_adjust(a_buf, a_mkr, a_buf->gap_len, apos,
 				    a_buf->gap_off);
 	}
 	a_buf->gap_off = apos;
@@ -469,7 +469,7 @@ buf_p_grow(cw_buf_t *a_buf, cw_uint64_t a_minlen)
     }
 
     /* Move the gap to the end before reallocating. */
-    buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
+    buf_p_gap_move(a_buf, ql_last(&a_buf->mkrs, link), a_buf->len + 1);
 
     a_buf->b = (cw_uint8_t *) cw_opaque_realloc(a_buf->realloc, a_buf->arg,
 						a_buf->b, new_size, old_size);
@@ -499,7 +499,7 @@ buf_p_shrink(cw_buf_t *a_buf)
     if (old_size > new_size)
     {
 	/* Move the gap to the end. */
-	buf_p_gap_move(a_buf, ql_last(&a_buf->bufms, link), a_buf->len + 1);
+	buf_p_gap_move(a_buf, ql_last(&a_buf->mkrs, link), a_buf->len + 1);
 
 	/* Shrink the gap. */
 	a_buf->b = (cw_uint8_t *) cw_opaque_realloc(a_buf->realloc,
@@ -549,9 +549,9 @@ buf_new(cw_buf_t *a_buf, cw_opaque_alloc_t *a_alloc,
     retval->hist = NULL;
 
     /* Initialize lists. */
-    ql_new(&retval->bufms);
-    ql_new(&retval->fbufes);
-    ql_new(&retval->rbufes);
+    ql_new(&retval->mkrs);
+    ql_new(&retval->fexts);
+    ql_new(&retval->rexts);
 
 #ifdef CW_DBG
     retval->magic = CW_BUF_MAGIC;
@@ -565,7 +565,7 @@ buf_delete(cw_buf_t *a_buf)
 {
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
-    cw_assert(ql_first(&a_buf->bufms) == NULL);
+    cw_assert(ql_first(&a_buf->mkrs) == NULL);
 
     if (a_buf->hist != NULL)
     {
@@ -692,7 +692,7 @@ buf_redoable(cw_buf_t *a_buf)
 }
 
 cw_uint64_t
-buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
+buf_undo(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_count)
 {
     cw_uint64_t retval;
 
@@ -705,14 +705,14 @@ buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 	goto RETURN;
     }
 
-    retval = hist_undo(a_buf->hist, a_buf, a_bufm, a_count);
+    retval = hist_undo(a_buf->hist, a_buf, a_mkr, a_count);
 
     RETURN:
     return retval;
 }
 
 cw_uint64_t
-buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
+buf_redo(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_count)
 {
     cw_uint64_t retval;
 
@@ -725,7 +725,7 @@ buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count)
 	goto RETURN;
     }
 
-    retval = hist_redo(a_buf->hist, a_buf, a_bufm, a_count);
+    retval = hist_redo(a_buf->hist, a_buf, a_mkr, a_count);
 
     RETURN:
     return retval;
@@ -744,14 +744,14 @@ buf_hist_flush(cw_buf_t *a_buf)
 }
 
 void
-buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm)
+buf_hist_group_beg(cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 {
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
     if (a_buf->hist != NULL)
     {
-	hist_group_beg(a_buf->hist, a_buf, a_bufm);
+	hist_group_beg(a_buf->hist, a_buf, a_mkr);
     }
 }
 
@@ -775,21 +775,21 @@ buf_hist_group_end(cw_buf_t *a_buf)
     return retval;
 }
 
-/* bufm. */
+/* mkr. */
 void
-bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after,
+mkr_l_insert(cw_mkr_t *a_mkr, cw_bool_t a_record, cw_bool_t a_after,
 	      const cw_bufv_t *a_bufv, cw_uint32_t a_bufvcnt)
 {
     cw_uint64_t i, count, nlines;
     cw_buf_t *buf;
-    cw_bufm_t *first, *bufm;
+    cw_mkr_t *first, *mkr;
     cw_bufv_t bufv;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    buf = a_bufm->buf;
+    buf = a_mkr->buf;
 
     /* Record the undo information before inserting so that the apos is still
      * unmodified. */
@@ -797,12 +797,12 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after,
     {
 	if (a_after)
 	{
-	    hist_ynk(buf->hist, buf, buf_p_pos_a2b(buf, a_bufm->apos), a_bufv,
+	    hist_ynk(buf->hist, buf, buf_p_pos_a2b(buf, a_mkr->apos), a_bufv,
 		     a_bufvcnt);
 	}
 	else
 	{
-	    hist_ins(buf->hist, buf, buf_p_pos_a2b(buf, a_bufm->apos), a_bufv,
+	    hist_ins(buf->hist, buf, buf_p_pos_a2b(buf, a_mkr->apos), a_bufv,
 		     a_bufvcnt);
 	}
     }
@@ -821,7 +821,7 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after,
     }
 
     /* Move the gap. */
-    buf_p_gap_move(buf, a_bufm, buf_p_pos_a2b(buf, a_bufm->apos));
+    buf_p_gap_move(buf, a_mkr, buf_p_pos_a2b(buf, a_mkr->apos));
 
     /* Insert. */
     bufv.data = &buf->b[buf->gap_off];
@@ -836,29 +836,29 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after,
     buf->len += count;
     buf->nlines += nlines;
 
-    /* If there are multiple bufm's at the same position as a_bufm, make sure
-     * that a_bufm is the first bufm in the bufm list, in order to simplify
-     * later list iteration operations and allow moving a_bufm. */
-    for (first = NULL, bufm = ql_prev(&buf->bufms, a_bufm, link);
-	 bufm != NULL && bufm->apos == a_bufm->apos;
-	 bufm = ql_prev(&buf->bufms, bufm, link))
+    /* If there are multiple mkr's at the same position as a_mkr, make sure
+     * that a_mkr is the first mkr in the mkr list, in order to simplify
+     * later list iteration operations and allow moving a_mkr. */
+    for (first = NULL, mkr = ql_prev(&buf->mkrs, a_mkr, link);
+	 mkr != NULL && mkr->apos == a_mkr->apos;
+	 mkr = ql_prev(&buf->mkrs, mkr, link))
     {
-	first = bufm;
+	first = mkr;
     }
 
     if (first != NULL)
     {
-	ql_remove(&buf->bufms, a_bufm, link);
-	ql_before_insert(&buf->bufms, first, a_bufm, link);
+	ql_remove(&buf->mkrs, a_mkr, link);
+	ql_before_insert(&buf->mkrs, first, a_mkr, link);
     }
 
-    /* If inserting after a_bufm, move a_bufm before the data just inserted.
-     * This relies on the bufm list re-ordering above, since moving a_bufm would
-     * otherwise require re-insertion into the bufm list. */
+    /* If inserting after a_mkr, move a_mkr before the data just inserted.
+     * This relies on the mkr list re-ordering above, since moving a_mkr would
+     * otherwise require re-insertion into the mkr list. */
     if (a_after)
     {
-	a_bufm->apos = buf_p_pos_b2a(buf,
-				     buf_p_pos_a2b(buf, a_bufm->apos) - count);
+	a_mkr->apos = buf_p_pos_b2a(buf,
+				     buf_p_pos_a2b(buf, a_mkr->apos) - count);
     }
 
     if (nlines > 0)
@@ -866,50 +866,50 @@ bufm_l_insert(cw_bufm_t *a_bufm, cw_bool_t a_record, cw_bool_t a_after,
 	/* Adjust line. */
 	if (a_after == FALSE)
 	{
-	    a_bufm->line += nlines;
+	    a_mkr->line += nlines;
 
-	    /* Adjust line for all bufm's at the same position. */
-	    for (bufm = ql_next(&buf->bufms, a_bufm, link);
-		 bufm != NULL && bufm->apos == a_bufm->apos;
-		 bufm = ql_next(&buf->bufms, bufm, link))
+	    /* Adjust line for all mkr's at the same position. */
+	    for (mkr = ql_next(&buf->mkrs, a_mkr, link);
+		 mkr != NULL && mkr->apos == a_mkr->apos;
+		 mkr = ql_next(&buf->mkrs, mkr, link))
 	    {
-		bufm->line += nlines;
+		mkr->line += nlines;
 	    }
 	}
 	else
 	{
-	    /* Move past bufm's at the same position. */
-	    for (bufm = ql_next(&buf->bufms, a_bufm, link);
-		 bufm != NULL && bufm->apos == a_bufm->apos;
-		 bufm = ql_next(&buf->bufms, bufm, link))
+	    /* Move past mkr's at the same position. */
+	    for (mkr = ql_next(&buf->mkrs, a_mkr, link);
+		 mkr != NULL && mkr->apos == a_mkr->apos;
+		 mkr = ql_next(&buf->mkrs, mkr, link))
 	    {
 		/* Do nothing. */
 	    }
 	}
 
-	/* Adjust line for all following bufm's. */
+	/* Adjust line for all following mkr's. */
 	for (;
-	     bufm != NULL;
-	     bufm = ql_next(&buf->bufms, bufm, link))
+	     mkr != NULL;
+	     mkr = ql_next(&buf->mkrs, mkr, link))
 	{
-	    bufm->line += nlines;
+	    mkr->line += nlines;
 	}
     }
 }
 
 void
-bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
+mkr_l_remove(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_bool_t a_record)
 {
     cw_buf_t *buf;
-    cw_bufm_t *start, *end, *bufm;
+    cw_mkr_t *start, *end, *mkr;
     cw_uint64_t start_bpos, end_bpos, rcount, nlines;
     cw_bufv_t bufv;
 
     cw_check_ptr(a_start);
-    cw_dassert(a_start->magic == CW_BUFM_MAGIC);
+    cw_dassert(a_start->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_start->buf);
     cw_check_ptr(a_end);
-    cw_dassert(a_end->magic == CW_BUFM_MAGIC);
+    cw_dassert(a_end->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_end->buf);
     cw_assert(a_start->buf == a_end->buf);
 
@@ -962,32 +962,32 @@ bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
     /* Grow the gap. */
     buf->gap_len += rcount;
 
-    /* Adjust apos for all bufm's before start that are at the same position. */
-    for (bufm = ql_prev(&buf->bufms, start, link);
-	 bufm != NULL && bufm->apos == start->apos;
-	 bufm = ql_prev(&buf->bufms, bufm, link))
+    /* Adjust apos for all mkr's before start that are at the same position. */
+    for (mkr = ql_prev(&buf->mkrs, start, link);
+	 mkr != NULL && mkr->apos == start->apos;
+	 mkr = ql_prev(&buf->mkrs, mkr, link))
     {
-	bufm->apos = end->apos;
+	mkr->apos = end->apos;
     }
 
-    /* Adjust apos and line for all bufm's from start (inclusive) to end
+    /* Adjust apos and line for all mkr's from start (inclusive) to end
      * (exclusive). */
-    for (bufm = start;
-	 bufm->apos < end->apos;
-	 bufm = ql_next(&buf->bufms, bufm, link))
+    for (mkr = start;
+	 mkr->apos < end->apos;
+	 mkr = ql_next(&buf->mkrs, mkr, link))
     {
-	bufm->apos = end->apos;
-	bufm->line = start->line;
+	mkr->apos = end->apos;
+	mkr->line = start->line;
     }
 	
     nlines = end->line - start->line;
 
-    /* Adjust the line for all bufm's after the gap. */
+    /* Adjust the line for all mkr's after the gap. */
     for (;
-	 bufm != NULL;
-	 bufm = ql_next(&buf->bufms, bufm, link))
+	 mkr != NULL;
+	 mkr = ql_next(&buf->mkrs, mkr, link))
     {
-	bufm->line -= nlines;
+	mkr->line -= nlines;
     }
 
     /* Adjust the buf's len and nlines. */
@@ -998,26 +998,24 @@ bufm_l_remove(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_bool_t a_record)
     buf_p_shrink(buf);
 }
 
-cw_bufm_t *
-bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf)
+cw_mkr_t *
+mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf)
 {
-    cw_bufm_t *retval;
+    cw_mkr_t *retval;
 
     cw_check_ptr(a_buf);
     cw_dassert(a_buf->magic == CW_BUF_MAGIC);
 
-    if (a_bufm == NULL)
+    if (a_mkr == NULL)
     {
-	retval = (cw_bufm_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
-					       sizeof(cw_bufm_t));
-	retval->dealloc = a_buf->dealloc;
-	retval->arg = a_buf->arg;
+	retval = (cw_mkr_t *) cw_opaque_alloc(a_buf->alloc, a_buf->arg,
+					       sizeof(cw_mkr_t));
+	retval->malloced = TRUE;
     }
     else
     {
-	retval = a_bufm;
-	retval->dealloc = NULL;
-	retval->arg = NULL;
+	retval = a_mkr;
+	retval->malloced = FALSE;
     }
 
     ql_elm_new(retval, link);
@@ -1025,73 +1023,73 @@ bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf)
     retval->apos = buf_p_pos_b2a(a_buf, 1);
     retval->line = 1;
 
-    ql_head_insert(&a_buf->bufms, retval, link);
+    ql_head_insert(&a_buf->mkrs, retval, link);
 
 #ifdef CW_DBG
-    retval->magic = CW_BUFM_MAGIC;
+    retval->magic = CW_MKR_MAGIC;
 #endif
 
     return retval;
 }
 
 void
-bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from)
+mkr_dup(cw_mkr_t *a_to, cw_mkr_t *a_from)
 {
     cw_check_ptr(a_to);
-    cw_dassert(a_to->magic == CW_BUFM_MAGIC);
+    cw_dassert(a_to->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_to->buf);
     cw_check_ptr(a_from);
-    cw_dassert(a_from->magic == CW_BUFM_MAGIC);
+    cw_dassert(a_from->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_from->buf);
     cw_assert(a_to->buf == a_from->buf);
 
     a_to->apos = a_from->apos;
     a_to->line = a_from->line;
 
-    ql_remove(&a_to->buf->bufms, a_to, link);
+    ql_remove(&a_to->buf->mkrs, a_to, link);
     ql_after_insert(a_from, a_to, link);
 }
 
 void
-bufm_delete(cw_bufm_t *a_bufm)
+mkr_delete(cw_mkr_t *a_mkr)
 {
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-    if (a_bufm->dealloc != NULL)
+    if (a_mkr->malloced)
     {
-	cw_opaque_dealloc(a_bufm->dealloc, a_bufm->arg, a_bufm,
-			  sizeof(cw_bufm_t));
+	cw_opaque_dealloc(a_mkr->buf->dealloc, a_mkr->buf->arg, a_mkr,
+			  sizeof(cw_mkr_t));
     }
 #ifdef CW_DBG
     else
     {
-	memset(a_bufm, 0x5a, sizeof(cw_bufm_t));
+	memset(a_mkr, 0x5a, sizeof(cw_mkr_t));
     }
 #endif
 }
 
 cw_buf_t *
-bufm_buf(cw_bufm_t *a_bufm)
+mkr_buf(cw_mkr_t *a_mkr)
 {
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    return a_bufm->buf;
+    return a_mkr->buf;
 }
 
 cw_uint64_t
-bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
+mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
-    cw_bufm_t *bufm;
+    cw_mkr_t *mkr;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
     /* When checking for attempted seeking out of buf bounds, it is important to
      * handle the cases of movement to exactly BOB or EOB, since there is one
@@ -1106,13 +1104,13 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    if (a_offset <= 0)
 	    {
 		/* Attempt to move to or before BOB.  Move to BOB. */
-		bufm_seek(a_bufm, 0, BUFW_BEG);
+		mkr_seek(a_mkr, 0, BUFW_BEG);
 		break;
 	    }
-	    else if (a_offset >= a_bufm->buf->nlines)
+	    else if (a_offset >= a_mkr->buf->nlines)
 	    {
 		/* Attempt to move to or past EOB.  Move to EOB. */
-		bufm_seek(a_bufm, 0, BUFW_END);
+		mkr_seek(a_mkr, 0, BUFW_END);
 		break;
 	    }
 
@@ -1123,35 +1121,35 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	     *   hello\ngoodbye\nyadda\nblah
 	     *                /\
 	     */
-	    a_bufm->apos
-		= buf_p_lines_rel_forward_count(a_bufm->buf,
-						buf_p_pos_b2a(a_bufm->buf, 1),
+	    a_mkr->apos
+		= buf_p_lines_rel_forward_count(a_mkr->buf,
+						buf_p_pos_b2a(a_mkr->buf, 1),
 						a_offset);
 
 	    /* Set the line number. */
-	    a_bufm->line = a_offset;
+	    a_mkr->line = a_offset;
 
-	    /* Relocate in the bufm list. */
-	    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+	    /* Relocate in the mkr list. */
+	    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-	    for (bufm = ql_first(&a_bufm->buf->bufms);
-		 bufm != NULL && a_bufm->apos > bufm->apos;
-		 bufm = ql_next(&a_bufm->buf->bufms, bufm, link))
+	    for (mkr = ql_first(&a_mkr->buf->mkrs);
+		 mkr != NULL && a_mkr->apos > mkr->apos;
+		 mkr = ql_next(&a_mkr->buf->mkrs, mkr, link))
 	    {
 		/* Iterate until the end of the list is reached, or the apos of
-		 * a bufm in the list is greater than that of the seeking
-		 * bufm. */
+		 * a mkr in the list is greater than that of the seeking
+		 * mkr. */
 	    }
 
-	    if (bufm == NULL)
+	    if (mkr == NULL)
 	    {
 		/* Insert at end. */
-		ql_tail_insert(&a_bufm->buf->bufms, a_bufm, link);
+		ql_tail_insert(&a_mkr->buf->mkrs, a_mkr, link);
 	    }
 	    else
 	    {
-		/* Insert before the last bufm looked at. */
-		ql_before_insert(&a_bufm->buf->bufms, bufm, a_bufm, link);
+		/* Insert before the last mkr looked at. */
+		ql_before_insert(&a_mkr->buf->mkrs, mkr, a_mkr, link);
 	    }
 	    break;
 	}
@@ -1163,10 +1161,10 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    if (a_offset > 0)
 	    {
 		/* Make sure not to go out of buf bounds. */
-		if (a_bufm->line + a_offset > a_bufm->buf->nlines)
+		if (a_mkr->line + a_offset > a_mkr->buf->nlines)
 		{
 		    /* Attempt to move to or after EOB.  Move to EOB. */
-		    bufm_seek(a_bufm, 0, BUFW_END);
+		    mkr_seek(a_mkr, 0, BUFW_END);
 		    break;
 		}
 		/* Move forward from the current position to just short
@@ -1177,52 +1175,52 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *                       /\
 		 */
-		apos = buf_p_lines_rel_forward_count(a_bufm->buf, a_bufm->apos,
+		apos = buf_p_lines_rel_forward_count(a_mkr->buf, a_mkr->apos,
 						     a_offset);
 
-		/* Relocate in the bufm list. */
-		for (bufm = ql_next(&a_bufm->buf->bufms, a_bufm, link);
-		     bufm != NULL && apos > bufm->apos;
-		     bufm = ql_next(&a_bufm->buf->bufms, bufm, link))
+		/* Relocate in the mkr list. */
+		for (mkr = ql_next(&a_mkr->buf->mkrs, a_mkr, link);
+		     mkr != NULL && apos > mkr->apos;
+		     mkr = ql_next(&a_mkr->buf->mkrs, mkr, link))
 		{
 		    /* Iterate until the end of the list is reached, or the apos
-		     * of a bufm in the list is greater than that of the seeking
-		     * bufm. */
+		     * of a mkr in the list is greater than that of the seeking
+		     * mkr. */
 		    relocate = TRUE;
 		}
 
 		if (relocate)
 		{
-		    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+		    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-		    if (bufm == NULL)
+		    if (mkr == NULL)
 		    {
 			/* Insert at end. */
-			ql_tail_insert(&a_bufm->buf->bufms,
-				       a_bufm, link);
+			ql_tail_insert(&a_mkr->buf->mkrs,
+				       a_mkr, link);
 		    }
 		    else
 		    {
-			/* Insert before the last bufm looked at. */
-			ql_before_insert(&a_bufm->buf->bufms, bufm, a_bufm,
+			/* Insert before the last mkr looked at. */
+			ql_before_insert(&a_mkr->buf->mkrs, mkr, a_mkr,
 					 link);
 		    }
 		}
 
 		/* Set the line number. */
-		a_bufm->line += a_offset - 1;
+		a_mkr->line += a_offset - 1;
 
-		/* Set the apos of the bufm now that the old value isn't needed
+		/* Set the apos of the mkr now that the old value isn't needed
 		 * anymore. */
-		a_bufm->apos = apos;
+		a_mkr->apos = apos;
 	    }
 	    else if (a_offset < 0)
 	    {
 		/* Make sure not to go out of buf bounds. */
-		if (-a_offset >= a_bufm->line)
+		if (-a_offset >= a_mkr->line)
 		{
 		    /* Attempt to move to or before BOB.  Move to BOB. */
-		    bufm_seek(a_bufm, 0, BUFW_BEG);
+		    mkr_seek(a_mkr, 0, BUFW_BEG);
 		    break;
 		}
 
@@ -1234,43 +1232,43 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		 *   hello\ngoodbye\nyadda\nblah
 		 *         /\
 		 */
-		apos = buf_p_lines_rel_backward_count(a_bufm->buf, a_bufm->apos,
+		apos = buf_p_lines_rel_backward_count(a_mkr->buf, a_mkr->apos,
 						      -a_offset);
 			
-		/* Relocate in the bufm list. */
-		for (bufm = ql_prev(&a_bufm->buf->bufms, a_bufm, link);
-		     bufm != NULL && apos < bufm->apos;
-		     bufm = ql_prev(&a_bufm->buf->bufms, bufm, link))
+		/* Relocate in the mkr list. */
+		for (mkr = ql_prev(&a_mkr->buf->mkrs, a_mkr, link);
+		     mkr != NULL && apos < mkr->apos;
+		     mkr = ql_prev(&a_mkr->buf->mkrs, mkr, link))
 		{
 		    /* Iterate until the beginning of the list is reached, or
-		     * the apos of a bufm in the list is less than that of the
-		     * seeking bufm. */
+		     * the apos of a mkr in the list is less than that of the
+		     * seeking mkr. */
 		    relocate = TRUE;
 		}
 
 		if (relocate)
 		{
-		    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+		    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-		    if (bufm == NULL)
+		    if (mkr == NULL)
 		    {
 			/* Insert at beginning. */
-			ql_head_insert(&a_bufm->buf->bufms,
-				       a_bufm, link);
+			ql_head_insert(&a_mkr->buf->mkrs,
+				       a_mkr, link);
 		    }
 		    else
 		    {
-			/* Insert after the last bufm looked at. */
-			ql_after_insert(bufm, a_bufm, link);
+			/* Insert after the last mkr looked at. */
+			ql_after_insert(mkr, a_mkr, link);
 		    }
 		}
 
 		/* Set the line number. */
-		a_bufm->line += a_offset + 1;
+		a_mkr->line += a_offset + 1;
 
-		/* Set the apos of the bufm now that the old value isn't needed
+		/* Set the apos of the mkr now that the old value isn't needed
 		 * anymore. */
-		a_bufm->apos = apos;
+		a_mkr->apos = apos;
 	    }
 
 	    break;
@@ -1281,13 +1279,13 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    if (a_offset >= 0)
 	    {
 		/* Attempt to move to or after EOB.  Move to EOB. */
-		bufm_seek(a_bufm, 0, BUFW_END);
+		mkr_seek(a_mkr, 0, BUFW_END);
 		break;
 	    }
-	    else if (a_offset >= a_bufm->buf->nlines)
+	    else if (a_offset >= a_mkr->buf->nlines)
 	    {
 		/* Attempt to move to or past BOB.  Move to BOB. */
-		bufm_seek(a_bufm, 0, BUFW_BEG);
+		mkr_seek(a_mkr, 0, BUFW_BEG);
 		break;
 	    }
 
@@ -1298,36 +1296,36 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	     *   hello\ngoodbye\nyadda\nblah
 	     *                  /\
 	     */
-	    a_bufm->apos
+	    a_mkr->apos
 		= buf_p_lines_rel_backward_count(
-		    a_bufm->buf,
-		    buf_p_pos_b2a(a_bufm->buf, a_bufm->buf->len + 1),
+		    a_mkr->buf,
+		    buf_p_pos_b2a(a_mkr->buf, a_mkr->buf->len + 1),
 		    -a_offset);
 
 	    /* Set the line number. */
-	    a_bufm->line = a_bufm->buf->nlines + a_offset + 1;
+	    a_mkr->line = a_mkr->buf->nlines + a_offset + 1;
 
-	    /* Relocate in the bufm list. */
-	    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+	    /* Relocate in the mkr list. */
+	    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-	    for (bufm = ql_last(&a_bufm->buf->bufms, link);
-		 bufm != NULL && a_bufm->apos < bufm->apos;
-		 bufm = ql_prev(&a_bufm->buf->bufms, bufm, link))
+	    for (mkr = ql_last(&a_mkr->buf->mkrs, link);
+		 mkr != NULL && a_mkr->apos < mkr->apos;
+		 mkr = ql_prev(&a_mkr->buf->mkrs, mkr, link))
 	    {
 		/* Iterate until the beginning of the list is reached, or the
-		 * apos of a bufm in the list is less than that of the seeking
-		 * bufm. */
+		 * apos of a mkr in the list is less than that of the seeking
+		 * mkr. */
 	    }
 
-	    if (bufm == NULL)
+	    if (mkr == NULL)
 	    {
 		/* Insert at beginning. */
-		ql_head_insert(&a_bufm->buf->bufms, a_bufm, link);
+		ql_head_insert(&a_mkr->buf->mkrs, a_mkr, link);
 	    }
 	    else
 	    {
-		/* Insert after the last bufm looked at. */
-		ql_after_insert(bufm, a_bufm, link);
+		/* Insert after the last mkr looked at. */
+		ql_after_insert(mkr, a_mkr, link);
 	    }
 	    break;
 	}
@@ -1337,32 +1335,32 @@ bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	}
     }
 
-    return buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
+    return buf_p_pos_a2b(a_mkr->buf, a_mkr->apos);
 }
 
 cw_uint64_t
-bufm_line(cw_bufm_t *a_bufm)
+mkr_line(cw_mkr_t *a_mkr)
 {
     cw_uint64_t retval;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    retval = a_bufm->line;
+    retval = a_mkr->line;
 
     return retval;
 }
 
 cw_uint64_t
-bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
+mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence)
 {
     cw_uint64_t bpos;
-    cw_bufm_t *bufm;
+    cw_mkr_t *mkr;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
     switch (a_whence)
     {
@@ -1374,45 +1372,45 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    {
 		bpos = 1;
 	    }
-	    else if (a_offset > a_bufm->buf->len)
+	    else if (a_offset > a_mkr->buf->len)
 	    {
-		bpos = a_bufm->buf->len + 1;
+		bpos = a_mkr->buf->len + 1;
 	    }
 	    else
 	    {
 		bpos = a_offset + 1;
 	    }
 
-	    a_bufm->apos = buf_p_pos_b2a(a_bufm->buf, bpos);
+	    a_mkr->apos = buf_p_pos_b2a(a_mkr->buf, bpos);
 
-	    /* Relocate in the bufm list. */
-	    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+	    /* Relocate in the mkr list. */
+	    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-	    for (bufm = ql_first(&a_bufm->buf->bufms);
-		 bufm != NULL && a_bufm->apos > bufm->apos;
-		 bufm = ql_next(&a_bufm->buf->bufms, bufm, link))
+	    for (mkr = ql_first(&a_mkr->buf->mkrs);
+		 mkr != NULL && a_mkr->apos > mkr->apos;
+		 mkr = ql_next(&a_mkr->buf->mkrs, mkr, link))
 	    {
 		/* Iterate until the end of the list is reached, or the apos of
-		 * a bufm in the list is greater than that of the seeking
-		 * bufm. */
+		 * a mkr in the list is greater than that of the seeking
+		 * mkr. */
 	    }
 
-	    if (bufm == NULL)
+	    if (mkr == NULL)
 	    {
 		/* Insert at end. */
-		ql_tail_insert(&a_bufm->buf->bufms, a_bufm, link);
+		ql_tail_insert(&a_mkr->buf->mkrs, a_mkr, link);
 	    }
 	    else
 	    {
-		/* Insert before the last bufm looked at. */
-		ql_before_insert(&a_bufm->buf->bufms, bufm, a_bufm, link);
+		/* Insert before the last mkr looked at. */
+		ql_before_insert(&a_mkr->buf->mkrs, mkr, a_mkr, link);
 	    }
 
 	    /* Count the number of newlines and set the line number
 	     * accordingly. */
-	    a_bufm->line = 1 + buf_p_lines_count(a_bufm->buf,
-						 buf_p_pos_b2a(a_bufm->buf, 1),
-						 a_bufm->apos);
+	    a_mkr->line = 1 + buf_p_lines_count(a_mkr->buf,
+						 buf_p_pos_b2a(a_mkr->buf, 1),
+						 a_mkr->apos);
 
 	    break;
 	}
@@ -1424,58 +1422,58 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	    /* The algorithm differs substantially depending whether seeking
 	     * forward or backward.  There is slight code duplication in the two
 	     * branches, but this avoids repeated branches. */
-	    bpos = buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
+	    bpos = buf_p_pos_a2b(a_mkr->buf, a_mkr->apos);
 	    if (a_offset > 0)
 	    {
 		/* Determine bpos and apos.  Make sure not to go out of buf
 		 * bounds. */
-		if (bpos + a_offset > a_bufm->buf->len + 1)
+		if (bpos + a_offset > a_mkr->buf->len + 1)
 		{
-		    bpos = a_bufm->buf->len + 1;
+		    bpos = a_mkr->buf->len + 1;
 		}
 		else
 		{
 		    bpos += a_offset;
 		}
 
-		apos = buf_p_pos_b2a(a_bufm->buf, bpos);
+		apos = buf_p_pos_b2a(a_mkr->buf, bpos);
 
-		/* Relocate in the bufm list. */
-		for (bufm = ql_next(&a_bufm->buf->bufms, a_bufm, link);
-		     bufm != NULL && apos > bufm->apos;
-		     bufm = ql_next(&a_bufm->buf->bufms, bufm, link))
+		/* Relocate in the mkr list. */
+		for (mkr = ql_next(&a_mkr->buf->mkrs, a_mkr, link);
+		     mkr != NULL && apos > mkr->apos;
+		     mkr = ql_next(&a_mkr->buf->mkrs, mkr, link))
 		{
 		    /* Iterate until the end of the list is reached, or the apos
-		     * of a bufm in the list is greater than that of the seeking
-		     * bufm. */
+		     * of a mkr in the list is greater than that of the seeking
+		     * mkr. */
 		    relocate = TRUE;
 		}
 
 		if (relocate)
 		{
-		    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+		    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-		    if (bufm == NULL)
+		    if (mkr == NULL)
 		    {
 			/* Insert at end. */
-			ql_tail_insert(&a_bufm->buf->bufms, a_bufm, link);
+			ql_tail_insert(&a_mkr->buf->mkrs, a_mkr, link);
 		    }
 		    else
 		    {
-			/* Insert before the last bufm looked at. */
-			ql_before_insert(&a_bufm->buf->bufms, bufm, a_bufm,
+			/* Insert before the last mkr looked at. */
+			ql_before_insert(&a_mkr->buf->mkrs, mkr, a_mkr,
 					 link);
 		    }
 		}
 
 		/* Count the number of newlines moved past and adjust the line
 		 * number accordingly. */
-		a_bufm->line += buf_p_lines_count(a_bufm->buf, a_bufm->apos,
+		a_mkr->line += buf_p_lines_count(a_mkr->buf, a_mkr->apos,
 						  apos);
 
-		/* Set the apos of the bufm now that the old value isn't
+		/* Set the apos of the mkr now that the old value isn't
 		 * needed anymore. */
-		a_bufm->apos = apos;
+		a_mkr->apos = apos;
 	    }
 	    else if (a_offset < 0)
 	    {
@@ -1490,43 +1488,43 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 		    bpos += a_offset;
 		}
 
-		apos = buf_p_pos_b2a(a_bufm->buf, bpos);
+		apos = buf_p_pos_b2a(a_mkr->buf, bpos);
 
-		/* Relocate in the bufm list. */
-		for (bufm = ql_prev(&a_bufm->buf->bufms, a_bufm, link);
-		     bufm != NULL && apos < bufm->apos;
-		     bufm = ql_prev(&a_bufm->buf->bufms, bufm, link))
+		/* Relocate in the mkr list. */
+		for (mkr = ql_prev(&a_mkr->buf->mkrs, a_mkr, link);
+		     mkr != NULL && apos < mkr->apos;
+		     mkr = ql_prev(&a_mkr->buf->mkrs, mkr, link))
 		{
 		    /* Iterate until the beginning of the list is reached, or
-		     * the apos of a bufm in the list is less than that of the
-		     * seeking bufm. */
+		     * the apos of a mkr in the list is less than that of the
+		     * seeking mkr. */
 		    relocate = TRUE;
 		}
 
 		if (relocate)
 		{
-		    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+		    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-		    if (bufm == NULL)
+		    if (mkr == NULL)
 		    {
 			/* Insert at beginning. */
-			ql_head_insert(&a_bufm->buf->bufms, a_bufm, link);
+			ql_head_insert(&a_mkr->buf->mkrs, a_mkr, link);
 		    }
 		    else
 		    {
-			/* Insert after the last bufm looked at. */
-			ql_after_insert(bufm, a_bufm, link);
+			/* Insert after the last mkr looked at. */
+			ql_after_insert(mkr, a_mkr, link);
 		    }
 		}
 
 		/* Count the number of newlines moved past and adjust the line
 		 * number accordingly. */
-		a_bufm->line -= buf_p_lines_count(a_bufm->buf, apos,
-						  a_bufm->apos);
+		a_mkr->line -= buf_p_lines_count(a_mkr->buf, apos,
+						  a_mkr->apos);
 
-		/* Set the apos of the bufm now that the old value isn't needed
+		/* Set the apos of the mkr now that the old value isn't needed
 		 * anymore. */
-		a_bufm->apos = apos;
+		a_mkr->apos = apos;
 	    }
 
 	    break;
@@ -1537,47 +1535,47 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 	     * bounds. */
 	    if (a_offset > 0)
 	    {
-		bpos = a_bufm->buf->len + 1;
+		bpos = a_mkr->buf->len + 1;
 	    }
-	    else if (-a_offset >= a_bufm->buf->len)
+	    else if (-a_offset >= a_mkr->buf->len)
 	    {
 		bpos = 1;
 	    }
 	    else
 	    {
-		bpos = a_bufm->buf->len + 1 + a_offset;
+		bpos = a_mkr->buf->len + 1 + a_offset;
 	    }
 
-	    a_bufm->apos = buf_p_pos_b2a(a_bufm->buf, bpos);
+	    a_mkr->apos = buf_p_pos_b2a(a_mkr->buf, bpos);
 
-	    /* Relocate in the bufm list. */
-	    ql_remove(&a_bufm->buf->bufms, a_bufm, link);
+	    /* Relocate in the mkr list. */
+	    ql_remove(&a_mkr->buf->mkrs, a_mkr, link);
 
-	    for (bufm = ql_last(&a_bufm->buf->bufms, link);
-		 bufm != NULL && a_bufm->apos < bufm->apos;
-		 bufm = ql_prev(&a_bufm->buf->bufms, bufm, link))
+	    for (mkr = ql_last(&a_mkr->buf->mkrs, link);
+		 mkr != NULL && a_mkr->apos < mkr->apos;
+		 mkr = ql_prev(&a_mkr->buf->mkrs, mkr, link))
 	    {
 		/* Iterate until the beginning of the list is reached, or the
-		 * apos of a bufm in the list is less than that of the seeking
-		 * bufm. */
+		 * apos of a mkr in the list is less than that of the seeking
+		 * mkr. */
 	    }
 
-	    if (bufm == NULL)
+	    if (mkr == NULL)
 	    {
 		/* Insert at beginning. */
-		ql_head_insert(&a_bufm->buf->bufms, a_bufm, link);
+		ql_head_insert(&a_mkr->buf->mkrs, a_mkr, link);
 	    }
 	    else
 	    {
-		/* Insert after the last bufm looked at. */
-		ql_after_insert(bufm, a_bufm, link);
+		/* Insert after the last mkr looked at. */
+		ql_after_insert(mkr, a_mkr, link);
 	    }
 
 	    /* Count the number of newlines and set the line number
 	     * accordingly. */
-	    a_bufm->line = 1 + buf_p_lines_count(a_bufm->buf,
-						 buf_p_pos_b2a(a_bufm->buf, 1),
-						 a_bufm->apos);
+	    a_mkr->line = 1 + buf_p_lines_count(a_mkr->buf,
+						 buf_p_pos_b2a(a_mkr->buf, 1),
+						 a_mkr->apos);
 
 	    break;
 	}
@@ -1591,33 +1589,33 @@ bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence)
 }
 
 cw_uint64_t
-bufm_pos(cw_bufm_t *a_bufm)
+mkr_pos(cw_mkr_t *a_mkr)
 {
     cw_uint64_t retval;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    retval = buf_p_pos_a2b(a_bufm->buf, a_bufm->apos);
+    retval = buf_p_pos_a2b(a_mkr->buf, a_mkr->apos);
 
     return retval;
 }
 
 cw_uint8_t *
-bufm_before_get(cw_bufm_t *a_bufm)
+mkr_before_get(cw_mkr_t *a_mkr)
 {
     cw_uint8_t *retval;
     cw_uint64_t bpos;
     cw_buf_t *buf;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    buf = a_bufm->buf;
+    buf = a_mkr->buf;
 
-    bpos = buf_p_pos_a2b(buf, a_bufm->apos);
+    bpos = buf_p_pos_a2b(buf, a_mkr->apos);
 
     /* Make sure the marker isn't at BOB. */
     if (bpos == 1)
@@ -1634,19 +1632,19 @@ bufm_before_get(cw_bufm_t *a_bufm)
 }
 
 cw_uint8_t *
-bufm_after_get(cw_bufm_t *a_bufm)
+mkr_after_get(cw_mkr_t *a_mkr)
 {
     cw_uint8_t *retval;
     cw_uint64_t bpos;
     cw_buf_t *buf;
 
-    cw_check_ptr(a_bufm);
-    cw_dassert(a_bufm->magic == CW_BUFM_MAGIC);
-    cw_check_ptr(a_bufm->buf);
+    cw_check_ptr(a_mkr);
+    cw_dassert(a_mkr->magic == CW_MKR_MAGIC);
+    cw_check_ptr(a_mkr->buf);
 
-    buf = a_bufm->buf;
+    buf = a_mkr->buf;
 
-    bpos = buf_p_pos_a2b(buf, a_bufm->apos);
+    bpos = buf_p_pos_a2b(buf, a_mkr->apos);
 
     /* Make sure the marker isn't at EOB. */
     if (bpos == buf->len + 1)
@@ -1655,23 +1653,23 @@ bufm_after_get(cw_bufm_t *a_bufm)
 	goto RETURN;
     }
 
-    retval = &buf->b[a_bufm->apos];
+    retval = &buf->b[a_mkr->apos];
 
     RETURN:
     return retval;
 }
 
 cw_bufv_t *
-bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
+mkr_range_get(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_uint32_t *r_bufvcnt)
 {
-    cw_bufm_t *start, *end;
+    cw_mkr_t *start, *end;
     cw_buf_t *buf;
 
     cw_check_ptr(a_start);
-    cw_dassert(a_start->magic == CW_BUFM_MAGIC);
+    cw_dassert(a_start->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_start->buf);
     cw_check_ptr(a_end);
-    cw_dassert(a_end->magic == CW_BUFM_MAGIC);
+    cw_dassert(a_end->magic == CW_MKR_MAGIC);
     cw_check_ptr(a_end->buf);
     cw_assert(a_start->buf == a_end->buf);
     cw_check_ptr(r_bufvcnt);
@@ -1690,7 +1688,7 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
     }
     else
     {
-	/* There are no characters between the two bufm's. */
+	/* There are no characters between the two mkr's. */
 	*r_bufvcnt = 0;
 	goto RETURN;
     }
@@ -1721,154 +1719,154 @@ bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_bufvcnt)
 }
 
 void
-bufm_before_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
+mkr_before_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
 		   cw_uint32_t a_bufvcnt)
 {
-    bufm_l_insert(a_bufm, TRUE, FALSE, a_bufv, a_bufvcnt);
+    mkr_l_insert(a_mkr, TRUE, FALSE, a_bufv, a_bufvcnt);
 }
 
 void
-bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
+mkr_after_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
 		  cw_uint32_t a_bufvcnt)
 {
-    bufm_l_insert(a_bufm, TRUE, TRUE, a_bufv, a_bufvcnt);
+    mkr_l_insert(a_mkr, TRUE, TRUE, a_bufv, a_bufvcnt);
 }
 
 void
-bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end)
+mkr_remove(cw_mkr_t *a_start, cw_mkr_t *a_end)
 {
-    bufm_l_remove(a_start, a_end, TRUE);
+    mkr_l_remove(a_start, a_end, TRUE);
 }
 
-/* bufe. */
-cw_bufe_t *
-bufe_new(cw_bufe_t *a_bufe, cw_buf_t *a_buf)
-{
-    cw_error("XXX Not implemented");
-}
-
-void
-bufe_dup(cw_bufe_t *a_to, cw_bufe_t *a_from)
+/* ext. */
+cw_ext_t *
+ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_delete(cw_bufe_t *a_bufe)
+ext_dup(cw_ext_t *a_to, cw_ext_t *a_from)
+{
+    cw_error("XXX Not implemented");
+}
+
+void
+ext_delete(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_buf_t *
-bufe_buf(cw_bufe_t *a_bufe)
+ext_buf(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_uint64_t
-bufe_beg_get(cw_bufe_t *a_bufe)
+ext_beg_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_beg_set(cw_bufe_t *a_bufe, cw_uint64_t a_beg)
+ext_beg_set(cw_ext_t *a_ext, cw_uint64_t a_beg)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_uint64_t
-bufe_end_get(cw_bufe_t *a_bufe)
+ext_end_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_end_set(cw_bufe_t *a_bufe, cw_uint64_t a_end)
+ext_end_set(cw_ext_t *a_ext, cw_uint64_t a_end)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_bool_t
-bufe_beg_open_get(cw_bufe_t *a_bufe)
+ext_beg_open_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_beg_open_set(cw_bufe_t *a_bufe, cw_bool_t a_beg_open)
+ext_beg_open_set(cw_ext_t *a_ext, cw_bool_t a_beg_open)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_bool_t
-bufe_end_open_get(cw_bufe_t *a_bufe)
+ext_end_open_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_end_open_set(cw_bufe_t *a_bufe, cw_bool_t a_end_open)
+ext_end_open_set(cw_ext_t *a_ext, cw_bool_t a_end_open)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_bool_t
-bufe_detachable_get(cw_bufe_t *a_bufe)
+ext_detachable_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_detachable_set(cw_bufe_t *a_bufe, cw_bool_t a_detachable)
+ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable)
 {
     cw_error("XXX Not implemented");
 }
 
 cw_bool_t
-bufe_detached_get(cw_bufe_t *a_bufe)
+ext_detached_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_detached_set(cw_bufe_t *a_bufe, cw_bool_t a_detached)
+ext_detached_set(cw_ext_t *a_ext, cw_bool_t a_detached)
 {
     cw_error("XXX Not implemented");
 }
 
 void
-bufe_detach(cw_bufe_t *a_bufe)
+ext_detach(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
-cw_bufe_t *
-bufe_before_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm)
+cw_ext_t *
+ext_before_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr)
 {
     cw_error("XXX Not implemented");
 }
 
-cw_bufe_t *
-bufe_at_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm)
+cw_ext_t *
+ext_at_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr)
 {
     cw_error("XXX Not implemented");
 }
 
-cw_bufe_t *
-bufe_after_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm)
+cw_ext_t *
+ext_after_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr)
 {
     cw_error("XXX Not implemented");
 }
 
-cw_bufe_t *
-bufe_prev_get(cw_bufe_t *a_bufe)
+cw_ext_t *
+ext_prev_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }
 
-cw_bufe_t *
-bufe_next_get(cw_bufe_t *a_bufe)
+cw_ext_t *
+ext_next_get(cw_ext_t *a_ext)
 {
     cw_error("XXX Not implemented");
 }

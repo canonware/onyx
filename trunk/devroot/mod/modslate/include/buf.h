@@ -11,8 +11,9 @@
  ******************************************************************************/
 
 typedef struct cw_hist_s cw_hist_t;
-typedef struct cw_bufe_s cw_bufe_t;
-typedef struct cw_bufm_s cw_bufm_t;
+typedef struct cw_ext_s cw_ext_t;
+typedef struct cw_mkr_s cw_mkr_t;
+typedef struct cw_bufb_s cw_bufb_t;
 typedef struct cw_buf_s cw_buf_t;
 
 /* Similar to struct iovec, but with 64 bit lengths. */
@@ -38,23 +39,22 @@ typedef enum
     BUFW_END
 } cw_bufw_t;
 
-struct cw_bufe_s
+struct cw_ext_s
 {
 #ifdef CW_DBG
     cw_uint32_t magic;
-#define CW_BUFE_MAGIC 0x8a94e34c
+#define CW_EXT_MAGIC 0x8a94e34c
 #endif
 
-    /* Ordered bufe list linkage.  flink: forward, rlink: reverse. */
-    ql_elm(cw_bufe_t) flink;
-    ql_elm(cw_bufe_t) rlink;
+    /* Ordered ext list linkage.  flink: forward, rlink: reverse. */
+    ql_elm(cw_ext_t) flink;
+    ql_elm(cw_ext_t) rlink;
 
     /* Buffer this extent is in. */
     cw_buf_t *buf;
 
     /* Allocator state. */
-    cw_opaque_dealloc_t *dealloc;
-    const void *arg;
+    cw_bool_t malloced:1;
 
     /* Gap movement can change this. */
     cw_uint64_t beg_apos;
@@ -73,22 +73,21 @@ struct cw_bufe_s
     cw_bool_t detached:1;
 };
 
-struct cw_bufm_s
+struct cw_mkr_s
 {
 #ifdef CW_DBG
     cw_uint32_t magic;
-#define CW_BUFM_MAGIC 0x2e84a3c9
+#define CW_MKR_MAGIC 0x2e84a3c9
 #endif
 
-    /* Ordered bufm list linkage. */
-    ql_elm(cw_bufm_t) link;
+    /* Ordered mkr list linkage. */
+    ql_elm(cw_mkr_t) link;
 
     /* Buffer this marker is in. */
     cw_buf_t *buf;
 
     /* Allocator state. */
-    cw_opaque_dealloc_t *dealloc;
-    const void *arg;
+    cw_bool_t malloced:1;
 
     /* Gap movement can change this. */
     cw_uint64_t apos;
@@ -129,15 +128,15 @@ struct cw_buf_s
     /* Gap length, in elements. */
     cw_uint64_t gap_len;
 
-    /* Returned by bufm_range_get(). */
+    /* Returned by mkr_range_get(). */
     cw_bufv_t bufv[2];
 
     /* Ordered list of all markers. */
-    ql_head(cw_bufm_t) bufms;
+    ql_head(cw_mkr_t) mkrs;
 
     /* Ordered lists of all extents, in forward and reverse order. */
-    ql_head(cw_bufe_t) fbufes;
-    ql_head(cw_bufe_t) rbufes;
+    ql_head(cw_ext_t) fexts;
+    ql_head(cw_ext_t) rexts;
 
     /* History (undo/redo), if non-NULL. */
     cw_hist_t *hist;
@@ -176,128 +175,128 @@ cw_bool_t
 buf_redoable(cw_buf_t *a_buf);
 
 cw_uint64_t
-buf_undo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
+buf_undo(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_count);
 
 cw_uint64_t
-buf_redo(cw_buf_t *a_buf, cw_bufm_t *a_bufm, cw_uint64_t a_count);
+buf_redo(cw_buf_t *a_buf, cw_mkr_t *a_mkr, cw_uint64_t a_count);
 
 void
 buf_hist_flush(cw_buf_t *a_buf);
 
 void
-buf_hist_group_beg(cw_buf_t *a_buf, cw_bufm_t *a_bufm);
+buf_hist_group_beg(cw_buf_t *a_buf, cw_mkr_t *a_mkr);
 
 cw_bool_t
 buf_hist_group_end(cw_buf_t *a_buf);
 
-/* bufm. */
-cw_bufm_t *
-bufm_new(cw_bufm_t *a_bufm, cw_buf_t *a_buf);
+/* mkr. */
+cw_mkr_t *
+mkr_new(cw_mkr_t *a_mkr, cw_buf_t *a_buf);
 
 void
-bufm_dup(cw_bufm_t *a_to, cw_bufm_t *a_from);
+mkr_dup(cw_mkr_t *a_to, cw_mkr_t *a_from);
 
 void
-bufm_delete(cw_bufm_t *a_bufm);
+mkr_delete(cw_mkr_t *a_mkr);
 
 cw_buf_t *
-bufm_buf(cw_bufm_t *a_bufm);
+mkr_buf(cw_mkr_t *a_mkr);
 
 cw_uint64_t
-bufm_line_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence);
+mkr_line_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence);
 
 cw_uint64_t
-bufm_line(cw_bufm_t *a_bufm);
+mkr_line(cw_mkr_t *a_mkr);
 
 cw_uint64_t
-bufm_seek(cw_bufm_t *a_bufm, cw_sint64_t a_offset, cw_bufw_t a_whence);
+mkr_seek(cw_mkr_t *a_mkr, cw_sint64_t a_offset, cw_bufw_t a_whence);
 
 cw_uint64_t
-bufm_pos(cw_bufm_t *a_bufm);
+mkr_pos(cw_mkr_t *a_mkr);
 
 cw_uint8_t *
-bufm_before_get(cw_bufm_t *a_bufm);
+mkr_before_get(cw_mkr_t *a_mkr);
 
 cw_uint8_t *
-bufm_after_get(cw_bufm_t *a_bufm);
+mkr_after_get(cw_mkr_t *a_mkr);
 
 cw_bufv_t *
-bufm_range_get(cw_bufm_t *a_start, cw_bufm_t *a_end, cw_uint32_t *r_iovcnt);
+mkr_range_get(cw_mkr_t *a_start, cw_mkr_t *a_end, cw_uint32_t *r_iovcnt);
 
 void
-bufm_before_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
-		   cw_uint32_t a_bufvcnt);
-
-void
-bufm_after_insert(cw_bufm_t *a_bufm, const cw_bufv_t *a_bufv,
+mkr_before_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
 		  cw_uint32_t a_bufvcnt);
 
 void
-bufm_remove(cw_bufm_t *a_start, cw_bufm_t *a_end);
-
-/* bufe. */
-cw_bufe_t *
-bufe_new(cw_bufe_t *a_bufe, cw_buf_t *a_buf);
+mkr_after_insert(cw_mkr_t *a_mkr, const cw_bufv_t *a_bufv,
+		 cw_uint32_t a_bufvcnt);
 
 void
-bufe_dup(cw_bufe_t *a_to, cw_bufe_t *a_from);
+mkr_remove(cw_mkr_t *a_start, cw_mkr_t *a_end);
+
+/* ext. */
+cw_ext_t *
+ext_new(cw_ext_t *a_ext, cw_buf_t *a_buf);
 
 void
-bufe_delete(cw_bufe_t *a_bufe);
+ext_dup(cw_ext_t *a_to, cw_ext_t *a_from);
+
+void
+ext_delete(cw_ext_t *a_ext);
 
 cw_buf_t *
-bufe_buf(cw_bufe_t *a_bufe);
+ext_buf(cw_ext_t *a_ext);
 
 cw_uint64_t
-bufe_beg_get(cw_bufe_t *a_bufe);
+ext_beg_get(cw_ext_t *a_ext);
 
 void
-bufe_beg_set(cw_bufe_t *a_bufe, cw_uint64_t a_beg);
+ext_beg_set(cw_ext_t *a_ext, cw_uint64_t a_beg);
 
 cw_uint64_t
-bufe_end_get(cw_bufe_t *a_bufe);
+ext_end_get(cw_ext_t *a_ext);
 
 void
-bufe_end_set(cw_bufe_t *a_bufe, cw_uint64_t a_end);
+ext_end_set(cw_ext_t *a_ext, cw_uint64_t a_end);
 
 cw_bool_t
-bufe_beg_open_get(cw_bufe_t *a_bufe);
+ext_beg_open_get(cw_ext_t *a_ext);
 
 void
-bufe_beg_open_set(cw_bufe_t *a_bufe, cw_bool_t a_beg_open);
+ext_beg_open_set(cw_ext_t *a_ext, cw_bool_t a_beg_open);
 
 cw_bool_t
-bufe_end_open_get(cw_bufe_t *a_bufe);
+ext_end_open_get(cw_ext_t *a_ext);
 
 void
-bufe_end_open_set(cw_bufe_t *a_bufe, cw_bool_t a_end_open);
+ext_end_open_set(cw_ext_t *a_ext, cw_bool_t a_end_open);
 
 cw_bool_t
-bufe_detachable_get(cw_bufe_t *a_bufe);
+ext_detachable_get(cw_ext_t *a_ext);
 
 void
-bufe_detachable_set(cw_bufe_t *a_bufe, cw_bool_t a_detachable);
+ext_detachable_set(cw_ext_t *a_ext, cw_bool_t a_detachable);
 
 cw_bool_t
-bufe_detached_get(cw_bufe_t *a_bufe);
+ext_detached_get(cw_ext_t *a_ext);
 
 void
-bufe_detached_set(cw_bufe_t *a_bufe, cw_bool_t a_detached);
+ext_detached_set(cw_ext_t *a_ext, cw_bool_t a_detached);
 
 void
-bufe_detach(cw_bufe_t *a_bufe);
+ext_detach(cw_ext_t *a_ext);
 
-cw_bufe_t *
-bufe_before_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm);
+cw_ext_t *
+ext_before_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr);
 
-cw_bufe_t *
-bufe_at_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm);
+cw_ext_t *
+ext_at_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr);
 
-cw_bufe_t *
-bufe_after_get(cw_bufe_t *a_bufe, cw_bufm_t *a_bufm);
+cw_ext_t *
+ext_after_get(cw_ext_t *a_ext, cw_mkr_t *a_mkr);
 
-cw_bufe_t *
-bufe_prev_get(cw_bufe_t *a_bufe);
+cw_ext_t *
+ext_prev_get(cw_ext_t *a_ext);
 
-cw_bufe_t *
-bufe_next_get(cw_bufe_t *a_bufe);
+cw_ext_t *
+ext_next_get(cw_ext_t *a_ext);

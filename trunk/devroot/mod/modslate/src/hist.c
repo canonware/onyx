@@ -216,10 +216,10 @@ CW_INLINE void
 hist_p_redo_flush(cw_hist_t *a_hist)
 {
     /* Flush redo state, if any. */
-    if (bufm_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
+    if (mkr_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
     {
-	bufm_seek(&a_hist->htmp, 0, BUFW_END);
-	bufm_remove(&a_hist->hcur, &a_hist->htmp);
+	mkr_seek(&a_hist->htmp, 0, BUFW_END);
+	mkr_remove(&a_hist->hcur, &a_hist->htmp);
     }
 }
 
@@ -235,7 +235,7 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     cw_bufv_t bufv;
 
     cw_assert(&a_hist->h != NULL);
-    cw_assert(bufm_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1);
+    cw_assert(mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1);
     cw_assert(a_bpos != a_hist->hbpos);
 
     if (a_hist->hbpos == 0)
@@ -249,13 +249,13 @@ hist_p_pos(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos)
     u.bpos = cw_htonq(a_hist->hbpos);
     bufv.data = u.str;
     bufv.len = sizeof(u.bpos);
-    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 
     /* Record header. */
     hst_tag_set(hdr, HST_TAG_POS);
     bufv.data = &hdr;
     bufv.len = sizeof(hdr);
-    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 
     /* Update hbpos now that the history record is complete. */
     a_hist->hbpos = a_bpos;
@@ -271,8 +271,8 @@ hist_new(cw_opaque_alloc_t *a_alloc, cw_opaque_realloc_t *a_realloc,
 
     retval = (cw_hist_t *) cw_opaque_alloc(a_alloc, a_arg, sizeof(cw_hist_t));
     buf_new(&retval->h, a_alloc, a_realloc, a_dealloc, a_arg);
-    bufm_new(&retval->hcur, &retval->h);
-    bufm_new(&retval->htmp, &retval->h);
+    mkr_new(&retval->hcur, &retval->h);
+    mkr_new(&retval->htmp, &retval->h);
     retval->hbpos = 0;
     retval->gdepth = 0;
     retval->dealloc = a_dealloc;
@@ -290,8 +290,8 @@ hist_delete(cw_hist_t *a_hist)
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
 
-    bufm_delete(&a_hist->hcur);
-    bufm_delete(&a_hist->htmp);
+    mkr_delete(&a_hist->hcur);
+    mkr_delete(&a_hist->htmp);
     buf_delete(&a_hist->h);
     cw_opaque_dealloc(a_hist->dealloc, a_hist->arg, a_hist, sizeof(cw_hist_t));
 }
@@ -306,7 +306,7 @@ hist_undoable(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cw_check_ptr(a_buf);
 
     /* There is at least one undoable operation unless hcur is at BOB. */
-    if (bufm_pos(&a_hist->hcur) == 1)
+    if (mkr_pos(&a_hist->hcur) == 1)
     {
 	retval = FALSE;
     }
@@ -328,7 +328,7 @@ hist_redoable(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cw_check_ptr(a_buf);
 
     /* There is at least one redoable operation unless hcur is at EOB. */
-    if (bufm_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1)
+    if (mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1)
     {
 	retval = FALSE;
     }
@@ -341,23 +341,23 @@ hist_redoable(cw_hist_t *a_hist, cw_buf_t *a_buf)
 }
 
 cw_uint64_t
-hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	  cw_uint64_t a_count)
 {
     cw_uint64_t retval;
     cw_bool_t undid;
     cw_uint8_t *p, uhdr, rhdr, c;
-    cw_bufm_t tbufm;
+    cw_mkr_t tmkr;
     cw_bufv_t bufv;
 
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
-    cw_check_ptr(a_bufm);
+    cw_check_ptr(a_mkr);
 
-    bufm_new(&tbufm, a_buf);
+    mkr_new(&tmkr, a_buf);
 
-    if (bufm_pos(&a_hist->hcur) == 1)
+    if (mkr_pos(&a_hist->hcur) == 1)
     {
 	retval = 0;
 	goto RETURN;
@@ -370,9 +370,9 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 	 * group depth is zero or the entire history has been undone. */
 	for (undid = FALSE;
 	     (a_hist->gdepth != 0 || undid == FALSE)
-		 && bufm_pos(&a_hist->hcur) > 1;)
+		 && mkr_pos(&a_hist->hcur) > 1;)
 	{
-	    p = bufm_before_get(&a_hist->hcur);
+	    p = mkr_before_get(&a_hist->hcur);
 	    uhdr = *p;
 	    switch (hst_tag_get(uhdr))
 	    {
@@ -389,9 +389,9 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		     * is positioned before the character, and htmp is
 		     * positioned after the redo header (if it exists and is
 		     * being re-used).  This allows an unconditional call to
-		     * bufm_remove().
+		     * mkr_remove().
 		     *
-		     * rhdr's count is updated before the bufm_remove(), whereas
+		     * rhdr's count is updated before the mkr_remove(), whereas
 		     * uhdr's count is updated later.  This is necessary because
 		     * the count can never be 0.
 		     *
@@ -399,17 +399,17 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		     * requires more special case code. */
 
 		    /* Set rhdr and move htmp to the appropriate position. */
-		    bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		    if (bufm_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
+		    mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		    if (mkr_pos(&a_hist->hcur) != buf_len(&a_hist->h) + 1)
 		    {
-			p = bufm_after_get(&a_hist->htmp);
+			p = mkr_after_get(&a_hist->htmp);
 			rhdr = *p;
 			if (hst_tag_get(rhdr)
 			    == hst_tag_inverse(hst_tag_get(uhdr))
 			    && hst_cnt_get(rhdr) < HST_CNT_MAX)
 			{
 			    hst_cnt_set(rhdr, hst_cnt_get(rhdr) + 1);
-			    bufm_seek(&a_hist->htmp, 1, BUFW_REL);
+			    mkr_seek(&a_hist->htmp, 1, BUFW_REL);
 			}
 			else
 			{
@@ -427,47 +427,47 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		    }
 
 		    /* Set c and move hcur to the appropriate position. */
-		    bufm_seek(&a_hist->hcur, -2, BUFW_REL);
-		    p = bufm_after_get(&a_hist->hcur);
+		    mkr_seek(&a_hist->hcur, -2, BUFW_REL);
+		    p = mkr_after_get(&a_hist->hcur);
 		    c = *p;
 
 		    /* Remove the character and header(s). */
-		    bufm_remove(&a_hist->hcur, &a_hist->htmp);
+		    mkr_remove(&a_hist->hcur, &a_hist->htmp);
 
 		    /* Insert the character. */
 		    bufv.data = &c;
 		    bufv.len = sizeof(c);
-		    bufm_after_insert(&a_hist->hcur, &bufv, 1);
+		    mkr_after_insert(&a_hist->hcur, &bufv, 1);
 		    /* Insert the redo header. */
 		    bufv.data = &rhdr;
 		    bufv.len = sizeof(rhdr);
-		    bufm_after_insert(&a_hist->hcur, &bufv, 1);
+		    mkr_after_insert(&a_hist->hcur, &bufv, 1);
 		    /* Insert the undo header if necessary. */
 		    if (hst_cnt_get(uhdr) > 1)
 		    {
 			hst_cnt_set(uhdr, hst_cnt_get(uhdr) - 1);
 			bufv.data = &uhdr;
 			bufv.len = sizeof(uhdr);
-			bufm_before_insert(&a_hist->hcur, &bufv, 1);
+			mkr_before_insert(&a_hist->hcur, &bufv, 1);
 		    }
 
 		    /* Actually take action, now that the log is updated. */
-		    bufm_seek(a_bufm, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
 		    switch (hst_tag_get(uhdr))
 		    {
 			case HST_TAG_INS:
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    bufm_l_insert(a_bufm, FALSE, FALSE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, 1);
 			    a_hist->hbpos++;
 			    break;
 			}
 			case HST_TAG_REM:
 			{
-			    bufm_dup(&tbufm, a_bufm);
-			    bufm_seek(&tbufm, -1, BUFW_REL);
-			    bufm_l_remove(&tbufm, a_bufm, FALSE);
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -1, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
 			    a_hist->hbpos--;
 			    break;
 			}
@@ -475,14 +475,14 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    bufm_l_insert(a_bufm, FALSE, TRUE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, 1);
 			    break;
 			}
 			case HST_TAG_DEL:
 			{
-			    bufm_dup(&tbufm, a_bufm);
-			    bufm_seek(&tbufm, 1, BUFW_REL);
-			    bufm_l_remove(a_bufm, &tbufm, FALSE);
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, 1, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
 			    break;
 			}
 			default:
@@ -497,13 +497,13 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		case HST_TAG_GRP_BEG:
 		{
 		    a_hist->gdepth--;
-		    bufm_seek(&a_hist->hcur, -1, BUFW_REL);
+		    mkr_seek(&a_hist->hcur, -1, BUFW_REL);
 		    break;
 		}
 		case HST_TAG_GRP_END:
 		{
 		    a_hist->gdepth++;
-		    bufm_seek(&a_hist->hcur, -1, BUFW_REL);
+		    mkr_seek(&a_hist->hcur, -1, BUFW_REL);
 		    break;
 		}
 		case HST_TAG_POS:
@@ -522,9 +522,9 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		    pbufv.len = 8;
 
 		    /* Read the history record. */
-		    bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		    bufm_seek(&a_hist->htmp, -9, BUFW_REL);
-		    bufv = bufm_range_get(&a_hist->htmp, &a_hist->hcur,
+		    mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		    mkr_seek(&a_hist->htmp, -9, BUFW_REL);
+		    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
 					  &bufvcnt);
 
 		    /* Swap from and to. */
@@ -534,17 +534,17 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		    u.bpos = cw_htonq(from);
 
 		    /* Invert the history record. */
-		    bufm_seek(&a_hist->htmp, 1, BUFW_REL);
-		    bufv = bufm_range_get(&a_hist->htmp, &a_hist->hcur,
+		    mkr_seek(&a_hist->htmp, 1, BUFW_REL);
+		    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
 					  &bufvcnt);
-		    bufm_seek(&a_hist->htmp, -1, BUFW_REL);
+		    mkr_seek(&a_hist->htmp, -1, BUFW_REL);
 		    bufv_copy(bufv, bufvcnt, &pbufv, 1, 0);
-		    p = bufm_after_get(&a_hist->htmp);
+		    p = mkr_after_get(&a_hist->htmp);
 		    *p = uhdr;
-		    bufm_dup(&a_hist->hcur, &a_hist->htmp);
+		    mkr_dup(&a_hist->hcur, &a_hist->htmp);
 
 		    /* Move. */
-		    bufm_seek(a_bufm, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
 
 		    break;
 		}
@@ -557,28 +557,28 @@ hist_undo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
     }
 
     RETURN:
-    bufm_delete(&tbufm);
+    mkr_delete(&tmkr);
     return retval;
 }
 
 cw_uint64_t
-hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
+hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr,
 	  cw_uint64_t a_count)
 {
     cw_uint64_t retval;
     cw_bool_t redid;
     cw_uint8_t *p, uhdr, rhdr, c;
-    cw_bufm_t tbufm;
+    cw_mkr_t tmkr;
     cw_bufv_t bufv;
 
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
-    cw_check_ptr(a_bufm);
+    cw_check_ptr(a_mkr);
 
-    bufm_new(&tbufm, a_buf);
+    mkr_new(&tmkr, a_buf);
 
-    if (bufm_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1)
+    if (mkr_pos(&a_hist->hcur) == buf_len(&a_hist->h) + 1)
     {
 	retval = 0;
 	goto RETURN;
@@ -591,9 +591,9 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 	 * group depth is zero or the entire history has been undone. */
 	for (redid = FALSE;
 	     (a_hist->gdepth != 0 || redid == FALSE)
-		 && bufm_pos(&a_hist->hcur) < buf_len(&a_hist->h) + 1;)
+		 && mkr_pos(&a_hist->hcur) < buf_len(&a_hist->h) + 1;)
 	{
-	    p = bufm_after_get(&a_hist->hcur);
+	    p = mkr_after_get(&a_hist->hcur);
 	    rhdr = *p;
 	    switch (hst_tag_get(rhdr))
 	    {
@@ -610,9 +610,9 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		     * is positioned after the character, and htmp is positioned
 		     * before the undo header (if it exists and is being
 		     * re-used).  This allows an unconditional call to
-		     * bufm_remove().
+		     * mkr_remove().
 		     *
-		     * uhdr's count is updated before the bufm_remove(), whereas
+		     * uhdr's count is updated before the mkr_remove(), whereas
 		     * rhdr's count is updated later.  This is necessary because
 		     * the count can never be 0.
 		     *
@@ -620,17 +620,17 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		     * requires more special case code. */
 
 		    /* Set uhdr and move htmp to the appropriate position. */
-		    bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		    if (bufm_pos(&a_hist->hcur) != 1)
+		    mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		    if (mkr_pos(&a_hist->hcur) != 1)
 		    {
-			p = bufm_before_get(&a_hist->htmp);
+			p = mkr_before_get(&a_hist->htmp);
 			uhdr = *p;
 			if (hst_tag_get(uhdr)
 			    == hst_tag_inverse(hst_tag_get(rhdr))
 			    && hst_cnt_get(rhdr) < HST_CNT_MAX)
 			{
 			    hst_cnt_set(uhdr, hst_cnt_get(uhdr) + 1);
-			    bufm_seek(&a_hist->htmp, - 1, BUFW_REL);
+			    mkr_seek(&a_hist->htmp, - 1, BUFW_REL);
 			}
 			else
 			{
@@ -647,47 +647,47 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		    }
 
 		    /* Set c and move hcur to the appropriate position. */
-		    bufm_seek(&a_hist->hcur, 2, BUFW_REL);
-		    p = bufm_before_get(&a_hist->hcur);
+		    mkr_seek(&a_hist->hcur, 2, BUFW_REL);
+		    p = mkr_before_get(&a_hist->hcur);
 		    c = *p;
 
 		    /* Remove the character and header(s). */
-		    bufm_remove(&a_hist->htmp, &a_hist->hcur);
+		    mkr_remove(&a_hist->htmp, &a_hist->hcur);
 
 		    /* Insert the character. */
 		    bufv.data = &c;
 		    bufv.len = sizeof(c);
-		    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+		    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 		    /* Insert the undo header. */
 		    bufv.data = &uhdr;
 		    bufv.len = sizeof(uhdr);
-		    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+		    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 		    /* Insert the redo header if necessary. */
 		    if (hst_cnt_get(rhdr) > 1)
 		    {
 			hst_cnt_set(rhdr, hst_cnt_get(rhdr) - 1);
 			bufv.data = &rhdr;
 			bufv.len = sizeof(rhdr);
-			bufm_after_insert(&a_hist->hcur, &bufv, 1);
+			mkr_after_insert(&a_hist->hcur, &bufv, 1);
 		    }
 
 		    /* Actually take action, now that the log is updated. */
-		    bufm_seek(a_bufm, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
 		    switch (hst_tag_get(rhdr))
 		    {
 			case HST_TAG_INS:
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    bufm_l_insert(a_bufm, FALSE, FALSE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, FALSE, &bufv, 1, 1);
 			    a_hist->hbpos++;
 			    break;
 			}
 			case HST_TAG_REM:
 			{
-			    bufm_dup(&tbufm, a_bufm);
-			    bufm_seek(&tbufm, -1, BUFW_REL);
-			    bufm_l_remove(&tbufm, a_bufm, FALSE);
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, -1, BUFW_REL);
+			    mkr_l_remove(&tmkr, a_mkr, FALSE);
 			    a_hist->hbpos--;
 			    break;
 			}
@@ -695,14 +695,14 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 			{
 			    bufv.data = &c;
 			    bufv.len = sizeof(c);
-			    bufm_l_insert(a_bufm, FALSE, TRUE, &bufv, 1, 1);
+			    mkr_l_insert(a_mkr, FALSE, TRUE, &bufv, 1, 1);
 			    break;
 			}
 			case HST_TAG_DEL:
 			{
-			    bufm_dup(&tbufm, a_bufm);
-			    bufm_seek(&tbufm, 1, BUFW_REL);
-			    bufm_l_remove(a_bufm, &tbufm, FALSE);
+			    mkr_dup(&tmkr, a_mkr);
+			    mkr_seek(&tmkr, 1, BUFW_REL);
+			    mkr_l_remove(a_mkr, &tmkr, FALSE);
 			    break;
 			}
 			default:
@@ -717,13 +717,13 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		case HST_TAG_GRP_BEG:
 		{
 		    a_hist->gdepth++;
-		    bufm_seek(&a_hist->hcur, 1, BUFW_REL);
+		    mkr_seek(&a_hist->hcur, 1, BUFW_REL);
 		    break;
 		}
 		case HST_TAG_GRP_END:
 		{
 		    a_hist->gdepth--;
-		    bufm_seek(&a_hist->hcur, 1, BUFW_REL);
+		    mkr_seek(&a_hist->hcur, 1, BUFW_REL);
 		    break;
 		}
 		case HST_TAG_POS:
@@ -742,12 +742,12 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		    pbufv.len = 8;
 
 		    /* Read the history record. */
-		    bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		    bufm_seek(&a_hist->hcur, 1, BUFW_REL);
-		    bufm_seek(&a_hist->htmp, 9, BUFW_REL);
-		    bufv = bufm_range_get(&a_hist->htmp, &a_hist->hcur,
+		    mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		    mkr_seek(&a_hist->hcur, 1, BUFW_REL);
+		    mkr_seek(&a_hist->htmp, 9, BUFW_REL);
+		    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
 					  &bufvcnt);
-		    bufm_seek(&a_hist->hcur, -1, BUFW_REL);
+		    mkr_seek(&a_hist->hcur, -1, BUFW_REL);
 
 		    /* Swap from and to. */
 		    bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
@@ -756,15 +756,15 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
 		    u.bpos = cw_htonq(from);
 
 		    /* Invert the history record. */
-		    bufv = bufm_range_get(&a_hist->htmp, &a_hist->hcur,
+		    bufv = mkr_range_get(&a_hist->htmp, &a_hist->hcur,
 					  &bufvcnt);
 		    bufv_copy(bufv, bufvcnt, &pbufv, 1, 0);
-		    p = bufm_before_get(&a_hist->htmp);
+		    p = mkr_before_get(&a_hist->htmp);
 		    *p = rhdr;
-		    bufm_dup(&a_hist->hcur, &a_hist->htmp);
+		    mkr_dup(&a_hist->hcur, &a_hist->htmp);
 
 		    /* Move. */
-		    bufm_seek(a_bufm, a_hist->hbpos - 1, BUFW_BEG);
+		    mkr_seek(a_mkr, a_hist->hbpos - 1, BUFW_BEG);
 
 		    break;
 		}
@@ -777,7 +777,7 @@ hist_redo(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm,
     }
 
     RETURN:
-    bufm_delete(&tbufm);
+    mkr_delete(&tmkr);
     return retval;
 }
 
@@ -788,15 +788,15 @@ hist_flush(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
 
-    bufm_seek(&a_hist->hcur, 0, BUFW_BEG);
-    bufm_seek(&a_hist->htmp, 0, BUFW_END);
-    bufm_remove(&a_hist->hcur, &a_hist->htmp);
+    mkr_seek(&a_hist->hcur, 0, BUFW_BEG);
+    mkr_seek(&a_hist->htmp, 0, BUFW_END);
+    mkr_remove(&a_hist->hcur, &a_hist->htmp);
     a_hist->hbpos = 0;
     a_hist->gdepth = 0;
 }
 
 void
-hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm)
+hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_mkr_t *a_mkr)
 {
     cw_uint8_t hdr;
     cw_bufv_t bufv;
@@ -804,23 +804,23 @@ hist_group_beg(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_bufm_t *a_bufm)
     cw_check_ptr(a_hist);
     cw_dassert(a_hist->magic == CW_HIST_MAGIC);
     cw_check_ptr(a_buf);
-    cw_check_ptr(a_bufm);
+    cw_check_ptr(a_mkr);
 
     hist_p_redo_flush(a_hist);
 
-    /* If the position of a_bufm is not the same as the last saved postion,
+    /* If the position of a_mkr is not the same as the last saved postion,
      * insert a position record before creating the group begin record, so that
      * when the group is undone, the position ends up where the user would
      * expect it to. */
-    if (a_bufm != NULL && bufm_pos(a_bufm) != a_hist->hbpos)
+    if (a_mkr != NULL && mkr_pos(a_mkr) != a_hist->hbpos)
     {
-	hist_p_pos(a_hist, a_buf, bufm_pos(a_bufm));
+	hist_p_pos(a_hist, a_buf, mkr_pos(a_mkr));
     }
 
     hst_tag_set(hdr, HST_TAG_GRP_BEG);
     bufv.data = &hdr;
     bufv.len = sizeof(hdr);
-    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 
     a_hist->gdepth++;
 }
@@ -848,7 +848,7 @@ hist_group_end(cw_hist_t *a_hist, cw_buf_t *a_buf)
     hst_tag_set(hdr, HST_TAG_GRP_END);
     bufv.data = &hdr;
     bufv.len = sizeof(hdr);
-    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 
     a_hist->gdepth--;
 
@@ -891,9 +891,9 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	 * If the last history record is the same type, and it still has
 	 * room left, insert as much data as will fit.
 	 */
-	if (bufm_pos(&a_hist->hcur) > 1)
+	if (mkr_pos(&a_hist->hcur) > 1)
 	{
-	    p = bufm_before_get(&a_hist->hcur);
+	    p = mkr_before_get(&a_hist->hcur);
 	    if (hst_tag_get(*p) == HST_TAG_REM
 		&& (hst_cnt = hst_cnt_get(*p)) < HST_CNT_MAX)
 	    {
@@ -912,11 +912,11 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		hst_cnt_set(*p, hst_cnt + j);
 
 		/* Move htmp before the header and insert text. */
-		bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		bufm_seek(&a_hist->htmp, -1, BUFW_REL);
+		mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		mkr_seek(&a_hist->htmp, -1, BUFW_REL);
 		bufv.data = a_bufv[i].data;
 		bufv.len = j;
-		bufm_before_insert(&a_hist->htmp, &bufv, 1);
+		mkr_before_insert(&a_hist->htmp, &bufv, 1);
 	    }
 	}
 
@@ -926,12 +926,12 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	{
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = HST_CNT_MAX;
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    hst_tag_set(hdr, HST_TAG_REM);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
 
 	/* Insert any remaining characters. */
@@ -939,12 +939,12 @@ hist_ins(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	{
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = a_bufv[i].len - j;
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    hst_tag_set(hdr, HST_TAG_REM);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
     }
 }
@@ -978,9 +978,9 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	j = 0;
 	/* If the last history record is the same type, and it still has room
 	 * left, insert as much data as will fit. */
-	if (bufm_pos(&a_hist->hcur) > 1)
+	if (mkr_pos(&a_hist->hcur) > 1)
 	{
-	    p = bufm_before_get(&a_hist->hcur);
+	    p = mkr_before_get(&a_hist->hcur);
 	    if (hst_tag_get(*p) == HST_TAG_DEL
 		&& (hst_cnt = hst_cnt_get(*p)) < HST_CNT_MAX)
 	    {
@@ -999,13 +999,13 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		hst_cnt_set(*p, hst_cnt + j);
 
 		/* Move htmp before the header and insert text. */
-		bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		bufm_seek(&a_hist->htmp, -1, BUFW_REL);
+		mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		mkr_seek(&a_hist->htmp, -1, BUFW_REL);
 		bufv.len = 1;
 		for (k = 0; k < j; k++)
 		{
 		    bufv.data = &a_bufv[i].data[j - 1 - k];
-		    bufm_before_insert(&a_hist->htmp, &bufv, 1);
+		    mkr_before_insert(&a_hist->htmp, &bufv, 1);
 		}
 	    }
 	}
@@ -1017,13 +1017,13 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    for (k = 0; k < HST_CNT_MAX; k++)
 	    {
 		bufv.data = &a_bufv[i].data[j + HST_CNT_MAX - 1 - k];
-		bufm_before_insert(&a_hist->hcur, &bufv, 1);
+		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
 	    hst_tag_set(hdr, HST_TAG_DEL);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
 
 	/* Insert any remaining characters. */
@@ -1033,13 +1033,13 @@ hist_ynk(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    for (k = 0; k < a_bufv[i].len - j; k++)
 	    {
 		bufv.data = &a_bufv[i].data[a_bufv[i].len - 1 - k];
-		bufm_before_insert(&a_hist->hcur, &bufv, 1);
+		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
 	    hst_tag_set(hdr, HST_TAG_DEL);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
     }
 }
@@ -1076,9 +1076,9 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	j = 0;
 	/* If the last history record is the same type, and it still has room
 	 * left, insert as much data as will fit. */
-	if (bufm_pos(&a_hist->hcur) > 1)
+	if (mkr_pos(&a_hist->hcur) > 1)
 	{
-	    p = bufm_before_get(&a_hist->hcur);
+	    p = mkr_before_get(&a_hist->hcur);
 	    if (hst_tag_get(*p) == HST_TAG_INS
 		&& (hst_cnt = hst_cnt_get(*p)) < HST_CNT_MAX)
 	    {
@@ -1097,13 +1097,13 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		hst_cnt_set(*p, hst_cnt + j);
 
 		/* Move htmp before the header and insert text. */
-		bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		bufm_seek(&a_hist->htmp, -1, BUFW_REL);
+		mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		mkr_seek(&a_hist->htmp, -1, BUFW_REL);
 		bufv.len = 1;
 		for (k = 0; k < j; k++)
 		{
 		    bufv.data = &a_bufv[i].data[j - 1 - k];
-		    bufm_before_insert(&a_hist->htmp, &bufv, 1);
+		    mkr_before_insert(&a_hist->htmp, &bufv, 1);
 		}
 	    }
 	}
@@ -1116,13 +1116,13 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    for (k = 0; k < HST_CNT_MAX; k++)
 	    {
 		bufv.data = &a_bufv[i].data[j + HST_CNT_MAX - 1 - k];
-		bufm_before_insert(&a_hist->hcur, &bufv, 1);
+		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
 	    hst_tag_set(hdr, HST_TAG_INS);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
 
 	/* Insert any remaining characters. */
@@ -1132,13 +1132,13 @@ hist_rem(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	    for (k = 0; k < a_bufv[i].len - j; k++)
 	    {
 		bufv.data = &a_bufv[i].data[a_bufv[i].len - 1 - k];
-		bufm_before_insert(&a_hist->hcur, &bufv, 1);
+		mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    }
 	    hst_tag_set(hdr, HST_TAG_INS);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
     }
 }
@@ -1172,9 +1172,9 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	j = 0;
 	/* If the last history record is the same type, and it still has room
 	 * left, insert as much data as will fit. */
-	if (bufm_pos(&a_hist->hcur) > 1)
+	if (mkr_pos(&a_hist->hcur) > 1)
 	{
-	    p = bufm_before_get(&a_hist->hcur);
+	    p = mkr_before_get(&a_hist->hcur);
 	    if (hst_tag_get(*p) == HST_TAG_YNK
 		&& (hst_cnt = hst_cnt_get(*p)) < HST_CNT_MAX)
 	    {
@@ -1193,11 +1193,11 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 		hst_cnt_set(*p, hst_cnt + j);
 
 		/* Move htmp before the header and insert text. */
-		bufm_dup(&a_hist->htmp, &a_hist->hcur);
-		bufm_seek(&a_hist->htmp, -1, BUFW_REL);
+		mkr_dup(&a_hist->htmp, &a_hist->hcur);
+		mkr_seek(&a_hist->htmp, -1, BUFW_REL);
 		bufv.data = a_bufv[i].data;
 		bufv.len = j;
-		bufm_before_insert(&a_hist->htmp, &bufv, 1);
+		mkr_before_insert(&a_hist->htmp, &bufv, 1);
 	    }
 	}
 
@@ -1207,12 +1207,12 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	{
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = HST_CNT_MAX;
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    hst_tag_set(hdr, HST_TAG_YNK);
 	    hst_cnt_set(hdr, HST_CNT_MAX);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
 
 	/* Insert any remaining characters. */
@@ -1220,12 +1220,12 @@ hist_del(cw_hist_t *a_hist, cw_buf_t *a_buf, cw_uint64_t a_bpos, const
 	{
 	    bufv.data = &a_bufv[i].data[j];
 	    bufv.len = a_bufv[i].len - j;
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	    hst_tag_set(hdr, HST_TAG_YNK);
 	    hst_cnt_set(hdr, a_bufv[i].len - j);
 	    bufv.data = &hdr;
 	    bufv.len = sizeof(hdr);
-	    bufm_before_insert(&a_hist->hcur, &bufv, 1);
+	    mkr_before_insert(&a_hist->hcur, &bufv, 1);
 	}
     }
 }
@@ -1241,7 +1241,7 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
     } u;
     cw_bufv_t *bufv, pbufv, cbufv;
     cw_uint8_t text[32];
-    cw_bufm_t tbufm, ttbufm;
+    cw_mkr_t tmkr, ttmkr;
     cw_uint32_t i, bufvcnt;
 
     pbufv.data = u.str;
@@ -1250,35 +1250,35 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
     cbufv.data = text;
     cbufv.len = 32;
 
-    bufm_new(&tbufm, &a_hist->h);
-    bufm_new(&ttbufm, &a_hist->h);
+    mkr_new(&tmkr, &a_hist->h);
+    mkr_new(&ttmkr, &a_hist->h);
 
     /* Undo. */
     fprintf(stderr, "%s(): Undo: ", __FUNCTION__);
-    bufm_dup(&tbufm, &a_hist->hcur);
-    while (bufm_pos(&tbufm) > 1)
+    mkr_dup(&tmkr, &a_hist->hcur);
+    while (mkr_pos(&tmkr) > 1)
     {
-	p = bufm_before_get(&tbufm);
+	p = mkr_before_get(&tmkr);
 	hdr = *p;
 	switch (hst_tag_get(hdr))
 	{
 	    case HST_TAG_GRP_BEG:
 	    {
 		fprintf(stderr, "B");
-		bufm_seek(&tbufm, -1, BUFW_REL);
+		mkr_seek(&tmkr, -1, BUFW_REL);
 		break;
 	    }
 	    case HST_TAG_GRP_END:
 	    {
 		fprintf(stderr, "E");
-		bufm_seek(&tbufm, -1, BUFW_REL);
+		mkr_seek(&tmkr, -1, BUFW_REL);
 		break;
 	    }
 	    case HST_TAG_POS:
 	    {
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, -9, BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, -9, BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
 		fprintf(stderr, "P(%llu)", cw_ntohq(u.bpos));
 		break;
@@ -1286,9 +1286,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_INS:
 	    {
 		fprintf(stderr, "I%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, -1 - hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
@@ -1298,9 +1298,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_YNK:
 	    {
 		fprintf(stderr, "Y%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, -1 - hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
@@ -1310,9 +1310,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_REM:
 	    {
 		fprintf(stderr, "R%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, -1 - hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
@@ -1322,9 +1322,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_DEL:
 	    {
 		fprintf(stderr, "D%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, -1 - hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, -1 - hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[hst_cnt_get(hdr) - 1 - i]);
@@ -1334,38 +1334,38 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    default:
 	    {
 		fprintf(stderr, "X");
-		bufm_seek(&tbufm, -1, BUFW_REL);
+		mkr_seek(&tmkr, -1, BUFW_REL);
 	    }
 	}
     }
 
     /* Redo. */
     fprintf(stderr, "     Redo: ");
-    bufm_dup(&tbufm, &a_hist->hcur);
-    while (bufm_pos(&tbufm) < buf_len(&a_hist->h) + 1)
+    mkr_dup(&tmkr, &a_hist->hcur);
+    while (mkr_pos(&tmkr) < buf_len(&a_hist->h) + 1)
     {
-	p = bufm_after_get(&tbufm);
+	p = mkr_after_get(&tmkr);
 	hdr = *p;
 	switch (hst_tag_get(hdr))
 	{
 	    case HST_TAG_GRP_BEG:
 	    {
 		fprintf(stderr, "B");
-		bufm_seek(&tbufm, 1, BUFW_REL);
+		mkr_seek(&tmkr, 1, BUFW_REL);
 		break;
 	    }
 	    case HST_TAG_GRP_END:
 	    {
 		fprintf(stderr, "E");
-		bufm_seek(&tbufm, 1, BUFW_REL);
+		mkr_seek(&tmkr, 1, BUFW_REL);
 		break;
 	    }
 	    case HST_TAG_POS:
 	    {
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, 9, BUFW_REL);
-		bufm_seek(&ttbufm, 1, BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, 9, BUFW_REL);
+		mkr_seek(&ttmkr, 1, BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&pbufv, 1, bufv, bufvcnt, 0);
 		fprintf(stderr, "P(%llu)", cw_ntohq(u.bpos));
 		break;
@@ -1373,9 +1373,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_INS:
 	    {
 		fprintf(stderr, "I%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, 1 + hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, 1 + hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[i + 1]);
@@ -1385,9 +1385,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_YNK:
 	    {
 		fprintf(stderr, "Y%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, 1 + hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, 1 + hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[i + 1]);
@@ -1397,9 +1397,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_REM:
 	    {
 		fprintf(stderr, "R%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, 1 + hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, 1 + hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[i + 1]);
@@ -1409,9 +1409,9 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    case HST_TAG_DEL:
 	    {
 		fprintf(stderr, "D%d(", hst_cnt_get(hdr));
-		bufm_dup(&ttbufm, &tbufm);
-		bufm_seek(&tbufm, 1 + hst_cnt_get(hdr), BUFW_REL);
-		bufv = bufm_range_get(&tbufm, &ttbufm, &bufvcnt);
+		mkr_dup(&ttmkr, &tmkr);
+		mkr_seek(&tmkr, 1 + hst_cnt_get(hdr), BUFW_REL);
+		bufv = mkr_range_get(&tmkr, &ttmkr, &bufvcnt);
 		bufv_copy(&cbufv, 1, bufv, bufvcnt, 0);
 		for (i = 0; i < hst_cnt_get(hdr); i++)
 		fprintf(stderr, "%c", text[i + 1]);
@@ -1421,12 +1421,12 @@ hist_dump(cw_hist_t *a_hist, cw_buf_t *a_buf)
 	    default:
 	    {
 		fprintf(stderr, "X");
-		bufm_seek(&tbufm, 1, BUFW_REL);
+		mkr_seek(&tmkr, 1, BUFW_REL);
 	    }
 	}
     }
     fprintf(stderr, "\n");
 
-    bufm_delete(&ttbufm);
-    bufm_delete(&tbufm);
+    mkr_delete(&ttmkr);
+    mkr_delete(&tmkr);
 }
