@@ -14,3 +14,28 @@
 
 \clearemptydoublepage
 \chapter{proxy}
+\binname{proxy} is a transparent TCP/IP proxy that listens for connections and
+forwards bi-directional data with the ability to log the data to stdout or to
+files within a specified directory.  \binname{proxy} can log the data streams in
+three formats.  Which format to use (if any) should be chosen according to the
+nature of the data being streamed.
+
+\section{Usage}
+\begin{verbatim}
+proxy -h
+proxy -V
+proxy [-v | -q] [-l | -d <dirpath>] [-f {p|h|a}] [-i <ip>]
+      [-p <port>] [-r [<rhost>:]<rport> | -t]
+\end{verbatim}
+
+\subsection{Options}
+\begin{description}
+\item[-d <dirpath>: ] Write logs to ``<dirpath>/proxy.*''.
+\item[$-f {p|h|a}$: ] Specify format of log output:
+\item[\-f \lbracket: ] Specify format of log output:
+	\begin{description}
+	\item[p: ] Pretty.
+	\item[h: ] Hexadecimal.
+	\item[a: ] Ascii.
+	\end{description}
+\end{description}
