@@ -13,4 +13,85 @@
 
 `slate.nxm' `slate_init' mrequire
 
-`Do something\n' print flush
+globaldict begin
+
+/redisplay {
+	globaldict begin
+
+	redisplay_mutex dup lock
+	redisplay_waiting {
+		redisplay_condition signal
+	} if
+	/redisplay_needed true def
+	unlock
+
+	end % globaldict
+} def
+
+/redisplay_wait {
+	globaldict begin
+	redisplay_mutex dup lock
+	{
+		redisplay_needed {
+			exit
+		}{
+			/redisplay_waiting true def
+			redisplay_condition 1 index wait
+			/redisplay_waiting false def
+		} ifelse
+	} loop
+	/redisplay_needed false def
+	unlock
+
+	end % globaldict
+} def
+
+/redisplay_entry {
+	slate_lock
+	/Buffer buffer def
+	/Display `xterm' stdin stdout display def
+	/Frame Display frame def
+	/Window Frame Buffer window def
+
+	Display display_start
+
+	{
+		% Wait for a redisplay or shutdown request.
+		slate_unlock
+		redisplay_wait
+		redisplay_shutdown {
+			% Time to shut down.
+			exit
+		} if
+		slate_lock
+
+		% Redisplay.
+	} loop
+
+	% Shut down.
+	slate_lock
+	Display display_stop
+	slate_unlock
+} def
+
+/scratch buffer def
+/redisplay_shutdown false def
+/redisplay_mutex mutex def
+/redisplay_condition condition def
+/redisplay_waiting false def
+/redisplay_needed false def
+end % globaldict
+
+% Start the redisplay thread.
+/redisplay_thread () //redisplay_entry thread def
+
+% Insert some text into the buffer.
+scratch marker `Hello world!' marker_before_insert
+
+redisplay
+1000000000 nsleep
+globaldict /redisplay_shutdown true put
+redisplay
+
+% Wait for the redisplay thread to exit.
+redisplay_thread join
