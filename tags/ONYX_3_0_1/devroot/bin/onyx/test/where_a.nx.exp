@@ -1,0 +1,12 @@
+Test begin
+`/foo'
+false
+`/bar'
+false
+`/threaddict'
+true
+</threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict->
+`/currenterror'
+true
+</threaddict -dict- /userdict -dict- /currenterror -dict- /errordict -dict->
+Test end
