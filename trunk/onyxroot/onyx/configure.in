@@ -377,6 +377,21 @@ if test "x$enable_libonyx" = "x1" ; then
   AC_DEFINE(CW_USE_LIBONYX)
 fi
 
+dnl Check if object-oriented programming support should be supported.
+AC_ARG_ENABLE(oop, [  --disable-oop           Disable object-oriented programming support],
+if test "x$enable_oop" = "xno" ; then
+  enable_oop="0"
+else
+  enable_oop="1"
+fi
+,
+enable_oop="1"
+)
+AC_SUBST(enable_oop)
+if test "x$enable_oop" = "x1" ; then
+  AC_DEFINE(CW_OOP)
+fi
+
 dnl Check if handles should be supported.
 AC_ARG_ENABLE(handle, [  --disable-handle        Disable handle support],
 if test "x$enable_handle" = "xno" ; then
@@ -757,6 +772,9 @@ AC_SUBST(with_docs)
 dnl Include rules for building/installing documents, if the docs are included.
 dnl These tests are orthogonal to the tests above.
 CW_BUILD_DOC(onyx, doc_onyx)
+if test "x$doc_onyx" = "x1" ; then
+  cfgoutputs="$cfgoutputs doc/latex/onyx/lang.tex"
+fi
 CW_BUILD_DOC(slate, doc_slate)
 
 VERIFY="$objroot/test/verify"
@@ -1018,6 +1036,7 @@ AC_MSG_RESULT(mods          :${mods})
 AC_MSG_RESULT(bins          :${bins})
 AC_MSG_RESULT(docs          :${docs})
 AC_MSG_RESULT()
+AC_MSG_RESULT(oop           : ${enable_oop})
 AC_MSG_RESULT(handle        : ${enable_handle})
 AC_MSG_RESULT(threads       : ${enable_threads})
 AC_MSG_RESULT(real          : ${enable_real})

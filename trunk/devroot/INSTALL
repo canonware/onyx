@@ -131,6 +131,11 @@ Optionally, pass any of the following (not a definitive list) arguments to
 		make
 		make install
 
+--disable-oop
+	Do not include support for object-oriented programming.  This excludes
+	the "class" and "instance" Onyx types and associated operators.  The
+	documentation does not mention the effects of this option -- UTSL.
+
 --disable-handle
 	Do not include the "handle" Onyx type, which is used by extensions
 	implemented as loadable modules.  This option is incompatible with the
