@@ -15,6 +15,11 @@
 % Definitions and front matter.
 \input{@abs_srcdir@/doc/latex/front}
 
+% Onyx Language Reference.
+\clearemptydoublepage
+\part{Languages}
+\input{@abs_srcdir@/doc/latex/onyx}
+
 % Programs.
 \clearemptydoublepage
 \part{Programs}
@@ -22,22 +27,17 @@
 @bin_onyx_manual@\input{@abs_objdir@/bin/onyx/doc/latex/manual}
 @bin_proxy_manual@\input{@abs_objdir@/bin/proxy/doc/latex/manual}
 
+% Modules.
+@mod_ncurses_manual@\clearemptydoublepage
+@mod_ncurses_manual@\part{Modules}
+@mod_ncurses_manual@\input{@abs_objdir@/mod/modncurses/doc/latex/manual}
+
 % Libraries.
 \clearemptydoublepage
 \part{Libraries}
 @lib_stash_manual@\input{@abs_objdir@/lib/c/libstash/doc/latex/manual}
 @lib_sock_manual@\input{@abs_objdir@/lib/c/libsock/doc/latex/manual}
 @lib_onyx_manual@\input{@abs_objdir@/lib/c/libonyx/doc/latex/manual}
-
-% Modules.
-@mod_ncurses_manual@\clearemptydoublepage
-@mod_ncurses_manual@\part{Modules}
-@mod_ncurses_manual@\input{@abs_objdir@/mod/modncurses/doc/latex/manual}
-
-% onyx Language Reference.
-\clearemptydoublepage
-\part{Languages}
-\input{@abs_srcdir@/doc/latex/onyx}
 
 % Back matter.
 \clearemptydoublepage
