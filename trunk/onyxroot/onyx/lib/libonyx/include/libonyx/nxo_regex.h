@@ -57,5 +57,16 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
 		      cw_bool_t *r_match);
 
 void
+nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_uint32_t a_limit,
+		cw_nxo_t *a_input, cw_nxo_t *r_array);
+
+cw_nxn_t
+nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
+		      cw_uint32_t a_len, cw_bool_t a_insensitive,
+		      cw_bool_t a_multiline, cw_bool_t a_singleline,
+		      cw_uint32_t a_limit, cw_nxo_t *a_input,
+		      cw_nxo_t *r_array);
+
+void
 nxo_regex_submatch(cw_nxo_t *a_thread, cw_uint32_t a_capture,
 		   cw_nxo_t *r_match);

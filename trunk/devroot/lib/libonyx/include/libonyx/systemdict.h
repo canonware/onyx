@@ -770,6 +770,10 @@ systemdict_sockopt(cw_nxo_t *a_thread);
 void
 systemdict_sover(cw_nxo_t *a_thread);
 
+#ifdef CW_REGEX
+void
+systemdict_split(cw_nxo_t *a_thread);
+#endif
 void
 systemdict_spop(cw_nxo_t *a_thread);
 

@@ -547,6 +547,9 @@ typedef enum
     NXN_ENTRY(sockopt),
 #endif
     NXN_ENTRY(sover),
+#ifdef CW_REGEX
+    NXN_ENTRY(split),
+#endif
     NXN_ENTRY(spop),
     NXN_ENTRY(spush),
 #ifdef CW_REAL

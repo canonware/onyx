@@ -212,7 +212,15 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
     NOMATCH:
     /* Store the location to start the next search from, if $c or $g is set.
      * Also set the cached input string accordingly. */
-    if (a_regex->global)
+    if (a_regex->cont)
+    {
+	if (cache->mcnt > 0)
+	{
+	    nxo_dup(&cache->input, a_input);
+	    cache->cont = cache->ovp[1];
+	}
+    }
+    else if (a_regex->global)
     {
 	if (cache->mcnt > 0)
 	{
@@ -223,14 +231,6 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 	{
 	    nxo_no_new(&cache->input);
 	    cache->cont = 0;
-	}
-    }
-    else if (a_regex->cont)
-    {
-	if (cache->mcnt > 0)
-	{
-	    nxo_dup(&cache->input, a_input);
-	    cache->cont = cache->ovp[1];
 	}
     }
     else
@@ -247,6 +247,145 @@ nxo_p_regex_match(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
 
     RETURN:
     return retval;
+}
+
+static void
+nxo_p_regex_split(cw_nxoe_regex_t *a_regex, cw_nxo_t *a_thread,
+		  cw_uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)
+{
+    cw_nxo_regex_cache_t *cache;
+    cw_nxo_t *tstack, *tnxo;
+    cw_nx_t *nx;
+    cw_nxa_t *nxa;
+    int ilen, offset;
+    cw_uint32_t i, acnt;
+
+    cache = nxo_l_thread_regex_cache_get(a_thread);
+    tstack = nxo_thread_tstack_get(a_thread);
+    nx = nxo_thread_nx_get(a_thread);
+    nxa = nx_nxa_get(nx);
+
+    ilen = (int) nxo_string_len_get(a_input);
+    if (ilen == 0)
+    {
+	cache->mcnt = -1;
+	acnt = 0;
+	goto NOMATCH;
+    }
+
+    /* Allocate or extend the vector for passing to pcre_exec(), if
+     * necessary. */
+    if (cache->ovp == NULL)
+    {
+	cache->ovp = nxa_malloc(nxa, sizeof(int) * a_regex->ovcnt);
+	cache->ovcnt = a_regex->ovcnt;
+    }
+    else if (cache->ovcnt < a_regex->ovcnt)
+    {
+	cache->ovp = nxa_realloc(nxa, cache->ovp, sizeof(int) * a_regex->ovcnt,
+				 sizeof(int) * cache->ovcnt);
+	cache->ovcnt = a_regex->ovcnt;
+    }
+
+    /* Iteratively search for matches with the splitting pattern and create
+     * substrings until there is no more text, or the split limit has been
+     * reached. */
+    for (acnt = offset = 0;
+	 offset < ilen && (acnt + 1 < a_limit || a_limit == 0);
+	 )
+    {
+	/* Look for a match. */
+	nxo_string_lock(a_input);
+	cache->mcnt = pcre_exec(a_regex->pcre, a_regex->extra,
+				(char *) nxo_string_get(a_input), ilen, offset,
+				0, cache->ovp, cache->ovcnt);
+	nxo_string_unlock(a_input);
+	if (cache->mcnt <= 0)
+	{
+	    switch (cache->mcnt)
+	    {
+		case 0:
+		case PCRE_ERROR_NOMATCH:
+		{
+		    /* No match found.  Not an error. */
+		    goto DONE;
+		}
+		case PCRE_ERROR_NOMEMORY:
+		{
+		    xep_throw(CW_ONYXX_OOM);
+		}
+		case PCRE_ERROR_NULL:
+		case PCRE_ERROR_BADOPTION:
+		case PCRE_ERROR_BADMAGIC:
+		case PCRE_ERROR_UNKNOWN_NODE:
+		default:
+		{
+		    cw_not_reached();
+		}
+	    }
+	}
+
+	/* Create a substring of the text that falls between the previous match
+	 * and this match. */
+	tnxo = nxo_stack_push(tstack);
+	if (cache->ovp[0] < cache->ovp[1])
+	{
+	    /* Create a substring (normal case). */
+	    nxo_string_substring_new(tnxo, a_input, nx, offset,
+				     cache->ovp[0] - offset);
+	    offset = cache->ovp[1];
+	}
+	else
+	{
+	    /* The pattern matches the empty string, so split a single character
+	     * to avoid an infinite loop. */
+	    nxo_string_substring_new(tnxo, a_input, nx, offset, 1);
+	    offset++;
+	}
+	acnt++;
+
+	/* If there were capturing subpatterns that matched, create substrings
+	 * of them.  If there are interspersed subpatterns that did not match,
+	 * create null objects for them. */
+	if (cache->mcnt > 1)
+	{
+	    for (i = 1; i < cache->mcnt; i++)
+	    {
+		tnxo = nxo_stack_push(tstack);
+		nxo_string_substring_new(tnxo, a_input, nx,
+					 cache->ovp[i * 2],
+					 cache->ovp[i * 2 + 1]
+					 - cache->ovp[i * 2]);
+		acnt++;
+	    }
+	}
+    }
+    DONE:
+    /* If there are trailing bytes after the last match, create a substring and
+     * push it onto tstack. */
+    if (offset < ilen)
+    {
+	tnxo = nxo_stack_push(tstack);
+	nxo_string_substring_new(tnxo, a_input, nx, offset,
+				 nxo_string_len_get(a_input)
+				 - (cw_uint32_t) offset);
+	acnt++;
+    }
+
+    NOMATCH:
+    /* Create an array that contains the substrings on tstack. */
+    nxo_array_new(r_array, nx, nxo_thread_currentlocking(a_thread), acnt);
+
+    /* Dup the substrings into r_matches. */
+    for (i = 0, tnxo = nxo_stack_get(tstack);
+	 i < acnt;
+	 i++, tnxo = nxo_stack_down_get(tstack, tnxo))
+    {
+	nxo_array_el_set(r_array, tnxo, acnt - 1 - i);
+    }
+
+    /* Clean up tstack. */
+    nxo_stack_npop(tstack, acnt);
 }
 
 cw_nxn_t
@@ -336,6 +475,62 @@ nxo_regex_nonew_match(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
     }
 
     *r_match = nxo_p_regex_match(&regex, a_thread, a_input);
+
+    /* Clean up memory. */
+    free(regex.pcre);
+    if (regex.extra != NULL)
+    {
+	free(regex.extra);
+    }
+
+    retval = NXN_ZERO;
+    RETURN:
+    return retval;
+}
+
+void
+nxo_regex_split(cw_nxo_t *a_nxo, cw_nxo_t *a_thread, cw_uint32_t a_limit,
+		cw_nxo_t *a_input, cw_nxo_t *r_array)
+{
+    cw_nxoe_regex_t *regex;
+
+    cw_check_ptr(a_nxo);
+    cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
+    cw_assert(nxo_type_get(a_nxo) == NXOT_REGEX);
+
+    regex = (cw_nxoe_regex_t *) a_nxo->o.nxoe;
+
+    cw_check_ptr(regex);
+    cw_dassert(regex->nxoe.magic == CW_NXOE_MAGIC);
+    cw_assert(regex->nxoe.type == NXOT_REGEX);
+
+    nxo_p_regex_split(regex, a_thread, a_limit, a_input, r_array);
+}
+
+/* Do a split without creating a regex object, in order to avoid putting
+ * pressure on the GC. */
+cw_nxn_t
+nxo_regex_nonew_split(cw_nxo_t *a_thread, const cw_uint8_t *a_pattern,
+		      cw_uint32_t a_len, cw_bool_t a_insensitive,
+		      cw_bool_t a_multiline, cw_bool_t a_singleline,
+		      cw_uint32_t a_limit, cw_nxo_t *a_input, cw_nxo_t *r_array)
+{
+    cw_nxn_t retval;
+    cw_nxoe_regex_t regex;
+    cw_nx_t *nx;
+    cw_nxa_t *nxa;
+
+    nx = nxo_thread_nx_get(a_thread);
+    nxa = nx_nxa_get(nx);
+
+    retval = nxo_p_regex_init(&regex, nxa, a_pattern, a_len, FALSE, FALSE,
+			      a_insensitive, a_multiline, a_singleline);
+    if (retval)
+    {
+	goto RETURN;
+    }
+
+    nxo_p_regex_split(&regex, a_thread, a_limit, a_input, r_array);
 
     /* Clean up memory. */
     free(regex.pcre);

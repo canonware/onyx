@@ -5,6 +5,7 @@
 	  + match
 	  + submatch
 	  + offset
+	  + split
 
 2002-11-27 : Jason Evans <jasone@canonware.com>
 

@@ -423,6 +423,9 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(sockopt),
 #endif
     ENTRY(sover),
+#ifdef CW_REGEX
+    ENTRY(split),
+#endif
     ENTRY(spop),
     ENTRY(spush),
 #ifdef CW_REAL
@@ -5247,24 +5250,22 @@ systemdict_p_regex_flags_get(cw_nxo_t *a_flags, cw_nxo_t *a_thread,
 #define REGEX_FLAG_GET(a_nxn, a_var)					\
     do									\
     {									\
-	nxo_name_new(tkey, nx, nxn_str(a_nxn), nxn_len(a_nxn), TRUE);	\
-	if (nxo_dict_lookup(a_flags, tkey, tval))			\
+	if ((a_var) != NULL)						\
 	{								\
-	    if ((a_var) != NULL)					\
+	    nxo_name_new(tkey, nx, nxn_str(a_nxn), nxn_len(a_nxn),	\
+			 TRUE);						\
+	    if (nxo_dict_lookup(a_flags, tkey, tval))			\
 	    {								\
 		*(a_var) = FALSE;					\
 	    }								\
-	}								\
-	else								\
-	{								\
-	    if (nxo_type_get(tval) != NXOT_BOOLEAN)			\
+	    else							\
 	    {								\
-		retval = NXN_typecheck;					\
-		goto RETURN;						\
-	    }								\
+	        if (nxo_type_get(tval) != NXOT_BOOLEAN)			\
+	        {							\
+		    retval = NXN_typecheck;				\
+		    goto RETURN;					\
+	        }							\
 									\
-	    if ((a_var) != NULL)					\
-	    {								\
 		*(a_var) = nxo_boolean_get(tval);			\
 	    }								\
 	}								\
@@ -9793,6 +9794,136 @@ systemdict_sover(cw_nxo_t *a_thread)
 
     nxo_stack_pop(ostack);
 }
+
+#ifdef CW_REGEX
+void
+systemdict_split(cw_nxo_t *a_thread)
+{
+    cw_nxo_t *ostack, *nxo, *flags, *pattern, *input, *output;
+    cw_uint32_t npop;
+    cw_nxn_t error;
+    cw_nxoi_t limit;
+
+    ostack = nxo_thread_ostack_get(a_thread);
+
+    /* Get limit, if specified. */
+    npop = 1;
+    NXO_STACK_GET(nxo, ostack, a_thread);
+    if (nxo_type_get(nxo) == NXOT_INTEGER)
+    {
+	npop++;
+	limit = nxo_integer_get(nxo);
+	if (limit < 0LL)
+	{
+	    nxo_thread_nerror(a_thread, NXN_rangecheck);
+	    return;
+	}
+	NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+    }
+    else
+    {
+	limit = 0;
+    }
+
+    flags = NULL;
+    switch (nxo_type_get(nxo))
+    {
+	case NXOT_DICT:
+	{
+	    npop++;
+	    flags = nxo;
+	    NXO_STACK_DOWN_GET(nxo, ostack, a_thread, nxo);
+	    if (nxo_type_get(nxo) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    /* Fall through. */
+	}
+	case NXOT_STRING:
+	{
+	    cw_bool_t insensitive, multiline, singleline;
+
+	    /* Get regex flags. */
+	    if (flags != NULL)
+	    {
+		error = systemdict_p_regex_flags_get(flags, a_thread,
+						     NULL, NULL,
+						     &insensitive, &multiline,
+						     &singleline);
+		if (error)
+		{
+		    nxo_thread_nerror(a_thread, error);
+		    return;
+		}
+	    }
+	    else
+	    {
+		insensitive = FALSE;
+		multiline = FALSE;
+		singleline = FALSE;
+	    }
+
+	    /* Get pattern. */
+	    pattern = nxo;
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_string_lock(pattern);
+	    error = nxo_regex_nonew_split(a_thread, nxo_string_get(pattern),
+					  nxo_string_len_get(pattern),
+					  insensitive, multiline, singleline,
+					  (cw_uint32_t) limit, input, output);
+	    nxo_string_unlock(pattern);
+	    if (error)
+	    {
+		nxo_stack_remove(ostack, output);
+		nxo_thread_nerror(a_thread, error);
+		return;
+	    }
+
+	    break;
+	}
+	case NXOT_REGEX:
+	{
+	    cw_nxo_t *regex;
+
+	    regex = nxo;
+
+	    /* Get input string. */
+	    npop++;
+	    NXO_STACK_DOWN_GET(input, ostack, a_thread, nxo);
+	    if (nxo_type_get(input) != NXOT_STRING)
+	    {
+		nxo_thread_nerror(a_thread, NXN_typecheck);
+		return;
+	    }
+
+	    output = nxo_stack_under_push(ostack, input);
+	    nxo_regex_split(regex, a_thread, (cw_uint32_t) limit, input,
+			    output);
+
+	    break;
+	}
+	default:
+	{
+	    nxo_thread_nerror(a_thread, NXN_typecheck);
+	    return;
+	}
+    }
+
+    nxo_stack_npop(ostack, npop);
+}
+#endif
 
 void
 systemdict_spop(cw_nxo_t *a_thread)
