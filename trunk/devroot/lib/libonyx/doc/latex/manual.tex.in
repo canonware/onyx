@@ -44,7 +44,7 @@ main(int argc, char **argv, char **envp)
         /* Set up stdin for evaluation by the start operator. */
         nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
         nxo_dup(nxo, nxo_thread_stdin_get(&thread));
-        nxo_attrs_set(nxo, NXOA_EXECUTABLE);
+        nxo_attr_set(nxo, NXOA_EXECUTABLE);
 
         /* Start the thread. */
         nxo_thread_start(&thread);
