@@ -372,8 +372,10 @@ thd_p_sr_handle(int a_signal)
 
 	thd = thd_self();
 	if (thd->suspended == FALSE) {
-		/* Block all signals except _CW_THD_SIGSR while
-		 * suspended. */
+		/*
+		 * Block all signals except _CW_THD_SIGSR while
+		 * suspended.
+		 */
 		sigfillset(&set);
 		sigdelset(&set, _CW_THD_SIGSR);
 		thd->suspended = TRUE;
