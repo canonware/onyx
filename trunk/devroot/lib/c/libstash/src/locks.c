@@ -8,35 +8,50 @@
  *
  * $Source$
  * $Author: jasone $
- * $Revision: 213 $
- * $Date: 1998-09-08 20:22:29 -0700 (Tue, 08 Sep 1998) $
+ * $Revision: 218 $
+ * $Date: 1998-09-11 00:24:05 -0700 (Fri, 11 Sep 1998) $
  *
  * <<< Description >>>
  *
  * Implementation of some complex locking classes.
  *
- * lwq : Lock wait queue.  Same as mtx, except that lock waiters are
- * queued.  This is useful when serializeability is important, or when
- * wishing to avoid the (implementation-independent) non-deterministic
- * order in which lock waiters are granted a mutex.
- * 
  * rwl : Read/write lock.  Multiple simultaneous readers are allowed, but
  * only one locker (with no readers) is allowed.  This implementation
  * toggles back and forth between read locks and write locks to assure
  * deterministic locking.
  *
- * rwq : Same as rwl, except write lock waiters are queued, to ensure
- * serialization.
- *
- * jtl : B-tree lock.  These are used by the block repository to provide
- * the necessary locking semantics for concurrent B-trees.  The following
- * lock types are encapsulated by btl:
+ * jtl : JOE-tree lock.  These are used by the block repository to provide
+ * the necessary locking semantics for concurrent JOE-trees.  The following
+ * lock types are encapsulated by jtl:
  *   s : Non-serialized place holder lock.
  *   t : Serialized place holder lock.
  *   d : Potential deletion lock (only needed when holding an s lock).
+ *   q : Non-exclusive read lock.
  *   r : Non-exclusive read lock.
- *   w : Write lock that allows simultaneous r locks.
- *   x : Exclusive write lock.  No simultaneous r or w locks allowed.
+ *   w : Write lock that allows simultaneous q locks.
+ *   x : Exclusive write lock.
+ *
+ * jtl lock compatibility matrix:
+ *
+ * (X == compatible)
+ * (q == queued, incompatible)
+ *
+ * | s | t | d | q | r | w | x |
+ * +---+---+---+---+---+---+---+--
+ * | X |   | X | X | X | X | X | s
+ * +---+---+---+---+---+---+---+--
+ *     | q |   | X | X | X | X | t
+ *     +---+---+---+---+---+---+--
+ *         | X | X | X | X | X | d
+ *         +---+---+---+---+---+--
+ *             | X | X |   |   | q
+ *             +---+---+---+---+--
+ *                 | X | X |   | r
+ *                 +---+---+---+--
+ *                     |   |   | w
+ *                     +---+---+--
+ *                         |   | x
+ *                         +---+--
  *
  ****************************************************************************/
 
@@ -44,137 +59,6 @@
 
 #include <libstash.h>
 #include <locks_priv.h>
-
-cw_lwq_t *
-lwq_new(cw_lwq_t * a_lwq_o)
-{
-  cw_lwq_t * retval;
-
-  if (a_lwq_o == NULL)
-  {
-    retval = (cw_lwq_t *) _cw_malloc(sizeof(cw_lwq_t));
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_lwq_o;
-    retval->is_malloced = FALSE;
-  }
-
-  mtx_new(&retval->lock);
-  list_new(&retval->list, FALSE);
-
-  return retval;
-}
-
-void
-lwq_delete(cw_lwq_t * a_lwq_o)
-{
-  _cw_check_ptr(a_lwq_o);
-
-  mtx_delete(&a_lwq_o->lock);
-
-  /* Clean up wait list. */
-  _cw_assert(list_count(&a_lwq_o->list) == 0);
-  list_delete(&a_lwq_o->list);
-
-  if (a_lwq_o->is_malloced == TRUE)
-  {
-    _cw_free(a_lwq_o);
-  }
-}
-
-void
-lwq_lock(cw_lwq_t * a_lwq_o)
-{
-  cw_cnd_t condition;
-  
-  _cw_check_ptr(a_lwq_o);
-  
-  mtx_lock(&a_lwq_o->lock);
-
-  if ((a_lwq_o->num_lockers > 0) || (a_lwq_o->num_lock_waiters > 0))
-  {
-    /* Create a condition variable. */
-    cnd_new(&condition);
-
-    list_tpush(&a_lwq_o->list, (void *) &condition);
-
-    /* Wait on the condition variable. */
-    a_lwq_o->num_lock_waiters++;
-    cnd_wait(&condition, &a_lwq_o->lock);
-    a_lwq_o->num_lock_waiters--;
-    
-    /* Clean this up while we're still in this stack frame. */
-    cnd_delete(&condition);
-  }
-
-  /* If we didn't enter the above block, it means no one else is holding
-   * the lock, so in either case we've got the lock now. */
-  a_lwq_o->num_lockers++;
-  
-  mtx_unlock(&a_lwq_o->lock);
-}
-
-void
-lwq_unlock(cw_lwq_t * a_lwq_o)
-{
-  cw_cnd_t * condition;
-
-  _cw_check_ptr(a_lwq_o);
-  
-  mtx_lock(&a_lwq_o->lock);
-
-  a_lwq_o->num_lockers--;
-
-  if (list_count(&a_lwq_o->list) > 0)
-  {
-    condition = (cw_cnd_t *) list_hpop(&a_lwq_o->list);
-    
-    cnd_signal(condition);
-
-    /* We do NOT free condition here, since it's on another thread's
-     * stack.  That thread cleans it up after unblocking. */
-  }
-  
-  mtx_unlock(&a_lwq_o->lock);
-}
-
-cw_sint32_t
-lwq_num_waiters(cw_lwq_t * a_lwq_o)
-{
-  cw_sint32_t retval;
-  
-  _cw_check_ptr(a_lwq_o);
-
-  mtx_lock(&a_lwq_o->lock);
-
-  retval = list_count(&a_lwq_o->list);
-
-  mtx_unlock(&a_lwq_o->lock);
-  
-  return retval;
-}
-
-/****************************************************************************
- * <<< Description >>>
- *
- * Frees the list items in the list spares list, if any.  Normally we
- * shouldn't care about this too much, but in the case of B-trees, there
- * may be long queues for the root node, then the root node may become a
- * node with much less contention.  In such a case, it's nice to be able to
- * reclaim space that will likely never be needed again.
- *
- ****************************************************************************/
-void lwq_purge_spares(cw_lwq_t * a_lwq_o)
-{
-  _cw_check_ptr(a_lwq_o);
-  mtx_lock(&a_lwq_o->lock);
-
-  list_purge_spares(&a_lwq_o->list);
-  
-  mtx_unlock(&a_lwq_o->lock);
-}
 
 cw_rwl_t *
 rwl_new(cw_rwl_t * a_rwl_o)
@@ -296,119 +180,6 @@ rwl_wunlock(cw_rwl_t * a_rwl_o)
   mtx_unlock(&a_rwl_o->lock);
 }
 
-
-cw_rwq_t *
-rwq_new(cw_rwq_t * a_rwq_o)
-{
-  cw_rwq_t * retval;
-
-  if (a_rwq_o == NULL)
-  {
-    retval = (cw_rwq_t *) _cw_malloc(sizeof(cw_rwq_t));
-    retval->is_malloced = TRUE;
-  }
-  else
-  {
-    retval = a_rwq_o;
-    retval->is_malloced = FALSE;
-  }
-
-  bzero(retval, sizeof(cw_rwq_t));
-  
-  mtx_new(&retval->lock);
-  cnd_new(&retval->read_wait);
-  lwq_new(&retval->write_waiters);
-  
-  return retval;
-}
-
-void
-rwq_delete(cw_rwq_t * a_rwq_o)
-{
-  _cw_check_ptr(a_rwq_o);
-
-  mtx_delete(&a_rwq_o->lock);
-  cnd_delete(&a_rwq_o->read_wait);
-  lwq_delete(&a_rwq_o->write_waiters);
-
-  if (a_rwq_o->is_malloced)
-  {
-    _cw_free(a_rwq_o);
-  }
-}
-
-void
-rwq_rlock(cw_rwq_t * a_rwq_o)
-{
-  _cw_check_ptr(a_rwq_o);
-
-  mtx_lock(&a_rwq_o->lock);
-
-  while (lwq_num_waiters(&a_rwq_o->write_waiters) > 0)
-  {
-    a_rwq_o->read_waiters++;
-    cnd_wait(&a_rwq_o->read_wait, &a_rwq_o->lock);
-    a_rwq_o->read_waiters--;
-  }
-  if (a_rwq_o->num_readers == 0)
-  {
-    /* Grab a lwq lock to prevent potential lockers from getting in. */
-    lwq_lock(&a_rwq_o->write_waiters);
-  }
-  a_rwq_o->num_readers++;
-  
-  mtx_unlock(&a_rwq_o->lock);
-}
-
-void
-rwq_runlock(cw_rwq_t * a_rwq_o)
-{
-  _cw_check_ptr(a_rwq_o);
-
-  mtx_lock(&a_rwq_o->lock);
-
-  a_rwq_o->num_readers--;
-
-  if ((a_rwq_o->num_readers == 0)
-      && (lwq_num_waiters(&a_rwq_o->write_waiters) > 0))
-  {
-    /* Release our lock on the lwq so that lockers can get in. */
-    lwq_unlock(&a_rwq_o->write_waiters);
-  }
-  
-  mtx_unlock(&a_rwq_o->lock);
-}
-
-void
-rwq_wlock(cw_rwq_t * a_rwq_o)
-{
-  _cw_check_ptr(a_rwq_o);
-
-  mtx_lock(&a_rwq_o->lock);
-
-  lwq_lock(&a_rwq_o->write_waiters);
-  
-  mtx_unlock(&a_rwq_o->lock);
-}
-
-void
-rwq_wunlock(cw_rwq_t * a_rwq_o)
-{
-  _cw_check_ptr(a_rwq_o);
-
-  mtx_lock(&a_rwq_o->lock);
-
-  lwq_unlock(&a_rwq_o->write_waiters);
-
-  if ((lwq_num_waiters(&a_rwq_o->write_waiters) == 0)
-      && (a_rwq_o->read_waiters > 0))
-  {
-    cnd_signal(&a_rwq_o->read_wait);
-  }
-  
-  mtx_unlock(&a_rwq_o->lock);
-}
-
 cw_jtl_t *
 jtl_new(cw_jtl_t * a_jtl_o)
 {
@@ -429,11 +200,13 @@ jtl_new(cw_jtl_t * a_jtl_o)
   bzero(retval, sizeof(cw_jtl_t)); /* So that we don't have to individually 
 				    * set lots of variables to 0. */
   mtx_new(&retval->lock);
-  rwq_new(&retval->stlock);
-  sem_new(&retval->dlock_sem, 0); /* XXX Do we want to set this
-				   * intelligently now or later? */
-  rwl_new(&retval->rxlock);
-  sem_new(&retval->wlock_sem, 1);
+  cnd_new(&retval->slock_wait);
+  list_new(&retval->tlock_wait, FALSE);
+  cnd_new(&retval->dlock_wait);
+  cnd_new(&retval->qlock_wait);
+  cnd_new(&retval->rlock_wait);
+  cnd_new(&retval->wlock_wait);
+  cnd_new(&retval->xlock_wait);
 
   return retval;
 }
@@ -445,10 +218,13 @@ jtl_delete(cw_jtl_t * a_jtl_o)
 
   /* Clean up structures. */
   mtx_delete(&a_jtl_o->lock);
-  rwq_delete(&a_jtl_o->stlock);
-  sem_delete(&a_jtl_o->dlock_sem);
-  rwl_delete(&a_jtl_o->rxlock);
-  sem_delete(&a_jtl_o->wlock_sem);
+  cnd_delete(&a_jtl_o->slock_wait);
+  list_delete(&a_jtl_o->tlock_wait);
+  cnd_delete(&a_jtl_o->dlock_wait);
+  cnd_delete(&a_jtl_o->qlock_wait);
+  cnd_delete(&a_jtl_o->rlock_wait);
+  cnd_delete(&a_jtl_o->wlock_wait);
+  cnd_delete(&a_jtl_o->xlock_wait);
   
   if (a_jtl_o->is_malloced == TRUE)
   {
@@ -462,19 +238,70 @@ jtl_slock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwq_rlock(&a_jtl_o->stlock);
-  a_jtl_o->num_stlocks++;
+  while ((a_jtl_o->tlock_holders > 0)
+	 || (a_jtl_o->tlock_waiters > 0))
+  {
+    a_jtl_o->slock_waiters++;
+    cnd_wait(&a_jtl_o->slock_wait, &a_jtl_o->lock);
+    a_jtl_o->slock_waiters--;
+  }
+  a_jtl_o->slock_holders++;
+  
   mtx_unlock(&a_jtl_o->lock);
 }
 
-void
-jtl_tlock(cw_jtl_t * a_jtl_o)
+cw_jtl_tq_el_t *
+jtl_get_tq_el(cw_jtl_t * a_jtl_o)
 {
+  cw_jtl_tq_el_t * retval;
+  
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwq_wlock(&a_jtl_o->stlock);
-  a_jtl_o->num_stlocks++;
+
+  retval = (cw_jtl_tq_el_t *) _cw_malloc(sizeof(cw_jtl_tq_el_t));
+  retval->is_blocked = FALSE;
+  cnd_new(&retval->tlock_wait);
+
+  list_tpush(&a_jtl_o->tlock_wait, retval);
+
+  mtx_unlock(&a_jtl_o->lock);
+  return retval;
+}
+
+void
+jtl_tlock(cw_jtl_t * a_jtl_o, cw_jtl_tq_el_t * a_tq_el)
+{
+  cw_jtl_tq_el_t * tq_el;
+  
+  _cw_check_ptr(a_jtl_o);
+  _cw_check_ptr(a_tq_el);
+
+  mtx_lock(&a_jtl_o->lock);
+
+  if ((a_jtl_o->tlock_holders == 0)
+      && (a_jtl_o->tlock_waiters == 0))
+  {
+    /* No other threads are waiting for a tlock.  Help ourselves. */
+    cnd_delete(&a_tq_el->tlock_wait);
+    _cw_free(a_tq_el);
+    a_jtl_o->tlock_holders++;
+  }
+  else
+  {
+    a_tq_el->is_blocked = TRUE;
+    while(a_jtl_o->tlock_holders > 0)
+    {
+      a_jtl_o->tlock_waiters++;
+      cnd_wait(&a_tq_el->tlock_wait, &a_jtl_o->lock);
+      a_jtl_o->tlock_waiters--;
+    }
+    a_jtl_o->tlock_holders++;
+    tq_el = (cw_jtl_tq_el_t *) list_hpop(&a_jtl_o->tlock_wait);
+    cnd_delete(&tq_el->tlock_wait);
+    _cw_free(tq_el);
+  }
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -484,7 +311,34 @@ jtl_s2dlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
   
   mtx_lock(&a_jtl_o->lock);
-  sem_wait(&a_jtl_o->dlock_sem);
+
+  while (a_jtl_o->dlock_holders >= a_jtl_o->dlock_holders)
+  {
+    a_jtl_o->dlock_waiters++;
+    cnd_wait(&a_jtl_o->dlock_wait, &a_jtl_o->lock);
+    a_jtl_o->dlock_waiters--;
+  }
+  a_jtl_o->dlock_holders++;
+
+  mtx_unlock(&a_jtl_o->lock);
+}
+
+void
+jtl_2qlock(cw_jtl_t * a_jtl_o)
+{
+  _cw_check_ptr(a_jtl_o);
+
+  mtx_lock(&a_jtl_o->lock);
+
+  while ((a_jtl_o->wlock_holders > 0)
+	 || (a_jtl_o->xlock_holders > 0))
+  {
+    a_jtl_o->qlock_waiters++;
+    cnd_wait(&a_jtl_o->qlock_wait, &a_jtl_o->lock);
+    a_jtl_o->qlock_waiters--;
+  }
+  a_jtl_o->qlock_holders++;
+  
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -494,7 +348,15 @@ jtl_2rlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwl_rlock(&a_jtl_o->rxlock);
+
+  while (a_jtl_o->xlock_holders > 0)
+  {
+    a_jtl_o->rlock_waiters++;
+    cnd_wait(&a_jtl_o->rlock_wait, &a_jtl_o->lock);
+    a_jtl_o->rlock_waiters--;
+  }
+  a_jtl_o->rlock_holders++;
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -504,9 +366,17 @@ jtl_2wlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  /* Grab an a read lock on rxlock to assure that there are no xlockers. */
-  rwl_rlock(&a_jtl_o->rxlock);
-  sem_wait(&a_jtl_o->wlock_sem);
+
+  while ((a_jtl_o->qlock_holders > 0)
+	 || (a_jtl_o->wlock_holders > 0)
+	 || (a_jtl_o->xlock_holders > 0))
+  {
+    a_jtl_o->wlock_waiters++;
+    cnd_wait(&a_jtl_o->wlock_wait, &a_jtl_o->lock);
+    a_jtl_o->wlock_waiters--;
+  }
+  a_jtl_o->wlock_holders++;
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -516,7 +386,18 @@ jtl_2xlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwl_wlock(&a_jtl_o->rxlock);
+
+  while ((a_jtl_o->qlock_holders > 0)
+	 || (a_jtl_o->rlock_holders > 0)
+	 || (a_jtl_o->wlock_holders > 0)
+	 || (a_jtl_o->xlock_holders > 0))
+  {
+    a_jtl_o->xlock_waiters++;
+    cnd_wait(&a_jtl_o->xlock_wait, &a_jtl_o->lock);
+    a_jtl_o->xlock_waiters--;
+  }
+  a_jtl_o->xlock_holders++;
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -526,8 +407,31 @@ jtl_sunlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwq_runlock(&a_jtl_o->stlock);
-  a_jtl_o->num_stlocks--;
+
+  a_jtl_o->slock_holders--;
+
+  if ((a_jtl_o->slock_holders == 0)
+      && (a_jtl_o->tlock_waiters > 0))
+  {
+    cw_jtl_tq_el_t * tq_el;
+
+    _cw_assert(list_count(&a_jtl_o->tlock_wait) > 0);
+    tq_el = (cw_jtl_tq_el_t *) list_hpop(&a_jtl_o->tlock_wait);
+    _cw_check_ptr(tq_el);
+
+    if (tq_el->is_blocked == TRUE)
+    {
+      cnd_signal(&tq_el->tlock_wait);
+    }
+    /* Unconditionally push tq_el back on the list, because we can't delete
+     * it, no matter what, since the condition variable must exist until
+     * after the blocked thread wakes up.  That thread is responsible for
+     * cleaning up. */
+    /* XXX Perhaps a more efficient way of getting at the head/tail is in
+     * order. */
+    list_hpush(&a_jtl_o->tlock_wait, tq_el);
+  }
+  
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -537,8 +441,26 @@ jtl_tunlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwq_wunlock(&a_jtl_o->stlock);
-  a_jtl_o->num_stlocks--;
+
+  a_jtl_o->tlock_holders--;
+
+  if (a_jtl_o->tlock_waiters > 0)
+  {
+    cw_jtl_tq_el_t * tq_el;
+
+    _cw_assert(list_count(&a_jtl_o->tlock_wait) > 0);
+    tq_el = (cw_jtl_tq_el_t *) list_hpop(&a_jtl_o->tlock_wait);
+    _cw_check_ptr(tq_el);
+
+    if (tq_el->is_blocked == TRUE)
+    {
+      cnd_signal(&tq_el->tlock_wait);
+    }
+    
+    /* Unconditionally push tq_el back on the list. */
+    list_hpush(&a_jtl_o->tlock_wait, tq_el);
+  }
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -548,7 +470,29 @@ jtl_dunlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  sem_post(&a_jtl_o->dlock_sem);
+
+  a_jtl_o->dlock_holders--;
+
+  if ((a_jtl_o->dlock_waiters > 0)
+      && (a_jtl_o->dlock_holders < a_jtl_o->max_dlocks))
+  {
+    cnd_signal(&a_jtl_o->dlock_wait);
+  }
+
+  mtx_unlock(&a_jtl_o->lock);
+}
+
+void
+jtl_qunlock(cw_jtl_t * a_jtl_o)
+{
+  _cw_check_ptr(a_jtl_o);
+
+  mtx_lock(&a_jtl_o->lock);
+
+  a_jtl_o->qlock_holders--;
+
+  /* XXX Implement. */
+  
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -558,7 +502,9 @@ jtl_runlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwl_runlock(&a_jtl_o->rxlock);
+
+  /* XXX Implement. */
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -569,9 +515,7 @@ jtl_wunlock(cw_jtl_t * a_jtl_o)
 
   mtx_lock(&a_jtl_o->lock);
 
-  sem_post(&a_jtl_o->wlock_sem);
-  /* Release the lock we grabbed earlier. */
-  rwl_runlock(&a_jtl_o->rxlock);
+  /* XXX Implement. */
   
   mtx_unlock(&a_jtl_o->lock);
 }
@@ -582,7 +526,9 @@ jtl_xunlock(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  rwl_wunlock(&a_jtl_o->rxlock);
+
+  /* XXX Implement. */
+
   mtx_unlock(&a_jtl_o->lock);
 }
 
@@ -611,7 +557,6 @@ jtl_set_max_dlocks(cw_jtl_t * a_jtl_o, cw_uint32_t a_dlocks)
   mtx_lock(&a_jtl_o->lock);
   retval = a_jtl_o->max_dlocks;
   a_jtl_o->max_dlocks = a_dlocks;
-  sem_adjust(&a_jtl_o->dlock_sem, retval - a_jtl_o->max_dlocks);
   mtx_unlock(&a_jtl_o->lock);
 
   return retval;
@@ -625,7 +570,10 @@ jtl_get_num_stlocks(cw_jtl_t * a_jtl_o)
   _cw_check_ptr(a_jtl_o);
 
   mtx_lock(&a_jtl_o->lock);
-  retval = a_jtl_o->num_stlocks;
+
+  /* XXX Implement. */
+  retval = 0; /* XXX Gets rid of warning. */
+
   mtx_unlock(&a_jtl_o->lock);
 
   return retval;
