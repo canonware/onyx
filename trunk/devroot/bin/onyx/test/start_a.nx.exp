@@ -1,5 +1,5 @@
 Test begin
-(--start-- -file-)
-(--start-- -file-)
-(--start-- -file-)
+(--start-- -file- --estack--)
+(--start-- -file- --estack--)
+(--start-- -file- --estack--)
 Test end

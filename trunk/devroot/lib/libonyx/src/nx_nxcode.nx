@@ -196,11 +196,11 @@ systemdict begin
 	% currenterror that we pushed.
 	/dstack dstack spop pop def
 
-	% estack.
-	estack /estack exch def
+	% estack.  Remove this procedure from the snapshot.
+	estack spop pop /estack exch def
 
-	% istack.
-	istack /istack exch def
+	% istack.  Remove this procedure from the snapshot.
+	istack spop pop /istack exch def
 
 	% Push the offending object onto ostack.
 	/estack load sdup spop exch pop

@@ -36,10 +36,14 @@ estack/istack trace (0..2):
 	--pop--
 	--def--
 	--estack--
+	--spop--
+	--pop--
 	/estack
 	--exch--
 	--def--
 	--istack--
+	--spop--
+	--pop--
 	/istack
 	--exch--
 	--def--
