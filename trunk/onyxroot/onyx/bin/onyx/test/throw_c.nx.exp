@@ -59,7 +59,7 @@ estack/istack trace (0..2):
 	/errordict
 	--load--
 	--exch--
- 55:-->	--get--
+ 55:--> --get--
 	--eval--
 	/errordict
 	--load--

@@ -13,7 +13,7 @@ estack/istack trace (0..3):
 	/nametype
 	--ne--
 	{/typecheck /systemdict --load-- /throw --get-- --eval--}
- 8:-->	--if--
+  8:--> --if--
 	/currenterror
 	--load--
 	--begin--

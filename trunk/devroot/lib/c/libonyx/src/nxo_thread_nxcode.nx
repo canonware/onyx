@@ -123,9 +123,8 @@ def
 					% <edepth> <array> <aindex>
 					% <iindex> <aindex>
 					eq {
-						` ' print
-						dup cvs print
-						`:-->\t' print
+						dup </w 3> output
+						`:--> ' print
 					}{
 						`\t' print
 					} ifelse

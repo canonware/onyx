@@ -7,7 +7,7 @@ estack/istack trace (0..2):
 	{-array- -array- -array- -array-}
 	{--eval-- --not-- -array- --if--}
 	--foreach--
- 3:-->	--dup--
+  3:--> --dup--
 	--type--
 	/nametype
 	--ne--
