@@ -202,4 +202,3 @@ poll(struct pollfd *fds, unsigned int nfds, int timeout)
     RETURN:
     return retval;
 }
-
