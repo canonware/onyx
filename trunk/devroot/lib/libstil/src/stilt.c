@@ -11,17 +11,6 @@
 
 #include "../include/libstil/libstil.h"
 
-/* XXX */
-#define soft_code(a_str) do {						\
-	cw_stilts_t	stilts;						\
-	static const cw_uint8_t	code[] = (a_str);			\
-									\
-	stilts_new(&stilts, a_stilt);					\
-	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);	\
-	stilt_flush(a_stilt, &stilts);					\
-	stilts_delete(&stilts, a_stilt);				\
-} while (0)
-
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>

@@ -16,16 +16,6 @@
 /* Initial size of dictionaries created with the dict operator. */
 #define	_CW_SYSTEMDICT_DICT_SIZE	16
 
-#define soft_code(a_str) do {						\
-	cw_stilts_t	stilts;						\
-	static const cw_uint8_t	code[] = (a_str);			\
-									\
-	stilts_new(&stilts, a_stilt);					\
-	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);	\
-	stilt_flush(a_stilt, &stilts);					\
-	stilts_delete(&stilts, a_stilt);				\
-} while (0)
-
 struct cw_systemdict_entry {
 	cw_stiln_t	stiln;
 	cw_op_t		*op_f;
@@ -79,7 +69,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(exec),
 	ENTRY(execstack),
 	ENTRY(executeonly),
-	ENTRY(executive),
 	ENTRY(exit),
 	ENTRY(exp),
 	ENTRY(false),
@@ -122,7 +111,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(pop),
 	ENTRY(print),
 	ENTRY(product),
-	ENTRY(prompt),
 	ENTRY(promptstring),
 	ENTRY(pstack),
 	ENTRY(put),
@@ -286,7 +274,7 @@ systemdict_aload(cw_stilt_t *a_stilt)
 void
 systemdict_anchorsearch(cw_stilt_t *a_stilt)
 {
-	soft_code("
+	_cw_stil_code(a_stilt, "
 %/anchorsearch
 %{
   exch dup 3 1 roll % Make a copy of the original string.
@@ -1114,49 +1102,6 @@ void
 systemdict_executeonly(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_executive(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*ostack, *estack, *tstack;
-	cw_stilo_t	*estilo, *tstilo;
-	cw_uint32_t	edepth;
-
-	ostack = stilt_ostack_get(a_stilt);
-	estack = stilt_estack_get(a_stilt);
-	tstack = stilt_tstack_get(a_stilt);
-
-	/* Create a procedure that we can execute again and again. */
-	soft_code("{//stdin 128 //string //readstring //cvx //exec}");
-	tstilo = stils_push(tstack);
-	stilo_dup(tstilo, stils_get(ostack));
-	stils_pop(ostack);
-
-	/*
-	 * Cache the depth of the execution stack so that we can clean up later.
-	 */
-	edepth = stils_count(estack);
-
-	xep_begin();
-	xep_try {
-		estilo = stils_push(estack);
-		stilo_dup(estilo, tstilo);
-
-		stilt_loop(a_stilt);
-	}
-	xep_catch(_CW_STILX_QUIT) {
-		/*
-		 * Pop objects off the exec stack, up to and including estilo.
-		 */
-		stils_npop(estack, stils_count(estack) - edepth);
-
-		xep_handled();
-	}
-	/* XXX Set up exception handling. */
-	xep_end();
-
-	stils_pop(tstack);
 }
 
 void
@@ -2247,19 +2192,13 @@ systemdict_print(cw_stilt_t *a_stilt)
 void
 systemdict_product(cw_stilt_t *a_stilt)
 {
-	soft_code("(Canonware stil)");
-}
-
-void
-systemdict_prompt(cw_stilt_t *a_stilt)
-{
-	soft_code("promptstring print flush");
+	_cw_stil_code(a_stilt, "(Canonware stil)");
 }
 
 void
 systemdict_promptstring(cw_stilt_t *a_stilt)
 {
-	soft_code("(s> )");
+	_cw_stil_code(a_stilt, "(s> )");
 }
 
 void
@@ -2657,7 +2596,7 @@ systemdict_roll(cw_stilt_t *a_stilt)
 void
 systemdict_run(cw_stilt_t *a_stilt)
 {
-	soft_code("(r) file cvx exec");
+	_cw_stil_code(a_stilt, "(r) file cvx exec");
 }
 
 void
@@ -2773,7 +2712,6 @@ systemdict_start(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*estack;
 	cw_stilo_t	*file;
-	cw_uint32_t	depth;
 
 	estack = stilt_estack_get(a_stilt);
 
@@ -2781,7 +2719,6 @@ systemdict_start(cw_stilt_t *a_stilt)
 	stilo_dup(file, stilt_stdin_get(a_stilt));
 	stilo_attrs_set(file, STILOA_EXECUTABLE);
 
-	depth = stils_count(estack);
 	xep_begin();
 	xep_try {
 		stilt_loop(a_stilt);
@@ -3204,7 +3141,7 @@ systemdict_usertime(cw_stilt_t *a_stilt)
 void
 systemdict_version(cw_stilt_t *a_stilt)
 {
-	soft_code("(" _LIBSTIL_VERSION ")");
+	_cw_stil_code(a_stilt, "(" _LIBSTIL_VERSION ")");
 }
 
 void

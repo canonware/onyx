@@ -39,6 +39,17 @@ extern  "C" {
 #include "libstil_defs.h"
 #include "libstil_incs.h"
 
+/* Convenience macro for static embedded stil code. */
+#define	_cw_stil_code(a_stilt, a_code) do {				\
+	cw_stilts_t		stilts;					\
+	static const cw_uint8_t	code[] = (a_code);			\
+									\
+	stilts_new(&stilts, (a_stilt));					\
+	stilt_interpret((a_stilt), &stilts, code, sizeof(code) - 1);	\
+	stilt_flush((a_stilt), &stilts);				\
+	stilts_delete(&stilts, (a_stilt));				\
+} while (0)
+
 #endif	/* _LIBSTIL_H_ */
 
 #ifdef __cplusplus

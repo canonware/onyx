@@ -17,8 +17,8 @@
 
 /*
  * Size and fullness control of initial name cache hash table.  We know for sure
- * that there will be about 175 names referenced by systemdict and threaddict to
- * begin with.
+ * that there will be about 175 names referenced by systemdict, threaddict,
+ * errordict, and $error to begin with.
  */
 #define _CW_STIL_NAME_BASE_TABLE	512
 #define _CW_STIL_NAME_BASE_GROW		400
@@ -43,6 +43,9 @@
  */
 #define	_CW_STIL_STDIN_BUFFER_SIZE	512
 #define	_CW_STIL_STDOUT_BUFFER_SIZE	512
+
+cw_sint32_t	stil_p_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t
+    *a_stilt, cw_uint32_t a_len, cw_uint8_t *r_str);
 
 cw_stil_t
 *stil_new(cw_stil_t *a_stil, cw_stil_read_t *a_stdin, cw_stil_write_t *a_stdout,
@@ -97,7 +100,13 @@ cw_stil_t
 		/* Initialize stdin. */
 		stilo_file_new(&retval->stdin_stilo, &stilt);
 		if (a_stdin == NULL) {
-			stilo_file_fd_wrap(&retval->stdin_stilo, 0);
+			if (isatty(0)) {
+				stilo_file_new(&retval->stdin_internal, &stilt);
+				stilo_file_fd_wrap(&retval->stdin_internal, 0);
+				stilo_file_interactive(&retval->stdin_stilo,
+				    stil_p_read, NULL, &retval->stdin_internal);
+			} else
+				stilo_file_fd_wrap(&retval->stdin_stilo, 0);
 		} else {
 			stilo_file_interactive(&retval->stdin_stilo, a_stdin,
 			    NULL, a_arg);
@@ -190,4 +199,19 @@ stil_delete(cw_stil_t *a_stil)
 	else
 		memset(a_stil, 0x5a, sizeof(cw_stil_t));
 #endif
+}
+
+cw_sint32_t
+stil_p_read(void *a_arg, cw_stilo_t *a_file, cw_stilt_t *a_stilt, cw_uint32_t
+    a_len, cw_uint8_t *r_str)
+{
+	cw_stilo_t		*arg = (cw_stilo_t *)a_arg;
+
+	if ((stilt_deferred(a_stilt) == FALSE) && (stilt_state(a_stilt)
+	    == STILTTS_START)) {
+		/* Print prompt. */
+		_cw_stil_code(a_stilt, "promptstring print flush");
+	}
+
+	return stilo_file_read(arg, a_stilt, a_len, r_str);
 }

@@ -13,16 +13,6 @@
 
 #include <errno.h>
 
-#define soft_code(a_str) do {						\
-	cw_stilts_t	stilts;						\
-	static const cw_uint8_t	code[] = (a_str);			\
-									\
-	stilts_new(&stilts, a_stilt);					\
-	stilt_interpret(a_stilt, &stilts, code, sizeof(code) - 1);	\
-	stilt_flush(a_stilt, &stilts);					\
-	stilts_delete(&stilts, a_stilt);				\
-} while (0)
-
 static const cw_stiln_t errordict_ops[] = {
 	STILN_dictstackoverflow,
 	STILN_dictstackunderflow,
@@ -232,13 +222,13 @@ errordict_generic(cw_stilt_t *a_stilt)
 	}
 	stils_npop(tstack, 3);
 
-	soft_code("handleerror stop");
+	_cw_stil_code(a_stilt, "handleerror stop");
 }
 
 void
 errordict_handleerror(cw_stilt_t *a_stilt)
 {
-	soft_code("
+	_cw_stil_code(a_stilt, "
 $error begin
 (newerror\t: ) print
 newerror ==
