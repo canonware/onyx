@@ -132,23 +132,15 @@ struct cw_stilt_s {
 
 	union {
 		struct {
-			enum {
-				SIGN_POS,
-				SIGN_NEG
-			}	sign;
-			union {
-				struct {
-					cw_uint32_t	base;
-				}	b;	/* radix (base). */
-			}	t;	/* type. */
+			cw_uint32_t	base;
 			cw_uint32_t	b_off;	/* Depends on sign, radix. */
 		}       n;	/* number. */
 		struct {
 			cw_uint8_t	hex_val;
 		}	s;	/* string. */
 		struct {
-			cw_uint32_t	npad;
-		}	p;	/* base 64 string. */
+			cw_uint32_t	nodd;
+		}	b;	/* base 64 string. */
 		struct {
 			enum {
 				ACTION_EXECUTE,

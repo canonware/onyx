@@ -33,7 +33,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(begin),
 	_SYSTEMDICT_ENTRY(bind),
 	_SYSTEMDICT_ENTRY(bytesavailable),
-	_SYSTEMDICT_ENTRY(ceiling),
 	_SYSTEMDICT_ENTRY(clear),
 	_SYSTEMDICT_ENTRY(cleardictstack),
 	_SYSTEMDICT_ENTRY(cleartomark),
@@ -79,7 +78,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(fileposition),
 	_SYSTEMDICT_ENTRY(filter),
 	_SYSTEMDICT_ENTRY(findresource),
-	_SYSTEMDICT_ENTRY(floor),
 	_SYSTEMDICT_ENTRY(flush),
 	_SYSTEMDICT_ENTRY(flushfile),
 	_SYSTEMDICT_ENTRY(for),
@@ -90,7 +88,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(get),
 	_SYSTEMDICT_ENTRY(getinterval),
 	_SYSTEMDICT_ENTRY(gt),
-	_SYSTEMDICT_ENTRY(idiv),
 	_SYSTEMDICT_ENTRY(if),
 	_SYSTEMDICT_ENTRY(ifelse),
 	_SYSTEMDICT_ENTRY(index),
@@ -137,14 +134,12 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(resourceforall),
 	_SYSTEMDICT_ENTRY(resourcestatus),
 	_SYSTEMDICT_ENTRY(roll),
-	_SYSTEMDICT_ENTRY(round),
 	_SYSTEMDICT_ENTRY(run),
 	_SYSTEMDICT_ENTRY(search),
 	_SYSTEMDICT_ENTRY(setfileposition),
 	_SYSTEMDICT_ENTRY(setglobal),
 	_SYSTEMDICT_ENTRY(setobjectformat),
 	_SYSTEMDICT_ENTRY(shift),
-	_SYSTEMDICT_ENTRY(sqrt),
 	_SYSTEMDICT_ENTRY(srand),
 	_SYSTEMDICT_ENTRY(stack),
 	_SYSTEMDICT_ENTRY(start),
@@ -163,7 +158,6 @@ static struct cw_systemdict_entry systemdict_ops[] = {
 	_SYSTEMDICT_ENTRY(timedwait),
 	_SYSTEMDICT_ENTRY(token),
 	_SYSTEMDICT_ENTRY(true),
-	_SYSTEMDICT_ENTRY(truncate),
 	_SYSTEMDICT_ENTRY(trylock),
 	_SYSTEMDICT_ENTRY(type),
 	_SYSTEMDICT_ENTRY(undef),
@@ -323,12 +317,6 @@ systemdict_bytesavailable(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_ceiling(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_clear(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -448,7 +436,12 @@ systemdict_currentobjectformat(cw_stilt_t *a_stilt)
 void
 systemdict_cvlit(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_get(stack, 0);
+	stilo_attrs_set(stilo, STILOA_LITERAL);
 }
 
 void
@@ -478,7 +471,12 @@ systemdict_cvs(cw_stilt_t *a_stilt)
 void
 systemdict_cvx(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_get(stack, 0);
+	stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 }
 
 void
@@ -662,12 +660,6 @@ systemdict_findresource(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_floor(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_flush(cw_stilt_t *a_stilt)
 {
 /*  	_cw_error("XXX Not implemented"); */
@@ -731,25 +723,6 @@ void
 systemdict_if(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_idiv(cw_stilt_t *a_stilt)
-{
-	cw_stils_t	*stack;
-	cw_stilo_t	t_stilo, *a, *b;
-
-	stack = stilt_data_stack_get(a_stilt);
-	
-	b = stils_get(stack, 0);
-	a = stils_get_down(stack, b);
-	if (a == NULL)
-		xep_throw(_CW_XEPV_STACKUNDERFLOW);
-	stilo_no_new(&t_stilo);
-	stilo_move(&t_stilo, a);
-	stilo_integer_div(&t_stilo, b, a);
-	stils_pop(stack, a_stilt, 1);
-	stilo_delete(&t_stilo, a_stilt);
 }
 
 void
@@ -1119,12 +1092,6 @@ systemdict_roll(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_round(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_run(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -1162,12 +1129,6 @@ systemdict_setobjectformat(cw_stilt_t *a_stilt)
 
 void
 systemdict_shift(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
-systemdict_sqrt(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
 }
@@ -1323,12 +1284,6 @@ systemdict_true(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_truncate(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_trylock(cw_stilt_t *a_stilt)
 {
 	_cw_error("XXX Not implemented");
@@ -1420,7 +1375,20 @@ systemdict_writestring(cw_stilt_t *a_stilt)
 void
 systemdict_xcheck(cw_stilt_t *a_stilt)
 {
-	_cw_error("XXX Not implemented");
+	cw_stils_t	*stack;
+	cw_stilo_t	*stilo;
+	cw_stiloa_t	attr;
+
+	stack = stilt_data_stack_get(a_stilt);
+	stilo = stils_get(stack, 0);
+	
+	attr = stilo_attrs_get(stilo);
+	stilo_delete(stilo, a_stilt);
+
+	if (attr == STILOA_EXECUTABLE)
+		stilo_boolean_new(stilo, TRUE);
+	else
+		stilo_boolean_new(stilo, FALSE);
 }
 
 void

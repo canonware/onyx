@@ -1627,7 +1627,8 @@ stilo_integer_sub(const cw_stilo_t *a_num, const cw_stilo_t *a_sub, cw_stilo_t
 }
 
 void
-stilo_integer_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t *r_product)
+stilo_integer_mul(const cw_stilo_t *a_a, const cw_stilo_t *a_b, cw_stilo_t
+    *r_product)
 {
 	stilo_p_integer_calc(a_a, a_b, _STILO_CALC_MUL, r_product);
 }

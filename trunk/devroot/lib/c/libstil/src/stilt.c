@@ -317,7 +317,6 @@ stilt_exec(cw_stilt_t *a_stilt)
 			case STILOT_DICT:
 			case STILOT_INTEGER:
 			case STILOT_MARK:
-			case STILOT_STRING:
 				/* Push onto the dictionary stack. */
 				tstilo = stils_push(&a_stilt->data_stils);
 				stilo_dup(tstilo, stilo, a_stilt);
@@ -331,6 +330,10 @@ stilt_exec(cw_stilt_t *a_stilt)
 				cw_uint32_t	i;
 				cw_stilo_t	*array;
 
+				/*
+				 * Iterate through the array and execute each
+				 * element in turn.
+				 */
 				for (i = 0; i < stilo_array_len_get(stilo) - 1;
 				     i++) {
 					tstilo =
@@ -338,22 +341,56 @@ stilt_exec(cw_stilt_t *a_stilt)
 					stilo_dup(tstilo, &array[i], a_stilt);
 					stilt_exec(a_stilt);
 				}
-				/* Make tail recursion safe. */
+				/*
+				 * Make tail recursion safe by replacing the
+				 * array with its last element before executing
+				 * the last element.
+				 */
 				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
 				tstilo = stils_push(&a_stilt->exec_stils);
 				stilo_dup(tstilo, &array[i], a_stilt);
 
 				break;
 			}
-			case STILOT_FILE:
-			case STILOT_HOOK:
-			case STILOT_LOCK:
-			case STILOT_NAME:
-				_cw_not_reached();	/* XXX */
+			case STILOT_STRING: {
+				cw_stilts_t	stilts;
+
+				/*
+				 * Use the string as a source of code.
+				 */
+				stilts_new(&stilts, a_stilt);
+				stilt_interpret(a_stilt, &stilts,
+				    stilo_string_get(stilo),
+				    stilo_string_len_get(stilo));
+				stilts_delete(&stilts, a_stilt);
+				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
+
+				break;
+			}
+			case STILOT_NAME: {
+				cw_stilo_t	val;
+
+				/*
+				 * Search for a value associated with the name
+				 * in the dictionary stack, push it onto the
+				 * execution stack, and execute it.
+				 */
+				stilo = stils_get(&a_stilt->exec_stils, 0);
+				stilo_no_new(&val);
+				if (stilt_dict_stack_search(a_stilt, stilo,
+				    &val))
+					xep_throw(_CW_XEPV_UNDEFINED);
+				stilo_move(stilo, &val);
+				break;
+			}
 			case STILOT_OPERATOR:
 				stilo->o.operator.f(a_stilt);
 				stils_pop(&a_stilt->exec_stils, a_stilt, 1);
 				break;
+			case STILOT_FILE:
+			case STILOT_HOOK:
+			case STILOT_LOCK:
+				_cw_not_reached();	/* XXX */
 			default:
 				_cw_not_reached();
 			}
@@ -546,20 +583,17 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			case '+':
 				a_stilt->state = STATE_INTEGER;
-				a_stilt->m.n.sign = SIGN_POS;
 				a_stilt->m.n.b_off = 1;
 				_CW_STILT_PUTC(c);
 				break;
 			case '-':
 				a_stilt->state = STATE_INTEGER;
-				a_stilt->m.n.sign = SIGN_NEG;
 				a_stilt->m.n.b_off = 1;
 				_CW_STILT_PUTC(c);
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
 				a_stilt->state = STATE_INTEGER;
-				a_stilt->m.n.sign = SIGN_POS;
 				a_stilt->m.n.b_off = 0;
 				_CW_STILT_PUTC(c);
 				break;
@@ -676,7 +710,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				 * Convert the string to a base (interpreted as
 				 * base 10).
 				 */
-				a_stilt->m.n.t.b.base = 0;
+				a_stilt->m.n.base = 0;
 
 				for (i = 0; i < a_stilt->index; i++) {
 					digit =
@@ -686,22 +720,22 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					if (a_stilt->index - a_stilt->m.n.b_off
 					    - i == 2)
 						digit *= 10;
-					a_stilt->m.n.t.b.base += digit;
+					a_stilt->m.n.base += digit;
 
 					if (((digit != 0) && ((a_stilt->index -
 					    a_stilt->m.n.b_off - i) > 2)) ||
-					    (a_stilt->m.n.t.b.base > 36)) {
+					    (a_stilt->m.n.base > 36)) {
 						/*
 						 * Base too large. Set base to 0
 						 * so that the check for too
 						 * small a base catches this.
 						 */
-						a_stilt->m.n.t.b.base = 0;
+						a_stilt->m.n.base = 0;
 						break;
 					}
 				}
 
-				if (a_stilt->m.n.t.b.base < 2) {
+				if (a_stilt->m.n.base < 2) {
 					/*
 					 * Base too small (or too large, as
 					 * detected in the for loop above).
@@ -783,7 +817,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			case 'p': case 'q': case 'r': case 's': case 't':
 			case 'u': case 'v': case 'w': case 'x': case 'y':
 			case 'z':
-				if (a_stilt->m.n.t.b.base <= (10 +
+				if (a_stilt->m.n.base <= (10 +
 				    ((cw_uint32_t)(c - 'a')))) {
 					/* Too big for this base. */
 					a_stilt->state = STATE_NAME;
@@ -793,7 +827,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				break;
 			case '0': case '1': case '2': case '3': case '4':
 			case '5': case '6': case '7': case '8': case '9':
-				if (a_stilt->m.n.t.b.base <=
+				if (a_stilt->m.n.base <=
 				    ((cw_uint32_t)(c - '0'))) {
 					/* Too big for this base. */
 					a_stilt->state = STATE_NAME;
@@ -832,7 +866,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					val =
 					    strtoq(&a_stilt->tok_str[a_stilt->m.n.b_off],
 					    NULL,
-					    a_stilt->m.n.t.b.base);
+					    a_stilt->m.n.base);
 					if ((errno == ERANGE) && ((val ==
 					    QUAD_MIN) || (val == QUAD_MAX)))
 						xep_throw(_CW_XEPV_RANGECHECK);
@@ -1165,7 +1199,7 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 		case STATE_BASE64_STRING:
 			switch (c) {
 			case '~':
-				a_stilt->m.p.npad = 0;
+				a_stilt->m.b.nodd = 0;
 				a_stilt->state = STATE_BASE64_STRING_FINISH;
 				break;
 			case '\n':
@@ -1204,16 +1238,14 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					stilt_p_syntax_error_print(a_stilt, c);
 					break;
 				case 2:
-					a_stilt->m.p.npad = 2;
+					a_stilt->m.b.nodd = 1;
 					a_stilt->state =
 					    STATE_BASE64_STRING_PAD;
-					_CW_STILT_PUTC(c);
 					break;
 				case 3:
-					a_stilt->m.p.npad = 1;
+					a_stilt->m.b.nodd = 2;
 					a_stilt->state =
 					    STATE_BASE64_STRING_TILDE;
-					_CW_STILT_PUTC(c);
 					break;
 				default:
 					_cw_not_reached();
@@ -1228,7 +1260,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 			switch (c) {
 			case '=':
 				a_stilt->state = STATE_BASE64_STRING_TILDE;
-				_CW_STILT_PUTC(c);
 				break;
 			case '\n':
 				_CW_STILT_NEWLINE();
@@ -1269,11 +1300,10 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 				stilt_p_token_print(a_stilt, a_stilts,
 				    a_stilt->index, "base 64 string");
 
-				ngroups = (a_stilt->index - a_stilt->m.p.npad)
-				    >> 2;
+				ngroups = a_stilt->index >> 2;
 				stilo = stils_push(&a_stilt->data_stils);
 				stilo_string_new(stilo, a_stilt,
-				    (ngroups + 1) * 3 - a_stilt->m.p.npad);
+				    ngroups * 3 + a_stilt->m.b.nodd);
 
 				str = stilo_string_get(stilo);
 				for (j = 0; j < ngroups; j++) {
@@ -1293,11 +1323,22 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					str[j * 3 + 2] = bits & 0xff;
 				}
 
-				switch (a_stilt->m.p.npad) {
+				switch (a_stilt->m.b.nodd) {
 				case 0:
 					/* abcd. Do nothing. */
 					break;
 				case 1:
+					/* ab==. */
+					/* Accumulate the bits. */
+					bits = stilt_p_b64b(a_stilt->tok_str[j *
+					    4]) << 18;
+					bits |= stilt_p_b64b(a_stilt->tok_str[j
+					    * 4 + 1]) << 12;
+
+					/* Pull out the bytes. */
+					str[j * 3] = bits >> 16;
+					break;
+				case 2:
 					/* abc=. */
 					/* Accumulate the bits. */
 					bits = stilt_p_b64b(a_stilt->tok_str[j *
@@ -1310,16 +1351,6 @@ stilt_p_feed(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
 					/* Pull out the bytes. */
 					str[j * 3] = bits >> 16;
 					str[j * 3 + 1] = (bits >> 8) & 0xff;
-					break;
-				case 2:
-					/* ab==. */
-					/* Accumulate the bits. */
-					bits = stilt_p_b64b(a_stilt->tok_str[j * 4]) << 18;
-					bits |= stilt_p_b64b(a_stilt->tok_str[j * 4 + 1]) <<
-					    12;
-
-					/* Pull out the bytes. */
-					str[j * 3] = bits >> 16;
 					break;
 				default:
 					_cw_not_reached();
@@ -1418,10 +1449,6 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		 */
 		a_stilt->tok_str = (cw_uint8_t *)stilt_malloc(a_stilt,
 		    a_stilt->index * 2);
-		if (a_stilt->tok_str == NULL) {
-			retval = -1;
-			goto RETURN;
-		}
 		a_stilt->buffer_len = a_stilt->index * 2;
 		memcpy(a_stilt->tok_str, a_stilt->buffer,
 		    a_stilt->index);
@@ -1433,10 +1460,6 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		 */
 		t_str = (cw_uint8_t *)stilt_malloc(a_stilt,
 		    a_stilt->index * 2);
-		if (t_str == NULL) {
-			retval = -1;
-			goto RETURN;
-		}
 		a_stilt->buffer_len = a_stilt->index * 2;
 		memcpy(t_str, a_stilt->tok_str, a_stilt->index);
 		stilt_free(a_stilt, a_stilt->tok_str);
@@ -1444,7 +1467,6 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 	}
 
 	retval = 0;
-	RETURN:
 	return retval;
 }
 
@@ -1543,20 +1565,14 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 	switch (a_stilt->m.m.action) {
 	case ACTION_EXECUTE:
 		if (a_stilt->defer_count == 0) {
-			cw_stilo_t	key;
-
 			/*
 			 * Find the the value associated with the name in the
 			 * dictionary stack, push it onto the execution stack,
 			 * and run the execution loop.
 			 */
-			stilo_name_new(&key, a_stilt, a_stilt->tok_str,
-			    a_stilt->index, FALSE);
-
 			stilo = stils_push(&a_stilt->exec_stils);
-			if (stilt_dict_stack_search(a_stilt, &key, stilo))
-				xep_throw(_CW_XEPV_UNDEFINED);
-			stilo_delete(&key, a_stilt);
+			stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
+			    a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 			stilt_p_reset(a_stilt);
