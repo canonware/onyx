@@ -11,6 +11,7 @@
 
 #include "../include/libstil/libstil.h"
 #include "../include/libstil/stil_l.h"
+#include "../include/libstil/stila_l.h"
 #include "../include/libstil/stilo_l.h"
 #include "../include/libstil/stilt_l.h"
 
@@ -147,32 +148,10 @@ struct cw_stiloe_mutex_s {
 struct cw_stiloe_name_s {
 	cw_stiloe_t	stiloe;
 	/*
-	 * Modifications must be locked if this is a globally allocated object.
-	 */
-	cw_mtx_t	lock;
-	/*
-	 * Always the value of the root name stiloe, regardless of whether this
-	 * is a reference (local) or the root (global).  This allows fast access
-	 * to what is effectively the key for name comparisions.
-	 */
-	cw_stiloe_name_t *val;
-
-	/*
-	 * The following fields are only used by a root (global) name.
-	 */
-
-	/*
-	 * If non-NULL, a hash of keyed references to this object.  Keyed
-	 * references are used by global dictionary entries.  This allows a
-	 * thread to determine whether an entry exists in a particular global
-	 * dictionary without having to lock the entire dictionary.
-	 */
-	cw_dch_t	*keyed_refs;
-	/*
-	 * name is *not* required to be NULL-terminated, so we keep track of the
+	 * name is not required to be NULL-terminated, so we keep track of the
 	 * length.
 	 */
-	const cw_uint8_t *name;
+	const cw_uint8_t *str;
 	cw_uint32_t	len;
 };
 
@@ -309,9 +288,6 @@ static cw_stiloe_t *stiloe_p_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t
     a_reset);
 static cw_stilte_t stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file,
     cw_bool_t a_syntactic, cw_bool_t a_newline);
-
-static cw_stiloe_name_t *stilo_p_name_gref(cw_stilt_t *a_stilt, const char
-    *a_str, cw_uint32_t a_len, cw_bool_t a_is_static);
 
 #define		stiloe_p_name_lock(a_name) do {				\
 	if ((a_name)->stiloe.global)					\
@@ -693,7 +669,7 @@ stilo_p_hash(const void *a_key)
 		cw_stiloe_name_t	*name;
 
 		name = (cw_stiloe_name_t *)key->o.stiloe;
-		retval = ch_direct_hash((void *)name->val);
+		retval = ch_direct_hash((void *)name);
 	} else {
 		_cw_error("XXX Unimplemented");
 	}
@@ -718,11 +694,8 @@ stilo_p_key_comp(const void *a_k1, const void *a_k2)
 	    STILOT_NAME)) {
 		cw_stiloe_name_t	*n1, *n2;
 		
-		/* Chase down the names. */
 		n1 = (cw_stiloe_name_t *)k1->o.stiloe;
-		n1 = n1->val;
 		n2 = (cw_stiloe_name_t *)k2->o.stiloe;
-		n2 = n2->val;
 
 		retval = (n1 == n2) ? TRUE : FALSE;
 	} else {
@@ -1458,7 +1431,7 @@ stiloe_p_dict_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 	mtx_delete(&dict->lock);
 	while (dch_remove_iterate(&dict->hash, NULL, (void **)&dicto, &chi) ==
 	    FALSE) {
-		/* XXX Remove keyed references. */
+		stila_dicto_put(stil_stila_get(a_stil), dicto);
 		stila_chi_put(stil_stila_get(a_stil), chi);
 	}
 
@@ -2648,7 +2621,8 @@ stilo_file_output_n(cw_stilo_t *a_stilo, cw_uint32_t a_size, const char
 
 			nwrite = out_put_svn(cw_g_out,
 			    &file->buffer[file->buffer_offset],
-			    maxlen, a_format, ap);
+			    a_size, a_format, ap);
+			_cw_assert(nwrite == a_size);
 			file->buffer_mode = BUFFER_WRITE;
 			file->buffer_offset += nwrite;
 		} else {
@@ -3336,152 +3310,65 @@ stilo_mutex_unlock(cw_stilo_t *a_stilo)
 /*
  * name.
  */
-/*
- * Names are kept in a global hash table of stiloe_name's, and there is only one
- * stiloe_name per unique character string.  This allows the address of each
- * stiloe_name in the global hash table to be used as a unique key, so
- * regardless of the string length of a name, once it has been converted to a
- * stiloe_name pointer, name comparisons are a constant time operation.
- *
- * The following diagram shows the various name-related object relationships
- * that are possible.  Locally allocated name objects use a thread-specific
- * cache.  Globally allocated name objects refer directly to the global table.
- *
- * The reason for the thread-specific cache is that all operations on the global
- * table require locking.  By caching references to the global table on a
- * per-thread basis, we amortize the cost of locking the global table.
- *
- * The garbage collector periodically cleans out unused cached references from
- * the thread-specific hashes.  This means that any cached references not
- * referred to at GC time will be collected.  The frequency of local GC should
- * be low enough that repopulating the name cache after each GC doesn't add
- * significant overhead.
- *
- * /-----------------\                     /-----------------\
- * | stil.name_hash  |                     | stilt.name_hash |
- * |                 |                     |                 |
- * | /-------------\ |                     | /-------------\ |
- * | | stiloe_name | |                     | | stiloe_name | |
- * | |             | |                     | |             | |
- * | | /------\    | |                     | | /-------\   | |
- * | | | name |    | |            /------------| stilo |   | |
- * | | \------/    | |           /         | | \-------/   | |
- * | |             | |          /          | |             | |
- * | \-------------/ |          |          | \-------------/ |
- * |                 |          |          |                 |
- * | ............... |          |          | ............... |
- * | ............... |          |          | ............... |
- * | ............... |          |          | ............... |
- * |                 |          |          |                 |
- * | /-------------\ |          |          | /-------------\ |
- * | | stiloe_name | |          |          | | stiloe_name | |
- * | |             | |          /          | |             | |
- * | | /------\    | |         /           | | /-------\   | |
- * | | | name |    |<---------/   /------------| stilo |   | |
- * | | \------/    | |           /         | | \-------/   | |
- * | |             | |          /          | |             | |
- * | \-------------/ |          |          | \-------------/ |
- * |                 |          |          |                 |
- * | ............... |          |          \-----------------/
- * | ............... |          |
- * | ............... |          |
- * |                 |          |
- * | /-------------\ |          |          /-----------------\
- * | | stiloe_name | |          |          | stilt.name_hash |
- * | |             | |          |          |                 |
- * | | /------\    | |          |          | /-------------\ |
- * | | | name |    |<-----------+--\       | | stiloe_name | |
- * | | \------/    | |          |   \      | |             | |
- * | |             | |          |    \     | | /-------\   | |
- * | \-------------/ |          |     \--------| stilo |   | |
- * |                 |          |          | | \-------/   | |
- * | ............... |          |          | |             | |
- * | ............... |          |          | \-------------/ |
- * | ............... |          |          |                 |
- * |                 |          |          | ............... |
- * | /-------------\ |          /          | ............... |
- * | | stiloe_name | |         /           | ............... |
- * | |             |<---------/            |                 |
- * | | /------\    | |                     | /-------------\ |
- * | | | name |    | |                     | | stiloe_name | |
- * | | \------/    |<-----------\          | |             | |
- * | |             | |           \         | | /-------\   | |
- * | \-------------/ |            \------------| stilo |   | |
- * |       ^         |                     | | \-------/   | |
- * \-------|---------/                     | |             | |
- *         |                               | \-------------/ |
- *         |                               |        ^        |
- *         |                               \--------|--------/
- *         |                                        |
- * /-------------------\                            |
- * | stilo (global VM) |                            |
- * | (possibly keyed)  |                            |
- * \-------------------/                   /------------------\
- *                                         | stilo (local VM) |
- *                                         \------------------/
- */
-
-/*
- * a_stilt's allocation mode (local/global) is used to determine how the object
- * is allocated.
- */
 void
-stilo_name_new(cw_stilo_t *a_stilo, cw_stilt_t *a_stilt, const cw_uint8_t
-    *a_name, cw_uint32_t a_len, cw_bool_t a_is_static)
+stilo_name_new(cw_stilo_t *a_stilo, cw_stil_t *a_stil, const cw_uint8_t
+    *a_str, cw_uint32_t a_len, cw_bool_t a_is_static)
 {
 	cw_stiloe_name_t	*name, key;
+	cw_mtx_t		*name_lock;
+	cw_dch_t		*name_hash;
 
 	/* Fake up a key so that we can search the hash tables. */
-	key.name = a_name;
+	key.str = a_str;
 	key.len = a_len;
 
-	if (stilt_currentglobal(a_stilt) == FALSE) {
-		cw_dch_t		*name_hash;
-		cw_stiloe_name_t	*gname;
+	name_lock = stil_l_name_lock_get(a_stil);
+	name_hash = stil_l_name_hash_get(a_stil);
 
+	/*
+	 * Look in the global hash for the name.  If the name doesn't exist,
+	 * create it.
+	 */
+	mtx_lock(name_lock);
+	if (dch_search(name_hash, (void *)&key, (void **)&name)) {
 		/*
-		 * Look in the per-thread name cache for a cached reference to
-		 * the name.  If there is no cached reference, check the global
-		 * hash for the name.  Create the name in the global hash if
-		 * necessary, then create a cached reference if necessary.
+		 * Not found in the name hash.  Create, initialize, and insert
+		 * a new entry.
 		 */
-		name_hash = stilt_l_name_hash_get(a_stilt);
-		if (dch_search(name_hash, (void *)&key, (void **)&name)) {
-			/* Not found in the per-thread name cache. */
-			gname = stilo_p_name_gref(a_stilt, a_name, a_len,
-			    a_is_static);
+		name = (cw_stiloe_name_t *)_cw_malloc(sizeof(cw_stiloe_name_t));
 
-			name = (cw_stiloe_name_t
-			    *)_cw_malloc(sizeof(cw_stiloe_name_t));
+		stiloe_p_new(&name->stiloe, STILOT_NAME);
+		name->stiloe.name_static = a_is_static;
+		name->stiloe.name_referenced = TRUE;
+		name->stiloe.global = TRUE;
+		name->len = a_len;
 
-			name->val = gname;
-
-			stiloe_p_new(&name->stiloe, STILOT_NAME);
-			mtx_new(&name->lock);
-
+		if (a_is_static == FALSE) {
+			name->str = _cw_malloc(a_len);
 			/*
-			 * Insert a cached entry for this thread.
+			 * Cast away the const here; it's one of two places that
+			 * the string is allowed to be modified, and this cast
+			 * is better than dropping the const altogether.
 			 */
-			dch_insert(name_hash, (void *)gname, (void **)name,
-			    stilt_chi_get(a_stilt));
+			memcpy((cw_uint8_t *)name->str, a_str, a_len);
+		} else
+			name->str = a_str;
 
-			stilo_p_new(a_stilo, STILOT_NAME);
-			a_stilo->o.stiloe = (cw_stiloe_t *)name;
+		dch_insert(name_hash, (void *)name, (void **)name,
+		    stila_chi_get(stil_stila_get(a_stil)));
 
-			stila_gc_register(stil_stila_get(
-			    stilt_stil_get(a_stilt)), (cw_stiloe_t *)name);
-		} else {
-			stilo_p_new(a_stilo, STILOT_NAME);
-			a_stilo->o.stiloe = (cw_stiloe_t *)name;
-		}
-	} else {
-		name = stilo_p_name_gref(a_stilt, a_name, a_len, a_is_static);
+		mtx_unlock(name_lock);
 
 		stilo_p_new(a_stilo, STILOT_NAME);
 		a_stilo->o.stiloe = (cw_stiloe_t *)name;
-		
-/*  		stila_gc_register(stil_stila_get(stilt_stil_get(a_stilt)), */
-/*  		    (cw_stiloe_t *)name); */
+
+		stila_gc_register(stil_stila_get(a_stil), (cw_stiloe_t *)name);
+	} else {
+		name->stiloe.name_referenced = TRUE;
+		mtx_unlock(name_lock);
+
+		stilo_p_new(a_stilo, STILOT_NAME);
+		a_stilo->o.stiloe = (cw_stiloe_t *)name;
 	}
 }
 
@@ -3489,48 +3376,45 @@ static void
 stiloe_p_name_delete(cw_stiloe_t *a_stiloe, cw_stil_t *a_stil)
 {
 	cw_stiloe_name_t	*name;
+	cw_mtx_t		*name_lock;
+	cw_dch_t		*name_hash;
+	cw_chi_t		*chi;
 
 	name = (cw_stiloe_name_t *)a_stiloe;
 
+	name_lock = stil_l_name_lock_get(a_stil);
+	name_hash = stil_l_name_hash_get(a_stil);
+
+	mtx_lock(name_lock);
 	/*
-	 * XXX Remove from hash table.
+	 * Only delete the hash entry if this object hasn't been put back into
+	 * use.
 	 */
-	mtx_delete(&name->lock);
-	_CW_STILOE_FREE(name);
+	if (name->stiloe.color != stila_l_white_get(stil_stila_get(a_stil))) {
+		/*
+		 * Remove from hash table.
+		 */
+		dch_remove(name_hash, (void *)name, NULL, NULL, &chi);
+		stila_chi_put(stil_stila_get(a_stil), chi);
+
+		if (name->stiloe.name_static == FALSE) {
+			/*
+			 * Cast away the const here; it's one of two places that
+			 * the string is allowed to be modified, and this cast
+			 * is better than dropping the const altogether.
+			 */
+			_CW_FREE((cw_uint8_t *)name->str);
+		}
+
+		_CW_STILOE_FREE(name);
+	}
+	mtx_unlock(name_lock);
 }
 
 static cw_stiloe_t *
 stiloe_p_name_ref_iter(cw_stiloe_t *a_stiloe, cw_bool_t a_reset)
 {
-	cw_stiloe_t		*retval;
-	cw_stiloe_name_t	*name;
-
-	name = (cw_stiloe_name_t *)a_stiloe;
-	
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-
-	/*
-	 * Since a name can reference at most one other object (an indirect name
-	 * references the global name object), there can be at most one
-	 * reference returned, which will always happen during the first
-	 * iteration.  Therefore, we check the first time we're called whether
-	 * this object is indirect, but the second time we can indiscriminatly
-	 * return NULL.
-	 *
-	 * We don't need to (or want to) report the values of any keyed
-	 * references, because it will in some cases prevent the dictionaries
-	 * from ever being collected.  There is the problem of deletion order if
-	 * both the name and the dictionary are collectible.  We handle this
-	 * case specially in the name deletion code.
-	 */
-	if (a_reset && name->val != name)
-		retval = (cw_stiloe_t *)name->val;
-	else
-		retval = NULL;
-
-	return retval;
+	return NULL;
 }
 
 static cw_stilte_t
@@ -3544,17 +3428,11 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_stilo->type == STILOT_NAME);
 
-	/* Chase down the name. */
 	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-	name = name->val;
 
 	_cw_check_ptr(name);
 	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(name->stiloe.type == STILOT_NAME);
-	_cw_assert(name == name->val);
 	
 	if ((a_syntactic) && (a_stilo->attrs == STILOA_LITERAL)) {
 		retval = stilo_file_output(a_file, "/");
@@ -3563,20 +3441,9 @@ stilo_p_name_print(cw_stilo_t *a_stilo, cw_stilo_t *a_file, cw_bool_t
 	}
 
 	retval = stilo_file_output_n(a_file, name->len, "[s]",
-	    name->name);
+	    name->str);
 	if (retval)
 		goto RETURN;
-#ifdef _LIBSTIL_CONFESS
-	if ((cw_stiloe_t *)name == a_stilo->o.stiloe) {
-		retval = stilo_file_output(a_file, "<G>");
-		if (retval)
-			goto RETURN;
-	} else {
-		retval = stilo_file_output(a_file, "<L>");
-		if (retval)
-			goto RETURN;
-	}
-#endif
 	if (a_newline) {
 		retval = stilo_file_output(a_file, "\n");
 		if (retval)
@@ -3598,7 +3465,7 @@ stilo_l_name_hash(const void *a_key)
 
 	_cw_check_ptr(a_key);
 
-	for (i = 0, str = key->name, retval = 0; i < key->len;
+	for (i = 0, str = key->str, retval = 0; i < key->len;
 	    i++, str++)
 		retval = retval * 33 + *str;
 
@@ -3625,18 +3492,18 @@ stilo_l_name_key_comp(const void *a_k1, const void *a_k2)
 	{
 		cw_bool_t	equal;
 
-		equal = strncmp((char *)k1->name, (char *)k2->name, len)
+		equal = strncmp((char *)k1->str, (char *)k2->str, len)
 		    ? FALSE : TRUE;
 
 		_cw_out_put_e("\"");
-		_cw_out_put_n(k1->len, "[s]", k1->name);
+		_cw_out_put_n(k1->len, "[s]", k1->str);
 		_cw_out_put("\" [c]= \"", equal ? '=' : '!');
-		_cw_out_put_n(k2->len, "[s]", k2->name);
+		_cw_out_put_n(k2->len, "[s]", k2->str);
 		_cw_out_put("\"\n");
 	}
 #endif
 
-	return strncmp((char *)k1->name, (char *)k2->name, len) ? FALSE
+	return strncmp((char *)k1->str, (char *)k2->str, len) ? FALSE
 	    : TRUE;
 }
 
@@ -3650,19 +3517,13 @@ stilo_name_str_get(cw_stilo_t *a_stilo)
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_stilo->type == STILOT_NAME);
 
-	/* Chase down the name. */
 	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-	name = name->val;
 
 	_cw_check_ptr(name);
 	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(name->stiloe.type == STILOT_NAME);
-	_cw_assert(name == name->val);
 
-	retval = name->name;
+	retval = name->str;
 
 	return retval;
 }
@@ -3677,85 +3538,13 @@ stilo_name_len_get(cw_stilo_t *a_stilo)
 	_cw_assert(a_stilo->magic == _CW_STILO_MAGIC);
 	_cw_assert(a_stilo->type == STILOT_NAME);
 
-	/* Chase down the name. */
 	name = (cw_stiloe_name_t *)a_stilo->o.stiloe;
-	_cw_check_ptr(name);
-	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
-	_cw_assert(name->stiloe.type == STILOT_NAME);
-	name = name->val;
 
 	_cw_check_ptr(name);
 	_cw_assert(name->stiloe.magic == _CW_STILOE_MAGIC);
 	_cw_assert(name->stiloe.type == STILOT_NAME);
-	_cw_assert(name == name->val);
 
 	retval = name->len;
-
-	return retval;
-}
-
-static cw_stiloe_name_t *
-stilo_p_name_gref(cw_stilt_t *a_stilt, const char *a_str, cw_uint32_t a_len,
-    cw_bool_t a_is_static)
-{
-	cw_stiloe_name_t	*retval, key;
-	cw_mtx_t		*name_lock;
-	cw_dch_t		*name_hash;
-
-/*  	_cw_out_put_e("Reference ([s] VM) \"", stilt_currentglobal(a_stilt) ? */
-/*  	    "global" : "local"); */
-/*  	_cw_out_put_n(a_len, "[s]", a_str); */
-/*  	_cw_out_put("\" (len [i])\n", a_len); */
-
-	/* Fake up a key so that we can search the hash tables. */
-	key.name = a_str;
-	key.len = a_len;
-
-	name_lock = stil_l_name_lock_get(stilt_stil_get(a_stilt));
-	name_hash = stil_l_name_hash_get(stilt_stil_get(a_stilt));
-
-	/*
-	 * Look in the global hash for the name.  If the name doesn't exist,
-	 * create it.
-	 */
-	mtx_lock(name_lock);
-	if (dch_search(name_hash, (void *)&key, (void **)&retval)) {
-		/*
-		 * Not found in the global hash.  Create, initialize, and insert
-		 * a new entry.
-		 */
-		retval = (cw_stiloe_name_t
-		    *)_cw_malloc(sizeof(cw_stiloe_name_t));
-		memset(retval, 0, sizeof(cw_stiloe_name_t));
-
-		stiloe_p_new(&retval->stiloe, STILOT_NAME);
-
-		retval->val = retval;
-
-		retval->stiloe.name_static = a_is_static;
-		retval->len = a_len;
-	
-		if (a_is_static == FALSE) {
-			/* This should be allocated from global space. */
-			retval->name = _cw_malloc(a_len);
-			/*
-			 * Cast away the const here; it's the only place that
-			 * the string is allowed to be modified, and this cast
-			 * is better than dropping the const altogether.
-			 */
-			memcpy((cw_uint8_t *)retval->name, a_str, a_len);
-		} else
-			retval->name = a_str;
-
-		mtx_new(&retval->lock);
-
-		dch_insert(name_hash, (void *)retval, (void **)retval,
-		    stilt_chi_get(a_stilt));
-
-		stila_gc_register(stil_stila_get(stilt_stil_get(a_stilt)),
-		    (cw_stiloe_t *)retval);
-	}
-	mtx_unlock(name_lock);
 
 	return retval;
 }

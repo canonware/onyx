@@ -174,7 +174,7 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	stilo_dict_new(a_dict, stilt_stil_get(a_stilt), NENTRIES + NEXTRA);
 
 	for (i = 0; i < NENTRIES; i++) {
-		stilo_name_new(&name, a_stilt,
+		stilo_name_new(&name, stilt_stil_get(a_stilt),
 		    stiln_str(systemdict_ops[i].stiln),
 		    stiln_len(systemdict_ops[i].stiln), TRUE);
 		stilo_operator_new(&operator, systemdict_ops[i].op_f,
@@ -187,49 +187,49 @@ systemdict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	/* Initialize entries that are not operators. */
 
 	/* globaldict. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_globaldict),
-	    stiln_len(STILN_globaldict), TRUE);
+	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_globaldict), stiln_len(STILN_globaldict), TRUE);
 	stilo_dup(&operator, stilt_globaldict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* systemdict. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_systemdict),
-	    stiln_len(STILN_systemdict), TRUE);
+	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_systemdict), stiln_len(STILN_systemdict), TRUE);
 	stilo_dup(&operator, stilt_systemdict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* stdin. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_stdin),
+	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_stdin),
 	    stiln_len(STILN_stdin), TRUE);
 	stilo_dup(&operator, stilt_stdin_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* stdout. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_stdout),
+	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_stdout),
 	    stiln_len(STILN_stdout), TRUE);
 	stilo_dup(&operator, stilt_stdout_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* stderr. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_stderr),
+	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_stderr),
 	    stiln_len(STILN_stderr), TRUE);
 	stilo_dup(&operator, stilt_stderr_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* true. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_true),
+	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_true),
 	    stiln_len(STILN_true), TRUE);
 	stilo_boolean_new(&operator, TRUE);
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* false. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_false),
+	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_false),
 	    stiln_len(STILN_false), TRUE);
 	stilo_boolean_new(&operator, FALSE);
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
 
 	/* null. */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_null),
+	stilo_name_new(&name, stilt_stil_get(a_stilt), stiln_str(STILN_null),
 	    stiln_len(STILN_null), TRUE);
 	stilo_null_new(&operator);
 	stilo_dict_def(a_dict, a_stilt, &name, &operator);
@@ -887,7 +887,7 @@ systemdict_cvn(cw_stilt_t *a_stilt)
 	tstilo = stils_push(tstack);
 	stilo_dup(tstilo, stilo);
 
-	stilo_name_new(stilo, a_stilt, stilo_string_get(tstilo),
+	stilo_name_new(stilo, stilt_stil_get(a_stilt), stilo_string_get(tstilo),
 	    stilo_string_len_get(tstilo), FALSE);
 	stilo_attrs_set(stilo, stilo_attrs_get(tstilo));
 
@@ -1941,7 +1941,7 @@ systemdict_handleerror(cw_stilt_t *a_stilt)
 	/* Get errordict. */
 	errordict = stils_push(tstack);
 	key = stils_push(tstack);
-	stilo_name_new(key, a_stilt, stiln_str(STILN_errordict),
+	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(STILN_errordict),
 	    stiln_len(STILN_errordict), TRUE);
 	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
 		stils_npop(tstack, 2);
@@ -1950,8 +1950,8 @@ systemdict_handleerror(cw_stilt_t *a_stilt)
 
 	/* Get handleerror from errordict and push it onto estack. */
 	handleerror = stils_push(estack);
-	stilo_name_new(key, a_stilt, stiln_str(STILN_handleerror),
-	    stiln_len(STILN_handleerror), TRUE);
+	stilo_name_new(key, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_handleerror), stiln_len(STILN_handleerror), TRUE);
 	if (stilo_dict_lookup(errordict, a_stilt, key, handleerror)) {
 		stils_pop(estack);
 		stils_npop(tstack, 2);
@@ -3738,8 +3738,8 @@ systemdict_type(cw_stilt_t *a_stilt)
 	type = stilo_type_get(stilo);
 	_cw_assert(type != STILOT_NO && type <= STILOT_STRING);
 
-	stilo_name_new(stilo, a_stilt, stiln_str(typenames[type]),
-		    stiln_len(typenames[type]), TRUE);
+	stilo_name_new(stilo, stilt_stil_get(a_stilt),
+	    stiln_str(typenames[type]), stiln_len(typenames[type]), TRUE);
 	stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 }
 

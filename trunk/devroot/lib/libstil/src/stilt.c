@@ -794,7 +794,7 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 */
 	errordict = stils_push(&a_stilt->tstack);
 	key = stils_push(&a_stilt->tstack);
-	stilo_name_new(key, a_stilt, stiln_str(STILN_errordict),
+	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(STILN_errordict),
 	    stiln_len(STILN_errordict), TRUE);
 	if (stilt_dict_stack_search(a_stilt, key, errordict)) {
 		stils_npop(&a_stilt->tstack, 2);
@@ -811,7 +811,8 @@ stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error)
 	 * Find handler corresponding to error.
 	 */
 	stiln = stilte_stiln(a_error);
-	stilo_name_new(key, a_stilt, stiln_str(stiln), stiln_len(stiln), TRUE);
+	stilo_name_new(key, stilt_stil_get(a_stilt), stiln_str(stiln),
+	    stiln_len(stiln), TRUE);
 
 	/*
 	 * Push the object being executed onto ostack unless this is an
@@ -2055,7 +2056,7 @@ stilt_p_special_accept(cw_stilt_t *a_stilt, const cw_uint8_t *a_token,
 					 * practice, just bad practice.
 					 */
 
-	stilo_name_new(&key, a_stilt, a_token, a_len, TRUE);
+	stilo_name_new(&key, stilt_stil_get(a_stilt), a_token, a_len, TRUE);
 
 	stilo = stils_push(&a_stilt->estack);
 	if (stilt_dict_stack_search(a_stilt, &key, stilo)) {
@@ -2123,8 +2124,8 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 			 * and run the execution loop.
 			 */
 			stilo = stils_push(&a_stilt->estack);
-			stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
-			    a_stilt->index, FALSE);
+			stilo_name_new(stilo, stilt_stil_get(a_stilt),
+			    a_stilt->tok_str, a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 
 			stilt_p_reset(a_stilt);
@@ -2132,8 +2133,8 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		} else {
 			/* Push the name object onto the data stack. */
 			stilo = stils_push(&a_stilt->ostack);
-			stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
-			    a_stilt->index, FALSE);
+			stilo_name_new(stilo, stilt_stil_get(a_stilt),
+			    a_stilt->tok_str, a_stilt->index, FALSE);
 			stilo_attrs_set(stilo, STILOA_EXECUTABLE);
 			stilt_p_reset(a_stilt);
 		}
@@ -2141,7 +2142,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 	case ACTION_LITERAL:
 		/* Push the name object onto the data stack. */
 		stilo = stils_push(&a_stilt->ostack);
-		stilo_name_new(stilo, a_stilt, a_stilt->tok_str,
+		stilo_name_new(stilo, stilt_stil_get(a_stilt), a_stilt->tok_str,
 		    a_stilt->index, FALSE);
 		stilt_p_reset(a_stilt);
 		break;
@@ -2153,7 +2154,7 @@ stilt_p_name_accept(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts)
 		 * stack and push the value onto the data stack.
 		 */
 		key = stils_push(&a_stilt->estack);
-		stilo_name_new(key, a_stilt, a_stilt->tok_str,
+		stilo_name_new(key, stilt_stil_get(a_stilt), a_stilt->tok_str,
 		    a_stilt->index, FALSE);
 		stilt_p_reset(a_stilt);
 

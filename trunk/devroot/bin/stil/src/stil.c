@@ -118,10 +118,6 @@ main(int argc, char **argv)
 		stilt_start(&stilt);
 	}
 
-	/* XXX Turn off leak warnings until GC works. */
-	dbg_unregister(cw_g_dbg, "mem_error");
-	dbg_unregister(cw_g_dbg, "pool_error");
-
 	stilts_delete(&stilts, &stilt);
 	stilt_delete(&stilt);
 	stil_delete(&stil);

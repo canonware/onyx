@@ -22,18 +22,18 @@ threaddict_populate(cw_stilo_t *a_dict, cw_stilt_t *a_stilt)
 	/*
 	 * Initialize entries that are not operators.
 	 */
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_errordict),
-	    stiln_len(STILN_errordict), TRUE);
+	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_errordict), stiln_len(STILN_errordict), TRUE);
 	stilo_dup(&val, stilt_errordict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &val);
 
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_sym_derror),
-	    stiln_len(STILN_sym_derror), TRUE);
+	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_sym_derror), stiln_len(STILN_sym_derror), TRUE);
 	stilo_dup(&val, stilt_derror_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &val);
 
-	stilo_name_new(&name, a_stilt, stiln_str(STILN_userdict),
-	    stiln_len(STILN_userdict), TRUE);
+	stilo_name_new(&name, stilt_stil_get(a_stilt),
+	    stiln_str(STILN_userdict), stiln_len(STILN_userdict), TRUE);
 	stilo_dup(&val, stilt_userdict_get(a_stilt));
 	stilo_dict_def(a_dict, a_stilt, &name, &val);
 

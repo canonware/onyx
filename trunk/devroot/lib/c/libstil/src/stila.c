@@ -156,6 +156,21 @@ stila_collect_set(cw_stila_t *a_stila, cw_bool_t a_collect)
 	mq_put(&a_stila->gc_mq, a_collect ? STILAM_RESUME : STILAM_SUSPEND);
 }
 
+cw_bool_t
+stila_l_white_get(cw_stila_t *a_stila)
+{
+	cw_bool_t	retval;
+
+	_cw_check_ptr(a_stila);
+	_cw_assert(a_stila->magic == _CW_STILA_MAGIC);
+
+	mtx_lock(&a_stila->lock);
+	retval = a_stila->white;
+	mtx_unlock(&a_stila->lock);
+
+	return retval;
+}
+
 static void *
 stila_p_gc_entry(void *a_arg)
 {
