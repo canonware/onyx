@@ -780,10 +780,13 @@ dictionary, which is described in Section~\ref{sec:gcdict}.
 \section{Dictionary reference}
 
 All operators built in to Onyx have corresponding names that are composed
-entirely of lower case letters.  In order to avoid any possibility of namespace
+entirely of lower case letters (with the exception of syntax-supporting
+operators like {\lb}).  In order to avoid any possibility of namespace
 collisions with names defined by current and future versions of Onyx, use at
 least one character that is not a lower case letter in names (for example,
-capital letters, numbers, underscore, etc.).
+capital letters, numbers, underscore, etc.).  In practice, namespace collisions
+usually aren't a problem, even if they happen, since the only effect is that the
+program-defined definition shadows the built in definition during name lookups.
 
 \subsection{currenterror}
 \label{sec:currenterror}
@@ -3217,6 +3220,9 @@ objects from ostack through topmost mark. \\
 \hline
 -- & {\bf \htmlref{ostack}{systemdict:ostack}} & stack & Get a current ostack
 snapshot. \\
+\hline
+thread & {\bf \htmlref{threadostack}{systemdict:threadostack}} & stack & Get a
+reference to thread's ostack. \\
 \hline \hline
 \multicolumn{4}{|l|}{Execution, control, and execution stack operators} \\
 \hline \hline
@@ -3276,11 +3282,17 @@ name & {\bf \htmlref{throw}{systemdict:throw}} & obj & Throw an error. \\
 -- & {\bf \htmlref{estack}{systemdict:estack}} & stack & Get a current estack
 snapshot. \\
 \hline
+thread & {\bf \htmlref{threadestack}{systemdict:threadestack}} & stack & Get a
+reference to thread's estack. \\
+\hline
 -- & {\bf \htmlref{countestack}{systemdict:countestack}} & count & Get current
 estack depth. \\
 \hline
 -- & {\bf \htmlref{istack}{systemdict:istack}} & stack & Get a current istack
 snapshot. \\
+\hline
+thread & {\bf \htmlref{threadistack}{systemdict:threadistack}} & stack & Get a
+reference to thread's istack. \\
 \hline
 status & {\bf \htmlref{die}{systemdict:die}} & -- & Exit program. \\
 \hline
@@ -3574,6 +3586,9 @@ outputsdict. \\
 \hline
 -- & {\bf \htmlref{envdict}{systemdict:envdict}} & dict & Get envdict. \\
 \hline
+-- & {\bf \htmlref{threadsdict}{systemdict:threadsdict}} & dict & Get
+threadsdict. \\
+\hline
 key val & {\bf \htmlref{setenv}{systemdict:setenv}} & -- & Set environment
 variable. \\
 \hline
@@ -3630,6 +3645,9 @@ dictionary contents. \\
 dstack dictionary. \\
 \hline
 -- & {\bf \htmlref{dstack}{systemdict:dstack}} & stack & Get dstack snapshot. \\
+\hline
+thread & {\bf \htmlref{threaddstack}{systemdict:threaddstack}} & stack & Get a
+reference to thread's dstack. \\
 \hline
 -- & {\bf \htmlref{countdstack}{systemdict:countdstack}} & count & Get number of
 stacks on dstack. \\
@@ -11132,6 +11150,144 @@ onyx:0>
 onyx:0> (1 2) {add 1 sprint} thread join `Done\n' print flush
 3
 Done
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:threaddstack}
+\index{threaddstack@\onyxop{}{threaddstack}{}}
+\item[{\onyxop{thread}{threaddstack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[thread: ]
+			A thread object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The dictionary stack belonging to \oparg{thread}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get a reference to the dictionary stack belonging to
+		\oparg{thread}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> self threaddstack 1 sprint
+(-dict- -dict- -dict- -dict-)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:threadestack}
+\index{threadestack@\onyxop{}{threadestack}{}}
+\item[{\onyxop{thread}{threadestack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[thread: ]
+			A thread object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The execution stack belonging to \oparg{thread}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get a reference to the execution stack belonging to
+		\oparg{thread}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> self threadestack 1 sprint
+(-file- -array- --eval-- --ifelse-- -array- --for-- -array-)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:threadistack}
+\index{threadistack@\onyxop{}{threadistack}{}}
+\item[{\onyxop{thread}{threadistack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[thread: ]
+			A thread object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The index stack belonging to \oparg{thread}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get a reference to the index stack belonging to \oparg{thread}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> self threadistack 1 sprint
+(0 0 0 0 7 0 3)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:threadostack}
+\index{threadostack@\onyxop{}{threadostack}{}}
+\item[{\onyxop{thread}{threadostack}{stack}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[thread: ]
+			A thread object.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[stack: ]
+			The operand stack belonging to \oparg{thread}.
+		\end{description}
+	\item[Errors(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Get a reference to the operand stack belonging to
+		\oparg{thread}.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> self threadostack 1 sprint
+(-stack- -stack- -stack- -stack-)
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{systemdict:threadsdict}
+\index{threadsdict@\onyxop{}{threadsdict}{}}
+\item[{\onyxop{--}{threadsdict}{dict}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[dict: ]
+			A dictionary.  Each key is a thread reference.  By
+			default, each value is the same as its key, but this
+			need not be so, and the value can be redefined for
+			debugging purposes.
+		\end{description}
+	\item[Errors(s): ] None.
+	\item[Description: ]
+		Get a dictionary containing references to all threads.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> threadsdict 1 sprint
+<-thread- -thread->
 onyx:0>
 		\end{verbatim}
 	\end{description}
