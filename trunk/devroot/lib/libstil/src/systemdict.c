@@ -2215,7 +2215,7 @@ systemdict_load(cw_stilt_t *a_stilt)
 
 	STILS_GET(key, ostack, a_stilt);
 	val = stils_push(tstack);
-	
+
 	if (stilt_dict_stack_search(a_stilt, key, val)) {
 		stilt_error(a_stilt, STILTE_UNDEFINED);
 		return;
