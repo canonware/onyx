@@ -107,7 +107,13 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   void * retval;
 
   _cw_assert(a_size > 0);
-  
+
+#ifdef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+  mtx_lock(&a_mem->lock);
+#  endif
+#endif
+    
   retval = _cw_malloc(a_size);
   
 #ifdef _LIBSTASH_DBG
@@ -133,9 +139,6 @@ mem_malloc(cw_mem_t * a_mem, size_t a_size)
   {
     struct cw_mem_item_s * old_allocation;
     
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_mem->lock);
-#endif
     if (FALSE == oh_item_search(&a_mem->addr_hash,
 				retval,
 				(void **) &old_allocation))
@@ -270,6 +273,12 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
 
   _cw_assert(a_size * a_number > 0);
   
+#ifdef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+  mtx_lock(&a_mem->lock);
+#  endif
+#endif
+  
   retval = _cw_calloc(a_number, a_size);
 
 #ifdef _LIBSTASH_DBG
@@ -295,10 +304,6 @@ mem_calloc(cw_mem_t * a_mem, size_t a_number, size_t a_size)
   else if (NULL != a_mem)
   {
     struct cw_mem_item_s * old_allocation;
-    
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_mem->lock);
-#endif
     
     if (FALSE == oh_item_search(&a_mem->addr_hash,
 				retval,
@@ -436,6 +441,12 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   _cw_check_ptr(a_ptr);
   _cw_assert(a_size > 0);
 
+#ifdef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+  mtx_lock(&a_mem->lock);
+#  endif
+#endif
+  
   retval = _cw_realloc(a_ptr, a_size);
   
 #ifdef _LIBSTASH_DBG
@@ -462,10 +473,6 @@ mem_realloc(cw_mem_t * a_mem, void * a_ptr, size_t a_size)
   else if (NULL != a_mem)
   {
     struct cw_mem_item_s * allocation;
-    
-#ifdef _CW_REENTRANT
-    mtx_lock(&a_mem->lock);
-#endif
     
     if (TRUE == oh_item_delete(&a_mem->addr_hash, a_ptr, NULL,
 			       (void **) &allocation))
@@ -631,13 +638,16 @@ mem_free(cw_mem_t * a_mem, void * a_ptr)
       memset(a_ptr, 0x5a, allocation->size);
       _cw_free(allocation);
     }
-#ifdef _CW_REENTRANT
-    mtx_unlock(&a_mem->lock);
-#endif
   }
 #endif
 
   _cw_free(a_ptr);
+
+#ifdef _LIBSTASH_DBG
+#  ifdef _CW_REENTRANT
+  mtx_unlock(&a_mem->lock);
+#  endif
+#endif
 }
 
 void
