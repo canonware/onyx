@@ -1,3 +1,11 @@
+1999-07-06  J. Owen Evans  <jasone@canonware.com>
+
+	* src/bhp.c (bhp_delete): Delete the tree.
+
+	* test/c_bhp_b.c: Add unit tests for the bhp class.
+
+	* src/bhp.c (bhp_union): Don't try to delete a_b while owning its lock.
+
 1999-06-20  Jason Evans  <jasone@canonware.com>
 
 	* src/mq.c: Rewrite mq, using ring instead of list.
