@@ -296,9 +296,9 @@ out_put_fle(cw_out_t * a_out, cw_sint32_t a_fd,
   curr_time = time(NULL);
   cts = localtime(&curr_time);
   if (-1 == out_put_sa(a_out, &format,
-		       "\[[t:i32|w:4]/[t:i32|w:2|p:0]/[t:i32|w:2|p:0] "
-		       "[t:i32|w:2|p:0]:[t:i32|w:2|p:0]:[t:i32|w:2|p:0] "
-		       "([t:s])]: [t:s]",
+		       "\[[i32|w:4]/[i32|w:2|p:0]/[i32|w:2|p:0] "
+		       "[i32|w:2|p:0]:[i32|w:2|p:0]:[i32|w:2|p:0] "
+		       "([s])]: [s]",
 		       cts->tm_year + 1900, cts->tm_mon + 1, cts->tm_mday,
 		       cts->tm_hour, cts->tm_min, cts->tm_sec, tzname[0],
 		       a_format))
@@ -374,6 +374,7 @@ out_put_fn(cw_out_t * a_out, cw_sint32_t a_fd, cw_uint32_t a_size,
     mtx_unlock(&a_out->lock);
   }
 #endif
+/*    fsync(a_fd); */
 
   retval = i;
   
@@ -403,7 +404,7 @@ out_put_fv(cw_out_t * a_out, cw_sint32_t a_fd,
     goto RETURN;
   }
 
-  retval = out_put_fn(a_out, a_fd, (cw_uint32_t) out_size, "[t:s]", output);
+  retval = out_put_fn(a_out, a_fd, (cw_uint32_t) out_size, "[s]", output);
   
   RETURN:
   if (NULL != output)
@@ -582,7 +583,7 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 	     spec_len++);
 
 	/* Find the type string. */
-	type_len = spec_get_val(&a_format[i], spec_len, "t", &type);
+	type_len = spec_get_type(&a_format[i], spec_len, &type);
 	_cw_assert(0 <= type_len);
 
 	ent = out_p_get_ent(a_out, type, type_len);
@@ -637,10 +638,7 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 /*  	  log_eprintf(cw_g_log, __FILE__, __LINE__, __FUNCTION__, */
 /*  		      "Fit\n"); */
 
-	  /* XXX */
 	  ent->render_func(&a_format[i], spec_len, arg, &a_str[j]);
-	  
-/*  	  memset(&a_str[j], 'X', metric); */
 	}
 	else
 	{
@@ -670,7 +668,6 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
     }
   }
   
-  /* XXX */
   retval = size;
 
   RETURN:
@@ -686,6 +683,29 @@ out_put_svn(cw_out_t * a_out, char * a_str, cw_uint32_t a_size,
 }
 
 cw_sint32_t
+spec_get_type(const char * a_spec, cw_uint32_t a_spec_len, const char ** r_val)
+{
+  cw_sint32_t retval, i;
+
+  _cw_check_ptr(a_spec);
+  _cw_assert(0 < a_spec_len);
+  _cw_check_ptr(r_val);
+  
+  for (i = 0; i < a_spec_len; i++)
+  {
+    if ('|' == a_spec[i])
+    {
+      break;
+    }
+  }
+
+  *r_val = a_spec;
+  retval = i;
+
+  return retval;
+}
+
+cw_sint32_t
 spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
 	     const char * a_name, const char ** r_val)
 {
@@ -697,12 +717,14 @@ spec_get_val(const char * a_spec, cw_uint32_t a_spec_len,
     VALUE
   } state;
 
+  _cw_check_ptr(a_spec);
+  _cw_assert(0 < a_spec_len);
   _cw_check_ptr(a_name);
   _cw_check_ptr(r_val);
 
   name_len = strlen(a_name);
-  
-  for (i = curr_name_len = 0, state = NAME, match = TRUE;
+
+  for (i = val_len = 0, match = FALSE, state = VALUE;
        i < a_spec_len;
        i++)
   {
@@ -822,7 +844,7 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
     {
       /* Print filename, line number, and function name. */
       if (-1 == out_put_sa(a_out, &format,
-			   "At [t:s], line [t:i32]: [t:s](): [t:s]",
+			   "At [s], line [i32]: [s](): [s]",
 			   a_file_name, a_line_num,
 			   a_func_name, a_format))
       {
@@ -835,7 +857,7 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
     {
       /* Print filename and line number. */
       if (-1 == out_put_sa(a_out, &format,
-			   "At [t:s], line [t:i32]: [t:s]",
+			   "At [s], line [i32]: [s]",
 			   a_file_name, a_line_num, a_format))
       {
 	retval = -1;
@@ -848,7 +870,7 @@ out_p_put_vfe(cw_out_t * a_out, cw_sint32_t a_fd,
   {
     /* Print function name. */
     if (-1 == out_put_sa(a_out, &format,
-			 "[t:s](): [t:s]",
+			 "[s](): [s]",
 			 a_func_name, a_format))
     {
       retval = -1;
@@ -880,16 +902,12 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   char * format; /* After parsing, each byte contains a code. */
   enum
   {
-    START,   /* Initial vanilla state. */
-    BRACKET, /* `[' seen. */
-    PAIR,    /* Beginning of a name/value pair. */
-    NAME,    /* Name. */
-    VALUE,   /* Value. */
-    T,       /* Current name starts with `t'. */
-    NAME_T,  /* Name.  "t" name has already been seen. */
-    VALUE_T  /* Value. "t" name has already been seen. */
+    NORMAL,
+    BRACKET,
+    NAME,
+    VALUE
   } state;
-
+  
   format_len = strlen(a_format);
   if (0 == format_len)
   {
@@ -906,13 +924,13 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   }
   bzero(format, format_len + 1);
 
-  for (i = out_size = 0, state = START;
+  for (i = out_size = 0, state = NORMAL;
        i < format_len;
        i++)
   {
     switch (state)
     {
-      case START:
+      case NORMAL:
       {
 	if ('[' == a_format[i])
 	{
@@ -941,31 +959,15 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 /*  		      "out_size++ (%lu --> %lu)\n", */
 /*  		      out_size, out_size + 1); */
 	  out_size++;
-	  state = START;
-	}
-	else if ('t' == a_format[i])
-	{
-	  format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	  spec_len = 1;
-	  state = T;
+	  state = NORMAL;
 	}
 	else
 	{
 	  format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	  spec_len = 1;
-	  state = NAME;
-	}
-	
-	break;
-      }
-      case PAIR:
-      {
-	format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	spec_len++;
-	
-	if ('t' == a_format[i])
-	{
-	  state = T;
+/*  	  spec_len = 1; */
+	  /* XXX */
+	  spec_len = 0;
+	  state = VALUE;
 	}
 	
 	break;
@@ -989,46 +991,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	
 	if ('|' == a_format[i])
 	{
-	  state = PAIR;
-	}
-	  
-	break;
-      }
-      case T:
-      {
-	format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	spec_len++;
-	
-	if (':' == a_format[i])
-	{
-	  state = VALUE_T;
-	}
-	else
-	{
 	  state = NAME;
-	}
-	
-	break;
-      }
-      case NAME_T:
-      {
-	format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	spec_len++;
-	
-	if (':' == a_format[i])
-	{
-	  state = VALUE_T;
-	}
-	
-	break;
-      }
-      case VALUE_T:
-      {
-	if ('|' == a_format[i])
-	{
-	  format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	  spec_len++;
-	  state = NAME_T;
 	}
 	else if (']' == a_format[i])
 	{
@@ -1037,7 +1000,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 	  cw_out_ent_t * ent;
 	  
 	  format[i] = _LIBSTASH_OUT_DES_WHITEOUT;
-	  state = START;
+	  state = NORMAL;
 
 	  /* Successful completion of parsing this specifier.  Call the
 	   * corresponding metric function. */
@@ -1046,8 +1009,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 /*  	  log_nprintf(cw_g_log, spec_len, "%s", &a_format[i - spec_len]); */
 /*  	  log_printf(cw_g_log, "\"\n"); */
 
-	  val_len = spec_get_val(&a_format[i - spec_len], spec_len,
-				 "t", &val);
+	  val_len = spec_get_type(&a_format[i - spec_len], spec_len, &val);
 	  if (-1 == val_len)
 	  {
 	    _cw_marker("Error");
@@ -1121,11 +1083,6 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
 					 spec_len, arg);
 	  }
 	}
-	else
-	{
-	  format[i] = _LIBSTASH_OUT_DES_SPECIFIER;
-	  spec_len++;
-	}
 	
 	break;
       }
@@ -1135,7 +1092,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
       }
     }
   }
-  if (START != state)
+  if (NORMAL != state)
   {
     _cw_marker("Error");
     retval = -2;
@@ -1143,7 +1100,7 @@ out_p_metric(cw_out_t * a_out, const char * a_format, char ** r_format,
   }
 
   retval = out_size;
-
+  
   RETURN:
 /*    _cw_marker("Before"); */
 /*    log_printf(cw_g_log, "\"%s\"\n\"%s\"\nretval == %d\n", */
