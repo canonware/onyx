@@ -153,7 +153,10 @@ docs_relclean :
     -dir [abs_objdir]/%0html -split 3 -toc_depth 4
     -footnode -noinfo -auto_link -transparent -image_type png
     [abs_objdir]/%0latex/%.tex;
-  /* Fix up [, ], and \ characters. */
+  /*
+   * Fix up [, ], and \ characters.
+   * Get rid of spurious <> at the end of tables.
+   */
   [SHELL] -e;
 data
   for i in `find [objdir]/%0html/ -type f |grep "\.html$"` ; do
@@ -161,6 +164,8 @@ data
     cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
       | sed -e s/YYYlbZZZ/\[/g \\
       | sed -e s/YYYrbZZZ/\]/g \\
+      | sed -e \\
+        "s/^\\\\\\(\\\\\\<\\\\/TABLE\\\\\\>\\\\\\)\\\\\\<\\\\\\>/\\\\1/g" \\
       > $i
     rm $i.tmp
   done
