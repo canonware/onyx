@@ -17,8 +17,7 @@ typedef struct cw_thd_s cw_thd_t;
  * FreeBSD.
  */
 #ifdef _CW_OS_FREEBSD
-#define _CW_THD_GENERIC_SR
-/*  #define _CW_THD_FREEBSD_SR */
+#define _CW_THD_FREEBSD_SR
 #else
 #define _CW_THD_GENERIC_SR
 #endif
@@ -33,6 +32,7 @@ struct cw_thd_s {
 #ifdef _CW_THD_GENERIC_SR
 	sem_t		sem;	/* For suspend/resume. */
 #endif
+	cw_bool_t	suspended;
 	cw_mtx_t	crit_lock;
 };
 

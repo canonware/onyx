@@ -2,7 +2,7 @@
 
 	* src/thd.c: Add a generic implementation of thread
 	suspension/resumption.  This implementation is known to work with
-	FreeBSD's libc_r and the FreeBSD port of LinuxThreads.
+	the FreeBSD port of LinuxThreads.
 
 	thd_crit_{enter,leave}(): Remove the a_thd argument.
 
