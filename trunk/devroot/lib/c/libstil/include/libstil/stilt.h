@@ -206,8 +206,6 @@ void	stilt_interpret(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const
 void	stilt_flush(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts);
 cw_uint32_t stilt_token(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const
     cw_uint8_t *a_str, cw_uint32_t a_len);
-void	stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const
-    cw_uint8_t *a_str, cw_uint32_t a_len);
 void	stilt_error(cw_stilt_t *a_stilt, cw_stilte_t a_error);
 
 cw_bool_t stilt_dict_stack_search(cw_stilt_t *a_stilt, cw_stilo_t *a_key,

@@ -77,14 +77,6 @@ stilte_stiln(cw_stilte_t a_stilte)
 		a_stilts->column = -1;					\
 	} while (0)
 
-struct cw_stilt_entry_s {
-	cw_thd_t	thd;
-	cw_stilt_t	*stilt;
-	cw_stilts_t	*stilts;
-	const cw_uint8_t *str;
-	cw_uint32_t	len;
-};
-
 /*
  * Lookup table for base64 decoding.
  */
@@ -116,7 +108,6 @@ static void		stilt_p_syntax_error_print(cw_stilt_t *a_stilt,
 #define			stilt_p_token_print(a, b, c, d)
 #define			stilt_p_syntax_error_print(a, b)
 #endif
-static void		*stilt_p_entry(void *a_arg);
 static void		stilt_p_special_accept(cw_stilt_t *a_stilt, const
     cw_uint8_t *a_token, cw_uint32_t a_len);
 static void		stilt_p_reset(cw_stilt_t *a_stilt);
@@ -751,26 +742,6 @@ stilt_token(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t *a_str,
 	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
 
 	return stilt_p_feed(a_stilt, a_stilts, 1, a_str, a_len);
-}
-
-void
-stilt_detach(cw_stilt_t *a_stilt, cw_stilts_t *a_stilts, const cw_uint8_t
-    *a_str, cw_uint32_t a_len)
-{
-	struct cw_stilt_entry_s	*entry_arg;
-
-	_cw_check_ptr(a_stilt);
-	_cw_assert(a_stilt->magic == _CW_STILT_MAGIC);
-	_cw_check_ptr(a_str);
-
-	entry_arg = (struct cw_stilt_entry_s *)_cw_malloc(sizeof(struct
-	    cw_stilt_entry_s));
-	entry_arg->stilt = a_stilt;
-	entry_arg->stilts = a_stilts;
-	entry_arg->str = a_str;
-	entry_arg->len = a_len;
-
-	stilt_p_entry((void *)entry_arg);
 }
 
 void
@@ -2018,22 +1989,6 @@ stilt_p_tok_str_expand(cw_stilt_t *a_stilt)
 		_cw_free(a_stilt->tok_str);
 		a_stilt->tok_str = t_str;
 	}
-}
-
-static void *
-stilt_p_entry(void *a_arg)
-{
-	struct cw_stilt_entry_s	*arg = (struct cw_stilt_entry_s *)a_arg;
-
-	stilt_interpret(arg->stilt, arg->stilts, arg->str, arg->len);
-	stilt_flush(arg->stilt, arg->stilts);
-
-	stilts_delete(arg->stilts, arg->stilt);
-	stilt_delete(arg->stilt);
-	/* XXX Deal with detach/join inside interpreter. */
-	thd_delete(&arg->thd);
-	_cw_free(arg);
-	return NULL;
 }
 
 static void

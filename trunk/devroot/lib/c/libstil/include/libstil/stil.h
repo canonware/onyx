@@ -53,7 +53,6 @@ struct cw_stil_s {
 	/*
 	 * Files.
 	 */
-	cw_stilo_t	stdin_internal;
 	cw_stilo_t	stdin_stilo;
 	cw_stilo_t	stdout_stilo;
 	cw_stilo_t	stderr_stilo;

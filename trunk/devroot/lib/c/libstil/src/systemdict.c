@@ -38,6 +38,8 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(bind),
 	ENTRY(broadcast),
 	ENTRY(bytesavailable),
+	ENTRY(chmod),
+	ENTRY(chown),
 	ENTRY(clear),
 	ENTRY(cleardictstack),
 	ENTRY(cleartomark),
@@ -62,6 +64,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(detach),
 	ENTRY(dict),
 	ENTRY(dictstack),
+	ENTRY(dirnameforall),
 	ENTRY(div),
 	ENTRY(dup),
 	ENTRY(end),
@@ -78,7 +81,6 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(flushfile),
 	ENTRY(for),
 	ENTRY(forall),
-	ENTRY(fork),
 	ENTRY(gcheck),
 	ENTRY(ge),
 	ENTRY(get),
@@ -92,11 +94,13 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	ENTRY(known),
 	ENTRY(le),
 	ENTRY(length),
+	ENTRY(link),
 	ENTRY(load),
 	ENTRY(lock),
 	ENTRY(loop),
 	ENTRY(lt),
 	ENTRY(mark),
+	ENTRY(mkdir),
 	ENTRY(mod),
 	ENTRY(mul),
 	ENTRY(mutex),
@@ -144,8 +148,12 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
 	{STILN_sym_lb, systemdict_mark},
 	{STILN_sym_lt_lt, systemdict_mark},
 	ENTRY(sym_rb),
+	ENTRY(symlink),
+	ENTRY(test),
+	ENTRY(thread),
 	ENTRY(timedwait),
 	ENTRY(token),
+	ENTRY(truncate),
 	ENTRY(trylock),
 	ENTRY(type),
 	ENTRY(undef),
@@ -549,6 +557,18 @@ systemdict_bytesavailable(cw_stilt_t *a_stilt)
 
 	bytes = stilo_file_buffer_count(file);
 	stilo_integer_new(file, bytes);
+}
+
+void
+systemdict_chmod(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_chown(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -1164,6 +1184,12 @@ systemdict_dictstack(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_dirnameforall(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_div(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -1706,12 +1732,6 @@ systemdict_forall(cw_stilt_t *a_stilt)
 }
 
 void
-systemdict_fork(cw_stilt_t *a_stilt)
-{
-	_cw_error("XXX Not implemented");
-}
-
-void
 systemdict_gcheck(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -2135,6 +2155,12 @@ systemdict_length(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_link(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_load(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack, *tstack;
@@ -2262,6 +2288,12 @@ systemdict_mark(cw_stilt_t *a_stilt)
 	ostack = stilt_ostack_get(a_stilt);
 	stilo = stils_push(ostack);
 	stilo_mark_new(stilo);
+}
+
+void
+systemdict_mkdir(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
 }
 
 void
@@ -3526,6 +3558,24 @@ systemdict_sym_rb(cw_stilt_t *a_stilt)
 }
 
 void
+systemdict_symlink(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_test(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
+systemdict_thread(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
+}
+
+void
 systemdict_timedwait(cw_stilt_t *a_stilt)
 {
 	cw_stils_t	*ostack;
@@ -3687,6 +3737,12 @@ systemdict_token(cw_stilt_t *a_stilt)
 		stilt_error(a_stilt, STILTE_TYPECHECK);
 		return;
 	}
+}
+
+void
+systemdict_truncate(cw_stilt_t *a_stilt)
+{
+	_cw_error("XXX Not implemented");
 }
 
 void
