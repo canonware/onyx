@@ -3384,7 +3384,10 @@ systemdict_sindex(cw_stilo_t *a_thread)
 	}
 
 	STILO_STACK_NGET(orig, stack, a_thread, index);
+	stilo = stilo_stack_push(stack);
 	stilo_dup(stilo, orig);
+
+	stilo_stack_pop(ostack);
 }
 
 void
