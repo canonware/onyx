@@ -170,7 +170,7 @@ collector will leave it alone.
 
 It is usually pretty obvious how to remove references to objects.  Objects on
 the operand stack can be popped off.  Definitions in the dictionary stack can be
-undefined.  However, there may be situations such an array that contains
+undefined.  However, there may be situations such as an array that contains
 references to various objects, and the array cannot be discarded as a whole, but
 individual elements are no longer needed.  The null type is useful for
 clobbering such references, and can even be effectively used to clobber portions
@@ -244,7 +244,7 @@ each other, though pathological cases for rotation incur a slightly higher
 overhead (a constant factor more expensive, when amortized).
 
 Stacks have more memory and performance overhead than arrays, so unless growing
-or shrinking is imporant, arrays are a better choice for indexed access.
+or shrinking is important, arrays are a better choice for indexed access.
 Dictionaries are always a better choice for keyed access.
 
 \subsection{Using stacks as queues}
