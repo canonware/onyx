@@ -705,7 +705,11 @@ thd_p_suspend(cw_thd_t *a_thd)
 		__FILE__, __LINE__, __func__, strerror(error));
 	abort();
     }
-    if (sem_wait(&s_thd_sem) != 0)
+    while ((error = sem_wait(&s_thd_sem)) != 0 && errno == EINTR)
+    {
+	/* Interrupted system call; try again. */
+    }
+    if (error != 0)
     {
 	fprintf(stderr, "%s:%u:%s(): Error in sem_wait(): %s\n",
 		__FILE__, __LINE__, __func__, strerror(errno));
