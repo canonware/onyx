@@ -96,7 +96,7 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 #endif
 	nxo_file_origin_set(&retval->stdin_nxo,
 			    "*stdin*", sizeof("*stdin*") - 1);
-	
+
 	nxo_file_buffer_size_set(&retval->stdin_nxo,
 				 CW_LIBONYX_FILE_BUFFER_SIZE);
 
