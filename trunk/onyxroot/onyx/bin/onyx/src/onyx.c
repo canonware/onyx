@@ -487,8 +487,8 @@ batch_run(int a_argc, char **a_argv, bool a_version, char *a_expression)
     }
     else
     {
-	/* No source file specified, and there there was no -e expression
-	 * specified either, so treat stdin as the source. */
+	/* No source file specified, and there was no -e expression specified
+	 * either, so treat stdin as the source. */
 	nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
 	nxo_dup(nxo, nx_stdin_get(&nx));
 	nxo_attr_set(nxo, NXOA_EXECUTABLE);
