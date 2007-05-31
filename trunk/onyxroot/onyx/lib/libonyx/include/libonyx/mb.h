@@ -58,6 +58,16 @@ mb_write(void)
 		  );
 #endif
 }
+#elif (defined(CW_CPU_AMD64))
+CW_INLINE void
+mb_write(void)
+{
+    asm volatile ("sfence"
+		  : /* Outputs. */
+		  : /* Inputs. */
+		  : "memory" /* Clobbers. */
+		  );
+}
 #elif (defined(CW_CPU_PPC))
 CW_INLINE void
 mb_write(void)

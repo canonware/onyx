@@ -46,6 +46,7 @@
 #endif
 
 #undef CW_CPU_IA32
+#undef CW_CPU_AMD64
 #undef CW_CPU_PPC
 
 #undef SIZEOF_INT_P

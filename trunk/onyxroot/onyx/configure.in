@@ -173,6 +173,9 @@ case "${host_cpu}" in
   i[[3456]]86)
 	AC_DEFINE([CW_CPU_IA32])
 	;;
+  x86_64)
+	AC_DEFINE([CW_CPU_AMD64])
+	;;
   powerpc)
 	AC_DEFINE([CW_CPU_PPC])
 	;;
