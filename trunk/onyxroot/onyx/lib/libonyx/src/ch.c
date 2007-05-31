@@ -18,7 +18,7 @@
 #endif
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, uint32_t a_table_size,
+ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, size_t a_table_size,
        cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp)
 {
     cw_ch_t *retval;
@@ -61,7 +61,7 @@ void
 ch_delete(cw_ch_t *a_ch)
 {
     cw_chi_t *chi;
-    uint32_t i;
+    size_t i;
 
     cw_check_ptr(a_ch);
     cw_dassert(a_ch->magic == CW_CH_MAGIC);
@@ -109,7 +109,7 @@ ch_delete(cw_ch_t *a_ch)
 #endif
 }
 
-uint32_t
+size_t
 ch_count(cw_ch_t *a_ch)
 {
     cw_check_ptr(a_ch);
@@ -122,7 +122,7 @@ void
 ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
 	  cw_chi_t *a_chi)
 {
-    uint32_t slot;
+    size_t slot;
     cw_chi_t *chi;
 
     cw_check_ptr(a_ch);
@@ -170,7 +170,7 @@ ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	  cw_chi_t **r_chi)
 {
     bool retval;
-    uint32_t slot;
+    size_t slot;
     cw_chi_t *chi;
 
     cw_check_ptr(a_ch);
@@ -261,7 +261,7 @@ bool
 ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
 {
     bool retval;
-    uint32_t slot;
+    size_t slot;
     cw_chi_t *chi;
 
     cw_check_ptr(a_ch);
@@ -296,15 +296,15 @@ ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data)
     return retval;
 }
 
-uint32_t
+size_t
 ch_string_hash(const void *a_key)
 {
-    uint32_t retval, c;
+    size_t retval, c;
     unsigned char *str;
 
     cw_check_ptr(a_key);
 
-    for (str = (char *) a_key, retval = 5381; (c = *str) != 0; str++)
+    for (str = (unsigned char *) a_key, retval = 5381; (c = *str) != 0; str++)
     {
 	retval = ((retval << 5) + retval) + c;
     }
@@ -312,29 +312,12 @@ ch_string_hash(const void *a_key)
     return retval;
 }
 
-uint32_t
+size_t
 ch_direct_hash(const void *a_key)
 {
-#if (SIZEOF_INT_P == 4)
-    uint32_t t = (uint32_t) a_key;
-#elif (SIZEOF_INT_P == 8)
-    uint64_t t = (uint64_t) a_key;
-#else
-#error Unsupported pointer size
-#endif
+    size_t retval = (uintptr_t) a_key;
 
-    /* Shift right until we've shifted one 1 bit off. */
-#if (SIZEOF_INT_P == 8)
-    t >>= 32 * !(t & 0xffffffff);
-#endif
-    t >>= 16 * !(t & 0xffff);
-    t >>= 8 * !(t & 0xff);
-    t >>= 4 * !(t & 0xf);
-    t >>= 2 * !(t & 0x3);
-    t >>= 1 * !(t & 0x1);
-    t >>= 1;
-
-    return t;
+    return retval;
 }
 
 bool

@@ -50,18 +50,10 @@ static cw_mtx_t s_origin_lock;
 
 /* Slots in base hash table. */
 #define CW_ORIGIN_OSTR_BASE_TABLE 32
-/* Maximum fullness of base table. */
-#define CW_ORIGIN_OSTR_BASE_GROW 8
-/* Proportional minimal fullness. */
-#define CW_ORIGIN_OSTR_BASE_SHRINK 1
 static cw_dch_t s_origin_ostr_hash;
 
 /* Slots in base hash table. */
 #define CW_ORIGIN_OBJ_BASE_TABLE 1024
-/* Maximum fullness of base table. */
-#define CW_ORIGIN_OBJ_BASE_GROW 256
-/* Proportional minimal fullness. */
-#define CW_ORIGIN_OBJ_BASE_SHRINK 1
 static cw_dch_t s_origin_obj_hash;
 
 /* Prototypes. */
@@ -81,12 +73,10 @@ origin_l_init(void)
 
     /* Initialize ostr hash. */
     dch_new(&s_origin_ostr_hash, cw_g_mema, CW_ORIGIN_OSTR_BASE_TABLE,
-	    CW_ORIGIN_OSTR_BASE_GROW, CW_ORIGIN_OSTR_BASE_SHRINK,
 	    origin_p_ostr_hash, origin_p_ostr_key_comp);
 
     /* Initialize obj hash. */
     dch_new(&s_origin_obj_hash, cw_g_mema, CW_ORIGIN_OBJ_BASE_TABLE,
-	    CW_ORIGIN_OBJ_BASE_GROW, CW_ORIGIN_OBJ_BASE_SHRINK,
 	    ch_direct_hash, ch_direct_key_comp);
 
 #ifdef CW_DBG

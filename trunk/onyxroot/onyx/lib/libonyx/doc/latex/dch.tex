@@ -28,9 +28,8 @@ class documentation for additional information.
 
 \label{dch_new}
 \index{dch_new@\cfunc{dch\_new}{}}
-\citem{\cfunc[]{dch\_new}{cw\_dch\_t *a\_dch, cw\_mema\_t *a\_mema,
-uint32\_t a\_base\_table, uint32\_t a\_base\_grow, uint32\_t
-a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
+\citem{\cfunc[]{dch\_new}{cw\_dch\_t *a\_dch, cw\_mema\_t *a\_mema, size\_t
+a\_base\_count, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -38,17 +37,8 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 			Pointer to space for a \classname{dch}, or NULL.
 		\item[a\_mema: ]
 			Pointer to a memory allocator.
-		\item[a\_base\_table: ]
-			Number of slots in the initial hash table.
-		\item[a\_base\_grow: ]
-			Maximum number of items to allow in \cvar{a\_dch} before
-			doubling the hash table size.  The same proportions (in
-			relation to \cvar{a\_base\_table}) are used to decide
-			when to double the table additional times.
-		\item[a\_base\_shrink: ]
-			Minimum proportional (with respect to
-			\cvar{a\_base\_table}) emptiness to allow in the hash
-			table before cutting the hash table size in half.
+		\item[a\_base\_count: ]
+			Number of usable slots in the initial hash table.
 		\item[a\_hash: ]
 			Pointer to a hashing function.
 		\item[a\_key\_comp: ]
@@ -82,7 +72,7 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{dch_count}
 \index{dch_count@\cfunc{dch\_count}{}}
-\citem{\cfunc[uint32\_t]{dch\_count}{cw\_dch\_t *a\_dch}}
+\citem{\cfunc[size\_t]{dch\_count}{cw\_dch\_t *a\_dch}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

@@ -35,9 +35,7 @@ nxo_name_l_init(void)
 {
     /* Initialize the global name cache. */
     dch_new(&cw_g_name_hash, cw_g_nxaa,
-	    CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
-	    CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
-	    nxo_l_name_key_comp);
+	    CW_LIBONYX_NAME_HASH, nxo_l_name_hash, nxo_l_name_key_comp);
 #ifdef CW_THREADS
     mtx_new(&cw_g_name_lock);
 #endif

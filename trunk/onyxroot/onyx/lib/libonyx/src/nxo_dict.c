@@ -73,8 +73,7 @@ nxo_dict_new(cw_nxo_t *a_nxo, bool a_locking, uint32_t a_dict_size)
 
 	/* Don't let the table get more than 80% full, or less than 25% full,
 	 * when shrinking. */
-	dch_new(&dict->data.h.hash, cw_g_nxaa, a_dict_size * 1.25,
-		a_dict_size, a_dict_size / 4, nxo_p_dict_hash,
+	dch_new(&dict->data.h.hash, cw_g_nxaa, a_dict_size, nxo_p_dict_hash,
 		nxo_p_dict_key_comp);
 	ql_new(&dict->data.h.list);
     }
@@ -191,8 +190,7 @@ nxoe_p_dict_def(cw_nxoe_dict_t *a_dict, cw_nxo_t *a_key, cw_nxo_t *a_val)
 		 * Don't let the table get more than 80% full, or less than 25%
 		 * full, when shrinking. */
 		dch_new(&a_dict->data.h.hash, cw_g_nxaa,
-			CW_LIBONYX_DICT_SIZE * 2.5, CW_LIBONYX_DICT_SIZE * 2,
-			CW_LIBONYX_DICT_SIZE / 2,
+			CW_LIBONYX_DICT_SIZE * 2,
 			nxo_p_dict_hash, nxo_p_dict_key_comp);
 		ql_new(&a_dict->data.h.list);
 		for (i = 0; i < CW_LIBONYX_DICT_SIZE; i++)

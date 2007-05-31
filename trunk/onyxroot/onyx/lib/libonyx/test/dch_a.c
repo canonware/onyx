@@ -24,12 +24,12 @@ main()
     {
 	cw_dch_t *dch_a, dch_b;
 
-	dch_a = dch_new(NULL, cw_g_mema, 2, 2, 1, ch_string_hash,
+	dch_a = dch_new(NULL, cw_g_mema, 2, ch_string_hash,
 			ch_string_key_comp);
 	cw_check_ptr(dch_a);
 	dch_delete(dch_a);
 
-	cw_assert(dch_new(&dch_b, cw_g_mema, 4, 3, 1, ch_direct_hash,
+	cw_assert(dch_new(&dch_b, cw_g_mema, 4, ch_direct_hash,
 			  ch_direct_key_comp) == &dch_b);
 	dch_delete(&dch_b);
     }
@@ -42,8 +42,7 @@ main()
 	char *c = "two of these";
 	char *d = "two of these\0foo";
 
-	dch = dch_new(NULL, cw_g_mema, 4, 2, 1, ch_string_hash,
-		      ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(dch);
 	cw_assert(dch_count(dch) == 0);
 
@@ -74,8 +73,7 @@ main()
 	char *d = "two of these\0foo";
 	char *k, *v;
 
-	dch = dch_new(NULL, cw_g_mema, 4, 2, 1, ch_string_hash,
-		      ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(dch);
 	cw_assert(dch_count(dch) == 0);
 
@@ -129,8 +127,7 @@ main()
 	char *v;
 	cw_chi_t chi_a, chi_b, chi_c, chi_d;
 
-	dch = dch_new(NULL, cw_g_mema, 4, 2, 1, ch_string_hash,
-		      ch_string_key_comp);
+	dch = dch_new(NULL, cw_g_mema, 4, ch_string_hash, ch_string_key_comp);
 	cw_check_ptr(dch);
 
 	dch_insert(dch, a, a, &chi_a);

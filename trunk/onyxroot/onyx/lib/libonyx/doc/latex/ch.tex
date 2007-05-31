@@ -39,8 +39,7 @@ such situations.
 \begin{capi}
 \label{CW_CH_TABLE2SIZEOF}
 \index{CW_CH_TABLE2SIZEOF@\cppmacro{CW\_CH\_TABLE2SIZEOF}{}}
-\citem{\cppmacro[uint32\_t]{CW\_CH\_TABLE2SIZEOF}{uint32\_t
-a\_table\_size}}
+\citem{\cppmacro[size\_t]{CW\_CH\_TABLE2SIZEOF}{size\_t a\_table\_size}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -60,7 +59,7 @@ a\_table\_size}}
 	\end{capilist}
 \label{ch_new}
 \index{ch_new@\cfunc{ch\_new}{}}
-\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mema\_t *a\_mema, uint32\_t
+\citem{\cfunc[]{ch\_new}{cw\_ch\_t *a\_ch, cw\_mema\_t *a\_mema, size\_t
 a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -107,7 +106,7 @@ a\_table\_size, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{ch_count}
 \index{ch_count@\cfunc{ch\_count}{}}
-\citem{\cfunc[uint32\_t]{ch\_count}{cw\_ch\_t *a\_ch}}
+\citem{\cfunc[size\_t]{ch\_count}{cw\_ch\_t *a\_ch}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -247,7 +246,7 @@ void **r\_data}}
 	\end{capilist}
 \label{ch_string_hash}
 \index{ch_string_hash@\cfunc{ch\_string\_hash}{}}
-\citem{\cfunc[uint32\_t]{ch\_string\_hash}{const void *a\_key}}
+\citem{\cfunc[size\_t]{ch\_string\_hash}{const void *a\_key}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -265,7 +264,7 @@ void **r\_data}}
 	\end{capilist}
 \label{ch_direct_hash}
 \index{ch_direct_hash@\cfunc{ch\_direct\_hash}{}}
-\citem{\cfunc[uint32\_t]{ch\_direct\_hash}{const void *a\_key}}
+\citem{\cfunc[size\_t]{ch\_direct\_hash}{const void *a\_key}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]

@@ -66,10 +66,6 @@ cw_mema_t s_mem_mema;
 
 /* Slots in base hash table. */
 #define CW_MEM_BASE_TABLE 1024
-/* Maximum fullness of base table. */
-#define CW_MEM_BASE_GROW 256
-/* Proportional minimal fullness. */
-#define CW_MEM_BASE_SHRINK 32
 static cw_dch_t *s_mem_addr_hash;
 static ql_head(cw_mem_item_t) s_mem_addr_list;
 #endif
@@ -172,7 +168,6 @@ mem_l_init(void)
 	     (cw_opaque_dealloc_t *) mem_p_free_e,
 	     NULL);
     s_mem_addr_hash = dch_new(NULL, &s_mem_mema, CW_MEM_BASE_TABLE,
-			      CW_MEM_BASE_GROW, CW_MEM_BASE_SHRINK,
 			      ch_direct_hash, ch_direct_key_comp);
     ql_new(&s_mem_addr_list);
 #ifdef CW_THREADS

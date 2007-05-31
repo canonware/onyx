@@ -1,5 +1,9 @@
 2007-05-30 : Jason Evans <jasone@canonware.com>
 
+	* lib/libonyx/src/ch.c:ch_direct_hash() : Modify to directly use the
+	  pointer value as the return value.  This requires using prime-sized
+	  hash tables, so several things in the ch/dch API have changed.
+
 	* lib/libonyx/include/libonyx/mb.h : Add sfence-based memory barrier
 	  support for amd64.
 

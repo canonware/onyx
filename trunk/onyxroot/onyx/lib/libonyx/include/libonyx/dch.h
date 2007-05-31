@@ -41,17 +41,13 @@ struct cw_dch_s
 
     /* Intial table size and high/low water marks.  These values are used in
      * proportion if the table grows. */
-    uint32_t base_table;
-    uint32_t base_grow;
-    uint32_t base_shrink;
+    size_t base_power;
+    size_t cur_power;
 
     bool shrinkable:1;
 
-    /* (grow_factor * base_table) is the current table size. */
-    uint32_t grow_factor;
-
     /* Cached for later ch creation during rehashes. */
-    uint32_t (*hash)(const void *);
+    size_t (*hash)(const void *);
     bool (*key_comp)(const void *, const void *);
 
     /* Where all of the real work is done. */
@@ -59,14 +55,13 @@ struct cw_dch_s
 };
 
 cw_dch_t *
-dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, uint32_t a_base_table,
-	uint32_t a_base_grow, uint32_t a_base_shrink,
+dch_new(cw_dch_t *a_dch, cw_mema_t *a_mema, size_t a_base_count,
 	cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 
 void
 dch_delete(cw_dch_t *a_dch);
 
-uint32_t
+size_t
 dch_count(cw_dch_t *a_dch);
 
 bool
