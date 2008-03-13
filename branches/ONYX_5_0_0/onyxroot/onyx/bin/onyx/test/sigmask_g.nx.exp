@@ -1,0 +1,3 @@
+Test begin
+Error $argcheck
+ostack: ($foo -dict- -dict-)

@@ -1,0 +1,92 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% nxo_mutex portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{nxo\_mutex}
+\label{nxo_mutex}
+\index{nxo_mutex@\classname{nxo\_mutex}{}}
+
+The \classname{nxo\_mutex} class is a subclass of the \classname{nxo} class.
+
+\subsubsection{API}
+\begin{capi}
+\label{nxo_mutex_new}
+\index{nxo_mutex_new@\cfunc{nxo\_mutex\_new}{}}
+\citem{\cfunc[void]{nxo\_mutex\_new}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_mutex_lock}
+\index{nxo_mutex_lock@\cfunc{nxo\_mutex\_lock}{}}
+\citem{\cfunc[void]{nxo\_mutex\_lock}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Lock \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_mutex_trylock}
+\index{nxo_mutex_trylock@\cfunc{nxo\_mutex\_trylock}{}}
+\citem{\cfunc[bool]{nxo\_mutex\_trylock}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[false: ]
+				Success.
+			\item[true: ]
+				Failure.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Try to lock \cvar{a\_nxo}, but return immediately with an error
+		if unable to do so.
+	\end{capilist}
+\label{nxo_mutex_unlock}
+\index{nxo_mutex_unlock@\cfunc{nxo\_mutex\_unlock}{}}
+\citem{\cfunc[void]{nxo\_mutex\_unlock}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a mutex \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Unlock \cvar{a\_nxo}.
+	\end{capilist}
+\end{capi}

@@ -1,0 +1,73 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% nxo_integer portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{nxo\_integer}
+\label{nxo_integer}
+\index{nxo_integer@\classname{nxo\_integer}{}}
+
+The \classname{nxo\_integer} class is a subclass of the \classname{nxo} class.
+
+\subsubsection{API}
+\begin{capi}
+\label{nxo_integer_new}
+\index{nxo_integer_new@\cfunc{nxo\_integer\_new}{}}
+\citem{\cfunc[void]{nxo\_integer\_new}{cw\_nxo\_t *a\_nxo, cw\_nxoi\_t a\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an integer \classname{nxo}.
+		\item[a\_val: ]
+			Initial value.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_integer_get}
+\index{nxo_integer_get@\cfunc{nxo\_integer\_get}{}}
+\citem{\cfunc[cw\_nxoi\_t]{nxo\_integer\_get}{const cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an integer \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Value of \cvar{a\_nxo}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the value of \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_integer_set}
+\index{nxo_integer_set@\cfunc{nxo\_integer\_set}{}}
+\citem{\cfunc[void]{nxo\_integer\_set}{cw\_nxo\_t *a\_nxo, cw\_nxoi\_t a\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an integer \classname{nxo}.
+		\item[a\_val: ]
+			Integer value.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the value of \cvar{a\_nxo} to \cvar{a\_val}.
+	\end{capilist}
+\end{capi}

@@ -1,0 +1,34 @@
+Test begin
+`1 array dup 0 [\`a\'] putinterval'
+[`a']
+`2 array dup 0 [\`a\'] putinterval'
+[`a' null]
+`2 array dup 1 [\`a\'] putinterval'
+[null `a']
+`3 array dup 0 [\`a\'] putinterval'
+[`a' null null]
+`3 array dup 1 [\`a\'] putinterval'
+[null `a' null]
+`3 array dup 2 [\`a\'] putinterval'
+[null null `a']
+`3 array dup 0 [\`a\' \`b\'] putinterval'
+[`a' `b' null]
+`3 array dup 1 [\`a\' \`b\'] putinterval'
+[null `a' `b']
+`1 string dup 0 \`a\' putinterval'
+`a'
+`2 string dup 0 \`a\' putinterval'
+`a\x00'
+`2 string dup 1 \`a\' putinterval'
+`\x00a'
+`3 string dup 0 \`a\' putinterval'
+`a\x00\x00'
+`3 string dup 1 \`a\' putinterval'
+`\x00a\x00'
+`3 string dup 2 \`a\' putinterval'
+`\x00\x00a'
+`3 string dup 0 \`ab\' putinterval'
+`ab\x00'
+`3 string dup 1 \`ab\' putinterval'
+`\x00ab'
+Test end

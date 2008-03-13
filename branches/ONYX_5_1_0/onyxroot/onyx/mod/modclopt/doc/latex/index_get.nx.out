@@ -1,0 +1,5 @@
+$ ./index_get.nx --foo --foo=42 --foo=
+index: 1
+index: 2
+index: 3
+$ 

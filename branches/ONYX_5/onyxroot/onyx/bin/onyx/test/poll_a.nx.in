@@ -1,0 +1,74 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$tmpfilename_a argv 2 get `/poll_a.tmp_a' cat def
+$tmpfile_a tmpfilename_a `w' open def
+tmpfile_a 0 setiobuf
+
+$tmpfilename_b argv 2 get `/poll_a.tmp_b' cat def
+$tmpfile_b tmpfilename_b `w' open def
+tmpfile_b 0 setiobuf
+
+tmpfile_a `Hello\n' write pop
+tmpfile_a flushfile
+tmpfile_a 3 seek
+
+[
+    <tmpfile_a <$POLLOUT false>>
+    <
+	tmpfile_a <$POLLOUT false>
+	tmpfile_b <$POLLOUT false>
+    >
+    <tmpfile_a <$POLLOUT false>>
+    <tmpfile_a <$POLLOUT true $garbage `ignore me'>>
+    <
+	tmpfile_a <
+	    $POLLIN false
+	>
+    >
+    <
+	tmpfile_a <
+	    $POLLIN true
+	>
+    >
+    <
+	tmpfile_a <
+	    $POLLIN false
+	>
+	tmpfile_b <
+	    $POLLIN false
+	>
+    >
+]{
+    `in:\n' print
+    dup 2 sprint
+    dup 0 poll
+    `out:\n' print
+    1 sprint
+    # Strip $POLLWRNORM out of the results.  FreeBSD uses the same value for POLLOUT and
+    # POLLWRNORM, which causes $POLLWRNORM to show up in the output.
+    dup {
+	dup $POLLWRNORM known {
+	    $POLLWRNORM undef
+	}{
+	    pop
+	} ifelse
+	pop # Key.
+    } foreach
+    2 sprint
+} foreach
+
+tmpfile_a close
+tmpfilename_a unlink
+
+tmpfile_b close
+tmpfilename_b unlink

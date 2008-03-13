@@ -1,0 +1,14 @@
+Test begin
+`$AF_LOCAL $SOCK_STREAM'
+`a-->b'
+`b-->a'
+`$AF_LOCAL $SOCK_STREAM $ip'
+`a-->b'
+`b-->a'
+`$AF_LOCAL $SOCK_DGRAM'
+`a-->b'
+`b-->a'
+`$AF_LOCAL $SOCK_DGRAM $ip'
+`a-->b'
+`b-->a'
+Test end
