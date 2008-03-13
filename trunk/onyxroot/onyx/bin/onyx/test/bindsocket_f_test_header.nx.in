@@ -1,0 +1,24 @@
+# Simplify error output.
+errordict $handleerror {
+    !currenterror begin
+
+    # If this is a syntaxerror, print the line and column numbers.
+    !errorname $syntaxerror eq {
+	`At line ' {stderr exch write}{} until
+	!line cvs {stderr exch write}{} until
+	`, column ' {stderr exch write}{} until
+	!column cvs {stderr exch write}{} until
+	`: ' {stderr exch write}{} until
+    } if
+
+    # Print the errorname.
+    `Error ' {stderr exch write}{} until
+    !errorname 1 sprints {stderr exch write}{} until
+    `\n' {stderr exch write}{} until
+
+    flush
+    end # currenterror.
+} put
+
+`Test begin\n' print flush
+

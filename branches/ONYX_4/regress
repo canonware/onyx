@@ -1,5 +1,3 @@
-#!/home/jasone/cw/devroot/bin/onyx/bin/tonyx
-# -*- mode: onyx -*-
 #!/usr/bin/onyx
 #
 # regress [<srcdir>] [<par>]
@@ -13,7 +11,7 @@ argv length 2 ge {
 argv length 3 ge {
     $nworker_threads argv 2 get cvx eval def
 }{
-    $nworker_threads 4 def
+    $nworker_threads 8 def
 } ifelse
 
 $PREFIX pwd `/regress_' SRCDIR 3 ncat def
@@ -132,6 +130,10 @@ $worker_entry {
     )
     (
 	`'
+	`--disable-regex'
+    )
+    (
+	`'
 	`--enable-debug'
     )
     (
@@ -202,7 +204,7 @@ pop
 
 # Create worker threads.
 1 1 nworker_threads {
-    (over) {$$worker_entry} thread
+    (over) {~worker_entry} thread
 } for
 
 # Join on worker threads.

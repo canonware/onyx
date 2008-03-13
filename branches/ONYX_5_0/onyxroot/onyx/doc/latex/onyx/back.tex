@@ -1,0 +1,58 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% Back matter of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearemptydoublepage
+\backmatter
+\chapter{LICENSES}
+%
+% Don't print the chapter number in the header.
+%
+%begin{latexonly}
+\rhead[\bfseries{LICENSE}]{\bfseries\thepage}
+%end{latexonly}
+
+Onyx is licensed according to the following terms:
+
+\begin{verbatim}
+<Copyright = jasone>
+<Copyright = mordor>
+<License>
+\end{verbatim}
+
+Onyx's regular expression support is provided by the PCRE library package, which
+is open source software, written by Philip Hazel, and copyright by the
+University of Cambridge, England.  The official PCRE distribution site is
+\htmlurl{ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/}.  Inclusion of
+the previous two sentences in this documentation meets the requirements of the
+PCRE license, both for source and binary distributions of Onyx.  See the PCRE
+source distribution for additional details.
+
+\clearemptydoublepage
+%
+% Don't print the chapter number in the header for the index.
+%
+%begin{latexonly}
+\rhead[\bfseries{INDEX}]{\bfseries\thepage}
+%end{latexonly}
+
+\addcontentsline{toc}{chapter}{Index}
+\begin{theindex}
+% latex2html apparently generates and inserts its own index, so don't actually
+% include the index for the html version.
+%begin{latexonly}
+\printindex
+%end{latexonly}
+\end{theindex}
+
+\end{document}

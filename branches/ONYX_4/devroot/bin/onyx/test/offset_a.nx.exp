@@ -1,0 +1,18 @@
+Test begin
+{`Input string of words' `.'}
+true
+`I'
+0
+{`Input string of words' `string'}
+true
+`string'
+6
+{`Input string of words' `\\w+$'}
+true
+`words'
+16
+{`Input string of words' `\\w+'}
+true
+`Input'
+0
+Test end

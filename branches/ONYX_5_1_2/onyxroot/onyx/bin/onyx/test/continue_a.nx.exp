@@ -1,0 +1,54 @@
+Test begin
+`0 1 4 {dup 1 sprint 3 eq {continue} if \`bye\' 1 sprint} for'
+0
+`bye'
+1
+`bye'
+2
+`bye'
+3
+4
+`bye'
+`5 {\`hi\' 1 sprint continue \`bye\' 1 sprint} repeat'
+`hi'
+`hi'
+`hi'
+`hi'
+`hi'
+`$foo true def {\`hi\' 1 sprint foo {$foo false def continue} if\n\t \`bye\' 1 sprint exit} loop currentdict $foo undef'
+`hi'
+`hi'
+`bye'
+`[1 2 3 4 5 6] {dup 1 sprint 3 eq {continue} if \`bye\' 1 sprint} foreach'
+1
+`bye'
+2
+`bye'
+3
+4
+`bye'
+5
+`bye'
+6
+`bye'
+`$foo true def 0 {dup 1 sprint inc foo {$foo false def continue} if\n\t \`bye\' 1 sprint}{dup 5 lt} until pop currentdict $foo undef'
+0
+1
+`bye'
+2
+`bye'
+3
+`bye'
+4
+`bye'
+`$foo true def 0 {dup 5 lt}{dup 1 sprint inc\n\t foo {$foo false def continue} if \`bye\' 1 sprint} while pop\n\t currentdict $foo undef'
+0
+1
+`bye'
+2
+`bye'
+3
+`bye'
+4
+`bye'
+Test end

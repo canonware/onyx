@@ -55,6 +55,7 @@ $opt_retval =
 		"b|branchpoint=s" => \$opt_branchpoint,
 		"B|branchtag=s" => \$opt_branchtag,
 		"t|tag=s" => \$opt_tag,
+		"p|pkgname=s" => \$opt_pkgname,
 		"V|version=s%" => \%OPT_VERSION
 		);
 
@@ -67,8 +68,13 @@ if (($#ARGV >= 0)
     exit(1);
 }
 
+if (!defined($opt_pkgname))
+{
+    $opt_pkgname = "onyx";
+}
+
 $run =
-    "./snap @ARGS -T ONYX_ -p onyx -r devroot"
+    "./snap @ARGS -T ONYX_ -p $opt_pkgname -r devroot"
     . " -f .cvsignore -f CHANGES.onyx"
     . " -f Cookfile.in -f Cookfile.inc.in"
     . " -f COPYING -f INSTALL -f PLATFORMS -f README"
@@ -99,6 +105,7 @@ $0 [-chnv --cvsnotag --help --noact --verbose]
        [--branchpoint=<revision> | -b <revision>]
        [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
+       {--pkgname=<name> | -p <pkgname>}
        {--version <key>=<version> | -V <key>=<version>}*
 EOF
 }

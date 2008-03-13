@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2002 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2004 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,11 @@ $opt_retval =
 		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
+		"m|majorbranch=s" => \$opt_majorbranch,
 		"b|branchpoint=s" => \$opt_branchpoint,
 		"B|branchtag=s" => \$opt_branchtag,
 		"t|tag=s" => \$opt_tag,
+		"p|pkgname=s" => \$opt_pkgname,
 		"V|version=s%" => \%OPT_VERSION
 		);
 
@@ -67,9 +69,14 @@ if (($#ARGV >= 0)
     exit(1);
 }
 
+if (!defined($opt_pkgname))
+{
+    $opt_pkgname = "onyx";
+}
+
 $run =
-    "./snap @ARGS -T ONYX_ -p onyx -r devroot"
-    . " -f .cvsignore -f CHANGES.onyx"
+    "../snap @ARGS -T ONYX_ -p $opt_pkgname -r onyxroot/onyx"
+    . " -f .cvsignore -f ChangeLog"
     . " -f Cookfile.in -f Cookfile.inc.in"
     . " -f COPYING -f INSTALL -f PLATFORMS -f README"
     . " -f autogen.sh -f acinclude.m4"
@@ -96,9 +103,11 @@ sub print_usage
     print <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint=<revision> | -b <revision>]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
        [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
+       {--pkgname=<name> | -p <pkgname>}
        {--version <key>=<version> | -V <key>=<version>}*
 EOF
 }

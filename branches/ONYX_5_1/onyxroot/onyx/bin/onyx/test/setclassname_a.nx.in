@@ -1,0 +1,22 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$c class def
+
+c $fooclass setclassname
+c classname 1 sprint
+
+c null setclassname
+c classname 1 sprint
+
+c $barclass setclassname
+c classname 1 sprint

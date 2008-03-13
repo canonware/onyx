@@ -1,14 +1,14 @@
 /* -*- mode: c ; c-file-style: "canonware-c-style" -*-
-******************************************************************************
-*
-* <Copyright = jasone>
-* <License>
-*
-******************************************************************************
-*
-* Version: Onyx <Version = onyx>
-*
-******************************************************************************/
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ ******************************************************************************/
 
 /* Maintain counters used to get an idea of performance. */
 /* #define CW_CH_COUNT */
@@ -29,10 +29,10 @@ typedef struct cw_mem_s cw_mem_t;
 struct cw_chi_s
 {
 #ifdef CW_DBG
-    cw_uint32_t magic;
+    uint32_t magic;
 #endif
-    /* If space for a chi wasn't passed into ch_insert(), this is TRUE. */
-    cw_bool_t is_malloced;
+    /* If space for a chi wasn't passed into ch_insert(), this is true. */
+    bool is_malloced;
 
     /* Key. */
     const void *key;
@@ -40,50 +40,42 @@ struct cw_chi_s
     /* Data. */
     const void *data;
 
-    /* Link into the ch-wide list of chi's. */
-    ql_elm(cw_chi_t) ch_link;
-
     /* Link into the slot's list of chi's. */
     ql_elm(cw_chi_t) slot_link;
 
     /* Slot number. */
-    cw_uint32_t slot;
+    size_t slot;
 };
 
 struct cw_ch_s
 {
 #ifdef CW_DBG
-    cw_uint32_t magic;
+    uint32_t magic;
 #endif
 
 #ifdef CW_CH_COUNT
     /* Counters used to get an idea of performance. */
-    cw_uint64_t num_collisions;
-    cw_uint64_t num_inserts;
-    cw_uint64_t num_removes;
-    cw_uint64_t num_searches;
+    uint64_t num_collisions;
+    uint64_t num_inserts;
+    uint64_t num_removes;
+    uint64_t num_searches;
 #endif
 
     /* Opaque allocation/deallocation pointers. */
-    cw_opaque_alloc_t *alloc;
-    cw_opaque_dealloc_t *dealloc;
-    void *arg;
+    cw_mema_t *mema;
 
-    /* TRUE if we malloced this structure internally. */
-    cw_bool_t is_malloced;
-
-    /* Head of the list of chi's. */
-    ql_head(cw_chi_t) chi_ql;
+    /* true if we malloced this structure internally. */
+    bool is_malloced;
 
     /* Total number of items. */
-    cw_uint32_t count;
+    size_t count;
 
     /* Number of table slots. */
-    cw_uint32_t table_size;
+    size_t table_size;
 
     /* Hashing and key comparison function pointers. */
-    cw_uint32_t (*hash)(const void *);
-    cw_bool_t (*key_comp)(const void *, const void *);
+    size_t (*hash)(const void *);
+    bool (*key_comp)(const void *, const void *);
 
     /* Must be last field, since it is used for array indexing of chi's beyond
      * the end of the structure. */
@@ -91,8 +83,8 @@ struct cw_ch_s
 };
 
 /* Typedefs to allow easy function pointer passing. */
-typedef cw_uint32_t cw_ch_hash_t (const void *);
-typedef cw_bool_t cw_ch_key_comp_t (const void *, const void *);
+typedef size_t cw_ch_hash_t (const void *);
+typedef bool cw_ch_key_comp_t (const void *, const void *);
 
 /* Calculates ch size, given the number of hash table slots.  Use this to
  * calculate space allocation when passing pre-allocated space to ch_new(). */
@@ -100,41 +92,37 @@ typedef cw_bool_t cw_ch_key_comp_t (const void *, const void *);
     (sizeof(cw_ch_t) + (((t) - 1) * sizeof(cw_chi_t *)))
 
 cw_ch_t *
-ch_new(cw_ch_t *a_ch, cw_opaque_alloc_t *a_alloc,
-       cw_opaque_dealloc_t *a_dealloc, void *a_arg, cw_uint32_t a_table_size,
+ch_new(cw_ch_t *a_ch, cw_mema_t *a_mema, size_t a_table_size,
        cw_ch_hash_t *a_hash, cw_ch_key_comp_t *a_key_comp);
 
 void
 ch_delete(cw_ch_t *a_ch);
 
-cw_uint32_t
+size_t
 ch_count(cw_ch_t *a_ch);
 
 void
 ch_insert(cw_ch_t *a_ch, const void *a_key, const void *a_data,
 	  cw_chi_t *a_chi);
 
-cw_bool_t
+bool
 ch_remove(cw_ch_t *a_ch, const void *a_search_key, void **r_key, void **r_data,
 	  cw_chi_t **r_chi);
 
-cw_bool_t
+void
+ch_chi_remove(cw_ch_t *a_ch, cw_chi_t *a_chi);
+
+bool
 ch_search(cw_ch_t *a_ch, const void *a_key, void **r_data);
 
-cw_bool_t
-ch_get_iterate(cw_ch_t *a_ch, void **r_key, void **r_data);
-
-cw_bool_t
-ch_remove_iterate(cw_ch_t *a_ch, void **r_key, void **r_data, cw_chi_t **r_chi);
-
-cw_uint32_t
+size_t
 ch_string_hash(const void *a_key);
 
-cw_uint32_t
+size_t
 ch_direct_hash(const void *a_key);
 
-cw_bool_t
+bool
 ch_string_key_comp(const void *a_k1, const void *a_k2);
 
-cw_bool_t
+bool
 ch_direct_key_comp(const void *a_k1, const void *a_k2);

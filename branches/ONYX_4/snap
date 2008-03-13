@@ -46,8 +46,12 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2002 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2003 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
+= "All rights reserved.";
+$COPYRIGHT{"mordor", 0}
+= "Copyright (C) 2002 Zeljko Vrba <mordor\@fly.srk.fer.hr>.";
+$COPYRIGHT{"mordor", 1}
 = "All rights reserved.";
 $COPYRIGHT{"nectar", 0}
 = "Copyright (C) 2001 Jacques A. Vidrine <nectar\@freebsd.org>.";
@@ -385,11 +389,11 @@ unless ($opt_noact)
 # Create the tarball.
 if ($opt_verbose)
 {
-    print STDERR "tar czf $opt_pkgname.tar.gz $opt_pkgname\n";
+    print STDERR "tar cjf $opt_pkgname.tar.bz2 $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `tar czf $opt_pkgname.tar.gz $opt_pkgname`;
+    `tar cjf $opt_pkgname.tar.bz2 $opt_pkgname`;
 }
 
 # Create symlinks to the directory and tarball.
@@ -397,15 +401,15 @@ if ($opt_verbose)
 {
     print STDERR "rm -f $pkgname_base\-latest\n";
     print STDERR "ln -s $opt_pkgname $pkgname_base\-latest\n";
-    print STDERR "rm -f $pkgname_base\-latest.tar.gz\n";
-    print STDERR "ln -s $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz\n";
+    print STDERR "rm -f $pkgname_base\-latest.tar.bz2\n";
+    print STDERR "ln -s $opt_pkgname.tar.bz2 $pkgname_base\-latest.tar.bz2\n";
 }
 unless ($opt_noact)
 {
     `rm -f $pkgname_base\-latest`;
     `ln -s $opt_pkgname $pkgname_base\-latest`;
-    `rm -f $pkgname_base\-latest.tar.gz`;
-    `ln -s $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz`;
+    `rm -f $pkgname_base\-latest.tar.bz2`;
+    `ln -s $opt_pkgname.tar.bz2 $pkgname_base\-latest.tar.bz2`;
 }
 
 # End of main execution.

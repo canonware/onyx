@@ -1,0 +1,8 @@
+Test begin
+`foo'
+`FOO'
+(-dict- -dict- -dict- -dict- -dict- -dict-)
+`foo'
+(-dict- -dict- -dict- -dict- -dict-)
+(-dict- -dict- -dict- -dict-)
+Test end

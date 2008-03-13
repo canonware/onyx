@@ -16,13 +16,6 @@
 #undef CW_ASSERT
 #endif
 
-/* Solaris needs this for sigwait(). */
-#undef _POSIX_PTHREAD_SEMANTICS
-
-/* GNU libc hides various prototypes, such as that for asprintf() unless this is
- * defined. */
-#undef _GNU_SOURCE
-
 #undef WORDS_BIGENDIAN
 
 #undef CW_THREADS
@@ -32,14 +25,13 @@
 #undef CW_STHREADS
 #undef CW_PTH
 
+#undef CW_OOP
+#undef CW_HANDLE
 #undef CW_REAL
-
+#undef CW_REGEX
 #undef CW_POSIX
-
 #undef CW_POSIX_FILE
-
 #undef CW_SOCKET
-
 #undef CW_MODULES
 
 /* If using gcc and inlines weren't disabled by configure, use inline
@@ -54,35 +46,29 @@
 #endif
 
 #undef CW_CPU_IA32
+#undef CW_CPU_AMD64
 #undef CW_CPU_PPC
 
-#undef SIZEOF_SIGNED_CHAR
-#undef SIZEOF_UNSIGNED_CHAR
-#undef SIZEOF_SIGNED_SHORT
-#undef SIZEOF_UNSIGNED_SHORT
-#undef SIZEOF_INT
-#undef SIZEOF_UNSIGNED
-#undef SIZEOF_LONG
-#undef SIZEOF_UNSIGNED_LONG
-#undef SIZEOF_LONG_LONG
-#undef SIZEOF_UNSIGNED_LONG_LONG
 #undef SIZEOF_INT_P
-#undef SIZEOF_FLOAT
-#undef SIZEOF_DOUBLE
-#undef SIZEOF_LONG_DOUBLE
 
 #undef CW_HAVE_SOCKLEN_T
 #undef CW_HAVE_DIRENT_NAMLEN
 #undef CW_LIBONYX_USE_STAT_ATIMESPEC
 #undef CW_LIBONYX_USE_STAT_MTIMESPEC
 #undef CW_LIBONYX_USE_STAT_CTIMESPEC
+#undef CW_LIBONYX_USE_TM_ZONE
+#undef CW_LIBONYX_USE_TZNAME
+#undef CW_LIBONYX_USE_TM_GMTOFF
+#undef CW_LIBONYX_USE_ALTZONE
 
 #undef HAVE_POLL
 #undef HAVE_READDIR_R
 #undef HAVE_UNSETENV
 #undef HAVE_ASPRINTF
 
+#undef HAVE_STDBOOL_H
 #undef HAVE_SYS_SOCKET_H
 #undef HAVE_NETINET_IN_H
 #undef HAVE_ARPA_INET_H
 #undef HAVE_MACHINE_ENDIAN_H
+#undef HAVE_PTHREAD_NP_H
