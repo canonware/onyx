@@ -1,6 +1,0 @@
-$ ./arg_get.nx --foo --foo= --foo=arg --foo
---foo
---foo --> `'
---foo --> `arg'
---foo
-$ 

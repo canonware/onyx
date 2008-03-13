@@ -1,9 +1,0 @@
-2001-07-17  Jason Evans  <jasone@canonware.com>
-
-	* man/man1/onyx.1.in: Add man page.
-
-2001-07-14  Jason Evans  <jasone@canonware.com>
-
-	* Cookfile.inc: Link directly with libedit.a rather than using
-	-ledit on the link line to assure that the linker gets the right
-	copy of libedit, even if the OS has its own version (as on FreeBSD).

@@ -1,6 +1,0 @@
-$ ./arg_uint_get.nx --foo=0 --foo=42 --foo=+43 --foo=-5
---foo --> 0
---foo --> 42
---foo --> 43
-arg_uint_get.nx: Integer must be non-negative for option --foo
-$ 

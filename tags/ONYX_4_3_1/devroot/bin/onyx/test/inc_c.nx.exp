@@ -1,8 +1,0 @@
-Test begin
-Error $typecheck
-ostack: (1.000000e+00)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:	--inc--
-1:	-file-
-2:	--start--

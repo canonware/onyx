@@ -1,6 +1,0 @@
-At line 3, column 0: Error /syntaxerror
-ostack: (`\'')
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..1):
-0:	-file-
-1:	--start--

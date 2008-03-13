@@ -1,7 +1,0 @@
-onyx:0> mclass:singleton:modules 1 sprint
-<$modprompt -instance=$module- $modclopt -instance=$module->
-onyx:0> $modfoo mclass:singleton:load
-onyx:0> mclass:singleton:modules 1 sprint
-<$modprompt -instance=$module- $modclopt -instance=$module-
-$modfoo -instance=$module->
-onyx:0> 

@@ -1,7 +1,0 @@
-Test begin
-(-mark- 1 2 -mark- 3 4 5 -mark- -mark-)
-(-mark- 1 2 -mark- 3 4 5 -mark-)
-(-mark- 1 2 -mark- 3 4 5)
-(-mark- 1 2)
-()
-Test end

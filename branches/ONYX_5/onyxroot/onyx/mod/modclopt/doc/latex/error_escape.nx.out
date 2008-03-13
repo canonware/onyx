@@ -1,6 +1,0 @@
-$ ./error_escape.nx      
-Parse success
-$ ./error_escape.nx --bang
-error_escape.nx: This is an arror string
-Parse error
-$ 

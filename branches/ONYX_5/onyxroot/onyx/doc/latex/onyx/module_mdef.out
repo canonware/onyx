@@ -1,4 +1,0 @@
-onyx:0> $modfoo mclass:singleton:load
-onyx:0> foo 1 sprint
-`foo'
-onyx:0> 

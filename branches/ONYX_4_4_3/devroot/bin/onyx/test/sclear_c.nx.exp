@@ -1,7 +1,0 @@
-Error $typecheck
-ostack: (1 2 3)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:	--sclear--
-1:	-file-
-2:	--start--

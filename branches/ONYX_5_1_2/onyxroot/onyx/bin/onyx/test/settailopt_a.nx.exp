@@ -1,6 +1,0 @@
-Test begin
-true
-(--start-- -file- {estack 2 sprint} --estack--)
-false
-(--start-- -file- foo {bar} bar {estack 2 sprint} estack --estack--)
-Test end

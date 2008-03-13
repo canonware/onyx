@@ -1,6 +1,0 @@
-Test begin
-{product pop countdstack true globaldict {product pop countdstack true globaldict}}
-{`Canonware Onyx' --pop-- --countdstack-- true <> {`Canonware Onyx' --pop-- --countdstack-- true -dict-}}
-[product pop countdstack true globaldict [product pop countdstack true globaldict]]
-[`Canonware Onyx' --pop-- --countdstack-- true <> [product pop countdstack true globaldict]]
-Test end

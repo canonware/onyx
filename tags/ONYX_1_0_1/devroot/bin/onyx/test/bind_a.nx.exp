@@ -1,6 +1,0 @@
-Test begin
-{product pop realtime true globaldict {product pop realtime true globaldict}}
-{`Canonware Onyx' --pop-- --realtime-- true <> {`Canonware Onyx' --pop-- --realtime-- true -dict-}}
-[product pop realtime true globaldict [product pop realtime true globaldict]]
-[`Canonware Onyx' --pop-- --realtime-- true <> [product pop realtime true globaldict]]
-Test end

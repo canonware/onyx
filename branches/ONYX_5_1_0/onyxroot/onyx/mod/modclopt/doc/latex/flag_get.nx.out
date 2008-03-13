@@ -1,5 +1,0 @@
-$ ./flag_get.nx --foo --foo= --foo=blah
---foo --> `--foo'
---foo --> `--foo'
---foo --> `--foo'
-$ 

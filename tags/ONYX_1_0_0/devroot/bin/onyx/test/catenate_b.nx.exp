@@ -1,7 +1,0 @@
-Error /typecheck
-ostack: (-stack- -array-)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:	--catenate--
-1:	-file-
-2:	--start--

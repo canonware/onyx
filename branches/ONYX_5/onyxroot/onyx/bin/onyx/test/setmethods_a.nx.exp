@@ -1,5 +1,0 @@
-Test begin
-<$foo {`foo'}>
-null
-<$foo {`bar'}>
-Test end

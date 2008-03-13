@@ -1,8 +1,0 @@
-Test begin
-Error /rangecheck
-ostack: (-array- 1 3)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:	--getinterval--
-1:	-file-
-2:	--start--

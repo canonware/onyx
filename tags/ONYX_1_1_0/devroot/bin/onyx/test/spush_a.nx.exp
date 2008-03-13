@@ -1,3 +1,0 @@
-Test begin
-(true -array- -condition- -dict- -fino- 1 -mark- -mutex- /foo null --pop-- -stack- `hi')
-Test end

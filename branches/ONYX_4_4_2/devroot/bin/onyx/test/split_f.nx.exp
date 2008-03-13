@@ -1,8 +1,0 @@
-Test begin
-Error $rangecheck
-ostack: (`input' `pattern' -dict- -1)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:	--split--
-1:	-file-
-2:	--start--

@@ -1,3 +1,0 @@
-$modclopt ;dep_load
-
-$foo `foo' systemdict ;mdef

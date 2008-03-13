@@ -1,6 +1,0 @@
-$ ./arg_int_get.nx --foo=42 --foo=+43 --foo=-44 --foo=hi      
---foo --> 42
---foo --> 43
---foo --> -44
-arg_int_get.nx: Error parsing value `hi' for option --foo
-$ 
