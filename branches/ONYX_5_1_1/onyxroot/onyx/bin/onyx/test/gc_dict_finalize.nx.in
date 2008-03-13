@@ -1,0 +1,29 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# 1) Create strings, 2) create a dict, and 3) insert the strings into the dict,
+# so that the GC sweeper will happen to finalize the strings before the dict.
+# If the dict finalizer tries to access the strings, this test will blow up.
+
+$pre_count 64 def
+
+[
+    0 1 pre_count dec {
+	cvs
+    } for
+]
+
+<> exch {
+    under dup put
+} foreach
+
+pop

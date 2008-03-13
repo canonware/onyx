@@ -1,0 +1,47 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ * Top level Cookfile for modules.
+ *
+ ******************************************************************************/
+
+#include-cooked [fromto % @objroot@/mod/%/Cookfile.inc @mods@]
+
+/*
+ * Targets.
+ */
+mods : @mods@;
+
+mods_tests : [addsuffix _mods_tests @mods@];
+mods_check : [addsuffix _mods_check @mods@];
+mods_check_update : [addsuffix _mods_check_update @mods@];
+
+mods_install : [addsuffix _mods_install @mods@];
+
+mods_uninstall : [addsuffix _mods_uninstall @mods@];
+
+mods_clean : [addsuffix _mods_clean @mods@];
+
+mods_distclean : [addsuffix _mods_distclean @mods@];
+
+/*
+ * Build rules for module C files --> object files.
+ */
+@objroot@/mod/%0src/%1.o_s : @srcroot@/mod/%0src/%1.c
+  set mkdir
+{
+  [TCC] [S_CFLAGS] [CPPFLAGS] -c @srcroot@/mod/%0src/%1.c
+        -o [target];
+
+  c_incl [filter_cppdefs [CPPFLAGS]] --no-cache -Absent_Local_Ignore -No_System
+         @srcroot@/mod/%0src/%1.c
+         "--prefix='"[target]" : "@srcroot@/mod/%0src/%1.c"'"
+         "--suffix='set nodefault;'"
+         -o [fromto mod/%0src/%1.o_s mod/%0src/%1.d_s [target]];
+}

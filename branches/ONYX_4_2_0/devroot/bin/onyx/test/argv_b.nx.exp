@@ -1,0 +1,7 @@
+Test begin
+b_argv_b.nx begin
+`-e'
+`1 2 3 pstack'
+b_argv_b.nx end
+Termination status: 0
+Test end

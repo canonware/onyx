@@ -1,0 +1,3 @@
+$ ./argv_get.nx --foo -- unprocessed args
+argv: [`./argv_get.nx' `--foo' `--' `unprocessed' `args']
+$ 

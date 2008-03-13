@@ -1,0 +1,48 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Called as: waitpid_a.nx <srcdir> <objdir>
+
+# Test successful child.
+[
+    argv 2 get `/b_waitpid_a_a.nx' cat
+] forkexec
+
+waitpid dup 0 ne {
+    `Non-zero exit status: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse
+
+# Test error child.
+[
+    argv 2 get `/b_waitpid_a_b.nx' cat
+] forkexec
+
+waitpid dup 0 ne {
+    `Non-zero exit status: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse
+
+# Test signal-terminated child.
+[
+    argv 2 get `/b_waitpid_a_c.nx' cat
+] forkexec
+
+dup $SIGKILL kill
+
+waitpid dup 0 ne {
+    `Non-zero exit status: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse
