@@ -1,0 +1,28 @@
+Test begin
+`{1 2 3}'
+false
+`[1 2 3]'
+true
+`true'
+true
+`<$foo \`foo\' $bar \`bar\'>'
+true
+`stdin'
+true
+`('
+true
+`42'
+true
+`mark'
+true
+`$foo'
+true
+`null'
+true
+`~pop'
+false
+`(1 2 3)'
+true
+`\`foo\''
+true
+Test end

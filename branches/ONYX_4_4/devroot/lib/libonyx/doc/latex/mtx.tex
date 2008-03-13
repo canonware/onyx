@@ -1,0 +1,103 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% mtx portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{mtx}
+\label{mtx}
+\index{mtx@\classname{mtx}{}}
+
+The \classname{mtx} class implements typical mutual exclusion locks.  Only one
+thread can hold a lock at a time, and attempting to attain the lock while
+already owning it has undefined results.
+
+\subsubsection{API}
+\begin{capi}
+\label{mtx_new}
+\index{mtx_new@\cfunc{mtx\_new}{}}
+\citem{\cfunc[void]{mtx\_new}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mtx: ]
+			Pointer to space for a \classname{mtx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{mtx_delete}
+\index{mtx_delete@\cfunc{mtx\_delete}{}}
+\citem{\cfunc[void]{mtx\_delete}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mtx: ]
+			Pointer to a \classname{mtx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{mtx_lock}
+\index{mtx_lock@\cfunc{mtx\_lock}{}}
+\citem{\cfunc[void]{mtx\_lock}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mtx: ]
+			Pointer to a \classname{mtx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Lock \cvar{a\_mtx}.
+	\end{capilist}
+\label{mtx_trylock}
+\index{mtx_trylock@\cfunc{mtx\_trylock}{}}
+\citem{\cfunc[cw\_bool\_t]{mtx\_trylock}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mtx: ]
+			Pointer to a \classname{mtx}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Failure.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Try to lock \cvar{a\_mtx}, but return immediately instead of
+		blocking if \cvar{a\_mtx} is already locked.
+	\end{capilist}
+\label{mtx_unlock}
+\index{mtx_unlock@\cfunc{mtx\_unlock}{}}
+\citem{\cfunc[void]{mtx\_unlock}{cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mtx: ]
+			Pointer to a \classname{mtx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Unlock \cvar{a\_mtx}.
+	\end{capilist}
+\end{capi}

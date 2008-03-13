@@ -1,0 +1,57 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+0 localtime
+
+dup $sec get type $integertype ne {
+    `$sec not an integer\n' print
+} if
+
+dup $min get type $integertype ne {
+    `$min not an integer\n' print
+} if
+
+dup $hour get type $integertype ne {
+    `$hour not an integer\n' print
+} if
+
+dup $mday get type $integertype ne {
+    `$mday not an integer\n' print
+} if
+
+dup $mon get type $integertype ne {
+    `$mon not an integer\n' print
+} if
+
+dup $year get type $integertype ne {
+    `$year not an integer\n' print
+} if
+
+dup $wday get type $integertype ne {
+    `$wday not an integer\n' print
+} if
+
+dup $yday get type $integertype ne {
+    `$yday not an integer\n' print
+} if
+
+dup $isdst get type $booleantype ne {
+    `$isdst not a boolean\n' print
+} if
+
+dup $zone get type $stringtype ne {
+    `$zone not a string\n' print
+} if
+
+$gmtoff get type $integertype ne {
+    `$gmtoff not an integer\n' print
+} if

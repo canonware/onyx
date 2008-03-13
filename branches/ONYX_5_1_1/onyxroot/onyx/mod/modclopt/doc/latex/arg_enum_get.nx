@@ -1,0 +1,29 @@
+#!/usr/bin/env onyx
+
+# Load the clopt module.
+$modclopt mclass:singleton:load
+
+# Subclass clopt and add option handlers.
+$myopts clopt <
+><
+    #class#
+    #- new #instance
+    $new {
+        ;rnew
+        #instance
+    } bind
+
+    #instance#
+    #- `--verbose?' -
+    `--verbose?' {
+        `Verbosity: ' print 
+        <
+            $default true
+            `yes' true
+            `no' false
+        > ;arg_enum_get
+        1 sprint
+    } bind
+> cdef
+
+argv myopts:new:parse

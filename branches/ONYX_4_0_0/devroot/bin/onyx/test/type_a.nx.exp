@@ -1,0 +1,26 @@
+Test begin
+`[1 2 3]'
+arraytype
+`true'
+booleantype
+`<$foo \`foo\' $bar \`bar\'>'
+dicttype
+`stdin'
+filetype
+`('
+finotype
+`42'
+integertype
+`mark'
+marktype
+`$foo'
+nametype
+`null'
+nulltype
+`$$pop'
+operatortype
+`(1 2 3)'
+stacktype
+`\`foo\''
+stringtype
+Test end

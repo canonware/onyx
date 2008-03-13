@@ -1,0 +1,39 @@
+Branches are created for major and minor releases, but not for bugfix releases.
+
+To do a major release of onyx:
+
+	./release -v -m HEAD -b ONYX_5 -B ONYX_5_0 -t 5.0.0 -V onyx=5.0.0
+
+To do a minor release of onyx:
+
+	./release -v -b ONYX_5 -B ONYX_5_1 -t 5.1.0 -V onyx=5.1.0
+  or
+	./release -v -b ONYX_5 -B ONYX_5_2 -t 5.2.0 -V onyx=5.2.0
+
+To do a bugfix release of onyx:
+
+	./release -v -b ONYX_5_0 -t 5.0.1 -V onyx=5.0.1
+  or
+	./release -v -b ONYX_5_0 -t 5.0.2 -V onyx=5.0.2
+  or
+	./release -v -b ONYX_5_1 -t 5.1.1 -V onyx=5.1.1
+
+To re-create a release of onyx using an existing tag:
+
+	./release -cv -b ONYX_5_0_1 -t 5.0.1 -V onyx=5.0.1
+
+To create a snapshot of HEAD:
+
+	./release -cv -t 5.0a1.0 -V onyx=5.0a1.0
+
+To run the test suite harness (zsh syntax):
+
+	./regress |& tee regress.out
+
+To watch the log:
+
+	tail -f regress.out -n 10000 |grep "]==>"
+
+To watch for errors:
+
+	tail -f regress.out -n 10000 |grep "]==>>"

@@ -1,0 +1,8 @@
+Test begin
+`(0 42) dup stuck'
+(42 0 42)
+`(1 0 ()) dup stuck'
+(1 -stack- 0 -stack-)
+`(2 1 0 mark) dup stuck'
+(2 1 -mark- 0 -mark-)
+Test end

@@ -1,0 +1,39 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print flush
+
+[
+	`1 array dup 0 [`a'] putinterval'
+	`2 array dup 0 [`a'] putinterval'
+	`2 array dup 1 [`a'] putinterval'
+	`3 array dup 0 [`a'] putinterval'
+	`3 array dup 1 [`a'] putinterval'
+	`3 array dup 2 [`a'] putinterval'
+	`3 array dup 0 [`a' `b'] putinterval'
+	`3 array dup 1 [`a' `b'] putinterval'
+
+	`1 string dup 0 `a' putinterval'
+	`2 string dup 0 `a' putinterval'
+	`2 string dup 1 `a' putinterval'
+	`3 string dup 0 `a' putinterval'
+	`3 string dup 1 `a' putinterval'
+	`3 string dup 2 `a' putinterval'
+	`3 string dup 0 `ab' putinterval'
+	`3 string dup 1 `ab' putinterval'
+]{
+	dup 1 sprint
+	cvx eval
+	1 sprint
+} foreach
+
+`Test end\n' print

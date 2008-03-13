@@ -1,0 +1,27 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+{
+    $blah escape
+} trapped {
+    `Trapped: ' print 1 sprint
+}{
+    `No trap\n' print
+} ifelse
+
+{
+    mark escape
+} trapped {
+    `Trapped: ' print 1 sprint
+}{
+    `No trap\n' print
+} ifelse

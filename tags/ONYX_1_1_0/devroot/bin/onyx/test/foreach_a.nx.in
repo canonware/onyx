@@ -1,0 +1,44 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print
+
+[
+	`[]'
+	`[1]'
+	`[1 2]'
+	`<>'
+%	`</foo `foo''
+	`</foo `foo'>'
+	`</foo `foo' /bar `bar'>'
+	`()'
+	`(1)'
+	`(1 2)'
+	``''
+	``a''
+	``ab''
+]{
+	dup 1 sprint
+	cvx eval {pstack clear} foreach
+} foreach
+
+[
+	`[1 2]'
+	`</foo `foo' /bar `bar'>'
+	`(1 2)'
+	``ab''
+]{
+	dup 1 sprint
+	cvx eval {pstack clear exit} foreach
+} foreach
+
+`Test end\n' print

@@ -1,0 +1,22 @@
+Test begin
+`0 0'
+0
+`1 0'
+1
+`16#7fffffffffffffff -62'
+1
+`16#7fffffffffffffff -63'
+0
+`16#7fffffffffffffff -64'
+0
+`16#7fffffffffffffff -65'
+0
+`1 62'
+4611686018427387904
+`1 63'
+-9223372036854775808
+`1 64'
+0
+`1 65'
+0
+Test end

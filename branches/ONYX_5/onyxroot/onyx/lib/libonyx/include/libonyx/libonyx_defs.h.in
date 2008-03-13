@@ -1,0 +1,73 @@
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ ******************************************************************************/
+
+#undef CW_DBG
+
+#ifndef CW_ASSERT
+#undef CW_ASSERT
+#endif
+
+#undef WORDS_BIGENDIAN
+
+#undef CW_THREADS
+#undef CW_PTHREADS
+#undef CW_FTHREADS
+#undef CW_MTHREADS
+#undef CW_STHREADS
+#undef CW_PTH
+
+#undef CW_OOP
+#undef CW_HANDLE
+#undef CW_REAL
+#undef CW_REGEX
+#undef CW_POSIX
+#undef CW_POSIX_FILE
+#undef CW_SOCKET
+#undef CW_MODULES
+
+/* If using gcc and inlines weren't disabled by configure, use inline
+ * functions. */
+#undef CW_USE_INLINES
+#if (defined(__GNUC__) && defined(CW_USE_INLINES))
+#define CW_INLINE static __inline__
+#define CW_P_INLINE static __inline__
+#else
+#define CW_INLINE
+#define CW_P_INLINE static
+#endif
+
+#undef CW_CPU_IA32
+#undef CW_CPU_PPC
+
+#undef SIZEOF_INT_P
+
+#undef CW_HAVE_SOCKLEN_T
+#undef CW_HAVE_DIRENT_NAMLEN
+#undef CW_LIBONYX_USE_STAT_ATIMESPEC
+#undef CW_LIBONYX_USE_STAT_MTIMESPEC
+#undef CW_LIBONYX_USE_STAT_CTIMESPEC
+#undef CW_LIBONYX_USE_TM_ZONE
+#undef CW_LIBONYX_USE_TZNAME
+#undef CW_LIBONYX_USE_TM_GMTOFF
+#undef CW_LIBONYX_USE_ALTZONE
+
+#undef HAVE_POLL
+#undef HAVE_READDIR_R
+#undef HAVE_UNSETENV
+#undef HAVE_ASPRINTF
+
+#undef HAVE_STDBOOL_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_MACHINE_ENDIAN_H
+#undef HAVE_PTHREAD_NP_H

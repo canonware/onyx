@@ -1,0 +1,40 @@
+Test begin
+v:data --> <>
+<$foo `foo'> v:setdata
+v:data --> <$foo `foo'>
+$bar `bar' v:def
+v:data --> <$bar `bar' $foo `foo'>
+$bar v:undef
+v:data --> <$foo `foo'>
+v:isa --> -class=$vclass-
+v:isa --> -class=$vclass-
+vclass v:setisa
+v:isa --> -class=$vclass-
+vclass v:kind --> true
+fooclass:new --> -instance=$fooclass-
+fooclass:rnew --> -instance=$fooclass-
+$rnew fooclass:implementor --> -class=$vclass-
+$rnew fooclass:implements --> false
+$rnew vclass:implements --> true
+$blah fooclass:implements --> false
+$method fooclass:method --> {--this-- --exch-- --method--}
+fooclass:classname --> $fooclass
+$barclass fooclass:setclassname
+fooclass:classname --> $barclass
+$fooclass fooclass:setclassname
+fooclass:super --> -class=$vclass-
+fooclass:super --> -class=$vclass-
+vclass fooclass:setsuper
+fooclass:super --> -class=$vclass-
+fooclass:methods --> <>
+<$foo {`foo' 1 sprint}> fooclass:setmethods
+fooclass:methods --> <$foo -array->
+fooclass:foo --> `foo'
+fooclass:data --> <>
+<$foo `foo'> fooclass:setdata
+fooclass:data --> <$foo `foo'>
+$bar `bar' fooclass:def
+fooclass:data --> <$bar `bar' $foo `foo'>
+$bar fooclass:undef
+fooclass:data --> <$foo `foo'>
+Test end

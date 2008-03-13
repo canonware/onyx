@@ -1,0 +1,3 @@
+Test begin
+At line 34, column 0: Error $syntaxerror
+ostack: (`\`Unterminated string\n\n\`Test end\n\' print\npstack\n')

@@ -1,0 +1,25 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Called as: b_ppid_a.nx <ppid>
+
+`Child test begin\n' print flush
+
+argv 1 get cvx eval
+ppid over ne {
+    `Parent pid not ppid: ' exch cvs ` != ' ppid cvs `\n' 5 ncat
+}{
+    pop
+} ifelse
+
+`Child test end\n' print
+pstack

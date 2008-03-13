@@ -1,0 +1,37 @@
+Test begin
+in:
+<-file- <$POLLWRNORM false $POLLOUT false>>
+out:
+[-file-]
+<-file- <$POLLWRNORM true $POLLOUT true>>
+in:
+<-file- <$POLLWRNORM false $POLLOUT false> -file- <$POLLWRNORM false $POLLOUT false>>
+out:
+[-file- -file-]
+<-file- <$POLLWRNORM true $POLLOUT true> -file- <$POLLWRNORM true $POLLOUT true>>
+in:
+<-file- <$POLLWRNORM false $POLLOUT false>>
+out:
+[-file-]
+<-file- <$POLLWRNORM true $POLLOUT true>>
+in:
+<-file- <$garbage `ignore me' $POLLWRNORM true $POLLOUT true>>
+out:
+[-file-]
+<-file- <$garbage `ignore me' $POLLWRNORM true $POLLOUT true>>
+in:
+<-file- <$POLLWRNORM false $POLLOUT false $POLLRDNORM false $POLLIN false>>
+out:
+[-file-]
+<-file- <$POLLWRNORM true $POLLOUT true $POLLRDNORM true $POLLIN true>>
+in:
+<-file- <$POLLWRNORM true $POLLOUT true $POLLRDNORM true $POLLIN true>>
+out:
+[-file-]
+<-file- <$POLLWRNORM true $POLLOUT true $POLLRDNORM true $POLLIN true>>
+in:
+<-file- <$POLLWRNORM false $POLLOUT false $POLLRDNORM false $POLLIN false> -file- <$POLLWRNORM false $POLLOUT false $POLLRDNORM false $POLLIN false>>
+out:
+[-file- -file-]
+<-file- <$POLLWRNORM true $POLLOUT true $POLLRDNORM true $POLLIN true> -file- <$POLLWRNORM true $POLLOUT true $POLLRDNORM true $POLLIN true>>
+Test end

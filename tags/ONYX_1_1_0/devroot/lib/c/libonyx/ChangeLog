@@ -1,0 +1,90 @@
+2001-07-30  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Change the API of the following operators to
+	not leave the input stack on ostack: spush, scount, scounttomark,
+	sdup, sindex, sexch, sroll, spop, sclear, and scleartomark.
+
+2001-07-29  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_thread.c (nxoe_p_thread_name_accept): When the result of
+	immediate name evaluation is an executable array, set the
+	evaluatable attribute.
+
+	* : Add an additional attribute.  Objects are now literal,
+	executable, or evaluatable.  The addition of the evaluatable
+	attribute allows the bind operator to replace executable names
+	with associated executable arrays by converting the executable
+	arrays to evaluatable arrays.
+
+	* src/systemdict.c: Add the cve and echeck operators.
+
+	* src/nxa.c: Add nxa_malloc_e() and nxa_free_e().
+
+2001-07-27  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_dict.c (nxoe_l_dict_delete): Don't leak the internal dch.
+
+	* src/nxa.c: Track number of bytes of memory allocation rather
+	than number of object allocations in order to provide more
+	predictable threshold-triggered collection.
+
+	* src/systemdict.c (systemdict_copy): Pop the source dictionary off
+	ostack before returning.
+
+2001-07-26  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_mark): Ignored unregistered objects, rather
+	than asserting that all objects are registered.
+
+2001-07-23  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Add the following operators: pid, ppid, uid,
+	euid, gid, egid, setuid, seteuid, setgid, and setegid.
+
+2001-07-22  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Add the ndup and npop operators.
+
+	* include/libonyx/nxo_stack.h (NXO_STACK_NPOP): Add a missing ")".
+
+	* src/systemdict.c: Add the setenv and unsetenv operators, since
+	direct modifications to envdict will not be visible to programs
+	such as ps.
+
+2001-07-21  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode_gen.nx: Generate a temporary dictionary of short
+	names that is used to compact the onyx bootstrapping code.
+
+2001-07-20  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode.nx: Implement outputsdict, outputs and output.
+
+	* src/systemdict.c (systemdict_cvrs): Treat integer as signed
+	rather than unsigned.
+
+2001-07-19  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_hooktag): Add.
+
+	* include/libonyx/nx.h: Remove sprintdict, which is replaced by
+	sprintsdict.
+
+	* src/nx_nxcode.nx: Implement sprintsdict and sprints.  Re-define
+	sprint in terms of sprints.
+
+	* src/systemdict.c (systemdict_cvs): Convert a string to a
+	syntactically valid equivalent.  Strings were previously left alone.
+
+2001-07-13  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_thread.c (nxoe_p_thread_feed): Support signed radix
+	integers.  The format is <sign><radix>#<value>.  The sign is optional.
+	
+	(nxoe_p_thread_integer_accept): Implement the equivalent of
+	strtoll().  This avoids redundant error checking, since the onyx
+	scanner already assures that all input characters are valid.  Most
+	importantly though, it gets around using Solaris's buggy strtoll()
+	implementation.
+
+	* : Add nxo_hook_data_set().

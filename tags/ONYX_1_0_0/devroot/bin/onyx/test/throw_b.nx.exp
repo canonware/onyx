@@ -1,0 +1,70 @@
+Test begin
+Error /stackunderflow
+ostack: ()
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0: {
+	{-array- -array- -array- -array-}
+	{--eval-- --not-- -array- --if--}
+	--foreach--
+ 3:-->	--dup--
+	--type--
+	/nametype
+	--ne--
+	{/typecheck /systemdict --load-- /throw --get-- --eval--}
+	--if--
+	/currenterror
+	--load--
+	--begin--
+	/newerror
+	true
+	--def--
+	--dup--
+	/errorname
+	--exch--
+	--cvlit--
+	--def--
+	--ostack--
+	--spop--
+	--pop--
+	/ostack
+	--exch--
+	--def--
+	/dstack
+	--dstack--
+	--spop--
+	--pop--
+	--def--
+	--estack--
+	--spop--
+	--pop--
+	/estack
+	--exch--
+	--def--
+	--istack--
+	--spop--
+	--pop--
+	/istack
+	--exch--
+	--def--
+	/estack
+	--load--
+	--sdup--
+	--spop--
+	--exch--
+	--pop--
+	--end--
+	--exch--
+	/errordict
+	--load--
+	--exch--
+	--get--
+	--eval--
+	/errordict
+	--load--
+	/stop
+	--get--
+	--eval--
+}
+1:	-file-
+2:	--start--

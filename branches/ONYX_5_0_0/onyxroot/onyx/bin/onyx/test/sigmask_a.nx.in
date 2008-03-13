@@ -1,0 +1,83 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Get.
+$SIG_GETMASK <> sigmask
+type $dicttype ne {
+    `Expected dict (1)\n' print
+} if
+
+$SIG_GETMASK <> sigmask
+$SIGABRT known {
+    $SIG_GETMASK <$foo `foo' $SIGABRT false> sigmask
+    dup $foo get pop
+    $SIGABRT known {
+	`$SIGABRT defined\n' print
+    } if
+} unless
+
+# Set.
+$SIG_SETMASK
+$SIG_GETMASK <> sigmask
+<>
+sigmask
+type $dicttype ne {
+    `Expected dict (2)\n' print
+} if
+
+$SIG_SETMASK
+$SIG_GETMASK <> sigmask
+sigmask
+count 0 ne {
+    `Unexpected stack object (1)\n' print
+} if
+
+$SIG_SETMASK
+$SIG_GETMASK <> sigmask
+dup $SIGINT true put
+sigmask
+$SIG_GETMASK <> sigmask $SIGINT known {
+    `Expected $SIGINT to be defined (1)\n' print
+} unless
+
+# Block/unblock.
+$SIG_UNBLOCK <$SIGINT true> <> sigmask
+type $dicttype ne {
+    `Expected dict (3)\n' print
+} if
+$SIG_GETMASK <> sigmask $SIGINT known {
+    `Did not expect $SIGINT to be defined\n' print
+} if
+
+$SIG_BLOCK <$SIGINT true> <> sigmask
+type $dicttype ne {
+    `Expected dict (4)\n' print
+} if
+$SIG_GETMASK <> sigmask $SIGINT known {
+    `Expected $SIGINT to be defined (2)\n' print
+} unless
+
+$SIG_UNBLOCK <$SIGINT true> sigmask
+count 0 ne {
+    `Unexpected stack object (2)\n' print
+} if
+$SIG_GETMASK <> sigmask $SIGINT known {
+    `Did not expect $SIGINT to be defined\n' print
+} if
+
+$SIG_BLOCK <$SIGINT true> sigmask
+count 0 ne {
+    `Unexpected stack object (3)\n' print
+} if
+$SIG_GETMASK <> sigmask $SIGINT known {
+    `Expected $SIGINT to be defined (3)\n' print
+} unless

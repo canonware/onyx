@@ -1,0 +1,256 @@
+dnl 
+dnl <Copyright = jasone>
+dnl <License>
+dnl 
+dnl Version: <Version>
+dnl 
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(Cookfile.in)
+
+abs_srcdir=`cd $srcdir; pwd`
+AC_SUBST(abs_srcdir)
+
+objdir=.
+AC_SUBST(objdir)
+abs_objdir=`pwd`
+AC_SUBST(abs_objdir)
+
+cfgoutputs="Cookfile doc/latex/manual.tex test/verify"
+cfghdrs=
+bins=
+mods=
+libs=
+
+dnl If CFLAGS isn't defined and using gcc, set CFLAGS to something reasonable.
+dnl Otherwise, just prevent autoconf from molesting CFLAGS.
+CFLAGS=$CFLAGS
+AC_PROG_CC
+if test "x$CFLAGS" = "x" -a "x$GCC" = "xyes" ; then
+	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+fi
+AC_PROG_CPP
+
+dnl Use threads by default.
+CW_ENABLE_THREADS
+
+dnl Support POSIX file operations by default.
+CW_ENABLE_POSIX_FILE
+
+dnl Support POSIX by default.
+CW_ENABLE_POSIX
+
+dnl Enable inline functions by default.
+CW_ENABLE_INLINES
+
+dnl Use libedit by default.
+CW_ENABLE_LIBEDIT
+
+dnl Do not compile with debugging by default.
+CW_DISABLE_DEBUG
+
+dnl Do not compile with profiling by default.
+CW_DISABLE_PROFILE
+
+dnl Only optimize if not debugging.
+if test "x$enable_debug" = "x0" ; then
+  CFLAGS="$CFLAGS -O"
+fi
+
+if test "x$enable_profile" = "x1" ; then
+  CFLAGS="$CFLAGS -pg"
+fi
+
+dnl Look for libraries.  Order matters.  They should appear in an order that
+dnl works on the link line (-lonyx -ledit).
+CW_BUILD_LIB(libonyx, lib_onyx)
+if test "x$enable_libedit" = "x1" ; then
+  CW_BUILD_LIB(libedit, lib_edit)
+fi
+
+dnl Look for modules.
+if test "x$enable_threads" = "x1" -a "x$enable_posix" = "x1" ; then
+  CW_BUILD_MOD(modcanonyx, mod_canonyx)
+  CW_BUILD_MOD(modgtk, mod_gtk)
+  CW_BUILD_MOD(modncurses, mod_ncurses)
+fi
+
+dnl Look for binaries.
+CW_BUILD_BIN(onyx, bin_onyx)
+
+AC_CONFIG_HEADER($cfghdrs)
+AC_SUBST(cfghdrs)
+AC_SUBST(bins)
+AC_SUBST(mods)
+AC_SUBST(libs)
+
+AC_CANONICAL_HOST
+case "${host}" in
+  *-*-freebsd*)
+	AC_DEFINE(_CW_OS_FREEBSD, )
+	RPATH="-Wl,-rpath,"
+        ;;
+  *-*-linux*)
+	AC_DEFINE(_CW_OS_LINUX, )
+	RPATH="-Wl,-rpath,"
+        ;;
+  *-*-solaris2*)
+	AC_DEFINE(_CW_OS_SOLARIS, )
+	AC_DEFINE(_POSIX_PTHREAD_SEMANTICS)
+	RPATH="-Wl,-R,"
+	LIBS="$LIBS -lposix4"
+	if test "x$enable_threads" = "x1" ; then
+		LIBS="$LIBS -lthread"
+	fi
+        ;;
+  *)
+	AC_MSG_RESULT(Unsupported operating system: ${host})
+	RPATH="-Wl,-rpath,"
+	;;
+esac
+AC_SUBST(RPATH)
+
+AC_PROG_INSTALL
+AC_PROG_RANLIB
+AC_PATH_PROG(AR, ar, , $PATH)
+AC_PATH_PROG(LD, ld, , $PATH)
+AC_PATH_PROG(LN, ln, , $PATH)
+AC_PATH_PROG(PERL, perl, , $PATH)
+AC_PATH_PROG(BASENAME, basename, , $PATH)
+AC_PATH_PROG(CHMOD, chmod, , $PATH)
+AC_PATH_PROG(INSTALL, install, , $PATH)
+AC_PATH_PROG(CAT, cat, , $PATH)
+AC_PATH_PROG(DIFF, diff, , $PATH)
+AC_PATH_PROG(ETAGS, etags, , $PATH)
+AC_PATH_PROG(LATEX, latex, , $PATH)
+AC_PATH_PROG(PDFLATEX, pdflatex, , $PATH)
+AC_PATH_PROG(DVIPS, dvips, , $PATH)
+AC_PATH_PROG(FIG2DEV, fig2dev, , $PATH)
+AC_PATH_PROG(LATEX2HTML, latex2html, , $PATH)
+AC_PATH_PROG(MAKEINDEX, makeindex, , $PATH)
+
+VERIFY="$objdir/test/verify"
+mkdir -p $objdir/test
+AC_SUBST(VERIFY)
+
+dnl Find libraries.
+
+if test "x$enable_libedit" = "x1" -a "x$build_libedit" = "xyes" ; then
+  AC_CHECK_LIB(curses, tigetstr, LIBS="$LIBS", \
+    AC_MSG_ERROR(Cannot find the curses library))
+fi
+
+dnl Define preprocessor macros.
+
+dnl Check for header files.
+dnl AC_HEADER_STDC
+AC_CHECK_HEADERS(poll.h, , AC_MSG_ERROR(Cannot build without unistd.h))
+AC_CHECK_HEADERS(unistd.h, , AC_MSG_ERROR(Cannot build without poll.h))
+
+dnl Check for typedefs, structures, and compiler characteristics.
+AC_C_BIGENDIAN
+
+if test "x$build_libonyx" = "xyes" ; then
+  AC_CHECK_SIZEOF(signed char, 1)
+  AC_CHECK_SIZEOF(unsigned char, 1)
+  AC_CHECK_SIZEOF(signed short, 2)
+  AC_CHECK_SIZEOF(unsigned short, 2)
+  AC_CHECK_SIZEOF(int, 4) dnl defines SIZEOF_INT
+  AC_CHECK_SIZEOF(unsigned, 4)
+  AC_CHECK_SIZEOF(long, 4)
+  AC_CHECK_SIZEOF(unsigned long, 4)
+  AC_CHECK_SIZEOF(long long, 4)
+  AC_CHECK_SIZEOF(unsigned long long, 4)
+  AC_CHECK_SIZEOF(int *, 4) dnl defines SIZEOF_INT_P
+
+dnl Try to figure out which field of struct dirent contains the entry string
+dnl length.
+AC_MSG_CHECKING(for (struct dirent).d_namlen)
+AC_TRY_LINK([
+#include <dirent.h>
+], [
+	struct dirent	ent;
+
+	ent.d_namlen = 0;
+], AC_MSG_RESULT(yes), AC_MSG_RESULT(no)
+
+dnl d_namlen doesn't exist, so try d_reclen.
+AC_MSG_CHECKING(for (struct dirent).d_reclen)
+AC_TRY_LINK([
+#include <dirent.h>
+], [
+	struct dirent	ent;
+
+	ent.d_reclen = 0;
+], AC_MSG_RESULT(yes)
+   AC_DEFINE(_CW_LIBONYX_USE_DIRENT_RECLEN),
+   AC_MSG_RESULT(no)
+   AC_MSG_ERROR(struct dirent too deviant)))
+
+  AC_CHECK_FUNCS(unsetenv)
+fi
+
+if test "x$build_onyx" = "xyes" ; then
+  AC_CHECK_FUNCS(dlopen, , \
+    AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl", \
+      AC_MSG_ERROR(Cannot find dlopen)))
+
+  if test "x$prefix" = "xNONE" ; then
+    _CW_ONYX_RPATH="/usr/local/share/onyx/nxcode"
+    _CW_ONYX_MPATH="/usr/local/share/onyx/nxmod"
+  else
+    _CW_ONYX_RPATH="$prefix/share/onyx/nxcode"
+    _CW_ONYX_MPATH="$prefix/share/onyx/nxmod"
+  fi
+  AC_DEFINE_UNQUOTED(_CW_ONYX_RPATH, "$_CW_ONYX_RPATH")
+  AC_DEFINE_UNQUOTED(_CW_ONYX_MPATH, "$_CW_ONYX_MPATH")
+
+  mkdir -p $objdir/bin/onyx/man/man1
+  cfgoutputs="$cfgoutputs bin/onyx/man/man1/onyx.1"
+fi
+
+if test "x$build_modncurses" = "xyes" ; then
+  AC_CHECK_HEADERS(ncurses.h, , AC_MSG_ERROR(Cannot build without ncurses.h))
+fi
+
+if test "x$build_modgtk" = "xyes" ; then
+  AC_PATH_PROGS(GTKCONFIG, gtk-config gtk12-config, , $PATH)
+fi
+
+dnl 
+dnl Print out the results of configuration.
+dnl 
+AC_MSG_RESULT(===============================================================================)
+AC_MSG_RESULT(CFLAGS       : ${CFLAGS})
+AC_MSG_RESULT(CPPFLAGS     : ${CPPFLAGS})
+AC_MSG_RESULT(LDFLAGS      : ${LDFLAGS})
+AC_MSG_RESULT(LIBS         : ${LIBS})
+AC_MSG_RESULT()
+AC_MSG_RESULT(objdir       : ${objdir})
+AC_MSG_RESULT(abs_objdir   : ${abs_objdir})
+AC_MSG_RESULT(srcdir       : ${srcdir})
+AC_MSG_RESULT(abs_srcdir   : ${abs_srcdir})
+AC_MSG_RESULT(prefix       : ${prefix})
+AC_MSG_RESULT()
+AC_MSG_RESULT(libs         :${libs})
+AC_MSG_RESULT(mods         :${mods})
+AC_MSG_RESULT(bins         :${bins})
+AC_MSG_RESULT()
+AC_MSG_RESULT(threads      : ${enable_threads})
+AC_MSG_RESULT(posix        : ${enable_posix})
+AC_MSG_RESULT(posix-file   : ${enable_posix_file})
+AC_MSG_RESULT(inlines      : ${enable_inlines})
+AC_MSG_RESULT(libedit      : ${enable_libedit})
+AC_MSG_RESULT(debug        : ${enable_debug})
+AC_MSG_RESULT(profile      : ${enable_profile})
+AC_MSG_RESULT(===============================================================================)
+
+dnl Create additional directories that processed files will land in.
+mkdir -p $objdir/doc/latex
+
+dnl Process .in files.
+AC_OUTPUT($cfgoutputs)
+
+dnl autoconf doesn't keep the execute bit if it's set for the input files, so do
+dnl it manually.
+echo chmod u+x $objdir/test/verify
+chmod u+x $objdir/test/verify
