@@ -1,4 +1,0 @@
-1999-09-09  Jason Evans  <jasone@canonware.com>
-
-	* : Port ficl to Linux and restructure code layout to conform with
-	other libraries.
