@@ -1,0 +1,28 @@
+Test begin
+`0 0 ibdup'
+0
+0
+`0 1 0 ibdup'
+0
+1
+0
+`0 1 1 ibdup'
+1
+1
+0
+`0 1 2 0 ibdup'
+0
+2
+1
+0
+`0 1 2 1 ibdup'
+1
+2
+1
+0
+`0 1 2 2 ibdup'
+2
+2
+1
+0
+Test end

@@ -1,0 +1,199 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% nxo_handle portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{nxo\_handle}
+\label{nxo_handle}
+\index{nxo_handle@\classname{nxo\_handle}{}}
+
+The \classname{nxo\_handle} class is a subclass of the \classname{nxo} class.
+
+\subsubsection{API}
+\begin{capi}
+\label{cw_nxo_handle_eval_t}
+\index{cw_nxo_handle_eval_t@\cfunc{cw\_nxo\_handle\_eval\_t}{}}
+\citem{\cfunc[void]{cw\_nxo\_handle\_eval\_t}{void *a\_opaque,
+cw\_nxo\_t *a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_opaque: ]
+			Opaque data pointer.
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Handle-dependent.
+	\item[Description: ]
+		Evaluation function typedef.
+	\end{capilist}
+\label{cw_nxo_handle_ref_iter_t}
+\index{cw_nxo_handle_ref_iter_t@\cfunc{cw\_nxo\_handle\_ref\_iter\_t}{}}
+\citem{\cfunc[cw\_nxoe\_t *]{cw\_nxo\_handle\_ref\_iter\_t}{void *a\_opaque,
+bool a\_reset}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_opaque: ]
+			Opaque data pointer.
+		\item[a\_reset: ]
+			\begin{description}\item[]
+			\item[false: ]
+				At least one iteration has already occurred.
+			\item[true: ]
+				First iteration.
+			\end{description}
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer to an \classname{nxoe}.
+			\item[NULL: ]
+				No more references.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Reference iterator function typedef.
+	\end{capilist}
+\label{cw_nxo_handle_delete_t}
+\index{cw_nxo_handle_delete_t@\cfunc{cw\_nxo\_handle\_delete\_t}{}}
+\citem{\cfunc[bool]{cw\_nxo\_handle\_delete\_t}{void *a\_opaque,
+uint32\_t a\_iter}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_opaque: ]
+			Opaque data pointer.
+		\item[a\_iter: ]
+			Garbage collector sweep iteration count (starts at 0).
+			This value can be used to impose ordering of dependent
+			object deletions.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[false: ] Success.
+			\item[true: ] Defer deletion until a later garbage
+			collector sweep iteration.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor function typedef.
+	\end{capilist}
+\label{nxo_handle_new}
+\index{nxo_handle_new@\cfunc{nxo\_handle\_new}{}}
+\citem{\cfunc[void]{nxo\_handle\_new}{cw\_nxo\_t *a\_nxo, void *a\_opaque,
+cw\_nxo\_handle\_eval\_t *a\_eval\_f, cw\_nxo\_handle\_ref\_iter\_t
+*a\_ref\_iter\_f, cw\_nxo\_handle\_delete\_t *a\_delete\_f}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo}.
+		\item[a\_opaque: ]
+			Opaque data pointer to be passed to \cvar{a\_eval\_f},
+			\cvar{a\_ref\_iter\_f}, and \cvar{a\_delete\_f}.
+		\item[a\_eval\_f: ]
+			Pointer to an evaluation function.
+		\item[a\_ref\_iter\_f: ]
+			Pointer to a reference iterator function.
+		\item[a\_delete\_f: ]
+			Pointer to a destructor function.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_handle_tag_get}
+\index{nxo_handle_tag_get@\cfunc{nxo\_handle\_tag\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_handle\_tag\_get}{const cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the tag object associated with \cvar{a\_nxo}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the tag object associated with
+		\cvar{a\_nxo}.  This object pointer can safely be used for
+		modifying the tag object.
+	\end{capilist}
+\label{nxo_handle_opaque_get}
+\index{nxo_handle_opaque_get@\cfunc{nxo\_handle\_opaque\_get}{}}
+\citem{\cfunc[void *]{nxo\_handle\_opaque\_get}{const cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Opaque data pointer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the opaque data pointer associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_handle_opaque_set}
+\index{nxo_handle_opaque_set@\cfunc{nxo\_handle\_opaque\_set}{}}
+\citem{\cfunc[void]{nxo\_handle\_opaque\_set}{cw\_nxo\_t *a\_nxo, void
+*a\_opaque}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo}.
+		\item[a\_opaque: ]
+			Opaque data pointer.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the opaque data pointer associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_handle_eval}
+\index{nxo_handle_eval@\cfunc{nxo\_handle\_eval}{}}
+\citem{\cfunc[void]{nxo\_handle\_eval}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+*a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo}.
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Handle-specific.
+	\item[Description: ]
+		Evaluate the \cvar{a\_nxo}.  If there is no evaluation function
+		associated with \cvar{a\_nxo}, it is pushed onto ostack.
+	\end{capilist}
+\end{capi}

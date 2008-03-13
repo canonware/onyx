@@ -1,0 +1,8 @@
+Test begin
+Error $typecheck
+ostack: (-mark-)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--setgstdout--
+1:	-file-
+2:	--start--

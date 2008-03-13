@@ -1,0 +1,35 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`class\n' print
+$c class def
+
+c <$foo `foo'> setdata
+c data 2 sprint
+
+c null setdata
+c data 2 sprint
+
+c <$foo `bar'> setdata
+c data 2 sprint
+
+`instance\n' print
+$i vclass:new def
+
+i <$foo `foo'> setdata
+i data 2 sprint
+
+i null setdata
+i data 2 sprint
+
+i <$foo `bar'> setdata
+i data 2 sprint

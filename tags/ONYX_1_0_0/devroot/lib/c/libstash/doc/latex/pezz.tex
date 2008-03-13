@@ -1,0 +1,165 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% pezz portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{pezz}
+\label{pezz}
+\index{pezz@\classname{pezz}{}}
+
+The \classname{pezz} class provides cached allocation for equal-size buffers.
+It does incremental block allocation, then carves buffers from those blocks.  No
+memory is freed until \cfunc{pezz\_delete}{} is called.
+
+In the debug version of \libname{libstash}, tracking information is kept so that
+memory leaks and other memory allocation errors can be detected and printed to
+\cvar{out\_err}.
+
+\subsubsection{API}
+\begin{capi}
+\label{pezz_new}
+\index{pezz_new@\cfunc{pezz\_new}{}}
+\citem{\cfunc[cw\_pezz\_t *]{pezz\_new}{cw\_pezz\_t *a\_pezz, cw\_mem\_t
+*a\_mem, cw\_uint32\_t a\_buffer\_size, cw\_uint32\_t a\_num\_buffers}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pezz: ]
+			Pointer to space for a \classname{pezz}, or NULL.
+		\item[a\_mem: ]
+			Pointer to the allocator to use internally, or NULL.
+		\item[a\_buffer\_size: ]
+			Size of buffers to allocate and return from
+			\cfunc{pezz\_get}{}.
+		\item[a\_num\_buffers: ]
+			Number of buffers to allocate space for each time a new
+			memory block is allocated.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a \classname{pezz}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{pezz_delete}
+\index{pezz_delete@\cfunc{pezz\_delete}{}}
+\citem{\cfunc[void]{pezz\_delete}{cw\_pezz\_t *a\_pezz}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pezz: ]
+			Pointer to a \classname{pezz}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{pezz_buffer_size_get}
+\index{pezz_buffer_size_get@\cfunc{pezz\_buffer\_size\_get}{}}
+\citem{\cfunc[cw\_uint32\_t]{pezz\_size\_get}{cw\_pezz\_t *a\_pezz}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pezz: ]
+			Pointer to a \classname{pezz}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Size of buffers that \cvar{a\_pezz} is using.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the size of the buffers that \cvar{a\_pezz} is using.
+	\end{capilist}
+\label{pezz_get_e}
+\index{pezz_get_e@\cfunc{pezz\_get\_e}{}}
+\citem{\cfunc[void *]{pezz\_get\_e}{cw\_pezz\_t *a\_pezz, const char
+*a\_filename, cw\_uint32\_t a\_line\_num}}
+\label{pezz_get}
+\index{pezz_get@\cppmacro{pezz\_get}{}}
+\citem{\cppmacro[void *]{pezz\_get}{cw\_pezz\_t *a\_pezz}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pezz: ]
+			Pointer to a \classname{pezz}.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory buffer.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate a memory buffer and return a pointer to it.
+	\end{capilist}
+\label{pezz_put_e}
+\index{pezz_put_e@\cfunc{pezz\_put\_e}{}}
+\citem{\cfunc[void]{pezz\_put\_e}{cw\_pezz\_t *a\_pezz, void *a\_buffer, const
+char *a\_filename, cw\_uint32\_t a\_line\_num}}
+\label{pezz_put}
+\index{pezz_put@\cppmacro{pezz\_put}{}}
+\citem{\cppmacro[void]{pezz\_put}{cw\_pezz\_t *a\_pezz, void *a\_buffer}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pezz: ]
+			Pointer to a \classname{pezz}.
+		\item[a\_buffer: ]
+			Pointer to a memory buffer.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Put back (deallocate) \cvar{a\_buffer}.
+	\end{capilist}
+\label{pezz_dump}
+\index{pezz_dump@\cfunc{pezz\_dump}{}}
+\citem{\cfunc[void]{pezz\_dump}{cw\_pezz\_t *a\_pezz, const char *a\_prefix}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pezz: ]
+			Pointer to a \classname{pezz}.
+		\item[a\_prefix: ]
+			Pointer to a string which is used as a prefix for all
+			lines of output.
+		\end{description}
+	\item[Output(s): ]
+		Output printed to \cvar{out\_err}.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Dump the internal state of \cvar{a\_pezz} to \cvar{out\_err}.
+	\end{capilist}
+\end{capi}

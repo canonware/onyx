@@ -1,0 +1,18 @@
+Test begin
+`$AF_INET $SOCK_STREAM'
+-file-
+`$AF_INET $SOCK_STREAM $tcp'
+-file-
+`$AF_LOCAL $SOCK_STREAM'
+-file-
+`$AF_LOCAL $SOCK_STREAM $ip'
+-file-
+`$AF_INET $SOCK_DGRAM'
+-file-
+`$AF_INET $SOCK_DGRAM $udp'
+-file-
+`$AF_LOCAL $SOCK_DGRAM'
+-file-
+`$AF_LOCAL $SOCK_DGRAM $ip'
+-file-
+Test end

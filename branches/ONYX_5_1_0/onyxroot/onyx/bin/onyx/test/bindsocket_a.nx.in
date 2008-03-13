@@ -1,0 +1,40 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# TCP/IP socket.
+$AF_INET $SOCK_STREAM socket
+$s exch def
+
+s `localhost' bindsocket
+
+s sockname
+dup $family get 1 sprint
+dup $address get 1 sprint
+$port get type $integertype ne {
+    `Port is not an integer\n' print
+} if
+
+# Unix-domain socket.
+$AF_LOCAL $SOCK_STREAM socket
+$s exch def
+
+$sockpath `/tmp/bindsocket_a_' uid cvs `_' pid cvs 4 ncat def
+
+s sockpath bindsocket
+s sockname
+dup $family get 1 sprint
+$path get type $stringtype ne {
+    `Path is not a string\n' print
+} if
+
+s close
+sockpath unlink

@@ -1,0 +1,56 @@
+Test begin
+`-1 trunc'
+-1
+`0 trunc'
+0
+`1 trunc'
+1
+`-1.0 trunc'
+-1
+`0.0 trunc'
+0
+`1.0 trunc'
+1
+`-2.9 trunc'
+-2
+`-2.6 trunc'
+-2
+`-2.5 trunc'
+-2
+`-2.4 trunc'
+-2
+`-2.1 trunc'
+-2
+`-1.9 trunc'
+-1
+`-1.6 trunc'
+-1
+`-1.5 trunc'
+-1
+`-1.4 trunc'
+-1
+`-1.1 trunc'
+-1
+`0.0 trunc'
+0
+`1.1 trunc'
+1
+`1.4 trunc'
+1
+`1.5 trunc'
+1
+`1.6 trunc'
+1
+`1.9 trunc'
+1
+`2.1 trunc'
+2
+`2.4 trunc'
+2
+`2.5 trunc'
+2
+`2.6 trunc'
+2
+`2.9 trunc'
+2
+Test end

@@ -1,0 +1,78 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+[
+    ``\\\`''
+    ``\\\'''
+    ``\\\\''
+    ``\\0''
+    ``\\n''
+    ``\\r''
+    ``\\t''
+    ``\\b''
+    ``\\f''
+    ``\\a''
+    ``\\\n''
+    ``\\\r\n''
+    ``\\e''
+
+    # Lower case control character.
+    `a' 0 get 1 `z' 0 get {
+	`\`\\c'
+	#c #string
+	exch
+	#string #c
+	`?' dup 0 4 ndn put cat
+	#string
+	`\'' cat
+    } for
+
+    # Upper case control character.
+    `A' 0 get 1 `Z' 0 get {
+	`\`\\c'
+	#c #string
+	exch
+	#string #c
+	`?' dup 0 4 ndn put cat
+	#string
+	`\'' cat
+    } for
+
+    # Hexadecimal character.
+    [`0' `1' `2' `3' `4' `5' `6' `7' `8' `9'
+    `a' `b' `c' `d' `e' `f'
+    `A' `B' `C' `D' `E' `F']
+
+    0 1 21 {
+	0 1 21 {
+	    #key #Y #Z
+	    `\`\\x'
+	    3 idup 3 idup get cat
+	    exch 3 idup exch get cat
+	    `\'' cat
+
+	    up
+	    #string #key #Y
+	} for
+	#key #Y
+	pop
+    } for
+    #key
+    pop
+]{
+    dup 1 sprints print
+    ` --> ' print
+
+    cvx eval
+
+    1 sprint
+} foreach

@@ -1,0 +1,291 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% dch portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{dch}
+\label{dch}
+\index{dch@\classname{dch}{}}
+
+The \classname{dch} class implements dynamic chained hashing.  The
+\classname{dch} class is a wrapper around the \classname{ch} class that enforces
+fullness/emptiness constraints and rebuilds the hash table when necessary.
+Other than this added functionality, the \classname{dch} class behaves almost
+exactly like the \classname{ch} class.  See the \htmlref{\classname{ch}}{ch}
+class documentation for additional information.
+
+\subsubsection{API}
+\begin{capi}
+
+\label{dch_new}
+\index{dch_new@\cfunc{dch\_new}{}}
+\citem{\cfunc[]{dch\_new}{cw\_dch\_t *a\_dch, cw\_opaque\_alloc\_t *a\_alloc,
+cw\_opaque\_dealloc\_t *a\_dealloc, void *a\_arg, cw\_uint32\_t a\_base\_table,
+cw\_uint32\_t a\_base\_grow, cw\_uint32\_t a\_base\_shrink, cw\_ch\_hash\_t
+*a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to space for a \classname{dch}, or NULL.
+		\item[a\_alloc: ]
+			Pointer to an allocation function to use internally.
+		\item[a\_dealloc: ]
+			Pointer to a deallocation function to use internally.
+		\item[a\_arg: ]
+			Opaque pointer to pass to \cfunc{a\_alloc}{} and
+			\cfunc{a\_dealloc}{}.
+		\item[a\_base\_table: ]
+			Number of slots in the initial hash table.
+		\item[a\_base\_grow: ]
+			Maximum number of items to allow in \cvar{a\_dch} before
+			doubling the hash table size.  The same proportions (in
+			relation to \cvar{a\_base\_table}) are used to decide
+			when to double the table additional times.
+		\item[a\_base\_shrink: ]
+			Minimum proportional (with respect to
+			\cvar{a\_base\_table}) emptiness to allow in the hash
+			table before cutting the hash table size in half.
+		\item[a\_hash: ]
+			Pointer to a hashing function.
+		\item[a\_key\_comp: ]
+			Pointer to a key comparison function.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a \classname{dch}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{dch_delete}
+\index{dch_delete@\cfunc{dch\_delete}{}}
+\citem{\cfunc[void]{dch\_delete}{cw\_dch\_t *a\_dch}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{dch_count}
+\index{dch_count@\cfunc{dch\_count}{}}
+\citem{\cfunc[cw\_uint32\_t]{dch\_count}{cw\_dch\_t *a\_dch}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of items in \cvar{a\_dch}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the number of items in \cvar{a\_dch}.
+	\end{capilist}
+\label{dch_insert}
+\index{dch_insert@\cfunc{dch\_insert}{}}
+\citem{\cfunc[void]{dch\_insert}{cw\_dch\_t *a\_dch, const void *a\_key, const
+void *a\_data, cw\_chi\_t *a\_chi}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[a\_key: ]
+			Pointer to a key.
+		\item[a\_data: ]
+			Pointer to data associated with \cvar{a\_key}.
+		\item[a\_chi: ]
+			Pointer to space for a \classname{chi}, or NULL.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Insert \cvar{a\_data} into \cvar{a\_dch}, using key
+		\cvar{a\_key}.  Use \cvar{a\_chi} for the internal
+		\classname{chi} container if non-NULL.
+	\end{capilist}
+\label{dch_remove}
+\index{dch_remove@\cfunc{dch\_remove}{}}
+\citem{\cfunc[cw\_bool\_t]{dch\_remove}{cw\_dch\_t *a\_dch, const void
+*a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[a\_search\_key: ]
+			Pointer to the key to search with.
+		\item[r\_key: ]
+			Pointer to a key pointer, or NULL.
+		\item[r\_data: ]
+			Pointer to a data pointer, or NULL.
+		\item[r\_chi: ]
+			Pointer to a \classname{chi} pointer, or NULL.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Item with key \cvar{a\_search\_key} not	found.
+			\end{description}
+		\item[*r\_key: ]
+			If (\cvar{r\_key} != NULL) and (retval == FALSE),
+			pointer to a key.  Otherwise, undefined.
+		\item[*r\_data: ]
+			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			pointer to data.  Otherwise, undefined.
+		\item[*r\_chi: ]
+			If (\cvar{r\_chi} != NULL) and (retval == FALSE),
+			pointer to space for a \classname{chi}, or NULL.
+			Otherwise, undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove the item from \cvar{a\_dch} that was most recently
+		inserted with key \cvar{a\_search\_key}.  If successful, set
+		\cvar{*r\_key} and \cvar{*r\_data} to point to the key, data,
+		and externally allocated \classname{chi}, respectively.
+	\end{capilist}
+\label{dch_search}
+\index{dch_search@\cfunc{dch\_search}{}}
+\citem{\cfunc[cw\_bool\_t]{dch\_search}{cw\_dch\_t *a\_dch, const void *a\_key,
+void **r\_data}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[a\_key: ]
+			Pointer to a key.
+		\item[r\_data: ]
+			Pointer to a data pointer, or NULL.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Item with key \cvar{a\_key} not found in
+				\cvar{a\_dch}.
+			\end{description}
+		\item[*r\_data: ]
+			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			pointer to data.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Search for the most recently inserted item with key
+		\cvar{a\_key}.  If found, \cvar{*r\_data} to point to the
+		associated data.
+	\end{capilist}
+\label{dch_get_iterate}
+\index{dch_get_iterate@\cfunc{dch\_get\_iterate}{}}
+\citem{\cfunc[cw\_bool\_t]{dch\_get\_iterate}{cw\_dch\_t *a\_dch, void **r\_key,
+void **r\_data}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[r\_key: ]
+			Pointer to a key pointer, or NULL.
+		\item[r\_data: ]
+			Pointer to a data pointer, or NULL.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				\cvar{a\_dch} is empty.
+			\end{description}
+		\item[*r\_key: ]
+			If (\cvar{r\_key} != NULL) and (retval == FALSE),
+			pointer to a key.  Otherwise, undefined.
+		\item[*r\_data: ]
+			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			pointer to data.  Otherwise, undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
+		item in \cvar{a\_dch}.  Promote the item so that it is the
+		newest item in \cvar{a\_dch}.
+	\end{capilist}
+\label{dch_remove_iterate}
+\index{dch_remove_iterate@\cfunc{dch\_remove\_iterate}{}}
+\citem{\cfunc[cw\_bool\_t]{dch\_remove\_iterate}{cw\_dch\_t *a\_dch,  void
+**r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_dch: ]
+			Pointer to a \classname{dch}.
+		\item[r\_key: ]
+			Pointer to a key pointer, or NULL.
+		\item[r\_data: ]
+			Pointer to a data pointer, or NULL.
+		\item[r\_chi: ]
+			Pointer to a \classname{chi} pointer, or NULL.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				\cvar{a\_dch} is empty.
+			\end{description}
+		\item[*r\_key: ]
+			If (\cvar{r\_key} != NULL) and (retval == FALSE),
+			pointer to a key.  Otherwise, undefined.
+		\item[*r\_data: ]
+			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			pointer to data.  Otherwise, undefined.
+		\item[*r\_chi: ]
+			If (\cvar{r\_chi} != NULL) and (retval == FALSE),
+			pointer to a \classname{chi}, or NULL.  Otherwise,
+			undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{*r\_key} and \cvar{*r\_data} to point to the oldest
+		item in \cvar{a\_dch}, set \cvar{*r\_chi} to point to the item's
+		container, if externally allocated, and remove the item from
+		\cvar{a\_dch}.
+	\end{capilist}
+\end{capi}

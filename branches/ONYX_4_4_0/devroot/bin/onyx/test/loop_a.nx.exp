@@ -1,0 +1,9 @@
+Test begin
+`{\`hi\' 1 sprint exit \`bye\' 1 sprint} loop'
+`hi'
+`0 {1 add dup 1 sprint dup 3 eq {pop exit} if} loop'
+1
+2
+3
+`~exit loop'
+Test end

@@ -1,0 +1,57 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ ******************************************************************************/
+
+#undef _CW_DBG
+
+#ifndef _CW_ASSERT
+#undef _CW_ASSERT
+#endif
+
+#undef _CW_OS_FREEBSD
+#undef _CW_OS_LINUX
+#undef _CW_OS_SOLARIS
+
+/* Solaris needs this for sigwait(). */
+#undef _POSIX_PTHREAD_SEMANTICS
+
+#undef WORDS_BIGENDIAN
+
+#undef _CW_THREADS
+
+#undef _CW_POSIX
+
+#undef _CW_POSIX_FILE
+
+/*
+ * If using gcc and inlines weren't disabled by configure, use inline functions.
+ */
+#undef _CW_USE_INLINES
+#if (defined(__GNUC__) && defined(_CW_USE_INLINES))
+#define _CW_INLINE static __inline__
+#else
+#define _CW_INLINE
+#endif
+
+#undef SIZEOF_SIGNED_CHAR
+#undef SIZEOF_UNSIGNED_CHAR
+#undef SIZEOF_SIGNED_SHORT
+#undef SIZEOF_UNSIGNED_SHORT
+#undef SIZEOF_INT
+#undef SIZEOF_UNSIGNED
+#undef SIZEOF_LONG
+#undef SIZEOF_UNSIGNED_LONG
+#undef SIZEOF_LONG_LONG
+#undef SIZEOF_UNSIGNED_LONG_LONG
+#undef SIZEOF_INT_P
+
+#undef _CW_LIBONYX_USE_DIRENT_RECLEN
+
+#undef HAVE_UNSETENV

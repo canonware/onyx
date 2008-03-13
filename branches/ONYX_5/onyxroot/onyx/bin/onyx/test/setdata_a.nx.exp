@@ -1,0 +1,10 @@
+Test begin
+class
+<$foo `foo'>
+null
+<$foo `bar'>
+instance
+<$foo `foo'>
+null
+<$foo `bar'>
+Test end
