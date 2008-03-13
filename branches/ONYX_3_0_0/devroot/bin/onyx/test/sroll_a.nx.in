@@ -1,0 +1,43 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print flush
+
+[
+	`(1 2 3 4) dup 1 0 sroll pstack clear'
+	`(1 2 3 4) dup 1 1 sroll pstack clear'
+	`(1 2 3 4) dup 1 2 sroll pstack clear'
+	`(1 2 3 4) dup 2 0 sroll pstack clear'
+	`(1 2 3 4) dup 2 1 sroll pstack clear'
+	`(1 2 3 4) dup 2 2 sroll pstack clear'
+	`(1 2 3 4) dup 3 1 sroll pstack clear'
+	`(1 2 3 4) dup 3 2 sroll pstack clear'
+	`(1 2 3 4) dup 3 -1 sroll pstack clear'
+	`(1 2 3 4) dup 3 -2 sroll pstack clear'
+	`(1 2 3 4) dup 3 3 sroll pstack clear'
+	`(1 2 3 4) dup 4 -4 sroll pstack clear'
+	`(1 2 3 4) dup 4 -3 sroll pstack clear'
+	`(1 2 3 4) dup 4 -2 sroll pstack clear'
+	`(1 2 3 4) dup 4 -1 sroll pstack clear'
+	`(1 2 3 4) dup 4 0 sroll pstack clear'
+	`(1 2 3 4) dup 4 1 sroll pstack clear'
+	`(1 2 3 4) dup 4 2 sroll pstack clear'
+	`(1 2 3 4) dup 4 3 sroll pstack clear'
+	`(1 2 3 4) dup 4 4 sroll pstack clear'
+	`(1 2 3 4) dup 4 5 sroll pstack clear'
+]{
+	dup 1 sprint
+	cvx eval
+} foreach
+
+`Test end\n' print
+pstack

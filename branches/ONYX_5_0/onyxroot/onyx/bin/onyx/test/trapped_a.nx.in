@@ -1,0 +1,33 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+null cvx trapped {
+    `Trapped: ' print 1 sprint
+}{
+    `No trap\n' print
+} ifelse
+
+{
+    `Blah\n' print
+} trapped {
+    `Trapped: ' print 1 sprint
+}{
+    `No trap\n' print
+} ifelse
+
+{
+    $blah escape
+} trapped {
+    `Trapped: ' print 1 sprint
+}{
+    `No trap\n' print
+} ifelse

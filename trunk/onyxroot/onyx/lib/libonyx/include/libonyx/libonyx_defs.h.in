@@ -1,64 +1,74 @@
-/******************************************************************************
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
  *
  * <Copyright = jasone>
  * <License>
  *
  ******************************************************************************
  *
- * Version: <Version>
+ * Version: Onyx <Version = onyx>
  *
  ******************************************************************************/
 
-#undef _CW_DBG
+#undef CW_DBG
 
-#ifndef _CW_ASSERT
-#undef _CW_ASSERT
+#ifndef CW_ASSERT
+#undef CW_ASSERT
 #endif
-
-#undef _CW_OS_DARWIN
-#undef _CW_OS_FREEBSD
-#undef _CW_OS_LINUX
-#undef _CW_OS_SOLARIS
-
-/* Solaris needs this for sigwait(). */
-#undef _POSIX_PTHREAD_SEMANTICS
 
 #undef WORDS_BIGENDIAN
 
-#undef _CW_THREADS
-#undef _CW_PTHREADS
-#undef _CW_FTHREADS
-#undef _CW_MTHREADS
-#undef _CW_STHREADS
+#undef CW_THREADS
+#undef CW_PTHREADS
+#undef CW_FTHREADS
+#undef CW_MTHREADS
+#undef CW_STHREADS
+#undef CW_PTH
 
-#undef _CW_POSIX
+#undef CW_OOP
+#undef CW_HANDLE
+#undef CW_REAL
+#undef CW_REGEX
+#undef CW_POSIX
+#undef CW_POSIX_FILE
+#undef CW_SOCKET
+#undef CW_MODULES
 
-#undef _CW_POSIX_FILE
-
-/*
- * If using gcc and inlines weren't disabled by configure, use inline functions.
- */
-#undef _CW_USE_INLINES
-#if (defined(__GNUC__) && defined(_CW_USE_INLINES))
-#define _CW_INLINE static __inline__
+/* If using gcc and inlines weren't disabled by configure, use inline
+ * functions. */
+#undef CW_USE_INLINES
+#if (defined(__GNUC__) && defined(CW_USE_INLINES))
+#define CW_INLINE static __inline__
+#define CW_P_INLINE static __inline__
 #else
-#define _CW_INLINE
+#define CW_INLINE
+#define CW_P_INLINE static
 #endif
 
-#undef SIZEOF_SIGNED_CHAR
-#undef SIZEOF_UNSIGNED_CHAR
-#undef SIZEOF_SIGNED_SHORT
-#undef SIZEOF_UNSIGNED_SHORT
-#undef SIZEOF_INT
-#undef SIZEOF_UNSIGNED
-#undef SIZEOF_LONG
-#undef SIZEOF_UNSIGNED_LONG
-#undef SIZEOF_LONG_LONG
-#undef SIZEOF_UNSIGNED_LONG_LONG
+#undef CW_CPU_IA32
+#undef CW_CPU_AMD64
+#undef CW_CPU_PPC
+
 #undef SIZEOF_INT_P
 
-#undef _CW_LIBONYX_USE_DIRENT_RECLEN
+#undef CW_HAVE_SOCKLEN_T
+#undef CW_HAVE_DIRENT_NAMLEN
+#undef CW_LIBONYX_USE_STAT_ATIMESPEC
+#undef CW_LIBONYX_USE_STAT_MTIMESPEC
+#undef CW_LIBONYX_USE_STAT_CTIMESPEC
+#undef CW_LIBONYX_USE_TM_ZONE
+#undef CW_LIBONYX_USE_TZNAME
+#undef CW_LIBONYX_USE_TM_GMTOFF
+#undef CW_LIBONYX_USE_ALTZONE
 
 #undef HAVE_POLL
 #undef HAVE_READDIR_R
 #undef HAVE_UNSETENV
+#undef HAVE_ASPRINTF
+
+#undef HAVE_STDBOOL_H
+#undef HAVE_SYS_SOCKET_H
+#undef HAVE_NETINET_IN_H
+#undef HAVE_ARPA_INET_H
+#undef HAVE_MACHINE_ENDIAN_H
+#undef HAVE_PTHREAD_NP_H

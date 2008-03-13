@@ -1,0 +1,486 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% libonyx portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearemptydoublepage
+\chapter{The libonyx library}
+\label{onyxlib}
+
+The \libname{libonyx} library implements an embeddable \htmlref{Onyx}{onyxlang}
+interpreter.  \libname{libonyx} is designed to allow multiple interpreter
+instances in the same program, though since \htmlref{Onyx}{onyxlang} is a
+multi-threaded language, in most cases it makes more sense to use a single
+interpreter instance with multiple threads.
+
+The \htmlref{Onyx}{onyxlang} language is described elsewhere in this manual, so
+this chapter documents the C API with as little information about the
+\htmlref{Onyx}{onyxlang} language as possible.
+
+A minimal program that runs the Onyx interpreter interactively looks like:
+\begin{verbatim}
+#include <libonyx/libonyx.h>
+
+int
+main(int argc, char **argv, char **envp)
+{
+    cw_nx_t nx;
+    cw_nxo_t thread, *nxo;
+
+    /* Initialize libonyx and the Onyx interpreter. */
+    libonyx_init();
+    nx_new(&nx, NULL, argc, argv, envp);
+
+    /* Create a thread. */
+    nxo_thread_new(&thread, &nx);
+
+    /* Set up stdin for evaluation. */
+    nxo = nxo_stack_push(nxo_thread_ostack_get(&thread));
+    nxo_dup(nxo, nxo_thread_stdin_get(&thread));
+    nxo_attr_set(nxo, NXOA_EXECUTABLE);
+
+    /* Start the thread. */
+    nxo_thread_start(&thread);
+
+    /* Clean up. */
+    nx_delete(&nx);
+    libonyx_shutdown();
+    return 0;
+}
+\end{verbatim}
+
+In most cases, an application will need to implement additional Onyx operators
+(and make them accessible from within the Onyx interpreter) in order to make the
+application accessible/controllable from the Onyx interpreter.  If the
+application user interface is to be interaction with the Onyx interpreter, then
+little else needs to be done.
+
+\section{Compilation}
+Use the following compiler command line to compile applications with
+\libname{libonyx}.
+\begin{verbatim}
+cc <file> -lonyx -lpthread
+\end{verbatim}
+
+\section{Types}
+\libname{libonyx} is careful to use the following data types rather than the
+built-in types (other than when using system library functions and string
+pointers (char *)) to allow easy porting and explicit knowledge of variable
+sizes:
+\begin{description}
+\item[cw\_bool\_t: ] Boolean, either FALSE or TRUE.
+\item[cw\_sint8\_t: ] Signed 8 bit variable.
+\item[cw\_uint8\_t: ] Unsigned 8 bit variable.
+\item[cw\_sint16\_t: ] Signed 16 bit variable.
+\item[cw\_uint16\_t: ] Unsigned 16 bit variable.
+\item[cw\_sint32\_t: ] Signed 32 bit variable.
+\item[cw\_uint32\_t: ] Unsigned 32 bit variable.
+\item[cw\_sint64\_t: ] Signed 64 bit variable.
+\item[cw\_uint64\_t: ] Unsigned 64 bit variable.
+\end{description}
+
+\section{Global variables}
+\libname{libonyx} defines the following global variables, which can be used by
+the application:
+\begin{description}
+\item[cw\_g\_mem: ] \classname{mem} instance, default memory allocator.
+\end{description}
+
+\section{Threads}
+\libname{libonyx} encapsulates each interpreter instance in an \classname{nx}
+object.  An \classname{nx} object supports running multiple concurrent threads.
+Each thread context is encapsulated by an \classname{nxo} thread object.
+
+In general, each process thread should execute in its own \classname{nxo} thread
+object context, though the only explicit restriction placed on \classname{nxo}
+thread object operations is that only one thread can be executing in an
+\classname{nxo} thread object context at a time.  In other words, the
+\classname{nxo} thread class does not synchronize access to its internals, since
+there is normally no reason for multiple threads to execute in the same
+\classname{nxo} thread object context.
+
+\section{Garbage collection}
+Since there can be arbitrary threads executing in the interpreter concurrently,
+there are two ways to implement safe garbage collection: concurrent or atomic.
+\libname{libonyx} uses atomic garbage collection, which means that the thread
+doing garbage collection suspends all other threads that are created via
+\cfunc{\htmlref{thd\_new}{thd_new}}{..., TRUE} during the mark phase.  In order
+for this to work, the garbage collector must not do any locking while the other
+threads are suspended, or else there is a high probability of eventual deadlock.
+\libname{libonyx} itself meets these criteria, as must any C extensions to the
+interpreter that are executed by the garbage collector during the mark phase
+(reference iteration).
+
+\section{Exceptions}
+\libname{libonyx} reserves \htmlref{\classname{xep}}{xep} exception numbers 0 to
+127 and defines the following exceptions:
+\begin{description}
+\label{CW_ONYXX_OOM}
+\item[\cppdef{CW\_ONYXX\_OOM}: ]
+	Memory allocation error.
+\label{CW_ONYXX_EXIT}
+\item[\cppdef{CW\_ONYXX\_EXIT}: ]
+	Internal use, for the exit operator.
+\label{CW_ONYXX_STOP}
+\item[\cppdef{CW\_ONYXX\_STOP}: ]
+	Internal use, for the stop operator.
+\label{CW_ONYXX_QUIT}
+\item[\cppdef{CW\_ONYXX\_QUIT}: ]
+	Internal use, for the quit operator.
+\end{description}
+
+\section{Integration issues}
+\subsection{Thread creation}
+\libname{libonyx}'s garbage collector uses the \htmlref{\classname{thd}}{thd}
+class to suspend and resume all other threads during the mark phase of atomic
+collection.  For this to work, all threads that have any contact with
+\libname{libonyx} must be created as suspendible threads using the
+\htmlref{\classname{thd}}{thd} class.
+
+This can cause integration headaches for existing threaded applications, but
+there is no other portable way to suspend and resume threads.  The only
+alternative is to assure that only one thread is executing in the interpreter
+and to disable timeout-based (asynchronous) collection.
+
+\subsection{Restarted interrupted system calls}
+As mentioned above, \libname{libonyx} uses thread suspension and resumption to
+implement garbage collection.  This has the side-effect of making restarted
+interrupted system calls a real possibility.  However, the operating system will
+return with a partial result if the system call was partially complete when it
+was interrupted.  In practice, what this means is that short reads and writes
+are possible where they otherwise wouldn't happen, so the application should not
+make any assumptions about interruptible system calls always completing with a
+full result.  See the \htmlref{\classname{thd}}{thd} class documentation for
+more details.
+
+\section{Guidelines for writing extensions}
+When embedding \libname{libonyx} in an application, it is usually desireable to
+add some operators so that the interpreter can interact with the rest of the
+application.  The \libname{libonyx} source code contains hundreds of operators
+that can be used as examples when writing new operators.  However, there are
+some very important rules that operators must follow, some of which may not be
+obvious when reading the code.
+
+\begin{itemize}
+\item{Manually managed (\cfunc{malloc}{}/\cfunc{free}{}) memory should not be
+allocated unless the code is very careful.  If a function recurses into the
+interpreter (this includes calls to functions such as
+\htmlref{\cfunc{nxo\_thread\_nerror}{}}{nxo_thread_nerror}), there is the very
+real possibility that control will never return to the operator due to an
+exception.  Code must either catch all exceptions and clean up allocations, or
+not recurse into the interpreter.}
+
+\item{Composite objects should never be allocated on the C stack.  The garbage
+collector has no knowledge of such objects, so if the only reference to an
+object is on the C stack, the object may be collected, which will lead to
+unpredictable program behavior.  Instead of allocating objects on the C stack,
+use tstack, available via
+\htmlref{\cfunc{nxo\_thread\_tstack\_get}{}}{nxo_thread_tstack_get}, which is a
+per-thread stack that the garbage collector scans.}
+
+\item{For an object to be safe from garbage collection, there must always be at
+least one reference to it inside the interpreter.  So, if C code obtains a
+pointer to a composite object, then destroys the last known internal Onyx
+reference (pops it off a stack, redefines it in a dict, replaces an element of
+an array, etc.), the pointer is no longer safe to use.  The \libname{libonyx}
+API is structured such that it is invalid to do such a thing, for this reason.}
+
+\item{tstack must be cleaned up before returning from a function.  This
+constraint is placed on the code in order to avoid leaking space on tstack.  In
+debug versions of \libname{libonyx}, this is enforced by assertions.  The one
+exception to this rule has to do with \htmlref{\classname{xep}}{xep} exceptions,
+in which case the catchers of the exceptions are responsible for cleaning up
+tstack.  Therefore, it is not necessary to catch exceptions merely to avoid
+tstack leakage.}
+\end{itemize}
+
+Since Onyx type checking is dynamic, it is the responsibility of the operators
+to assure objects are the correct type before calling any of the type-specific
+\cfunc{nxo\_*}{} functions.  Failure to do so will result in unpredictable
+behavior and likely crashes.
+
+\section{API}
+\begin{capi}
+\label{libonyx_init}
+\index{libonyx_init@\cfunc{libonyx\_init}{}}
+\citem{\cfunc[void]{libonyx\_init}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Initialize various global variables.  In particular, initialize
+		\cvar{cw\_g\_mem}.
+	\end{capilist}
+\label{libonyx_shutdown}
+\index{libonyx_shutdown@\cfunc{libonyx\_shutdown}{}}
+\citem{\cfunc[void]{libonyx\_shutdown}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Clean up the global variables that are initialized by
+		\cfunc{libonyx\_init}{}.
+	\end{capilist}
+\label{cw_opaque_alloc_t}
+\index{cw_opaque_alloc_t@\cfunc{cw\_opaque\_alloc\_t}{}}
+\citem{\cfunc[void *]{cw\_opaque\_alloc\_t}{void *a\_arg, size\_t a\_size,
+const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate \cvar{a\_size} of space and return a pointer to it.
+	\end{capilist}
+\label{cw_opaque_realloc_t}
+\index{cw_opaque_realloc_t@\cfunc{cw\_opaque\_realloc\_t}{}}
+\citem{\cfunc[void *]{cw\_opaque\_realloc\_t}{void *a\_arg, void *a\_ptr,
+size\_t a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_ptr: ]
+			Pointer to memory range to be reallocated.
+		\item[a\_size: ]
+			Size of memory range to allocate.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to a memory range.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Allocate \cvar{a\_size} of space and return a pointer to it.
+	\end{capilist}
+\label{cw_opaque_dealloc_t}
+\index{cw_opaque_dealloc_t@\cfunc{cw\_opaque\_dealloc\_t}{}}
+\citem{\cfunc[void]{cw\_opaque\_dealloc\_t}{void *a\_mem, void *a\_ptr, size\_t
+a\_size, const char *a\_filename, cw\_uint32\_t a\_line\_num}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_arg: ]
+			Opaque pointer.
+		\item[a\_ptr: ]
+			Pointer to to memory range to be freed.
+		\item[a\_size: ]
+			Sizef of memory range pointed to by \cvar{a\_ptr}.
+		\item[a\_filename: ]
+			Should be \_\_FILE\_\_.
+		\item[a\_line\_num: ]
+			Should be \_\_LINE\_\_.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Deallocate the memory pointed to by \cvar{a\_ptr}.
+	\end{capilist}
+\label{cw_onyx_code}
+\index{cw_onyx_code@\cppmacro{cw\_onyx\_code}{}}
+\citem{\cppmacro[void]{cw\_onyx\_code}{cw\_nxo\_t *a\_thread, const char
+*a\_code}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_code: ]
+			A "-delimited string constant.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Depends on actions of a\_code.
+	\item[Description: ]
+		Convenience macro for static embedded \htmlref{Onyx}{onyxlang}
+		code.
+	\end{capilist}
+\label{cw_assert}
+\index{cw_assert@\cppmacro{cw\_assert}{}}
+\citem{\cppmacro[void]{cw\_assert}{expression}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[expression: ]
+			C expression that evaluates to zero or non-zero.
+		\end{description}
+	\item[Output(s): ]
+			Possible error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		If the expression evaluates to zero, print an error message to
+		file descriptor 2 and \cfunc{abort}{}.
+
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{cw_not_reached}
+\index{cw_not_reached@\cppmacro{cw\_not\_reached}{}}
+\citem{\cppmacro[void]{cw\_not\_reached}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		Error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Abort with an error message.
+
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{cw_check_ptr}
+\index{cw_check\_ptr@\cppmacro{cw\_check\_ptr}{}}
+\citem{\cppmacro[void]{cw\_check\_ptr}{a\_pointer}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_pointer: ]
+			A pointer.
+		\end{description}
+	\item[Output(s): ]
+			Possible error printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		If \cvar{a\_pointer} is NULL, print an error message to file
+		descriptor 2 and \cfunc{abort}{}.
+
+		Note: This macro is only active if the \cppdef{CW\_ASSERT} cpp
+		macro is defined.
+	\end{capilist}
+\label{cw_error}
+\index{cw_error@\cppmacro{cw\_error}{}}
+\citem{\cppmacro[void]{cw\_error}{const char *a\_str}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_str: ]
+			Pointer to a NULL-terminated character array.
+		\end{description}
+	\item[Output(s): ]
+		Contents of \cvar{a\_str}, followed by a carriage return,
+		printed to file descriptor 2.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Print the contents of \cvar{a\_str}, followed by a carriage
+		return, to file descriptor 2.
+	\end{capilist}
+\label{cw_ntohq}
+\index{cw_ntohq@\cppmacro{cw\_ntohq}{}}
+\citem{\cppmacro[cw\_uint64\_t]{cw\_ntohq}{cw\_uint64\_t a\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_val: ]
+			64 bit integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			64 bit integer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Convert \cvar{a\_val} from network byte order to host byte order
+		and return the result.
+	\end{capilist}
+\label{cw_htonq}
+\index{cw_htonq@\cppmacro{cw\_htonq}{}}
+\citem{\cppmacro[cw\_uint64\_t]{cw\_htonq}{cw\_uint64\_t a\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_val: ]
+			64 bit integer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			64 bit integer.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Convert \cvar{a\_val} from host byte order to network byte order
+		and return the result.
+	\end{capilist}
+\end{capi}
+
+\section{Classes}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/ch}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/cnd}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/dch}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/mb}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/mem}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/mq}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/mtx}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nx}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxa}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxn}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_array}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_boolean}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_condition}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_dict}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_file}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_fino}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_hook}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_integer}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_mark}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_mutex}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_name}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_no}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_null}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_operator}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_pmark}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_real}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_stack}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_string}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/nxo_thread}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/ql}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/qr}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/qs}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/thd}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/tsd}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/xep}
+
+\section{Dictionaries}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/gcdict}
+\input{@abs_srcroot@/lib/libonyx/doc/latex/systemdict}

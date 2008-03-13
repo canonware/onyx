@@ -1,0 +1,51 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+[
+    `-1 round'
+    `0 round'
+    `1 round'
+
+    `-1.0 round'
+    `0.0 round'
+    `1.0 round'
+
+    `-2.9 round'
+    `-2.6 round'
+    `-2.5 round'
+    `-2.4 round'
+    `-2.1 round'
+
+    `-1.9 round'
+    `-1.6 round'
+    `-1.5 round'
+    `-1.4 round'
+    `-1.1 round'
+
+    `0.0 round'
+
+    `1.1 round'
+    `1.4 round'
+    `1.5 round'
+    `1.6 round'
+    `1.9 round'
+
+    `2.1 round'
+    `2.4 round'
+    `2.5 round'
+    `2.6 round'
+    `2.9 round'
+]{
+    dup 1 sprint
+    cvx eval
+    1 sprint
+} foreach

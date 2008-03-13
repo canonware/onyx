@@ -1,8 +1,3 @@
 Test begin
-Error /undefinedresult
+Error $undefinedresult
 ostack: (1 0)
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..2):
-0:	--mod--
-1:	-file-
-2:	--start--

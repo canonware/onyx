@@ -1,0 +1,3 @@
+Test begin
+Error $typecheck
+ostack: ($AF_INET $SOCK_STREAM -mark-)

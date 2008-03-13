@@ -1,0 +1,44 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+	`[0] 0 1 getinterval'
+	`[0 1] 0 1 getinterval'
+	`[0 1] 1 1 getinterval'
+	`[0 1] 0 2 getinterval'
+	`[0 1 2 3] 0 2 getinterval'
+	`[0 1 2 3] 0 3 getinterval'
+	`[0 1 2 3] 0 4 getinterval'
+	`[0 1 2 3] 1 2 getinterval'
+	`[0 1 2 3] 1 3 getinterval'
+	`[0 1 2 3] 2 2 getinterval'
+	`[0 1 2 3] 3 1 getinterval'
+
+	``a' 0 1 getinterval'
+	``ab' 0 1 getinterval'
+	``ab' 1 1 getinterval'
+	``abcd' 0 2 getinterval'
+	``abcd' 0 3 getinterval'
+	``abcd' 0 4 getinterval'
+	``abcd' 1 2 getinterval'
+	``abcd' 1 3 getinterval'
+	``abcd' 2 2 getinterval'
+	``abcd' 3 1 getinterval'
+]{
+	dup 1 sprint
+	cvx eval
+	1 sprint
+} foreach
+
+`Test end\n' print
