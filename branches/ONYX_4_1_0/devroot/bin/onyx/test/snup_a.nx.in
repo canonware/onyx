@@ -1,0 +1,36 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    (0)
+    (1 0)
+    (2 1 0)
+    (3 2 1 0)
+    (4 3 2 1 0)
+]{
+    dup scount 1 1 dn {
+	over 1 sprints print
+	` ' print
+	dup cvs print
+	` snup --> ' print
+
+	over () copy dup dn snup
+	
+	1 sprint
+    } for
+    clear
+} foreach
+
+`Test end\n' print
+pstack

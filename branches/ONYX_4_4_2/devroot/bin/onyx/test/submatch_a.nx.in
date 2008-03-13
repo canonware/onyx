@@ -1,0 +1,35 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    {`' `'}
+    {`' `.'}
+    {`Some input text' `'}
+    {`Some input text' `\w\w+'}
+    {`Some input text' `(\w\w+)'}
+    {`Some input text' `((\w)\w+)'}
+    {`Some input text' `((i)((n)|(X))\w+)'}
+    {`Some input text' `((i)((X)|(n))\w+)'}
+    {`' `'}
+]{
+    dup 1 sprint
+    eval match 1 sprint
+    0 1 9 {
+	dup cvs print `: ' print
+	submatch 1 sprint
+    } for
+} foreach
+
+`Test end\n' print
+pstack

@@ -1,22 +1,18 @@
 /* -*- mode: c ; c-file-style: "canonware-c-style" -*-
-******************************************************************************
-*
-* <Copyright = jasone>
-* <License>
-*
-******************************************************************************
-*
-* Version: Onyx <Version = onyx>
-*
-******************************************************************************/
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ ******************************************************************************/
 
 #define	CW_NX_C_
 
 #include "../include/libonyx/libonyx.h"
-#ifdef CW_POSIX
-#include "../include/libonyx/envdict_l.h"
-#endif
-#include "../include/libonyx/gcdict_l.h"
 #include "../include/libonyx/systemdict_l.h"
 #include "../include/libonyx/nx_l.h"
 #include "../include/libonyx/nxa_l.h"
@@ -28,11 +24,10 @@ void
 nx_p_nxcode(cw_nx_t *a_nx);
 
 cw_nx_t *
-nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
-       char **a_envp)
+nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, cw_thread_start_t *a_thread_start)
 {
     cw_nx_t *retval;
-    volatile cw_uint32_t try_stage = 0;
+    volatile uint32_t try_stage = 0;
 
     xep_begin();
     volatile cw_nx_t *v_retval;
@@ -42,13 +37,12 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	{
 	    retval = a_nx;
 	    memset(retval, 0, sizeof(cw_nx_t));
-	    retval->is_malloced = FALSE;
+	    retval->is_malloced = false;
 	}
 	else
 	{
-	    retval = (cw_nx_t *) cw_malloc(sizeof(cw_nx_t));
-	    memset(retval, 0, sizeof(cw_nx_t));
-	    retval->is_malloced = TRUE;
+	    retval = (cw_nx_t *) cw_calloc(1, sizeof(cw_nx_t));
+	    retval->is_malloced = true;
 	}
 	v_retval = retval;
 	try_stage = 1;
@@ -57,73 +51,72 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	retval->magic = CW_NX_MAGIC;
 #endif
 
-	/* Initialize the GC. */
-	nxa_l_new(&retval->nxa, retval);
+	/* Set initial maximum estack depth. */
+	retval->maxestack = CW_LIBONYX_ESTACK_MAX;
+
+	/* Set initial value for tail call optimization. */
+	retval->tailopt = CW_LIBONYX_TAILOPT;
+
+	/* Initialize the internals such that if a collection happens before
+	 * we're done, reference iteration will work correctly. */
+	nxo_no_new(&retval->threadsdict);
+	nxo_no_new(&retval->systemdict);
+	nxo_no_new(&retval->globaldict);
+	nxo_no_new(&retval->stdin_nxo);
+	nxo_no_new(&retval->stdout_nxo);
+	nxo_no_new(&retval->stderr_nxo);
+
+	/* Insert this nx into nxa's list of nx's in the root set. */
+	ql_elm_new(retval, link);
+	nxa_l_nx_insert(retval);
 	try_stage = 2;
 
-	/* Initialize the global name cache. */
-#ifdef CW_THREADS
-	mtx_new(&retval->name_lock);
-#endif
-	dch_new(&retval->name_hash, (cw_opaque_alloc_t *) nxa_malloc_e,
-		(cw_opaque_dealloc_t *) nxa_free_e, &retval->nxa,
-		CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
-		CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
-		nxo_l_name_key_comp);
-	try_stage = 3;
-
-	/* Initialize gcdict. */
-	gcdict_l_populate(nxa_gcdict_get(&retval->nxa), &retval->nxa);
-	try_stage = 4;
-
-	/* Initialize stdin. */
-	nxo_file_new(&retval->stdin_nxo, retval, TRUE);
-#ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stdin_nxo, 0);
-#endif
-	nxo_file_buffer_size_set(&retval->stdin_nxo,
-				 CW_LIBONYX_FILE_BUFFER_SIZE);
-	try_stage = 5;
-
-	/* Initialize stdout. */
-	nxo_file_new(&retval->stdout_nxo, retval, TRUE);
-#ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stdout_nxo, 1);
-#endif
-	nxo_file_buffer_size_set(&retval->stdout_nxo,
-				 CW_LIBONYX_FILE_BUFFER_SIZE);
-	try_stage = 6;
-
-	/* Initialize stderr. */
-	nxo_file_new(&retval->stderr_nxo, retval, TRUE);
-#ifdef CW_POSIX_FILE
-	nxo_file_fd_wrap(&retval->stderr_nxo, 2);
-#endif
-	try_stage = 7;
-
 	/* Initialize globaldict. */
-	nxo_dict_new(&retval->globaldict, retval, TRUE,
-		     CW_LIBONYX_GLOBALDICT_HASH);
-	try_stage = 8;
+	nxo_dict_new(&retval->globaldict, true, CW_LIBONYX_GLOBALDICT_HASH);
 
-#ifdef CW_POSIX
-	/* Initialize envdict. */
-	envdict_l_populate(&retval->envdict, retval, a_envp);
-	try_stage = 9;
-#endif
-
-	/* Initialize systemdict. */
-	systemdict_l_populate(&retval->systemdict, retval, a_argc,
-			      a_argv);
-	try_stage = 10;
+	/* Use stdin_nxo and stdout_nxo as temporaries for the dictionary
+	 * population functions.  This is the only place where such temporaries
+	 * are needed, so embedding additional fields into cw_nx_t (and
+	 * reporting them during reference iteration) just for this purpose
+	 * would be wasteful. */
 
 	/* Initialize threadsdict. */
-	nxo_dict_new(&retval->threadsdict, retval, TRUE,
-		     CW_LIBONYX_THREADSDICT_HASH);
-	try_stage = 11;
+	nxo_dict_new(&retval->threadsdict, true, CW_LIBONYX_THREADSDICT_HASH);
 
-	/* Now that we have an initial thread, activate the GC. */
-	nxa_active_set(&retval->nxa, TRUE);
+	/* Initialize systemdict.  This must happen after the other dict
+	 * initializations, since references to them are inserted into
+	 * systemdict. */
+	systemdict_l_populate(&retval->systemdict, &retval->stdin_nxo,
+			      &retval->stdout_nxo, retval);
+
+	/* Initialize stdin. */
+	nxo_file_new(&retval->stdin_nxo, true);
+#ifdef CW_POSIX_FILE
+	nxo_file_fd_wrap(&retval->stdin_nxo, 0, false);
+#endif
+	nxo_file_origin_set(&retval->stdin_nxo,
+			    "*stdin*", sizeof("*stdin*") - 1);
+
+	nxo_file_buffer_size_set(&retval->stdin_nxo,
+				 CW_LIBONYX_FILE_BUFFER_SIZE);
+
+	/* Initialize stdout. */
+	nxo_file_new(&retval->stdout_nxo, true);
+#ifdef CW_POSIX_FILE
+	nxo_file_fd_wrap(&retval->stdout_nxo, 1, false);
+#endif
+	nxo_file_origin_set(&retval->stdout_nxo,
+			    "*stdout*", sizeof("*stdout*") - 1);
+	nxo_file_buffer_size_set(&retval->stdout_nxo,
+				 CW_LIBONYX_FILE_BUFFER_SIZE);
+
+	/* Initialize stderr. */
+	nxo_file_new(&retval->stderr_nxo, true);
+#ifdef CW_POSIX_FILE
+	nxo_file_fd_wrap(&retval->stderr_nxo, 2, false);
+#endif
+	nxo_file_origin_set(&retval->stderr_nxo,
+			    "*stderr*", sizeof("*stderr*") - 1);
 
 	/* Do soft operator initialization. */
 	nx_p_nxcode(retval);
@@ -139,27 +132,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 	retval = (cw_nx_t *) v_retval;
 	switch (try_stage)
 	{
-	    case 11:
-	    case 10:
-#ifdef CW_POSIX
-	    case 9:
-#endif
-	    case 8:
-	    case 7:
-	    case 6:
-	    case 5:
-	    case 4:
-	    case 3:
-	    {
-		nxa_l_shutdown(&retval->nxa);
-		dch_delete(&retval->name_hash);
-#ifdef CW_THREADS
-		mtx_delete(&retval->name_lock);
-#endif
-	    }
 	    case 2:
 	    {
-		nxa_l_delete(&retval->nxa);
+		nxa_l_nx_remove(retval);
 	    }
 	    case 1:
 	    {
@@ -167,7 +142,9 @@ nx_new(cw_nx_t *a_nx, cw_op_t *a_thread_init, int a_argc, char **a_argv,
 		memset(a_nx, 0x5a, sizeof(cw_nx_t));
 #endif
 		if (retval->is_malloced)
-		cw_free(retval);
+		{
+		    cw_free(retval);
+		}
 		break;
 	    }
 	    default:
@@ -187,15 +164,7 @@ nx_delete(cw_nx_t *a_nx)
     cw_check_ptr(a_nx);
     cw_dassert(a_nx->magic == CW_NX_MAGIC);
 
-    a_nx->shutdown = TRUE;
-    /* All objects must be destroyed before name_hash is deleted, in order to
-     * avoid a circular shutdown dependency. */
-    nxa_l_shutdown(&a_nx->nxa);
-    dch_delete(&a_nx->name_hash);
-#ifdef CW_THREADS
-    mtx_delete(&a_nx->name_lock);
-#endif
-    nxa_l_delete(&a_nx->nxa);
+    nxa_l_nx_remove(a_nx);
 
     if (a_nx->is_malloced)
     {
@@ -207,4 +176,50 @@ nx_delete(cw_nx_t *a_nx)
 	memset(a_nx, 0x5a, sizeof(cw_nx_t));
     }
 #endif
+}
+
+void
+nx_maxestack_set(cw_nx_t *a_nx, cw_nxoi_t a_maxestack)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+    cw_assert(a_maxestack >= 0);
+
+    a_nx->maxestack = a_maxestack;
+}
+
+void
+nx_tailopt_set(cw_nx_t *a_nx, bool a_tailopt)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    a_nx->tailopt = a_tailopt;
+}
+
+void
+nx_stdin_set(cw_nx_t *a_nx, cw_nxo_t *a_stdin)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    nxo_dup(&a_nx->stdin_nxo, a_stdin);
+}
+
+void
+nx_stdout_set(cw_nx_t *a_nx, cw_nxo_t *a_stdout)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    nxo_dup(&a_nx->stdout_nxo, a_stdout);
+}
+
+void
+nx_stderr_set(cw_nx_t *a_nx, cw_nxo_t *a_stderr)
+{
+    cw_check_ptr(a_nx);
+    cw_dassert(a_nx->magic == CW_NX_MAGIC);
+
+    nxo_dup(&a_nx->stderr_nxo, a_stderr);
 }

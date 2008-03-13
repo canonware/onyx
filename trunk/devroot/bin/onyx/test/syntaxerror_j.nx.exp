@@ -1,7 +1,0 @@
-Test begin
-At line 6, column 0: Error /syntaxerror
-ostack: (`\`Unterminated string\n\`Test end\n\' print\n')
-dstack: (-dict- -dict- -dict- -dict-)
-estack/istack trace (0..1):
-0:	-file-
-1:	--start--

@@ -1,15 +1,16 @@
 /* -*- mode: c ; c-file-style: "canonware-c-style" -*-
-******************************************************************************
-*
-* <Copyright = jasone>
-* <License>
-*
-******************************************************************************
-*
-* Version: Onyx <Version = onyx>
-*
-******************************************************************************/
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version = onyx>
+ *
+ ******************************************************************************/
 
+#define CW_MEM_C_
 #include "../include/libonyx/libonyx.h"
 
 #ifdef cw_malloc
@@ -33,263 +34,351 @@
 #define cw_free(a) free(a)
 
 #ifdef CW_MEM_ERROR
+typedef struct cw_mem_item_s cw_mem_item_t;
+
 struct cw_mem_item_s
 {
+    void *addr;
     size_t size;
     char *filename;
-    cw_uint32_t line_num;
-    cw_chi_t chi; /* For internal ch linkage. */
+    uint32_t line_num;
+    cw_chi_t chi; /* For internal dch linkage. */
+    ql_elm(cw_mem_item_t) link; /* For iteration. */
 };
 #endif
 
-cw_mem_t *
-mem_new(cw_mem_t *a_mem, cw_mem_t *a_internal)
-{
-    cw_mem_t *retval;
-    volatile cw_uint32_t try_stage = 0;
+/* Globals. */
+cw_mema_t *cw_g_mema = NULL;
 
-    xep_begin();
-    volatile cw_mem_t	*v_retval;
-    xep_try
-    {
-	if (a_mem != NULL)
-	{
-	    v_retval = retval = a_mem;
-	    retval->is_malloced = FALSE;
-	}
-	else
-	{
-	    v_retval = retval = (cw_mem_t *) mem_malloc(a_internal,
-							sizeof(cw_mem_t));
-	    retval->is_malloced = TRUE;
-	}
-	retval->mem = a_internal;
-#ifdef CW_THREADS
-	mtx_new(&retval->lock);
+/* File-global variables. */
+static cw_mema_t s_mema;
+
+#ifdef CW_DBG
+static bool s_mem_initialized = false;
 #endif
-	try_stage = 1;
 
 #ifdef CW_MEM_ERROR
-	retval->addr_hash = dch_new(NULL, (cw_opaque_alloc_t *) mem_malloc_e,
-				    (cw_opaque_dealloc_t *) mem_free_e,
-				    a_internal, CW_MEM_BASE_TABLE,
-				    CW_MEM_BASE_GROW,
-				    CW_MEM_BASE_SHRINK, ch_direct_hash,
-				    ch_direct_key_comp);
-	try_stage = 2;
-#endif
-	retval->handler_data = NULL;
-    }
-    xep_catch(CW_ONYXX_OOM)
-    {
-	retval = (cw_mem_t *)v_retval;
-	switch (try_stage)
-	{
-	    case 1:
-	    {
 #ifdef CW_THREADS
-		mtx_delete(&retval->lock);
+static cw_mtx_t s_mem_lock;
 #endif
-		if (retval->is_malloced)
-		mem_free(a_internal, retval);
-	    }
-	    case 0:
-	    {
-		break;
-	    }
-	}
+
+cw_mema_t s_mem_mema;
+
+/* Slots in base hash table. */
+#define CW_MEM_BASE_TABLE 1024
+static cw_dch_t *s_mem_addr_hash;
+static ql_head(cw_mem_item_t) s_mem_addr_list;
+#endif
+
+/* mema. */
+cw_mema_t *
+mema_new(cw_mema_t *a_mema, cw_opaque_alloc_t *a_alloc,
+	 cw_opaque_calloc_t *a_calloc, cw_opaque_realloc_t *a_realloc,
+	 cw_opaque_dealloc_t *a_dealloc, void *a_arg)
+{
+    cw_mema_t *retval;
+
+    if (a_mema != NULL)
+    {
+	retval = a_mema;
+	retval->is_malloced = false;
     }
-    xep_end();
+    else
+    {
+	cw_check_ptr(a_alloc);
+	cw_check_ptr(a_dealloc);
+	retval = (cw_mema_t *) cw_opaque_alloc(a_alloc, a_arg,
+					       sizeof(cw_mema_t));
+	retval->is_malloced = true;
+    }
+
+    retval->alloc = a_alloc;
+    retval->calloc = a_calloc;
+    retval->realloc = a_realloc;
+    retval->dealloc = a_dealloc;
+    retval->arg = a_arg;
+
     return retval;
 }
 
 void
-mem_delete(cw_mem_t *a_mem)
+mema_delete(cw_mema_t *a_mema)
 {
-    cw_check_ptr(a_mem);
+    cw_check_ptr(a_mema);
 
-#ifdef CW_MEM_ERROR
+    if (a_mema->is_malloced)
     {
-	cw_uint32_t i, num_addrs;
-	void *addr;
-	struct cw_mem_item_s *allocation;
-
-	num_addrs = dch_count(a_mem->addr_hash);
-
-	if (num_addrs > 0)
-	{
-	    fprintf(stderr, "%s(%p): %u unfreed allocation%s\n",
-		    __FUNCTION__, a_mem, num_addrs, num_addrs != 1 ? "s" : "");
-	}
-	for (i = 0; i < num_addrs; i++)
-	{
-	    dch_remove_iterate(a_mem->addr_hash, &addr, (void **) &allocation,
-			       NULL);
-	    fprintf(stderr,
-		    "%s(%p): %p, size %u never freed (allocated at %s:%u)\n",
-		    __FUNCTION__, a_mem, addr,
-		    allocation->size, allocation->filename,
-		    allocation->line_num);
-	    mem_free(a_mem->mem, allocation->filename);
-	    mem_free(a_mem->mem, allocation);
-	}
-	dch_delete(a_mem->addr_hash);
-#ifdef CW_THREADS
-	mtx_delete(&a_mem->lock);
-#endif
-    }
-#endif
-
-    if (a_mem->is_malloced)
-    {
-	mem_free(a_mem->mem, a_mem);
+	cw_opaque_dealloc(a_mema->dealloc, a_mema->arg, a_mema,
+			  sizeof(cw_mema_t));
     }
 }
 
+/* mem. */
+
+/* The following private functions are used for the internal dch that tracks
+ * memory allocations. */
+#ifdef CW_MEM_ERROR
+static void *
+mem_p_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
+	       uint32_t a_line_num)
+{
+    return cw_malloc(a_size);
+}
+
+static void *
+mem_p_calloc_e(void *a_arg, size_t a_number, size_t a_size,
+	       const char *a_filename, uint32_t a_line_num)
+{
+    return cw_calloc(a_number, a_size);
+}
+
+static void *
+mem_p_realloc_e(void *a_arg, void *a_ptr, size_t a_size,
+		size_t a_old_size, const char *a_filename,
+		uint32_t a_line_num)
+{
+    return cw_realloc(a_ptr, a_size);
+}
+
+static void
+mem_p_free_e(void *a_arg, void *a_ptr, size_t a_size,
+	     const char *a_filename, uint32_t a_line_num)
+{
+    cw_free(a_ptr);
+}
+#endif
+
+void
+mem_l_init(void)
+{
+    cw_assert(s_mem_initialized == false);
+
+    cw_g_mema = mema_new(&s_mema,
+			 (cw_opaque_alloc_t *) mem_malloc_e,
+			 (cw_opaque_calloc_t *) mem_calloc_e,
+			 (cw_opaque_realloc_t *) mem_realloc_e,
+			 (cw_opaque_dealloc_t *) mem_free_e,
+			 NULL);
+
+#ifdef CW_MEM_ERROR
+    mema_new(&s_mem_mema,
+	     (cw_opaque_alloc_t *) mem_p_malloc_e,
+	     (cw_opaque_calloc_t *) mem_p_calloc_e,
+	     (cw_opaque_realloc_t *) mem_p_realloc_e,
+	     (cw_opaque_dealloc_t *) mem_p_free_e,
+	     NULL);
+    s_mem_addr_hash = dch_new(NULL, &s_mem_mema, CW_MEM_BASE_TABLE,
+			      ch_direct_hash, ch_direct_key_comp);
+    ql_new(&s_mem_addr_list);
+#ifdef CW_THREADS
+    mtx_new(&s_mem_lock);
+#endif
+#endif
+
+#ifdef CW_DBG
+    s_mem_initialized = true;
+#endif
+}
+
+void
+mem_l_shutdown(void)
+{
+    cw_assert(s_mem_initialized);
+
+#ifdef CW_DBG
+    s_mem_initialized = false;
+#endif
+
+    mema_delete(cw_g_mema);
+    cw_g_mema = NULL;
+
+#ifdef CW_MEM_ERROR
+    {
+	cw_mem_item_t *allocation;
+
+	if (dch_count(s_mem_addr_hash) > 0)
+	{
+	    fprintf(stderr, "%s(): %u unfreed allocation%s\n",
+		    __func__, dch_count(s_mem_addr_hash),
+		    dch_count(s_mem_addr_hash) != 1 ? "s" : "");
+	}
+
+	for (allocation = ql_first(&s_mem_addr_list);
+	     allocation != NULL;
+	     allocation = ql_first(&s_mem_addr_list))
+	{
+	    dch_chi_remove(s_mem_addr_hash, &allocation->chi);
+	    ql_remove(&s_mem_addr_list, allocation, link);
+	    fprintf(stderr,
+		    "%s(): %p, size %zu never freed (allocated at %s:%u)\n",
+		    __func__, allocation->addr,
+		    allocation->size, allocation->filename,
+		    allocation->line_num);
+	    cw_free(allocation->filename);
+	    cw_free(allocation);
+	}
+
+	dch_delete(s_mem_addr_hash);
+	mema_delete(&s_mem_mema);
+#ifdef CW_THREADS
+	mtx_delete(&s_mem_lock);
+#endif
+    }
+#endif
+}
+
 void *
-mem_malloc_e(cw_mem_t *a_mem, size_t a_size, const char *a_filename,
-	     cw_uint32_t a_line_num)
+mem_malloc_e(void *a_arg, size_t a_size, const char *a_filename,
+	     uint32_t a_line_num)
 {
     void *retval;
+#ifdef CW_MEM_ERROR
+    cw_mem_item_t *old_allocation;
+#endif
 
+    cw_assert(s_mem_initialized);
     cw_assert(a_size > 0);
 
 #ifdef CW_MEM_ERROR
 #ifdef CW_THREADS
-    if (a_mem != NULL)
-    {
-	mtx_lock(&a_mem->lock);
-    }
+    mtx_lock(&s_mem_lock);
 #endif
 #endif
 
     retval = cw_malloc(a_size);
     if (retval == NULL)
     {
+#ifdef CW_MEM_ERROR
+	fprintf(stderr, "%s(): %p <-- malloc(%zu) at %s:%u\n",
+		__func__, retval, a_size, a_filename, a_line_num);
+#ifdef CW_THREADS
+	mtx_unlock(&s_mem_lock);
+#endif
+#endif
 	xep_throw(CW_ONYXX_OOM);
     }
 
 #ifdef CW_MEM_ERROR
-    if (a_mem != NULL)
+    if (a_filename == NULL)
     {
-	struct cw_mem_item_s *old_allocation;
+	a_filename = "<?>";
+    }
 
-	if (a_filename == NULL)
-	{
-	    a_filename = "<?>";
-	}
+    if (dch_search(s_mem_addr_hash, retval, (void **) &old_allocation)
+	== false)
+    {
+	fprintf(stderr, "%s(): %p multiply-allocated "
+		"(was at %s:%u, size %zu; now at %s:%u, size %zu)\n",
+		__func__, retval,
+		old_allocation->filename, old_allocation->line_num,
+		old_allocation->size, a_filename, a_line_num,
+		a_size);
+    }
+    else
+    {
+	cw_mem_item_t *allocation;
 
-	if (dch_search(a_mem->addr_hash, retval, (void **) &old_allocation)
-	    == FALSE)
-	{
-	    fprintf(stderr, "%s(%p): %p multiply-allocated "
-		    "(was at %s:%u, size %u; now at %s:%u, size %u)\n",
-		    __FUNCTION__, a_mem, retval,
-		    old_allocation->filename, old_allocation->line_num,
-		    old_allocation->size, a_filename, a_line_num,
-		    a_size);
-	}
-	else
-	{
-	    struct cw_mem_item_s *allocation;
+	allocation = (cw_mem_item_t *) cw_malloc(sizeof(cw_mem_item_t));
+	memset(retval, 0xa5, a_size);
 
-	    allocation = mem_malloc(a_mem->mem, sizeof(struct cw_mem_item_s));
-	    memset(retval, 0xa5, a_size);
-
-	    allocation->size = a_size;
-	    allocation->filename = mem_malloc(a_mem->mem,
-					      strlen(a_filename) + 1);
-	    memcpy(allocation->filename, a_filename,
-		   strlen(a_filename) + 1);
-	    allocation->line_num = a_line_num;
+	allocation->addr = retval;
+	allocation->size = a_size;
+	allocation->filename = cw_malloc(strlen(a_filename) + 1);
+	memcpy(allocation->filename, a_filename,
+	       strlen(a_filename) + 1);
+	allocation->line_num = a_line_num;
+	ql_elm_new(allocation, link);
 
 #ifdef CW_MEM_VERBOSE
-	    fprintf(stderr, "%s(%p): %p <-- malloc(%u) at %s:%u\n",
-		    __FUNCTION__, a_mem, retval, a_size, a_filename,
-		    a_line_num);
+	fprintf(stderr, "%s(): %p <-- malloc(%zu) at %s:%u\n",
+		__func__, retval, a_size, a_filename,
+		a_line_num);
 #endif
-	    dch_insert(a_mem->addr_hash, retval, allocation, &allocation->chi);
-	}
-#ifdef CW_THREADS
-	mtx_unlock(&a_mem->lock);
-#endif
+	dch_insert(s_mem_addr_hash, retval, allocation, &allocation->chi);
+	ql_tail_insert(&s_mem_addr_list, allocation, link);
     }
+#ifdef CW_THREADS
+    mtx_unlock(&s_mem_lock);
+#endif
 #endif
 
     return retval;
 }
 
 void *
-mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size,
-	     const char *a_filename, cw_uint32_t a_line_num)
+mem_calloc_e(void *a_arg, size_t a_number, size_t a_size,
+	     const char *a_filename, uint32_t a_line_num)
 {
     void *retval;
+#ifdef CW_MEM_ERROR
+    cw_mem_item_t *old_allocation;
+#endif
 
+    cw_assert(s_mem_initialized);
     cw_assert(a_size * a_number > 0);
 
 #ifdef CW_MEM_ERROR
 #ifdef CW_THREADS
-    if (a_mem != NULL)
-    {
-	mtx_lock(&a_mem->lock);
-    }
+    mtx_lock(&s_mem_lock);
 #endif
 #endif
 
     retval = cw_calloc(a_number, a_size);
     if (retval == NULL)
     {
+#ifdef CW_MEM_ERROR
+	fprintf(stderr, "%s(): %p <-- calloc(%zu, %zu) at %s:%u\n",
+		__func__, retval, a_number, a_size,
+		a_filename, a_line_num);
+#ifdef CW_THREADS
+	mtx_unlock(&s_mem_lock);
+#endif
+#endif
 	xep_throw(CW_ONYXX_OOM);
     }
 
 #ifdef CW_MEM_ERROR
-    if (a_mem != NULL)
+    if (a_filename == NULL)
     {
-	struct cw_mem_item_s *old_allocation;
+	a_filename = "<?>";
+    }
 
-	if (a_filename == NULL)
-	{
-	    a_filename = "<?>";
-	}
+    if (dch_search(s_mem_addr_hash, retval, (void **) &old_allocation)
+	== false)
+    {
+	fprintf(stderr, "%s(): %p multiply-allocated "
+		"(was at %s:%u, size %zu; now at %s:%u, size %zu\n",
+		__func__, retval,
+		old_allocation->filename, old_allocation->line_num,
+		old_allocation->size, a_filename, a_line_num,
+		a_size);
+    }
+    else
+    {
+	cw_mem_item_t *allocation;
 
-	if (dch_search(a_mem->addr_hash, retval, (void **) &old_allocation)
-	    == FALSE)
-	{
-	    fprintf(stderr, "%s(%p): %p multiply-allocated "
-		    "(was at %s:%u, size %u; now at %s:%u, size %u\n",
-		    __FUNCTION__, a_mem, retval,
-		    old_allocation->filename, old_allocation->line_num,
-		    old_allocation->size, a_filename, a_line_num,
-		    a_size);
-	}
-	else
-	{
-	    struct cw_mem_item_s *allocation;
+	allocation = (cw_mem_item_t *) cw_malloc(sizeof(cw_mem_item_t));
+	/* Leave the memory alone, since calloc() is supposed to return
+	 * zeroed memory. */
 
-	    allocation = mem_malloc(a_mem->mem, sizeof(struct cw_mem_item_s));
-	    /* Leave the memory alone, since calloc() is supposed to return
-	     * zeroed memory. */
-
-	    allocation->size = a_number * a_size;
-	    allocation->filename = mem_malloc(a_mem->mem,
-					      strlen(a_filename) + 1);
-	    memcpy(allocation->filename, a_filename, strlen(a_filename) + 1);
-	    allocation->line_num = a_line_num;
+	allocation->addr = retval;
+	allocation->size = a_number * a_size;
+	allocation->filename = cw_malloc(strlen(a_filename) + 1);
+	memcpy(allocation->filename, a_filename, strlen(a_filename) + 1);
+	allocation->line_num = a_line_num;
+	ql_elm_new(allocation, link);
 
 #ifdef CW_MEM_VERBOSE
-	    fprintf(stderr, "%s(%p): %p <-- calloc(%u, %u) at %s:%u\n",
-		    __FUNCTION__, a_mem, retval, a_number, a_size,
-		    a_filename, a_line_num);
+	fprintf(stderr, "%s(): %p <-- calloc(%zu, %zu) at %s:%u\n",
+		__func__, retval, a_number, a_size,
+		a_filename, a_line_num);
 #endif
-	    dch_insert(a_mem->addr_hash, retval, allocation,
-		       &allocation->chi);
-	}
+	dch_insert(s_mem_addr_hash, retval, allocation,
+		   &allocation->chi);
+	ql_tail_insert(&s_mem_addr_list, allocation, link);
     }
 #ifdef CW_THREADS
-    if (a_mem != NULL)
-    {
-	mtx_unlock(&a_mem->lock);
-    }
+    mtx_unlock(&s_mem_lock);
 #endif
 #endif
 
@@ -297,89 +386,92 @@ mem_calloc_e(cw_mem_t *a_mem, size_t a_number, size_t a_size,
 }
 
 void *
-mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
-	      const char *a_filename, cw_uint32_t a_line_num)
+mem_realloc_e(void *a_arg, void *a_ptr, size_t a_size, size_t a_old_size,
+	      const char *a_filename, uint32_t a_line_num)
 {
     void *retval;
+#ifdef CW_MEM_ERROR
+    cw_mem_item_t *allocation;
+#endif
 
+    cw_assert(s_mem_initialized);
     cw_check_ptr(a_ptr);
     cw_assert(a_size > 0);
 
 #ifdef CW_MEM_ERROR
 #ifdef CW_THREADS
-    if (a_mem != NULL)
-    {
-	mtx_lock(&a_mem->lock);
-    }
+    mtx_lock(&s_mem_lock);
 #endif
 #endif
 
     retval = cw_realloc(a_ptr, a_size);
     if (retval == NULL)
     {
+#ifdef CW_MEM_ERROR
+	fprintf(stderr, "%s(): %p <-- realloc(%p, %zu) at %s:%u\n",
+		__func__, retval, a_ptr, a_size,
+		a_filename, a_line_num);
+#ifdef CW_THREADS
+	mtx_unlock(&s_mem_lock);
+#endif
+#endif
 	xep_throw(CW_ONYXX_OOM);
     }
 
 #ifdef CW_MEM_ERROR
-    if (a_mem != NULL)
+    if (a_filename == NULL)
     {
-	struct cw_mem_item_s *allocation;
+	a_filename = "<?>";
+    }
 
-	if (a_filename == NULL)
+    if (dch_remove(s_mem_addr_hash, a_ptr, NULL, (void **) &allocation,
+		   NULL))
+    {
+	fprintf(stderr, "%s(): %p not allocated\n", __func__, a_ptr);
+    }
+    else
+    {
+	char *old_filename;
+	size_t old_size;
+	uint32_t old_line_num;
+
+	ql_remove(&s_mem_addr_list, allocation, link);
+
+	old_filename = allocation->filename;
+	old_size = allocation->size;
+	old_line_num = allocation->line_num;
+	allocation->filename = cw_malloc(strlen(a_filename) + 1);
+	memcpy(allocation->filename, a_filename, strlen(a_filename) + 1);
+	allocation->addr = retval;
+	allocation->size = a_size;
+	allocation->line_num = a_line_num;
+
+	dch_insert(s_mem_addr_hash, retval, allocation, &allocation->chi);
+	ql_tail_insert(&s_mem_addr_list, allocation, link);
+	if (a_size > old_size)
 	{
-	    a_filename = "<?>";
+	    memset(((char *) retval) + old_size, 0xa5,
+		   a_size - old_size);
 	}
-
-	if (dch_remove(a_mem->addr_hash, a_ptr, NULL, (void **) &allocation,
-		       NULL))
+	if (a_old_size != 0 && a_old_size != old_size)
 	{
-	    fprintf(stderr, "%s(%p): %p not allocated\n", __FUNCTION__, a_mem,
-		    a_ptr);
+	    fprintf(stderr, "%s(): Wrong size %zu for %p "
+		    "at %s:%u (size %zu, allocated at %s:%u)\n",
+		    __func__, a_old_size, a_ptr,
+		    a_filename, a_line_num, old_size,
+		    old_filename, old_line_num);
 	}
-	else
-	{
-	    char *old_filename;
-	    size_t old_size;
-	    cw_uint32_t old_line_num;
-
-	    old_filename = allocation->filename;
-	    old_size = allocation->size;
-	    old_line_num = allocation->line_num;
-	    allocation->filename = mem_malloc(a_mem->mem,
-					      strlen(a_filename) + 1);
-	    memcpy(allocation->filename, a_filename, strlen(a_filename) + 1);
-	    allocation->size = a_size;
-	    allocation->line_num = a_line_num;
-
-	    dch_insert(a_mem->addr_hash, retval, allocation, &allocation->chi);
-	    if (a_size > old_size)
-	    {
-		memset(((cw_uint8_t *) retval) + old_size, 0xa5,
-		       a_size - old_size);
-	    }
-	    if (a_old_size != 0 && a_old_size != old_size)
-	    {
-		fprintf(stderr, "%s(%p): Wrong size %u for %p "
-			"at %s:%u (size %u, allocated at %s:%u)\n",
-			__FUNCTION__, a_mem, a_old_size, a_ptr,
-			a_filename, a_line_num, old_size,
-			old_filename, old_line_num);
-	    }
 #ifdef CW_MEM_VERBOSE
-	    fprintf(stderr, "%s(%p): %p <-- realloc(%p, %u) at "
-		    "%s:%u (was size %u, allocated at %s:%u)\n",
-		    __FUNCTION__, a_mem, retval, a_ptr, a_size,
-		    a_filename, a_line_num, old_size, old_filename,
-		    old_line_num);
+	fprintf(stderr, "%s(): %p <-- realloc(%p, %zu) at "
+		"%s:%u (was size %zu, allocated at %s:%u)\n",
+		__func__, retval, a_ptr, a_size,
+		a_filename, a_line_num, old_size, old_filename,
+		old_line_num);
 #endif
-	    mem_free(a_mem->mem, old_filename);
-	}
+	cw_free(old_filename);
     }
 #ifdef CW_THREADS
-    if (a_mem != NULL)
-    {
-	mtx_unlock(&a_mem->lock);
-    }
+    mtx_unlock(&s_mem_lock);
 #endif
 #endif
 
@@ -387,51 +479,54 @@ mem_realloc_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, size_t a_old_size,
 }
 
 void
-mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
-	   cw_uint32_t a_line_num)
+mem_free_e(void *a_arg, void *a_ptr, size_t a_size, const char *a_filename,
+	   uint32_t a_line_num)
 {
 #ifdef CW_MEM_ERROR
-    if (a_mem != NULL)
-    {
-	struct cw_mem_item_s *allocation;
+    cw_mem_item_t *allocation;
+#endif
 
-	if (a_filename == NULL)
-	{
-	    a_filename = "<?>";
-	}
+    cw_assert(s_mem_initialized);
+
+#ifdef CW_MEM_ERROR
+    if (a_filename == NULL)
+    {
+	a_filename = "<?>";
+    }
 
 #ifdef CW_THREADS
-	mtx_lock(&a_mem->lock);
+    mtx_lock(&s_mem_lock);
 #endif
 
-	if (dch_remove(a_mem->addr_hash, a_ptr, NULL, (void **) &allocation,
-		       NULL))
+    if (dch_remove(s_mem_addr_hash, a_ptr, NULL, (void **) &allocation,
+		   NULL))
+    {
+	fprintf(stderr, "%s(): %p not allocated, attempted "
+		"to free at %s:%u\n", __func__, a_ptr,
+		a_filename, a_line_num);
+    }
+    else
+    {
+	ql_remove(&s_mem_addr_list, allocation, link);
+
+	if (a_size != 0 && a_size != allocation->size)
 	{
-	    fprintf(stderr, "%s(%p): %p not allocated, attempted "
-		    "to free at %s:%u\n", __FUNCTION__, a_mem, a_ptr,
-		    a_filename, a_line_num);
+	    fprintf(stderr, "%s(): Wrong size %zu for %p "
+		    "at %s:%u (size %zu, allocated at %s:%u)\n",
+		    __func__, a_size, a_ptr,
+		    a_filename, a_line_num, allocation->size,
+		    allocation->filename, allocation->line_num);
 	}
-	else
-	{
-	    if (a_size != 0 && a_size != allocation->size)
-	    {
-		fprintf(stderr, "%s(%p): Wrong size %u for %p "
-			"at %s:%u (size %u, allocated at %s:%u)\n",
-			__FUNCTION__, a_mem, a_size, a_ptr,
-			a_filename, a_line_num, allocation->size,
-			allocation->filename, allocation->line_num);
-	    }
 #ifdef CW_MEM_VERBOSE
-	    fprintf(stderr, "%s(%p): free(%p) at %s:%u "
-		    "(size %u, allocated at %s:%u)\n", __FUNCTION__,
-		    a_mem, a_ptr, a_filename, a_line_num,
-		    allocation->size, allocation->filename,
-		    allocation->line_num);
+	fprintf(stderr, "%s(): free(%p) at %s:%u "
+		"(size %zu, allocated at %s:%u)\n", __func__,
+		a_ptr, a_filename, a_line_num,
+		allocation->size, allocation->filename,
+		allocation->line_num);
 #endif
-	    memset(a_ptr, 0x5a, allocation->size);
-	    mem_free(a_mem->mem, allocation->filename);
-	    mem_free(a_mem->mem, allocation);
-	}
+	memset(a_ptr, 0x5a, allocation->size);
+	cw_free(allocation->filename);
+	cw_free(allocation);
     }
 #endif
 
@@ -439,10 +534,7 @@ mem_free_e(cw_mem_t *a_mem, void *a_ptr, size_t a_size, const char *a_filename,
 
 #ifdef CW_MEM_ERROR
 #ifdef CW_THREADS
-    if (a_mem != NULL)
-    {
-	mtx_unlock(&a_mem->lock);
-    }
+    mtx_unlock(&s_mem_lock);
 #endif
 #endif
 }

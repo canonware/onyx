@@ -1,0 +1,4 @@
+Test begin
+thd_suspend()
+thd_trysuspend()
+Test end

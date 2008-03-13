@@ -1,0 +1,3 @@
+Test begin
+Error $stackunderflow
+ostack: (-class=$vclass- -dict- -dict-)

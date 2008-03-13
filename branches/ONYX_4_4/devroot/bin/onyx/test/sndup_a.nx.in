@@ -1,0 +1,32 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    `() dup 0 sndup'
+    `(0) dup 0 sndup'
+    `(0) dup 1 sndup'
+    `(1 0) dup 0 sndup'
+    `(1 0) dup 1 sndup'
+    `(1 0) dup 2 sndup'
+    `(2 1 0) dup 0 sndup'
+    `(2 1 0) dup 1 sndup'
+    `(2 1 0) dup 2 sndup'
+    `(2 1 0) dup 3 sndup'
+]{
+    dup 1 sprint
+    cvx eval pstack clear
+} foreach
+
+`Test end\n' print
+pstack
