@@ -1,0 +1,3 @@
+Test begin
+Error $typecheck
+ostack: ($foo -class=$vclass- -array- -dict-)

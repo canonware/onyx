@@ -1,0 +1,33 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print
+
+0 srand rand
+0 srand rand
+eq {
+	`Equal'
+}{
+	`Not equal'
+} ifelse
+1 sprint
+
+42 srand rand
+42 srand rand
+eq {
+	`Equal'
+}{
+	`Not equal'
+} ifelse
+1 sprint
+
+`Test end\n' print

@@ -1,0 +1,30 @@
+Test begin
+`[1 2 3]'
+arraytype
+`true'
+booleantype
+`condition'
+conditiontype
+`</foo \`foo\' /bar \`bar\'>'
+dicttype
+`stdin'
+filetype
+`('
+finotype
+`42'
+integertype
+`mark'
+marktype
+`mutex'
+mutextype
+`/foo'
+nametype
+`null'
+nulltype
+`//pop'
+operatortype
+`(1 2 3)'
+stacktype
+`\`foo\''
+stringtype
+Test end

@@ -1,0 +1,1168 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% Terminfo routines.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% %filepath terminfo_decompile %dict
+/terminfo_decompile {
+	% Open the file.
+	`r' open
+
+	% Read the entire file into a string.  The entire file is not allowed to
+	% be more than 4096 bytes long, so don't bother finding out the exact
+	% length of the file before creating the container string.
+	dup 4096 string read pop
+
+	% Close the file.
+	exch close
+
+	% The structure of the file is well defined.  The following formats are
+	% used for the various data types in the file:
+	%
+	% Boolean : One byte, either 0 (false) or 1 (true).
+	%
+	% Integer : Two bytes, little endian.  -1 is interpreted to mean that a
+	%           capability is missing, and is represented as 0xff,0xff.
+	%           Other negative values are illegal.  However, evidence
+	%           suggests that some operating systems (namely SGI Irix) also
+	%           use 0xfe,0xff to represent -2.  Such incorrect usage is not
+	%           supported in this code.
+	%
+	% The file consists of the following sections:
+	%
+	% 1) Header (total of 12 bytes).
+	%
+	%    1) Magic number (0x011a).
+	%    2) Number of bytes in the terminal names section.
+	%    3) Number of bytes in the boolean flags section.
+	%    4) Number of (double-byte) integers in the numbers section.
+	%    5) Number of (double-byte) offsets in the strings section.
+	%    6) Number of bytes in the string table.
+	%
+	% 2) Terminal names.
+	%
+	%    1) Names for the terminal, separated by '|' characters.
+	%    2) '\0' terminator.
+	%
+	% 3) Boolean flags.  This section is followed by a pad character if one
+	%    is necessary to double-byte-align the following section.
+	%
+	%    The order is the same as that in <term.h>.  SUSv2
+	%    doesn't specify the order that I can see, but both Solaris 2.6 and
+	%    ncurses 5.2 use the same order, which seems to imply that the order
+	%    is well known.
+	%
+	%    The names are those typically used in C code.  It would make about
+	%    as much sense to use the terminfo capability names, but these are
+	%    slightly more memorable.
+	%
+	%     0) auto_left_margin
+	%     1) auto_right_margin
+	%     2) no_esc_ctlc
+	%     3) ceol_standout_glitch
+	%     4) eat_newline_glitch
+	%     5) erase_overstrike
+	%     6) generic_type
+	%     7) hard_copy
+	%     8) has_meta_key
+	%     9) has_status_line
+	%    10) insert_null_glitch
+	%    11) memory_above
+	%    12) memory_below
+	%    13) move_insert_mode
+	%    14) move_standout_mode
+	%    15) over_strike
+	%    16) status_line_esc_ok
+	%    17) dest_tabs_magic_smso
+	%    18) tilde_glitch
+	%    19) transparent_underline
+	%    20) xon_xoff
+	%    21) needs_xon_xoff
+	%    22) prtr_silent
+	%    23) hard_cursor
+	%    24) non_rev_rmcup
+	%    25) no_pad_char
+	%    26) non_dest_scroll_region
+	%    27) can_change
+	%    28) back_color_erase
+	%    29) hue_lightness_saturation
+	%    30) col_addr_glitch
+	%    31) cr_cancels_micro_mode
+	%    32) has_print_wheel
+	%    33) row_addr_glitch
+	%    34) semi_auto_right_margin
+	%    35) cpi_changes_res
+	%    36) lpi_changes_res
+	%
+	% 4) Numbers.
+	%
+	%     0) columns
+	%     1) init_tabs
+	%     2) lines
+	%     3) lines_of_memory
+	%     4) magic_cookie_glitch
+	%     5) padding_baud_rate
+	%     6) virtual_terminal
+	%     7) width_status_line
+	%     8) num_labels
+	%     9) label_height
+	%    10) label_width
+	%    11) max_attributes
+	%    12) maximum_windows
+	%    13) max_colors
+	%    14) max_pairs
+	%    15) no_color_video
+	%    16) buffer_capacity
+	%    17) dot_vert_spacing
+	%    18) dot_horz_spacing
+	%    19) max_micro_address
+	%    20) max_micro_jump
+	%    21) micro_col_size
+	%    22) micro_line_size
+	%    23) number_of_pins
+	%    24) output_res_char
+	%    25) output_res_line
+	%    26) output_res_horz_inch
+	%    27) output_res_vert_inch
+	%    28) print_rate
+	%    29) wide_char_size
+	%    30) buttons
+	%    31) bit_image_entwining
+	%    32) bit_image_type
+	%
+	% 5) String offsets.  These are represented as integers that specify the
+	%    byte offset from the beginning of the string table.
+	%
+	%      0) back_tab
+	%      1) bell
+	%      2) carriage_return
+	%      3) change_scroll_region
+	%      4) clear_all_tabs
+	%      5) clear_screen
+	%      6) clr_eol
+	%      7) clr_eos
+	%      8) column_address
+	%      9) command_character
+	%     10) cursor_address
+	%     11) cursor_down
+	%     12) cursor_home
+	%     13) cursor_invisible
+	%     14) cursor_left
+	%     15) cursor_mem_address
+	%     16) cursor_normal
+	%     17) cursor_right
+	%     18) cursor_to_ll
+	%     19) cursor_up
+	%     20) cursor_visible
+	%     21) delete_character
+	%     22) delete_line
+	%     23) dis_status_line
+	%     24) down_half_line
+	%     25) enter_alt_charset_mode
+	%     26) enter_blink_mode
+	%     27) enter_bold_mode
+	%     28) enter_ca_mode
+	%     29) enter_delete_mode
+	%     30) enter_dim_mode
+	%     31) enter_insert_mode
+	%     32) enter_secure_mode
+	%     33) enter_protected_mode
+	%     34) enter_reverse_mode
+	%     35) enter_standout_mode
+	%     36) enter_underline_mode
+	%     37) erase_chars
+	%     38) exit_alt_charset_mode
+	%     39) exit_attribute_mode
+	%     40) exit_ca_mode
+	%     41) exit_delete_mode
+	%     42) exit_insert_mode
+	%     43) exit_standout_mode
+	%     44) exit_underline_mode
+	%     45) flash_screen
+	%     46) form_feed
+	%     47) from_status_line
+	%     48) init_1string
+	%     49) init_2string
+	%     50) init_3string
+	%     51) init_file
+	%     52) insert_character
+	%     53) insert_line
+	%     54) insert_padding
+	%     55) key_backspace
+	%     56) key_catab
+	%     57) key_clear
+	%     58) key_ctab
+	%     59) key_dc
+	%     60) key_dl
+	%     61) key_down
+	%     62) key_eic
+	%     63) key_eol
+	%     64) key_eos
+	%     65) key_f0
+	%     66) key_f1
+	%     67) key_f10
+	%     68) key_f2
+	%     69) key_f3
+	%     70) key_f4
+	%     71) key_f5
+	%     72) key_f6
+	%     73) key_f7
+	%     74) key_f8
+	%     75) key_f9
+	%     76) key_home
+	%     77) key_ic
+	%     78) key_il
+	%     79) key_left
+	%     80) key_ll
+	%     81) key_npage
+	%     82) key_ppage
+	%     83) key_right
+	%     84) key_sf
+	%     85) key_sr
+	%     86) key_stab
+	%     87) key_up
+	%     88) keypad_local
+	%     89) keypad_xmit
+	%     90) lab_f0
+	%     91) lab_f1
+	%     92) lab_f10
+	%     93) lab_f2
+	%     94) lab_f3
+	%     95) lab_f4
+	%     96) lab_f5
+	%     97) lab_f6
+	%     98) lab_f7
+	%     99) lab_f8
+	%    100) lab_f9
+	%    101) meta_off
+	%    102) meta_on
+	%    103) newline
+	%    104) pad_char
+	%    105) parm_dch
+	%    106) parm_delete_line
+	%    107) parm_down_cursor
+	%    108) parm_ich
+	%    109) parm_index
+	%    110) parm_insert_line
+	%    111) parm_left_cursor
+	%    112) parm_right_cursor
+	%    113) parm_rindex
+	%    114) parm_up_cursor
+	%    115) pkey_key
+	%    116) pkey_local
+	%    117) pkey_xmit
+	%    118) print_screen
+	%    119) prtr_off
+	%    120) prtr_on
+	%    121) repeat_char
+	%    122) reset_1string
+	%    123) reset_2string
+	%    124) reset_3string
+	%    125) reset_file
+	%    126) restore_cursor
+	%    127) row_address
+	%    128) save_cursor
+	%    129) scroll_forward
+	%    130) scroll_reverse
+	%    131) set_attributes
+	%    132) set_tab
+	%    133) set_window
+	%    134) tab
+	%    135) to_status_line
+	%    136) underline_char
+	%    137) up_half_line
+	%    138) init_prog
+	%    139) key_a1
+	%    140) key_a3
+	%    141) key_b2
+	%    142) key_c1
+	%    143) key_c3
+	%    144) prtr_non
+	%    145) char_padding
+	%    146) acs_chars
+	%    147) plab_norm
+	%    148) key_btab
+	%    149) enter_xon_mode
+	%    150) exit_xon_mode
+	%    151) enter_am_mode
+	%    152) exit_am_mode
+	%    153) xon_character
+	%    154) xoff_character
+	%    155) ena_acs
+	%    156) label_on
+	%    157) label_off
+	%    158) key_beg
+	%    159) key_cancel
+	%    160) key_close
+	%    161) key_command
+	%    162) key_copy
+	%    163) key_create
+	%    164) key_end
+	%    165) key_enter
+	%    166) key_exit
+	%    167) key_find
+	%    168) key_help
+	%    169) key_mark
+	%    170) key_message
+	%    171) key_move
+	%    172) key_next
+	%    173) key_open
+	%    174) key_options
+	%    175) key_previous
+	%    176) key_print
+	%    177) key_redo
+	%    178) key_reference
+	%    179) key_refresh
+	%    180) key_replace
+	%    181) key_restart
+	%    182) key_resume
+	%    183) key_save
+	%    184) key_suspend
+	%    185) key_undo
+	%    186) key_sbeg
+	%    187) key_scancel
+	%    188) key_scommand
+	%    189) key_scopy
+	%    190) key_screate
+	%    191) key_sdc
+	%    192) key_sdl
+	%    193) key_select
+	%    194) key_send
+	%    195) key_seol
+	%    196) key_sexit
+	%    197) key_sfind
+	%    198) key_shelp
+	%    199) key_shome
+	%    200) key_sic
+	%    201) key_sleft
+	%    202) key_smessage
+	%    203) key_smove
+	%    204) key_snext
+	%    205) key_soptions
+	%    206) key_sprevious
+	%    207) key_sprint
+	%    208) key_sredo
+	%    209) key_sreplace
+	%    210) key_sright
+	%    211) key_srsume
+	%    212) key_ssave
+	%    213) key_ssuspend
+	%    214) key_sundo
+	%    215) req_for_input
+	%    216) key_f11
+	%    217) key_f12
+	%    218) key_f13
+	%    219) key_f14
+	%    220) key_f15
+	%    221) key_f16
+	%    222) key_f17
+	%    223) key_f18
+	%    224) key_f19
+	%    225) key_f20
+	%    226) key_f21
+	%    227) key_f22
+	%    228) key_f23
+	%    229) key_f24
+	%    230) key_f25
+	%    231) key_f26
+	%    232) key_f27
+	%    233) key_f28
+	%    234) key_f29
+	%    235) key_f30
+	%    236) key_f31
+	%    237) key_f32
+	%    238) key_f33
+	%    239) key_f34
+	%    240) key_f35
+	%    241) key_f36
+	%    242) key_f37
+	%    243) key_f38
+	%    244) key_f39
+	%    245) key_f40
+	%    246) key_f41
+	%    247) key_f42
+	%    248) key_f43
+	%    249) key_f44
+	%    250) key_f45
+	%    251) key_f46
+	%    252) key_f47
+	%    253) key_f48
+	%    254) key_f49
+	%    255) key_f50
+	%    256) key_f51
+	%    257) key_f52
+	%    258) key_f53
+	%    259) key_f54
+	%    260) key_f55
+	%    261) key_f56
+	%    262) key_f57
+	%    263) key_f58
+	%    264) key_f59
+	%    265) key_f60
+	%    266) key_f61
+	%    267) key_f62
+	%    268) key_f63
+	%    269) clr_bol
+	%    270) clear_margins
+	%    271) set_left_margin
+	%    272) set_right_margin
+	%    273) label_format
+	%    274) set_clock
+	%    275) display_clock
+	%    276) remove_clock
+	%    277) create_window
+	%    278) goto_window
+	%    279) hangup
+	%    280) dial_phone
+	%    281) quick_dial
+	%    282) tone
+	%    283) pulse
+	%    284) flash_hook
+	%    285) fixed_pause
+	%    286) wait_tone
+	%    287) user0
+	%    288) user1
+	%    289) user2
+	%    290) user3
+	%    291) user4
+	%    292) user5
+	%    293) user6
+	%    294) user7
+	%    295) user8
+	%    296) user9
+	%    297) orig_pair
+	%    298) orig_colors
+	%    299) initialize_color
+	%    300) initialize_pair
+	%    301) set_color_pair
+	%    302) set_foreground
+	%    303) set_background
+	%    304) change_char_pitch
+	%    305) change_line_pitch
+	%    306) change_res_horz
+	%    307) change_res_vert
+	%    308) define_char
+	%    309) enter_doublewide_mode
+	%    310) enter_draft_quality
+	%    311) enter_italics_mode
+	%    312) enter_leftward_mode
+	%    313) enter_micro_mode
+	%    314) enter_near_letter_quality
+	%    315) enter_normal_quality
+	%    316) enter_shadow_mode
+	%    317) enter_subscript_mode
+	%    318) enter_superscript_mode
+	%    319) enter_upward_mode
+	%    320) exit_doublewide_mode
+	%    321) exit_italics_mode
+	%    322) exit_leftward_mode
+	%    323) exit_micro_mode
+	%    324) exit_shadow_mode
+	%    325) exit_subscript_mode
+	%    326) exit_superscript_mode
+	%    327) exit_upward_mode
+	%    328) micro_column_address
+	%    329) micro_down
+	%    330) micro_left
+	%    331) micro_right
+	%    332) micro_row_address
+	%    333) micro_up
+	%    334) order_of_pins
+	%    335) parm_down_micro
+	%    336) parm_left_micro
+	%    337) parm_right_micro
+	%    338) parm_up_micro
+	%    339) select_char_set
+	%    340) set_bottom_margin
+	%    341) set_bottom_margin_parm
+	%    342) set_left_margin_parm
+	%    343) set_right_margin_parm
+	%    344) set_top_margin
+	%    345) set_top_margin_parm
+	%    346) start_bit_image
+	%    347) start_char_set_def
+	%    348) stop_bit_image
+	%    349) stop_char_set_def
+	%    350) subscript_characters
+	%    351) superscript_characters
+	%    352) these_cause_cr
+	%    353) zero_motion
+	%    354) char_set_names
+	%    355) key_mouse
+	%    356) mouse_info
+	%    357) req_mouse_pos
+	%    358) get_mouse
+	%    359) set_a_foreground
+	%    360) set_a_background
+	%    361) pkey_plab
+	%    362) device_type
+	%    363) code_set_init
+	%    364) set0_des_seq
+	%    365) set1_des_seq
+	%    366) set2_des_seq
+	%    367) set3_des_seq
+	%    368) set_lr_margin
+	%    369) set_tb_margin
+	%    370) bit_image_repeat
+	%    371) bit_image_newline
+	%    372) bit_image_carriage_return
+	%    373) color_names
+	%    374) define_bit_image_region
+	%    375) end_bit_image_region
+	%    376) set_color_band
+	%    377) set_page_length
+	%    378) display_pc_char
+	%    379) enter_pc_charset_mode
+	%    380) exit_pc_charset_mode
+	%    381) enter_scancode_mode
+	%    382) exit_scancode_mode
+	%    383) pc_term_options
+	%    384) scancode_escape
+	%    385) alt_scancode_esc
+	%    386) enter_horizontal_hl_mode
+	%    387) enter_left_hl_mode
+	%    388) enter_low_hl_mode
+	%    389) enter_right_hl_mode
+	%    390) enter_top_hl_mode
+	%    391) enter_vertical_hl_mode
+	%    392) set_a_attributes
+	%    393) set_pglen_inch
+	%
+	% 6) String table.  `\x00'-terminated strings.
+
+	% Most terminals only have a small subset of the defined capabilities,
+	% so the dictionary we create sparsely defines only those capabilities
+	% that are defined for the terminal type, rather than using nulls to
+	% indicate the lack of capabilities.
+
+	% Verify the file magic.
+	dup 0 get 1 index 1 get 256 mul add
+	16#11a ne {
+		/limitcheck throw
+	} if
+	% %data
+
+	% Remove the magic.
+	dup length 2 sub 2 exch getinterval
+
+	% Read the header, then discard it.
+	0 1 4 {
+		pop
+		% Convert the first two bytes to an integer.
+		dup 0 get 1 index 1 get 256 mul add
+		exch
+
+		% Chop the first two bytes off.
+		dup length 2 sub 2 exch getinterval
+	} for
+	% The header is gone now.
+	% %nnames %nbools %nnums %nstr_offs %nstrs %data
+
+	% Before throwing away the names section, use its size plus the booleans
+	% section size to determine if there is a padding character after the
+	% booleans.
+	5 index 5 index add 2 mod
+	5 1 roll
+	% %nnames %nbools %npad %nnums %nstr_offs %nstrs %data
+	
+	% Throw away the names section.
+	7 -1 roll 1 index length 1 index sub getinterval
+	% %nbools %npad %nnums %nstr_offs %nstrs %data
+
+	% Create the attribute dict.
+	dict begin
+
+	% Construct a key for the booleans, then use it to translate the
+	% booleans section.
+	{
+		/auto_left_margin
+		/auto_right_margin
+		/no_esc_ctlc
+		/ceol_standout_glitch
+		/eat_newline_glitch
+		/erase_overstrike
+		/generic_type
+		/hard_copy
+		/has_meta_key
+		/has_status_line
+		/insert_null_glitch
+		/memory_above
+		/memory_below
+		/move_insert_mode
+		/move_standout_mode
+		/over_strike
+		/status_line_esc_ok
+		/dest_tabs_magic_smso
+		/tilde_glitch
+		/transparent_underline
+		/xon_xoff
+		/needs_xon_xoff
+		/prtr_silent
+		/hard_cursor
+		/non_rev_rmcup
+		/no_pad_char
+		/non_dest_scroll_region
+		/can_change
+		/back_color_erase
+		/hue_lightness_saturation
+		/col_addr_glitch
+		/cr_cancels_micro_mode
+		/has_print_wheel
+		/row_addr_glitch
+		/semi_auto_right_margin
+		/cpi_changes_res
+		/lpi_changes_res
+	}
+	% %nbools %npad %nnums %nstr_offs %nstrs %data %bools_key
+	0 1 8 index 1 sub {
+		2 index 1 index get
+		1 eq {
+			% Attribute is set.
+			1 index exch get true
+			def
+		}{
+			pop
+		} ifelse
+	} for
+	pop
+	% %nbools %npad %nnums %nstr_offs %nstrs %data
+
+	% Throw away the booleans section and the padding character, if there is
+	% one.
+	6 -2 roll add
+	1 index length 1 index sub getinterval
+	% %nnums %nstr_offs %nstrs %data
+
+	% Create a key for the numbers, then use it to translate the numbers
+	% section.
+	{
+		/columns
+		/init_tabs
+		/lines
+		/lines_of_memory
+		/magic_cookie_glitch
+		/padding_baud_rate
+		/virtual_terminal
+		/width_status_line
+		/num_labels
+		/label_height
+		/label_width
+		/max_attributes
+		/maximum_windows
+		/max_colors
+		/max_pairs
+		/no_color_video
+		/buffer_capacity
+		/dot_vert_spacing
+		/dot_horz_spacing
+		/max_micro_address
+		/max_micro_jump
+		/micro_col_size
+		/micro_line_size
+		/number_of_pins
+		/output_res_char
+		/output_res_line
+		/output_res_horz_inch
+		/output_res_vert_inch
+		/print_rate
+		/wide_char_size
+		/buttons
+		/bit_image_entwining
+		/bit_image_type
+	}
+	% %nnums %nstr_offs %nstrs %data %nums_key
+	0 2 6 index 1 sub 2 mul {
+		2 index 1 index get
+		3 index 2 index 1 add get 256 mul add
+		% %nnums %nstr_offs %nstrs %data %nums_key %data_off %num
+		dup 16#ffff ne {
+			% Attribute is set.  Divide %data_off by 2 for the
+			% %nums_key lookup.
+			2 index 3 -1 roll 2 div get exch
+			def
+		}{
+			2 npop
+		} ifelse
+	} for
+	pop
+	% %nnums %nstr_offs %nstrs %data
+
+	% Throw away the numbers section.
+	4 -1 roll 2 mul
+	1 index length 1 index sub getinterval
+	% %nstr_offs %nstrs %data
+
+	% Create a key for the string offsets, then use it to translate the
+	% strings.
+	{
+		/back_tab
+		/bell
+		/carriage_return
+		/change_scroll_region
+		/clear_all_tabs
+		/clear_screen
+		/clr_eol
+		/clr_eos
+		/column_address
+		/command_character
+		/cursor_address
+		/cursor_down
+		/cursor_home
+		/cursor_invisible
+		/cursor_left
+		/cursor_mem_address
+		/cursor_normal
+		/cursor_right
+		/cursor_to_ll
+		/cursor_up
+		/cursor_visible
+		/delete_character
+		/delete_line
+		/dis_status_line
+		/down_half_line
+		/enter_alt_charset_mode
+		/enter_blink_mode
+		/enter_bold_mode
+		/enter_ca_mode
+		/enter_delete_mode
+		/enter_dim_mode
+		/enter_insert_mode
+		/enter_secure_mode
+		/enter_protected_mode
+		/enter_reverse_mode
+		/enter_standout_mode
+		/enter_underline_mode
+		/erase_chars
+		/exit_alt_charset_mode
+		/exit_attribute_mode
+		/exit_ca_mode
+		/exit_delete_mode
+		/exit_insert_mode
+		/exit_standout_mode
+		/exit_underline_mode
+		/flash_screen
+		/form_feed
+		/from_status_line
+		/init_1string
+		/init_2string
+		/init_3string
+		/init_file
+		/insert_character
+		/insert_line
+		/insert_padding
+		/key_backspace
+		/key_catab
+		/key_clear
+		/key_ctab
+		/key_dc
+		/key_dl
+		/key_down
+		/key_eic
+		/key_eol
+		/key_eos
+		/key_f0
+		/key_f1
+		/key_f10
+		/key_f2
+		/key_f3
+		/key_f4
+		/key_f5
+		/key_f6
+		/key_f7
+		/key_f8
+		/key_f9
+		/key_home
+		/key_ic
+		/key_il
+		/key_left
+		/key_ll
+		/key_npage
+		/key_ppage
+		/key_right
+		/key_sf
+		/key_sr
+		/key_stab
+		/key_up
+		/keypad_local
+		/keypad_xmit
+		/lab_f0
+		/lab_f1
+		/lab_f10
+		/lab_f2
+		/lab_f3
+		/lab_f4
+		/lab_f5
+		/lab_f6
+		/lab_f7
+		/lab_f8
+		/lab_f9
+		/meta_off
+		/meta_on
+		/newline
+		/pad_char
+		/parm_dch
+		/parm_delete_line
+		/parm_down_cursor
+		/parm_ich
+		/parm_index
+		/parm_insert_line
+		/parm_left_cursor
+		/parm_right_cursor
+		/parm_rindex
+		/parm_up_cursor
+		/pkey_key
+		/pkey_local
+		/pkey_xmit
+		/print_screen
+		/prtr_off
+		/prtr_on
+		/repeat_char
+		/reset_1string
+		/reset_2string
+		/reset_3string
+		/reset_file
+		/restore_cursor
+		/row_address
+		/save_cursor
+		/scroll_forward
+		/scroll_reverse
+		/set_attributes
+		/set_tab
+		/set_window
+		/tab
+		/to_status_line
+		/underline_char
+		/up_half_line
+		/init_prog
+		/key_a1
+		/key_a3
+		/key_b2
+		/key_c1
+		/key_c3
+		/prtr_non
+		/char_padding
+		/acs_chars
+		/plab_norm
+		/key_btab
+		/enter_xon_mode
+		/exit_xon_mode
+		/enter_am_mode
+		/exit_am_mode
+		/xon_character
+		/xoff_character
+		/ena_acs
+		/label_on
+		/label_off
+		/key_beg
+		/key_cancel
+		/key_close
+		/key_command
+		/key_copy
+		/key_create
+		/key_end
+		/key_enter
+		/key_exit
+		/key_find
+		/key_help
+		/key_mark
+		/key_message
+		/key_move
+		/key_next
+		/key_open
+		/key_options
+		/key_previous
+		/key_print
+		/key_redo
+		/key_reference
+		/key_refresh
+		/key_replace
+		/key_restart
+		/key_resume
+		/key_save
+		/key_suspend
+		/key_undo
+		/key_sbeg
+		/key_scancel
+		/key_scommand
+		/key_scopy
+		/key_screate
+		/key_sdc
+		/key_sdl
+		/key_select
+		/key_send
+		/key_seol
+		/key_sexit
+		/key_sfind
+		/key_shelp
+		/key_shome
+		/key_sic
+		/key_sleft
+		/key_smessage
+		/key_smove
+		/key_snext
+		/key_soptions
+		/key_sprevious
+		/key_sprint
+		/key_sredo
+		/key_sreplace
+		/key_sright
+		/key_srsume
+		/key_ssave
+		/key_ssuspend
+		/key_sundo
+		/req_for_input
+		/key_f11
+		/key_f12
+		/key_f13
+		/key_f14
+		/key_f15
+		/key_f16
+		/key_f17
+		/key_f18
+		/key_f19
+		/key_f20
+		/key_f21
+		/key_f22
+		/key_f23
+		/key_f24
+		/key_f25
+		/key_f26
+		/key_f27
+		/key_f28
+		/key_f29
+		/key_f30
+		/key_f31
+		/key_f32
+		/key_f33
+		/key_f34
+		/key_f35
+		/key_f36
+		/key_f37
+		/key_f38
+		/key_f39
+		/key_f40
+		/key_f41
+		/key_f42
+		/key_f43
+		/key_f44
+		/key_f45
+		/key_f46
+		/key_f47
+		/key_f48
+		/key_f49
+		/key_f50
+		/key_f51
+		/key_f52
+		/key_f53
+		/key_f54
+		/key_f55
+		/key_f56
+		/key_f57
+		/key_f58
+		/key_f59
+		/key_f60
+		/key_f61
+		/key_f62
+		/key_f63
+		/clr_bol
+		/clear_margins
+		/set_left_margin
+		/set_right_margin
+		/label_format
+		/set_clock
+		/display_clock
+		/remove_clock
+		/create_window
+		/goto_window
+		/hangup
+		/dial_phone
+		/quick_dial
+		/tone
+		/pulse
+		/flash_hook
+		/fixed_pause
+		/wait_tone
+		/user0
+		/user1
+		/user2
+		/user3
+		/user4
+		/user5
+		/user6
+		/user7
+		/user8
+		/user9
+		/orig_pair
+		/orig_colors
+		/initialize_color
+		/initialize_pair
+		/set_color_pair
+		/set_foreground
+		/set_background
+		/change_char_pitch
+		/change_line_pitch
+		/change_res_horz
+		/change_res_vert
+		/define_char
+		/enter_doublewide_mode
+		/enter_draft_quality
+		/enter_italics_mode
+		/enter_leftward_mode
+		/enter_micro_mode
+		/enter_near_letter_quality
+		/enter_normal_quality
+		/enter_shadow_mode
+		/enter_subscript_mode
+		/enter_superscript_mode
+		/enter_upward_mode
+		/exit_doublewide_mode
+		/exit_italics_mode
+		/exit_leftward_mode
+		/exit_micro_mode
+		/exit_shadow_mode
+		/exit_subscript_mode
+		/exit_superscript_mode
+		/exit_upward_mode
+		/micro_column_address
+		/micro_down
+		/micro_left
+		/micro_right
+		/micro_row_address
+		/micro_up
+		/order_of_pins
+		/parm_down_micro
+		/parm_left_micro
+		/parm_right_micro
+		/parm_up_micro
+		/select_char_set
+		/set_bottom_margin
+		/set_bottom_margin_parm
+		/set_left_margin_parm
+		/set_right_margin_parm
+		/set_top_margin
+		/set_top_margin_parm
+		/start_bit_image
+		/start_char_set_def
+		/stop_bit_image
+		/stop_char_set_def
+		/subscript_characters
+		/superscript_characters
+		/these_cause_cr
+		/zero_motion
+		/char_set_names
+		/key_mouse
+		/mouse_info
+		/req_mouse_pos
+		/get_mouse
+		/set_a_foreground
+		/set_a_background
+		/pkey_plab
+		/device_type
+		/code_set_init
+		/set0_des_seq
+		/set1_des_seq
+		/set2_des_seq
+		/set3_des_seq
+		/set_lr_margin
+		/set_tb_margin
+		/bit_image_repeat
+		/bit_image_newline
+		/bit_image_carriage_return
+		/color_names
+		/define_bit_image_region
+		/end_bit_image_region
+		/set_color_band
+		/set_page_length
+		/display_pc_char
+		/enter_pc_charset_mode
+		/exit_pc_charset_mode
+		/enter_scancode_mode
+		/exit_scancode_mode
+		/pc_term_options
+		/scancode_escape
+		/alt_scancode_esc
+		/enter_horizontal_hl_mode
+		/enter_left_hl_mode
+		/enter_low_hl_mode
+		/enter_right_hl_mode
+		/enter_top_hl_mode
+		/enter_vertical_hl_mode
+		/set_a_attributes
+		/set_pglen_inch
+	}
+	% %nstr_offs %nstrs %data %str_offs_key
+	0 2 5 index 1 sub 2 mul {
+		2 index 1 index get
+		3 index 2 index 1 add get 256 mul add
+		% %nstr_offs %nstrs %data %str_offs_key %data_off %str_off
+		dup 16#ffff ne {
+			% Attribute is set.  Divide %data_off by 2 for the
+			% %str_offs_key lookup.
+			2 index 3 -1 roll 2 div get
+			% %nstr_offs %nstrs %data %str_offs_key %str_off
+			% %str_name
+
+			% Calculate the offset to the string, which is %str_off
+			% plus the size of the string offsets table.
+			exch 5 index 2 mul add
+			% %nstr_offs %nstrs %data %str_offs_key %str_name
+			% %abs_str_off
+
+			% Get a substring that starts at the beginning of the
+			% string and extends to the end of the data.  Then
+			% get the string by searching for the first `\x00'.
+			3 index exch 1 index length 1 index sub
+			getinterval
+			`\x00' search
+			pop 3 1 roll 2 npop
+			% %nstr_offs %nstrs %data %str_offs_key %str_name %str
+			def
+			% %nstr_offs %nstrs %data %str_offs_key
+		}{
+			2 npop
+		} ifelse
+	} for
+	% %nstr_offs %nstrs %data %str_offs_key
+	4 npop
+
+	% Clean up dstack and return the attribute dict.
+	currentdict end
+} bind def
+
+% Using terminfo_search_path, find a terminfo definition for %term_name.
+%
+% %term_name terminfo_lookup %dict false
+% %term_name terminfo_lookup true
+/terminfo_lookup {
+	% Prepend the subdirectory for %term_name.
+	% For example, `xterm' --> `x/term'.
+	`/?/' 1 index 0 get 1 index exch 1 exch put exch catenate
+
+	terminfo_search_path {
+		1 index catenate
+		dup `f' test
+		1 index `r' test and {
+			terminfo_decompile
+			exch pop
+			false
+			exit
+		}{
+			pop
+		} ifelse
+	} foreach
+
+	% If the top object on ostack isn't a boolean, the terminal description
+	% wasn't found.
+	dup type /booleantype ne {
+		pop
+		true
+	} if
+} def

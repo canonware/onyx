@@ -1,0 +1,207 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Load the clopt module.
+$modclopt mclass:singleton:load
+
+# Subclass clopt, overriding error_print and adding option handlers.
+$optclass clopt <
+    #
+    # Class data.
+    #
+><
+    #
+    # Methods.
+    #
+
+    #class#
+    #- new #instance
+    $new {
+	;rnew
+	#instance
+    }
+
+    # Print an error.
+    #
+    #instance#
+    #errstr error_print -
+    $error_print {
+	# Call the superclass's print method.
+	this:isa:super:methods $error_print get eval
+
+	# Construct the usage statement.
+	;progname_get `\
+progname usage:
+    progname [--foo] [--bar[=<arg>]] [--biz=<arg>]
+    padchars [-a] [-b <arg>]
+    padchars [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+'
+	`progname' ;progname_get <$g true> subst pop
+	`padchars' ;progname_get `.' ` ' <$g true> subst pop <$g true> subst pop
+	#str
+
+	# Print usage.
+	stderr exch write pop
+    }
+
+    #instance#
+    #- `--foo' -
+    `--foo' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	this:arg_get 1 sprint
+    }
+
+    #instance#
+    #- `--bar?' -
+    `--bar?' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	this:arg_get 1 sprint
+    }
+
+    #instance#
+    #- `--biz=' -
+    `--biz=' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	this:arg_get 1 sprint
+    }
+
+    #instance#
+    #- `-a' -
+    `-a' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	this:arg_get 1 sprint
+    }
+
+    #instance#
+    #- `-b:' -
+    `-b:' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	this:arg_get 1 sprint
+    }
+
+    #instance#
+    #- `--enum?' -
+    `--enum?' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	<
+	    $default `default'
+	    `hi' `HI'
+	    `bye' `BYE'
+	> ;arg_enum_get 1 sprint
+    }
+
+    #instance#
+    #- `--int=' -
+    `--int=' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	;arg_int_get 1 sprint
+    }
+
+    #instance#
+    #- `--uint=' -
+    `--uint=' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	;arg_uint_get 1 sprint
+    }
+
+    #instance#
+    #- `--optint?' -
+    `--optint?' {
+	this:index_get cvs print
+	` --> ' ;flag_get ` ==> ' 3 ncat print
+	;arg_int_get 1 sprint
+    }
+> cdef
+
+# Instantiate optclass.
+optclass:new
+#opt_inst
+
+# Parse argv.
+[
+    [`fake_argv_0' `--foo' `--bar' `--bar=blah' `--biz=bang' `-a' `-b' `bam']
+
+    [`fake_argv_1' `--foo=']
+
+    [`fake_argv_2' `--foo=blah']
+
+    [`fake_argv_3' `--bar=']
+
+    [`fake_argv_4' `--bar=blah']
+    
+    [`fake_argv_5' `--biz']
+
+    [`fake_argv_6' `--biz=']
+
+    [`fake_argv_7' `-a' `remainder' `arguments']
+    
+    [`fake_argv_8' `-b']
+
+    [`fake_argv_9' `-bbam']
+
+    [`fake_argv_10' `-b-a' `remainder' `arguments']
+
+    [`fake_argv_11' `-b' `-a' `remainder' `arguments']
+
+    [`fake_argv_12' `-b' `bam' `remainder' `arguments']
+
+    [`fake_argv_13' `--foo' `--bar' `--' `--biz=bang' `more' `remainder']
+
+    [`fake_argv_14' `--enum']
+
+    [`fake_argv_15' `--enum=hi']
+
+    [`fake_argv_16' `--enum=blah']
+
+    [`fake_argv_17' `--int=-42']
+
+    [`fake_argv_18' `--int=0']
+
+    [`fake_argv_19' `--int=777']
+
+    [`fake_argv_20' `--int=']
+
+    [`fake_argv_21' `--int=foo']
+
+    [`fake_argv_22' `--uint=0']
+
+    [`fake_argv_23' `--uint=888']
+
+    [`fake_argv_24' `--uint=-5']
+
+    [`fake_argv_25' `--uint=bar']
+
+    [`fake_argv_26' `--optint']
+]{
+    `=== ' print
+    dup 1 sprints print
+    ` ===\n' print flush
+
+    over :parse {
+	`Parse error\n' print flush
+    }{
+	`Parse success\n' print
+	`Remainder: ' print 1 sprint
+    } ifelse
+} foreach
+pop
+
+# Unload the clopt module now that we're done with it.
+modclopt:unload

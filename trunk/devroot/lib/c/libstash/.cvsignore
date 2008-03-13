@@ -1,9 +1,0 @@
-*.core
-core
-Makefile
-Makefile.bsd
-Makefile.gnu
-config.cache
-config.log
-config.status
-stamp

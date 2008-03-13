@@ -1,0 +1,113 @@
+#!/usr/bin/perl
+#-*-mode:perl-*-
+#############################################################################
+#
+# Copyright (C) 1998-2004 Jason Evans <jasone@canonware.com>.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice(s), this list of conditions and the following disclaimer as
+#    the first lines of this file unmodified other than the possible
+#    addition of one or more copyright notices.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice(s), this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDER(S) ``AS IS'' AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT HOLDER(S) BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+# DAMAGE.
+#
+#############################################################################
+#
+# Wrapper for the snap script that includes the package name and all the
+# necessary components for that package.
+#
+#############################################################################
+
+use Getopt::Long;
+
+#
+# Copy command-line arguments for later use.
+#
+@ARGS = @ARGV;
+
+#
+# Parse command-line arguments.
+#
+Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
+
+$opt_retval = 
+    &GetOptions("c|cvsnotag" => \$opt_cvsnotag,
+		"h|help" => \$opt_help,
+		"n|noact" => \$opt_noact,
+		"v|verbose" => \$opt_verbose,
+		"m|majorbranch=s" => \$opt_majorbranch,
+		"b|branchpoint=s" => \$opt_branchpoint,
+		"B|branchtag=s" => \$opt_branchtag,
+		"t|tag=s" => \$opt_tag,
+		"p|pkgname=s" => \$opt_pkgname,
+		"V|version=s%" => \%OPT_VERSION
+		);
+
+if (($#ARGV >= 0)
+    || ($opt_retval == 0)
+    || ($opt_help)
+    )
+{
+    &print_usage;
+    exit(1);
+}
+
+if (!defined($opt_pkgname))
+{
+    $opt_pkgname = "onyx";
+}
+
+$run =
+    "../snap @ARGS -T ONYX_ -p $opt_pkgname -r onyxroot/onyx"
+    . " -f .cvsignore -f ChangeLog"
+    . " -f Cookfile.in -f Cookfile.inc.in"
+    . " -f COPYING -f INSTALL -f PLATFORMS -f README"
+    . " -f autogen.sh -f acinclude.m4"
+    . " -f config.guess -f config.sub -f config.stamp.in -f configure.in"
+    . " -f install-sh"
+    . " -f bin -f doc -f lib -f mod -f test"
+    ;
+if (defined($opt_verbose))
+{
+    print STDERR "$run\n";
+}
+
+`$run`;
+
+if ($? != 0)
+{
+    exit 1;
+}
+
+# End of main execution.
+
+sub print_usage
+{
+    print <<EOF;
+$0 usage:
+$0 [-chnv --cvsnotag --help --noact --verbose]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
+       [--branchtag=<tag> | -B <tag>]
+       [--tag=<tag> | -t <tag>]
+       {--pkgname=<name> | -p <pkgname>}
+       {--version <key>=<version> | -V <key>=<version>}*
+EOF
+}

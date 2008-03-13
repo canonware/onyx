@@ -1,0 +1,10 @@
+Test begin
+`0 0 idup'
+0
+`1 0 1 idup'
+1
+`2 1 0 1 idup'
+1
+`2 1 0 2 idup'
+2
+Test end

@@ -1,0 +1,3 @@
+Test begin
+Error $rangecheck
+ostack: (-array- -1 3)

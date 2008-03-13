@@ -1,0 +1,78 @@
+[]
+[]
+[]
+[1]
+[1]
+[1]
+[-array-]
+[[1]]
+[[1]]
+[-array- -array-]
+[[-array-] []]
+[[[1]] []]
+true
+true
+true
+false
+false
+false
+-condition-
+-condition-
+-condition-
+<>
+<>
+<>
+</foo /bar>
+</foo /bar>
+</foo /bar>
+</foo -dict->
+</foo <>>
+</foo <>>
+</foo -dict->
+</foo </bar -array->>
+</foo </bar [1]>>
+-file-
+-file-
+-file-
+-fino-
+-fino-
+-fino-
+-1
+-1
+-1
+0
+0
+0
+123412341234
+123412341234
+123412341234
+-mutex-
+-mutex-
+-mutex-
+/foo
+/foo
+/foo
+foo
+foo
+foo
+null
+null
+null
+--pop--
+--pop--
+--pop--
+()
+()
+()
+(-stack-)
+(())
+(())
+(1 2 -array- 6)
+(1 2 [3 4 5] 6)
+(1 2 [3 4 5] 6)
+(1 2 -array- 6)
+(1 2 [3 4 5 -array-] 6)
+(1 2 [3 4 5 [`a' `b']] 6)
+`abc\n\n'
+`abc\n\n'
+`abc\n\n'

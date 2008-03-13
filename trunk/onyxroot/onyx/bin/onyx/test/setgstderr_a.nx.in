@@ -1,0 +1,22 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+gstderr
+
+gstdout setgstderr
+gstderr gstdout ne {
+    `gstderr and gstdout are not equal\n' print
+} if
+
+gstderr eq {
+    `gstderr did not really change\n' print
+} if

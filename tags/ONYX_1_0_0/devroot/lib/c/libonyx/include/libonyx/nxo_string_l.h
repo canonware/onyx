@@ -1,0 +1,40 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ ******************************************************************************/
+
+typedef struct cw_nxoe_string_s cw_nxoe_string_t;
+
+struct cw_nxoe_string_s {
+	cw_nxoe_t	nxoe;
+	/*
+	 * Access is locked if this object has the locking bit set.  Indirect
+	 * strings aren't locked, but their parents are.
+	 */
+	cw_mtx_t	lock;
+	/*
+	 * Used for remembering the current state of reference iteration.
+	 */
+	cw_uint32_t	ref_iter;
+	union {
+		struct {
+			cw_nxo_t	nxo;
+			cw_uint32_t	beg_offset;
+			cw_uint32_t	len;
+		}	i;
+		struct {
+			cw_uint8_t	*str;
+			cw_sint32_t	len;
+		}	s;
+	}	e;
+};
+
+void	nxoe_l_string_delete(cw_nxoe_t *a_nxoe, cw_nx_t *a_nx);
+cw_nxoe_t *nxoe_l_string_ref_iter(cw_nxoe_t *a_nxoe, cw_bool_t a_reset);
+void	nxo_l_string_print(cw_nxo_t *a_thread);

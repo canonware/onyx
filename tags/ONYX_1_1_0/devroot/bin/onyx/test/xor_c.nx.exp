@@ -1,0 +1,8 @@
+Test begin
+Error /typecheck
+ostack: (-mark- 1)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--xor--
+1:	-file-
+2:	--start--
