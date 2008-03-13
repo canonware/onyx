@@ -1,6 +1,6 @@
-#!/usr/bin/onyx
+#!/usr/bin/env onyx
 #
-# regress [<srcdir>] [<par>]
+# regress [<srcdir> [<par>]]
 
 argv length 2 ge {
     $SRCDIR argv 1 get def
@@ -19,8 +19,8 @@ $PREFIX pwd `/regress_' SRCDIR 3 ncat def
 #$CONFIGURE_FLAGS [`--with-libedit-prefix=/usr/local'] def
 $CONFIGURE_FLAGS [] def
 
-# $CC `gcc30' setenv
-$CFLAGS `-Wall -Werror -Wno-uninitialized -g3' setenv
+# Make sure that build warnings get noticed.
+$EXTRA_CFLAGS `-Werror' setenv
 
 # Create a stack and mutex to be used as a job queue.
 globaldict begin
@@ -175,6 +175,7 @@ $worker_entry {
     (
 	`'
 	`--enable-debug'
+	`--disable-inlines'
     )
     (
 	`'
@@ -182,13 +183,9 @@ $worker_entry {
     )
     (
 	`'
-	`--disable-posix'
 	`--disable-socket'
+	`--disable-posix'
 	`--disable-posix-file'
-    )
-    (
-	`'
-	`--disable-inlines'
     )
 ) conf_permute
 

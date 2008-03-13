@@ -1,0 +1,24 @@
+Test begin
+`instance vclass'
+false
+`vclass:new class'
+false
+`vclass:new vclass'
+true
+`vclass:new fooclass'
+false
+`vclass:new barclass'
+false
+`fooclass:new vclass'
+true
+`fooclass:new fooclass'
+true
+`fooclass:new barclass'
+false
+`barclass:new vclass'
+true
+`barclass:new fooclass'
+true
+`barclass:new barclass'
+true
+Test end

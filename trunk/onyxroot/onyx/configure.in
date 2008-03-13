@@ -2,10 +2,10 @@ dnl
 dnl <Copyright = jasone>
 dnl <License>
 dnl 
-dnl Version: <Version>
+dnl Version: Onyx <Version>
 dnl 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(Cookfile.in)
+AC_INIT([Cookfile.in])
 
 dnl 
 dnl Version requirements for external software we depend on.
@@ -55,10 +55,11 @@ AC_SUBST([MANDIR])
 cfgoutputs="Cookfile Cookfile.inc bin/Cookfile.inc doc/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/Cookfile.inc mod/Cookfile.inc test/Cookfile.inc"
 cfgoutputs="$cfgoutputs lib/libonyx/src/nx_gen.nx"
+cfgoutputs="$cfgoutputs lib/libonyx/src/liboonyx_init_gen.nx"
 cfgoutputs="$cfgoutputs lib/libonyx/src/libonyx_init_gen.nx"
 cfgoutputs="$cfgoutputs lib/libonyx/src/nx.nx lib/libonyx/src/nxo_thread.nx"
 cfgoutputs="$cfgoutputs bin/onyx/src/batch.nx bin/onyx/src/interactive.nx"
-cfgoutputs="$cfgoutputs bin/onyx_config/src/onyx_config.nx.in"
+cfgoutputs="$cfgoutputs bin/onyx_config/src/onyx_config.nx"
 cfghdrs="$objroot/config.stamp"
 
 bins=
@@ -74,7 +75,18 @@ if test "x$CFLAGS" = "x" ; then
   no_CFLAGS="yes"
 fi
 if test "x$no_CFLAGS" = "xyes" -a "x$GCC" = "xyes" ; then
-	CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+  GCC_MAJ=`$CC -dumpversion | tr . " " |awk '{print $1}'`
+  GCC_MIN=`$CC -dumpversion | tr . " " |awk '{print $2}'`
+
+  if test $GCC_MAJ -gt 3 -o $GCC_MAJ -eq 3 -a $GCC_MIN -ge 3 ; then
+    CFLAGS="-Wall -Wno-uninitialized -Wno-strict-aliasing -pipe -g3"
+  else
+    CFLAGS="-Wall -Wno-uninitialized -pipe -g3"
+  fi
+fi
+dnl Append EXTRA_CFLAGS to CFLAGS, if defined.
+if test "x$EXTRA_CFLAGS" != "x" ; then
+  CFLAGS="$CFLAGS $EXTRA_CFLAGS"
 fi
 AC_PROG_CPP
 
@@ -128,7 +140,7 @@ case "${host}" in
 	RPATH="-Wl,-rpath,"
 	;;
   *-*-netbsd*)
-	AC_MSG_CHECKING(ABI)
+	AC_MSG_CHECKING([ABI])
         AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
 [[#ifdef __ELF__
 /* ELF */
@@ -146,7 +158,7 @@ case "${host}" in
 	RPATH="-Wl,-R,"
 	dnl Solaris needs this for sigwait().
 	CPPFLAGS="$CPPFLAGS -D_POSIX_PTHREAD_SEMANTICS"
-	LIBS="$LIBS -lposix4"
+	LIBS="$LIBS -lposix4 -lsocket -lnsl"
 	;;
   *)
 	AC_MSG_RESULT([Unsupported operating system: ${host}])
@@ -160,6 +172,9 @@ AC_SUBST([RPATH])
 case "${host_cpu}" in
   i[[3456]]86)
 	AC_DEFINE([CW_CPU_IA32])
+	;;
+  x86_64)
+	AC_DEFINE([CW_CPU_AMD64])
 	;;
   powerpc)
 	AC_DEFINE([CW_CPU_PPC])
@@ -223,6 +238,7 @@ if test "x$enable_threads" = "x1" ; then
     AC_CHECK_FUNCS([pthread_suspend_np], , [have_fthreads="0"])
     AC_CHECK_FUNCS([pthread_resume_np], , [have_fthreads="0"])
     if test "x$have_fthreads" = "x1" ; then
+      AC_CHECK_HEADERS([pthread_np.h])
       AC_DEFINE([CW_FTHREADS])
     fi
   else
@@ -480,7 +496,8 @@ AC_SUBST([enable_debug])
 
 dnl Only optimize if not debugging.
 if test "x$enable_debug" = "x0" -a "x$no_CFLAGS" = "xyes" ; then
-  CFLAGS="$CFLAGS -O2"
+  dnl Make sure that an optimization flag was not specified in EXTRA_CFLAGS.
+  echo "$EXTRA_CFLAGS" | grep "\-O" >/dev/null || CFLAGS="$CFLAGS -O2"
 fi
 
 dnl Support inlines by default.
@@ -670,15 +687,14 @@ fi
 [with_docs="0"]
 )
 if test "x$with_docs" = "x1" ; then
-  AC_PATH_PROG([LATEX], [latex], , [$PATH])
   AC_PATH_PROG([PDFLATEX], [pdflatex], , [$PATH])
   AC_PATH_PROG([DVIPS], [dvips], , [$PATH])
   AC_PATH_PROG([FIG2DEV], [fig2dev], , [$PATH])
   AC_PATH_PROG([LATEX2HTML], [latex2html], , [$PATH])
   AC_PATH_PROG([MAKEINDEX], [makeindex], , [$PATH])
 
-  if test "x$LATEX" = "x" -o "x$PDFLATEX" = "x" -o "x$DVIPS" = "x" \
-     -o "x$FIG2DEV" = "x" -o "x$LATEX2HTML" = "x" -o "x$MAKEINDEX" = "x" ; then
+  if test "x$PDFLATEX" = "x" -o "x$DVIPS" = "x" -o "x$FIG2DEV" = "x" \
+     -o "x$LATEX2HTML" = "x" -o "x$MAKEINDEX" = "x" ; then
     AC_MSG_ERROR([Missing one or more programs necessary for documentation build])
   fi
 fi
@@ -688,6 +704,7 @@ dnl These tests are orthogonal to the tests above.
 CW_BUILD_DOC([onyx], [doc_onyx])
 if test "x$doc_onyx" = "x1" ; then
   cfgoutputs="$cfgoutputs doc/latex/onyx/lang.tex"
+  cfgoutputs="$cfgoutputs doc/latex/onyx/lang_class_module.tex"
 fi
 
 VERIFY="$objroot/test/verify"
@@ -697,9 +714,37 @@ dnl Define preprocessor macros.
 
 dnl Check for header files.
 if test "x$enable_posix_file" = "x1" ; then
-  dnl Make sure that poll() and/or select() is available.
-  can_poll="0"
-  AC_CHECK_FUNCS([poll select], [can_poll="1"])
+  dnl Make sure that poll() and/or select() is available.  The strange structure
+  dnl of tests assures that HAVE_POLL isn't defined unless the necessary cpp
+  dnl definitions are also present.  (Mac OS X 10.3 has poll.h, but is missing
+  dnl the appropriate cpp definitions.)
+  AC_MSG_CHECKING([for poll])
+  AC_TRY_LINK([
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/poll.h>
+#ifndef POLLRDNORM
+#error Missing POLLRDNORM
+#endif
+#ifndef POLLWRNORM
+#error Missing POLLWRNORM
+#endif
+#ifndef POLLRDBAND
+#error Missing POLLRDBAND
+#endif
+#ifndef POLLWRBAND
+#error Missing POLLWRBAND
+#endif
+], [
+poll(NULL, 0, 0);
+], [can_poll="1"], [can_poll="0"])
+  if test "x$can_poll" = "x1" ; then
+    AC_MSG_RESULT(yes)
+    AC_DEFINE(HAVE_POLL)
+  else
+    AC_MSG_RESULT(no)
+    AC_CHECK_FUNCS([select], [can_poll="1"])
+  fi
   if test "x$can_poll" = "x0" ; then
     AC_MSG_ERROR([Cannot build without poll() or select()])
   fi
@@ -725,25 +770,11 @@ if test "x$bin_onyx" = "x1" ; then
   fi
   AC_SUBST([onyx_version])
 
-  ONYX="$abs_objroot/bin/onyx/bin/onyx"
+  OONYX="$abs_objroot/bin/onyx/bin/oonyx"
+  AC_SUBST([OONYX])
+
+  ONYX="$BINDIR/onyx-$onyx_version"
   AC_SUBST([ONYX])
-
-  TONYX="$abs_objroot/bin/onyx/bin/tonyx"
-  AC_SUBST([TONYX])
-
-  AC_DEFINE_UNQUOTED([CW_TONYX_ONYX], ["$abs_objroot/bin/onyx/bin/onyx"])
-
-  tmpath=ONYX_MPATH=
-  trpath=ONYX_RPATH=
-  for i in $mods ; do
-    tmpath=$tmpath:$abs_objroot/mod/$i/nxm
-    trpath=$trpath:$abs_objroot/mod/$i/nx
-  done
-  dnl Remove leading ':'.
-  tmpath=`echo $tmpath | sed s/://`
-  trpath=`echo $trpath | sed s/://`
-  AC_DEFINE_UNQUOTED([CW_TONYX_MPATH], ["$tmpath"])
-  AC_DEFINE_UNQUOTED([CW_TONYX_RPATH], ["$trpath"])
 
   AC_CHECK_DECL([optreset])
 fi
@@ -752,28 +783,32 @@ dnl
 dnl libonyx configuration.
 dnl 
 if test "x$lib_onyx" = "x1" ; then
-  AC_CHECK_SIZEOF([signed char], [1])
-  AC_CHECK_SIZEOF([unsigned char], [1])
-  AC_CHECK_SIZEOF([signed short], [2])
-  AC_CHECK_SIZEOF([unsigned short], [2])
-  AC_CHECK_SIZEOF([int], [4]) dnl defines SIZEOF_INT
-  AC_CHECK_SIZEOF([unsigned], [4])
-  AC_CHECK_SIZEOF([long], [4])
-  AC_CHECK_SIZEOF([unsigned long], [4])
-  AC_CHECK_SIZEOF([long long], [4])
-  AC_CHECK_SIZEOF([unsigned long long], [4])
   AC_CHECK_SIZEOF([int *], [4]) dnl defines SIZEOF_INT_P
-  AC_CHECK_SIZEOF([float], [4])
-  AC_CHECK_SIZEOF([double], [8])
-  AC_CHECK_SIZEOF([long double], [12])
+
+  AC_HEADER_STDBOOL
 
   AC_CHECK_HEADERS([sys/socket.h netinet/in.h arpa/inet.h machine/endian.h])
 
   if test "x$enable_posix" = "x1" ; then
-    rpath_post="\`$DATADIR/onyx-$onyx_version/nx'"
-    mpath_post="\`$DATADIR/onyx-$onyx_version/nxm'"
-    AC_SUBST([rpath_post])
-    AC_SUBST([mpath_post])
+    oonyx_mpath_post=
+    oonyx_rpath_post=
+    for i in $mods ; do
+      oonyx_mpath_post="$oonyx_mpath_post \`$abs_srcroot/mod/$i/nxm'"
+      oonyx_mpath_post="$oonyx_mpath_post \`$abs_objroot/mod/$i/nxm'"
+
+      oonyx_rpath_post="$oonyx_rpath_post \`$abs_srcroot/mod/$i/nx'"
+      oonyx_rpath_post="$oonyx_rpath_post \`$abs_objroot/mod/$i/nx'"
+    done
+    dnl Remove leading ' '.
+    oonyx_mpath_post=`echo $oonyx_mpath_post | sed s/\ //`
+    oonyx_rpath_post=`echo $oonyx_rpath_post | sed s/\ //`
+    AC_SUBST([oonyx_rpath_post])
+    AC_SUBST([oonyx_mpath_post])
+
+    onyx_rpath_post="\`$DATADIR/onyx-$onyx_version/nx'"
+    onyx_mpath_post="\`$DATADIR/onyx-$onyx_version/nxm'"
+    AC_SUBST([onyx_rpath_post])
+    AC_SUBST([onyx_mpath_post])
 
     dnl Try to figure out which field of struct dirent contains the entry string
     dnl length.
@@ -827,6 +862,52 @@ if test "x$lib_onyx" = "x1" ; then
 ], AC_MSG_RESULT([yes])
    AC_DEFINE([CW_LIBONYX_USE_STAT_CTIMESPEC]),
    AC_MSG_RESULT([no]))
+
+    dnl Look for either (struct tm).tm_zone or tzname.
+    AC_MSG_CHECKING([for (struct tm).tm_zone])
+    AC_TRY_LINK([
+#include <sys/time.h>
+#include <time.h>
+], [
+    struct tm tm;
+
+    tm.tm_zone = "GMT";
+], AC_MSG_RESULT([yes])
+   AC_DEFINE([CW_LIBONYX_USE_TM_ZONE]),
+   AC_MSG_RESULT([no])
+   AC_MSG_CHECKING([for tzname])
+   AC_TRY_LINK([
+#include <sys/time.h>
+#include <time.h>
+], [
+    tzname[[0]] = "GMT";
+], AC_MSG_RESULT([yes])
+   AC_DEFINE([CW_LIBONYX_USE_TZNAME]),
+   AC_MSG_RESULT([no])
+   AC_MSG_ERROR([Cannot support localtime operator (POSIX)])))
+
+    dnl Look for either (struct tm).tm_gmtoff or altzone.
+    AC_MSG_CHECKING([for (struct tm).tm_gmtoff])
+    AC_TRY_LINK([
+#include <sys/time.h>
+#include <time.h>
+], [
+    struct tm tm;
+
+    tm.tm_gmtoff = 0;
+], AC_MSG_RESULT([yes])
+   AC_DEFINE([CW_LIBONYX_USE_TM_GMTOFF]),
+   AC_MSG_RESULT([no])
+   AC_MSG_CHECKING([for altzone])
+   AC_TRY_LINK([
+#include <sys/time.h>
+#include <time.h>
+], [
+    altzone = 0;
+], AC_MSG_RESULT([yes])
+   AC_DEFINE([CW_LIBONYX_USE_ALTZONE]),
+   AC_MSG_RESULT([no])
+   AC_MSG_ERROR([Cannot support localtime operator (POSIX)])))
 
     AC_CHECK_FUNCS([unsetenv])
   fi

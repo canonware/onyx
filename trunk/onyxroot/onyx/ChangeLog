@@ -1,3 +1,191 @@
+2007-05-30 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/ch.c:ch_direct_hash() : Modify to directly use the
+	  pointer value as the return value.  This requires using prime-sized
+	  hash tables, so several things in the ch/dch API have changed.
+
+	* lib/libonyx/include/libonyx/mb.h : Add sfence-based memory barrier
+	  support for amd64.
+
+2005-05-13 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/thd.c:thd_p_suspend() : Retry sem_wait() call if
+	  EINTR is returned.
+
+2005-03-16 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.2 released.
+	
+2004-10-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{bindsocket,connect}() :
+	  Move a mtx_unlock() call inside the conditional block that calls
+	  mtx_lock(), in order to keep from trying to unlock a mutex that
+	  isn't locked.
+
+2004-03-16 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.1 released.
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix the ordering
+	  of code that sets a key/value pair in an array-based dict.  This
+	  fixes a small race condition window, wherein the GC could end up
+	  looking at a bogus val.
+
+2004-03-07 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.0 released.
+
+2004-02-29 : Jason Evans <jasone@canonware.com>
+
+	* configure.in : Check for pthread_np.h independently of checking
+	  for pthread_{suspend,resume}_np(), so this works on NetBSD,
+	  which has the functions, but not the header.
+
+	* Install documentation in <prefix>/share/doc/onyx rather than
+	  <prefix>/share/onyx/doc.
+
+	* Change linker flags for OS X from:
+	    -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
+	  or
+	    -undefined suppress -flat_namespace -dynamiclib -bind_at_load
+	  to
+	    -undefined dynamic_lookup -bundle -all_load -prebind
+	  or
+	    -undefined dynamic_lookup -dynamiclib -prebind
+
+	  This change has two caveats:
+	  1) It is not backward compatible; it only works for OS X 10.3.
+	  2) The -bind_at_load flag was removed, which is a bad thing if the
+	     -prebind flag doesn't prevent dynamic symbol lookups at the
+	     same time as garbage collections.  -prebind probably does the
+	     right thing, but if deadlocks in dyld start appearing, this
+	     change is probably the cause.
+
+2004-01-17 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.1 released.
+
+2004-01-16 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix a race
+	  condition between updating the internal list and internal hash
+	  that could cause a crash if suspended by the garbage collector
+	  while inserting the first object into a dictionary.
+	  Additionally, this could only happen when the dictionary was
+	  stored as a hash, rather than as an array.  This was a
+	  regression that existed since the 5.0.0 release.
+
+2004-01-03 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.0 released.
+
+2003-12-31  Jason Evans  <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{send,recv}() : Fix
+	  handling of the flags array.
+
+2003-12-30  Jason Evans  <jasone@canonware.com>
+
+	* configure.in : Add EXTRA_CFLAGS.
+
+2003-12-29  Jason Evans  <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_localtime() : Use tzname
+	  and altzone if (struct tm).tm_{zone,gmtoff} are missing, as on
+	  Solaris 9.
+
+	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Revise string
+	  hashing to marginally improve performance.
+
+2003-12-28 : Jason Evans <jasone@canonware.com>
+
+	* Use the char type rather than uint8_t wherever it makes sense.
+	  This is a sweeping API change, much like the change on
+	  2003-12-13, but it has little actual impact on applications,
+	  except that it fixes some long-standing casting issues for C++
+	  applications.
+
+	* lib/libonyx/src/nxm.c : Add the nxm class, which abstracts
+	  loadable module functionality.  Remove cw_nxmod_t, which is
+	  obsoleted by this change.
+
+2003-12-26 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + sigmask
+	  + sigpending
+	  + sigsuspend
+	  + sigwait
+	  + getpgid, setpgid
+	  + getsid, setsid
+
+2003-12-25 : Jason Evans <jasone@canonware.com>
+
+	* Stop building a PostScript version of the documentation.  There
+	  is no good reason to keep building two printable formats, and
+	  PDF is supported by all operating systems of interest, whereas
+	  PostScript is not.
+
+2003-12-13 : Jason Evans <jasone@canonware.com>
+
+	* Remove the following types, and replace them with C99 equivalents:
+	  + cw_uint8_t	--> uint8_t
+	  + cw_uint8_t	--> uint8_t
+	  + cw_sint8_t	--> int8_t
+	  + cw_uint16_t	--> uint16_t
+	  + cw_sint16_t	--> int16_t
+	  + cw_uint32_t	--> uint32_t
+	  + cw_sint32_t	--> int32_t
+	  + cw_uint64_t	--> uint64_t
+	  + cw_sint64_t	--> int64_t
+	  + cw_fp64_t	--> double
+	  + cw_bool_t	--> bool
+
+	  Use false and true, rather than FALSE and TRUE.
+
+2003-10-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def(),nxo_dict_undef() : Fix
+	  the same problem as was fixed in nxoe_p_dict_lookup() on 2003-08-22.
+
+2003-10-22 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx/src/interactive.nx.in : Modify the resume procedure to clear
+	  the error snapshot state in currenterror.
+
+	* Add the path operator.
+
+	* lib/libonyx/src/systemdict.c:systemdict_forkexec() : Add the optional
+	  redirects parameter, which makes it possible to redirect standard I/O,
+	  thus enabling program pipelines.
+
+2003-10-21 : Jason Evans <jasone@canonware.com>
+
+	* mod/modprompt/src/modprompt.c : Wrap workaround code for
+	  LinuxThreads's broken signal handling in 
+	  #ifdef CW_MODPROMPT_LINUXTHREADS ... #endif.
+
+2003-10-20 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config/src/onyx_config.nx.in : Add --bindir, --datadir,
+	  --libdir, --includedir, and --mandir.
+
+2003-10-13 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config/src/onyx_config.nx.in : Add --onyx-path.
+
+	* Remove tonyx, and replace it with oonyx (and oonyx_config).  This
+	  makes it possible to run the debugger directly on oonyx (was not
+	  possible with tonyx), and oonyx_config makes it possible for external
+	  programs to use an onyx build tree, rather than requiring that onyx be
+	  installed.
+
+2003-10-05 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_p_nxmod_delete() : Add support
+	  for a hook function that is called just before a module is unloaded.
+
 2003-10-02 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_{while,until}() : Replace an
@@ -96,7 +284,7 @@
 
 	  Update to autoconf 2.57.
 
-	  Add --disable-clopt.
+	  Add --disable-modclopt.
 
 2003-07-29 : Jason Evans <jasone@canonware.com>
 

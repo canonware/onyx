@@ -28,9 +28,8 @@ class documentation for additional information.
 
 \label{dch_new}
 \index{dch_new@\cfunc{dch\_new}{}}
-\citem{\cfunc[]{dch\_new}{cw\_dch\_t *a\_dch, cw\_mema\_t *a\_mema,
-cw\_uint32\_t a\_base\_table, cw\_uint32\_t a\_base\_grow, cw\_uint32\_t
-a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
+\citem{\cfunc[]{dch\_new}{cw\_dch\_t *a\_dch, cw\_mema\_t *a\_mema, size\_t
+a\_base\_count, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -38,17 +37,8 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 			Pointer to space for a \classname{dch}, or NULL.
 		\item[a\_mema: ]
 			Pointer to a memory allocator.
-		\item[a\_base\_table: ]
-			Number of slots in the initial hash table.
-		\item[a\_base\_grow: ]
-			Maximum number of items to allow in \cvar{a\_dch} before
-			doubling the hash table size.  The same proportions (in
-			relation to \cvar{a\_base\_table}) are used to decide
-			when to double the table additional times.
-		\item[a\_base\_shrink: ]
-			Minimum proportional (with respect to
-			\cvar{a\_base\_table}) emptiness to allow in the hash
-			table before cutting the hash table size in half.
+		\item[a\_base\_count: ]
+			Number of usable slots in the initial hash table.
 		\item[a\_hash: ]
 			Pointer to a hashing function.
 		\item[a\_key\_comp: ]
@@ -82,7 +72,7 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{dch_count}
 \index{dch_count@\cfunc{dch\_count}{}}
-\citem{\cfunc[cw\_uint32\_t]{dch\_count}{cw\_dch\_t *a\_dch}}
+\citem{\cfunc[size\_t]{dch\_count}{cw\_dch\_t *a\_dch}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -100,7 +90,7 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{dch_shrinkable_get}
 \index{dch_shrinkable_get@\cfunc{dch\_shrinkable\_get}{}}
-\citem{\cfunc[cw\_bool\_t]{dch\_shrinkable\_get}{cw\_dch\_t *a\_dch}}
+\citem{\cfunc[bool]{dch\_shrinkable\_get}{cw\_dch\_t *a\_dch}}
 	\begin{capilist}
 	\item[Input(s): ]
 		\begin{description}\item[]
@@ -111,9 +101,9 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[TRUE: ] \cvar{a\_dch} is currently shrinkable
+			\item[true: ] \cvar{a\_dch} is currently shrinkable
 				(initial default).
-			\item[FALSE: ] \cvar{a\_dch} is not currently
+			\item[false: ] \cvar{a\_dch} is not currently
 				shrinkable, so no attempt will be made to shrink
 				the hash table in \cfunc{dch\_remove}{} or
 				\cfunc{dch\_remove\_iterate}{}.
@@ -125,7 +115,7 @@ a\_base\_shrink, cw\_ch\_hash\_t *a\_hash, cw\_ch\_key\_comp\_t *a\_key\_comp}}
 	\end{capilist}
 \label{dch_shrinkable_set}
 \index{dch_shrinkable_set@\cfunc{dch\_shrinkable\_set}{}}
-\citem{\cfunc[void]{dch\_shrinkable\_set}{cw\_dch\_t *a\_dch, cw\_bool\_t
+\citem{\cfunc[void]{dch\_shrinkable\_set}{cw\_dch\_t *a\_dch, bool
 a\_shrinkable}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -134,8 +124,8 @@ a\_shrinkable}}
 			Pointer to a \classname{dch}.
 		\item[a\_shrinkable: ]
 			\begin{description}\item[]
-			\item[TRUE: ] Set \cvar{a\_dch} to be shrinkable.
-			\item[FALSE: ] Set \cvar{a\_dch} to not be shrinkable.
+			\item[true: ] Set \cvar{a\_dch} to be shrinkable.
+			\item[false: ] Set \cvar{a\_dch} to not be shrinkable.
 				No attempt will be made to shrink the hash table
 				in \cfunc{dch\_remove}{} or
 				\cfunc{dch\_remove\_iterate}{} while in this
@@ -176,7 +166,7 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 	\end{capilist}
 \label{dch_remove}
 \index{dch_remove@\cfunc{dch\_remove}{}}
-\citem{\cfunc[cw\_bool\_t]{dch\_remove}{cw\_dch\_t *a\_dch, const void
+\citem{\cfunc[bool]{dch\_remove}{cw\_dch\_t *a\_dch, const void
 *a\_search\_key, void **r\_key, void **r\_data, cw\_chi\_t **r\_chi}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -196,19 +186,19 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Item with key \cvar{a\_search\_key} not	found.
 			\end{description}
 		\item[*r\_key: ]
-			If (\cvar{r\_key} != NULL) and (retval == FALSE),
+			If (\cvar{r\_key} != NULL) and (retval == false),
 			pointer to a key.  Otherwise, undefined.
 		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			If (\cvar{r\_data} != NULL) and (retval == false),
 			pointer to data.  Otherwise, undefined.
 		\item[*r\_chi: ]
-			If (\cvar{r\_chi} != NULL) and (retval == FALSE),
+			If (\cvar{r\_chi} != NULL) and (retval == false),
 			pointer to space for a \classname{chi}, or NULL.
 			Otherwise, undefined.
 		\end{description}
@@ -221,7 +211,7 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 	\end{capilist}
 \label{dch_chi_remove}
 \index{dch_chi_remove@\cfunc{dch\_chi\_remove}{}}
-\citem{\cfunc[cw\_bool\_t]{dch\_chi\_remove}{cw\_dch\_t *a\_dch, cw\_chi\_t
+\citem{\cfunc[bool]{dch\_chi\_remove}{cw\_dch\_t *a\_dch, cw\_chi\_t
 *a\_chi}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -239,7 +229,7 @@ void *a\_data, cw\_chi\_t *a\_chi}}
 	\end{capilist}
 \label{dch_search}
 \index{dch_search@\cfunc{dch\_search}{}}
-\citem{\cfunc[cw\_bool\_t]{dch\_search}{cw\_dch\_t *a\_dch, const void *a\_key,
+\citem{\cfunc[bool]{dch\_search}{cw\_dch\_t *a\_dch, const void *a\_key,
 void **r\_data}}
 	\begin{capilist}
 	\item[Input(s): ]
@@ -255,14 +245,14 @@ void **r\_data}}
 		\begin{description}\item[]
 		\item[retval: ]
 			\begin{description}\item[]
-			\item[FALSE: ]
+			\item[false: ]
 				Success.
-			\item[TRUE: ]
+			\item[true: ]
 				Item with key \cvar{a\_key} not found in
 				\cvar{a\_dch}.
 			\end{description}
 		\item[*r\_data: ]
-			If (\cvar{r\_data} != NULL) and (retval == FALSE),
+			If (\cvar{r\_data} != NULL) and (retval == false),
 			pointer to data.
 		\end{description}
 	\item[Exception(s): ] None.

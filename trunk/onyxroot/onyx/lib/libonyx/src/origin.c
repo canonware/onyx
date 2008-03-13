@@ -24,10 +24,10 @@
 typedef struct cw_origin_ostr_s cw_origin_ostr_t;
 struct cw_origin_ostr_s
 {
-    cw_uint8_t *ostr;
-    cw_uint32_t olen;
+    char *ostr;
+    uint32_t olen;
 
-    cw_uint32_t ref_count; /* Reference count, used to remove hash items. */
+    uint32_t ref_count; /* Reference count, used to remove hash items. */
     cw_chi_t chi; /* For internal dch linkage. */
 };
 
@@ -35,13 +35,13 @@ typedef struct cw_origin_obj_s cw_origin_obj_t;
 struct cw_origin_obj_s
 {
     cw_origin_ostr_t *ostr_hash_key;
-    cw_uint32_t line_num;
+    uint32_t line_num;
     cw_chi_t chi; /* For internal dch linkage. */
 };
 
 /* File-global variables. */
 #ifdef CW_DBG
-static cw_bool_t s_origin_initialized = FALSE;
+static bool s_origin_initialized = false;
 #endif
 
 #ifdef CW_THREADS
@@ -50,30 +50,22 @@ static cw_mtx_t s_origin_lock;
 
 /* Slots in base hash table. */
 #define CW_ORIGIN_OSTR_BASE_TABLE 32
-/* Maximum fullness of base table. */
-#define CW_ORIGIN_OSTR_BASE_GROW 8
-/* Proportional minimal fullness. */
-#define CW_ORIGIN_OSTR_BASE_SHRINK 1
 static cw_dch_t s_origin_ostr_hash;
 
 /* Slots in base hash table. */
 #define CW_ORIGIN_OBJ_BASE_TABLE 1024
-/* Maximum fullness of base table. */
-#define CW_ORIGIN_OBJ_BASE_GROW 256
-/* Proportional minimal fullness. */
-#define CW_ORIGIN_OBJ_BASE_SHRINK 1
 static cw_dch_t s_origin_obj_hash;
 
 /* Prototypes. */
-static cw_uint32_t
+static uint32_t
 origin_p_ostr_hash(const void *a_key);
-static cw_bool_t
+static bool
 origin_p_ostr_key_comp(const void *a_k1, const void *a_k2);
 
 void
 origin_l_init(void)
 {
-    cw_assert(s_origin_initialized == FALSE);
+    cw_assert(s_origin_initialized == false);
 
 #ifdef CW_THREADS
     mtx_new(&s_origin_lock);
@@ -81,16 +73,14 @@ origin_l_init(void)
 
     /* Initialize ostr hash. */
     dch_new(&s_origin_ostr_hash, cw_g_mema, CW_ORIGIN_OSTR_BASE_TABLE,
-	    CW_ORIGIN_OSTR_BASE_GROW, CW_ORIGIN_OSTR_BASE_SHRINK,
 	    origin_p_ostr_hash, origin_p_ostr_key_comp);
 
     /* Initialize obj hash. */
     dch_new(&s_origin_obj_hash, cw_g_mema, CW_ORIGIN_OBJ_BASE_TABLE,
-	    CW_ORIGIN_OBJ_BASE_GROW, CW_ORIGIN_OBJ_BASE_SHRINK,
 	    ch_direct_hash, ch_direct_key_comp);
 
 #ifdef CW_DBG
-    s_origin_initialized = TRUE;
+    s_origin_initialized = true;
 #endif
 }
 
@@ -100,7 +90,7 @@ origin_l_shutdown(void)
     cw_assert(s_origin_initialized);
 
 #ifdef CW_DBG
-    s_origin_initialized = FALSE;
+    s_origin_initialized = false;
 #endif
 
     /* Destroy obj hash. */
@@ -117,16 +107,16 @@ origin_l_shutdown(void)
 }
 
 CW_P_INLINE cw_origin_ostr_t *
-origin_p_ostr_insert(const cw_uint8_t *a_ostr, cw_uint32_t a_olen)
+origin_p_ostr_insert(const char *a_ostr, uint32_t a_olen)
 {
     cw_origin_ostr_t *retval;
     cw_origin_ostr_t tkey;
 
-    tkey.ostr = (cw_uint8_t *) a_ostr;
+    tkey.ostr = (char *) a_ostr;
     tkey.olen = a_olen;
 
     if (dch_search(&s_origin_ostr_hash, (void *) &tkey, (void **) &retval)
-	== FALSE)
+	== false)
     {
 	/* Increment reference count. */
 	retval->ref_count++;
@@ -173,8 +163,8 @@ origin_p_ostr_remove(cw_origin_ostr_t *a_ostr_hash_key)
 }
 
 void
-origin_l_insert(void *a_obj, const cw_uint8_t *a_ostr, cw_uint32_t a_olen,
-		cw_uint32_t a_line_num)
+origin_l_insert(void *a_obj, const char *a_ostr, uint32_t a_olen,
+		uint32_t a_line_num)
 {
     cw_origin_obj_t *obj_hash_item;
     cw_origin_ostr_t *ostr_hash_key;
@@ -235,11 +225,11 @@ origin_l_remove(void *a_obj)
 #endif
 }
 
-cw_bool_t
-origin_l_lookup(void *a_obj, const cw_uint8_t **r_ostr,
-		cw_uint32_t *r_olen, cw_uint32_t *r_line_num)
+bool
+origin_l_lookup(void *a_obj, const char **r_ostr,
+		uint32_t *r_olen, uint32_t *r_line_num)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_origin_obj_t *obj_hash_item;
 
     cw_assert(s_origin_initialized);
@@ -249,7 +239,7 @@ origin_l_lookup(void *a_obj, const cw_uint8_t **r_ostr,
 #endif
 
     retval = dch_search(&s_origin_obj_hash, a_obj, (void **) &obj_hash_item);
-    if (retval == FALSE)
+    if (retval == false)
     {
 	if (r_ostr != NULL)
 	{
@@ -271,13 +261,13 @@ origin_l_lookup(void *a_obj, const cw_uint8_t **r_ostr,
     return retval;
 }
 
-static cw_uint32_t
+static uint32_t
 origin_p_ostr_hash(const void *a_key)
 {
-    cw_uint32_t retval;
+    uint32_t retval;
     cw_origin_ostr_t *key = (cw_origin_ostr_t *) a_key;
-    cw_uint8_t *str;
-    cw_uint32_t i, len;
+    char *str;
+    uint32_t i, len;
 
     str = key->ostr;
     len = key->olen;
@@ -289,10 +279,10 @@ origin_p_ostr_hash(const void *a_key)
     return retval;
 }
 
-static cw_bool_t
+static bool
 origin_p_ostr_key_comp(const void *a_k1, const void *a_k2)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_origin_ostr_t *k1 = (cw_origin_ostr_t *) a_k1;
     cw_origin_ostr_t *k2 = (cw_origin_ostr_t *) a_k2;
 
@@ -302,11 +292,11 @@ origin_p_ostr_key_comp(const void *a_k1, const void *a_k2)
     if (k1->olen == k2->olen
 	&& (memcmp(k1->ostr, k2->ostr, k1->olen) == 0))
     {
-	retval = TRUE;
+	retval = true;
     }
     else
     {
-	retval = FALSE;
+	retval = false;
     }
 
     return retval;

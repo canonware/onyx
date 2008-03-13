@@ -1,0 +1,3 @@
+$ ./progname_get.nx --foo       
+progname: `progname_get.nx'
+$ 

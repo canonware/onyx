@@ -1,0 +1,27 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# verify should always pass two arguments, which means argv should have 3
+# elements.
+`Number of arguments: ' print
+argv length 1 sprint
+
+# Make sure that both arguments are directories.
+argv 1 2 getinterval {
+    dup `d' test {
+	# Yes, it's a directory.
+	pop
+    }{
+	# No, it's not a directory.  The test should fail.
+	`Not a directory: ' print 1 sprint
+    } ifelse
+} foreach

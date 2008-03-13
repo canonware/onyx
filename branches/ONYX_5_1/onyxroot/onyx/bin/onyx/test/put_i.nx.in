@@ -1,0 +1,21 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Insert enough objects into a dict to cause conversion from an embedded array
+# to a dch.
+
+<>
+0 1 63 {
+    under dup put
+} for
+
+1 sprint
