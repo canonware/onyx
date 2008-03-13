@@ -1,0 +1,44 @@
+Test begin
+main(): i == 0
+main(): CW_XEPV_CODE
+main(): CW_XEPV_FINALLY
+main(): i == 1
+main(): CW_XEPV_CODE
+main(): CW_XEPV_FINALLY
+main(): i == 2
+main(): CW_XEPV_CODE
+main(): CW_XEPV_FOO
+main(): CW_XEPV_BAR
+main(): CW_XEPV_FINALLY
+main(): i == 3
+main(): CW_XEPV_CODE
+main(): CW_XEPV_BIZ
+main(): CW_XEPV_FINALLY
+main(): i == 4
+main(): CW_XEPV_CODE
+main(): CW_XEPV_FINALLY
+main(): i == 5
+main(): CW_XEPV_CODE
+func_b(): CW_XEPV_CODE
+func_b(): CW_XEPV_BIZ
+main(): CW_XEPV_FINALLY
+main(): i == 6
+main(): CW_XEPV_CODE
+func_c(): CW_XEPV_CODE
+func_c(): CW_XEPV_FINALLY
+main(): CW_XEPV_BIZ
+main(): CW_XEPV_FINALLY
+main(): i == 7
+main(): CW_XEPV_CODE
+main(): CW_XEPV_BAZ
+main(): CW_XEPV_CODE
+main(): CW_XEPV_BANG
+main(): CW_XEPV_FINALLY
+main(): i == 9
+main(): CW_XEPV_CODE
+main(): CW_XEPV_BAM
+main(): CW_XEPV_FINALLY
+main(): i == 10
+main(): CW_XEPV_CODE
+main(): CW_XEPV_FINALLY
+Test end

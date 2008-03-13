@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2001 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2005 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
 # are met:
 # 1. Redistributions of source code must retain the above copyright
 #    notice(s), this list of conditions and the following disclaimer as
-#    the first lines of this file unmodified other than the possible 
+#    the first lines of this file unmodified other than the possible
 #    addition of one or more copyright notices.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice(s), this list of conditions and the following disclaimer in the
@@ -46,8 +46,12 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2001 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2005 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
+= "All rights reserved.";
+$COPYRIGHT{"mordor", 0}
+= "Copyright (C) 2002 Zeljko Vrba <mordor\@fly.srk.fer.hr>.";
+$COPYRIGHT{"mordor", 1}
 = "All rights reserved.";
 $COPYRIGHT{"nectar", 0}
 = "Copyright (C) 2001 Jacques A. Vidrine <nectar\@freebsd.org>.";
@@ -69,9 +73,9 @@ $COPYRIGHT{"toshok", 1}
  'modification, are permitted provided that the following conditions',
  'are met:',
  '1. Redistributions of source code must retain the above copyright',
- '   notice(s), this list of conditions and the following disclaimer as',
- '   the first lines of this file unmodified other than the possible',
- '   addition of one or more copyright notices.',
+ '   notice(s), this list of conditions and the following disclaimer',
+ '   unmodified other than the allowable addition of one or more',
+ '   copyright notices.',
  '2. Redistributions in binary form must reproduce the above copyright',
  '   notice(s), this list of conditions and the following disclaimer in',
  '   the documentation and/or other materials provided with the',
@@ -91,9 +95,14 @@ $COPYRIGHT{"toshok", 1}
  );
 
 #
-# Name to use for a temporary directory.
+# Name to use for a temporary directory during checkout and tagging.
 #
-$tmpdir = "tmpdir";
+$tagdir = "tagdir";
+
+#
+# Name to use for a temporary directory during export.
+#
+$expdir = "expdir";
 
 #
 # Parse command-line arguments.
@@ -101,11 +110,17 @@ $tmpdir = "tmpdir";
 Getopt::Long::config("bundling"); # Allow -hv rather than forcing -h -v.
 
 $opt_retval = 
-    &GetOptions("h|help" => \$opt_help,
+    &GetOptions("c|cvsnotag" => \$opt_cvsnotag,
+		"h|help" => \$opt_help,
 		"n|noact" => \$opt_noact,
 		"v|verbose" => \$opt_verbose,
+		"V|version=s%" => \%OPT_VERSION,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
+		"m|majorbranch=s" => \$opt_majorbranch,
+		"b|branchpoint=s" => \$opt_branchpoint,
+		"B|branchtag=s" => \$opt_branchtag,
+		"T|tagprefix=s" => \$opt_tagprefix,
 		"t|tag=s" => \$opt_tag,
 		"f|filetree=s@" => \@OPT_FILETREES
 		);
@@ -131,26 +146,64 @@ while ($opt_root =~ /\/$/)
     chop $opt_root;
 }
 
-if (defined($opt_tag))
+$pkgname_base = $opt_pkgname;
+
+if (defined($opt_branchpoint))
 {
+    $branchpoint_cvs = "-r $opt_branchpoint";
+}
+else
+{
+    $branchpoint_cvs = "";
+}
+
+if (defined($opt_tag) && !defined($opt_cvsnotag))
+{
+    if (!defined($opt_tagprefix))
+    {
+	$opt_tagprefix="";
+    }
     $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
     $tag_cvs = $opt_tag;
     $tag_cvs =~ s/\./_/g;
-    $tag_cvs = "SNAP_$tag_cvs";
-    $tag_cmd = "-r $tag_cvs";
+    $tag_cvs = "$opt_tagprefix$tag_cvs";
+    $exp_cvs = "-r $tag_cvs";
+}
+elsif (defined($opt_tag) && defined($opt_cvsnotag))
+{
+    $opt_pkgname = $opt_pkgname . "-" . $opt_tag;
+    $tag_cvs = "";
+    if (defined($opt_branchpoint))
+    {
+	$exp_cvs = $branchpoint_cvs;
+    }
+    else
+    {
+	$exp_cvs = "-r HEAD";
+    }
 }
 else
 {
     $tag_cvs = "";
-    $tag_cmd = "-r HEAD";
+    if (defined($opt_branchpoint))
+    {
+	$exp_cvs = $branchpoint_cvs;
+    }
+    else
+    {
+	$exp_cvs = "-r HEAD";
+    }
 }
 
 if ($opt_verbose)
 {
-    print STDERR "tag            : $opt_tag\n";
-    print STDERR "cvs tag        : $tag_cvs\n";
-    print STDERR "Tree root      : $opt_root\n";
-    print STDERR "Package name   : $opt_pkgname\n";
+    print STDERR "major branch point : $opt_majorbranch\n";
+    print STDERR "branch point       : $opt_branchpoint\n";
+    print STDERR "branch tag         : $opt_branchtag\n";
+    print STDERR "tag                : $opt_tag\n";
+    print STDERR "cvs tag            : $tag_cvs\n";
+    print STDERR "Tree root          : $opt_root\n";
+    print STDERR "Package name       : $opt_pkgname\n";
 }
 
 foreach $dir (@OPT_FILETREES)
@@ -166,43 +219,134 @@ foreach $dir (@OPT_FILETREES)
     @TREES = (@TREES, "$opt_root/$dir");
 }
 
-if (defined($opt_tag))
+# Remove the tag directory if it is already there.
+if ($opt_verbose)
 {
+    print STDERR "rm -rf $tagdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -rf $tagdir`;
+}
+
+if (defined($opt_majorbranch))
+{
+    # Check out.
     if ($opt_verbose)
     {
-	print STDERR "cvs tag $tag_cvs @TREES\n";
+	print STDERR "cvs co -r $opt_majorbranch -d $tagdir @TREES\n";
     }
     unless ($opt_noact)
     {
-	`cvs tag $tag_cvs @TREES`;
+	`cvs co -r $opt_majorbranch -d $tagdir @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint @TREES`;
+    }
+
+    # Delete checkout.
+    if ($opt_verbose)
+    {
+	print STDERR "rm -rf $tagdir\n";
+    }
+    unless ($opt_noact)
+    {
+	`rm -rf $tagdir`;
     }
 }
 
+# Check out on the appropriate tag, if specified.
 if ($opt_verbose)
 {
-    print STDERR "cvs export $tag_cmd -d $tmpdir @TREES\n";
+    print STDERR "cvs co $branchpoint_cvs -d $tagdir @TREES\n";
 }
 unless ($opt_noact)
 {
-    `cvs export $tag_cmd -d $tmpdir @TREES`;
+    `cvs co $branchpoint_cvs -d $tagdir @TREES`;
 }
 
-if ($opt_verbose)
+# Create the branch point and branch tags.
+if (defined($opt_branchtag) && !defined($opt_cvsnotag))
 {
-    print STDERR "mv $tmpdir/devroot $opt_pkgname\n";
-}
-unless ($opt_noact)
-{
-    `mv $tmpdir/devroot $opt_pkgname`;
+    if ($opt_verbose)
+    {
+	print STDERR "cd $tagdir && cvs tag -b $opt_branchtag\_BP @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchtag\_BP @TREES`;
+    }
+
+    if ($opt_verbose)
+    {
+	print STDERR "cd $tagdir && cvs tag -b $opt_branchtag @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchtag @TREES`;
+    }
 }
 
+# Create the release tag.
+if (defined($opt_tag) && !defined($opt_cvsnotag))
+{
+    if ($opt_verbose)
+    {
+	print STDERR "cd $tagdir && cvs tag $tag_cvs @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $tag_cvs @TREES`;
+    }
+}
+
+# Remove the tag directory.
 if ($opt_verbose)
 {
-    print STDERR "rmdir $tmpdir\n";
+    print STDERR "rm -r $tagdir\n";
 }
 unless ($opt_noact)
 {
-    `rmdir $tmpdir`;
+    `rm -r $tagdir`;
+}
+
+# Remove the export directory if it is already there.
+if ($opt_verbose)
+{
+    print STDERR "rm -rf $expdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -rf $expdir`;
+}
+
+# Export.
+if ($opt_verbose)
+{
+    print STDERR "cvs export $exp_cvs -d $expdir @TREES\n";
+}
+unless ($opt_noact)
+{
+    `cvs export $exp_cvs -d $expdir @TREES`;
 }
 
 # Find all the files that need the copyright tag expanded.
@@ -212,51 +356,128 @@ if ($opt_verbose)
 }
 unless ($opt_noact)
 {
-    finddepth(\&expand_tags, "$opt_pkgname");
+    finddepth(\&expand_tags, "$expdir/$opt_root");
+}
+
+# autogen.
+if ($opt_verbose)
+{
+    print STDERR "cd $expdir/$opt_root && ./autogen.sh --with-docs\n";
+}
+unless ($opt_noact)
+{
+    `cd $expdir/$opt_root && ./autogen.sh --with-docs`;
 }
 
 # cook release.
 if ($opt_verbose)
 {
-    print STDERR "cd $opt_pkgname && ./configure\n";
+    print STDERR "cd $expdir/$opt_root && cook release\n";
 }
 unless ($opt_noact)
 {
-    `cd $opt_pkgname && ./configure`;
+    `cd $expdir/$opt_root && cook release`;
+
+    # Sanity check to make sure documentation got built.
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
+    {
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
+    }
 }
 if ($opt_verbose)
 {
-    print STDERR "cd $opt_pkgname && cook release\n";
+    print STDERR "cd $expdir/$opt_root && cook distclean\n";
 }
 unless ($opt_noact)
 {
-    `cd $opt_pkgname && cook release`;
+    `cd $expdir/$opt_root && cook distclean`;
+
+    # Sanity check to make sure documentation is still in the tree.
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
+    {
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
+    }
 }
+
+# Move the tree to its final directory name.
 if ($opt_verbose)
 {
-    print STDERR "cd $opt_pkgname && cook distclean\n";
+    print STDERR "rm -rf $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `cd $opt_pkgname && cook distclean`;
+    `rm -rf $opt_pkgname`;
 }
 
 if ($opt_verbose)
 {
-    print STDERR "tar cvzf $opt_pkgname.tar.gz $opt_pkgname\n";
+    print STDERR "mv $expdir/$opt_root $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `tar cvzf $opt_pkgname.tar.gz $opt_pkgname`;
+    `mv $expdir/$opt_root $opt_pkgname`;
+}
+
+if ($opt_verbose)
+{
+    print STDERR "rm -rf $expdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -rf $expdir`;
+}
+
+# Create the tarball.
+if ($opt_verbose)
+{
+    print STDERR "tar cjf $opt_pkgname.tar.bz2 $opt_pkgname\n";
+}
+unless ($opt_noact)
+{
+    `tar cjf $opt_pkgname.tar.bz2 $opt_pkgname`;
+}
+
+# Create symlinks to the directory and tarball.
+if ($opt_verbose)
+{
+    print STDERR "rm -f $pkgname_base\-latest\n";
+    print STDERR "ln -s $opt_pkgname $pkgname_base\-latest\n";
+    print STDERR "rm -f $pkgname_base\-latest.tar.bz2\n";
+    print STDERR "ln -s $opt_pkgname.tar.bz2 $pkgname_base\-latest.tar.bz2\n";
+}
+unless ($opt_noact)
+{
+    `rm -f $pkgname_base\-latest`;
+    `ln -s $opt_pkgname $pkgname_base\-latest`;
+    `rm -f $pkgname_base\-latest.tar.bz2`;
+    `ln -s $opt_pkgname.tar.bz2 $pkgname_base\-latest.tar.bz2`;
 }
 
 # End of main execution.
 
 sub print_usage
 {
-    print <<EOF;
+    print STDERR <<EOF;
 $0 usage:
-$0 [-hnv --help --noact --verbose] [--tag=<tag> | -t <tag>]
+$0 [-chnv --cvsnotag --help --noact --verbose]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
+       [--branchtag=<tag> | -B <tag>]
+       [--tag=<tag> | -t <tag>]
+       [--tagprefix=<prefix> | -T <prefix>]
+       {--version <key>=<version> | -V <key>=<version>}*
        {--pkgname=<name> | -p <pkgname>}
        {--root=<treeroot> | -r <treeroot>}
        {--filetree=<filetree> | -f <filetree>}+
@@ -280,19 +501,20 @@ sub expand_tags
 	# The directory is in $File::Find::dir.
 	if ($opt_verbose)
 	{
-	    print STDERR "  $File::Find::dir/$name...";
+#	    print STDERR "  $File::Find::dir/$name...";
 	}
 
-	$ifh = new FileHandle $name, "r";
+	`cp $name $name.tmp`;
+	$ifh = new FileHandle "$name.tmp", "r";
 	unless (defined $ifh)
 	{
-	    print STDERR "Error opening $name for reading\n";
+	    print STDERR "Error opening $name.tmp for reading\n";
 	    exit(1);
 	}
-	$ofh = new FileHandle "$name.tmp", "w";
+	$ofh = new FileHandle "$name", "w";
 	unless (defined $ofh)
 	{
-	    print STDERR "Error opening $name.tmp for writing\n";
+	    print STDERR "Error opening $name for writing\n";
 	    exit(1);
 	}
 
@@ -324,10 +546,23 @@ sub expand_tags
 		    print $ofh "$1$_$2\n";
 		}
 	    }
-	    elsif (/^(.*)\<Version\>(.*)\n/)
+	    elsif (/^(.*)\<Version([ \t]*=[ \t]*([A-Za-z0-9]+))?\>(.*)\n/)
 	    {
 		$did_subst = 1;
-		print $ofh "$1$opt_tag$2\n";
+		if (defined($OPT_VERSION{$3}))
+		{
+		    print $ofh "$1$OPT_VERSION{$3}$4\n";
+		}
+		elsif ($3 eq "")
+		{
+		    print $ofh "$1$opt_tag$4\n";
+		}
+		else
+		{
+		    print $ofh "$_";
+		    print STDERR "Missing Version tag value for \"$3\""
+			. " in $File::Find::dir/$name\n";
+		}
 	    }
 	    else
 	    {
@@ -338,24 +573,17 @@ sub expand_tags
 	$ifh->close;
 	$ofh->close;
 
-	if ($did_subst)
-	{
-	    `mv $name.tmp $name`;
-	}
-	else
-	{
-	    `rm $name.tmp`
-	    }
+	`rm $name.tmp`;
 
 	if ($opt_verbose)
 	{
 	    if ($did_subst)
 	    {
-		print STDERR "yes\n";
+#		print STDERR "yes\n";
 	    }
 	    else
 	    {
-		print STDERR "no\n";
+#		print STDERR "no\n";
 	    }
 	}
     }

@@ -1,0 +1,48 @@
+Test begin
+{`a:b:c' `:' split 1 sprint}
+[`a' `b' `c']
+{`a:b:c' `:' < > split 1 sprint}
+[`a' `b' `c']
+{`a:b:c' `:' regex split 1 sprint}
+[`a' `b' `c']
+{`a:b:c' `:' < > regex split 1 sprint}
+[`a' `b' `c']
+{`@a@A@b@B@c@C@d@D' `A|B|C|D' split 1 sprint}
+[`@a@' `@b@' `@c@' `@d@']
+{`@a@A@b@B@c@C@d@D' `A|B|C|D' < $i true > split 1 sprint}
+[`@' `@' `@' `@' `@' `@' `@' `@']
+{`a:b:c:d:e' `:' < $i true > 0 split 1 sprint}
+[`a' `b' `c' `d' `e']
+{`a:b:c:d:e' `:' < $i true > 1 split 1 sprint}
+[`a:b:c:d:e']
+{`a:b:c:d:e' `:' < $i true > 2 split 1 sprint}
+[`a' `b:c:d:e']
+{`a:b:c:d:e' `:' < $i true > 3 split 1 sprint}
+[`a' `b' `c:d:e']
+{`a:b:c:d:e' `:' < $i true > 4 split 1 sprint}
+[`a' `b' `c' `d:e']
+{`a:b:c:d:e' `:' < $i true > 5 split 1 sprint}
+[`a' `b' `c' `d' `e']
+{`a:b:c:d:e' `:' < $i true > 6 split 1 sprint}
+[`a' `b' `c' `d' `e']
+{`a:b:c' `' split 1 sprint}
+[`a' `:' `b' `:' `c']
+{`a:b:c' `a' split 1 sprint}
+[`' `:b:c']
+{`a:b:c' `:' split 1 sprint}
+[`a' `b' `c']
+{`a:b:c' `b' split 1 sprint}
+[`a:' `:c']
+{`a:b:c' `c' split 1 sprint}
+[`a:b:']
+{`a:b:c' `X' split 1 sprint}
+[`a:b:c']
+{`aa:b:c' `a' split 1 sprint}
+[`' `' `:b:c']
+{`a:b:cc' `c' split 1 sprint}
+[`a:b:' `']
+{`a:b:c' `(:)' split 1 sprint}
+[`a' `:' `b' `:' `c']
+{`a:b:c' `((:))' split 1 sprint}
+[`a' `:' `:' `b' `:' `:' `c']
+Test end

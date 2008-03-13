@@ -1,0 +1,28 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+`Test begin\n' print flush
+
+[
+	``a' `bc' search'
+	``abcdefghij' `bcd' search'
+	``abbc' `ab' search'
+	``abbc' `bb' search'
+	``abbc' `bc' search'
+	``abbc' `B' search'
+] {
+	dup `s> ' print print `\n' print
+	cvx eval
+	pstack clear
+} foreach
+
+`Test end\n' print

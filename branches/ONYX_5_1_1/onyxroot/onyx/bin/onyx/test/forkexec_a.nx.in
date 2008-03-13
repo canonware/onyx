@@ -1,0 +1,46 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# Called as: forkexec_a.nx <srcdir> <objdir>
+
+[
+    argv 2 get `/b_forkexec_a.nx' cat
+] forkexec
+
+waitpid dup 0 ne {
+    `Non-zero exit status: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse
+
+pipe
+$WRITE exch def
+$READ exch def
+
+[
+    argv 2 get `/b_forkexec_a.nx' cat
+]<
+    stdout WRITE
+> forkexec
+WRITE close
+
+{READ readline not}{
+    `Parent read: ' print
+    1 sprint
+} while
+pop
+
+waitpid dup 0 ne {
+    `Non-zero exit status: ' exch cvs `\n' 3 ncat print
+}{
+    pop
+} ifelse

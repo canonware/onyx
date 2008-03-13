@@ -1,0 +1,325 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% gcdict reference portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{gcdict}
+\label{sec:gcdict}
+\index{gcdict@\onyxop{}{gcdict}{}}
+
+The gcdict dictionary provides garbage collection control and status
+capabilities.
+
+\begin{longtable}{\optableformat{4.10}}
+\caption{gcdict summary}
+\\
+\hline
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline
+%begin{latexonly}
+\endfirsthead
+\caption[]{\emph{continued}} \\
+\hline
+\optableent
+	{Input(s)}
+	{Op/Proc/Var}
+	{Output(s)}
+	{Description}
+\hline \hline \endhead
+\multicolumn{2}{r}{\emph{Continued on next page...}} \endfoot
+\hline \endlastfoot
+%end{latexonly}
+\multicolumn{2}{|l|}{Control operators} \\
+\hline \hline
+\optableent
+	{--}
+	{{\bf \htmlref{collect}{gcdict:collect}}}
+	{--}
+	{Force a garbage collection.}
+\hline
+\optableent
+	{boolean}
+	{{\bf \htmlref{setactive}{gcdict:setactive}}}
+	{--}
+	{Set whether the garbage collector is active.}
+\hline
+\optableent
+	{seconds}
+	{{\bf \htmlref{setperiod}{gcdict:setperiod}}}
+	{--}
+	{Set the inactivity period before the garbage collector will run.}
+\hline
+\optableent
+	{count}
+	{{\bf \htmlref{setthreshold}{gcdict:setthreshold}}}
+	{--}
+	{Set the number of bytes of memory allocation that will trigger a garbage collection.}
+\hline \hline
+\multicolumn{2}{|l|}{State and statistics operators} \\
+\hline \hline
+\optableent
+	{--}
+	{{\bf \htmlref{active}{gcdict:active}}}
+	{boolean}
+	{Get whether the garbage collector is active.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{period}{gcdict:period}}}
+	{seconds}
+	{Get the inactivity period before the garbage collector will run.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{threshold}{gcdict:threshold}}}
+	{count}
+	{Get the number of bytes of memory allocation that will trigger a garbage collection.}
+\hline
+\optableent
+	{--}
+	{{\bf \htmlref{stats}{gcdict:stats}}}
+	{array}
+	{Get garbage collection statistics.}
+\end{longtable}
+
+\begin{description}
+\label{gcdict:active}
+\index{active@\onyxop{}{active}{}}
+\item[{\onyxop{--}{active}{boolean}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If true, the garbage collector is active; otherwise it
+			is not active.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get whether the garbage collector is active.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin active end 1 sprint
+false
+		\end{verbatim}
+	\end{description}
+\label{gcdict:collect}
+\index{collect@\onyxop{}{collect}{}}
+\item[{\onyxop{--}{collect}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Force a garbage collection.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin collect end
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{gcdict:period}
+\index{period@\onyxop{}{period}{}}
+\item[{\onyxop{--}{period}{seconds}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[seconds: ]
+			The minimum number of seconds since the last object
+			allocation that the garbage collector will wait before
+			doing a garbage collection.  0 is treated specially to
+			mean forever.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the minimum number of seconds of object allocation
+		inactivity that the garbage collector will wait before doing a
+		garbage collection.  This setting is disjoint from the threshold
+		setting, and does not prevent garbage collection due to the
+		threshold having been reached.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin period end 1 sprint
+60
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{gcdict:setactive}
+\index{setactive@\onyxop{}{setactive}{}}
+\item[{\onyxop{boolean}{setactive}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[boolean: ]
+			If true (initial setting), activate the garbage
+			collector; otherwise deactivate the garbage collector.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\end{description}
+	\item[Description: ]
+		Set whether the garbage collector is active.  This setting takes
+		effect asynchronously, so it is possible for the garbage
+		collector to run even after it has been deactivated.  This
+		setting overrides the allocation inactivity period and
+		allocation threshold settings, so that if this setting is set to
+		false, the other settings have no effect.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin false setactive end
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{gcdict:setperiod}
+\index{setperiod@\onyxop{}{setperiod}{}}
+\item[{\onyxop{seconds}{setperiod}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[seconds: ]
+			The minimum number of seconds since the last object
+			allocation that the garbage collector will wait before
+			doing a garbage collection.  0 is treated specially to
+			mean forever.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the minimum number of seconds of object allocation
+		inactivity that the garbage collector will wait before doing a
+		garbage collection.  This setting is disjoint from the threshold
+		setting, and does not prevent garbage collection due to the
+		threshold having been reached.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin 60 setperiod end
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{gcdict:setthreshold}
+\index{setthreshold@\onyxop{}{setthreshold}{}}
+\item[{\onyxop{count}{setthreshold}{--}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			Number of bytes of memory allocation since the last
+			garbage collection that will trigger a garbage
+			collection.  0 is treated specially to mean infinity.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Error(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{stackunderflow}{stackunderflow}.]
+		\item[\htmlref{typecheck}{typecheck}.]
+		\item[\htmlref{limitcheck}{limitcheck}.]
+		\end{description}
+	\item[Description: ]
+		Set the number of bytes of memory allocation since the last
+		garbage collection that will trigger a garbage collection.  This
+		setting is disjoint from the inactivity period setting, and does
+		not prevent garbage collection due to the allocation inactivity
+		period having been exceeded.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin 40000 setthreshold end
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{gcdict:stats}
+\index{stats@\onyxop{}{stats}{}}
+\item[{\onyxop{--}{stats}{array}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[array: ]
+			An array with the format {\lb}collections count
+			{\lb}ccount cmark{\rb} {\lb}mcount mmark{\rb}
+			{\lb}scount smark{\rb}{\rb}, where
+			the fields have the following meanings:
+			\begin{description}%\item[]
+			\item[collections: ]
+				Total number of collections the garbage
+				collector has performed.
+			\item[count: ]
+				Current number of bytes of memory allocated.
+			\item[ccount: ]
+				Number of bytes of memory allocated as of the
+				end of the most recent garbage collection.
+			\item[cmark: ]
+				Number of microseconds taken by the most recent
+				garbage collection mark phase.
+			\item[mcount: ]
+				Largest number of bytes of memory ever allocated
+				at any point in time.
+			\item[mmark: ]
+				Maximum number of microseconds taken by any
+				garbage collection mark phase.
+			\item[scount: ]
+				Total number of bytes of memory ever allocated.
+			\item[smark: ]
+				Total number of microseconds taken by all
+				garbage collection mark phases.
+			\end{description}
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get statistics about the garbage collector.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin
+onyx:0> stats 2 sprint
+[28 280921 [118328 852] [904779 1007] [5707551 24205]]
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\label{gcdict:threshold}
+\index{threshold@\onyxop{}{threshold}{}}
+\item[{\onyxop{--}{threshold}{count}}: ]
+	\begin{description}\item[]
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[count: ]
+			Number of bytes of memory allocation since the last
+			garbage collection that will trigger a garbage
+			collection.  0 is treated specially to mean infinity.
+		\end{description}
+	\item[Error(s): ] None.
+	\item[Description: ]
+		Get the number of bytes of memory allocation since the last
+		garbage collection that will trigger a garbage collection.  This
+		setting is disjoint from the inactivity period setting, and does
+		not prevent garbage collection due to the allocation inactivity
+		period having been exceeded.
+	\item[Example(s): ]\begin{verbatim}
+
+onyx:0> gcdict begin threshold end 1 sprint
+65536
+onyx:0>
+		\end{verbatim}
+	\end{description}
+\end{description}

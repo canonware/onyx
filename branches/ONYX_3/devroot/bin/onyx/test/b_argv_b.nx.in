@@ -1,0 +1,27 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+%
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% argv should be: [`@objroot@/bin/onyx/test/b_argv_b.nx' `-e' `1 2 3 pstack']
+
+`b_argv_b.nx begin\n' print flush
+
+argv 0 get `f' test not {
+    `Not a file: ' print argv 0 get 1 sprint
+    1 die
+} if
+
+argv 1 2 getinterval {
+    1 sprint
+} foreach
+
+`b_argv_b.nx end\n' print
+pstack

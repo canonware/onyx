@@ -1,0 +1,3 @@
+Test begin
+Error $argcheck
+ostack: ($AF_INET $SOCK_STREAM $st2)

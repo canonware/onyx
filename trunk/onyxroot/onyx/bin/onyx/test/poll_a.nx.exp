@@ -1,0 +1,37 @@
+Test begin
+in:
+<-file- <$POLLOUT false>>
+out:
+[-file-]
+<-file- <$POLLOUT true>>
+in:
+<-file- <$POLLOUT false> -file- <$POLLOUT false>>
+out:
+[-file- -file-]
+<-file- <$POLLOUT true> -file- <$POLLOUT true>>
+in:
+<-file- <$POLLOUT false>>
+out:
+[-file-]
+<-file- <$POLLOUT true>>
+in:
+<-file- <$garbage `ignore me' $POLLOUT true>>
+out:
+[-file-]
+<-file- <$garbage `ignore me' $POLLOUT true>>
+in:
+<-file- <$POLLIN false>>
+out:
+[-file-]
+<-file- <$POLLIN true>>
+in:
+<-file- <$POLLIN true>>
+out:
+[-file-]
+<-file- <$POLLIN true>>
+in:
+<-file- <$POLLIN false> -file- <$POLLIN false>>
+out:
+[-file- -file-]
+<-file- <$POLLIN true> -file- <$POLLIN true>>
+Test end

@@ -1,0 +1,152 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% This file is processed by nxo_thread_gen.nx to produce a more compact
+% embedded version in nxo_thread_nxcode.c (normal build) and
+% nxo_thread_bootstrap.c (development bootstrap).  In order to make changes to
+% this file take effect in the bootstrap interpreter, either type:
+%
+%   cook bootstrap
+%
+% or
+%
+%   cat nxo_thread.nx | onyx nxo_thread_gen.nx > nxo_thread_boostrap.c
+%
+% The end result of executing this file is a procedure (executable array).  In
+% order to support output that differs according to configuration options, a
+% string is constructed, then evaluated.
+%
+% The output of running sprints on the procedure must be evaluatable, which
+% means that certain language features such as immediate evaluation must be
+% avoided.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Initial string with an opening brace to defer execution, to which other
+% strings are catenated.
+`{'
+
+`
+% userdict does not exist yet.  This code jumps through some hoops to push it
+% onto dstack, then define it in threaddict, to avoid a dstackunderflow error.
+dict begin
+/userdict currentdict
+dstack dup 3 sindex dup spop begin pop
+/threaddict currentdict def
+def
+
+% Define and initialize currenterror
+/currenterror <
+    /newerror	false
+    /errorname	`'
+    /estack	()
+    /istack	()
+    /ostack	()
+    /dstack	()
+    /line	1
+    /column	0
+> def
+
+% Define and initialize currenterror.
+/errordict <
+    /stop /stop load
+
+    % - handleerror -
+    /handleerror {
+	/currenterror load begin
+
+	% If this is a syntaxerror, print the line and column numbers.
+	/errorname load /syntaxerror eq {
+	    stderr dup `At line ' write
+	    dup /line load cvs write
+	    dup `, column ' write
+	    dup /column load cvs write
+	    `: ' write
+	} if
+
+	% Print the errorname.
+	stderr dup `Error ' write
+	dup /errorname load 1 sprints write
+
+	% Print ostack and dstack using sprint.
+	dup `\nostack: ' write
+	dup /ostack load 1 sprints write
+	dup `\ndstack: ' write
+	dup /dstack load 1 sprints write
+	`\n' write
+
+	% Print a stack trace that depicts the currently executing element of
+	% arrays.
+	/estack load scount 1 sub dup 0 gt {
+	    stderr dup `estack/istack trace (0..' write
+	    1 index cvs stderr exch write
+	    `):\n' write
+	} if
+
+	% For each element in estack:
+	0 1 3 2 roll {
+	    % %edepth
+	    % If this element is an array, print it specially.
+	    dup cvs stderr exch write
+	    dup /estack load dup 3 2 roll sindex spop
+	    % %edepth %array
+
+	    dup type /arraytype eq {
+		% Array.
+		`: {\n' stderr exch write
+		% %edepth %array
+		dup length 1 sub 0 1 3 -1 roll {
+		    % %edepth %array %aindex
+		    2 index /istack load
+		    dup 3 2 roll sindex spop
+		    % %edepth %array %aindex %iindex
+		    1 index
+		    % %edepth %array %aindex %iindex %aindex
+		    eq {
+			dup </w 3> outputs
+			stderr exch write
+			`:--> '
+		    }{
+			`\t'
+		    } ifelse
+		    stderr exch write
+		    % %edepth %array %aindex
+		    1 index exch get 1 sprints
+		    stderr exch write
+		    stderr `\n' write
+		    % %edepth %array
+		} for
+		stderr `}\n' write
+		% %edepth %array
+		pop
+		% %edepth
+	    }{
+		% Non-array.
+		stderr `:\t' write
+		% %edepth %array
+		1 sprints stderr exch write
+		stderr `\n' write
+		% %edepth
+	    } ifelse
+	    % %edepth
+	    pop
+	} for
+
+	end % currenterror.
+
+	% Make sure the output gets written before stop.
+	flush
+    } bind
+> def
+
+end % threaddict.
+' cat
+
+% Final closing brace.
+`}' cat cvx eval
