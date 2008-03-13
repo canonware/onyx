@@ -1,7 +1,0 @@
-*.[do]_a
-*.out
-*.diff
-*.perf
-*_[a-z]
-*.nx
-Cookfile.list

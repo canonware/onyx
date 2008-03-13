@@ -35,9 +35,7 @@ nxo_name_l_init(void)
 {
     /* Initialize the global name cache. */
     dch_new(&cw_g_name_hash, cw_g_nxaa,
-	    CW_LIBONYX_NAME_HASH, CW_LIBONYX_NAME_HASH / 4 * 3,
-	    CW_LIBONYX_NAME_HASH / 4, nxo_l_name_hash,
-	    nxo_l_name_key_comp);
+	    CW_LIBONYX_NAME_HASH, nxo_l_name_hash, nxo_l_name_key_comp);
 #ifdef CW_THREADS
     mtx_new(&cw_g_name_lock);
 #endif
@@ -47,6 +45,7 @@ nxo_name_l_init(void)
 void
 nxo_name_l_shutdown(void)
 {
+    cw_assert(dch_count(&cw_g_name_hash) == 0);
     dch_delete(&cw_g_name_hash);
 #ifdef CW_THREADS
     mtx_delete(&cw_g_name_lock);
@@ -54,8 +53,8 @@ nxo_name_l_shutdown(void)
 }
 
 void
-nxo_name_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
-	     cw_bool_t a_is_static)
+nxo_name_new(cw_nxo_t *a_nxo, const char *a_str, uint32_t a_len,
+	     bool a_is_static)
 {
     cw_nxoe_name_t *name, key;
 
@@ -74,17 +73,17 @@ nxo_name_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 	 * entry. */
 	name = (cw_nxoe_name_t *) nxa_malloc(sizeof(cw_nxoe_name_t));
 
-	nxoe_l_new(&name->nxoe, NXOT_NAME, FALSE);
+	nxoe_l_new(&name->nxoe, NXOT_NAME, false);
 	name->nxoe.name_static = a_is_static;
 	name->len = a_len;
 
-	if (a_is_static == FALSE)
+	if (a_is_static == false)
 	{
 	    name->str = nxa_malloc(a_len);
 	    /* Cast away the const here; it's one of two places that the string
 	     * is allowed to be modified, and this cast is better than dropping
 	     * the const altogether. */
-	    memcpy((cw_uint8_t *) name->str, a_str, a_len);
+	    memcpy((char *) name->str, a_str, a_len);
 	}
 	else
 	{
@@ -114,12 +113,12 @@ nxo_name_new(cw_nxo_t *a_nxo, const cw_uint8_t *a_str, cw_uint32_t a_len,
 }
 
 /* Hash {name string, length}. */
-cw_uint32_t
+uint32_t
 nxo_l_name_hash(const void *a_key)
 {
-    cw_uint32_t retval, i;
+    uint32_t retval, i;
     cw_nxoe_name_t *key = (cw_nxoe_name_t *) a_key;
-    const cw_uint8_t *str;
+    const unsigned char *str;
 
     cw_check_ptr(a_key);
 
@@ -132,10 +131,10 @@ nxo_l_name_hash(const void *a_key)
 }
 
 /* Compare keys {name string, length}. */
-cw_bool_t
+bool
 nxo_l_name_key_comp(const void *a_k1, const void *a_k2)
 {
-    cw_bool_t retval;
+    bool retval;
     cw_nxoe_name_t *k1 = (cw_nxoe_name_t *) a_k1;
     cw_nxoe_name_t *k2 = (cw_nxoe_name_t *) a_k2;
 
@@ -146,26 +145,26 @@ nxo_l_name_key_comp(const void *a_k1, const void *a_k2)
     {
 	if (strncmp((char *) k1->str, (char *) k2->str, k1->len) == 0)
 	{
-	    retval = TRUE;
+	    retval = true;
 	}
 	else
 	{
-	    retval = FALSE;
+	    retval = false;
 	}
     }
     else
     {
-	retval = FALSE;
+	retval = false;
 
     }
 
     return retval;
 }
 
-const cw_uint8_t *
+const char *
 nxo_name_str_get(const cw_nxo_t *a_nxo)
 {
-    const cw_uint8_t *retval;
+    const char *retval;
     cw_nxoe_name_t *name;
 
     cw_check_ptr(a_nxo);
@@ -183,10 +182,10 @@ nxo_name_str_get(const cw_nxo_t *a_nxo)
     return retval;
 }
 
-cw_uint32_t
+uint32_t
 nxo_name_len_get(const cw_nxo_t *a_nxo)
 {
-    cw_uint32_t retval;
+    uint32_t retval;
     cw_nxoe_name_t *name;
 
     cw_check_ptr(a_nxo);

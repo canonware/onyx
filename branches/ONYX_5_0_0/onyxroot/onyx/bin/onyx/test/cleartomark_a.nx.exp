@@ -1,0 +1,8 @@
+Test begin
+`mark cleartomark'
+`mark 0 cleartomark'
+`1 mark cleartomark'
+1
+`2 mark 0 cleartomark'
+2
+Test end

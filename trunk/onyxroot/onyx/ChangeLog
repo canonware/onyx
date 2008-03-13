@@ -1,3 +1,339 @@
+2007-05-30 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/ch.c:ch_direct_hash() : Modify to directly use the
+	  pointer value as the return value.  This requires using prime-sized
+	  hash tables, so several things in the ch/dch API have changed.
+
+	* lib/libonyx/include/libonyx/mb.h : Add sfence-based memory barrier
+	  support for amd64.
+
+2005-05-13 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/thd.c:thd_p_suspend() : Retry sem_wait() call if
+	  EINTR is returned.
+
+2005-03-16 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.2 released.
+	
+2004-10-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{bindsocket,connect}() :
+	  Move a mtx_unlock() call inside the conditional block that calls
+	  mtx_lock(), in order to keep from trying to unlock a mutex that
+	  isn't locked.
+
+2004-03-16 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.1 released.
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix the ordering
+	  of code that sets a key/value pair in an array-based dict.  This
+	  fixes a small race condition window, wherein the GC could end up
+	  looking at a bogus val.
+
+2004-03-07 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.1.0 released.
+
+2004-02-29 : Jason Evans <jasone@canonware.com>
+
+	* configure.in : Check for pthread_np.h independently of checking
+	  for pthread_{suspend,resume}_np(), so this works on NetBSD,
+	  which has the functions, but not the header.
+
+	* Install documentation in <prefix>/share/doc/onyx rather than
+	  <prefix>/share/onyx/doc.
+
+	* Change linker flags for OS X from:
+	    -undefined suppress -flat_namespace -bundle -all_load -bind_at_load
+	  or
+	    -undefined suppress -flat_namespace -dynamiclib -bind_at_load
+	  to
+	    -undefined dynamic_lookup -bundle -all_load -prebind
+	  or
+	    -undefined dynamic_lookup -dynamiclib -prebind
+
+	  This change has two caveats:
+	  1) It is not backward compatible; it only works for OS X 10.3.
+	  2) The -bind_at_load flag was removed, which is a bad thing if the
+	     -prebind flag doesn't prevent dynamic symbol lookups at the
+	     same time as garbage collections.  -prebind probably does the
+	     right thing, but if deadlocks in dyld start appearing, this
+	     change is probably the cause.
+
+2004-01-17 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.1 released.
+
+2004-01-16 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Fix a race
+	  condition between updating the internal list and internal hash
+	  that could cause a crash if suspended by the garbage collector
+	  while inserting the first object into a dictionary.
+	  Additionally, this could only happen when the dictionary was
+	  stored as a hash, rather than as an array.  This was a
+	  regression that existed since the 5.0.0 release.
+
+2004-01-03 : Jason Evans <jasone@canonware.com>
+
+	* Onyx 5.0.0 released.
+
+2003-12-31  Jason Evans  <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{send,recv}() : Fix
+	  handling of the flags array.
+
+2003-12-30  Jason Evans  <jasone@canonware.com>
+
+	* configure.in : Add EXTRA_CFLAGS.
+
+2003-12-29  Jason Evans  <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_localtime() : Use tzname
+	  and altzone if (struct tm).tm_{zone,gmtoff} are missing, as on
+	  Solaris 9.
+
+	* lib/libonyx/src/nxo_dict.c:nxo_p_dict_hash() : Revise string
+	  hashing to marginally improve performance.
+
+2003-12-28 : Jason Evans <jasone@canonware.com>
+
+	* Use the char type rather than uint8_t wherever it makes sense.
+	  This is a sweeping API change, much like the change on
+	  2003-12-13, but it has little actual impact on applications,
+	  except that it fixes some long-standing casting issues for C++
+	  applications.
+
+	* lib/libonyx/src/nxm.c : Add the nxm class, which abstracts
+	  loadable module functionality.  Remove cw_nxmod_t, which is
+	  obsoleted by this change.
+
+2003-12-26 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + sigmask
+	  + sigpending
+	  + sigsuspend
+	  + sigwait
+	  + getpgid, setpgid
+	  + getsid, setsid
+
+2003-12-25 : Jason Evans <jasone@canonware.com>
+
+	* Stop building a PostScript version of the documentation.  There
+	  is no good reason to keep building two printable formats, and
+	  PDF is supported by all operating systems of interest, whereas
+	  PostScript is not.
+
+2003-12-13 : Jason Evans <jasone@canonware.com>
+
+	* Remove the following types, and replace them with C99 equivalents:
+	  + cw_uint8_t	--> uint8_t
+	  + cw_uint8_t	--> uint8_t
+	  + cw_sint8_t	--> int8_t
+	  + cw_uint16_t	--> uint16_t
+	  + cw_sint16_t	--> int16_t
+	  + cw_uint32_t	--> uint32_t
+	  + cw_sint32_t	--> int32_t
+	  + cw_uint64_t	--> uint64_t
+	  + cw_sint64_t	--> int64_t
+	  + cw_fp64_t	--> double
+	  + cw_bool_t	--> bool
+
+	  Use false and true, rather than FALSE and TRUE.
+
+2003-10-27 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def(),nxo_dict_undef() : Fix
+	  the same problem as was fixed in nxoe_p_dict_lookup() on 2003-08-22.
+
+2003-10-22 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx/src/interactive.nx.in : Modify the resume procedure to clear
+	  the error snapshot state in currenterror.
+
+	* Add the path operator.
+
+	* lib/libonyx/src/systemdict.c:systemdict_forkexec() : Add the optional
+	  redirects parameter, which makes it possible to redirect standard I/O,
+	  thus enabling program pipelines.
+
+2003-10-21 : Jason Evans <jasone@canonware.com>
+
+	* mod/modprompt/src/modprompt.c : Wrap workaround code for
+	  LinuxThreads's broken signal handling in 
+	  #ifdef CW_MODPROMPT_LINUXTHREADS ... #endif.
+
+2003-10-20 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config/src/onyx_config.nx.in : Add --bindir, --datadir,
+	  --libdir, --includedir, and --mandir.
+
+2003-10-13 : Jason Evans <jasone@canonware.com>
+
+	* bin/onyx_config/src/onyx_config.nx.in : Add --onyx-path.
+
+	* Remove tonyx, and replace it with oonyx (and oonyx_config).  This
+	  makes it possible to run the debugger directly on oonyx (was not
+	  possible with tonyx), and oonyx_config makes it possible for external
+	  programs to use an onyx build tree, rather than requiring that onyx be
+	  installed.
+
+2003-10-05 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_p_nxmod_delete() : Add support
+	  for a hook function that is called just before a module is unloaded.
+
+2003-10-02 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_{while,until}() : Replace an
+	  empty executable conditional array with an executable null to improve
+	  performance.
+
+2003-09-19 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nx.nx.in : Only embed as a string when bootstrapping
+	  or if POSIX support is disabled.  This reduces memory footprint in
+	  exchange for a negligible increase in startup time.
+
+2003-09-18 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_thread.nx.in : Modify errordict's handleerror
+	  procedure to report the origins of arrays for which the origins have
+	  been recorded.
+
+	  Add $origin to currenterror.
+
+	* Add the origin operator.
+
+	* lib/libonyx/src/nxo_array.c:nxo_array_origin_[gs]et() : Add.
+
+	* lib/libonyx/src/nxo_file.c:nxo_file_origin_[gs]et() : Add.
+
+	* lib/libonyx/src/nxo_thread.c:nxo_threadp_origin_[gs]et() : Add.
+
+	* lib/libonyx/include/libonyx/nxo_pmark.h:nxo_pmark_line_[gs]et() : Add.
+
+2003-09-11 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/thd.c:thd_single_{enter,leave}() : Unlock
+	  s_thd_single_lock in thd_single_enter(), then re-acquire it in
+	  thd_single_leave(), in order to avoid the possibility of lock
+	  recursion.  This regression was introduced before the 1.0.0 release,
+	  but no releases of Onyx included code that triggered the failure mode.
+
+2003-08-30 : Jason Evans <jasone@canonware.com>
+
+	* Add the cdef operator.
+
+	* Add the cstackunderflow error.
+
+2003-08-22 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_lookup() : Make sure that the
+	  search key and the dictionary item key are the same type when
+	  searching a dict that is in compact array format.  Before this fix,
+	  string and name keys were treated equivalently for dicts that had
+	  never grown beyond 8 items.  This was a regression that existed since
+	  the 4.0.0 release.
+
+2003-08-21 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/libonyx.h:libonyx_gcdict_get() : Add.
+
+	* lib/libonyx/include/libonyx/nx.h:nx_gcdict_get() : Remove.
+
+2003-08-18 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/nxo_thread.c:nxo_thread_loop() : Restructure code so
+	  that object attribute always takes precedence over type in the outer
+	  loop, thus allowing all object types to serve as keys in method and
+	  data lookups.
+
+	* Add operators:
+	  + this
+	  + cstack
+	  + threadcstack
+	  + cvf
+	  + cvi
+	  + fcheck
+	  + icheck
+
+	* Modify the build system to prepend/append headers/footers when
+	  creating tests written in Onyx.  Modify error output in the header so
+	  that errors are reported with the same format, regardless of
+	  configuration.
+
+2003-08-08 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + escape
+	  + trapped
+
+2003-08-07 : Jason Evans <jasone@canonware.com>
+
+	* Add the clopt (command line option parsing) module.
+
+	* lib/libonyx/src/nx.nx.in : Remove the search procedure, since the
+	  regular expression facilities offer superior functionality.
+
+	* configure.in : Remove the --disable-libonyx and --disable-onyx
+	  options.
+
+	  Update to autoconf 2.57.
+
+	  Add --disable-modclopt.
+
+2003-07-29 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/mem.c : Unlock s_mem_lock before throwing exceptions.
+
+2003-06-26 : Jason Evans <jasone@canonware.com>
+
+	* Add the continue operator.
+
+	* Add the invalidcontinue error.
+
+	* Add the CW_ONYXX_CONTINUE exception.
+
+	* lib/libonyx/src/systemdict.c:systemdict_{until,while}() : Do not
+	  return from within an xep block.
+
+2003-06-20 : Jason Evans <jasone@canonware.com>
+
+	* Add the kill operator.
+
+2003-06-19 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/src/systemdict.c:systemdict_exec() : Throw an error if the
+	  execve() call fails, rather than calling _exit().
+
+2003-06-07 : Jason Evans <jasone@canonware.com>
+
+	* lib/libonyx/include/libonyx/nxo_stack.h : Restructure the internals of
+	  stacks in order to make indexed object access a constant-time
+	  operation.
+
+	  Add the a_mincount argument to nxo_stack_new().
+
+	  Remove:
+	  + nxo_stack_under_push()
+	  + nxo_stack_remove()
+	  + nxo_stack_down_get()
+	  + nxo_stack_up_get()
+	  + NXO_STACK_DOWN_GET()
+	  + NXO_STACK_UP_GET()
+
+2003-05-29 : Jason Evans <jasone@canonware.com>
+
+	* Add operators:
+	  + tailopt
+	  + gtailopt
+	  + settailopt
+	  + setgtailopt
+
 2003-05-13 : Jason Evans <jasone@canonware.com>
 
 	* Add vclass, which serves as a convenient base class.
@@ -364,14 +700,14 @@
 	* lib/libonyx/include/libonyx/nxo_dict_l.h:nxoe_l_dict_delete() : Make
 	  the embedded dch non-shrinkable to avoid rehashes during finalization,
 	  in order to avoid accessing already-finalized objects.  This was a
-	  regression that has existed since the 4.0.0 release.
+	  regression that existed since the 4.0.0 release.
 
 	* lib/libonyx/src/dch.c : Add dch_shrinkable_[gs]et().
 
 	* lib/libonyx/src/nxo_dict.c:nxoe_p_dict_def() : Initialize the dch
 	  before inserting the contents of the array into it.  This bug could
 	  cause memory corruption and/or crashes if a dict grew from 7-->8-->9
-	  (assuming CW_LIBONYX_DICT_SIZE == 8).  This was a regression that has
+	  (assuming CW_LIBONYX_DICT_SIZE == 8).  This was a regression that
 	  existed since the 4.0.0 release.
 
 2003-02-01 : Jason Evans <jasone@canonware.com>
@@ -729,8 +1065,8 @@
 
 	* lib/libonyx/src/systemdict.c : Add operators:
 	  + bpop, nbpop, ipop, nip, tuck, under, over, up, nup, dn, ndn, bdup,
-	    ibdup, ibpop, bpush
-	  + sbpop, snbpop, sipop, snip, stuck, sunder, sover, sup, snup, sdn, 
+	    ibdup, ibpop
+	  + sbpop, snbpop, sipop, snip, stuck, sunder, sover, sup, snup, sdn,
 	    sndn, sndup, snpop, sbdup, sibdup, sibpop, sbpush
 
 	* lib/libonyx/include/libonyx/nxo_stack.h : Add functions:
@@ -963,7 +1299,7 @@
 	* configure.in : Do not specify CFLAGS unless none were passed in the
 	environment.
 
-	Add the --disable-onyx and --disable-slate flags.
+	Add the --disable-onyx flag.
 
 2001-11-13 : Jason Evans <jasone@canonware.com>
 
@@ -1034,7 +1370,7 @@
 2001-10-04 : Jason Evans <jasone@canonware.com>
 
 	* lib/libonyx/src/systemdict.c:systemdict_iobuf() : Add.
-	
+
 	systemdict_setiobuf() : Add.
 
 	* bin/onyx/src/onyx.c:signal_handle() : Reset the terminal before

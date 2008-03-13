@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2002 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2005 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2003 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2005 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
 = "All rights reserved.";
 $COPYRIGHT{"mordor", 0}
@@ -117,6 +117,7 @@ $opt_retval =
 		"V|version=s%" => \%OPT_VERSION,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
+		"m|majorbranch=s" => \$opt_majorbranch,
 		"b|branchpoint=s" => \$opt_branchpoint,
 		"B|branchtag=s" => \$opt_branchtag,
 		"T|tagprefix=s" => \$opt_tagprefix,
@@ -196,12 +197,13 @@ else
 
 if ($opt_verbose)
 {
-    print STDERR "branch point   : $opt_branchpoint\n";
-    print STDERR "branch tag     : $opt_branchtag\n";
-    print STDERR "tag            : $opt_tag\n";
-    print STDERR "cvs tag        : $tag_cvs\n";
-    print STDERR "Tree root      : $opt_root\n";
-    print STDERR "Package name   : $opt_pkgname\n";
+    print STDERR "major branch point : $opt_majorbranch\n";
+    print STDERR "branch point       : $opt_branchpoint\n";
+    print STDERR "branch tag         : $opt_branchtag\n";
+    print STDERR "tag                : $opt_tag\n";
+    print STDERR "cvs tag            : $tag_cvs\n";
+    print STDERR "Tree root          : $opt_root\n";
+    print STDERR "Package name       : $opt_pkgname\n";
 }
 
 foreach $dir (@OPT_FILETREES)
@@ -225,6 +227,51 @@ if ($opt_verbose)
 unless ($opt_noact)
 {
     `rm -rf $tagdir`;
+}
+
+if (defined($opt_majorbranch))
+{
+    # Check out.
+    if ($opt_verbose)
+    {
+	print STDERR "cvs co -r $opt_majorbranch -d $tagdir @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cvs co -r $opt_majorbranch -d $tagdir @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint @TREES`;
+    }
+
+    # Delete checkout.
+    if ($opt_verbose)
+    {
+	print STDERR "rm -rf $tagdir\n";
+    }
+    unless ($opt_noact)
+    {
+	`rm -rf $tagdir`;
+    }
 }
 
 # Check out on the appropriate tag, if specified.
@@ -309,52 +356,58 @@ if ($opt_verbose)
 }
 unless ($opt_noact)
 {
-    finddepth(\&expand_tags, "$expdir/devroot");
+    finddepth(\&expand_tags, "$expdir/$opt_root");
 }
 
 # autogen.
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && ./autogen.sh --with-docs\n";
+    print STDERR "cd $expdir/$opt_root && ./autogen.sh --with-docs\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && ./autogen.sh --with-docs`;
+    `cd $expdir/$opt_root && ./autogen.sh --with-docs`;
 }
 
 # cook release.
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && cook release\n";
+    print STDERR "cd $expdir/$opt_root && cook release\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && cook release`;
+    `cd $expdir/$opt_root && cook release`;
 
     # Sanity check to make sure documentation got built.
-    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
     }
 }
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && cook distclean\n";
+    print STDERR "cd $expdir/$opt_root && cook distclean\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && cook distclean`;
+    `cd $expdir/$opt_root && cook distclean`;
 
     # Sanity check to make sure documentation is still in the tree.
-    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
     }
 }
 
@@ -370,20 +423,20 @@ unless ($opt_noact)
 
 if ($opt_verbose)
 {
-    print STDERR "mv $expdir/devroot $opt_pkgname\n";
+    print STDERR "mv $expdir/$opt_root $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `mv $expdir/devroot $opt_pkgname`;
+    `mv $expdir/$opt_root $opt_pkgname`;
 }
 
 if ($opt_verbose)
 {
-    print STDERR "rmdir $expdir\n";
+    print STDERR "rm -rf $expdir\n";
 }
 unless ($opt_noact)
 {
-    `rmdir $expdir`;
+    `rm -rf $expdir`;
 }
 
 # Create the tarball.
@@ -419,7 +472,8 @@ sub print_usage
     print STDERR <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint=<revision> | -b <revision>]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
        [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
        [--tagprefix=<prefix> | -T <prefix>]
