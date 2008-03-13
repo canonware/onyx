@@ -1,0 +1,18 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$AF_LOCAL $SOCK_STREAM socketpair
+
+dup peername $family get 1 sprint
+over peername $family get 1 sprint
+
+2 npop

@@ -1,0 +1,4 @@
+$ ./error_print.nx
+$ ./error_print.nx --bang
+error_print.nx: This is an arror string
+$

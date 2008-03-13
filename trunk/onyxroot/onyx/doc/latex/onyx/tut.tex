@@ -64,6 +64,7 @@ then tries to execute the name, resulting in the following error:
 Error $undefined
 ostack: ()
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      1000L
 1:      -file-
@@ -126,21 +127,10 @@ Dynamic typing has advantages in the flexibility that it offers, but it also
 means that type errors can go undetected in code for long periods of time before
 the invalid code is executed.
 
-The Onyx type system is not extensible.  There is no way to add new types in a
-program.  However, there are techniques that can be combined with the built in
-types to simulate an extensible type system.  For example, dictionaries can be
-created with, say, a {\tt \_type} field that indicates the type of the object:
-
-\begin{verbatim}
-<
-    $_type  $fraction
-    $num    3
-    $den    4
->
-\end{verbatim}
-
-Logical extensions of this can be used to create object hierarchies with single
-or multiple inheritance.
+Onyx has a fixed set of basic types which cannot be extended.  However,
+object-oriented programming is supported, so the fixed set of object types is
+not a limitation in practice.  Object-oriented programming is discussed more in
+Section~\ref{sec:onyx_oop}.
 
 \section{Execution}
 
@@ -171,7 +161,7 @@ Onyx objects fall into two categories according to type: simple and composite.
 Simple objects take up no virtual memory of their own; they are embedded into
 other composite objects.  For example, an integer on the operand stack takes up
 only the space that the stack requires to store it.  The same is true of an
-integer that is stored an an element of an array.  Composite objects are
+integer that is stored as an element of an array.  Composite objects are
 composed of references that fit into the same places that an integer is stored,
 plus additional structures stored elsewhere in virtual memory.  There can be
 multiple references to the same composite object, and as there is a chain of
@@ -180,7 +170,7 @@ collector will leave it alone.
 
 It is usually pretty obvious how to remove references to objects.  Objects on
 the operand stack can be popped off.  Definitions in the dictionary stack can be
-undefined.  However, there may be situations such an array that contains
+undefined.  However, there may be situations such as an array that contains
 references to various objects, and the array cannot be discarded as a whole, but
 individual elements are no longer needed.  The null type is useful for
 clobbering such references, and can even be effectively used to clobber portions
@@ -191,12 +181,13 @@ executed, or pushed onto the operand stack.  Doing nothing at all can be useful.
 
 \section{Stacks}
 
-Stacks in Onyx are pretty typical.  Objects are implicitly or explicitly pushed
-onto stacks by operators, and the stack contents can be rearranged and removed.
-Although stacks are a first class object in Onyx, most Onyx programs are
-concerned only with the operand stack, often referred to as ostack, which is
-used as a place to store objects, pass arguments into operators and procedures,
-and return results.
+Stacks in Onyx are pretty typical, and a rich set of stack manipulation
+operators is provided..  Objects are implicitly or explicitly pushed onto stacks
+by operators, and the stack contents can be rearranged and removed.  Although
+stacks are a first class object in Onyx, most Onyx programs are mainly concerned
+with the operand stack, often referred to as ostack.  ostack is used as a place
+to store objects, pass arguments into operators and procedures, and return
+results.
 
 Onyx is a postfix language, which means that code is written such that operands
 precede operators.  For example, the following code Calculates $5 \times (3 +
@@ -230,20 +221,37 @@ onyx:3>
 Learning to efficiently (and accurately) manage stacks is a mind-warping process
 that no amount of reading is likely to impress upon the reader.  There are
 general concepts presented here, but ultimately, the reader will have to write a
-good bit of code to get a handle on stacks.  Even the author of Onyx found
-himself stumbling over stacks well after Onyx was complete, despite limited
-exposure to stack-based languages beforehand.  The problem seems to be that
-programmers learn to think in a different way that doesn't exercise the parts of
-the brain necessary for stack manipulation.  Some people might argue that stack
+good bit of code to get a handle on stacks.  Tthe author of Onyx found himself
+stumbling over stacks well after Onyx was complete, despite limited exposure to
+stack-based languages beforehand.  The problem seems to be that programmers
+learn to think in a different way that doesn't exercise the parts of the brain
+necessary for stack manipulation.  Some people might argue that stack
 manipulation is the job of the compiler.  In any case, stack manipulation is an
 acquired skill that requires practice.
 
+\subsection{Efficiency issues}
+
+Stacks are implemented such that accessing an object is a constant-time
+operation, regardless of its depth in a stack.  However, only the top and
+bottom of a stack may be modified in constant time.
+
+Typically, the cost of stack manipulations is proportional to the number of
+objects being touched.  So, rolling the top ten objects is five times as costly
+as exchanging the top two objects.  Likewise, rotating the stack by ten
+positions is typically five times as expensive as rotating the stack by two
+positions.  Costs for rolling and rotation are approximately proportional to
+each other, though pathological cases for rotation incur a slightly higher
+overhead (a constant factor more expensive, when amortized).
+
+Stacks have more memory and performance overhead than arrays, so unless growing
+or shrinking is important, arrays are a better choice for indexed access.
+Dictionaries are always a better choice for keyed access.
+
 \subsection{Using stacks as queues}
 
-Stacks are implemented such that access to the top or bottom is very efficient,
-and efficiency decreases linearly, the farther into the stack an operation has
-to iterate.  Since pushing and popping is efficient for both ends of stacks,
-this means that stacks are suitable for use as queues.
+Since pushing and popping is efficient for both ends of stacks, this means that
+stacks are suitable for use as queues.  Either orientation for input/output is
+fine.
 
 \subsection{Using the operand stack as two stacks}
 
@@ -251,25 +259,9 @@ The ability to efficiently manipulate both ends of the operand stack means that
 the operand stack can effectively be thought of as two stacks.  This can be very
 useful in situations where more than a handful of objects are being manipulated,
 and an additional location to temporarily stash objects would be useful.  If a
-program is repeatedly doing large stack rotations, using the bottom of the stack
-can often help to simplify the code and reduce stack manipulation overhead.
-
-\subsection{Efficiency issues}
-
-Since stacks are stored internally as doubly linked lists, the cost of indexed
-access to an object on a stack is proportional to its offset from the top or
-bottom of the stack, depending on the operator being used.  Therefore, stacks
-are not ideal in situations where arbitrary access to an object is a common
-operation.  An array is a better choice for indexed access, and a dictionary is
-a better choice for keyed access.
-
-Indexed access doesn't just apply to operators like
-\htmlref{\onyxop{}{idup}{}}{systemdict:idup}; operators like
-\htmlref{\onyxop{}{nup}{}}{systemdict:nup} and
-\htmlref{\onyxop{}{roll}{}}{systemdict:roll} are also affected.  However,
-operators such as \htmlref{\onyxop{}{rot}{}}{systemdict:rot} are not as heavily
-impacted, since they only need to index into the stack by the number of
-positions to rotate.
+program is repeatedly doing large stack rolls or rotations, using the bottom of
+the stack can often help to simplify the code and reduce stack manipulation
+overhead.
 
 \section{Dictionaries}
 
@@ -300,6 +292,38 @@ onyx:1>
 
 When the second key/value pair is inserted, it replaces the first pair.
 
+Actually, there is one way to create a dictionary, then modify it such that
+multiple entries have the same key.  However, doing so is a very bad idea, and
+is only discussed here as an example of something {\em not} to do.  Dictionary
+keys are merely references (in the case of composite objects), so if a string is
+modified after being used as a dictionary key, the dictionary will no longer be
+able to access the key/value pair associated with that string.  The following
+code creates a dictionary with two key/value pairs, then changes one of the
+keys.
+
+\begin{verbatim}
+onyx:0> $foostr `foo' def
+onyx:0> $barstr `bar' def
+onyx:0> $d <foostr 0 barstr 1> def
+onyx:0> foostr barstr copy pop
+onyx:0> d 1 sprint
+<`foo' 1 `foo' 1>
+onyx:0> d `foo' undef
+onyx:0> d 1 sprint
+<`foo' 0>
+onyx:0>
+\end{verbatim}
+
+Bad things are clearly happening here, and in fact there are other similar
+problems that surface, even if a key remains unique after being changed.  This
+is because during insertion, the key string is hashed, and inserted into a hash
+table accordingly.  A different string is likely to hash to a different slot in
+the hash table, which means that the key/value pair becomes inaccessible.
+
+In summary, do not change strings while they are being used as dictionary keys.
+Onyx does not prevent the use of strings for dictionary keys, since it would be
+limiting, but this feature can be abused.
+
 \subsection{Efficiency issues}
 
 Although dictionaries can handle keys of any type, they are optimized to use
@@ -308,11 +332,132 @@ be exacerbated by the cost of comparison for other types.  Name comparison is a
 constant time operation, but string comparison is not.  Therefore, use names
 rather than strings whenever possible.
 
+\section{Regular expressions}
+Onyx provides regular expression support that is very similar to what the Perl
+programming language provides.  There are two special data types, regex and
+regsub, that are specific to regular expressions, but there is no special
+language syntax devoted to regular expressions, unlike Perl.  Instead, patterns
+and substitution templates are specified via normal strings, and flags are
+specified via dictionaries.
+
+Regular expression syntax is similar to that of Perl.  See
+Section~\ref{sec:onyx_regular_expressions} for more information.
+
+\subsection{Matching}
+The following snippet iteratively searches for capitalized words:
+
+\begin{verbatim}
+`This is an Onyx string.'
+
+{dup `[A-Z]\w+' <$g true> match}{
+    0 submatch 1 sprint
+} while
+\end{verbatim}
+
+The above code generates the following output:
+
+\begin{verbatim}
+`This'
+`Onyx'
+\end{verbatim}
+
+The {\tt \$g} flag to the \htmlref{\onyxop{}{match}{}}{systemdict:match}
+operator says to start searching where the previous match ended, which is what
+makes the {\tt while} loop possible.  The
+\htmlref{\onyxop{}{submatch}{}}{systemdict:submatch} operator gets the substring
+of the input string that the regular expression most recently matched.
+
+With a slight modification to the previous example, it is possible to get at the
+capital letters, rather than the entire capitalized words.  This is achieved by
+using a set of capturing parentheses, and changing the argument to
+\htmlref{\onyxop{}{submatch}{}}{systemdict:submatch}:
+
+\begin{verbatim}
+`This is an Onyx string.'
+
+{dup `([A-Z])\w+' <$g true> match}{
+    1 submatch 1 sprint
+} while
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+`T'
+`O'
+\end{verbatim}
+
+This is a trivial example of how capturing subpatterns can be used, but the
+possibilities are wide and varied.
+
+\subsection{Splitting}
+
+Sometimes it is desirable to \htmlref{\onyxop{}{split}{}}{systemdict:split} a
+string into pieces, such as when dealing with a comma-delimited file:
+
+\begin{verbatim}
+`Jason Evans, jasone@canonware.com, http://www.canonware.com/~jasone/'
+
+`,\s*' split
+1 sprint
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+[`Jason Evans' `jasone@canonware.com' `http://www.canonware.com/~jasone/']
+\end{verbatim}
+
+If for some reason preserving the delimiters is important, capturing parentheses
+can be added to the splitting pattern:
+
+\begin{verbatim}
+`Jason Evans, jasone@canonware.com, http://www.canonware.com/~jasone/'
+
+`(,)\s*' split
+1 sprint
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+[`Jason Evans' `,' `jasone@canonware.com' `,' `http://www.canonware.com/~jasone/']
+\end{verbatim}
+
+\subsection{Substituting}
+
+The \htmlref{\onyxop{}{match}{}}{systemdict:match} and
+\htmlref{\onyxop{}{split}{}}{systemdict:split} operators provide enough power
+that with some effort, it is possible to find regular expression matches, modify
+the matched text, and create a modified string as output.  However, this is a
+common operation when using regular expressions for text processing, so the
+\htmlref{\onyxop{}{subst}{}}{systemdict:subst} operator is also provided as a
+more convenient interface for the most common types of substitution.
+
+Suppose that a list of email addresses needs to be converted from one format to
+another..  The following snippet does such a conversion:
+
+\begin{verbatim}
+`Jason Evans (jasone@canonware.com)
+Jason O. Evans ( jasone@canonware.com )
+'
+
+`(\w[A-Za-z. ]*\w) \(\s*([^\s]+)\s*\)' `"\1" <\2>' <$g true> subst pop
+stdout exch write pop
+\end{verbatim}
+
+This generates the following output:
+
+\begin{verbatim}
+"Jason Evans" <jasone@canonware.com>
+"Jason O. Evans" <jasone@canonware.com>
+\end{verbatim}
+
 \section{Code organization}
 
-As mentioned earlier, Onyx does not have named variables in the same way as many
-other languages.  However, it does have the dictionary stack (dstack), which is
-dynamically used for name lookups whenever an executable name is interpreted.
+As mentioned earlier, Onyx does not have named variables in the same way as most
+other languages do.  However, it does have the dictionary stack (dstack), which
+is dynamically used for name lookups whenever an executable name is interpreted.
 This section talks about how to effectively manage the namespace provided by
 dstack.
 
@@ -343,14 +488,14 @@ go.
 
 \subsection{Procedures}
 
-Named procedures can be created by associating a name in one of the dictionaries
-on dstack with a procedure.  There is nothing magical about this, but some care
+Named procedures can be created by associating a name with a procedure in one of
+the dictionaries on dstack.  There is nothing magical about this, but some care
 should be taken in choosing procedure names, and in deciding how to manage the
-namespace.  Onyx uses only lower case letters in the names of its definitions on
-dstack, so it is easy to avoid namespace collisions by using some other
-character in program definitions.  There is nothing wrong with using all
-lowercase letters for names in your programs, though some extra care is
-warranted when doing so.
+namespace.  Onyx uses only numberss and lowercase letters in the names of its
+definitions on dstack, so it is easy to avoid namespace collisions by using some
+other character in program definitions.  There is nothing wrong with using all
+numbers and lowercase letters for names in your programs, though some extra care
+is warranted when doing so.
 
 An important consideration in program design is determining what belongs in the
 global namespace.  For an example of how Onyx partitions its namespace, look at
@@ -359,12 +504,20 @@ when manipulating the garbage collector, so those definitions are stashed out of
 the way.  Your program can do the same for definitions that are not of regular
 interest.
 
+%%\subsection{Object-oriented programming}
+%%\label{onyxtut:object_oriented_programming}
+
 \subsection{Modules}
 Onyx provides the infrastructure for loadable modules, which can be implemented
-in Onyx and/or dynamically loaded machine code (shared libraries).  See the
-\htmlref{\onyxop{}{require}{}}{systemdict:require} and
-\htmlref{\onyxop{}{mrequire}{}}{systemdict:mrequire} documentation for details
-on how to load modules.
+as Onyx code and/or dynamically loaded machine code (shared libraries).  At the
+lowest level, \htmlref{\onyxop{}{modload}{}}{systemdict:modload} can be used to
+load a shared object.  At a higher level,
+\htmlref{\onyxop{}{mrequire}{}}{systemdict:mrequire} can be used to find a
+shared object in one of the directories specified by the module path, then
+\onyxop{}{modload}{} it.  At the highest level, the \classname{mclass} and
+\classname{module} classes provide methods for loading, introspecting, and
+unloading modules.  The lower level APIs are typically only utilized when
+writing modules, and the highest level APIs are utilized when using modules.
 
 When writing a module that is meant as a library of additional functionality,
 some choices have to be made about how to organize the module.  Some of the
@@ -374,10 +527,6 @@ obvious choices for how to organize the loaded definitions are:
 \item{Insert definitions into globaldict.}
 \item{Create a new dictionary full of definitions, and insert the dictionary
   into globaldict as, say, foodict.}
-\item{Create a new dictionary full of definitions, and put the dictionary on
-  dstack somewhere, such as directly above or below systemdict.  Note that this
-  can be done by the application manually, so simply creating the dictionary and
-  letting the application insert it where it pleases could be a better choice.}
 \item{Insert definitions into systemdict (questionable practice).}
 \end{itemize}
 
@@ -410,20 +559,20 @@ handling:
 # Restore error handling machinery...
 \end{verbatim}
 
-The possibilities are extensive.  However, a word of caution is in order.  If
-you mess something up in the error handling machinery, bad things will happen,
-and you will have a terrible time debugging the problem.  Be careful.
+The possibilities are extensive.  However, a few words of caution are in order.
+If you mess something up in the error handling machinery, bad things will
+happen, and you will have a terrible time debugging the problem.  Be careful.
 
 \section{Introspection}
 \label{onyxtut:introspection}
 
-The following code defines a named procedure that calculates factorials.
+The following code defines a named procedure that calculates factorials:
 
 \begin{verbatim}
-# #n factorial #result
+#n factorial #result
 $factorial {
     dup 1 gt {
-        # #n-1 factorial
+        #n-1 factorial
         dup 1 sub factorial
     }{
         # Terminate recursion.
@@ -436,7 +585,7 @@ $factorial {
 
 What this code actually does is create an executable array, which can be
 examined and modified.  The following transcript shows the effects of modifying
-the code.
+the code:
 
 \begin{verbatim}
 onyx:0> 3 factorial 1 sprint
@@ -444,7 +593,7 @@ onyx:0> 3 factorial 1 sprint
 onyx:0> $factorial load 2 sprint
 {dup 1 gt {dup 1 sub factorial} {1} ifelse mul}
 onyx:0> $factorial load 4 {1 pstack} put
-onyx:0> 3 factorial 
+onyx:0> 3 factorial
 1
 1
 2
@@ -483,11 +632,11 @@ Implicit locking for new objects is controlled via
 locking is turned off by default when Onyx is started up, so if an application
 needs to create an object that is shared among threads, it should temporarily
 turn on implicit locking.  For example, the following code creates a stack in
-globaldict that can be used as a simple message queue.
+globaldict that can be used as a simple message queue:
 
 \begin{verbatim}
 currentlocking # Save for later restoration.
-true currentlocking
+true setlocking
 
 # Push globaldict onto dstack before calling def.
 globaldict begin
@@ -512,24 +661,6 @@ of threads.  However, it requires skill and discipline to {\em not} crash the
 Onyx interpreter when using threads.  This was a conscious design decision for
 Onyx; doing otherwise would have limited the scalability of threading.
 
-Now prepare for some discouraging pontification on why threaded programming is
-generally harmful.  In the author's experience, the vast majority of developers
-do not have a solid enough grasp of threading concepts to be seriously engaging
-in the practice.  As a first step to becoming proficient at threaded
-programming, much reading and thought are necessary.  The next step is to
-implement several non-trivial threaded programs that are doomed to be complete
-disasters.  After that, it may be possible for a programmer to write threaded
-programs that do the right thing most of the time.  However, even the most
-skilled developers still will be unable to consistently write code that is free
-of race conditions, deadlocks, livelocks, locksteps, etc.  Finally, there are
-some developers who, despite being otherwise proficient, will {\em never} obtain
-a solid grasp of threaded programming, regardless of how many times the basic
-concepts are reviewed.
-
-In summary, don't use threads unless there are significant measurable gains in
-performance or code complexity.  Otherwise, threaded programming just is not
-worth the unavoidable pain that it inflicts.
-
 \section{Optimization}
 
 There are many fine points to optimizing Onyx code, but they can primarily be
@@ -547,7 +678,8 @@ distilled down to the following simple rules:
 \item{Use the \htmlref{\onyxop{}{bind}{}}{systemdict:bind} operator for
   procedure definitions whenever possible, in order to reduce dstack lookups.}
 \item{Avoid the \htmlref{\onyxop{}{exit}{}}{systemdict:exit},
-  \htmlref{\onyxop{}{stop}{}}{systemdict:stop}, and
+  \htmlref{\onyxop{}{stop}{}}{systemdict:stop},
+  \htmlref{\onyxop{}{escape}{}}{systemdict:escape}, and
   \htmlref{\onyxop{}{quit}{}}{systemdict:quit} operators when possible, since
   they are implemented via \cfunc{longjmp}{}.}
 \end{itemize}
@@ -568,6 +700,7 @@ onyx:0> 1 5L add
 Error $undefined
 ostack: (1)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      5L
 1:      -file-
@@ -585,6 +718,7 @@ onyx:2> pop $five resume
 Error $typecheck
 ostack: (1 $five)
 dstack: (-dict- -dict- -dict- -dict-)
+cstack: ()
 estack/istack trace (0..2):
 0:      --add--
 1:      -file-
@@ -620,7 +754,7 @@ Now the estack contents should be back to normal.
 \begin{verbatim}
 onyx:1> estack 1 sprint
 (--start-- -file- --estack--)
-onyx:1> 
+onyx:1>
 \end{verbatim}
 
 The above example only demonstrates the flavor of typical interactive debugging,

@@ -1,0 +1,7 @@
+$ ./arg_enum_get.nx --verbose
+Verbosity: true
+$ ./arg_enum_get.nx --verbose=yes
+Verbosity: true
+$ ./arg_enum_get.nx --verbose=no
+Verbosity: false
+$

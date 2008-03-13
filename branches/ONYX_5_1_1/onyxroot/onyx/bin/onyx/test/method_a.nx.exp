@@ -1,0 +1,18 @@
+Test begin
+`vclass $new'
+{--instance-- --dup-- --this-- --setisa-- --dup-- --dict-- --setdata--}
+`fooclass $new'
+{--instance-- --dup-- --this-- --setisa-- --dup-- --dict-- --setdata--}
+`fooclass $foo'
+{`fooclass'}
+`fooclass $bar'
+{`fooclass'}
+`barclass $new'
+{--instance-- --dup-- --this-- --setisa-- --dup-- --dict-- --setdata--}
+`barclass $foo'
+{`fooclass'}
+`barclass $bar'
+{`barclass'}
+`barclass $biz'
+{`barclass'}
+Test end

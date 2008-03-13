@@ -26,6 +26,6 @@ nxo_operator_f(const cw_nxo_t *a_nxo)
     cw_dassert(a_nxo->magic == CW_NXO_MAGIC);
     cw_assert(nxo_type_get(a_nxo) == NXOT_OPERATOR);
 
-    return a_nxo->o.operator.f;
+    return a_nxo->o.oper.f;
 }
 #endif /* (defined(CW_USE_INLINES) || defined(CW_NXO_OPERATOR_C_)) */

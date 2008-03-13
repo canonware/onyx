@@ -1,0 +1,8 @@
+Test begin
+true
+true
+(--start-- {estack 2 sprint} --estack--)
+false
+false
+(--start-- _{tailopt 1 sprint foo}_ foo {bar} bar {estack 2 sprint} estack --estack--)
+Test end

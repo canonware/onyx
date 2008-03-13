@@ -1,0 +1,746 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% nxo_thread portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{nxo\_thread}
+\label{nxo_thread}
+\index{nxo_thread@\classname{nxo\_thread}{}}
+
+The \classname{nxo\_thread} class is a subclass of the \classname{nxo} class.
+
+The \classname{threadp} class is a helper class that contains scanner position
+information.  The \classname{threadp} state is used when recording syntax
+errors.
+
+\subsubsection{API}
+\begin{capi}
+\label{nxo_threadp_new}
+\index{nxo_threadp_new@\cfunc{nxo\_threadp\_new}{}}
+\citem{\cfunc[void]{nxo\_threadp\_new}{cw\_nxo\_threadp\_t *a\_threadp}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_threadp_delete}
+\index{nxo_threadp_delete@\cfunc{nxo\_threadp\_delete}{}}
+\citem{\cfunc[void]{nxo\_threadp\_delete}{cw\_nxo\_threadp\_t *a\_threadp,
+cw\_nxo\_t *a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to a \classname{threadp}.
+		\item[a\_thread: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{nxo_threadp_position_get}
+\index{nxo_threadp_position_get@\cfunc{nxo\_threadp\_position\_get}{}}
+\citem{\cfunc[void]{nxo\_threadp\_position\_get}{const cw\_nxo\_threadp\_t
+*a\_threadp, cw\_uint32\_t *r\_line, cw\_uint32\_t *r\_column}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\item[r\_line: ]
+			Pointer to a location to store a line number.
+		\item[r\_column: ]
+			Pointer to a location to store a column number.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[*r\_line: ]
+			Line number.
+		\item[*r\_column: ]
+			Column number.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Retrieve the line number and column number.
+	\end{capilist}
+\label{nxo_threadp_position_set}
+\index{nxo_threadp_position_set@\cfunc{nxo\_threadp\_position\_set}{}}
+\citem{\cfunc[void]{nxo\_threadp\_position\_set}{cw\_nxo\_threadp\_t
+*a\_threadp, cw\_uint32\_t a\_line, cw\_uint32\_t a\_column}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_threadp: ]
+			Pointer to space for a \classname{threadp}.
+		\item[a\_line: ]
+			Line number.
+		\item[a\_column: ]
+			Column number.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the line number and column number.
+	\end{capilist}
+\label{nxo_thread_new}
+\index{nxo_thread_new@\cfunc{nxo\_thread\_new}{}}
+\citem{\cfunc[void]{nxo\_thread\_new}{cw\_nxo\_t *a\_nxo, cw\_nx\_t *a\_nx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_nx: ]
+			Pointer to an \classname{nx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{nxo_thread_start}
+\index{nxo_thread_start@\cfunc{nxo\_thread\_start}{}}
+\citem{\cfunc[void]{nxo\_thread\_start}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application dependent.
+	\item[Description: ]
+		Start a thread running by calling the \onyxop{}{start}{}
+		operator such that the top object on ostack will be executed.
+	\end{capilist}
+\label{nxo_thread_exit}
+\index{nxo_thread_exit@\cfunc{nxo\_thread\_exit}{}}
+\citem{\cfunc[void]{nxo\_thread\_exit}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Terminate the thread.  This has the same effect as a detached
+		thread exiting.  Calling this function may is necessary
+		(depending on the application) to allow the thread to be garbage
+		collected, much the same way as the \onyxop{}{detach}{} and
+		\onyxop{}{join}{} operators do.
+	\end{capilist}
+\label{nxo_thread_thread}
+\index{nxo_thread_thread@\cfunc{nxo\_thread\_thread}{}}
+\citem{\cfunc[void]{nxo\_thread\_thread}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Create a new thread.  The new thread calls
+		\cfunc{nxo\_thread\_start}{}.
+	\end{capilist}
+\label{nxo_thread_}
+\index{nxo_thread_detach@\cfunc{nxo\_thread\_detach}{}}
+\citem{\cfunc[void]{nxo\_thread\_detach}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Detach \cvar{a\_nxo} so that when it exits it can be garbage
+		collected.
+	\end{capilist}
+\label{nxo_thread_join}
+\index{nxo_thread_join@\cfunc{nxo\_thread\_join}{}}
+\citem{\cfunc[void]{nxo\_thread\_join}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Wait for \cvar{a\_nxo} to exit.
+	\end{capilist}
+\label{nxo_thread_state}
+\index{nxo_thread_state@\cfunc{nxo\_thread\_state}{}}
+\citem{\cfunc[cw\_nxo\_threadts\_t]{nxo\_thread\_state}{const cw\_nxo\_t
+*a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ] The current scanner state of \cvar{a\_nxo}.
+			\begin{description}\item[]
+			\item[THREADTS\_START: ] Start state.
+			\item[THREADTS\_COMMENT: ] '\%' seen, but no line break
+				yet.
+			\item[THREADTS\_INTEGER: ] Scanning an integer.
+			\item[THREADTS\_INTEGER\_RADIX: ] Scanning a radix
+				integer.
+			\item[THREADTS\_REAL\_FRAC: ] Scanning the fractional
+				portion of a real.
+			\item[THREADTS\_REAL\_EXP: ] Scanning the exponent
+				porttion of a real.
+			\item[THREADTS\_STRING: ] Scanning a string.
+			\item[THREADTS\_STRING\_NEWLINE\_CONT: ] '{\bs}r' seen
+				in a string.
+			\item[THREADTS\_STRING\_PROT\_CONT: ] '{\bs}{\bs}' seen
+				in a string.
+			\item[THREADTS\_STRING\_CRLF\_CONT: ] '{\bs}' '{\bs}r'
+				seen in a string.
+			\item[THREADTS\_STRING\_CTRL\_CONT: ] '{\bs}' 'c' seen
+				in a string.
+			\item[THREADTS\_STRING\_HEX\_CONT: ] '{\bs}' 'x' seen in
+				a string.
+			\item[THREADTS\_STRING\_HEX\_FINISH: ] First hex digit
+				of a ``{\bs}xDD'' string escape sequence seen.
+			\item[THREADTS\_NAME\_START: ] '!', '\$', or '{\twid}'
+				seen.
+			\item[THREADTS\_NAME: ] Scanning a name.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the current scanner state.  In general this is only
+		useful when implementing an interactive environment for which
+		the prompt behaves differently depending on what state the
+		scanner is in.  For example the interactive \binname{onyx} shell
+		needs only to know whether the scanner is in the start state.
+	\end{capilist}
+\label{nxo_thread_deferred}
+\index{nxo_thread_deferred@\cfunc{nxo\_thread\_deferred}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_thread\_deferred}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Execution is not deferred.
+			\item[TRUE: ]
+				Execution is deferred.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return whether the scanner is currently in deferred execution
+		mode.  See Section~\ref{sec:onyx_syntax} for information on
+		deferred execution.  In general this is only useful when
+		implementing an interactive environment for which the prompt
+		behaves differently depending on what state the scanner is in.
+	\end{capilist}
+\label{nxo_thread_reset}
+\index{nxo_thread_reset@\cfunc{nxo\_thread\_reset}{}}
+\citem{\cfunc[void]{nxo\_thread\_reset}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Reset the scanner to the start state, and turn deferral off.
+		This is a dangerous feature that should be used with great
+		care.  \classname{nxo\_no} objects should never be visible from
+		inside the interpreter, so the caller must assure that any
+		\classname{nxo\_no} objects are removed before further
+		processing is done in the context of \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_loop}
+\index{nxo_thread_loop@\cfunc{nxo\_thread\_loop}{}}
+\citem{\cfunc[void]{nxo\_thread\_loop}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application specific.
+	\item[Description: ]
+		Execute the top object on estack.  The caller is responsible
+		for placing the object on estack, but it is removed before this
+		function returns.
+	\end{capilist}
+\label{nxo_thread_interpret}
+\index{nxo_thread_interpret@\cfunc{nxo\_thread\_interpret}{}}
+\citem{\cfunc[void]{nxo\_thread\_interpret}{cw\_nxo\_t *a\_nxo,
+cw\_nxo\_threadp\_t *a\_threadp, const cw\_uint8\_t *a\_str, cw\_uint32\_t
+a\_len}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_threadp: ]
+			A \classname{threadp}.
+		\item[a\_str: ]
+			Pointer to a string to interpret.
+		\item[a\_len: ]
+			Length in bytes of \cvar{a\_str}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application specific.
+	\item[Description: ]
+		Interpret the string pointed to by \cvar{a\_str}.
+	\end{capilist}
+\label{nxo_thread_flush}
+\index{nxo_thread_flush@\cfunc{nxo\_thread\_flush}{}}
+\citem{\cfunc[void]{nxo\_thread\_flush}{cw\_nxo\_t *a\_nxo, cw\_nxo\_threadp\_t
+*a\_threadp}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_threadp: ]
+			A \classname{threadp}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application specific.
+	\item[Description: ]
+		Do the equivalent of interpreting a carriage return in order to
+		force acceptance of the previous token if no whitespace has yet
+		followed.
+	\end{capilist}
+\label{nxo_thread_nerror}
+\index{nxo_thread_nerror@\cfunc{nxo\_thread\_nerror}{}}
+\citem{\cfunc[void]{nxo\_thread\_nerror}{cw\_nxo\_t *a\_nxo, cw\_nxn\_t a\_nxn}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_nxn: ]
+			An nxn corresponding to the name of an error.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application dependent.
+	\item[Description: ]
+		Throw an error.
+	\end{capilist}
+\label{nxo_thread_serror}
+\index{nxo_thread_serror@\cfunc{nxo\_thread\_serror}{}}
+\citem{\cfunc[void]{nxo\_thread\_serror}{cw\_nxo\_t *a\_nxo, const cw\_uint8\_t
+a\_str, cw\_uint32\_t a\_len}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_str: ]
+			Pointer to a string that represents the name of an
+			error.
+		\item[a\_len: ]
+			The length of \cvar{a\_str}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] Application dependent.
+	\item[Description: ]
+		Throw an error.
+	\end{capilist}
+\label{nxo_thread_dstack_search}
+\index{nxo_thread_dstack_search@\cfunc{nxo\_thread\_dstack\_search}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_thread\_dstack\_search}{cw\_nxo\_t *a\_nxo,
+cw\_nxo\_t *a\_key, cw\_nxo\_t *r\_value}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_key: ]
+			Pointer to an \classname{nxo}.
+		\item[r\_value: ]
+			Pointer to an \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				\cvar{a\_key} not found on dstack.
+			\end{description}
+		\item[r\_value: ]
+			Top value in dstack associated with \cvar{a\_key}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Search dstack for the topmost definition of \cvar{a\_key} and
+		dup its value to \cvar{r\_value}.
+	\end{capilist}
+\label{nxo_thread_currentlocking}
+\index{nxo_thread_currentlocking@\cfunc{nxo\_thread\_currentlocking}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_thread\_currentlocking}{const cw\_nxo\_t
+*a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Implicit locking deactivated for new objects.
+			\item[TRUE: ]
+				Implicit locking activated for new objects.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return whether implicit locking is activated for new objects.
+	\end{capilist}
+\label{nxo_thread_setlocking}
+\index{nxo_thread_setlocking@\cfunc{nxo\_thread\_setlocking}{}}
+\citem{\cfunc[void]{nxo\_thread\_setlocking}{cw\_nxo\_t *a\_nxo, cw\_bool\_t
+a\_locking}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_locking: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Do not implicitly lock new objects.
+			\item[TRUE: ]
+				Implicitly lock new objects.
+			\end{description}
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Activate or deactivate implicit locking for new objects.
+	\end{capilist}
+\label{nxo_thread_nx_get}
+\index{nxo_thread_nx_get@\cfunc{nxo\_thread\_nx\_get}{}}
+\citem{\cfunc[cw\_nx\_t *]{nxo\_thread\_nx\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nx}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the \classname{nx} associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_userdict_get}
+\index{nxo_thread_userdict_get@\cfunc{nxo\_thread\_userdict\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_userdict\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the userdict associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_errordict_get}
+\index{nxo_thread_errordict_get@\cfunc{nxo\_thread\_errordict\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_errordict\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the errordict associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_currenterror_get}
+\index{nxo_thread_currenterror_get@\cfunc{nxo\_thread\_currenterror\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_currenterror\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the currenterror associated with
+		\cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_ostack_get}
+\index{nxo_thread_ostack_get@\cfunc{nxo\_thread\_ostack\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_ostack\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the ostack associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_dstack_get}
+\index{nxo_thread_dstack_get@\cfunc{nxo\_thread\_dstack\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_dstack\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the dstack associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_estack_get}
+\index{nxo_thread_estack_get@\cfunc{nxo\_thread\_estack\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_estack\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the estack associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_istack_get}
+\index{nxo_thread_istack_get@\cfunc{nxo\_thread\_istack\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_istack\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the istack associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_tstack_get}
+\index{nxo_thread_tstack_get@\cfunc{nxo\_thread\_tstack\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_tstack\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the tstack associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_stdin_get}
+\index{nxo_thread_stdin_get@\cfunc{nxo\_thread\_stdin\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_stdin\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the stdin associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_stdin_set}
+\index{nxo_thread_stdin_set@\cfunc{nxo\_thread\_stdin\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_stdin\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+ *a\_stdin}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_stdin: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s stdin to \cvar{a\_stdin}.
+	\end{capilist}
+\label{nxo_thread_stdout_get}
+\index{nxo_thread_stdout_get@\cfunc{nxo\_thread\_stdout\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_stdout\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the stdout associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_stdout_set}
+\index{nxo_thread_stdout_set@\cfunc{nxo\_thread\_stdout\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_stdout\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+ *a\_stdout}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_stdout: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s stdout to \cvar{a\_stdout}.
+	\end{capilist}
+\label{nxo_thread_stderr_get}
+\index{nxo_thread_stderr_get@\cfunc{nxo\_thread\_stderr\_get}{}}
+\citem{\cfunc[cw\_nxo\_t *]{nxo\_thread\_stderr\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{nxo} that can safely be used
+			without risk of being garbage collected.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the stderr associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_thread_stderr_set}
+\index{nxo_thread_stderr_set@\cfunc{nxo\_thread\_stderr\_set}{}}
+\citem{\cfunc[void]{nxo\_thread\_stderr\_set}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t
+ *a\_stderr}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a thread \classname{nxo}.
+		\item[a\_stderr: ]
+			Pointer to a file \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set \cvar{a\_nxo}'s stderr to \cvar{a\_stderr}.
+	\end{capilist}
+\end{capi}

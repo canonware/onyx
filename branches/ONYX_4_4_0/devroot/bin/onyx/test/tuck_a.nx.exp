@@ -1,0 +1,17 @@
+Test begin
+`0 42 tuck'
+42
+0
+42
+`1 0 () tuck'
+()
+0
+()
+1
+`2 1 0 mark tuck'
+-mark-
+0
+-mark-
+1
+2
+Test end
