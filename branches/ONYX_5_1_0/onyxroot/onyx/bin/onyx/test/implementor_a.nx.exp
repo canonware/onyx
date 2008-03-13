@@ -1,0 +1,20 @@
+Test begin
+`class $foo'
+null
+`vclass $foo'
+null
+`vclass $new'
+-class=$vclass-
+`fooclass $new'
+-class=$vclass-
+`fooclass $foo'
+-class=$fooclass-
+`fooclass $bar'
+null
+`fooclass \`foo\''
+-class=$fooclass-
+`fooclass \`bar\''
+null
+`fooclass null'
+null
+Test end

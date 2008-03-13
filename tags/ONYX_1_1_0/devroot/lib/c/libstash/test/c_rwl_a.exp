@@ -1,0 +1,46 @@
+Test begin
+main(): About to release rlock
+main(): About to release rlock
+main(): About to release rlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+main(): About to release wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+thread_entry_func(): Got wlock
+Test end

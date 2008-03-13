@@ -1,0 +1,25 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$fooclass vclass <
+><
+> cdef
+
+$barclass fooclass <
+><
+> cdef
+
+fooclass null setsuper
+fooclass super 1 sprint
+
+barclass vclass setsuper
+barclass super 1 sprint

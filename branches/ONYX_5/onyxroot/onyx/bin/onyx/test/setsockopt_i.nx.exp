@@ -1,0 +1,3 @@
+Test begin
+Error $typecheck
+ostack: (-file- $SOL_SOCKET $SO_OOBINLINE false)

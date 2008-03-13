@@ -1,0 +1,106 @@
+/******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: Onyx <Version>
+ *
+ * Top level Cookfile for documentation.  Documentation is only rebuilt if the
+ * --with-docs option is specified.
+ *
+ ******************************************************************************/
+
+#include-cooked [fromto % @objroot@/doc/latex/%/Cookfile.inc @docs@]
+
+/*
+ * Targets.
+ */
+docs_pdf : [addsuffix _docs_pdf @docs@];
+docs_html : [addsuffix _docs_html @docs@];
+docs : docs_pdf docs_html;
+
+docs_install_pdf : [addsuffix _docs_install_pdf @docs@];
+docs_install_html : [addsuffix _docs_install_html @docs@];
+docs_install : docs_install_pdf docs_install_html;
+
+docs_uninstall : [addsuffix _docs_uninstall @docs@];
+
+docs_clean : [addsuffix _docs_clean @docs@];
+
+docs_relclean : [addsuffix _docs_relclean @docs@]
+{
+  rm -rf @objroot@/doc/html;
+  rm -rf @objroot@/doc/pdf;
+}
+
+/*
+ * Build rules.
+ */
+@objroot@/%0%.ps : @srcroot@/%0%.fig
+  set mkdir
+{
+  @FIG2DEV@ -L ps @srcroot@/%0%.fig @objroot@/%0%.ps;
+}
+
+@objroot@/%0pdf/%1/%.pdf : @objroot@/%0latex/%1/%.tex
+  set mkdir
+{
+  /*
+   * Clean up the temp files to keep pdflatex from getting confused.
+   *
+   * Change directory to the object tree, since latex can't be made to use a
+   * different location for output files.
+   */
+
+  rm -f [addprefix @objroot@/%0latex/%1/%.
+                   alg aux aux-prev idx idx-prev ilg ind lof log lot out toc];
+  rm -f @objroot@/%0latex/%1/texput.log;
+
+  cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @PDFLATEX@
+                                    %.tex;
+  cd @objroot@/%0latex/%1/\; @MAKEINDEX@ -c -l
+                                         -s @abs_srcroot@/%0latex/%1/%.mst
+                                         %.idx;
+  cd @objroot@/%0latex/%1/\; @PERL@ @abs_srcroot@/%0latex/ltx2e @PDFLATEX@
+                                    %.tex;
+  cp @objroot@/%0latex/%1/%.pdf @objroot@/%0pdf/%1/%.pdf;
+}
+
+@objroot@/%0html/%1/%.html : @objroot@/%0latex/%1/%.tex
+  set mkdir
+{
+  @LATEX2HTML@ -init_file @srcroot@/%0latex/%1/.latex2html-init
+    -dir @abs_objroot@/%0html/%1 -split 5 -toc_depth 4 -show_section_numbers
+    -footnode -noinfo -auto_link -transparent -image_type png -local_icons
+    @abs_objroot@/%0latex/%1/%.tex;
+  /*
+   * Fix up [, ], and \ characters.
+   * Get rid of spurious <> at the end of tables.
+   */
+  [SHELL] -e;
+data
+  for i in `find @objroot@/%0html/%1/ -type f |grep "\.html$"` ; do
+    echo "Fix up $i"
+    mv $i $i.tmp
+    cat $i.tmp | sed -e s/YYYbsZZZ/\\\\\\\\/g \\
+      | sed -e s/YYYlbZZZ/\[/g \\
+      | sed -e s/YYYrbZZZ/\]/g \\
+      | sed -e s/YYYhrZZZ/\\<hr\\>/g \\
+      | sed -e s/YYYddashZZZ/--/g \\
+      | sed -e \\
+        "s/^\\\\\\(\\\\\\<\\\\/TABLE\\\\\\>\\\\\\)\\\\\\<\\\\\\>/\\\\1/g" \\
+      > $i
+    rm $i.tmp
+  done
+dataend
+
+  /*
+   * Clean up temp files so that they won't get installed.
+   */
+  rm -f @objroot@/%0html/%1/WARNINGS;
+  rm -f [addprefix @objroot@/%0html/%1/images. aux idx log pl tex];
+  rm -f @objroot@/%0html/%1/internals.pl;
+  rm -f @objroot@/%0html/%1/labels.pl;
+}

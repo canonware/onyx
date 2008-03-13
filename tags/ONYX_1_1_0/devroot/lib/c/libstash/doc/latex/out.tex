@@ -1,0 +1,852 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% out portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{out}
+\label{out}
+\index{out@\classname{out}{}}
+
+The \classname{out} class provides functionality similar to the printf family of
+functions, with the additional capability of dynamically adding handlers for
+non-builtin types.
+
+The syntax of formatting specifiers is significantly different than what printf
+uses, since arbitrary flags must be supported.  Formatting specifiers are
+delimited by `{\lb}' and `{\rb}'.  Following are some examples of formatting
+strings, followed by explanations.
+
+\begin{description}
+\item[{\tt "{\lb}{\lb}"}: ]
+	Print a `{\lb}' character.  Due to the way C strings and `{\bs}'
+	protection work, it is necessary to use a different escape character
+	(`{\lb}').
+\item[{\tt "[s{\rb}"}: ]
+	Print a string.
+\item[{\tt "{\lb}s{\pipe}w:10{\rb}"}: ]
+	Print a string, padded to be at least 10 bytes long.
+\item[{\tt "{\lb}i{\pipe}b:16{\pipe}p:0{\pipe}w:8{\rb}"}: ]
+	Print a 32 bit integer in base 16.  Pad the output to 8 bytes, using `0'
+	for the padding character.
+\end{description}
+
+As can be seen above, flags are specified as name/value pairs.  Each name and
+value is separated by `:', and name/value pairs are separated from each other
+(and the type specifier) by `{\pipe}'.  Names and values can be of arbitrary
+length (nonzero for names), and can contain any characters except `{\rb}',
+`{\pipe}', `:', and ` '.  The parser may let these characters slip through in
+some cases, but such behavior should not be relied on.  Some or all of the
+following flags are supported for the builtin types:
+
+\begin{description}
+\item[{\tt "w"}: ]
+	Minimum number of bytes of output.
+\item[{\tt "j"}: ]
+	Justification.  Legal values:
+	\begin{description}
+	\item[{\tt "r"}: ]
+		Right.
+	\item[{\tt "l"}: ]
+		Left.
+	\item[{\tt "c"}: ]
+		Center.
+	\end{description}
+\item[{\tt "p"}: ]
+	 Padding character.
+\item[{\tt "b"}: ]
+	Numerical base.  Legal bases are (2 {\lt}= base {\lt}= 36).
+\item[{\tt "s"}: ]
+	Signed/unsigned.  Legal values:
+	\begin{description}
+	\item[{\tt "u"}: ]
+		 Unsigned.
+	\item[{\tt "s"}: ]
+		Signed.
+	\end{description}
+\item[{\tt "+"}: ]
+	Show sign.  Legal values:
+	\begin{description}
+	\item[{\tt "-"}: ]
+		Only print sign if output is negative.
+	\item[{\tt "+"}: ]
+		Always print sign.
+	\end{description}
+\end{description}
+
+The following is a matrix of flag defaults for the builtin output types.  A
+blank cell indicates an unsupported type/flag combination:
+\begin{table}[htb]
+\begin{center}
+\begin{tabular}{|l|l||l|l|l|l|l|l|}
+\hline
+\multicolumn{2}{|c||}{Type} & \multicolumn{6}{c|}{Flag} \\
+\hline
+C type		& Symbol & w	& j	& p	& b	& s	& +	\\
+\hline \hline
+cw\_*int32\_t	& i	& Fit	& r	& ` '	& 10	& u	& --	\\
+\hline
+cw\_*int64\_t	& q	& Fit	& r	& ` '	& 10	& u	& --	\\
+\hline
+cw\_*int8\_t	& c	& Fit	& r	& ` '	&	&	&	\\
+\hline
+cw\_*int8\_t *	& s	& Fit	& r	& ` '	&	&	&	\\
+\hline
+void *		& p	& Fit	& r	& ` '	& 16	& u	& --	\\
+\hline
+\end{tabular}
+\end{center}
+\caption{Flag defaults for builtin output types}
+\end{table}
+
+\subsubsection{API}
+\begin{capi}
+\label{cw_out_render_t}
+\index{cw_out_render_t@\cfunc{cw\_out\_render\_t}{}}
+\citem{\cfunc[typedef cw\_uint32\_t]{out\_render\_t}{const char *a\_format,
+cw\_uint32\_t a\_format\_len, const void *a\_arg, cw\_uint32\_t a\_max\_len,
+cw\_uint8\_t *r\_str}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_format: ]
+			Pointer to a format specifier.
+		\item[a\_format\_len: ]
+			Length in bytes of \cvar{a\_format}.
+		\item[a\_arg: ]
+			Pointer to object to be output.
+		\item[a\_max\_len: ]
+			Maximum number of bytes to output.
+		\item[r\_str: ]
+			Pointer to space to render to.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes of output spoce that the rendering
+			function needs.
+		\item[*r\_str: ]
+			Rendered version of \cvar{a\_arg}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Print \cvar{a\_arg} to \cvar{*r\_str}, given the specification
+		pointed to by \cvar{a\_format}.
+	\end{capilist}
+\label{out_new}
+\index{out_new@\cfunc{out\_new}{}}
+\citem{\cfunc[cw\_out\_t *]{out\_new}{cw\_out\_t *a\_out, cw\_mem\_t
+*a\_mem}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to space for an \classname{out}, or NULL.
+		\item[a\_mem: ]
+			Pointer to the allocator to use internally.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to an \classname{out}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{out_delete}
+\index{out_delete@\cfunc{out\_delete}{}}
+\citem{\cfunc[void]{out\_delete}{cw\_out\_t *a\_out}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{out_register}
+\index{out_register@\cfunc{out\_register}{}}
+\citem{\cfunc[cw\_bool\_t]{out\_register}{cw\_out\_t *a\_out, const char
+*a\_type, cw\_uint32\_t a\_size, cw\_out\_render\_t *a\_render\_func}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_type: ]
+			Pointer to a NULL-terminated string that represents a
+			data type specifier.  The string length (not including
+			the NULL terminator) must be
+			\cppdef{\_CW\_OUT\_MAX\_TYPE} bytes or less.
+		\item[a\_size: ]
+			Size of the argument that will be passed to
+			\cfunc{*out\_put*}{}.  In almost all cases this will be
+			\cfunc{sizeof}{void *}.  \cvar{a\_size} must be 1, 2, 4,
+			or 8.
+		\item[a\_render\_func: ]
+			Pointer to a rendering function.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Register a new type with \cvar{a\_out}, so that non-builtin type
+		specifiers can be embedded in formatting strings.
+	\end{capilist}
+\label{out_merge}
+\index{out_merge@\cfunc{out\_merge}{}}
+\citem{\cfunc[void]{out\_merge}{cw\_out\_t *a\_a, cw\_out\_t *a\_b}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_a: ]
+			Pointer to an \classname{out}.
+		\item[a\_b: ]
+			Pointer to an \classname{out}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Merge the extended type handlers for \cvar{a\_b} into
+		\cvar{a\_a}.
+	\end{capilist}
+\label{out_default_fd_get}
+\index{out_default_fd_get@\cfunc{out\_default\_fd\_get}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_default\_fd\_get}{cw\_out\_t *a\_out}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			File descriptor number.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the default file descriptor for \cvar{a\_out}.
+	\end{capilist}
+\label{out_default_fd_set}
+\index{out_default_fd_set@\cfunc{out\_default\_fd\_set}{}}
+\citem{\cfunc[void]{out\_default\_fd\_set}{cw\_out\_t *a\_out, cw\_sint32\_t
+a\_fd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_fd: ]
+			File descriptor number.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the default file descriptor number for \cvar{a\_out}.
+	\end{capilist}
+\label{out_put}
+\index{out_put@\cfunc{out\_put}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put}{cw\_out\_t *a\_out, const char
+*a\_format, ...}}
+\label{_cw_out_put}
+\index{_cw_out_put@\cppmacro{\_cw\_out\_put}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put}{const char *a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+			\cppmacro{\_cw\_out\_put}{} implicitly uses
+			\cvar{out\_std}.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to the default file descriptor for
+			\cvar{a\_out}.}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print formatted output.
+	\end{capilist}
+\label{out_put_e}
+\index{out_put_e@\cfunc{out\_put\_e}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_e}{cw\_out\_t *a\_out, const char
+*a\_file\_name, cw\_uint32\_t a\_line\_num, const char *a\_func\_name, const
+char *a\_format, ...}}
+\label{_cw_out_put_e}
+\index{_cw_out_put_e@\cppmacro{\_cw\_out\_put\_e}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_e}{const char *a\_file\_name,
+cw\_uint32\_t a\_line\_num, const char *a\_func\_name, const char *a\_format,
+...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+			\cppmacro{\_cw\_out\_put\_e}{} implicitly uses
+			\cvar{out\_err}.
+		\item[a\_file\_name: ]
+			Pointer to a string that represents the source file
+			name, or NULL.
+		\item[a\_line\_num: ]
+			Source file line number.  Ignored if
+			\cvar{a\_file\_name} is NULL.
+		\item[a\_func\_name: ]
+			Pointer to a string that represents the sourc function
+			name, or NULL.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to the default file descriptor for
+			\cvar{a\_out}.}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print formatted output, with optional {\tt "At {\lt}file{\gt},
+		line {\lt}line{\gt}: {\lt}function{\gt}(): "} prepended to the
+		output.
+	\end{capilist}
+\label{out_put_n}
+\index{out_put_n@\cfunc{out\_put\_n}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_n}{cw\_out\_t *a\_out, cw\_uint32\_t
+a\_size, const char *a\_format, ...}}
+\label{_cw_out_put_n}
+\index{_cw_out_put_n@\cppmacro{\_cw\_out\_put\_n}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_n}{cw\_uint32\_t a\_size, const
+char *a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+			\cppmacro{\_cw\_out\_put\_n}{} implicitly uses
+			\cvar{out\_std}.
+		\item[a\_size: ]
+			Maximum number of characters to output.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to the default file descriptor for
+			\cvar{a\_out}.}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print at most \cvar{a\_size} bytes of formatted output.
+	\end{capilist}
+\label{out_put_f}
+\index{out_put_f@\cfunc{out\_put\_f}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_f}{cw\_out\_t *a\_out, cw\_sint32\_t
+a\_fd, const char *a\_format, ...}}
+\label{_cw_out_put_f}
+\index{_cw_out_put_f@\cppmacro{\_cw\_out\_put\_f}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_f}{cw\_sint32\_t a\_fd, const
+char *a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_fd: ]
+			File descriptor number.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to \cvar{a\_fd}.}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print formatted output.
+	\end{capilist}
+\label{out_put_fn}
+\index{out_put_fn@\cfunc{out\_put\_fn}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_fn}{cw\_out\_t *a\_out, cw\_sint32\_t
+a\_fd, cw\_uint32\_t a\_size, const char *a\_format, ...}}
+\label{_cw_out_put_fn}
+\index{_cw_out_put_fn@\cppmacro{\_cw\_out\_put\_fn}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_fn}{cw\_sint32\_t a\_fd,
+cw\_uint32\_t a\_size, const char *a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_fd: ]
+			File descriptor number.
+		\item[a\_size: ]
+			Maximum number of characters to output.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to \cvar{a\_fd}.}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print at most \cvar{a\_size} bytes of formatted output.
+	\end{capilist}
+\label{out_put_fv}
+\index{out_put_fv@\cfunc{out\_put\_fv}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_fv}{cw\_out\_t *a\_out, cw\_sint32\_t
+a\_fd, const char *a\_format, va\_list a\_p}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_fd: ]
+			File descriptor number.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to \cvar{a\_fd}.}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print formatted output.
+	\end{capilist}
+\label{out_put_fvn}
+\index{out_put_fvn@\cfunc{out\_put\_fvn}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_fvn}{cw\_out\_t *a\_out, cw\_sint32\_t
+a\_fd, cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_fd: ]
+			File descriptor number.
+		\item[a\_size: ]
+			Maximum number of characters to output.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item{Output printed to \cvar{a\_fd}.}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print at most \cvar{a\_size} bytes of formatted output.
+	\end{capilist}
+\label{out_put_s}
+\index{out_put_s@\cfunc{out\_put\_s}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_s}{cw\_out\_t *a\_out, char *a\_str,
+const char *a\_format, ...}}
+\label{_cw_out_put_s}
+\index{_cw_out_put_s@\cppmacro{\_cw\_out\_put\_s}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_s}{char *a\_str, const char
+*a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+			\cppmacro{\_cw\_out\_put\_s}{} implicitly uses NULL.
+		\item[a\_str: ]
+			Pointer to an output string.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[*a\_str: ]
+			Formatted output.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print formatted output.
+	\end{capilist}
+\label{out_put_sa}
+\index{out_put_sa@\cfunc{out\_put\_sa}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_sa}{cw\_out\_t *a\_out, char **r\_str,
+const char *a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+			\cppmacro{\_cw\_out\_put\_s}{} implicitly uses NULL.
+		\item[r\_str: ]
+			Pointer to a string pointer.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[**r\_str: ]
+			Formatted output.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Allocate space, then print formatted output to it.
+	\end{capilist}
+\label{out_put_sn}
+\index{out_put_sn@\cfunc{out\_put\_sn}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_sn}{cw\_out\_t *a\_out, char *a\_str,
+cw\_uint32\_t a\_size, const char *a\_format, ...}}
+\label{_cw_out_put_sn}
+\index{_cw_out_put_sn@\cppmacro{\_cw\_out\_put\_sn}{}}
+\citem{\cppmacro[cw\_sint32\_t]{\_cw\_out\_put\_sn}{char *a\_str, cw\_uint32\_t
+a\_size, const char *a\_format, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+			\cppmacro{\_cw\_out\_put\_sn}{} implicitly uses NULL.
+		\item[a\_str: ]
+			Pointer to an output string.
+		\item[a\_size: ]
+			Maximum number of characters to output.  If
+			\cvar{a\_size} is less than or equal to the number of
+			bytes that could be output, were there no limit, then no
+			'{\bs}0' string termination byte is written.  Therefore,
+			if the caller is depending on such string termination,
+			care should be taken to specify \cvar{a\_size} as one
+			less than the total string length, and to make sure that
+			if the string is completely filled with output, that the
+			last byte is set to '{\bs}0'.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[...: ]
+			Arguments that correspond to the specifiers in
+			\cvar{a\_format}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[*a\_str: ]
+			Formatted output.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print at most \cvar{a\_size} bytes of formatted output.
+	\end{capilist}
+\label{out_put_sv}
+\index{out_put_sv@\cfunc{out\_put\_sv}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_sv}{cw\_out\_t *a\_out, char *a\_str,
+const char *a\_format, va\_list a\_p}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_str: ]
+			Pointer to an output string.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[*a\_str: ]
+			Formatted output.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print formatted output.
+	\end{capilist}
+\label{out_put_sva}
+\index{out_put_sva@\cfunc{out\_put\_sva}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_sva}{cw\_out\_t *a\_out, char **r\_str,
+const char *a\_format, va\_list a\_p}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[r\_str: ]
+			Pointer to an output string pointer.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Number of bytes output, not including the terminating
+			'{\bs}0'.
+		\item[**r\_str: ]
+			Formatted output.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Allocate space, then print formatted output to it.
+	\end{capilist}
+\label{out_put_svn}
+\index{out_put_svn@\cfunc{out\_put\_svn}{}}
+\citem{\cfunc[cw\_sint32\_t]{out\_put\_svn}{cw\_out\_t *a\_out, char *a\_str,
+cw\_uint32\_t a\_size, const char *a\_format, va\_list a\_p}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_out: ]
+			Pointer to an \classname{out}.
+		\item[a\_str: ]
+			Pointer to an output string.
+		\item[a\_size: ]
+			Maximum number of characters to output.  If
+			\cvar{a\_size} is less than or equal to the number of
+			bytes that could be output, were there no limit, then no
+			'{\bs}0' string termination byte is written.  Therefore,
+			if the caller is depending on such string termination,
+			care should be taken to specify \cvar{a\_size} as one
+			less than the total string length, and to make sure that
+			if the string is completely filled with output, that the
+			last byte is set to '{\bs}0'.
+		\item[a\_format: ]
+			Pointer to a formatting specifier string.
+		\item[a\_p: ]
+			Variable argument list.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Number of bytes output.
+			\item[-1: ]
+				\cfunc{write}{} error.
+			\end{description}
+		\item[*a\_str: ]
+			Formatted output.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_STASHX\_OOM}{_CW_STASHX_OOM}.]
+		\item[\htmlref{\_CW\_STASHX\_OUT\_PARSE}{_CW_STASHX_OUT_PARSE}.]
+		\end{description}
+	\item[Description: ]
+		Print at most \cvar{a\_size} bytes of formatted output.
+	\end{capilist}
+\label{spec_type_get}
+\index{spec_type_get@\cfunc{spec\_type\_get}{}}
+\citem{\cfunc[cw\_sint32\_t]{spec\_type\_get}{const char *a\_spec, cw\_uint32\_t
+a\_spec\_len, const char **r\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_spec: ]
+			Pointer to a specifier string.
+		\item[a\_spec\_len: ]
+			Length of \cvar{a\_spec}.
+		\item[r\_val: ]
+			Pointer to a string pointer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Length of type value string.
+		\item[*r\_val: ]
+			Pointer to type value string.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the length of the type value string, and set
+		\cvar{*r\_val} to point to it.
+	\end{capilist}
+\label{spec_val_get}
+\index{spec_val_get@\cfunc{spec\_val\_get}{}}
+\citem{\cfunc[cw\_sint32\_t]{spec\_val\_get}{const char *a\_spec, cw\_uint32\_t
+a\_spec\_len, const char *a\_name, cw\_uint32\_t a\_name\_len, const
+cw\_uint8\_t **r\_val}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_spec: ]
+			Pointer to a specifier string.
+		\item[a\_spec\_len: ]
+			Length of \cvar{a\_spec}.
+		\item[a\_name: ]
+			Pointer to a NULL-terminated name.
+		\item[a\_name\_len: ]
+			Length of \cvar{a\_name}.
+		\item[r\_val: ]
+			Pointer to a string pointer.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[{\gt}= 0: ]
+				Length of value string.
+			\item[-1: ]
+				No such name.
+			\end{description}
+		\item[*r\_val: ]
+			Pointer to value string.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the length of the value string that corresponds to
+		\cvar{a\_spec}, and set \cvar{*r\_val} to point to it.
+	\end{capilist}
+\end{capi}

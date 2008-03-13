@@ -1,0 +1,238 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% qr portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{qr}
+\label{qr}
+\index{qr@\classname{qr}{}}
+
+The \classname{qr} macros implement operations on a ring.  The type of the ring
+elements and which field of the elements to use are determined by arguments that
+are passed into the macros.  The macros are optimized for speed and code size,
+which means that there is minimal error checking built in.  As a result, care
+must be taken to assure that these are used as intended, or strange things can
+happen.
+
+\subsubsection{API}
+\begin{capi}
+%\label{qr}
+\index{qr@\cppmacro{qr}{}}
+\citem{\cppmacro[]{qr}{{\lt}qr\_type{\gt} a\_type}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_type: ]
+			Data type for the \classname{qr}.
+		\end{description}
+	\item[Output(s): ]
+		A data structure that can be used for a \classname{qr}.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Generate code for a \classname{qr} data structure.
+	\end{capilist}
+\label{qr_new}
+\index{qr_new@\cppmacro{qr\_new}{}}
+\citem{\cppmacro[void]{qr\_new}{{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt}
+a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{qr_next}
+\index{qr_next@\cppmacro{qr\_next}{}}
+\citem{\cppmacro[{\lt}qr\_type{\gt} *]{qr\_next}{{\lt}qr\_type{\gt} *a\_qr,
+{\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the next element in the \classname{qr}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the next element in the \classname{qr}.
+	\end{capilist}
+\label{qr_prev}
+\index{qr_prev@\cppmacro{qr\_prev}{}}
+\citem{\cppmacro[{\lt}qr\_type{\gt} *]{qr\_prev}{{\lt}qr\_type{\gt} *a\_qr,
+{\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the previous element in the \classname{qr}.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the previous element in the \classname{qr}.
+	\end{capilist}
+\label{qr_before_insert}
+\index{qr_before_insert@\cppmacro{qr\_before\_insert}{}}
+\citem{\cppmacro[void]{qr\_before\_insert}{{\lt}qr\_type{\gt} *a\_qrelm,
+{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qrelm: ]
+			Pointer to an element in a \classname{qr}.
+		\item[a\_qr: ]
+			Pointer to an element that is the only element in its
+			ring.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_qr} before \cvar{a\_qrelm}.
+	\end{capilist}
+\label{qr_after_insert}
+\index{qr_after_insert@\cppmacro{qr\_after\_insert}{}}
+\citem{\cppmacro[void]{qr\_after\_insert}{{\lt}qr\_type{\gt} *a\_qrelm,
+{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qrelm: ]
+			Pointer to an element in a \classname{qr}.
+		\item[a\_qr: ]
+			Pointer to an element that is the only element in its
+			ring.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Insert \cvar{a\_qr} after \cvar{a\_qrelm}.
+	\end{capilist}
+\label{qr_meld}
+\index{qr_meld@\cppmacro{qr\_meld}{}}
+\citem{\cppmacro[void]{qr\_meld}{{\lt}qr\_type{\gt} *a\_qr\_a,
+{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr\_a: ]
+			Pointer to a \classname{qr}.
+		\item[a\_qr\_b: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Meld \cvar{a\_qr\_a} and \cvar{a\_qr\_b} into one ring.
+	\end{capilist}
+\label{qr_split}
+\index{qr_split@\cppmacro{qr\_split}{}}
+\citem{\cppmacro[void]{qr\_split}{{\lt}qr\_type{\gt} *a\_qr\_a,
+{\lt}qr\_type{\gt} *a\_qr\_b, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr\_a: ]
+			Pointer to a \classname{qr}.
+		\item[a\_qr\_b: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Split a ring at \cvar{a\_qr\_a} and \cvar{a\_qr\_b}.
+	\end{capilist}
+\label{qr_remove}
+\index{qr_remove@\cppmacro{qr\_remove}{}}
+\citem{\cppmacro[void]{qr\_remove}{{\lt}qr\_type{\gt} *a\_qr,
+{\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Remove \cvar{a\_qr} from the ring.
+	\end{capilist}
+\label{qr_foreach}
+\index{qr_foreach@\cppmacro{qr\_foreach}{}}
+\citem{\cppmacro[]{qr\_foreach}{{\lt}qr\_type{\gt} *a\_var, {\lt}qr\_type{\gt}
+*a\_qr, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate through the \classname{qr}, storing a pointer to each
+		element in \cvar{a\_var} along the way.
+	\end{capilist}
+\label{qr_reverse_foreach}
+\index{qr_reverse_foreach@\cppmacro{qr\_reverse\_foreach}{}}
+\citem{\cppmacro[]{qr\_reverse\_foreach}{{\lt}qr\_type{\gt} *a\_var,
+{\lt}qr\_type{\gt} *a\_qr, {\lt}field\_name{\gt} a\_field}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_var: ]
+			The name of a temporary variable to use for iteration.
+		\item[a\_qr: ]
+			Pointer to a \classname{qr}.
+		\item[a\_field: ]
+			Field within the \classname{qr} elements to use.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Iterate through the \classname{qr} in the reverse direction,
+		storing a pointer to each element in \cvar{a\_var} along the
+		way.
+	\end{capilist}
+\end{capi}

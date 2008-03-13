@@ -1,0 +1,14 @@
+Test begin
+`0 bdup'
+0
+0
+`0 1 bdup'
+0
+1
+0
+`mark 0 1 bdup'
+-mark-
+1
+0
+-mark-
+Test end

@@ -1,0 +1,7 @@
+Error /typecheck
+ostack: (1)
+dstack: (-dict- -dict- -dict- -dict-)
+estack/istack trace (0..2):
+0:	--sdup--
+1:	-file-
+2:	--start--
