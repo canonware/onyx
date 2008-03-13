@@ -1,0 +1,93 @@
+################################################################################
+#
+# Version: Onyx <Version>
+#
+# Supported platforms and platform-specific information.
+#
+################################################################################
+
+* Fedora Core 1.
+
+  + There are signal handling issues for SMP kernels that wreak havoc on Onyx's
+    garbage collector.  Expect Onyx to deadlock as a result.  Viable workarounds
+    include:
+
+    1) Run a uniprocessor kernel.
+    2) Use GNU pth rather than pthreads.
+    3) Disable threads.
+
+* Red Hat Linux 9.
+
+  + There are serious bugs in NPTL (the new pthreads implementation) that cause
+    Onyx to deadlock during startup.  An updated glibc was released by Red Hat
+    that fixes this problem.
+
+  + The signal handling issues in Fedora Core 1 apply to Red Hat Linux 9 as
+    well.
+
+* Red Hat Linux 8.
+
+  + Job control support (suspend/resume) is broken when using libedit for
+    command line editing.  This is because LinuxThreads's signal handling
+    semantics are broken.  There is workaround code in
+    mod/modprompt/src/modprompt.c that can be enabled by defining the
+    CW_MODPROMPT_LINUXTHREADS cpp macro.
+
+  + The Onyx 4.4.3 release was the last release tested on Red Hat Linux 8.  It
+    probably compiles and works, but there are no guarantees.
+
+* FreeBSD 4.9, 5.2.
+
+  + FreeBSD's libedit is too old for Onyx's needs.  Use the ports version of
+    libedit.  Take care to specify the appropriate configure script parameters
+    (see INSTALL for details).
+
+* Sun Solaris 9.
+
+* Apple OS X 10.2.
+
+  + Amazingly, execve() does not work for a multi-threaded process.  This can be
+    worked around by calling fork(), then execve(), and exiting the parent
+    process.  In Onyx code, the workaround looks like:
+
+    Original:
+
+      [`path'] exec
+
+    Workaround:
+
+      [`path'] forkexec 0 ne {
+	# Parent process.
+	0 die
+      } if
+
+    This workaround has the side effect of changing the process ID.
+
+  + OS X's linker was changed for OS X 10.3.  Onyx's build system specifies
+    flags like the following in multiple places:
+
+	-undefined suppress -flat_namespace -bundle -all_load -bind_at_load
+
+    and:
+
+	-undefined suppress -flat_namespace -dynamiclib -bind_at_load
+
+    This may need to be changed to something like the following for OS X 10.3:
+
+	-undefined dynamic_lookup -bundle -all_load -bind_at_load
+
+    and:
+
+	-undefined dynamic_lookup -dynamiclib -bind_at_load
+
+    This has not been tested by the author.  Whatever you do, do not remove the
+    -bind_at_load flag, since its absence will cause mysterious deadlocks in
+    dyld.  This is because all symbols that can be accessed via a signal handler
+    must be bound before the signal handler is invoked.  There are other ways of
+    causing all such symbols to be bound, but it would be a complex and
+    error-prone process to make these changes.
+
+* NetBSD 1.6.
+
+  + POSIX threading does not work due to NetBSD's lack of pthreads.  However,
+    GNU pth threading should work.

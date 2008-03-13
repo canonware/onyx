@@ -1,0 +1,7 @@
+Test begin
+`0 nbpop'
+`\`a\' 1 nbpop'
+`\`a\' \`b\' 1 nbpop'
+`b'
+`\`a\' \`b\' \`c\' 3 nbpop'
+Test end

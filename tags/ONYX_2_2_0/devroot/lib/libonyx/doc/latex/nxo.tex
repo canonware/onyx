@@ -1,0 +1,263 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% nxo portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{nxo}
+\label{nxo}
+\index{nxo@\classname{nxo}{}}
+
+The \classname{nxo} class is the basis for the Onyx type system.
+\classname{nxo} objects can be any of the following types, as determined by the
+\ctype{cw\_nxot\_t} type:
+\begin{description}
+\item[NXOT\_NO: ] \htmlref{\classname{nxo\_no}}{nxo_no}
+\item[NXOT\_ARRAY: ] \htmlref{\classname{nxo\_array}}{nxo_array}
+\item[NXOT\_BOOLEAN: ] \htmlref{\classname{nxo\_boolean}}{nxo_boolean}
+\item[NXOT\_CONDITION: ] \htmlref{\classname{nxo\_condition}}{nxo_condition}
+\item[NXOT\_DICT: ] \htmlref{\classname{nxo\_dict}}{nxo_dict}
+\item[NXOT\_FILE: ] \htmlref{\classname{nxo\_file}}{nxo_file}
+\item[NXOT\_FINO: ] \htmlref{\classname{nxo\_fino}}{nxo_fino}
+\item[NXOT\_HOOK: ] \htmlref{\classname{nxo\_hook}}{nxo_hook}
+\item[NXOT\_INTEGER: ] \htmlref{\classname{nxo\_integer}}{nxo_integer}
+\item[NXOT\_MARK: ] \htmlref{\classname{nxo\_mark}}{nxo_mark}
+\item[NXOT\_MUTEX: ] \htmlref{\classname{nxo\_mutex}}{nxo_mutex}
+\item[NXOT\_NAME: ] \htmlref{\classname{nxo\_name}}{nxo_name}
+\item[NXOT\_NULL: ] \htmlref{\classname{nxo\_null}}{nxo_null}
+\item[NXOT\_OPERATOR: ] \htmlref{\classname{nxo\_operator}}{nxo_operator}
+\item[NXOT\_STACK: ] \htmlref{\classname{nxo\_stack}}{nxo_stack}
+\item[NXOT\_STRING: ] \htmlref{\classname{nxo\_string}}{nxo_string}
+\item[NXOT\_THREAD: ] \htmlref{\classname{nxo\_thread}}{nxo_thread}
+\end{description}
+
+Due to limitations of the C programming language, it is the responsibility of
+the application to do type checking to assure that an incompatible
+\classname{nxo} object is not passed to a type-specific function.  For example,
+passing a file \classname{nxo} to \cfunc{nxo\_string\_get}{} is prohibited, and
+will result in undefined behaviour (including crashes).
+
+Composite objects contain a reference to an \classname{nxoe} object.  For the
+most part, the application does not need to be aware of this.  The only
+exception is when writing extensions with the hook type.  Hook objects need to
+be able to iterate over the objects they reference internally, and return
+\classname{nxoe} references to the garbage collector.
+
+The following functions are applicable to all types of \classname{nxo} objects.
+
+\subsubsection{API}
+\begin{capi}
+\label{nxo_compare}
+\index{nxo_compare@\cfunc{nxo\_compare}{}}
+\citem{\cfunc[cw\_sint32\_t]{nxo\_compare}{cw\_nxo\_t *a\_a, cw\_nxo\_t *a\_b}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_a: ]
+			Pointer to an \classname{nxo}.
+		\item[a\_b: ]
+			Pointer to an \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[-1: ]
+				For types which it is meaninful (integer,
+				string), \cvar{a\_a} is less than \cvar{a\_b}.
+			\item[0: ]
+				\cvar{a\_a} and \cvar{a\_b} are equal.
+			\item[1: ]
+				For types which it is meaninful (integer,
+				string), \cvar{a\_a} is greater than
+				\cvar{a\_b}.
+			\item[2: ]
+				Incompatible types, or not the same composite
+				object.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Compare \cvar{a\_a} and \cvar{a\_b}.
+	\end{capilist}
+\label{nxo_dup}
+\index{nxo_dup@\cfunc{nxo\_dup}{}}
+\citem{\cfunc[void]{nxo\_dup}{cw\_nxo\_t *a\_to, cw\_nxo\_t *a\_from}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_to: ]
+			Pointer to an \classname{nxo}.
+		\item[a\_from: ]
+			Pointer to an \classname{nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Duplicate \cvar{a\_from} to \cvar{a\_to}.  This does not do a
+		copy of composite objects; rather it creates a new reference to
+		the value of a composite object.
+	\end{capilist}
+\label{nxo_type_get}
+\index{nxo_type_get@\cfunc{nxo\_type\_get}{}}
+\citem{\cfunc[cw\_nxot\_t]{nxo\_type\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+				\item[NXOT\_NO: ]
+					\htmlref{\classname{nxo\_no}}{nxo_no}
+				\item[NXOT\_ARRAY: ]
+					\htmlref{\classname{nxo\_array}}
+					{nxo_array}
+				\item[NXOT\_BOOLEAN: ]
+					\htmlref{\classname{nxo\_boolean}}
+					{nxo_boolean}
+				\item[NXOT\_CONDITION: ]
+					\htmlref{\classname{nxo\_condition}}
+					{nxo_condition}
+				\item[NXOT\_DICT: ]
+					\htmlref{\classname{nxo\_dict}}
+					{nxo_dict}
+				\item[NXOT\_FILE: ]
+					\htmlref{\classname{nxo\_file}}
+					{nxo_file}
+				\item[NXOT\_FINO: ]
+					\htmlref{\classname{nxo\_fino}}
+					{nxo_fino}
+				\item[NXOT\_HOOK: ]
+					\htmlref{\classname{nxo\_hook}}
+					{nxo_hook}
+				\item[NXOT\_INTEGER: ]
+					\htmlref{\classname{nxo\_integer}}
+					{nxo_integer}
+				\item[NXOT\_MARK: ]
+					\htmlref{\classname{nxo\_mark}}
+					{nxo_mark}
+				\item[NXOT\_MUTEX: ]
+					\htmlref{\classname{nxo\_mutex}}
+					{nxo_mutex}
+				\item[NXOT\_NAME: ]
+					\htmlref{\classname{nxo\_name}}
+					{nxo_name}
+				\item[NXOT\_NULL: ]
+					\htmlref{\classname{nxo\_null}}
+					{nxo_null}
+				\item[NXOT\_OPERATOR: ]
+					\htmlref{\classname{nxo\_operator}}
+					{nxo_operator}
+				\item[NXOT\_STACK: ]
+					\htmlref{\classname{nxo\_stack}}
+					{nxo_stack}
+				\item[NXOT\_STRING: ]
+					\htmlref{\classname{nxo\_string}}
+					{nxo_string}
+				\item[NXOT\_THREAD: ]
+					\htmlref{\classname{nxo\_thread}}
+					{nxo_thread}
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the type of \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_nxoe_get}
+\index{nxo_nxoe_get@\cfunc{nxo\_nxoe\_get}{}}
+\citem{\cfunc[cw\_nxoe\_t *]{nxo\_nxoe\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the \classname{nxoe} associated with
+			\cvar{a\_nxo}, or NULL if \cvar{a\_nxo} is not
+			composite.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \classname{nxoe} associated with
+		\cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_lcheck}
+\index{nxo_lcheck@\cfunc{nxo\_lcheck}{}}
+\citem{\cfunc[cw\_bool\_t]{nxo\_lcheck}{}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an array, dict, file, stack, or string
+			\classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				\cvar{a\_nxo} is not implicitly locked.
+			\item[TRUE: ]
+				\cvar{a\_nxo} is implicitly locked.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		For array, dict, file, stack, or string \classname{nxo\/}s,
+		return whether \cvar{a\_nxo} is implicitly locked.
+	\end{capilist}
+\label{nxo_attr_get}
+\index{nxo_attr_get@\cfunc{nxo\_attr\_get}{}}
+\citem{\cfunc[cw\_nxoa\_t]{nxo\_attr\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an \classname{nxo}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[NXOA\_LITERAL: ]
+				\cvar{a\_nxo} is literal.
+			\item[NXOA\_EXECUTABLE: ]
+				\cvar{a\_nxo} is executable.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return the attribute for \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxo_attr_set}
+\index{nxo_attr_set@\cfunc{nxo\_attr\_set}{}}
+\citem{\cfunc[void]{nxo\_attr\_set}{cw\_nxo\_t *a\_nxo, cw\_nxoa\_t a\_attr}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to an \classname{nxo}.
+		\item[a\_attr: ]
+			Value of attribute to set for \cvar{a\_nxo}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the attribute for \cvar{a\_nxo} to \cvar{a\_attr}.
+	\end{capilist}
+\end{capi}

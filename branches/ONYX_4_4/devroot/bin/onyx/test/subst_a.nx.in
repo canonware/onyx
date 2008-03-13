@@ -1,0 +1,56 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    {`Input string' `p(.)' `X\1Y' <> subst pstack 2 npop}
+    {`Input string' `p(.)' `X\1Y' <> subst pstack 2 npop}
+    {`Input string' `p(.)' `X\1Y' <> regsub subst pstack 2 npop}
+
+    {`Input String' `([a-r])' `[\2]' subst pstack 2 npop}
+    {`Input String' `([a-r])' `[\2]' <> subst pstack 2 npop}
+    {`Input String' `([a-r])' `[\2]' <$g true> subst pstack 2 npop}
+
+    {`Input String' `([a-j])|([k-r])' `[\1|\2]' subst pstack 2 npop}
+    {`Input String' `([a-j])|([k-r])' `[\1|\2]' <> subst pstack 2 npop}
+    {`Input String' `([a-j])|([k-r])' `[\1|\2]' <$g true> subst pstack 2 npop}
+
+    {`Input String' `([a-j])' `\\\1' <$g true> subst pstack 2 npop}
+
+    {`Input String' `([a-j])' `\1\\' <$g true> subst pstack 2 npop}
+    
+    {`Input String' `i' `>\1<' <$g true> subst pstack 2 npop}
+    {`Input String' `i' `>\1<' <$g true $i true> subst pstack 2 npop}
+
+    {
+	`Multiple line\ninput string'
+	`(^\w+)' `>\1<' <$g true> subst
+	pstack 2 npop
+    }
+    {
+	`Multiple line\ninput string'
+	`(\w+.)' `>\1<' <$g true $m true> subst
+	pstack 2 npop
+    }
+    {
+	`Multiple line\ninput string'
+	`(\w+.)' `>\1<' <$g true $s true> subst
+	pstack 2 npop
+    }
+]{
+    dup 2 sprint
+    eval
+} foreach
+
+`Test end\n' print
+pstack

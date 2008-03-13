@@ -1,9 +1,0 @@
-% Test the exec operator.
-
-(Test begin\n) print
-
-(`hi' ==\n) cvx exec
-(`bye' ==\n) cvx exec
-
-pstack % Make sure the stack is empty.
-(Test end\n) print

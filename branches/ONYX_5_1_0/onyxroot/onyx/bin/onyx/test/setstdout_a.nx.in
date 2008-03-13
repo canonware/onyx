@@ -1,0 +1,22 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+stdout
+
+stderr setstdout
+stdout stderr ne {
+    `stdout and stderr are not equal\n' print
+} if
+
+stdout eq {
+    `stdout did not really change\n' print
+} if

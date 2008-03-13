@@ -1,0 +1,2 @@
+# Make sure there is no newline after the ~ to get a syntaxerror at EOF.
+~

@@ -1,0 +1,66 @@
+/* -*- mode: c ; c-file-style: "canonware-c-style" -*-
+ ******************************************************************************
+ *
+ * <Copyright = jasone>
+ * <License>
+ *
+ ******************************************************************************
+ *
+ * Version: <Version>
+ *
+ ******************************************************************************/
+
+#undef CW_DBG
+
+#ifndef CW_ASSERT
+#undef CW_ASSERT
+#endif
+
+#undef CW_OS_DARWIN
+#undef CW_OS_FREEBSD
+#undef CW_OS_LINUX
+#undef CW_OS_SOLARIS
+
+/* Solaris needs this for sigwait(). */
+#undef _POSIX_PTHREAD_SEMANTICS
+
+#undef WORDS_BIGENDIAN
+
+#undef CW_THREADS
+#undef CW_PTHREADS
+#undef CW_FTHREADS
+#undef CW_MTHREADS
+#undef CW_STHREADS
+
+#undef CW_POSIX
+
+#undef CW_POSIX_FILE
+
+#undef HAVE_DLOPEN
+
+/* If using gcc and inlines weren't disabled by configure, use inline
+ * functions. */
+#undef CW_USE_INLINES
+#if (defined(__GNUC__) && defined(CW_USE_INLINES))
+#define CW_INLINE static __inline__
+#else
+#define CW_INLINE
+#endif
+
+#undef SIZEOF_SIGNED_CHAR
+#undef SIZEOF_UNSIGNED_CHAR
+#undef SIZEOF_SIGNED_SHORT
+#undef SIZEOF_UNSIGNED_SHORT
+#undef SIZEOF_INT
+#undef SIZEOF_UNSIGNED
+#undef SIZEOF_LONG
+#undef SIZEOF_UNSIGNED_LONG
+#undef SIZEOF_LONG_LONG
+#undef SIZEOF_UNSIGNED_LONG_LONG
+#undef SIZEOF_INT_P
+
+#undef CW_LIBONYX_USE_DIRENT_RECLEN
+
+#undef HAVE_POLL
+#undef HAVE_READDIR_R
+#undef HAVE_UNSETENV

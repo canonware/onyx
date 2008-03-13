@@ -1,0 +1,210 @@
+2001-12-23  Jason Evans  <jasone@canonware.com>
+
+	* include/libonyx/nx_l.h (nx_l_ref_iter): Don't skip over gcdict
+	during root set iteration.  This bug caused threadsdict to be the
+	first object returned during root set iteration, which obscured
+	the bug in nxa_p_roots(), mentioned below.
+
+	* src/nxa.c (nxa_p_roots): Iterate over the entire root set,
+	rather than short-circuiting after finding the first root.
+
+2001-11-17  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c: Allocate copies of the filenames that are passed in
+	for debugging, so that leaks in dlopen()ed code that has been
+	unloaded won't cause the leak reporting to segfault.
+
+2001-11-13  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_sweep): Fix sweep iteration problems when
+	deferred deletion is encountered.
+
+2001-11-10  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode.nx: Print errors to stderr rather than stdout in
+	systemdict's throw.
+
+	* src/nxo_thread_nxcode.nx: Print errors to stderr rather than
+	stdout in errordict's handleerror.
+
+2001-11-04  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c: Rename nxa_new() and nxa_delete() to nxa_l_new() and
+	nxa_l_delete(), since the functions are not part of the public
+	API.
+
+2001-11-03  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_exec): Throw a rangecheck error if
+	the argument array is empty.
+
+	* src/nx_nxcode.nx: Redefine throw rather than handleerror in the
+	child process.  Do type checking for the argument.
+
+	* test/thd_a.c: Fix a race condition in the test.
+
+2001-10-31  Jason Evans  <jasone@canonware.com>
+
+	* src/mem.c: Use size_t instead of cw_uint32_t where appropriate
+	to avoid warnings and the possibility of varargs sizeof mismatches
+	for future ports.
+
+	* src/nx.c (nx_delete): Fix a circular dependency during deletion
+	that could cause a destroyed mutex to be referenced.
+
+2001-10-07  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_sweep): Implement multiple sweep passes, in
+	order to support ordering the deletion of dependent objects.
+
+	* src/systemdict.c (systemdict_bind): Bind to hooks, just as
+	operators are bound to.
+
+2001-10-04  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_iobuf): Add.
+	(systemdict_setiobuf): Add.
+
+2001-09-21  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_gc_entry): Only do periodic collection if there
+	has been allocation activity since the last collection.  Before
+	this fix, the code was doing periodic collection if there had been
+	no allocation since the last periodic check.
+
+2001-09-16  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_string.c (nxo_string_cstring): Add.
+
+2001-09-15  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_thread.c (nxo_threade_nxn): Remove.
+	(nxo_thread_error): Remove.
+	(nxo_thread_nerror): Add.
+	(nxo_thread_serror): Add.
+
+	Generalize the error mechanism to support errors of any name.
+
+2001-08-28  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_realloc_e): Add.
+
+2001-08-21  Jason Evans  <jasone@canonware.com>
+
+	* : Maintain the current number of bytes allocated by the
+	interpreter and use this count for threshold-based collection.
+
+	API additions: nxa_nx_get().
+
+	API modifications: cw_opaque_dealloc_t, _cw_opaque_dealloc(),
+	mem_free_e(), nxa_free(), nxa_free_e(), nxa_stats_get(), and
+	gcdict's stats operator.
+
+2001-08-20  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_file.c: Clean up the internals of onyx file objects and
+	rename nxo_file_interactive() to nxo_file_synthetic() (with API
+	changes).  As a result of the cleanup, the API for
+	nxo_file_readline() and nxo_file_buffer_size_set() have also
+	changed.
+
+2001-08-19  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_roots): Don't iterate through objects once a
+	root object is found; nxa_p_mark() does that just fine.
+
+2001-08-18  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_file.c: Remove nxo_file_output() and
+	nxo_file_output_n(), which were not used anywhere.
+
+2001-07-30  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Change the API of the following operators to
+	not leave the input stack on ostack: spush, scount, scounttomark,
+	sdup, sindex, sexch, sroll, spop, sclear, and scleartomark.
+
+2001-07-29  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_thread.c (nxoe_p_thread_name_accept): When the result of
+	immediate name evaluation is an executable array, set the
+	evaluatable attribute.
+
+	* : Add an additional attribute.  Objects are now literal,
+	executable, or evaluatable.  The addition of the evaluatable
+	attribute allows the bind operator to replace executable names
+	with associated executable arrays by converting the executable
+	arrays to evaluatable arrays.
+
+	* src/systemdict.c: Add the cve and echeck operators.
+
+	* src/nxa.c: Add nxa_malloc_e() and nxa_free_e().
+
+2001-07-27  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_dict.c (nxoe_l_dict_delete): Don't leak the internal dch.
+
+	* src/nxa.c: Track number of bytes of memory allocation rather
+	than number of object allocations in order to provide more
+	predictable threshold-triggered collection.
+
+	* src/systemdict.c (systemdict_copy): Pop the source dictionary off
+	ostack before returning.
+
+2001-07-26  Jason Evans  <jasone@canonware.com>
+
+	* src/nxa.c (nxa_p_mark): Ignored unregistered objects, rather
+	than asserting that all objects are registered.
+
+2001-07-23  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Add the following operators: pid, ppid, uid,
+	euid, gid, egid, setuid, seteuid, setgid, and setegid.
+
+2001-07-22  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c: Add the ndup and npop operators.
+
+	* include/libonyx/nxo_stack.h (NXO_STACK_NPOP): Add a missing ")".
+
+	* src/systemdict.c: Add the setenv and unsetenv operators, since
+	direct modifications to envdict will not be visible to programs
+	such as ps.
+
+2001-07-21  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode_gen.nx: Generate a temporary dictionary of short
+	names that is used to compact the onyx bootstrapping code.
+
+2001-07-20  Jason Evans  <jasone@canonware.com>
+
+	* src/nx_nxcode.nx: Implement outputsdict, outputs and output.
+
+	* src/systemdict.c (systemdict_cvrs): Treat integer as signed
+	rather than unsigned.
+
+2001-07-19  Jason Evans  <jasone@canonware.com>
+
+	* src/systemdict.c (systemdict_hooktag): Add.
+
+	* include/libonyx/nx.h: Remove sprintdict, which is replaced by
+	sprintsdict.
+
+	* src/nx_nxcode.nx: Implement sprintsdict and sprints.  Re-define
+	sprint in terms of sprints.
+
+	* src/systemdict.c (systemdict_cvs): Convert a string to a
+	syntactically valid equivalent.  Strings were previously left alone.
+
+2001-07-13  Jason Evans  <jasone@canonware.com>
+
+	* src/nxo_thread.c (nxoe_p_thread_feed): Support signed radix
+	integers.  The format is <sign><radix>#<value>.  The sign is optional.
+	
+	(nxoe_p_thread_integer_accept): Implement the equivalent of
+	strtoll().  This avoids redundant error checking, since the onyx
+	scanner already assures that all input characters are valid.  Most
+	importantly though, it gets around using Solaris's buggy strtoll()
+	implementation.
+
+	* : Add nxo_hook_data_set().

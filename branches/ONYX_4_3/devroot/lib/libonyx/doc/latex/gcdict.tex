@@ -1,0 +1,71 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% gcdict portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{gcdict}
+\label{gcdict}
+\index{gcdict@\classname{gcdict}{}}
+
+The \classname{gcdict} functions implement the operators contained in
+\onyxop{}{gcdict}{}.  Only the C API is documented here; see
+Section~\ref{sec:gcdict} for operator semantics.
+
+\subsubsection{API}
+\begin{capi}
+\label{gcdict_active}
+\index{gcdict_active@\cfunc{gcdict\_active}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{active}{gcdict:active}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_collect}
+\index{gcdict_collect@\cfunc{gcdict\_collect}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{collect}{gcdict:collect}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_period}
+\index{gcdict_period@\cfunc{gcdict\_period}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{period}{gcdict:period}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_setactive}
+\index{gcdict_setactive@\cfunc{gcdict\_setactive}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{setactive}{gcdict:setactive}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_setperiod}
+\index{gcdict_setperiod@\cfunc{gcdict\_setperiod}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{setperiod}{gcdict:setperiod}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_setthreshold}
+\index{gcdict_setthreshold@\cfunc{gcdict\_setthreshold}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{setthreshold}{gcdict:setthreshold}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_stats}
+\index{gcdict_stats@\cfunc{gcdict\_stats}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{stats}{gcdict:stats}}{cw\_nxo\_t
+*a\_thread}}
+\label{gcdict_threshold}
+\index{gcdict_threshold@\cfunc{gcdict\_threshold}{}}
+\citem{\cfunc[void]{gcdict\_\htmlref{threshold}{gcdict:threshold}}{cw\_nxo\_t
+*a\_thread}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thread: ]
+			Pointer to a thread.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		C interfaces to Onyx operators that control garbage collection.
+	\end{capilist}
+\end{capi}

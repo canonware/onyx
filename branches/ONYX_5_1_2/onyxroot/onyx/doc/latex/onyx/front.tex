@@ -1,0 +1,260 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% Definitions and front matter of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[10pt,titlepage]{book}
+\usepackage[dvips]{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{html}
+\usepackage{verbatim}
+\usepackage{makeidx}
+%begin{latexonly}
+\usepackage{newcent}
+\usepackage{fancyheadings}
+\usepackage{ifthen}
+%end{latexonly}
+
+%begin{latexonly}
+%
+% Configure margins, line spacing, etc.
+%
+\setlength{\topmargin}{0in}
+%\setlength{\headheight}{24pt}
+\setlength{\headsep}{12pt}
+\setlength{\topskip}{0in}
+\setlength{\textheight}{8.75in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\textwidth}{6.5in}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{8pt}
+%\setlength{\topsep}{0pt}
+%\setlength{\partopsep}{0pt}
+\renewcommand{\baselinestretch}{1.0}
+%end{latexonly}
+
+%begin{latexonly}
+% Use this to make sure chapter breaks look right.
+\newcommand{\clearemptydoublepage}
+	{\newpage \thispagestyle{empty} \cleardoublepage}
+
+%
+% Set up the standard page headers.
+%
+%\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+%\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+%\lhead[\bfseries\thepage]{\bfseries\rightmark}
+%\rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
+%\cfoot{}
+%\setlength{\headrulewidth}{2pt}
+%\chead[\bfseries{Onyx Manual}]{\bfseries{Jason Evans}}
+%end{latexonly}
+
+%begin{latexonly}
+\newenvironment{capilist}
+	{
+		\raggedright
+		\begin{list}{}
+		{
+			\listparindent 0pt
+			\itemindent \listparindent
+			\item\relax
+		}
+		\begin{description}
+	}
+	{
+		\end{description}
+		\end{list}
+		\vspace{8pt}
+	}
+%end{latexonly}
+\begin{htmlonly}
+\newenvironment{capilist}
+	{
+		\begin{description}
+		\begin{description}
+	}
+	{
+		\end{description}
+		\end{description}
+	}
+\end{htmlonly}
+
+\newcommand{\citem}[1]{\bfseries #1: \normalfont
+
+}
+\newenvironment{capi}
+	{\setlength{\parskip}{0pt}}
+	{\setlength{\parskip}{8pt}}
+
+%begin{latexonly}
+\newcommand{\example}[3]{
+  % Force a new paragraph.
+  \parbox{0pt}{}
+
+  \fbox{
+    \parbox{5.7in}{{\tt #1}:\\
+    \fbox{\parbox{5.55in}{\verbatiminput{#2}}}
+    \verbatiminput{#3}
+}}}
+%end{latexonly}
+\begin{htmlonly}
+\newcommand{\example}[3]{
+    {\tt #1}:\\
+    {\hr}
+    \verbatiminput{#2}
+    {\hr}
+    \verbatiminput{#3}
+    {\hr}
+}}}
+\end{htmlonly}
+
+\newcommand{\examplefile}[1]{\fbox{\parbox{5.0in}{\verbatiminput{#1}}}}
+\providecommand{\ifthenelse}[3]{ } % For latex2html.
+\newcommand{\cfunc}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
+\newcommand{\cvar}[1]{{\em #1}}
+\newcommand{\ctype}[1]{#1}
+\newcommand{\cppmacro}[3][]{#1\ifthenelse{\equal{}{#1}}{}{ }{\em #2}(#3)}
+\newcommand{\cppdef}[1]{{\em #1}}
+\newcommand{\method}[1]{{\em #1}}
+\newcommand{\binname}[1]{{\em #1}}
+\newcommand{\libname}[1]{{\em #1}}
+\newcommand{\filename}[1]{{\em #1}}
+\newcommand{\classname}[1]{{\em #1}}
+\newcommand{\modulename}[1]{{\em #1}}
+\newcommand{\dbgsym}[1]{{``#1''}}
+\newcommand{\onyxop}[3]{{\em #1}\ifthenelse{\equal{}{#1}}{}{ }{\bf #2}\ifthenelse{\equal{}{#3}}{}{ }{\em #3}}
+\newcommand{\oparg}[1]{{\em #1}}
+\newcommand{\commas}{,,,}
+
+% \optableent{inputs}{operator}{outputs}{description}
+\newcommand{\optableent}[4]{\parbox[t]{2.0in}{#1 \\
+\hspace*{0.25in} \parbox[t]{1.75in}{#2} \\
+\hspace*{0.50in} \parbox[t]{1.50in}{#3 \vspace*{2pt}}} & #4 \\
+}
+
+% For printed versions, we need to limit the width of tables, but for html
+% there is no need to.
+\newcommand{\optableformat}[1]{|l|p{#1in}|}
+\newcommand{\rxtableformat}[1]{|r|p{#1in}|}
+
+% TeX doesn't have '\', '^', '<', '>', '|', and '~' in its text fonts.
+\newcommand{\bs}{$\backslash$}
+\newcommand{\carat}{\^{ }}
+\newcommand{\lt}{$<$}
+\newcommand{\gt}{$>$}
+\newcommand{\pipe}{$|$}
+\newcommand{\twid}{$\sim$}
+\newcommand{\ddash}{--}
+\newcommand{\lb}{[}
+\newcommand{\rb}{]}
+
+% The build system does substitution of the YYY..ZZZ strings after the html
+% is generated.
+\begin{htmlonly}
+\newcommand{\optableformat}[1]{|l|l|}
+\newcommand{\rxtableformat}[1]{|r|l|}
+\newcommand{\bs}{YYYbsZZZ}
+\newcommand{\carat}{^}
+\newcommand{\lt}{<}
+\newcommand{\gt}{>}
+\newcommand{\pipe}{|}
+\newcommand{\twid}{\~}
+\newcommand{\ddash}{YYYddashZZZ}
+\newcommand{\lb}{YYYlbZZZ}
+\newcommand{\rb}{YYYrbZZZ}
+\newcommand{\hr}{YYYhrZZZ}
+\end{htmlonly}
+
+%
+% Title page setup
+%
+\title{Onyx Manual, Version <Version = onyx>}
+\author{Jason Evans {\lt}jasone@canonware.com{\gt}}
+\date{\today}
+
+% Control what all ends up in the table of contents.
+%\addtocounter{secnumdepth}{4}
+
+% Generate an index.
+\makeindex
+
+\begin{document}
+\frontmatter
+\pagestyle{plain}
+\maketitle
+
+\clearemptydoublepage
+\begin{htmlonly}
+\part*{Preface}
+\end{htmlonly}
+\begin{latexonly}
+\chapter*{Preface}
+\end{latexonly}
+
+This manual primarily documents the Onyx programming language.  However, Onyx is
+designed to be run either as a stand alone program or as an embeddable
+interpreter, so the manual also documents different aspects of the
+implementation that are important when embedding Onyx into another program.
+
+Onyx came into existence when the author started working on a text editor (since
+mothballed) that was meant to be extensible.  One of the goals was to provide
+robust multi-threading.  Unfortunately, when work began on the text editor in
+1999, the author was unable to find any embeddable scripting languages that
+provided adequate support for threads.  Thus Onyx was born.  The author was
+familiar and enamored with Adobe's PostScript$^{TM}$ language, which has basic
+threading support when used in a Display PostScript$^{TM}$ environment, so Onyx
+started off looking very similar.  As Onyx matured, it deviated to the point
+that it is now a truly different language, with different syntax, additional and
+more powerful data types, better debugging capabilities, POSIX-related
+functionality, more powerful threading, regular expressions, etc.
+
+As this project grew far beyond what was originally expected, it became clear
+that in order to justify the effort being put into Onyx's design and
+implementation, Onyx would have to be usable for more than just a text editor.
+Therefore, Onyx has been structured such that it can be configured in a myriad
+of ways, with the hope that others will be able to easily make it fit their
+needs.  This manual documents Onyx in its full glory without mention that
+features may be disabled, so there are portions that do not apply to Onyx
+interpreters that have been configured without Onyx's full feature set.
+
+For software distributions, news, and additional project information, see
+\htmlurl{http://www.canonware.com/onyx/}.  The author is interested in hearing
+how people are using Onyx, so please do not hesitate to email him comments or
+questions.
+
+\clearemptydoublepage
+\tableofcontents
+\begin{latexonly}
+\listoftables
+\end{latexonly}
+
+%
+% Setup for main body of document.
+%
+\mainmatter
+
+%
+% Set up the standard page headers.
+%
+%begin{latexonly}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\sectionmark}[1]{\markright{\thesection\ #1}}
+\lhead[\bfseries\thepage]{\bfseries\rightmark}
+\rhead[\bfseries{Chapter \thechapter}]{\bfseries\thepage}
+\cfoot{}
+\setlength{\headrulewidth}{2pt}
+\chead[\bfseries{Onyx Manual}]{\bfseries{Jason Evans}}
+\pagestyle{fancy}
+%end{latexonly}

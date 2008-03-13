@@ -1,0 +1,8 @@
+Test begin
+Before:
+`Hello\nHello\nHello\nHello\n'
+Shorten:
+`Hello\nHello\n'
+Lengthen:
+`Hello\nHello\n\0\0\0\0\0\0\0\0\0\0\0\0'
+Test end

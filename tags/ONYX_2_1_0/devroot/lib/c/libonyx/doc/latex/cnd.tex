@@ -1,0 +1,124 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% cnd portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{cnd}
+\label{cnd}
+\index{cnd@\classname{cnd}{}}
+
+The \classname{cnd} class implements condition variables, which can be used in
+conjunction with the \htmlref{\classname{mtx}}{mtx} class to wait for a
+condition to occur.
+
+\subsubsection{API}
+\begin{capi}
+\label{cnd_new}
+\index{cnd_new@\cfunc{cnd\_new}{}}
+\citem{\cfunc[void]{cnd\_new}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_cnd: ]
+			Pointer to space for a \classname{cnd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{cnd_delete}
+\index{cnd_delete@\cfunc{cnd\_delete}{}}
+\citem{\cfunc[void]{cnd\_delete}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_cnd: ]
+			Pointer to a \classname{cnd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{cnd_signal}
+\index{cnd_signal@\cfunc{cnd\_signal}{}}
+\citem{\cfunc[void]{cnd\_signal}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_cnd: ]
+			Pointer to a \classname{cnd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Signal one thread waiting on \cvar{a\_cnd}, if there are any
+		waiters.
+	\end{capilist}
+\label{cnd_broadcast}
+\index{cnd_broadcast@\cfunc{cnd\_broadcast}{}}
+\citem{\cfunc[void]{cnd\_broadcast}{cw\_cnd\_t *a\_cnd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_cnd: ]
+			Pointer to a \classname{cnd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Signal all threads waiting on \cvar{a\_cnd}.
+	\end{capilist}
+\label{cnd_timedwait}
+\index{cnd_timedwait@\cfunc{cnd\_timedwait}{}}
+\citem{\cfunc[cw\_bool\_t]{cnd\_timedwait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t
+*a\_mtx, const struct timespec *a\_timeout}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_cnd: ]
+			Pointer to a \classname{cnd}.
+		\item[a\_mtx: ]
+			Pointer to a \classname{mtx}.
+		\item[a\_timeout: ]
+			Timeout, specified as an absolute time interval.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Timeout.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Wait for \cvar{a\_cnd} for at least \cvar{a\_time}.
+	\end{capilist}
+\label{cnd_wait}
+\index{cnd_wait@\cfunc{cnd\_wait}{}}
+\citem{\cfunc[void]{cnd\_wait}{cw\_cnd\_t *a\_cnd, cw\_mtx\_t *a\_mtx}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_cnd: ]
+			Pointer to a \classname{cnd}.
+		\item[a\_mtx: ]
+			Pointer to a \classname{mtx}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Wait for \cvar{a\_cnd}.
+	\end{capilist}
+\end{capi}
