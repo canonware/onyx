@@ -1,0 +1,22 @@
+Test begin
+`() dup 0 sndup'
+()
+`(0) dup 0 sndup'
+(0)
+`(0) dup 1 sndup'
+(0 0)
+`(1 0) dup 0 sndup'
+(1 0)
+`(1 0) dup 1 sndup'
+(1 0 0)
+`(1 0) dup 2 sndup'
+(1 0 1 0)
+`(2 1 0) dup 0 sndup'
+(2 1 0)
+`(2 1 0) dup 1 sndup'
+(2 1 0 0)
+`(2 1 0) dup 2 sndup'
+(2 1 0 1 0)
+`(2 1 0) dup 3 sndup'
+(2 1 0 2 1 0)
+Test end

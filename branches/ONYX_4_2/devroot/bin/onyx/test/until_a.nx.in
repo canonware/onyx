@@ -1,0 +1,35 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    `{`Got here\n' print} false until'
+    `{`Got here\n' print exit} true until'
+    `{exit `Got here\n' print} true until'
+    `<> begin
+    $foo 0 def
+    {
+	`foo: ' print
+	foo 1 sprint
+
+	$foo foo inc def
+    }{foo 3 lt} until
+    end'
+]{
+    dup 1 sprint
+
+    cvx eval
+} foreach
+
+`Test end\n' print
+pstack

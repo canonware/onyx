@@ -1,0 +1,144 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% nxm portion of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{nxm}
+\label{nxm}
+\index{nxm@\classname{nxm}{}}
+
+The \classname{nxm} class provides basic loadable module functionality.
+
+\subsubsection{API}
+\begin{capi}
+\label{nxm_new}
+\index{nxm_new@\cfunc{nxm\_new}{}}
+\citem{\cfunc[cw\_nxn\_t]{nxm\_new}{cw\_nxo\_t *a\_nxo, cw\_nxo\_t *a\_path,
+cw\_nxo\_t *a\_sym}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to space for a handle \classname{nxo}.
+		\item[a\_path: ]
+			Pointer to a string \classname{nxo} that specifies the
+			path to a module.
+		\item[a\_sym: ]
+			Pointer to a string \classname{nxo} that specifies a
+			symbol in the module at \cvar{a\_path}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{enumerate}
+			\item[NXN\_ZERO: ] Success.
+			\item[NXN\_invalidfileaccess: ]
+				Unable to open a module at \cvar{a\_path}.
+			\item[NXN\_undefined: ]
+				A symbol named \cvar{a\_sym} was not found in
+				the module.
+			\end{enumerate}
+		\item[a\_nxo: ]
+			A handle \classname{nxo}, with its evaluation function
+			set to the specified symbol.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Open the module at \cvar{a\_path}, and create a handle with its
+		evaluation function set to the symbol specified by
+		\cvar{a\_sym}.  The module will remain loaded until the handle
+		\classname{nxo} is swept by the garbage collector.
+	\end{capilist}
+\label{nxm_iter_get}
+\index{nxm_iter_get@\cfunc{nxm\_iter\_get}{}}
+\citem{\cfunc[uint32\_t]{nxm\_iter\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo} that was constructed
+			by \cfunc{nxm\_new}{}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Garbage collector sweep iteration during which
+			\cvar{a\_nxo} will be deleted.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Get the garbage collector sweep iteration during which
+		\cvar{a\_nxo} will be deleted.  By default, this is 1, but it
+		can be changed by \cfunc{nxm\_iter\_set}{}.
+	\end{capilist}
+\label{nxm_iter_set}
+\index{nxm_iter_set@\cfunc{nxm\_iter\_set}{}}
+\citem{\cfunc[void]{nxm\_iter\_set}{cw\_nxo\_t *a\_nxo, uint32\_t a\_iter}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo} that was constructed
+			by \cfunc{nxm\_new}{}.
+		\item[a\_iter: ]
+			Garbage collector sweep iteration during which
+			\cvar{a\_nxo} will be deleted.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the garbage collector sweep iteration during which
+		\cvar{a\_nxo} will be deleted.
+	\end{capilist}
+\label{nxm_pre_unload_hook_get}
+\index{nxm_pre_unload_hook_get@\cfunc{nxm\_pre\_unload\_hook\_get}{}}
+\citem{\cfunc[void *]{nxm\_pre\_unload\_hook\_get}{cw\_nxo\_t *a\_nxo}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo} that was constructed
+			by \cfunc{nxm\_new}{}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			A function pointer, or NULL.  If non-NULL, the function
+			will be called just before the module is unloaded.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Get the pre-unload hook function associated with \cvar{a\_nxo}.
+	\end{capilist}
+\label{nxm_pre_unload_hook_set}
+\index{nxm_pre_unload_hook_set@\cfunc{nxm\_pre\_unload\_hook\_set}{}}
+\citem{\cfunc[void]{nxm\_pre\_unload\_hook\_set}{cw\_nxo\_t *a\_nxo, void
+(*a\_pre\_unload\_hook)(void)}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_nxo: ]
+			Pointer to a handle \classname{nxo} that was constructed
+			by \cfunc{nxm\_new}{}.
+		\item[a\_pre\_unload\_hook: ]
+			A function pointer, or NULL.  If non-NULL, the function
+			will be called just before the module is unloaded.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the pre-unload hook function associated with \cvar{a\_nxo}.
+	\end{capilist}
+\end{capi}

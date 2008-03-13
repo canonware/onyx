@@ -1,0 +1,263 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: <Version>
+%
+% mq portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{mq}
+\label{mq}
+\index{mq@\classname{mq}{}}
+
+The \classname{mq} class implements a simple unidirectional message queue.
+In addition to putting and getting messages, there are methods that control
+the ability to get or put.  This provides a simple out of band state
+transition capability.
+
+\subsubsection{API}
+\begin{capi}
+\label{mq_new}
+\index{mq_new@\cfunc{mq\_new}{}}
+\citem{\cfunc[void]{mq\_new}{cw\_mq\_t *a\_mq, cw\_mem\_t *a\_mem,
+cw\_uint32\_t a\_msg\_size}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to space for a \classname{mq}.
+		\item[a\_mem: ]
+			Pointer to the allocator to use internally.
+		\item[a\_msg\_size: ]
+			Size (in bytes) of messages used for all subsequent
+			calls to \cfunc{mq\_*get}{} and \cfunc{mq\_put}{}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor.
+	\end{capilist}
+\label{mq_delete}
+\index{mq_delete@\cfunc{mq\_delete}{}}
+\citem{\cfunc[void]{mq\_delete}{cw\_mq\_t *a\_mq}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{mq_tryget}
+\index{mq_tryget@\cfunc{mq\_tryget}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_tryget}{cw\_mq\_t *a\_mq, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\item[...: ]
+			Pointer to space to store a message.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] No messages in the queue, or get is
+				in the stop state.
+			\end{description}
+		\item[*...: ]
+			If \cvar{retval} is FALSE, a message.  Otherwise,
+			undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Try to get a message, but return TRUE if none are available.
+	\end{capilist}
+\label{mq_timedget}
+\index{mq_timedget@\cfunc{mq\_timedget}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_timedget}{cw\_mq\_t *a\_mq, const struct timespec
+*a\_timeout, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\item[a\_timeout: ]
+			Timeout, specified as an absolute time interval.
+		\item[...: ]
+			Pointer to space to store a message.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] No messages in the queue, or get is
+				in the stop state.
+			\end{description}
+		\item[*...: ]
+			If \cvar{retval} is FALSE, a message.  Otherwise,
+			undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Get a message.  If none are available, block until a
+		message is available, or until timeout.
+	\end{capilist}
+\label{mq_get}
+\index{mq_get@\cfunc{mq\_get}{}}
+\citem{\cfunc[cw\_bol\_t]{mq\_get}{cw\_mq\_t *a\_mq, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\item[...: ]
+			Pointer to space to store a message.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Get is in the stop state.
+			\end{description}
+		\item[*...: ]
+			If \cvar{retval} is FALSE, a message.  Otherwise,
+			undefined.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Get a message.  If none are available, block until a
+		message is available.
+	\end{capilist}
+\label{mq_put}
+\index{mq_put@\cfunc{mq\_put}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_put}{cw\_mq\_t *a\_mq, ...}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\item[...: ]
+			A message.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Failure due to put being in the stop
+				state.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{\_CW\_ONYXX\_OOM}{_CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Put a message in \cvar{a\_mq}.
+	\end{capilist}
+\label{mq_get_start}
+\index{mq_get_start@\cfunc{mq\_get\_start}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_get\_start}{cw\_mq\_t *a\_mq}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Error (already in start state).
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Change the get operation to the start state
+		(\cfunc{mq\_get}{} will not return TRUE).
+	\end{capilist}
+\label{mq_get_stop}
+\index{mq_get_stop@\cfunc{mq\_get\_stop}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_get\_stop}{cw\_mq\_t *a\_mq}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Error (already in stop state).
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Change the get operation to the stop state
+		(\cfunc{mq\_get}{} will return TRUE).
+	\end{capilist}
+\label{mq_put_start}
+\index{mq_put_start@\cfunc{mq\_put\_start}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_put\_start}{cw\_mq\_t *a\_mq}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Error (already in start state).
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Change the put operation to the start state
+		(\cfunc{mq\_put}{} will not return TRUE).
+	\end{capilist}
+\label{mq_put_stop}
+\index{mq_put_stop@\cfunc{mq\_put\_stop}{}}
+\citem{\cfunc[cw\_bool\_t]{mq\_put\_stop}{cw\_mq\_t *a\_mq}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_mq: ]
+			Pointer to a \classname{mq}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ] Success.
+			\item[TRUE: ] Error (already in stop state).
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Change the put operation to the stop state
+		(\cfunc{mq\_put}{} will return TRUE).
+	\end{capilist}
+\end{capi}

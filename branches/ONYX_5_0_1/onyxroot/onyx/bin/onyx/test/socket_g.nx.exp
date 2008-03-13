@@ -1,0 +1,3 @@
+Test begin
+Error $argcheck
+ostack: ($AF_NO_SUCH_FAMILY $SOCK_STREAM)

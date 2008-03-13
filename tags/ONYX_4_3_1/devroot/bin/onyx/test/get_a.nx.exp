@@ -1,0 +1,24 @@
+Test begin
+`[\`a\'] 0 get'
+`a'
+`[\`a\' \`b\'] 1 get'
+`b'
+`[\`a\' \`b\' \`c\'] 1 get'
+`b'
+`[\`a\' \`b\' \`c\'] 2 get'
+`c'
+`<$foo \`foo\' $bar \`bar\'> $foo get'
+`foo'
+`<$foo \`foo\' $bar \`bar\'> $bar get'
+`bar'
+`\`a\' 0 get'
+97
+`\`ab\' 0 get'
+97
+`\`ab\' 1 get'
+98
+`\`abc\' 1 get'
+98
+`\`abc\' 2 get'
+99
+Test end

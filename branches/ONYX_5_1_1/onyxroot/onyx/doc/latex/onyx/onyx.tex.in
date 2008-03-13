@@ -1,0 +1,31 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% Body of Onyx Manual.
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Definitions and front matter.
+\input{@abs_srcroot@/doc/latex/onyx/front}
+
+% Onyx Language Tutorial.
+\input{@abs_srcroot@/doc/latex/onyx/tut}
+
+% Onyx Language Reference.
+\input{@abs_objroot@/doc/latex/onyx/lang}
+
+% The onyx program.
+\input{@abs_objroot@/bin/onyx/doc/latex/manual}
+
+% The libonyx library.
+\input{@abs_objroot@/lib/libonyx/doc/latex/manual}
+
+% Back matter.
+\input{@abs_srcroot@/doc/latex/onyx/back}

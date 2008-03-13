@@ -1,0 +1,40 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$fooclass vclass <
+><
+    $foo {`fooclass'}
+    $bar {`fooclass'}
+> cdef
+
+$barclass fooclass <
+><
+    $bar {`barclass'}
+    $biz {`barclass'}
+> cdef
+
+[
+    `vclass $new'
+
+    `fooclass $new'
+    `fooclass $foo'
+    `fooclass $bar'
+
+    `barclass $new'
+    `barclass $foo'
+    `barclass $bar'
+    `barclass $biz'
+]{
+    dup 1 sprint
+    cvx eval
+    method 1 sprint
+} foreach

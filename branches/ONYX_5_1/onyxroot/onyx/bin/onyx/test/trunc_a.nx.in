@@ -1,0 +1,51 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+[
+    `-1 trunc'
+    `0 trunc'
+    `1 trunc'
+
+    `-1.0 trunc'
+    `0.0 trunc'
+    `1.0 trunc'
+
+    `-2.9 trunc'
+    `-2.6 trunc'
+    `-2.5 trunc'
+    `-2.4 trunc'
+    `-2.1 trunc'
+
+    `-1.9 trunc'
+    `-1.6 trunc'
+    `-1.5 trunc'
+    `-1.4 trunc'
+    `-1.1 trunc'
+
+    `0.0 trunc'
+
+    `1.1 trunc'
+    `1.4 trunc'
+    `1.5 trunc'
+    `1.6 trunc'
+    `1.9 trunc'
+
+    `2.1 trunc'
+    `2.4 trunc'
+    `2.5 trunc'
+    `2.6 trunc'
+    `2.9 trunc'
+]{
+    dup 1 sprint
+    cvx eval
+    1 sprint
+} foreach

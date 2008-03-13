@@ -1,0 +1,424 @@
+################################################################################
+#
+# <Copyright = jasone>
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$clopt class currentdict ;mdef
+clopt vclass setsuper
+clopt $clopt setclassname
+clopt <
+> setdata
+clopt <
+    # Constructor.
+    #
+    #class#
+    #- new #instance
+    $new {
+	;rnew
+	#instance
+
+	<
+	    $error false
+	    $argv null
+	    # Dictionary of the format:
+	    #
+	    #   `--flag' --> [arg? handler]
+	    $handlers dict
+	    $index 0
+	    $flag null
+	    $arg null
+	> over data copy pop
+    } bind
+
+    # Print an error.
+    #
+    #instance#
+    #errstr error_print -
+    $error_print {
+	,progname
+	`: ' cat
+	exch cat
+	`\n' cat
+
+	{stderr exch write}{} until
+    } bind
+
+    # Handle an error, and unwind to :parse.
+    #
+    #instance#
+    #errstr error_escape -
+    $error_escape {
+	;error_print
+
+	# Unwind to :parse.
+	true escape
+    } bind
+
+    # Parse #argv, and clean up from errors.
+    #
+    #instance#
+    #argv parse #remainder false
+    #argv parse true
+    $parse {
+	{
+	    ;p_parse
+	} trapped {
+	    nip
+	}{
+	    false
+	} ifelse
+    } bind
+
+    # Parse #argv.
+    #
+    #instance#
+    #argv p_parse #remainder
+    $p_parse {
+	# Store a reference to #argv.
+	$argv over ;def
+
+	# Get and store progname.
+	$progname ,argv 0 get
+	`/' split
+	dup length dec get
+	;def
+
+	# Clear the error flag.
+	$error false ;def
+
+	# Iterate over #argv (skip element 0).
+	1 {over under length lt}{
+	    #argv #i
+
+	    # Set index.
+	    $index over ;def
+
+	    # Reset flag and arg.
+	    $flag null ;def
+	    $arg null ;def
+
+	    2 ndup get
+	    #argv #i #elm
+
+	    dup `^(--[^=]+)(=?)(.*)?' match {
+		# Long format option.
+		pop
+		#argv #i
+		1 submatch
+
+		# Use the `=' opt/arg separator to determine whether an argument
+		# was passed, so that an empty (`') argument can be handled
+		# correctly.
+		2 submatch `=' ne {
+		    null
+		}{
+		    3 submatch
+		} ifelse
+		#argv #i #opt #arg
+		;p_longopt_dispatch
+		#argv #i
+	    }{
+	    dup `^--$' match {
+		# Terminate argument processing.  Do not include the -- in the
+		# remainder.
+		pop inc
+		#argv #i+1
+		exit
+	    }{
+	    dup `^-..*' match {
+		# Short format option.
+		#argv #i #elm
+		2 idup up
+		#argv #argv #i #elm
+		;p_shortopt_dispatch
+		#argv #i
+	    }{
+		# Not an option.
+		pop
+		#argv #i
+		exit
+	    } ifelse
+	    } ifelse
+	    } ifelse
+	    #argv #i
+
+	    # Increment index.
+	    inc
+	} while
+	#argv #i
+	over length over sub
+	#argv #i #remlen
+	getinterval
+	#remainder
+    } bind
+
+    # Dispatch a long format option.
+    #
+    #instance#
+    #opt #arg p_longopt_dispatch -
+    $p_longopt_dispatch {
+	this isa
+	#opt #arg #class
+	dup 3 idup implements {
+	    # Handler found for option with no argument.
+
+	    # Was an argument specified?
+	    over null ne {
+		`Argument ("' 2 idup cat
+		`") unexpected for option ' cat
+		3 idup cat
+		#opt #arg #class #errstr
+		;error_escape
+	    } if
+
+	    # Get the handler.
+	    2 idup method
+	}{
+	dup 3 idup `?' cat implements {
+	    # Handler found for option with optional argument.
+
+	    # Get the handler.
+	    2 idup `?' cat method
+	}{
+	dup 3 idup `=' cat implements {
+	    # Handler found for option with mandatory argument.
+
+	    # Is argument missing?
+	    over null eq {
+		`Argument missing for option ' 3 idup cat
+		#opt #arg #class #errstr
+		;error_escape
+	    } if
+
+	    # Get the handler.
+	    2 idup `=' cat method
+	}{
+	    # No handler found.
+	    pop
+	    #opt #arg
+	    
+	    `Error interpreting option '
+	    dn cat
+	    exch dup null ne {
+		`=' exch 3 ncat
+	    }{
+		pop
+	    } ifelse
+	    #errstr
+	    ;error_escape
+	} ifelse
+	} ifelse
+	} ifelse
+	#opt #arg #handler
+    
+	# Store the flag.
+	$flag 3 idup ;def
+
+	# Store the argument.
+	$arg 2 idup ;def
+
+	# Call the handler.
+	eval
+	#opt #arg
+
+	# Clean up.
+	2 npop
+    } bind
+
+    # Dispatch a short format option.
+    #
+    #instance#
+    #argv #i #elm p_shortopt_dispatch #i
+    $p_shortopt_dispatch {
+	this isa
+	#argv #i #elm #class
+
+	over `^(-.)(.+)?' match pop
+
+	# Set flag.
+	$flag 1 submatch ;def
+
+	dup 1 submatch implements {
+	    # Handler found for option with no argument.
+
+	    # Was an argument specified?
+	    2 submatch null ne {
+		`Argument ("' 2 submatch cat
+		`") unexpected for option ' cat
+		1 submatch cat
+		#argv #i #elm #class #errstr
+		;error_escape
+	    } if
+
+	    # Get the handler.
+	    1 submatch method
+	}{
+	dup 1 submatch `:' cat implements {
+	    # Handler found for option with mandatory argument.
+
+	    # Is argument missing?
+	    2 submatch null eq {
+		# The argument isn't in the same argv element.  If argv has
+		# remaining elements, get the next element and treat it as the
+		# argument.
+		2 idup inc 4 idup length lt {
+		    #argv #i #elm #class
+		    # Get next argv element.
+		    3 idup 4 ndn inc dup 5 nup
+		    #argv #i #elm #class #argv #i
+		    get
+		    #argv #i #elm #class #arg
+
+		    # Set argument.
+		    $arg exch ;def
+		}{
+		    # No argument specified.
+		    `Argument missing for option ' 1 submatch cat
+		    #argv #i #elm #instance #class #errstr
+		    ;error_escape
+		} ifelse
+	    }{
+		# Set argument.
+		$arg 2 submatch ;def
+	    } ifelse
+	    #argv #i #elm #class
+
+	    # Get handler.
+	    1 submatch `:' cat method
+	}{
+	    # No handler found.
+	    pop
+	    #argv #i #elm #instance
+	    `Error interpreting option '
+	    0 submatch cat
+	    #argv #i #elm #errstr
+	    ;error_escape
+	} ifelse
+	} ifelse
+	#argv #i #elm #handler
+
+	# Call the handler.
+	eval
+	#argv #i #elm
+
+	# Clean up.
+	pop nip
+    } bind
+
+    # Return the program name, which is the basename of argv[0].
+    #
+    #instance#
+    #- progname_get #progname
+    $progname_get {
+	,progname
+    } bind
+
+    # Return argv.  This is provided to aid option handlers.
+    #
+    #instance#
+    #- argv_get #argv
+    $argv_get {
+	,argv
+    } bind
+
+    # Return the current argv index.  This is provided to aid option handlers.
+    #
+    #instance#
+    #- index_get #index
+    $index_get {
+	,index
+    } bind
+
+    # Return the current option flag.  This is provided to aid option handlers.
+    #
+    #instance#
+    #- flag_get #flag
+    $flag_get {
+	,flag
+    } bind
+
+    # Return the current option argument.  This is provided to aid option
+    # handlers.
+    #
+    #instance#
+    #- arg_get #arg
+    $arg_get {
+	,arg
+    } bind
+
+    # Map the current option argument to a value, and return that value.
+    #
+    #instance#
+    #enum arg_enum_get #value
+    $arg_enum_get {
+	,arg 2 ndup known {
+	    get
+	}{
+	    null eq {
+		dup $default known {
+		    $default get
+		}{
+		    `Missing value for option ' ,flag cat ;error_escape
+		} ifelse
+	    }{
+		`Unsupported value \`' ,arg `\' for option ' ,flag 4 ncat
+		;error_escape
+	    } ifelse
+	} ifelse
+    } bind
+
+    # Return the current option argument as an integer.
+    #
+    #instance#
+    #- arg_int_get #int
+    $arg_int_get {
+	,arg dup type $stringtype eq {
+	    token {
+		dup type $integertype eq {
+		    # Stash the result until the error checking is done.
+		    aup
+
+		    # Make sure that there is no trailing garbage after the
+		    # integer token.
+		    dup `' eq {
+			# No trailing garbage.
+			pop
+		    }{
+			`Trailing garbage \`' exch `\' for option ' ,flag 4 ncat
+			;error_escape
+		    } ifelse
+		}{
+		    `Error parsing value \`' ;arg_get `\' for option ' ,flag
+		    4 ncat
+		    ;error_escape
+		} ifelse
+	    }{
+		`Error parsing value \`' ;arg_get `\' for option ' ,flag 4 ncat
+		;error_escape
+	    } ifelse
+
+	    # Unstash the result.
+	    adn
+	}{
+	    `Missing value for option ' ,flag cat
+	    ;error_escape
+	} ifelse
+    } bind
+
+    # Return the current option argument as an unsigned integer.
+    #
+    #instance#
+    #- arg_uint_get #uint
+    $arg_uint_get {
+	;arg_int_get
+	dup 0 lt {
+	    `Integer must be non-negative for option ' ,flag cat ;error_escape
+	} if
+    } bind
+> setmethods

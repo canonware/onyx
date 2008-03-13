@@ -1,0 +1,146 @@
+Test begin
+=== [`fake_argv_0' `--foo' `--bar' `--bar=blah' `--biz=bang' `-a' `-b' `bam'] ===
+1 --> --foo ==> null
+2 --> --bar ==> null
+3 --> --bar ==> `blah'
+4 --> --biz ==> `bang'
+5 --> -a ==> null
+6 --> -b ==> `bam'
+Parse success
+Remainder: []
+=== [`fake_argv_1' `--foo='] ===
+fake_argv_1: Argument ("") unexpected for option --foo
+fake_argv_1 usage:
+    fake_argv_1 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                [-a] [-b <arg>]
+                [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+Parse error
+=== [`fake_argv_2' `--foo=blah'] ===
+fake_argv_2: Argument ("blah") unexpected for option --foo
+fake_argv_2 usage:
+    fake_argv_2 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                [-a] [-b <arg>]
+                [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+Parse error
+=== [`fake_argv_3' `--bar='] ===
+1 --> --bar ==> `'
+Parse success
+Remainder: []
+=== [`fake_argv_4' `--bar=blah'] ===
+1 --> --bar ==> `blah'
+Parse success
+Remainder: []
+=== [`fake_argv_5' `--biz'] ===
+fake_argv_5: Argument missing for option --biz
+fake_argv_5 usage:
+    fake_argv_5 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                [-a] [-b <arg>]
+                [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+Parse error
+=== [`fake_argv_6' `--biz='] ===
+1 --> --biz ==> `'
+Parse success
+Remainder: []
+=== [`fake_argv_7' `-a' `remainder' `arguments'] ===
+1 --> -a ==> null
+Parse success
+Remainder: [`remainder' `arguments']
+=== [`fake_argv_8' `-b'] ===
+fake_argv_8: Argument missing for option -b
+fake_argv_8 usage:
+    fake_argv_8 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                [-a] [-b <arg>]
+                [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+Parse error
+=== [`fake_argv_9' `-bbam'] ===
+1 --> -b ==> `bam'
+Parse success
+Remainder: []
+=== [`fake_argv_10' `-b-a' `remainder' `arguments'] ===
+1 --> -b ==> `-a'
+Parse success
+Remainder: [`remainder' `arguments']
+=== [`fake_argv_11' `-b' `-a' `remainder' `arguments'] ===
+1 --> -b ==> `-a'
+Parse success
+Remainder: [`remainder' `arguments']
+=== [`fake_argv_12' `-b' `bam' `remainder' `arguments'] ===
+1 --> -b ==> `bam'
+Parse success
+Remainder: [`remainder' `arguments']
+=== [`fake_argv_13' `--foo' `--bar' `--' `--biz=bang' `more' `remainder'] ===
+1 --> --foo ==> null
+2 --> --bar ==> null
+Parse success
+Remainder: [`--biz=bang' `more' `remainder']
+=== [`fake_argv_14' `--enum'] ===
+1 --> --enum ==> `default'
+Parse success
+Remainder: []
+=== [`fake_argv_15' `--enum=hi'] ===
+1 --> --enum ==> `HI'
+Parse success
+Remainder: []
+=== [`fake_argv_16' `--enum=blah'] ===
+fake_argv_16: Unsupported value `blah' for option --enum
+fake_argv_16 usage:
+    fake_argv_16 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --enum ==> Parse error
+=== [`fake_argv_17' `--int=-42'] ===
+1 --> --int ==> -42
+Parse success
+Remainder: []
+=== [`fake_argv_18' `--int=0'] ===
+1 --> --int ==> 0
+Parse success
+Remainder: []
+=== [`fake_argv_19' `--int=777'] ===
+1 --> --int ==> 777
+Parse success
+Remainder: []
+=== [`fake_argv_20' `--int='] ===
+fake_argv_20: Error parsing value `' for option --int
+fake_argv_20 usage:
+    fake_argv_20 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --int ==> Parse error
+=== [`fake_argv_21' `--int=foo'] ===
+fake_argv_21: Error parsing value `foo' for option --int
+fake_argv_21 usage:
+    fake_argv_21 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --int ==> Parse error
+=== [`fake_argv_22' `--uint=0'] ===
+1 --> --uint ==> 0
+Parse success
+Remainder: []
+=== [`fake_argv_23' `--uint=888'] ===
+1 --> --uint ==> 888
+Parse success
+Remainder: []
+=== [`fake_argv_24' `--uint=-5'] ===
+fake_argv_24: Integer must be non-negative for option --uint
+fake_argv_24 usage:
+    fake_argv_24 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --uint ==> Parse error
+=== [`fake_argv_25' `--uint=bar'] ===
+fake_argv_25: Error parsing value `bar' for option --uint
+fake_argv_25 usage:
+    fake_argv_25 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --uint ==> Parse error
+=== [`fake_argv_26' `--optint'] ===
+fake_argv_26: Missing value for option --optint
+fake_argv_26 usage:
+    fake_argv_26 [--foo] [--bar[=<arg>]] [--biz=<arg>]
+                 [-a] [-b <arg>]
+                 [--enum[=(hi|bye)]] [--int=<int>] [--uint=<uint>]
+1 --> --optint ==> Parse error
+Test end

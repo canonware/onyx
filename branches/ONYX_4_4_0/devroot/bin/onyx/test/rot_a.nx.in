@@ -1,0 +1,41 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+[
+    {1}
+    {1 2}
+    {1 2 3}
+    {1 2 3 4}
+    {1 2 3 4 5}
+    {1 2 3 4 5 6}
+    {1 2 3 4 5 6 7}
+]{
+    $proc exch def
+    $proc load length
+    dup neg 1 dn {
+	dup <$w 2> output
+	` rot: ' print
+	$proc load 1 sprints print
+	` --> ' print flush
+
+	proc adn
+	rot
+	ostack 1 sprint
+
+	clear
+    } for
+} foreach
+
+`Test end\n' print
+pstack

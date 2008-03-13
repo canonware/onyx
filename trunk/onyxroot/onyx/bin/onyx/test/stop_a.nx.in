@@ -1,0 +1,69 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+# In start context.
+{
+    `A\n' print
+    stop
+    `B\n' print
+} start
+
+{
+    `C\n' print
+    {
+	`D\n' print
+	stop
+    } start
+    `E\n' print
+} start
+
+{
+    `F\n' print
+    {
+	`G\n' print
+	stop
+    } start
+    `H\n' print
+    stop
+    `I\n' print
+} start
+
+# In stopped context.
+{
+    `J\n' print
+    stop
+    `K\n' print
+} stopped 1 sprint
+
+{
+    `L\n' print
+    {
+	`M\n' print
+	stop
+    } stopped 1 sprint
+    `N\n' print
+} stopped 1 sprint
+
+{
+    `O\n' print
+    {
+	`P\n' print
+	stop
+    } stopped 1 sprint
+    `Q\n' print
+    stop
+    `R\n' print
+} stopped 1 sprint
+
+`S\n' print
+stop
+`T\n' print

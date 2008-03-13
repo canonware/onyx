@@ -1,0 +1,38 @@
+Test begin
+-array-_________
+[1 -array- 4]___
+[1 [2 3] 4]_____
+___false
+_false__
+false___
+____true
+__true__
+true____
++42
+-42
+42
+-42
+42
+-42
+    42
+____42
+____42
+__42__
+42____
+12345
+12345
+1234
+123
+12
+1
+
+__/foo
+_/foo_
+/foo__
+___foo
+_foo__
+foo___
+____string
+__string__
+string____
+Test end
