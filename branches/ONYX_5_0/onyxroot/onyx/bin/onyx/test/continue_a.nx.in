@@ -1,0 +1,27 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+[
+	`0 1 4 {dup 1 sprint 3 eq {continue} if `bye' 1 sprint} for'
+	`5 {`hi' 1 sprint continue `bye' 1 sprint} repeat'
+	`$foo true def {`hi' 1 sprint foo {$foo false def continue} if
+	 `bye' 1 sprint exit} loop currentdict $foo undef'
+	`[1 2 3 4 5 6] {dup 1 sprint 3 eq {continue} if `bye' 1 sprint} foreach'
+	`$foo true def 0 {dup 1 sprint inc foo {$foo false def continue} if
+	 `bye' 1 sprint}{dup 5 lt} until pop currentdict $foo undef'
+	`$foo true def 0 {dup 5 lt}{dup 1 sprint inc
+	 foo {$foo false def continue} if `bye' 1 sprint} while pop
+	 currentdict $foo undef'
+]{
+	dup 1 sprint
+	cvx eval
+} foreach

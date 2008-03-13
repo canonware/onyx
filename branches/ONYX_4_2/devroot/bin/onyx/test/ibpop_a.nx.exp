@@ -1,0 +1,16 @@
+Test begin
+`0 0 ibpop'
+`0 1 0 ibpop'
+1
+`0 1 1 ibpop'
+0
+`0 1 2 0 ibpop'
+2
+1
+`0 1 2 1 ibpop'
+2
+0
+`0 1 2 2 ibpop'
+1
+0
+Test end

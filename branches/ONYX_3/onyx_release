@@ -68,19 +68,14 @@ if (($#ARGV >= 0)
 }
 
 $run =
-    "./snap @ARGS -T ONYX_ -p onyx -r devroot -f CHANGES.onyx"
+    "./snap @ARGS -T ONYX_ -p onyx -r devroot"
+    . " -f .cvsignore -f CHANGES.onyx"
     . " -f Cookfile.in -f Cookfile.inc.in"
     . " -f COPYING -f INSTALL -f PLATFORMS -f README"
     . " -f autogen.sh -f acinclude.m4"
     . " -f config.guess -f config.sub -f config.stamp.in -f configure.in"
     . " -f install-sh"
-    . " -f test -f examples -f mod -f lib"
-    . " -f doc/.cvsignore -f doc/Cookfile.inc.in -f doc/Cookfile"
-    . " -f doc/latex/.cvsignore -f doc/latex/Cookfile -f doc/latex/ltx2e"
-    . " -f doc/latex/onyx"
-    . " -f bin/.cvsignore -f bin/Cookfile.inc.in -f bin/Cookfile -f bin/onyx"
-    . " -f mod/.cvsignore -f mod/Cookfile.inc.in -f mod/Cookfile"
-    . " -f mod/modprompt"
+    . " -f bin -f doc -f lib -f mod -f test"
     ;
 if (defined($opt_verbose))
 {

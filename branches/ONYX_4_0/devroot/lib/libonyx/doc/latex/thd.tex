@@ -1,0 +1,260 @@
+%-*-mode:latex-*-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% <Copyright = jasone>
+% <License>
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Version: Onyx <Version = onyx>
+%
+% thd portion of Onyx Manual.
+%              
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{thd}
+\label{thd}
+\index{thd@\classname{thd}{}}
+
+The \classname{thd} class implements a wrapper around the system POSIX threads
+library or GNU pth library.  In most regards, this is a thin wrapper around the
+normal threading functionality, but some extra information is kept in order to
+allow implmentation of thread suspension/resumption, ``critical sections'', and
+``single sections''.
+
+The suspendibility of each thread is determined by the arguments passed to
+\cfunc{thd\_new}{}.  The initial thread is always suspendible.  Other threads
+that are created via some mechanism other than \cfunc{thd\_new}{} are not
+suspendible.
+
+Depending on how \libname{libonyx} is built, the additional functionality is
+implemented with the aid of the \cvar{SIGUSR1} and \cvar{SIGUSR2} signals.  As a
+result, system calls may be interrupted by signals.  The system calls will be
+automaticalaly restarted if they have made no progress at the time of
+interruption, but will return a partial result otherwise.  Therefore, if any of
+the additional functionality is utilized, the application must be careful to
+handle partial system call results.  At least the following system calls can be
+interrupted: \cfunc{read}{}, \cfunc{write}{}, \cfunc{sendto}{},
+\cfunc{recvfrom}{}, \cfunc{sendmsg}{}, \cfunc{recvmsg}{}, \cfunc{ioctl}{}, and
+\cfunc{wait}{}.  See the system documentation for additional information.
+
+\subsubsection{API}
+\begin{capi}
+\label{thd_new}
+\index{thd_new@\cfunc{thd\_new}{}}
+\citem{\cfunc[cw\_thd\_t *]{thd\_new}{void *(*a\_start\_func)(void *), void
+*a\_arg, cw\_bool\_t a\_suspendible}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_start\_func: ] Pointer to a start function.
+		\item[a\_arg: ] Argument passed to \cfunc{a\_start\_func}{}.
+		\item[a\_suspendible: ]
+		\begin{description}\item[]
+			\item[FALSE: ] Not suspendible.
+			\item[TRUE: ] Suspendible.
+		\end{description}
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ] Pointer to a \classname{thd}.
+		\end{description}
+	\item[Exception(s): ]
+		\begin{description}\item[]
+		\item[\htmlref{CW\_ONYXX\_OOM}{CW_ONYXX_OOM}.]
+		\end{description}
+	\item[Description: ]
+		Constructor (creates a new thread).
+	\end{capilist}
+\label{thd_delete}
+\index{thd_delete@\cfunc{thd\_delete}{}}
+\citem{\cfunc[void]{thd\_delete}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ] Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Destructor.
+	\end{capilist}
+\label{thd_join}
+\index{thd_join@\cfunc{thd\_join}{}}
+\citem{\cfunc[void *]{thd\_join}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ] Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Return value from thread entry function.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Join (wait for) the thread associated with \cvar{a\_thd}.
+	\end{capilist}
+\label{thd_self}
+\index{thd_self@\cfunc{thd\_self}{}}
+\citem{\cfunc[cw\_thd\_t *]{thd\_self}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Pointer to the calling thread's \classname{thd}
+			structure.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Return a pointer to the \classname{thd} structure that
+		corresponds to the calling thread.
+	\end{capilist}
+\label{thd_yield}
+\index{thd_yield@\cfunc{thd\_yield}{}}
+\citem{\cfunc[void]{thd\_yield}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Give up the rest of the calling thread's time slice.
+	\end{capilist}
+\label{thd_sigmask}
+\index{thd_sigmask@\cfunc{thd\_sigmask}{}}
+\citem{\cfunc[int]{thd\_sigmask}{int a\_how, const sigset\_t *a\_set, sigset\_t
+*r\_oset}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_how: ]
+			\begin{description}\item[]
+			\item[SIG\_BLOCK: ]
+				Block signals in \cvar{a\_set}.
+			\item[SIG\_UNBLOCK: ]
+				Unblock signals in \cvar{a\_set}.
+			\item[SIG\_SETMASK: ]
+				Set signal mask to \cvar{a\_set}.
+			\end{description}
+		\item[a\_set: ]
+			Pointer to a signal set.
+		\item[r\_oset: ]
+			\begin{description}\item[]
+			\item[non-NULL: ]
+				Pointer space to store the old signal mask.
+			\item[NULL: ]
+				Ignored.
+			\end{description}
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			Always zero, unless the arguments are invalid.
+		\item[*r\_oset: ]
+			Old signal set.
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Set the calling thread's signal mask.
+	\end{capilist}
+\label{thd_crit_enter}
+\index{thd_crit_enter@\cfunc{thd\_crit\_enter}{}}
+\citem{\cfunc[void]{thd\_crit\_enter}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Enter a critical region where the calling thread may not be
+		suspended by \cfunc{thd\_suspend}{}, \cfunc{thd\_trysuspend}{},
+		or \cfunc{thd\_single\_enter}{}.
+	\end{capilist}
+\label{thd_crit_leave}
+\index{thd_crit_leave@\cfunc{thd\_crit\_leave}{}}
+\citem{\cfunc[void]{thd\_crit\_leave}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Leave a critical section; the calling thread may once again be
+		suspended.
+	\end{capilist}
+\label{thd_single_enter}
+\index{thd_single_enter@\cfunc{thd\_single\_enter}{}}
+\citem{\cfunc[void]{thd\_single\_enter}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Enter a critical region where all other suspendible threads must
+		be suspended.
+	\end{capilist}
+\label{thd_single_leave}
+\index{thd_single_leave@\cfunc{thd\_single\_leave}{}}
+\citem{\cfunc[void]{thd\_single\_leave}{void}}
+	\begin{capilist}
+	\item[Input(s): ] None.
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Leave a critical section where all other threads must be
+		suspended.  All threads that were suspended in
+		\cfunc{thd\_single\_enter}{} are resumed.
+	\end{capilist}
+\label{thd_suspend}
+\index{thd_suspend@\cfunc{thd\_suspend}{}}
+\citem{\cfunc[void]{thd\_suspend}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ]
+			Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Suspend \cvar{a\_thd}.
+	\end{capilist}
+\label{thd_trysuspend}
+\index{thd_trysuspend@\cfunc{thd\_trysuspend}{}}
+\citem{\cfunc[cw\_bool\_t]{thd\_trysuspend}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ]
+			Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ]
+		\begin{description}\item[]
+		\item[retval: ]
+			\begin{description}\item[]
+			\item[FALSE: ]
+				Success.
+			\item[TRUE: ]
+				Failure.
+			\end{description}
+		\end{description}
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Try to suspend \cvar{a\_thd}, but fail if it is in a critical
+		section.
+	\end{capilist}
+\label{thd_resume}
+\index{thd_resume@\cfunc{thd\_resume}{}}
+\citem{\cfunc[void]{thd\_resume}{cw\_thd\_t *a\_thd}}
+	\begin{capilist}
+	\item[Input(s): ]
+		\begin{description}\item[]
+		\item[a\_thd: ]
+			Pointer to a \classname{thd}.
+		\end{description}
+	\item[Output(s): ] None.
+	\item[Exception(s): ] None.
+	\item[Description: ]
+		Resume (make runnable) \classname{a\_thd}.
+	\end{capilist}
+\end{capi}

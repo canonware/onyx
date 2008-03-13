@@ -1,0 +1,22 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+$c class def
+
+c <$foo {`foo'}> setmethods
+c methods 2 sprint
+
+c null setmethods
+c methods 2 sprint
+
+c <$foo {`bar'}> setmethods
+c methods 2 sprint

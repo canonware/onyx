@@ -1,0 +1,28 @@
+Test begin
+s> `a' `bc' search
+false
+`a'
+s> `abcdefghij' `bcd' search
+true
+`a'
+`bcd'
+`efghij'
+s> `abbc' `ab' search
+true
+`'
+`ab'
+`bc'
+s> `abbc' `bb' search
+true
+`a'
+`bb'
+`c'
+s> `abbc' `bc' search
+true
+`ab'
+`bc'
+`'
+s> `abbc' `B' search
+false
+`abbc'
+Test end

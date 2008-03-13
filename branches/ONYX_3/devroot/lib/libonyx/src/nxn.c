@@ -49,7 +49,7 @@ const cw_uint8_t *cw_g_nx_names[] = {
     "broadcast",
 #endif
     "bytesavailable",
-    "catenate",
+    "cat",
 #ifdef CW_POSIX
     "cd",
 #endif

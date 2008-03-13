@@ -1,0 +1,7 @@
+&ignore_commands( <<_IGNORED_CMDS_);
+clearemptydoublepage
+lhead # [] # {}
+rhead # [] # {}
+rightmark
+_IGNORED_CMDS_
+1;

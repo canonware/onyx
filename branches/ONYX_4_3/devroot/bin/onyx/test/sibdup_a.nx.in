@@ -1,0 +1,20 @@
+################################################################################
+#
+# <Copyright = jasone>
+#
+# <License>
+#
+################################################################################
+#
+# Version: Onyx <Version = onyx>
+#
+################################################################################
+
+`Test begin\n' print flush
+
+(`a' `b' `c') dup 0 sibdup pstack clear
+(`a' `b' `c') dup 1 sibdup pstack clear
+(`a' `b' `c') dup 2 sibdup pstack clear
+
+`Test end\n' print
+pstack

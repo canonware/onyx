@@ -2,7 +2,7 @@
 #-*-mode:perl-*-
 #############################################################################
 #
-# Copyright (C) 1998-2001 Jason Evans <jasone@canonware.com>.
+# Copyright (C) 1998-2005 Jason Evans <jasone@canonware.com>.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,7 @@
 # are met:
 # 1. Redistributions of source code must retain the above copyright
 #    notice(s), this list of conditions and the following disclaimer as
-#    the first lines of this file unmodified other than the possible 
+#    the first lines of this file unmodified other than the possible
 #    addition of one or more copyright notices.
 # 2. Redistributions in binary form must reproduce the above copyright
 #    notice(s), this list of conditions and the following disclaimer in the
@@ -46,8 +46,12 @@ use Getopt::Long;
 # <Copyright = jasone>
 #
 $COPYRIGHT{"jasone", 0}
-= "Copyright (C) 1996-2002 Jason Evans <jasone\@canonware.com>.";
+= "Copyright (C) 1996-2005 Jason Evans <jasone\@canonware.com>.";
 $COPYRIGHT{"jasone", 1}
+= "All rights reserved.";
+$COPYRIGHT{"mordor", 0}
+= "Copyright (C) 2002 Zeljko Vrba <mordor\@fly.srk.fer.hr>.";
+$COPYRIGHT{"mordor", 1}
 = "All rights reserved.";
 $COPYRIGHT{"nectar", 0}
 = "Copyright (C) 2001 Jacques A. Vidrine <nectar\@freebsd.org>.";
@@ -113,7 +117,9 @@ $opt_retval =
 		"V|version=s%" => \%OPT_VERSION,
 		"p|pkgname=s" => \$opt_pkgname,
 		"r|root=s" => \$opt_root,
+		"m|majorbranch=s" => \$opt_majorbranch,
 		"b|branchpoint=s" => \$opt_branchpoint,
+		"B|branchtag=s" => \$opt_branchtag,
 		"T|tagprefix=s" => \$opt_tagprefix,
 		"t|tag=s" => \$opt_tag,
 		"f|filetree=s@" => \@OPT_FILETREES
@@ -191,11 +197,13 @@ else
 
 if ($opt_verbose)
 {
-    print STDERR "branch point   : $opt_branchpoint\n";
-    print STDERR "tag            : $opt_tag\n";
-    print STDERR "cvs tag        : $tag_cvs\n";
-    print STDERR "Tree root      : $opt_root\n";
-    print STDERR "Package name   : $opt_pkgname\n";
+    print STDERR "major branch point : $opt_majorbranch\n";
+    print STDERR "branch point       : $opt_branchpoint\n";
+    print STDERR "branch tag         : $opt_branchtag\n";
+    print STDERR "tag                : $opt_tag\n";
+    print STDERR "cvs tag            : $tag_cvs\n";
+    print STDERR "Tree root          : $opt_root\n";
+    print STDERR "Package name       : $opt_pkgname\n";
 }
 
 foreach $dir (@OPT_FILETREES)
@@ -211,7 +219,7 @@ foreach $dir (@OPT_FILETREES)
     @TREES = (@TREES, "$opt_root/$dir");
 }
 
-# Remove the temporary directory if it is already there.
+# Remove the tag directory if it is already there.
 if ($opt_verbose)
 {
     print STDERR "rm -rf $tagdir\n";
@@ -219,6 +227,51 @@ if ($opt_verbose)
 unless ($opt_noact)
 {
     `rm -rf $tagdir`;
+}
+
+if (defined($opt_majorbranch))
+{
+    # Check out.
+    if ($opt_verbose)
+    {
+	print STDERR "cvs co -r $opt_majorbranch -d $tagdir @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cvs co -r $opt_majorbranch -d $tagdir @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint\_BP @TREES`;
+    }
+
+    # Branch.
+    if ($opt_verbose)
+    {
+	print STDERR
+	    "cd $tagdir && cvs tag -b $opt_branchpoint @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchpoint @TREES`;
+    }
+
+    # Delete checkout.
+    if ($opt_verbose)
+    {
+	print STDERR "rm -rf $tagdir\n";
+    }
+    unless ($opt_noact)
+    {
+	`rm -rf $tagdir`;
+    }
 }
 
 # Check out on the appropriate tag, if specified.
@@ -232,25 +285,48 @@ unless ($opt_noact)
 }
 
 # Create the branch point and branch tags.
-if (defined($opt_tag) && !defined($opt_cvsnotag))
+if (defined($opt_branchtag) && !defined($opt_cvsnotag))
 {
     if ($opt_verbose)
     {
-	print STDERR "cd $tagdir && cvs tag -b $tag_cvs\_BP @TREES\n";
+	print STDERR "cd $tagdir && cvs tag -b $opt_branchtag\_BP @TREES\n";
     }
     unless ($opt_noact)
     {
-	`cd $tagdir && cvs tag -b $tag_cvs\_BP @TREES`;
+	`cd $tagdir && cvs tag -b $opt_branchtag\_BP @TREES`;
     }
 
     if ($opt_verbose)
     {
-	print STDERR "cd $tagdir && cvs tag -b $tag_cvs @TREES\n";
+	print STDERR "cd $tagdir && cvs tag -b $opt_branchtag @TREES\n";
+    }
+    unless ($opt_noact)
+    {
+	`cd $tagdir && cvs tag -b $opt_branchtag @TREES`;
+    }
+}
+
+# Create the release tag.
+if (defined($opt_tag) && !defined($opt_cvsnotag))
+{
+    if ($opt_verbose)
+    {
+	print STDERR "cd $tagdir && cvs tag $tag_cvs @TREES\n";
     }
     unless ($opt_noact)
     {
 	`cd $tagdir && cvs tag -b $tag_cvs @TREES`;
     }
+}
+
+# Remove the tag directory.
+if ($opt_verbose)
+{
+    print STDERR "rm -r $tagdir\n";
+}
+unless ($opt_noact)
+{
+    `rm -r $tagdir`;
 }
 
 # Remove the export directory if it is already there.
@@ -280,52 +356,58 @@ if ($opt_verbose)
 }
 unless ($opt_noact)
 {
-    finddepth(\&expand_tags, "$expdir/devroot");
+    finddepth(\&expand_tags, "$expdir/$opt_root");
 }
 
 # autogen.
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && ./autogen.sh --with-docs\n";
+    print STDERR "cd $expdir/$opt_root && ./autogen.sh --with-docs\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && ./autogen.sh --with-docs`;
+    `cd $expdir/$opt_root && ./autogen.sh --with-docs`;
 }
 
 # cook release.
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && cook release\n";
+    print STDERR "cd $expdir/$opt_root && cook release\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && cook release`;
+    `cd $expdir/$opt_root && cook release`;
 
     # Sanity check to make sure documentation got built.
-    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
     }
 }
 if ($opt_verbose)
 {
-    print STDERR "cd $expdir/devroot && cook distclean\n";
+    print STDERR "cd $expdir/$opt_root && cook distclean\n";
 }
 unless ($opt_noact)
 {
-    `cd $expdir/devroot && cook distclean`;
+    `cd $expdir/$opt_root && cook distclean`;
 
     # Sanity check to make sure documentation is still in the tree.
-    unless (-e "$expdir/devroot/doc/ps/onyx/onyx.ps"
-	    && -e "$expdir/devroot/doc/pdf/onyx/onyx.pdf"
-	    && -e "$expdir/devroot/doc/html/onyx/onyx.html")
+    if (-e "$expdir/$opt_root/doc/latex/$opt_pkgname")
     {
-	print STDERR "'cook release' seems to have failed\n";
-	exit 1;
+	unless (-e "$expdir/$opt_root/doc/pdf/$opt_pkgname/$opt_pkgname.pdf"
+		&& -e
+		"$expdir/$opt_root/doc/html/$opt_pkgname/$opt_pkgname.html")
+	{
+	    print STDERR "'cook release' seems to have failed\n";
+	    exit 1;
+	}
     }
 }
 
@@ -341,30 +423,30 @@ unless ($opt_noact)
 
 if ($opt_verbose)
 {
-    print STDERR "mv $expdir/devroot $opt_pkgname\n";
+    print STDERR "mv $expdir/$opt_root $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `mv $expdir/devroot $opt_pkgname`;
+    `mv $expdir/$opt_root $opt_pkgname`;
 }
 
 if ($opt_verbose)
 {
-    print STDERR "rmdir $expdir\n";
+    print STDERR "rm -rf $expdir\n";
 }
 unless ($opt_noact)
 {
-    `rmdir $expdir`;
+    `rm -rf $expdir`;
 }
 
 # Create the tarball.
 if ($opt_verbose)
 {
-    print STDERR "tar czf $opt_pkgname.tar.gz $opt_pkgname\n";
+    print STDERR "tar cjf $opt_pkgname.tar.bz2 $opt_pkgname\n";
 }
 unless ($opt_noact)
 {
-    `tar czf $opt_pkgname.tar.gz $opt_pkgname`;
+    `tar cjf $opt_pkgname.tar.bz2 $opt_pkgname`;
 }
 
 # Create symlinks to the directory and tarball.
@@ -372,15 +454,15 @@ if ($opt_verbose)
 {
     print STDERR "rm -f $pkgname_base\-latest\n";
     print STDERR "ln -s $opt_pkgname $pkgname_base\-latest\n";
-    print STDERR "rm -f $pkgname_base\-latest.tar.gz\n";
-    print STDERR "ln -s $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz\n";
+    print STDERR "rm -f $pkgname_base\-latest.tar.bz2\n";
+    print STDERR "ln -s $opt_pkgname.tar.bz2 $pkgname_base\-latest.tar.bz2\n";
 }
 unless ($opt_noact)
 {
     `rm -f $pkgname_base\-latest`;
     `ln -s $opt_pkgname $pkgname_base\-latest`;
-    `rm -f $pkgname_base\-latest.tar.gz`;
-    `ln -s $opt_pkgname.tar.gz $pkgname_base\-latest.tar.gz`;
+    `rm -f $pkgname_base\-latest.tar.bz2`;
+    `ln -s $opt_pkgname.tar.bz2 $pkgname_base\-latest.tar.bz2`;
 }
 
 # End of main execution.
@@ -390,7 +472,9 @@ sub print_usage
     print STDERR <<EOF;
 $0 usage:
 $0 [-chnv --cvsnotag --help --noact --verbose]
-       [--branchpoint <revision> | -b <revision>]
+       [--majorbranch=<tag> | -m <tag>]
+       [--branchpoint=<tag> | -b <tag>]
+       [--branchtag=<tag> | -B <tag>]
        [--tag=<tag> | -t <tag>]
        [--tagprefix=<prefix> | -T <prefix>]
        {--version <key>=<version> | -V <key>=<version>}*

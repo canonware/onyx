@@ -146,7 +146,7 @@ def
 > def
 
 end % threaddict.
-' catenate
+' cat
 
 % Final closing brace.
-`}' catenate cvx eval
+`}' cat cvx eval

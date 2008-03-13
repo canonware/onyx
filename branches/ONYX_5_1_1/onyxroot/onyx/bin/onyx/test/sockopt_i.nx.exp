@@ -1,0 +1,3 @@
+Test begin
+Error $argcheck
+ostack: (-file- $SOL_SOCKET $foo)

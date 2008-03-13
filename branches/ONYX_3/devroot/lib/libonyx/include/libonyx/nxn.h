@@ -48,7 +48,7 @@ typedef enum
     NXN_broadcast,
 #endif
     NXN_bytesavailable,
-    NXN_catenate,
+    NXN_cat,
 #ifdef CW_POSIX
     NXN_cd,
 #endif

@@ -39,7 +39,7 @@ currenterror begin
 	1 die
     } def
 end
-' catenate
+' cat
 
 % Final closing brace.
-`}' catenate cvx eval
+`}' cat cvx eval

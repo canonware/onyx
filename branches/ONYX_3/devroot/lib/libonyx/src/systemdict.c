@@ -16,6 +16,7 @@
 
 #include <unistd.h>
 #include <sys/time.h> /* For realtime operator. */
+#include <time.h> /* For nanosleep(). */
 #include <ctype.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -82,7 +83,7 @@ static const struct cw_systemdict_entry systemdict_ops[] = {
     ENTRY(broadcast),
 #endif
     ENTRY(bytesavailable),
-    ENTRY(catenate),
+    ENTRY(cat),
 #ifdef CW_POSIX
     ENTRY(cd),
 #endif
@@ -380,7 +381,8 @@ systemdict_l_populate(cw_nxo_t *a_dict, cw_nx_t *a_nx, int a_argc,
 #define NOPS								\
 	(sizeof(systemdict_ops) / sizeof(struct cw_systemdict_entry))
 
-    nxo_dict_new(a_dict, a_nx, TRUE, NFASTOPS + NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
+    nxo_dict_new(a_dict, a_nx, TRUE,
+		 NFASTOPS + NOPS + NEXTRA + CW_LIBONYX_SYSTEMDICT_HASH_SPARE);
 
     /* Fast operators. */
     for (i = 0; i < NFASTOPS; i++)
@@ -823,7 +825,7 @@ systemdict_bytesavailable(cw_nxo_t *a_thread)
 }
 
 void
-systemdict_catenate(cw_nxo_t *a_thread)
+systemdict_cat(cw_nxo_t *a_thread)
 {
     cw_nxo_t *ostack, *a, *b, *r;
     cw_uint32_t i, len_a, len_b;
@@ -1514,19 +1516,39 @@ systemdict_cvds(cw_nxo_t *a_thread)
 	return;
     }
 
+#ifdef HAVE_ASPRINTF
     len = asprintf(&result, "%.*f", (int) nxo_integer_get(precision),
 		   nxo_real_get(real));
     if (len == -1)
     {
 	xep_throw(CW_ONYXX_OOM);
     }
+#else
+    {
+#define CW_STARTLEN 16
+	result = (char *) cw_malloc(CW_STARTLEN);
+	len = snprintf(result, CW_STARTLEN, "%.*f",
+		       (int) nxo_integer_get(precision), nxo_real_get(real));
+	if (len >= CW_STARTLEN)
+	{
+	    result = (char *) cw_realloc(result, len + 1);
+	    snprintf(result, len + 1, "%.*f",
+		     (int) nxo_integer_get(precision), nxo_real_get(real));
+	}
+#undef CW_STARTLEN
+    }
+#endif
 
     nxo_string_new(real, nxo_thread_nx_get(a_thread),
 		   nxo_thread_currentlocking(a_thread), len);
     nxo_string_lock(real);
     nxo_string_set(real, 0, result, len);
     nxo_string_unlock(real);
+#ifdef HAVE_ASPRINTF
     free(result);
+#else
+    cw_free(result);
+#endif
 
     nxo_stack_pop(ostack);
 }
@@ -1562,19 +1584,39 @@ systemdict_cves(cw_nxo_t *a_thread)
 	return;
     }
 
+#ifdef HAVE_ASPRINTF
     len = asprintf(&result, "%.*e", (int) nxo_integer_get(precision),
 		   nxo_real_get(real));
     if (len == -1)
     {
 	xep_throw(CW_ONYXX_OOM);
     }
+#else
+    {
+#define CW_STARTLEN 16
+	result = (char *) cw_malloc(CW_STARTLEN);
+	len = snprintf(result, CW_STARTLEN, "%.*e",
+		       (int) nxo_integer_get(precision), nxo_real_get(real));
+	if (len >= CW_STARTLEN)
+	{
+	    result = (char *) cw_realloc(result, len + 1);
+	    snprintf(result, len + 1, "%.*e",
+		     (int) nxo_integer_get(precision), nxo_real_get(real));
+	}
+#undef CW_STARTLEN
+    }
+#endif
 
     nxo_string_new(real, nxo_thread_nx_get(a_thread),
 		   nxo_thread_currentlocking(a_thread), len);
     nxo_string_lock(real);
     nxo_string_set(real, 0, result, len);
     nxo_string_unlock(real);
+#ifdef HAVE_ASPRINTF
     free(result);
+#else
+    cw_free(result);
+#endif
 
     nxo_stack_pop(ostack);
 }
@@ -2093,6 +2135,9 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
     DIR *dir;
     cw_uint32_t edepth, tdepth;
     struct dirent *entp;
+#ifndef CW_HAVE_DIRENT_NAMLEN
+	size_t namlen;
+#endif
 #ifdef HAVE_READDIR_R
     struct dirent ent;
     int error;
@@ -2146,13 +2191,13 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 	while ((entp = readdir(dir)) != NULL)
 #endif
 	{
-/* OSes don't agree on field naming.  Try using d_reclen instead of d_namlen if
- * d_namlen isn't in struct dirent. */
-#ifdef CW_LIBONYX_USE_DIRENT_RECLEN
-#define d_namlen d_reclen
-#endif
 	    /* Ignore "." and "..". */
+#ifdef CW_HAVE_DIRENT_NAMLEN
 	    switch (entp->d_namlen)
+#else
+	    namlen = strlen(entp->d_name);
+	    switch (namlen)
+#endif
 	    {
 		case 2:
 		{
@@ -2186,8 +2231,13 @@ systemdict_dirforeach(cw_nxo_t *a_thread)
 		/* Push a string onto ostack that represents the directory
 		 * entry. */
 		entry = nxo_stack_push(ostack);
+#ifdef CW_HAVE_DIRENT_NAMLEN
 		nxo_string_new(entry, nx, currentlocking, entp->d_namlen);
 		nxo_string_set(entry, 0, entp->d_name, entp->d_namlen);
+#else
+		nxo_string_new(entry, nx, currentlocking, namlen);
+		nxo_string_set(entry, 0, entp->d_name, namlen);
+#endif
 
 		/* Evaluate proc. */
 		nxo = nxo_stack_push(estack);
@@ -4933,9 +4983,9 @@ systemdict_rand(cw_nxo_t *a_thread)
     num = nxo_stack_push(ostack);
     /* random() returns 31 bits. */
     nxo_integer_new(num,
-		    ((cw_nxoi_t) random())
-		    + (((cw_nxoi_t) random()) << 31)
-		    + (((cw_nxoi_t) random()) << 62));
+		    ((cw_nxoi_t) (random() & 1))
+		    | (((cw_nxoi_t) random()) << 1)
+		    | (((cw_nxoi_t) random()) << 32));
 }
 
 void
